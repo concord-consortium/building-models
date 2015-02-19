@@ -6,12 +6,12 @@ by the [Concord Consortium](http://concord.org/).
 
 ## TODO:
 
-* Setup github pages demo.
 * Inlucde link from [Model Survey](http://concord-consortium.github.io/model-survey/) to here
 * Think of a better name for this tool.
 
 ## See Also:
 
+* [Live demo site](http://concord-consortium.github.io/building-models/)
 * [MySystem](https://github.com/concord-consortium/mysystem_sc) – a simple concept mapping with node/edge graphs.
 * [Model Survey](http://concord-consortium.github.io/model-survey/) – Asessment Node/edge graphing tools.
 * [jsPlumb](https://jsplumbtoolkit.com/) – Graphing toolkit.
