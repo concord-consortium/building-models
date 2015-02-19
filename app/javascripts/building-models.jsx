@@ -3,7 +3,7 @@ var InfoPane = require('./info-pane');
 var Importer = require('./importer');
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 
-var MySystem = React.createClass({
+var BuildingModels = React.createClass({
   getInitialState: function() { 
     return {
       nodes: [],
@@ -163,10 +163,10 @@ jsPlumb.ready(function(){
   remote_url = "http://mysystem_sc.dev.concord.org/mysystem_designs/7e5c26385bbe26b9643ff84de9005cb6";
   local_url = "my_system_state.json";
   React.render(
-    <MySystem localUrl={local_url} className="my-system"/>,
-    document.getElementById('my-system')
+    <BuildingModels localUrl={local_url} className="my-system"/>,
+    document.getElementById('building-models')
 
   );
 });
 
-module.exports = MySystem;
+module.exports = BuildingModels;
