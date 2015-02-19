@@ -1,0 +1,84 @@
+{
+  "MySystem.Link": {
+    "MySystem.Link-0001": {
+      "color": "#c77f59",
+      "startTerminal": "b",
+      "endTerminal": "b",
+      "guid": "MySystem.Link-0001",
+      "startNode": "MySystem.Node-0001",
+      "endNode": "MySystem.Node-0002",
+      "energyType": "e7813b2e-26b9-4db0-b57a-d49b830fd2cb",
+      "text": "Becomes a"
+    },
+    "MySystem.Link-0002": {
+      "color": "#c77f59",
+      "startTerminal": "b",
+      "endTerminal": "b",
+      "guid": "MySystem.Link-0002",
+      "startNode": "MySystem.Node-0002",
+      "endNode": "MySystem.Node-0003",
+      "energyType": "e7813b2e-26b9-4db0-b57a-d49b830fd2cb",
+      "text": "Becomes a"
+    },
+    "MySystem.Link-0003": {
+      "color": "#dad09c",
+      "startTerminal": "a",
+      "endTerminal": "a",
+      "guid": "MySystem.Link-0003",
+      "startNode": "MySystem.Node-0003",
+      "endNode": "MySystem.Node-0001",
+      "energyType": "b68ce485-14d4-4fc8-a0da-0b0bb19c1200",
+      "text": "Makes a"
+    }
+  },
+  "MySystem.Node": {
+    "MySystem.Node-0001": {
+      "title": "Egg",
+      "image": "https://dl.dropboxusercontent.com/u/73403/mysystem/images/egg2.png",
+      "x": 102,
+      "y": 199,
+      "nodeType": "77bebab6-637e-4094-ba1c-d1330a675642",
+      "guid": "MySystem.Node-0001",
+      "outLinks": [
+        "MySystem.Link-0001"
+      ],
+      "inLinks": [
+        "MySystem.Link-0003"
+      ]
+    },
+    "MySystem.Node-0002": {
+      "title": "Chick",
+      "image": "http://www.charlieschickencompany.com/IMAGES/pic5_09.jpg",
+      "x": 283,
+      "y": 195,
+      "nodeType": "4c0b8202-769c-475a-954e-4d55e6f23faf",
+      "guid": "MySystem.Node-0002",
+      "inLinks": [
+        "MySystem.Link-0001"
+      ],
+      "outLinks": [
+        "MySystem.Link-0002"
+      ]
+    },
+    "MySystem.Node-0003": {
+      "title": "Chicken",
+      "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg",
+      "x": 428,
+      "y": 199,
+      "nodeType": "0b316a1b-1526-4ece-aa63-c07315dd92aa",
+      "guid": "MySystem.Node-0003",
+      "inLinks": [
+        "MySystem.Link-0002"
+      ],
+      "outLinks": [
+        "MySystem.Link-0003"
+      ]
+    }
+  },
+  "MySystem.Story": {},
+  "MySystem.StorySentence": {},
+  "MySystem.RuleFeedback": {},
+  "MySystem.GraphicPreview": {},
+  "MySystem.RubricScore": {},
+  "version": 5
+}

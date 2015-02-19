@@ -1,0 +1,99 @@
+  {
+  "rubricExpression": "true;",
+  "correctFeedback": "Your diagram has no obvious problems.",
+  "maxFeedbackItems": "1",
+  "minimumRequirementsFeedback": "You need to work more on your diagram to get feedback!",
+  "enableNodeLabelDisplay": true,
+  "enableNodeLabelEditing": false,
+  "enableNodeDescriptionEditing": false,
+  "enableLinkDescriptionEditing": false,
+  "enableLinkLabelEditing": false,
+  "enableCustomRuleEvaluator": false,
+  "customRuleEvaluator": "",
+  "maxSubmissionClicks": 0,
+  "maxSubmissionFeedback": "You have clicked 'submit' too many times. Please continue working without hints.",
+  "feedbackPanelWidth": 500,
+  "feedbackPanelHeight": 250,
+  "terminalRadius": 14,
+  "nodeHeight": 110,
+  "nodeWidth": 110,
+  "backgroundImage": "",
+  "backgroundImageScaling": false,
+  "modules": [
+    {
+      "uuid": "0b316a1b-1526-4ece-aa63-c07315dd92aa",
+      "name": "Chicken",
+      "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg"
+    },
+    {
+      "uuid": "4c0b8202-769c-475a-954e-4d55e6f23faf",
+      "name": "Chick",
+      "image": "http://www.charlieschickencompany.com/IMAGES/pic5_09.jpg"
+    },
+    {
+      "uuid": "77bebab6-637e-4094-ba1c-d1330a675642",
+      "name": "Egg",
+      "image": "https://dl.dropboxusercontent.com/u/73403/mysystem/images/egg2.png"
+    }
+  ],
+  "energy_types": [
+    {
+      "uuid": "b68ce485-14d4-4fc8-a0da-0b0bb19c1200",
+      "label": "Makes a",
+      "color": "#dad09c"
+    },
+    {
+      "uuid": "e7813b2e-26b9-4db0-b57a-d49b830fd2cb",
+      "label": "Becomes a",
+      "color": "#c77f59"
+    }
+  ],
+  "minimum_requirements": [],
+  "diagram_rules": [
+    {
+      "javascriptExpression": "",
+      "isJavascript": false,
+      "category": "none",
+      "comparison": "more than",
+      "type": "Chicken",
+      "number": "0",
+      "suggestion": "This diagram doesn't have any chickens.",
+      "name": "Need Chicken"
+    },
+    {
+      "javascriptExpression": "",
+      "isJavascript": false,
+      "category": "none",
+      "comparison": "more than",
+      "type": "Egg",
+      "name": "Must have Egg",
+      "number": "0",
+      "suggestion": "Your diagram must have at least one egg."
+    },
+    {
+      "javascriptExpression": "",
+      "isJavascript": false,
+      "category": "none",
+      "comparison": "more than",
+      "type": "Chick",
+      "name": "Must have Chick",
+      "suggestion": "Your diag",
+      "number": "0"
+    },
+    {
+      "javascriptExpression": "",
+      "isJavascript": false,
+      "category": "none",
+      "comparison": "exactly",
+      "type": "Chicken",
+      "number": "1",
+      "hasLink": true,
+      "linkDirection": "-->",
+      "otherNodeType": "Egg",
+      "energyType": "Makes a",
+      "suggestion": "But where does the egg come from?",
+      "name": "Chicken Makes an Egg"
+    }
+  ],
+  "rubric_categories": []
+}

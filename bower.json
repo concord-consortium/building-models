@@ -1,0 +1,16 @@
+{
+  "name": "building-models-jsplumb",
+  "version": "0.0.1",
+  "main": "public/app.js",
+  "ignore": [
+    "app",
+    "vendor",
+    "brunch-config.coffee",
+    "package.json"
+  ],
+  "dependencies": {
+    "react": ">= 0.12.0",
+    "jquery-ui": ">= 1.11.2"
+  },
+  "overrides": {}
+}

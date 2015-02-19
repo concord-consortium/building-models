@@ -1,0 +1,49 @@
+$deleteColor = hsl(1,50%,50%)
+
+.elm
+  position absolute
+  padding 0px;
+  margin 0px;
+  border-radius 5px
+  width 120
+  height 160
+  background-color none
+  text-align center
+  .img-background
+    padding 4px
+    border-radius 4px
+    border 1px solid #bbb
+    background-color white
+  img
+    max-width 110
+    max-height 110
+  .node-title
+    font-face sans-serif
+    padding 5px
+    font-size 10pt
+  .delete-box
+    position absolute
+    padding 2px
+    border-radius 3px
+    // border 2px solid $deleteColor
+    color $deleteColor
+    opacity 0.02
+    font-size 18pt
+    width 1em
+    height 1em
+    text-align center
+    vertical-align center
+    &:hover, .focus
+      opacity 0.9
+
+.label
+  background-color white
+  border-radius 8px
+  padding 0.1em
+  opacity 0.95
+  
+
+  
+._jsPlumb_endpoint
+  opacity 0.1
+  width 200px
