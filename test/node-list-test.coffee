@@ -26,12 +26,15 @@ describe 'GraphPrimitive', () ->
       it 'should increment the counter, and use the type name (Link)', () ->
         undertest = new Link()
         undertest.id.should.equal('Link-1')
+        secondLink = new Link()
+        secondLink.id.should.equal('Link-2')
     
     describe 'of a Node', () ->
       it 'should increment the counter, and use the type name (Node)', () ->
         undertest = new Node()
         undertest.id.should.equal('Node-1')
-
+        secondNode = new Node()
+        secondNode.id.should.equal('Node-2')
 describe 'Node', () ->
   beforeEach () ->
     @node_a = new Node()
@@ -91,7 +94,7 @@ describe 'Node', () ->
           @node_a.addLink(@link_a)
           @node_a.addLink(@link_b)
           @node_a.addLink(@link_c)
-          @node_a.addLink(@link_d)
+
         describe 'In Links', () ->
           it "should have 1 in link", () ->
             @node_a.inLinks().should.have.length(1)

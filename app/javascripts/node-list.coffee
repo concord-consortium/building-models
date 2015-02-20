@@ -5,9 +5,9 @@ class GraphPrimitive
     @counters = {}
 
   @.nextID  = (type) ->
-    counter = @counters[type] || 0
-    counter++
-    "#{type}-#{counter}"
+    @counters[type] ||= 0
+    @counters[type]++
+    "#{type}-#{@counters[type]}"
 
   type: () ->
     "GraphPrimitive"
@@ -23,8 +23,6 @@ class Link extends GraphPrimitive
     { @sourceNode, @sourceTerminal ,@targetNode, @targetTerminal} = @options
     super()
     @valid = false
-    # @sourceNode.addLink(@)
-    # @terminalNode.addLink(@)
 
   type: () ->
     "Link"
