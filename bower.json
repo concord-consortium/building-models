@@ -10,7 +10,11 @@
   ],
   "dependencies": {
     "react": ">= 0.12.0",
-    "jquery-ui": ">= 1.11.2"
+    "jquery-ui": ">= 1.11.2",
+    "lodash": "~3.3.0"
   },
-  "overrides": {}
+  "overrides": {},
+  "devDependencies": {
+    "lodash": "~3.3.0"
+  }
 }

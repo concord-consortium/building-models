@@ -20,5 +20,11 @@
     "react-brunch": ">= 1.0.7",
     "stylus-brunch": ">= 1.0 < 1.8",
     "uglify-js-brunch": ">= 1.0 < 1.8"
+  },
+  "devDependencies": {
+    "lodash": "^3.3.0",
+    "coffee-script": "^1.9.1",
+    "chai": "^2.0.0",
+    "mocha": "^2.1.0"
   }
 }
