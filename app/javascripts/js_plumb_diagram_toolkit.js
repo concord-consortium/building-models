@@ -6,23 +6,43 @@ function DiagramToolkit(domContext, options) {
   this.domContex = domContext;
   this.type      = 'jsPlumbWrappingDiagramToolkit';
   this.color     = this.options.color || "#222" ;
-  this.lineWidth = this.options.lineWidth || 6;  
-  
+  this.lineWidth = this.options.lineWidth || 6;    
   this.kit       = jsPlumb.getInstance({ Container: domContext});
 
   this.notifyStart = function() {
     
   };
 
+  this.registerListeners = function() {
+    this.kit.bind("beforeDrop", this.handleConnect.bind(this));
+  };
+
+
+  this.handleConnect = function(info,evnt) {
+    if (this.options.handleConnect) {
+      this.options.handleConnect(info, evnt);
+    }
+    return true; // required for drop to succeed.
+  };
+  
+  this.handleDisconnect = function(info,evnt) {
+    if (this.options.handleDisconnect) {
+      this.options.handleDisconnect(info, evnt);
+    }
+    return true;
+  };
+
   this.repaint = function() {
     this.kit.repaintEverything();
   };
+
+  this._endpoint = [ "Dot", { radius:15 } ];
 
   this.makeTarget = function(div, opts) {
     var opts = {
       isTarget:true, 
       isSource:true,
-      endpoint:"Dot", 
+      endpoint: this._endpoint,
       connector:[ "Bezier"],
       anchor: "Top",
       paintStyle: this._paintStyle(),
@@ -32,11 +52,14 @@ function DiagramToolkit(domContext, options) {
     };
     
     this.kit.addEndpoint(div,opts);
+    opts.anchor = "Bottom"
+    this.kit.addEndpoint(div,opts);
   };
 
   this.clear = function() {
     if(this.kit) {
       this.kit.reset();
+      this.registerListeners();
     }
     else {
       console.log("No kit defined");
@@ -46,9 +69,9 @@ function DiagramToolkit(domContext, options) {
   this.kit.importDefaults({
     Connector:        [ "Bezier",    { curviness: 50 } ],
     Anchors:          [ "TopCenter", "BottomCenter"],
-    Endpoint:         [ "Dot", { radius:20 } ],
+    Endpoint:         this._endpoint,
     DragOptions :     { cursor: 'pointer', zIndex:2000 },
-    DoNotThrowErrors: true
+    DoNotThrowErrors: false
   });
 
   this._paintStyle = function(color) {
@@ -69,15 +92,18 @@ function DiagramToolkit(domContext, options) {
   };
 
 
-  this.addLink = function(source, target, label, color, anchor_location) {
+  this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
     this.kit.connect({
       source: source,
       target: target,
-      anchor: anchor_location || "Top",
+      anchors: [source_terminal || "Top", target_terminal || "Bottom"],
       paintStyle: this._paintStyle(color),
       overlays: this._overlays(label)
     });
   };
+
+  this.registerListeners();
+
 }
 
 

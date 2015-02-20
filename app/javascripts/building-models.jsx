@@ -1,6 +1,9 @@
 var Node = require('./diagram-node');
 var InfoPane = require('./info-pane');
 var Importer = require('./importer');
+var idGenerator = require('./id-generator');
+
+
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 
 var BuildingModels = React.createClass({
@@ -32,8 +35,39 @@ var BuildingModels = React.createClass({
     this.removeNode(node_event.nodeKey);
   },
 
-  nodeForName: function(name) {
+  handleConnect: function(info,evnt) {
+    var newLink = {}; 
+    newLink.key = idGenerator("BuildingModels.link");
+    var startNode = document.getElementById(info.sourceId);
+    var endNode = document.getElementById(info.targetId);
+    var startName = this._nameForNode(startNode);
+    var endName = this._nameForNode(endNode);
+    var startTerminal = (info.connection.endpoints[0].anchor.type == "Top") ? "a" : "b";
+    var endTerminal   = (info.connection.endpoints[1].anchor.type == "Top") ? "a" : "b";
+    newLink.data = {
+      startNode:startName,
+      endNode:endName,
+      startTerminal: startTerminal,
+      endTerminal: endTerminal,
+      color: '#fea',
+      text: 'untitlted'
+    };
+    debugger
+    this.addLink(newLink);
+  },
+
+  _nodeForName: function(name) {
     return this.refs[name].getDOMNode();
+  },
+
+  // TODO: We should build a mapping class to help with this:
+  _nameForNode: function(domNode) {
+    for(var ref in this.refs) {
+      if (domNode == this.refs[ref].getDOMNode()) {
+        return ref;
+      }
+    }
+    return undefined;
   },
 
   updateNodeValue: function(name, key, value) {
@@ -52,7 +86,12 @@ var BuildingModels = React.createClass({
   },
 
   _bindDiagramToolkit: function()   {
-    this.diagramToolkit = new DiagramTookkit('#container');
+    var opts = {
+      handleConnect: this.handleConnect.bind(this),
+      handleDisconnect: this.handleDisconnect
+    };
+    this.diagramToolkit = new DiagramTookkit('#container', opts);
+    this._redrawTargets();
     this._redrawLinks();
   },
 
@@ -65,12 +104,13 @@ var BuildingModels = React.createClass({
   _redrawLinks: function() {
     if (this.diagramToolkit && this.diagramToolkit.addLink) {
       this.state.links.map(function(l) {
-        var source         = this.nodeForName(l.data.startNode);
-        var target         = this.nodeForName(l.data.endNode);
+        var source         = this._nodeForName(l.data.startNode);
+        var target         = this._nodeForName(l.data.endNode);
         var label          = l.data.text;
         var color          = l.data.color;
-        var anchorLocation = (l.data.startTerminal == "a") ? "Top" : "Bottom";
-        this.diagramToolkit.addLink(source, target, label, color, anchorLocation);
+        var sourceTerminal = (l.data.startTerminal == "a") ? "Top" : "Bottom";
+        var targetTerminal = (l.data.endTerminal == "a") ? "Top" : "Bottom";
+        this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
       }.bind(this));
     }
   },
@@ -94,6 +134,8 @@ var BuildingModels = React.createClass({
   componentDidMount: function() {
     this.loadLocalData();
   },
+
+
 
   addNode: function(newNode) {
     var nodes = this.state.nodes;
@@ -147,7 +189,7 @@ var BuildingModels = React.createClass({
       );
     });
     return (
-      <div className="mySystem">
+      <div className="building-models">
         <div id="container" className='my-container'>
           {nodes}
         </div>
