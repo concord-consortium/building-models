@@ -1,5 +1,5 @@
-# _ = require('lodash')
-# log = require('loglevel');
+_ = require('lodash')
+log = require('loglevel');
 
 # GraphPrimitive is the basis for the Node and Link classes.
 # They share a common ID generation mechanism mostly.
