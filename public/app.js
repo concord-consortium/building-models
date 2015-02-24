@@ -12490,8 +12490,6 @@ function DiagramToolkit(domContext, options) {
       target: target,
       anchors: [source_terminal || "Top", target_terminal || "Bottom"],
       paintStyle: this._paintStyle(color),
-      detachable:false,
-      deleteEndpointsOnDetach: true,
       overlays: this._overlays(label)
     });
   };
