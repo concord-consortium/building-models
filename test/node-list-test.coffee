@@ -127,8 +127,10 @@ describe 'Node', () ->
   describe "NodeList", () ->
     beforeEach () ->
       @nodeList = new NodeList()
-      @newLink = { terminalKey: 'newLink'}
-      @otherNewLink = {terminalKey: 'otherNewLink' }
+      @newLink = 
+        terminalKey: () -> 'newLink'
+      @otherNewLink = 
+        terminalKey: () -> 'otherNewLink'
 
     describe "addLink", () ->
       describe "When the link doesn't already exist", () ->
