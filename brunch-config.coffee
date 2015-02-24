@@ -11,6 +11,9 @@ exports.config =
       joinTo:
         'app.js': /^app/
         'vendor.js': /^(bower_components|vendor)/
+      order:
+        before:
+          'bower_components/lodash/dist/lodash.min.js'
     stylesheets:
       joinTo:
         'app.css': /^app/
