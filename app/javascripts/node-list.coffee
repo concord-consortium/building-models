@@ -1,4 +1,5 @@
-_ = require('lodash')
+# _ = require('lodash')
+# log = require('loglevel');
 
 # GraphPrimitive is the basis for the Node and Link classes.
 # They share a common ID generation mechanism mostly.
@@ -19,20 +20,21 @@ class GraphPrimitive
     @id = GraphPrimitive.nextID(@type())
 
 
+
 class Link extends GraphPrimitive
   constructor: (@options={}) ->
     @options.color ||= "red"
     @options.title ||= "untitled"
-    { @sourceNode, @sourceTerminal ,@targetNode, @targetTerminal} = @options
+    { @sourceNode, @sourceTerminal ,@targetNode, @targetTerminal, @color, @title} = @options
     super()
     @valid = false
 
   type: () ->
     "Link"
   terminalKey: () ->
-    "{@sourceNode.id}[{@sourceTerminal}] ---{@title}---> {@targetNode}[{@targetTerminal}]"
+    "#{@sourceNode}[#{@sourceTerminal}] ---#{@title}---> #{@targetNode}[#{@targetTerminal}]"
   nodeKey: () ->
-    "{@sourceNode.id} ---{@title}---> {@targetNode}"
+    "#{@sourceNode} ---#{@title}---> #{@targetNode}"
   outs: () ->
     [@targetNode]
   ins: () ->
@@ -78,18 +80,28 @@ class Node extends GraphPrimitive
         unless _.contains(visitedNodes, downstreamNode)
           visit(downstreamNode)
     visit(@)
-    _.without(visitedNodes,@) # remove ourself from the results.
+    _.without(visitedNodes, @) # remove ourself from the results.
           
 
+# NodeList is the logical manager of Nodes and Links.
+# It implements 
+#
 class NodeList
   constructor: () ->
-  getName: () ->
-  addLink: (sourceNode, sourceTerminal, targetNode, targetTerminal) ->
+    @linkKeys = {}
+
+  hasLink: (link) ->
+    @linkKeys[link.terminalKey()]?
+
+  addLink: (link) ->
+    unless @hasLink(link)
+      @linkKeys[link.terminalKey()] = link
+      return true
+    return false
 
 
-module.exports = {
+module.exports =
   NodeList:NodeList
   GraphPrimitive:GraphPrimitive
   Link:Link
   Node:Node
-}

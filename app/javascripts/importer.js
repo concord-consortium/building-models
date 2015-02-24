@@ -14,7 +14,14 @@ function Importer(system) {
     var link = null;
     for (var key in links) {
       data = links[key];
-      this.system.addLink({'key': key, 'data':data });
+      this.system.addLink({
+        sourceNode: data.startNode,
+        targetNode: data.endNode,
+        sourceTerminal: data.startTerminal,
+        targetTerminal: data.endTerminal,
+        title: data.text,
+        color: data.color
+      });
     }
   };
 

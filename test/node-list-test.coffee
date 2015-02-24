@@ -1,9 +1,11 @@
-expect = require('chai').expect
-should = require('chai').should()
-NodeList = require('../app/javascripts/node-list').NodeList
+expect         = require('chai').expect
+should         = require('chai').should()
+Sinon          = require('sinon')
+
+NodeList       = require('../app/javascripts/node-list').NodeList
 GraphPrimitive = require('../app/javascripts/node-list').GraphPrimitive
-Link = require('../app/javascripts/node-list').Link
-Node = require('../app/javascripts/node-list').Node
+Link           = require('../app/javascripts/node-list').Link
+Node           = require('../app/javascripts/node-list').Node
 
 describe 'GraphPrimitive', () ->
   it 'GraphPrimitive should exists', () ->
@@ -35,6 +37,21 @@ describe 'GraphPrimitive', () ->
         undertest.id.should.equal('Node-1')
         secondNode = new Node()
         secondNode.id.should.equal('Node-2')
+
+describe 'Link', () ->
+  describe 'terminalKey', () ->
+    beforeEach () ->
+      @link = new Link(
+        sourceNode: 'source',
+        sourceTerminal: 'a',
+        targetNode: 'target',
+        targetTerminal: 'b',
+        title: 'unkown link'
+      )
+    it "should have a reasonable text based terminalKey", () ->
+      @link.sourceNode.should.equal('source')
+      @link.terminalKey().should.equal("source[a] ---unkown link---> target[b]")
+
 describe 'Node', () ->
   beforeEach () ->
     @node_a = new Node()
@@ -42,7 +59,7 @@ describe 'Node', () ->
     @node_c = new Node()
 
   ###
-    Note Cycle in A <-> B
+    Note cyclic graph in A <-> B
                    +---+
           +-------->   |
           |        | B |
@@ -99,10 +116,34 @@ describe 'Node', () ->
           it "should have 1 in link", () ->
             @node_a.inLinks().should.have.length(1)
         
-        describe 'outLinks', () ->  
+        describe 'outLinks', () ->
           it "should have 2 outlinks", () ->
             @node_a.outLinks().should.have.length(2)
 
         describe 'downstreamNodes', () ->
           it "should have some nodes", () ->
             @node_a.downstreamNodes().should.have.length(2)
+
+  describe "NodeList", () ->
+    beforeEach () ->
+      @nodeList = new NodeList()
+      @newLink = { terminalKey: 'newLink'}
+      @otherNewLink = {terminalKey: 'otherNewLink' }
+
+    describe "addLink", () ->
+      describe "When the link doesn't already exist", () ->
+        it "should add a new link", () ->
+          should.not.exist @nodeList.linkKeys['newLink']
+          @nodeList.addLink(@newLink).should.equal(true)
+          @nodeList.addLink(@otherNewLink).should.equal(true)
+          @nodeList.linkKeys['newLink'].should.equal(@newLink)
+          @nodeList.linkKeys['otherNewLink'].should.equal(@otherNewLink)
+      describe "When the link does already exist", () ->
+        beforeEach () ->
+          @nodeList.linkKeys['newLink'] = 'oldValue'
+        it "should not add the new link", () ->
+          @nodeList.addLink(@newLink).should.equal(false)
+          @nodeList.linkKeys['newLink'].should.equal('oldValue')
+           
+         
+

@@ -1,13 +1,15 @@
-var Node = require('./diagram-node');
-var InfoPane = require('./info-pane');
-var Importer = require('./importer');
+var Node        = require('./diagram-node');
+var InfoPane    = require('./info-pane');
+var Importer    = require('./importer');
 var idGenerator = require('./id-generator');
-
+var NodeList    = require('./node-list').NodeList;
+var Link        = require('./node-list').Link;
 
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 
 var BuildingModels = React.createClass({
   getInitialState: function() { 
+    this.nodeList = new NodeList();
     return {
       nodes: [],
       links: []
@@ -44,16 +46,17 @@ var BuildingModels = React.createClass({
     var endName = this._nameForNode(endNode);
     var startTerminal = (info.connection.endpoints[0].anchor.type == "Top") ? "a" : "b";
     var endTerminal   = (info.connection.endpoints[1].anchor.type == "Top") ? "a" : "b";
-    newLink.data = {
-      startNode:startName,
-      endNode:endName,
-      startTerminal: startTerminal,
-      endTerminal: endTerminal,
+    var data = {
+      sourceNode:startName,
+      targetNode:endName,
+      sourceTerminal: startTerminal,
+      targetTerminal: endTerminal,
       color: '#fea',
-      text: 'untitlted'
-    };
-    debugger
-    this.addLink(newLink);
+      title: 'untitlted'
+    }
+    l = new Link(data);
+    console.log(l.terminalKey());
+    this.addLink(new Link(data));
   },
 
   _nodeForName: function(name) {
@@ -104,12 +107,12 @@ var BuildingModels = React.createClass({
   _redrawLinks: function() {
     if (this.diagramToolkit && this.diagramToolkit.addLink) {
       this.state.links.map(function(l) {
-        var source         = this._nodeForName(l.data.startNode);
-        var target         = this._nodeForName(l.data.endNode);
-        var label          = l.data.text;
-        var color          = l.data.color;
-        var sourceTerminal = (l.data.startTerminal == "a") ? "Top" : "Bottom";
-        var targetTerminal = (l.data.endTerminal == "a") ? "Top" : "Bottom";
+        var source         = this._nodeForName(l.sourceNode);
+        var target         = this._nodeForName(l.targetNode);
+        var label          = l.title;
+        var color          = l.color;
+        var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
+        var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
         this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
       }.bind(this));
     }
@@ -136,7 +139,6 @@ var BuildingModels = React.createClass({
   },
 
 
-
   addNode: function(newNode) {
     var nodes = this.state.nodes;
     nodes.push(newNode);
@@ -146,7 +148,7 @@ var BuildingModels = React.createClass({
   removeLinksForNode: function(nodeKey) {
     var links = this.state.links;
     var newLinks = links.filter(function(link) {
-      if (nodeKey === link.data.startNode || nodeKey === link.data.endNode) {
+      if (nodeKey === link.sourceNode || nodeKey === link.targetNode) {
         return false;
       }
       return true;
@@ -166,10 +168,13 @@ var BuildingModels = React.createClass({
     this.setState({nodes: newNodes});
   },
   
-  addLink: function(newLink) {
-    var links = this.state.links;
-    links.push(newLink);
-    this.setState({links: links});
+  addLink: function(data) {
+    var newLink = new Link(data);
+    if(this.nodeList.addLink(newLink)) {
+      var links = this.state.links;
+      links.push(newLink);
+      this.setState({links: links});
+    }
   },
 
   render: function() {

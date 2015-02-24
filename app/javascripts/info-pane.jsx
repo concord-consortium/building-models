@@ -28,7 +28,7 @@ var InfoPane = React.createClass({
 
   _linked_node: function(link_id) {
     var link = this._find_link(link_id);
-    var node_id = link.data.endNode;
+    var node_id = link.targetNode;
     var node = this._find_node(node_id);
     return node
   },
@@ -37,14 +37,14 @@ var InfoPane = React.createClass({
     var self = this;
     var nodes = self.props.nodes.map(function(node) {
       var outlinks = self.props.links.filter(function(link) {
-        if(link.data.startNode == node.key) {
+        if(link.sourceNode == node.key) {
           return true;
         }
         return false;
       });
       var link_display_data = outlinks.map(function(link) {
         var remote_node = self._linked_node(link.key);
-        var title = link.data.text;
+        var title = link.title;
         return (
           <span className = "node-link">
             <span className = "node-link-name"> {title} </span>

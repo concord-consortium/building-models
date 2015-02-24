@@ -14,7 +14,7 @@ function DiagramToolkit(domContext, options) {
   };
 
   this.registerListeners = function() {
-    this.kit.bind("beforeDrop", this.handleConnect.bind(this));
+    this.kit.bind("connection", this.handleConnect.bind(this));
   };
 
 
@@ -36,19 +36,17 @@ function DiagramToolkit(domContext, options) {
     this.kit.repaintEverything();
   };
 
-  this._endpoint = [ "Dot", { radius:15 } ];
+  this._endpointOptions = [ "Dot", { radius:15 } ];
 
   this.makeTarget = function(div, opts) {
     var opts = {
       isTarget:true, 
       isSource:true,
-      endpoint: this._endpoint,
+      endpoint: this._endpointOptions,
       connector:[ "Bezier"],
       anchor: "Top",
       paintStyle: this._paintStyle(),
-      maxConnections: -1
-      // overlays: this._overlays()
-      // anchor: ["TopCenter", "BottomCenter"],
+      maxConnections: -1,
     };
     
     this.kit.addEndpoint(div,opts);
@@ -58,6 +56,7 @@ function DiagramToolkit(domContext, options) {
 
   this.clear = function() {
     if(this.kit) {
+      this.kit.deleteEveryEndpoint();
       this.kit.reset();
       this.registerListeners();
     }
@@ -69,7 +68,7 @@ function DiagramToolkit(domContext, options) {
   this.kit.importDefaults({
     Connector:        [ "Bezier",    { curviness: 50 } ],
     Anchors:          [ "TopCenter", "BottomCenter"],
-    Endpoint:         this._endpoint,
+    Endpoint:         this._endpointOptions,
     DragOptions :     { cursor: 'pointer', zIndex:2000 },
     DoNotThrowErrors: false
   });
