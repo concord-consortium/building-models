@@ -1,11 +1,15 @@
-expect         = require('chai').expect
-should         = require('chai').should()
+chai = require('chai')
+chai.config.includeStack = true
+
+expect         = chai.expect
+should         = chai.should()
 Sinon          = require('sinon')
 
-NodeList       = require('../app/javascripts/node-list').NodeList
-GraphPrimitive = require('../app/javascripts/node-list').GraphPrimitive
-Link           = require('../app/javascripts/node-list').Link
-Node           = require('../app/javascripts/node-list').Node
+GraphPrimitive = require('../app/javascripts/models/graph-primitive')
+Link           = require('../app/javascripts/models/link')
+Node           = require('../app/javascripts/models/node')
+LinkManager       = require('../app/javascripts/models/link-manager')
+
 
 describe 'GraphPrimitive', () ->
   it 'GraphPrimitive should exists', () ->
@@ -124,9 +128,9 @@ describe 'Node', () ->
           it "should have some nodes", () ->
             @node_a.downstreamNodes().should.have.length(2)
 
-  describe "NodeList", () ->
+  describe "LinkManager", () ->
     beforeEach () ->
-      @nodeList = new NodeList()
+      @nodeList = new LinkManager()
       @newLink = 
         terminalKey: () -> 'newLink'
       @otherNewLink = 

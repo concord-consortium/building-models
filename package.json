@@ -19,13 +19,13 @@
     "javascript-brunch": ">= 1.0 < 1.8",
     "react-brunch": ">= 1.0.7",
     "stylus-brunch": ">= 1.0 < 1.8",
-    "uglify-js-brunch": ">= 1.0 < 1.8"
+    "uglify-js-brunch": ">= 1.0 < 1.8",
+    "lodash": "^3.3.0",
+    "loglevel": "^1.2.0"
   },
   "devDependencies": {
     "chai": "^2.0.0",
     "coffee-script": "^1.9.1",
-    "lodash": "^3.3.0",
-    "loglevel": "^1.2.0",
     "mocha": "^2.1.0",
     "sinon": "^1.12.2"
   }

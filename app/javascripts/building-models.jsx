@@ -2,8 +2,8 @@ var Node        = require('./diagram-node');
 var InfoPane    = require('./info-pane');
 var Importer    = require('./importer');
 var idGenerator = require('./id-generator');
-var NodeList    = require('./node-list').NodeList;
-var Link        = require('./node-list').Link;
+var NodeList    = require('./models/link-manager')
+var Link        = require('./models/link')
 
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 

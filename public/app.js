@@ -95,8 +95,8 @@ var Node        = require('./diagram-node');
 var InfoPane    = require('./info-pane');
 var Importer    = require('./importer');
 var idGenerator = require('./id-generator');
-var NodeList    = require('./node-list').NodeList;
-var Link        = require('./node-list').Link;
+var NodeList    = require('./models/link-manager')
+var Link        = require('./models/link')
 
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 
@@ -12502,42 +12502,12 @@ function DiagramToolkit(domContext, options) {
 module.exports = DiagramToolkit;
 });
 
-require.register("javascripts/noah-connector", function(exports, require, module) {
-/**
- * Class: Connectors.Noah
- * Simple test to check if we can create new connector styles.
- * ✔ we can. 
- */
-var Noah = jsPlumb.Connectors.Noah = function() {
-  this.type = "Noah";
-  var _super =  jsPlumb.Connectors.AbstractConnector.apply(this, arguments);    
-    this._compute = function(paintInfo, _) {                        
-      
-      _super.addSegment(this, "Straight", {x1:paintInfo.sx, y1:paintInfo.sy, x2:paintInfo.startStubX, y2:paintInfo.startStubY});                                                
-      _super.addSegment(this, "Straight", {
-        x1:paintInfo.startStubX, 
-        y1:paintInfo.startStubY, 
-        x2:paintInfo.endStubX / 2, 
-        y2:paintInfo.endStubY
-      });
-      _super.addSegment(this, "Straight", {
-        x1:paintInfo.endStubX / 2, 
-        y1:paintInfo.endStubY, 
-        x2:paintInfo.endStubX, 
-        y2:paintInfo.endStubY
-      });
-      _super.addSegment(this, "Straight", {x1:paintInfo.endStubX, y1:paintInfo.endStubY, x2:paintInfo.tx, y2:paintInfo.ty});                                    
-    };                    
-  };
-jsPlumbUtil.extend(jsPlumb.Connectors.Noah, jsPlumb.Connectors.AbstractConnector);
-jsPlumb.registerConnectorType(Noah, "Noah");
+require.register("javascripts/models/graph-primitive", function(exports, require, module) {
+var GraphPrimitive, log, _;
 
-});
+_ = require('lodash');
 
-require.register("javascripts/node-list", function(exports, require, module) {
-var GraphPrimitive, Link, Node, NodeList,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+log = require('loglevel');
 
 GraphPrimitive = (function() {
   GraphPrimitive.counters = {};
@@ -12564,6 +12534,47 @@ GraphPrimitive = (function() {
   return GraphPrimitive;
 
 })();
+
+module.exports = GraphPrimitive;
+});
+
+;require.register("javascripts/models/link-manager", function(exports, require, module) {
+var LinkManager, log, _;
+
+_ = require('lodash');
+
+log = require('loglevel');
+
+LinkManager = (function() {
+  function LinkManager() {
+    this.linkKeys = {};
+  }
+
+  LinkManager.prototype.hasLink = function(link) {
+    return this.linkKeys[link.terminalKey()] != null;
+  };
+
+  LinkManager.prototype.addLink = function(link) {
+    if (!this.hasLink(link)) {
+      this.linkKeys[link.terminalKey()] = link;
+      return true;
+    }
+    return false;
+  };
+
+  return LinkManager;
+
+})();
+
+module.exports = LinkManager;
+});
+
+;require.register("javascripts/models/link", function(exports, require, module) {
+var GraphPrimitive, Link,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+GraphPrimitive = require('./graph-primitive');
 
 Link = (function(_super) {
   __extends(Link, _super);
@@ -12602,10 +12613,24 @@ Link = (function(_super) {
 
 })(GraphPrimitive);
 
+module.exports = Link;
+});
+
+;require.register("javascripts/models/node", function(exports, require, module) {
+var GraphPrimitive, Node, log, _,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+_ = require('lodash');
+
+log = require('loglevel');
+
+GraphPrimitive = require('./graph-primitive');
+
 Node = (function(_super) {
   __extends(Node, _super);
 
-  function Node() {
+  function Node(name) {
     Node.__super__.constructor.call(this);
     this.links = [];
   }
@@ -12651,7 +12676,7 @@ Node = (function(_super) {
     var visit, visitedNodes;
     visitedNodes = [];
     visit = function(node) {
-      console.log("visiting node: " + node.id);
+      log.info("visiting node: " + node.id);
       visitedNodes.push(node);
       return _.each(node.outLinks(), function(link) {
         var downstreamNode;
@@ -12669,34 +12694,40 @@ Node = (function(_super) {
 
 })(GraphPrimitive);
 
-NodeList = (function() {
-  function NodeList() {
-    this.linkKeys = {};
-  }
-
-  NodeList.prototype.hasLink = function(link) {
-    return this.linkKeys[link.terminalKey()] != null;
-  };
-
-  NodeList.prototype.addLink = function(link) {
-    if (!this.hasLink(link)) {
-      this.linkKeys[link.terminalKey()] = link;
-      return true;
-    }
-    return false;
-  };
-
-  return NodeList;
-
-})();
-
-module.exports = {
-  NodeList: NodeList,
-  GraphPrimitive: GraphPrimitive,
-  Link: Link,
-  Node: Node
-};
+module.exports = Node;
 });
 
-;
+;require.register("javascripts/noah-connector", function(exports, require, module) {
+/**
+ * Class: Connectors.Noah
+ * Simple test to check if we can create new connector styles.
+ * ✔ we can. 
+ */
+var Noah = jsPlumb.Connectors.Noah = function() {
+  this.type = "Noah";
+  var _super =  jsPlumb.Connectors.AbstractConnector.apply(this, arguments);    
+    this._compute = function(paintInfo, _) {                        
+      
+      _super.addSegment(this, "Straight", {x1:paintInfo.sx, y1:paintInfo.sy, x2:paintInfo.startStubX, y2:paintInfo.startStubY});                                                
+      _super.addSegment(this, "Straight", {
+        x1:paintInfo.startStubX, 
+        y1:paintInfo.startStubY, 
+        x2:paintInfo.endStubX / 2, 
+        y2:paintInfo.endStubY
+      });
+      _super.addSegment(this, "Straight", {
+        x1:paintInfo.endStubX / 2, 
+        y1:paintInfo.endStubY, 
+        x2:paintInfo.endStubX, 
+        y2:paintInfo.endStubY
+      });
+      _super.addSegment(this, "Straight", {x1:paintInfo.endStubX, y1:paintInfo.endStubY, x2:paintInfo.tx, y2:paintInfo.ty});                                    
+    };                    
+  };
+jsPlumbUtil.extend(jsPlumb.Connectors.Noah, jsPlumb.Connectors.AbstractConnector);
+jsPlumb.registerConnectorType(Noah, "Noah");
+
+});
+
+
 //# sourceMappingURL=app.js.map
