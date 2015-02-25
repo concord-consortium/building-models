@@ -5,35 +5,47 @@ by the [Concord Consortium](http://concord.org/).
 
 
 ## TODO:
-
-* Inlucde link from [Model Survey](http://concord-consortium.github.io/model-survey/) to here
+* Include link from [Model Survey](http://concord-consortium.github.io/model-survey/) to here
 * Think of a better name for this tool.
 
 ## See Also:
-
 * [Live demo site](http://concord-consortium.github.io/building-models/)
 * [MySystem](https://github.com/concord-consortium/mysystem_sc) – a simple concept mapping with node/edge graphs.
-* [Model Survey](http://concord-consortium.github.io/model-survey/) – Asessment Node/edge graphing tools.
-* [jsPlumb](https://jsplumbtoolkit.com/) – Graphing toolkit.
+* [Model Survey](http://concord-consortium.github.io/model-survey/) – Assessing available node/edge graphing tools.
+* [jsPlumb](https://jsplumbtoolkit.com/) – The graphing toolkit we are currently using.
 * [React](http://facebook.github.io/react/) – Javscript component development toolkit.
 * [MIT License](LICENSE) – The license we are using.
 
-## Developing with [Brunch](http://brunch.io):
-* Install (if you don't have them):
+## Developing with [Gulp](http://gulpjs.com/) and [jspm](http://jspm.io/):
+This is still a bit raw. For package management we use jspm, but we still have to 
+compile jsx and styl and cofee sources, so we use gulp for that. Tests are performed on
+the compiled artifacts, which is less than ideal.
+
+* Install Deps:
     * [Node.js](http://nodejs.org): `brew install node` on OS X
-    * [Brunch](http://brunch.io): `npm install -g brunch`
-    * [Bower](http://bower.io): `npm install -g bower`
-    * Brunch plugins and Bower dependencies: `npm install & bower install`.
+    * [Gulp](http://gulpjs.com/): `npm install -g gulp`
+    * [jspm](http://jspm.io/): `npm install -g jspm`
+    * [live-server](https://www.npmjs.com/package/live-server) `npm install -g live-server`
+    * npm modules needed for gulp plugins &etc. : `npm install`.
+    * jspm modules needed for jspm require(). : `jspm install`. 
+
 * Run:
-    * `brunch watch --server` — watches the project with continuous rebuild. This will also launch HTTP server with [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history).
-    * `brunch build --production` — builds minified project for production
+    * `gulp default` — watches the project sources in `./src/` and builds artifacts into `public`.
+    * `cd public && live-server`– starts a live webserver on localhost:8080 with autorefreshing.
+    * Fiddle around with files in ./src/, watch live changes in browser.
+
+* Test:
+    * `gulp default` — watches the project sources in `./src/` and builds artifacts into `public`.
+    * Run mocha tests (located in `./test/`):   `./node_modules/mocha/bin/mocha -w`
+
 * Learn:
-    * `public/` dir is fully auto-generated and served by HTTP server.  Write your code in `app/` dir.
-    * Place static files you want to be copied from `app/assets/` to `public/`.
-    * [Brunch site](http://brunch.io), [Chaplin site](http://chaplinjs.org)
+    * `./public/` dir is fully auto-generated and served by HTTP server.  Write your code in `./src/` dir.
+    * Place static files you want to be copied from `src/assets/` to `public/`.
 
-## Building for deployment on github pages:
-
-Run `./build.sh` and hope for the best. Might be better just to read `build.sh` for now.
-
-
+## Deployment to github pages:
+* Run `./build.sh` and hope for the best. (It might be worth having a quick read `build.sh`, in the event that things go terribly wrong.  That script should be doing the following things):
+  * Check out new clone of this repo into dest, checking out the gh-pages branch by default
+  * Run `gulp build-all` to generate all assets into public/*
+  * Run `jspm bundle-sfx` to create a bootstapped deployable app.js.
+  * Copy files into ./dist/
+  * Push changes up to gh-pages on github.
