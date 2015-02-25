@@ -18,5 +18,9 @@ module.exports = {
   jsx: {
     src: src + '/javascripts/**/*.jsx',
     dest: dest + '/javascripts/'
+  },
+  assets: {
+    src: src + '/assets/**/*.*',
+    dest: dest
   }
 };

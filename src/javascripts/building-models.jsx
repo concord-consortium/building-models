@@ -1,11 +1,13 @@
+var React       = require('react');
 var Node        = require('./diagram-node');
 var InfoPane    = require('./info-pane');
 var Importer    = require('./importer');
 var idGenerator = require('./id-generator');
 var NodeList    = require('./models/link-manager');
 var Link        = require('./models/link');
-
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
+var $              = require('jquery');
+require('jquery-ui');
 
 var BuildingModels = React.createClass({
   getInitialState: function() { 
@@ -205,7 +207,7 @@ var BuildingModels = React.createClass({
   }
 });
 
-jsPlumb = require('javascripts/jsPlumb').jsPlumb
+// jsPlumb = require('javascripts/jsPlumb')
 jsPlumb.ready(function(){
   remote_url = "http://mysystem_sc.dev.concord.org/mysystem_designs/7e5c26385bbe26b9643ff84de9005cb6";
   local_url = "my_system_state.json";

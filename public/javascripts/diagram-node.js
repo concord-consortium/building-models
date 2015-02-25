@@ -1,5 +1,5 @@
-var React = require('react');
-var DiagramNode = React.createClass({
+var React       = require('react');
+var DiagramNode = React.createClass({displayName: "DiagramNode",
 
   componentDidMount: function() {
     var $elem = $(this.getDOMNode());
@@ -55,15 +55,15 @@ var DiagramNode = React.createClass({
 
 
     return (
-      <div className="elm" style={style}>
-        <div className="img-background">
-          <div className="delete-box" onClick={deleteHandler}>
-            <i className="fa fa-times-circle"></i>
-          </div>
-          <img src={this.props.data.image}/>
-        </div>
-        <div className="node-title">{this.props.data.title}</div>
-      </div>
+      React.createElement("div", {className: "elm", style: style}, 
+        React.createElement("div", {className: "img-background"}, 
+          React.createElement("div", {className: "delete-box", onClick: deleteHandler}, 
+            React.createElement("i", {className: "fa fa-times-circle"})
+          ), 
+          React.createElement("img", {src: this.props.data.image})
+        ), 
+        React.createElement("div", {className: "node-title"}, this.props.data.title)
+      )
     );
   }
 });

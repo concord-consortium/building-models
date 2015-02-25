@@ -1,9 +1,9 @@
 var gulp        = require('gulp');
-var config      = require('../config').jsx;
+var config      = require('../config').assets;
 var react = require('gulp-react');
  
-gulp.task('jsx', function() {
+// Copy files directly simple
+gulp.task('assets', function() {
   return gulp.src(config.src)
-    .pipe(react())
     .pipe(gulp.dest(config.dest));
 });

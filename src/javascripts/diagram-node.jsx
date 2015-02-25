@@ -1,3 +1,4 @@
+var React       = require('react');
 var DiagramNode = React.createClass({
 
   componentDidMount: function() {
