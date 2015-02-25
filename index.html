@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="css/app.css">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   
 </head>
@@ -16,10 +16,10 @@
     <div id="building-models"></div>
   </div>
 </body>
-<script src="vendor.js"></script>
-<script src="app.js"></script>
-
-<script>jsPlumb = require('javascripts/jsPlumb')</script>
-<script>require('javascripts/building-models')</script>
-
+  <script src="javascripts/jsPlumb.js"></script>
+  <script src="jspm_packages/system.js"></script>
+  <script src="config.js"></script>
+  <script>
+    System.import('javascripts/building-models.jsx!');
+  </script>
 </html>
