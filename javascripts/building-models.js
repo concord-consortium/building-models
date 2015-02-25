@@ -1,16 +1,15 @@
-var Node        = require('./diagram-node.jsx!');
-var InfoPane    = require('./info-pane.jsx!');
+var React       = require('react');
+var Node        = require('./diagram-node');
+var InfoPane    = require('./info-pane');
 var Importer    = require('./importer');
 var idGenerator = require('./id-generator');
-var NodeList    = require('./models/link-manager.coffee!');
-var Link        = require('./models/link.coffee!');
-var React       = require('react');
-var $           = require('jquery');
-var $ui         = require('jquery-ui');
-
+var NodeList    = require('./models/link-manager');
+var Link        = require('./models/link');
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
+var $              = require('jquery');
+require('jquery-ui');
 
-var BuildingModels = React.createClass({
+var BuildingModels = React.createClass({displayName: "BuildingModels",
   getInitialState: function() { 
     this.nodeList = new NodeList();
     return {
@@ -187,33 +186,33 @@ var BuildingModels = React.createClass({
     var nodeData = this.state.nodes;
     var nodes = this.state.nodes.map(function(node) {
       return (
-        <Node 
-          key={node.key} 
-          data={node.data}
-          nodeKey={node.key}
-          ref={node.key} 
-          onMove={moveHandler}
-          onDelete={deleteHandler}/>
+        React.createElement(Node, {
+          key: node.key, 
+          data: node.data, 
+          nodeKey: node.key, 
+          ref: node.key, 
+          onMove: moveHandler, 
+          onDelete: deleteHandler})
       );
     });
     return (
-      <div className="building-models">
-        <div id="container" className='my-container'>
-          {nodes}
-        </div>
-        <InfoPane title="Info Pane" ref="info" nodes={nodeData} links={linkData}>
-        </InfoPane>
-      </div>
+      React.createElement("div", {className: "building-models"}, 
+        React.createElement("div", {id: "container", className: "my-container"}, 
+          nodes
+        ), 
+        React.createElement(InfoPane, {title: "Info Pane", ref: "info", nodes: nodeData, links: linkData}
+        )
+      )
     );
   }
 });
 
-// jsPlumb = require('./jsPlumb').jsPlumb
+// jsPlumb = require('javascripts/jsPlumb')
 jsPlumb.ready(function(){
   remote_url = "http://mysystem_sc.dev.concord.org/mysystem_designs/7e5c26385bbe26b9643ff84de9005cb6";
   local_url = "my_system_state.json";
   React.render(
-    <BuildingModels localUrl={local_url} className="my-system"/>,
+    React.createElement(BuildingModels, {localUrl: local_url, className: "my-system"}),
     document.getElementById('building-models')
 
   );

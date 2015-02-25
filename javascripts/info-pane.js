@@ -1,6 +1,5 @@
-var React = require('react');
-
-var InfoPane = React.createClass({
+var React       = require('react');
+var InfoPane = React.createClass({displayName: "InfoPane",
   getInitialState: function() { 
     return {
       nodes: [],
@@ -48,30 +47,30 @@ var InfoPane = React.createClass({
         var remote_node = self._linked_node(link.key);
         var title = link.title;
         return (
-          <span className = "node-link">
-            <span className = "node-link-name"> {title} </span>
-            <span className = "node-link-node"> {remote_node.data.title} </span>
-          </span>
+          React.createElement("span", {className: "node-link"}, 
+            React.createElement("span", {className: "node-link-name"}, " ", title, " "), 
+            React.createElement("span", {className: "node-link-node"}, " ", remote_node.data.title, " ")
+          )
         )
       });
 
       return (
-        <div className="nodePanel">
-          <div id="info-node-{node.key}" className = "node-key"> {node.data.title} 
-            &nbsp; @(
-              <span className="node-location-x">{node.data.x}
-              </span>x<span className="node-location-y">{node.data.y}</span>
-            )
-            {link_display_data}
-          </div>
-        </div>
+        React.createElement("div", {className: "nodePanel"}, 
+          React.createElement("div", {id: "info-node-{node.key}", className: "node-key"}, " ", node.data.title, 
+            "  @(", 
+              React.createElement("span", {className: "node-location-x"}, node.data.x
+              ), "x", React.createElement("span", {className: "node-location-y"}, node.data.y), 
+            ")", 
+            link_display_data
+          )
+        )
       );
     });
     return (
-      <div className="info-pane">
-        <div className="info-title">{this.props.title}</div>
-        #{nodes}
-      </div>
+      React.createElement("div", {className: "info-pane"}, 
+        React.createElement("div", {className: "info-title"}, this.props.title), 
+        "#", nodes
+      )
     );
   }
 });
