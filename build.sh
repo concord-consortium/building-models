@@ -34,7 +34,7 @@ jspm bundle-sfx javascripts/building-models dist/app.js &&\
 
 # 4) Copy files
 cp -r ./src/assets/* $DISTDIR &&\
-cp ./src/production_index.html $DISTDIR/index.html &&\
+sed "s/__BUILD_INFO__/$SHA built on $DATE/g" ./src/production_index.html > $DISTDIR/index.html &&\
 cp ./public/css/app.css $DISTDIR/css/app.css &&\
 cp ./src/javascripts/jsPlumb.js $DISTDIR/jsPlumb.js &&\
 
