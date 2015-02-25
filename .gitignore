@@ -21,13 +21,12 @@
 nbproject
 Thumbs.db
 
-# NPM packages folder.
+# Packages folder.
 node_modules/
 public/jspm_packages/
+
 # Brunch folder for temporary files.
 tmp/
 
-# Brunch output folder.
-
-# Bower stuff.
-bower_components/
+# The dist folder
+dist/
