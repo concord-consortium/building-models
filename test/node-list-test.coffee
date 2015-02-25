@@ -5,10 +5,10 @@ expect         = chai.expect
 should         = chai.should()
 Sinon          = require('sinon')
 
-GraphPrimitive = require('../app/javascripts/models/graph-primitive')
-Link           = require('../app/javascripts/models/link')
-Node           = require('../app/javascripts/models/node')
-LinkManager       = require('../app/javascripts/models/link-manager')
+GraphPrimitive = require('../public/javascripts/models/graph-primitive')
+Link           = require('../public/javascripts/models/link')
+Node           = require('../public/javascripts/models/node')
+LinkManager    = require('../public/javascripts/models/link-manager')
 
 
 describe 'GraphPrimitive', () ->
