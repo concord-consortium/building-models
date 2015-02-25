@@ -13,33 +13,33 @@ echo "Building gh-pages branch in $DISTDIR for SHA $SHA on $DATE"
 if [ -e "$GITCONFIG" ]
 then
   echo "found existing git clone in $DISTDIR"
+  cd $DISTDIR &&\
+  git checkout gh-pages &&\
+  git pull
 else
   echo "cloning building-models repo in $DISTDIR"
   git clone git@github.com:concord-consortium/building-models.git $DISTDIR &&\
   cd $DISTDIR &&\
   echo "checking out gh-pages branch" &&\
   git checkout gh-pages
-  echo "Done."
-  cd $HERE
 fi
+
+cd $HERE
 
 # 2) Build our project using gulp:
 gulp build-all &&\
 
-# 2) Bundle our app using jspm
+# 3) Bundle our app using jspm
 jspm bundle-sfx javascripts/building-models dist/app.js &&\
 
-# 3) Copy files
+# 4) Copy files
+cp -r ./src/assets/* $DISTDIR &&\
 cp ./src/production_index.html $DISTDIR/index.html &&\
-cp -r ./src/assets/* ./dist &&\
-
-cp ./public/css/app.css ./dist/css/app.css &&\
-cp ./src/javascripts/jsPlumb.js ./dist/jsPlumb.js &&\
+cp ./public/css/app.css $DISTDIR/css/app.css &&\
+cp ./src/javascripts/jsPlumb.js $DISTDIR/jsPlumb.js &&\
 
 # 5) Commit and push
-cd dist &&\
-git checkout gh-pages &&\
-git pull &&\
+cd $DISTDIR
 git add * &&\
 git commit -a -m "deployment for $SHA built on $DATE" &&\
-git push
+git push origin gh-pages
