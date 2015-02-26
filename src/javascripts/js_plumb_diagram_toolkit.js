@@ -9,14 +9,9 @@ function DiagramToolkit(domContext, options) {
   this.lineWidth = this.options.lineWidth || 6;    
   this.kit       = jsPlumb.getInstance({ Container: domContext});
 
-  this.notifyStart = function() {
-    
-  };
-
   this.registerListeners = function() {
     this.kit.bind("connection", this.handleConnect.bind(this));
   };
-
 
   this.handleConnect = function(info,evnt) {
     if (this.options.handleConnect) {
@@ -38,7 +33,7 @@ function DiagramToolkit(domContext, options) {
 
   this._endpointOptions = [ "Dot", { radius:15 } ];
 
-  this.makeTarget = function(div, opts) {
+  this.makeTarget = function(div) {
     var opts = {
       isTarget:true, 
       isSource:true,
@@ -46,7 +41,7 @@ function DiagramToolkit(domContext, options) {
       connector:[ "Bezier"],
       anchor: "Top",
       paintStyle: this._paintStyle(),
-      maxConnections: 20,
+      maxConnections: -1,
     };
     
     this.kit.addEndpoint(div,opts);
@@ -91,7 +86,6 @@ function DiagramToolkit(domContext, options) {
   };
 
   this._clean_borked_endpoints = function() {
-    // $("._jsPlumb_endpoint").remove()
     $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
   }
 
@@ -118,7 +112,7 @@ function DiagramToolkit(domContext, options) {
   
   this.resumeDrawing = function() {
     this.setSuspendDrawing(false);
-  }
+  };
 
   this.registerListeners();
 
