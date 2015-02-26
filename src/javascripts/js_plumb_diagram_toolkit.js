@@ -17,12 +17,12 @@ function DiagramToolkit(domContext, options) {
     if (this.options.handleConnect) {
       this.options.handleConnect(info, evnt);
     }
-    return true; // required for drop to succeed.
+    return true;
   };
   
   this.handleDisconnect = function(info,evnt) {
     if (this.options.handleDisconnect) {
-      this.options.handleDisconnect(info, evnt);
+      return this.options.handleDisconnect(info, evnt);
     }
     return true;
   };

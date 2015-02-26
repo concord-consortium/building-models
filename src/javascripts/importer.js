@@ -14,7 +14,7 @@ function Importer(system) {
     var link = null;
     for (var key in links) {
       data = links[key];
-      this.system.addLink({
+      this.system.importLink({
         sourceNode: data.startNode,
         targetNode: data.endNode,
         sourceTerminal: data.startTerminal,

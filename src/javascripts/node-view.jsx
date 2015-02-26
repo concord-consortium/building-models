@@ -2,7 +2,8 @@ var React       = require('react');
 var DiagramNode = React.createClass({
 
   componentDidMount: function() {
-    var $elem = $(this.getDOMNode());
+    var $elem        = $(this.getDOMNode());
+    var nodeKey      = this.props.nodeKey;
     var movedHandler = this.doMove;
     $elem.draggable({
       // grid: [ 10, 10 ],
@@ -51,11 +52,11 @@ var DiagramNode = React.createClass({
       top: this.props.data.y,
       left: this.props.data.x
     };
+    var nodeKey=  this.props.nodeKey;
     var deleteHandler = this.doDelete;
 
-
     return (
-      <div className="elm" style={style}>
+      <div className="elm" style={style} data-node-key={nodeKey}>
         <div className="img-background">
           <div className="delete-box" onClick={deleteHandler}>
             <i className="fa fa-times-circle"></i>

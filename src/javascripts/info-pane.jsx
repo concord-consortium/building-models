@@ -31,7 +31,7 @@ var InfoPane = React.createClass({
     var link = this._find_link(link_id);
     var node_id = link.targetNode;
     var node = this._find_node(node_id);
-    return node
+    return node;
   },
 
   render: function() {

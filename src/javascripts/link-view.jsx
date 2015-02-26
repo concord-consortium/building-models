@@ -1,5 +1,5 @@
 var React       = require('react');
-var Node        = require('./diagram-node');
+var Node        = require('./node-view');
 var InfoPane    = require('./info-pane');
 var Importer    = require('./importer');
 var idGenerator = require('./id-generator');
@@ -7,11 +7,21 @@ var NodeList    = require('./models/link-manager');
 var Link        = require('./models/link');
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 var $              = require('jquery');
+var _              = require('lodash');
+
 require('jquery-ui');
 
-var BuildingModels = React.createClass({
+var LinkView = React.createClass({
+  
+  componentDidMount: function() {
+    this._bindDiagramToolkit();
+    this.linkManager = this.props.linkManager;
+    this.linkManager.addLinkListener(this);
+    this.linkManager.addNodeListener(this);
+    this.linkManager.loadData(this.props.url);
+  },
+
   getInitialState: function() { 
-    this.nodeList = new NodeList();
     return {
       nodes: [],
       links: []
@@ -38,43 +48,31 @@ var BuildingModels = React.createClass({
   handleNodeDeleted: function(node_event) {
     if (this.ignoringEvents) { return; }
     this.removeNode(node_event.nodeKey);
+    return true;
   },
 
   handleConnect: function(info,evnt) {
     if (this.ignoringEvents) { return; }
-    var newLink = {}; 
-    newLink.key = idGenerator("BuildingModels.link");
-    var startNode = document.getElementById(info.sourceId);
-    var endNode = document.getElementById(info.targetId);
-    var startName = this._nameForNode(startNode);
-    var endName = this._nameForNode(endNode);
-    var startTerminal = (info.connection.endpoints[0].anchor.type == "Top") ? "a" : "b";
-    var endTerminal   = (info.connection.endpoints[1].anchor.type == "Top") ? "a" : "b";
-    var data = {
-      sourceNode:startName,
-      targetNode:endName,
-      sourceTerminal: startTerminal,
-      targetTerminal: endTerminal,
-      color: '#fea',
-      title: 'untitlted'
-    }
-    l = new Link(data);
-    console.log(l.terminalKey());
-    this.addLink(new Link(data));
+    this.linkManager.newLinkFromEvent(info,evnt);
+    return true;
   },
 
+  handleLinkAdd: function(info,evnt) {
+    var links = this.linkManager.getLinks();
+    this.setState({links: links});
+    return true;
+  },
+
+  handleNodeAdd: function(nodeData) {
+    var nodes = this.state.nodes;
+    nodes.push(nodeData);
+    this.setState({nodes: nodes});
+    return true;
+  },
+
+  // TODO, can we get rid of this?
   _nodeForName: function(name) {
     return this.refs[name].getDOMNode();
-  },
-
-  // TODO: We should build a mapping class to help with this:
-  _nameForNode: function(domNode) {
-    for(var ref in this.refs) {
-      if (domNode == this.refs[ref].getDOMNode()) {
-        return ref;
-      }
-    }
-    return undefined;
   },
 
   updateNodeValue: function(name, key, value) {
@@ -94,8 +92,7 @@ var BuildingModels = React.createClass({
 
   _bindDiagramToolkit: function()   {
     var opts = {
-      handleConnect: this.handleConnect.bind(this),
-      handleDisconnect: this.handleDisconnect
+      handleConnect: this.handleConnect.bind(this)
     };
     this.diagramToolkit = new DiagramTookkit('#container', opts);
     this._updateToolkit();
@@ -117,7 +114,9 @@ var BuildingModels = React.createClass({
   },
 
   _redrawLinks: function() {
-    this.state.links.map(function(l) {
+    var links = this.state.links;
+    links.forEach(function(l) {
+      // TODO move the bellow junk into Node class.
       var source         = this._nodeForName(l.sourceNode);
       var target         = this._nodeForName(l.targetNode);
       var label          = l.title;
@@ -126,34 +125,6 @@ var BuildingModels = React.createClass({
       var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
       this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
     }.bind(this));
-    
-  },
-
-
-  loadLocalData: function(callback) {
-    $.ajax({
-        url: this.props.localUrl,
-        dataType: 'json',
-        success: function(data) {
-          var importer = new Importer(this);
-          importer.importData(data);
-          this._bindDiagramToolkit();
-        }.bind(this),
-        error: function(xhr, status, err) {
-          console.error(this.props.url, status, err.toString());
-        }.bind(this)
-      });
-  },
-
-  componentDidMount: function() {
-    this.loadLocalData();
-  },
-
-
-  addNode: function(newNode) {
-    var nodes = this.state.nodes;
-    nodes.push(newNode);
-    this.setState({nodes: nodes});
   },
 
   removeLinksForNode: function(nodeKey) {
@@ -179,18 +150,11 @@ var BuildingModels = React.createClass({
     this.setState({nodes: newNodes});
   },
   
-  addLink: function(data) {
-    var newLink = new Link(data);
-    if(this.nodeList.addLink(newLink)) {
-      var links = this.state.links;
-      links.push(newLink);
-      this.setState({links: links});
-    }
-  },
 
   render: function() {
     var moveHandler = this.handleNodeMoved;
     var deleteHandler = this.handleNodeDeleted;
+    var linkManager = this.linkManager;
     var linkData = this.state.links;
     var nodeData = this.state.nodes;
     var nodes = this.state.nodes.map(function(node) {
@@ -216,15 +180,5 @@ var BuildingModels = React.createClass({
   }
 });
 
-// jsPlumb = require('javascripts/jsPlumb')
-jsPlumb.ready(function(){
-  remote_url = "http://mysystem_sc.dev.concord.org/mysystem_designs/7e5c26385bbe26b9643ff84de9005cb6";
-  local_url = "my_system_state.json";
-  React.render(
-    <BuildingModels localUrl={local_url} className="my-system"/>,
-    document.getElementById('building-models')
 
-  );
-});
-
-module.exports = BuildingModels;
+module.exports = LinkView;
