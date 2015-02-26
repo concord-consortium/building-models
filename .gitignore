@@ -30,3 +30,9 @@ tmp/
 
 # The dist folder
 dist/
+
+# the public folder
+public/
+
+# except jspm config
+!public/config.js
