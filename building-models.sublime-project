@@ -1,0 +1,10 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "/Users/npaessel/lab/cc/building-models",
+      "folder_exclude_patterns": ["public","node_modules","dist"],
+		}
+	]
+}
