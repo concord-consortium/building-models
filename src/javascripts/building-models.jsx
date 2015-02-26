@@ -105,8 +105,8 @@ var BuildingModels = React.createClass({
     if(this.diagramToolkit) {
       this.ignoringEvents = true;
       this.diagramToolkit.supspendDrawing();
-      this._redrawTargets();
       this._redrawLinks();
+      this._redrawTargets();
       this.diagramToolkit.resumeDrawing();
       this.ignoringEvents = false;
     }
