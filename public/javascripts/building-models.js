@@ -25,21 +25,23 @@ var BuildingModels = React.createClass({displayName: "BuildingModels",
   },
 
   componentDidUpdate: function() {
-    this._redrawLinks();
-    this._redrawTargets();
+    this._updateToolkit();
   },
 
   handleNodeMoved: function(node_event) {
+    if (this.ignoringEvents) { return; }
     this.updateNodeValue(node_event.nodeKey, 'x', node_event.extra.position.left);
     this.updateNodeValue(node_event.nodeKey, 'y', node_event.extra.position.top);
     this.diagramToolkit.repaint();
   },
 
   handleNodeDeleted: function(node_event) {
+    if (this.ignoringEvents) { return; }
     this.removeNode(node_event.nodeKey);
   },
 
   handleConnect: function(info,evnt) {
+    if (this.ignoringEvents) { return; }
     var newLink = {}; 
     newLink.key = idGenerator("BuildingModels.link");
     var startNode = document.getElementById(info.sourceId);
@@ -96,14 +98,22 @@ var BuildingModels = React.createClass({displayName: "BuildingModels",
       handleDisconnect: this.handleDisconnect
     };
     this.diagramToolkit = new DiagramTookkit('#container', opts);
-    this._redrawTargets();
-    this._redrawLinks();
+    this._updateToolkit();
+  },
+
+  _updateToolkit: function() {
+    if(this.diagramToolkit) {
+      this.ignoringEvents = true;
+      this.diagramToolkit.supspendDrawing();
+      this._redrawTargets();
+      this._redrawLinks();
+      this.diagramToolkit.resumeDrawing();
+      this.ignoringEvents = false;
+    }
   },
 
   _redrawTargets: function() {
-    if(this.diagramToolkit && this.diagramToolkit.makeTarget) {
-      this.diagramToolkit.makeTarget($(".elm"));
-    }
+    this.diagramToolkit.makeTarget($(".elm"));
   },
 
   _redrawLinks: function() {

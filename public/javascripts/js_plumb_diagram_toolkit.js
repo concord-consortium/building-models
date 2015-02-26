@@ -1,4 +1,4 @@
-
+var $ = require('jquery');
 // Purpose of this class: Provide an abstraction over our
 // chosen diagramming toolkit.  
 function DiagramToolkit(domContext, options) {
@@ -46,11 +46,11 @@ function DiagramToolkit(domContext, options) {
       connector:[ "Bezier"],
       anchor: "Top",
       paintStyle: this._paintStyle(),
-      maxConnections: -1,
+      maxConnections: 20,
     };
     
     this.kit.addEndpoint(div,opts);
-    opts.anchor = "Bottom"
+    opts.anchor = "Bottom";
     this.kit.addEndpoint(div,opts);
   };
 
@@ -90,6 +90,10 @@ function DiagramToolkit(domContext, options) {
     ]);
   };
 
+  this._clean_borked_endpoints = function() {
+    // $("._jsPlumb_endpoint").remove()
+    $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
+  }
 
   this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
     this.kit.connect({
@@ -100,6 +104,21 @@ function DiagramToolkit(domContext, options) {
       overlays: this._overlays(label)
     });
   };
+
+  this.setSuspendDrawing = function(shouldwestop) {
+    if (!shouldwestop) {
+      this._clean_borked_endpoints();
+    }
+    this.kit.setSuspendDrawing(shouldwestop,!shouldwestop);
+  };
+
+  this.supspendDrawing = function() {
+    this.setSuspendDrawing(true);
+  };
+  
+  this.resumeDrawing = function() {
+    this.setSuspendDrawing(false);
+  }
 
   this.registerListeners();
 
