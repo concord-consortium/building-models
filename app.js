@@ -8425,104 +8425,6 @@ System.register("javascripts/models/graph-primitive", [], true, function(require
 
 
 
-System.register("javascripts/js_plumb_diagram_toolkit", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  function DiagramToolkit(domContext, options) {
-    this.options = options || {};
-    this.domContex = domContext;
-    this.type = 'jsPlumbWrappingDiagramToolkit';
-    this.color = this.options.color || "#222";
-    this.lineWidth = this.options.lineWidth || 6;
-    this.kit = jsPlumb.getInstance({Container: domContext});
-    this.notifyStart = function() {};
-    this.registerListeners = function() {
-      this.kit.bind("connection", this.handleConnect.bind(this));
-    };
-    this.handleConnect = function(info, evnt) {
-      if (this.options.handleConnect) {
-        this.options.handleConnect(info, evnt);
-      }
-      return true;
-    };
-    this.handleDisconnect = function(info, evnt) {
-      if (this.options.handleDisconnect) {
-        this.options.handleDisconnect(info, evnt);
-      }
-      return true;
-    };
-    this.repaint = function() {
-      this.kit.repaintEverything();
-    };
-    this._endpointOptions = ["Dot", {radius: 15}];
-    this.makeTarget = function(div, opts) {
-      var opts = {
-        isTarget: true,
-        isSource: true,
-        endpoint: this._endpointOptions,
-        connector: ["Bezier"],
-        anchor: "Top",
-        paintStyle: this._paintStyle(),
-        maxConnections: -1
-      };
-      this.kit.addEndpoint(div, opts);
-      opts.anchor = "Bottom";
-      this.kit.addEndpoint(div, opts);
-    };
-    this.clear = function() {
-      if (this.kit) {
-        this.kit.deleteEveryEndpoint();
-        this.kit.reset();
-        this.registerListeners();
-      } else {
-        console.log("No kit defined");
-      }
-    };
-    this.kit.importDefaults({
-      Connector: ["Bezier", {curviness: 50}],
-      Anchors: ["TopCenter", "BottomCenter"],
-      Endpoint: this._endpointOptions,
-      DragOptions: {
-        cursor: 'pointer',
-        zIndex: 2000
-      },
-      DoNotThrowErrors: false
-    });
-    this._paintStyle = function(color) {
-      var _color = color || this.color;
-      var _line_width = this.lineWidth;
-      return ({
-        strokeStyle: _color,
-        lineWidth: _line_width
-      });
-    };
-    this._overlays = function(label) {
-      var _label = label || "";
-      return ([["Arrow", {location: 1.0}], ["Label", {
-        location: 0.4,
-        label: _label,
-        cssClass: "label"
-      }]]);
-    };
-    this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
-      this.kit.connect({
-        source: source,
-        target: target,
-        anchors: [source_terminal || "Top", target_terminal || "Bottom"],
-        paintStyle: this._paintStyle(color),
-        overlays: this._overlays(label)
-      });
-    };
-    this.registerListeners();
-  }
-  module.exports = DiagramToolkit;
-  global.define = __define;
-  return module.exports;
-});
-
-
-
 (function() {
 function define(){};  define.amd = {};
 (function(global, factory) {
@@ -30812,6 +30714,120 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
 
 
 
+System.register("javascripts/js_plumb_diagram_toolkit", ["github:components/jquery@2.1.3"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var $ = require("github:components/jquery@2.1.3");
+  function DiagramToolkit(domContext, options) {
+    this.options = options || {};
+    this.domContex = domContext;
+    this.type = 'jsPlumbWrappingDiagramToolkit';
+    this.color = this.options.color || "#222";
+    this.lineWidth = this.options.lineWidth || 6;
+    this.kit = jsPlumb.getInstance({Container: domContext});
+    this.notifyStart = function() {};
+    this.registerListeners = function() {
+      this.kit.bind("connection", this.handleConnect.bind(this));
+    };
+    this.handleConnect = function(info, evnt) {
+      if (this.options.handleConnect) {
+        this.options.handleConnect(info, evnt);
+      }
+      return true;
+    };
+    this.handleDisconnect = function(info, evnt) {
+      if (this.options.handleDisconnect) {
+        this.options.handleDisconnect(info, evnt);
+      }
+      return true;
+    };
+    this.repaint = function() {
+      this.kit.repaintEverything();
+    };
+    this._endpointOptions = ["Dot", {radius: 15}];
+    this.makeTarget = function(div, opts) {
+      var opts = {
+        isTarget: true,
+        isSource: true,
+        endpoint: this._endpointOptions,
+        connector: ["Bezier"],
+        anchor: "Top",
+        paintStyle: this._paintStyle(),
+        maxConnections: 20
+      };
+      this.kit.addEndpoint(div, opts);
+      opts.anchor = "Bottom";
+      this.kit.addEndpoint(div, opts);
+    };
+    this.clear = function() {
+      if (this.kit) {
+        this.kit.deleteEveryEndpoint();
+        this.kit.reset();
+        this.registerListeners();
+      } else {
+        console.log("No kit defined");
+      }
+    };
+    this.kit.importDefaults({
+      Connector: ["Bezier", {curviness: 50}],
+      Anchors: ["TopCenter", "BottomCenter"],
+      Endpoint: this._endpointOptions,
+      DragOptions: {
+        cursor: 'pointer',
+        zIndex: 2000
+      },
+      DoNotThrowErrors: false
+    });
+    this._paintStyle = function(color) {
+      var _color = color || this.color;
+      var _line_width = this.lineWidth;
+      return ({
+        strokeStyle: _color,
+        lineWidth: _line_width
+      });
+    };
+    this._overlays = function(label) {
+      var _label = label || "";
+      return ([["Arrow", {location: 1.0}], ["Label", {
+        location: 0.4,
+        label: _label,
+        cssClass: "label"
+      }]]);
+    };
+    this._clean_borked_endpoints = function() {
+      $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
+    };
+    this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
+      this.kit.connect({
+        source: source,
+        target: target,
+        anchors: [source_terminal || "Top", target_terminal || "Bottom"],
+        paintStyle: this._paintStyle(color),
+        overlays: this._overlays(label)
+      });
+    };
+    this.setSuspendDrawing = function(shouldwestop) {
+      if (!shouldwestop) {
+        this._clean_borked_endpoints();
+      }
+      this.kit.setSuspendDrawing(shouldwestop, !shouldwestop);
+    };
+    this.supspendDrawing = function() {
+      this.setSuspendDrawing(true);
+    };
+    this.resumeDrawing = function() {
+      this.setSuspendDrawing(false);
+    };
+    this.registerListeners();
+  }
+  module.exports = DiagramToolkit;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("github:jspm/nodelibs-process@0.1.1", ["github:jspm/nodelibs-process@0.1.1/index"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -32506,18 +32522,26 @@ System.register("javascripts/building-models", ["npm:react@0.12.2", "javascripts
       }
     },
     componentDidUpdate: function() {
-      this._redrawLinks();
-      this._redrawTargets();
+      this._updateToolkit();
     },
     handleNodeMoved: function(node_event) {
+      if (this.ignoringEvents) {
+        return ;
+      }
       this.updateNodeValue(node_event.nodeKey, 'x', node_event.extra.position.left);
       this.updateNodeValue(node_event.nodeKey, 'y', node_event.extra.position.top);
       this.diagramToolkit.repaint();
     },
     handleNodeDeleted: function(node_event) {
+      if (this.ignoringEvents) {
+        return ;
+      }
       this.removeNode(node_event.nodeKey);
     },
     handleConnect: function(info, evnt) {
+      if (this.ignoringEvents) {
+        return ;
+      }
       var newLink = {};
       newLink.key = idGenerator("BuildingModels.link");
       var startNode = document.getElementById(info.sourceId);
@@ -32568,26 +32592,31 @@ System.register("javascripts/building-models", ["npm:react@0.12.2", "javascripts
         handleDisconnect: this.handleDisconnect
       };
       this.diagramToolkit = new DiagramTookkit('#container', opts);
-      this._redrawTargets();
-      this._redrawLinks();
+      this._updateToolkit();
+    },
+    _updateToolkit: function() {
+      if (this.diagramToolkit) {
+        this.ignoringEvents = true;
+        this.diagramToolkit.supspendDrawing();
+        this._redrawTargets();
+        this._redrawLinks();
+        this.diagramToolkit.resumeDrawing();
+        this.ignoringEvents = false;
+      }
     },
     _redrawTargets: function() {
-      if (this.diagramToolkit && this.diagramToolkit.makeTarget) {
-        this.diagramToolkit.makeTarget($(".elm"));
-      }
+      this.diagramToolkit.makeTarget($(".elm"));
     },
     _redrawLinks: function() {
-      if (this.diagramToolkit && this.diagramToolkit.addLink) {
-        this.state.links.map(function(l) {
-          var source = this._nodeForName(l.sourceNode);
-          var target = this._nodeForName(l.targetNode);
-          var label = l.title;
-          var color = l.color;
-          var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
-          var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
-          this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
-        }.bind(this));
-      }
+      this.state.links.map(function(l) {
+        var source = this._nodeForName(l.sourceNode);
+        var target = this._nodeForName(l.targetNode);
+        var label = l.title;
+        var color = l.color;
+        var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
+        var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
+        this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
+      }.bind(this));
     },
     loadLocalData: function(callback) {
       $.ajax({
