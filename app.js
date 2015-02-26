@@ -30726,7 +30726,6 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["github:components/jque
     this.color = this.options.color || "#222";
     this.lineWidth = this.options.lineWidth || 6;
     this.kit = jsPlumb.getInstance({Container: domContext});
-    this.notifyStart = function() {};
     this.registerListeners = function() {
       this.kit.bind("connection", this.handleConnect.bind(this));
     };
@@ -30746,7 +30745,7 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["github:components/jque
       this.kit.repaintEverything();
     };
     this._endpointOptions = ["Dot", {radius: 15}];
-    this.makeTarget = function(div, opts) {
+    this.makeTarget = function(div) {
       var opts = {
         isTarget: true,
         isSource: true,
@@ -30754,7 +30753,7 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["github:components/jque
         connector: ["Bezier"],
         anchor: "Top",
         paintStyle: this._paintStyle(),
-        maxConnections: 20
+        maxConnections: -1
       };
       this.kit.addEndpoint(div, opts);
       opts.anchor = "Bottom";
@@ -32598,8 +32597,8 @@ System.register("javascripts/building-models", ["npm:react@0.12.2", "javascripts
       if (this.diagramToolkit) {
         this.ignoringEvents = true;
         this.diagramToolkit.supspendDrawing();
-        this._redrawTargets();
         this._redrawLinks();
+        this._redrawTargets();
         this.diagramToolkit.resumeDrawing();
         this.ignoringEvents = false;
       }
