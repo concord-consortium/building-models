@@ -36,3 +36,4 @@ public/
 
 # except jspm config
 !public/config.js
+building-models.sublime-workspace
