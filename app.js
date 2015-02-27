@@ -4016,8 +4016,13 @@ System.register("javascripts/diagram-node", ["npm:react@0.12.2"], true, function
     displayName: "DiagramNode",
     componentDidMount: function() {
       var $elem = $(this.getDOMNode());
+      var linkManager = this.props.linkManager;
+      var nodeKey = this.props.nodeKey;
       var movedHandler = this.doMove;
       $elem.draggable({drag: movedHandler});
+      if (linkManager) {
+        linkManger.registerNode($elem, nodeKey);
+      }
     },
     propTypes: {
       onDelete: React.PropTypes.func,
@@ -4171,7 +4176,7 @@ System.register("javascripts/importer", [], true, function(require, exports, mod
       var link = null;
       for (var key in links) {
         data = links[key];
-        this.system.addLink({
+        this.system.importLink({
           sourceNode: data.startNode,
           targetNode: data.endNode,
           sourceTerminal: data.startTerminal,
@@ -8386,39 +8391,6 @@ System.register("npm:loglevel@1.2.0/lib/loglevel", [], true, function(require, e
     loadPersistedLevel();
     return self;
   }));
-  global.define = __define;
-  return module.exports;
-});
-
-
-
-System.register("javascripts/models/graph-primitive", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  (function() {
-    var GraphPrimitive;
-    GraphPrimitive = (function() {
-      GraphPrimitive.counters = {};
-      GraphPrimitive.reset_counters = function() {
-        return this.counters = {};
-      };
-      GraphPrimitive.nextID = function(type) {
-        var base;
-        (base = this.counters)[type] || (base[type] = 0);
-        this.counters[type]++;
-        return type + "-" + this.counters[type];
-      };
-      GraphPrimitive.prototype.type = function() {
-        return "GraphPrimitive";
-      };
-      function GraphPrimitive() {
-        this.id = GraphPrimitive.nextID(this.type());
-      }
-      return GraphPrimitive;
-    })();
-    module.exports = GraphPrimitive;
-  }).call(this);
   global.define = __define;
   return module.exports;
 });
@@ -14351,6 +14323,152 @@ function define(){};  define.amd = {};
 
 
 })();
+System.register("javascripts/models/graph-primitive", [], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  (function() {
+    var GraphPrimitive;
+    GraphPrimitive = (function() {
+      GraphPrimitive.counters = {};
+      GraphPrimitive.reset_counters = function() {
+        return this.counters = {};
+      };
+      GraphPrimitive.nextID = function(type) {
+        var base;
+        (base = this.counters)[type] || (base[type] = 0);
+        this.counters[type]++;
+        return type + "-" + this.counters[type];
+      };
+      GraphPrimitive.prototype.type = function() {
+        return "GraphPrimitive";
+      };
+      function GraphPrimitive() {
+        this.id = GraphPrimitive.nextID(this.type());
+      }
+      return GraphPrimitive;
+    })();
+    module.exports = GraphPrimitive;
+  }).call(this);
+  global.define = __define;
+  return module.exports;
+});
+
+
+
+System.register("javascripts/js_plumb_diagram_toolkit", ["github:components/jquery@2.1.3"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var $ = require("github:components/jquery@2.1.3");
+  function DiagramToolkit(domContext, options) {
+    this.options = options || {};
+    this.domContex = domContext;
+    this.type = 'jsPlumbWrappingDiagramToolkit';
+    this.color = this.options.color || "#222";
+    this.lineWidth = this.options.lineWidth || 6;
+    this.kit = jsPlumb.getInstance({Container: domContext});
+    this.registerListeners = function() {
+      this.kit.bind("connection", this.handleConnect.bind(this));
+    };
+    this.handleConnect = function(info, evnt) {
+      if (this.options.handleConnect) {
+        this.options.handleConnect(info, evnt);
+      }
+      return true;
+    };
+    this.handleDisconnect = function(info, evnt) {
+      if (this.options.handleDisconnect) {
+        return this.options.handleDisconnect(info, evnt);
+      }
+      return true;
+    };
+    this.repaint = function() {
+      this.kit.repaintEverything();
+    };
+    this._endpointOptions = ["Dot", {radius: 15}];
+    this.makeTarget = function(div) {
+      var opts = {
+        isTarget: true,
+        isSource: true,
+        endpoint: this._endpointOptions,
+        connector: ["Bezier"],
+        anchor: "Top",
+        paintStyle: this._paintStyle(),
+        maxConnections: -1
+      };
+      this.kit.addEndpoint(div, opts);
+      opts.anchor = "Bottom";
+      this.kit.addEndpoint(div, opts);
+    };
+    this.clear = function() {
+      if (this.kit) {
+        this.kit.deleteEveryEndpoint();
+        this.kit.reset();
+        this.registerListeners();
+      } else {
+        console.log("No kit defined");
+      }
+    };
+    this.kit.importDefaults({
+      Connector: ["Bezier", {curviness: 50}],
+      Anchors: ["TopCenter", "BottomCenter"],
+      Endpoint: this._endpointOptions,
+      DragOptions: {
+        cursor: 'pointer',
+        zIndex: 2000
+      },
+      DoNotThrowErrors: false
+    });
+    this._paintStyle = function(color) {
+      var _color = color || this.color;
+      var _line_width = this.lineWidth;
+      return ({
+        strokeStyle: _color,
+        lineWidth: _line_width
+      });
+    };
+    this._overlays = function(label) {
+      var _label = label || "";
+      return ([["Arrow", {location: 1.0}], ["Label", {
+        location: 0.4,
+        label: _label,
+        cssClass: "label"
+      }]]);
+    };
+    this._clean_borked_endpoints = function() {
+      $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
+    };
+    this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
+      this.kit.connect({
+        source: source,
+        target: target,
+        anchors: [source_terminal || "Top", target_terminal || "Bottom"],
+        paintStyle: this._paintStyle(color),
+        overlays: this._overlays(label)
+      });
+    };
+    this.setSuspendDrawing = function(shouldwestop) {
+      if (!shouldwestop) {
+        this._clean_borked_endpoints();
+      }
+      this.kit.setSuspendDrawing(shouldwestop, !shouldwestop);
+    };
+    this.supspendDrawing = function() {
+      this.setSuspendDrawing(true);
+    };
+    this.resumeDrawing = function() {
+      this.setSuspendDrawing(false);
+    };
+    this.registerListeners();
+  }
+  module.exports = DiagramToolkit;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("github:components/jqueryui@1.11.3/jquery-ui", ["github:components/jquery@2.1.3"], false, function(__require, __exports, __module) {
   System.get("@@global-helpers").prepareGlobal(__module.id, ["github:components/jquery@2.1.3"]);
   (function() {
@@ -28393,6 +28511,16 @@ System.register("npm:loglevel@1.2.0", ["npm:loglevel@1.2.0/lib/loglevel"], true,
 
 
 
+(function() {
+function define(){};  define.amd = {};
+System.register("github:components/jquery@2.1.3", ["github:components/jquery@2.1.3/jquery"], false, function(__require, __exports, __module) {
+  return (function(main) {
+    return main;
+  }).call(this, __require('github:components/jquery@2.1.3/jquery'));
+});
+
+
+})();
 System.register("javascripts/models/link", ["javascripts/models/graph-primitive"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -28453,16 +28581,6 @@ System.register("javascripts/models/link", ["javascripts/models/graph-primitive"
 
 
 
-(function() {
-function define(){};  define.amd = {};
-System.register("github:components/jquery@2.1.3", ["github:components/jquery@2.1.3/jquery"], false, function(__require, __exports, __module) {
-  return (function(main) {
-    return main;
-  }).call(this, __require('github:components/jquery@2.1.3/jquery'));
-});
-
-
-})();
 System.register("github:components/jqueryui@1.11.3", ["github:components/jqueryui@1.11.3/jquery-ui"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -30680,147 +30798,160 @@ System.register("npm:react@0.12.2/lib/ReactDefaultPerf", ["npm:react@0.12.2/lib/
 
 
 
-System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:loglevel@1.2.0"], true, function(require, exports, module) {
+System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "javascripts/importer", "javascripts/models/link"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
   (function() {
-    var LinkManager,
+    var $,
+        Importer,
+        Link,
+        LinkManager,
         _,
-        log;
+        log,
+        bind = function(fn, me) {
+          return function() {
+            return fn.apply(me, arguments);
+          };
+        };
     _ = require("npm:lodash@3.3.1");
     log = require("npm:loglevel@1.2.0");
+    $ = require("github:components/jquery@2.1.3");
+    Importer = require("javascripts/importer");
+    Link = require("javascripts/models/link");
     LinkManager = (function() {
-      function LinkManager() {
+      LinkManager.instances = {};
+      LinkManager.instance = function(context) {
+        var base;
+        (base = this.instances)[context] || (base[context] = new this(context));
+        return this.instances[context];
+      };
+      function LinkManager(context) {
+        this.loadData = bind(this.loadData, this);
         this.linkKeys = {};
+        this.nodeDoms = {};
+        this.linkListeners = [];
+        this.nodeListeners = [];
       }
+      LinkManager.prototype.addLinkListener = function(listener) {
+        log.info("adding link listener");
+        return this.linkListeners.push(listener);
+      };
+      LinkManager.prototype.addNodeListener = function(listener) {
+        log.info("adding node listener");
+        return this.nodeListeners.push(listener);
+      };
+      LinkManager.prototype.getLinks = function() {
+        var key,
+            value;
+        return (function() {
+          var ref,
+              results;
+          ref = this.linkKeys;
+          results = [];
+          for (key in ref) {
+            value = ref[key];
+            results.push(value);
+          }
+          return results;
+        }).call(this);
+      };
       LinkManager.prototype.hasLink = function(link) {
         return this.linkKeys[link.terminalKey()] != null;
       };
+      LinkManager.prototype.hasNode = function(nodeinfo) {
+        return false;
+      };
+      LinkManager.prototype.importLink = function(linkSpec) {
+        var link;
+        link = new Link(linkSpec);
+        return this.addLink(link);
+      };
       LinkManager.prototype.addLink = function(link) {
+        var i,
+            len,
+            listener,
+            ref;
         if (!this.hasLink(link)) {
           this.linkKeys[link.terminalKey()] = link;
+          ref = this.linkListeners;
+          for (i = 0, len = ref.length; i < len; i++) {
+            listener = ref[i];
+            log.info("notifying of new link: " + (link.terminalKey()));
+            listener.handleLinkAdd(link);
+          }
           return true;
         }
         return false;
+      };
+      LinkManager.prototype.addNode = function(node) {
+        var i,
+            len,
+            listener,
+            ref;
+        if (!this.hasNode(node)) {
+          ref = this.linkListeners;
+          for (i = 0, len = ref.length; i < len; i++) {
+            listener = ref[i];
+            log.info("notifying of new Node");
+            listener.handleNodeAdd(node);
+          }
+          return true;
+        }
+        return false;
+      };
+      LinkManager.prototype._nameForNode = function(node) {
+        return this.nodeDoms[node];
+      };
+      LinkManager.prototype.newLinkFromEvent = function(info) {
+        var color,
+            endKey,
+            endTerminal,
+            newLink,
+            startKey,
+            startTerminal,
+            title;
+        newLink = {};
+        startKey = $(info.source).data('node-key') || 'undefined';
+        endKey = $(info.target).data('node-key') || 'undefined';
+        startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
+        endTerminal = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
+        color = info.color || '#fea';
+        title = info.title || 'untitled';
+        this.importLink({
+          sourceNode: startKey,
+          targetNode: endKey,
+          sourceTerminal: startTerminal,
+          targetTerminal: endTerminal,
+          color: color,
+          title: title
+        });
+        return true;
+      };
+      LinkManager.prototype.loadData = function(url) {
+        log.info("loading local data");
+        log.info("url " + url);
+        return $.ajax({
+          url: url,
+          dataType: 'json',
+          success: (function(_this) {
+            return function(data) {
+              var importer;
+              log.info("json success");
+              log.info(data);
+              importer = new Importer(_this);
+              return importer.importData(data);
+            };
+          })(this),
+          error: function(xhr, status, err) {
+            return log.error(url, status, err.toString());
+          }
+        });
       };
       return LinkManager;
     })();
     module.exports = LinkManager;
   }).call(this);
-  global.define = __define;
-  return module.exports;
-});
-
-
-
-System.register("javascripts/js_plumb_diagram_toolkit", ["github:components/jquery@2.1.3"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var $ = require("github:components/jquery@2.1.3");
-  function DiagramToolkit(domContext, options) {
-    this.options = options || {};
-    this.domContex = domContext;
-    this.type = 'jsPlumbWrappingDiagramToolkit';
-    this.color = this.options.color || "#222";
-    this.lineWidth = this.options.lineWidth || 6;
-    this.kit = jsPlumb.getInstance({Container: domContext});
-    this.registerListeners = function() {
-      this.kit.bind("connection", this.handleConnect.bind(this));
-    };
-    this.handleConnect = function(info, evnt) {
-      if (this.options.handleConnect) {
-        this.options.handleConnect(info, evnt);
-      }
-      return true;
-    };
-    this.handleDisconnect = function(info, evnt) {
-      if (this.options.handleDisconnect) {
-        this.options.handleDisconnect(info, evnt);
-      }
-      return true;
-    };
-    this.repaint = function() {
-      this.kit.repaintEverything();
-    };
-    this._endpointOptions = ["Dot", {radius: 15}];
-    this.makeTarget = function(div) {
-      var opts = {
-        isTarget: true,
-        isSource: true,
-        endpoint: this._endpointOptions,
-        connector: ["Bezier"],
-        anchor: "Top",
-        paintStyle: this._paintStyle(),
-        maxConnections: -1
-      };
-      this.kit.addEndpoint(div, opts);
-      opts.anchor = "Bottom";
-      this.kit.addEndpoint(div, opts);
-    };
-    this.clear = function() {
-      if (this.kit) {
-        this.kit.deleteEveryEndpoint();
-        this.kit.reset();
-        this.registerListeners();
-      } else {
-        console.log("No kit defined");
-      }
-    };
-    this.kit.importDefaults({
-      Connector: ["Bezier", {curviness: 50}],
-      Anchors: ["TopCenter", "BottomCenter"],
-      Endpoint: this._endpointOptions,
-      DragOptions: {
-        cursor: 'pointer',
-        zIndex: 2000
-      },
-      DoNotThrowErrors: false
-    });
-    this._paintStyle = function(color) {
-      var _color = color || this.color;
-      var _line_width = this.lineWidth;
-      return ({
-        strokeStyle: _color,
-        lineWidth: _line_width
-      });
-    };
-    this._overlays = function(label) {
-      var _label = label || "";
-      return ([["Arrow", {location: 1.0}], ["Label", {
-        location: 0.4,
-        label: _label,
-        cssClass: "label"
-      }]]);
-    };
-    this._clean_borked_endpoints = function() {
-      $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
-    };
-    this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
-      this.kit.connect({
-        source: source,
-        target: target,
-        anchors: [source_terminal || "Top", target_terminal || "Bottom"],
-        paintStyle: this._paintStyle(color),
-        overlays: this._overlays(label)
-      });
-    };
-    this.setSuspendDrawing = function(shouldwestop) {
-      if (!shouldwestop) {
-        this._clean_borked_endpoints();
-      }
-      this.kit.setSuspendDrawing(shouldwestop, !shouldwestop);
-    };
-    this.supspendDrawing = function() {
-      this.setSuspendDrawing(true);
-    };
-    this.resumeDrawing = function() {
-      this.setSuspendDrawing(false);
-    };
-    this.registerListeners();
-  }
-  module.exports = DiagramToolkit;
   global.define = __define;
   return module.exports;
 });
@@ -32506,8 +32637,8 @@ System.register("javascripts/building-models", ["npm:react@0.12.2", "javascripts
   var DiagramTookkit = require("javascripts/js_plumb_diagram_toolkit");
   var $ = require("github:components/jquery@2.1.3");
   require("github:components/jqueryui@1.11.3");
-  var BuildingModels = React.createClass({
-    displayName: "BuildingModels",
+  var LinkView = React.createClass({
+    displayName: "LinkView",
     getInitialState: function() {
       this.nodeList = new NodeList();
       return {
@@ -32542,7 +32673,7 @@ System.register("javascripts/building-models", ["npm:react@0.12.2", "javascripts
         return ;
       }
       var newLink = {};
-      newLink.key = idGenerator("BuildingModels.link");
+      newLink.key = idGenerator("LinkView.link");
       var startNode = document.getElementById(info.sourceId);
       var endNode = document.getElementById(info.targetId);
       var startName = this._nameForNode(startNode);
@@ -32697,12 +32828,12 @@ System.register("javascripts/building-models", ["npm:react@0.12.2", "javascripts
   jsPlumb.ready(function() {
     remote_url = "http://mysystem_sc.dev.concord.org/mysystem_designs/7e5c26385bbe26b9643ff84de9005cb6";
     local_url = "my_system_state.json";
-    React.render(React.createElement(BuildingModels, {
+    React.render(React.createElement(LinkView, {
       localUrl: local_url,
       className: "my-system"
     }), document.getElementById('building-models'));
   });
-  module.exports = BuildingModels;
+  module.exports = LinkView;
   global.define = __define;
   return module.exports;
 });
