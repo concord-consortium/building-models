@@ -40,12 +40,18 @@ class LinkManager
     return @nodeKeys[node.key]
 
   importLink: (linkSpec) ->
+    sourceNode = @nodeKeys[linkSpec.sourceNode]
+    targetNode = @nodeKeys[linkSpec.targetNode]
+    linkSpec.sourceNode = sourceNode
+    linkSpec.targetNode = targetNode
     link = new Link(linkSpec)
     @addLink(link)
 
   addLink: (link) ->
     unless @hasLink(link)
       @linkKeys[link.terminalKey()] = link
+      @nodeKeys[link.sourceNode.key].addLink(link)
+      @nodeKeys[link.targetNode.key].addLink(link)
       for listener in @linkListeners
         log.info "notifying of new link: #{link.terminalKey()}"
         listener.handleLinkAdd(link)

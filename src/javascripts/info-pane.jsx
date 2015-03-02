@@ -36,36 +36,24 @@ var InfoPane = React.createClass({
 
   render: function() {
     var self = this;
-    var nodes = self.props.nodes.map(function(node) {
-      var outlinks = self.props.links.filter(function(link) {
-        if(link.sourceNode == node.key) {
-          return true;
-        }
-        return false;
-      });
-      var link_display_data = outlinks.map(function(link) {
-        var remote_node = self._linked_node(link.key);
-        var title = link.title;
-        return (
-          <span className = "node-link">
-            <span className = "node-link-name"> {title} </span>
-            <span className = "node-link-node"> {remote_node.title} </span>
-          </span>
-        )
-      });
-
+    var nodes = self.props.nodes.map(function(_node) {
+      var infoString = _node.infoString();
+      var x = _node.x;
+      var y = _node.y;
+      var title = _node.title;
       return (
         <div className="nodePanel">
-          <div id="info-node-{node.key}" className = "node-key"> {node.title} 
+          <div id="info-node-{node.key}" className = "node-key"> {title} 
             &nbsp; @(
-              <span className="node-location-x">{node.x}
-              </span>x<span className="node-location-y">{node.y}</span>
+              <span className="node-location-x">{x}
+              </span>x<span className="node-location-y">{y}</span>
             )
-            {link_display_data}
+            {infoString}
           </div>
         </div>
       );
     });
+
     return (
       <div className="info-pane">
         <div className="info-title">{this.props.title}</div>
@@ -73,6 +61,7 @@ var InfoPane = React.createClass({
       </div>
     );
   }
+
 });
 
 module.exports = InfoPane;

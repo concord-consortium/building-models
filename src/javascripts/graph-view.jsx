@@ -29,9 +29,7 @@ var GraphView = React.createClass({
     var url = "my_system_state.json";
     var linkManager = this.props.linkManager;
     return (
-      <div className="graph-view">
-        <LinkView url={url} className="my-system" linkManager={linkManager}/>
-      </div>
+      <LinkView url={url} className="my-system" linkManager={linkManager}/>
     );
   }
 });

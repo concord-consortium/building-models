@@ -7,7 +7,8 @@ var DiagramNode = React.createClass({
     var movedHandler = this.doMove;
     $elem.draggable({
       // grid: [ 10, 10 ],
-      drag: movedHandler
+      drag: movedHandler,
+      containment: "parent"
     });
   },
 

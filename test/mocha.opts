@@ -1,5 +1,6 @@
 --require chai
 --require lodash
+--require jquery
 --reporter spec
 --compilers coffee:coffee-script/register
 --ui bdd

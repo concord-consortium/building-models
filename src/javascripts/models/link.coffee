@@ -10,7 +10,7 @@ class Link extends GraphPrimitive
   type: () ->
     "Link"
   terminalKey: () ->
-    "#{@sourceNode}[#{@sourceTerminal}] ---#{@title}---> #{@targetNode}[#{@targetTerminal}]"
+    "#{@sourceNode.key}[#{@sourceTerminal}] ---#{@title}---> #{@targetNode.key}[#{@targetTerminal}]"
   nodeKey: () ->
     "#{@sourceNode} ---#{@title}---> #{@targetNode}"
   outs: () ->

@@ -3,7 +3,7 @@ log            = require('loglevel')
 GraphPrimitive = require('./graph-primitive')
 
 class Node extends GraphPrimitive
-  constructor: (nodeSpec,key) ->
+  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null},key) ->
     super()
     if key
       @key = key
@@ -35,6 +35,12 @@ class Node extends GraphPrimitive
       if (link.targetNode == @)
         return true
       return false
+
+  infoString: () ->
+    linkNamer = (link) =>
+      " --#{link.title}-->[#{link.targetNode.title}]"
+    outs = (linkNamer link for link in @outLinks())
+    "#{@title} #{outs}"
 
   downstreamNodes: () ->
     visitedNodes = []

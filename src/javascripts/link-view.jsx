@@ -78,6 +78,7 @@ var LinkView = React.createClass({
 
   handleNodeRm: function() {
     var nodes = this.linkManager.getNodes();
+
     this.setState({nodes: nodes});
   },
 
@@ -105,10 +106,12 @@ var LinkView = React.createClass({
   },
 
   _bindDiagramToolkit: function()   {
+    var container = $(this.getDOMNode()).find(".container");
     var opts = {
+      Container: container[0],
       handleConnect: this.handleConnect.bind(this)
     };
-    this.diagramToolkit = new DiagramTookkit('#container', opts);
+    this.diagramToolkit = new DiagramTookkit(container, opts);
     this._updateToolkit();
   },
 
@@ -132,8 +135,8 @@ var LinkView = React.createClass({
     links.forEach(function(l) {
       // TODO move the bellow junk into Node class.
 
-      var source         = this._nodeForName(l.sourceNode);
-      var target         = this._nodeForName(l.targetNode);
+      var source         = this._nodeForName(l.sourceNode.key);
+      var target         = this._nodeForName(l.targetNode.key);
 
       var label          = l.title;
       var color          = l.color;
@@ -150,7 +153,6 @@ var LinkView = React.createClass({
   render: function() {
     var moveHandler = this.onNodeMoved;
     var deleteHandler = this.onNodeDeleted;
-    var linkManager = this.linkManager;
     var linkData = this.state.links;
     var nodeData = this.state.nodes;
     var nodes = this.state.nodes.map(function(node) {
@@ -166,7 +168,7 @@ var LinkView = React.createClass({
     });
     return (
       <div className="building-models">
-        <div id="container" className='my-container'>
+        <div className="container">
           {nodes}
         </div>
         <InfoPane title="Info Pane" ref="info" nodes={nodeData} links={linkData}>

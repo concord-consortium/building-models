@@ -46,21 +46,20 @@ describe 'Link', () ->
   describe 'terminalKey', () ->
     beforeEach () ->
       @link = new Link(
-        sourceNode: 'source',
+        sourceNode: {key: 'source'},
         sourceTerminal: 'a',
-        targetNode: 'target',
+        targetNode: {key: 'target'},
         targetTerminal: 'b',
         title: 'unkown link'
       )
     it "should have a reasonable text based terminalKey", () ->
-      @link.sourceNode.should.equal('source')
       @link.terminalKey().should.equal("source[a] ---unkown link---> target[b]")
 
 describe 'Node', () ->
   beforeEach () ->
-    @node_a = new Node()
-    @node_b = new Node()
-    @node_c = new Node()
+    @node_a = new Node({title: "Node a"},'a')
+    @node_b = new Node({title: "Node b"},'b')
+    @node_c = new Node({title: "Node c"},'c')
 
   ###
     Note cyclic graph in A <-> B
@@ -78,18 +77,22 @@ describe 'Node', () ->
   describe 'its links', () ->
     beforeEach () ->
       @link_a = new Link
+        title: "link a"
         sourceNode: @node_a
         targetNode: @node_b
       
       @link_b = new Link
+        title: "link b"
         sourceNode: @node_a
         targetNode: @node_c
       
       @link_c = new Link
+        title: "link c"
         sourceNode: @node_b
         targetNode: @node_a
       
       @link_without_a = new Link
+        title: "link without a"
         sourceNode: @node_b
         targetNode: @node_c
       
@@ -128,13 +131,26 @@ describe 'Node', () ->
           it "should have some nodes", () ->
             @node_a.downstreamNodes().should.have.length(2)
 
+        describe '#infoString', () ->
+          it "should print a list of nodes its connected to", () ->
+            expected = "Node a  --link a-->[Node b], --link b-->[Node c]"
+            @node_a.infoString().should.equal(expected)
+
   describe "LinkManager", () ->
     beforeEach () ->
+      @nodeA = new Node({}, 'a')
+      @nodeB = new Node({}, 'b')
       @nodeList = new LinkManager()
-      @newLink = 
+      @nodeList.addNode(@nodeA);
+      @nodeList.addNode(@nodeB);
+      @newLink =
         terminalKey: () -> 'newLink'
-      @otherNewLink = 
+        sourceNode: @nodeA
+        targetNode: @nodeB
+      @otherNewLink =
         terminalKey: () -> 'otherNewLink'
+        sourceNode: @nodeB
+        targetNode: @nodeA
 
     describe "addLink", () ->
       describe "When the link doesn't already exist", () ->
