@@ -5,7 +5,7 @@ function Importer(system) {
     var node = null;
     for (var key in importNodes) {
       data = importNodes[key];
-      this.system.addNode({'key': key, 'data':data });
+      this.system.importNode({'key': key, 'data':data });
     }
   };
 

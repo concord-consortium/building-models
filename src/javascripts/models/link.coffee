@@ -6,7 +6,6 @@ class Link extends GraphPrimitive
     @options.title ||= "untitled"
     { @sourceNode, @sourceTerminal ,@targetNode, @targetTerminal, @color, @title} = @options
     super()
-    @valid = false
 
   type: () ->
     "Link"

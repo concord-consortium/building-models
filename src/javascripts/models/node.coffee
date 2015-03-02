@@ -3,10 +3,16 @@ log            = require('loglevel')
 GraphPrimitive = require('./graph-primitive')
 
 class Node extends GraphPrimitive
-  constructor: (name) ->
+  constructor: (nodeSpec,key) ->
     super()
+    if key
+      @key = key
     @links = []
-    
+    @x = nodeSpec.x
+    @y = nodeSpec.y
+    @title = nodeSpec.title
+    @image = nodeSpec.image
+
   type: () ->
     "Node"
 

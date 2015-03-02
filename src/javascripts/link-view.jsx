@@ -2,14 +2,13 @@ var React       = require('react');
 var Node        = require('./node-view');
 var InfoPane    = require('./info-pane');
 var Importer    = require('./importer');
-var idGenerator = require('./id-generator');
 var NodeList    = require('./models/link-manager');
-var Link        = require('./models/link');
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 var $              = require('jquery');
+var $UI            = require('jquery-ui');
 var _              = require('lodash');
+log            = require('loglevel')
 
-require('jquery-ui');
 
 var LinkView = React.createClass({
   
@@ -38,16 +37,17 @@ var LinkView = React.createClass({
     this._updateToolkit();
   },
 
-  handleNodeMoved: function(node_event) {
+  onNodeMoved: function(node_event) {
     if (this.ignoringEvents) { return; }
-    this.updateNodeValue(node_event.nodeKey, 'x', node_event.extra.position.left);
-    this.updateNodeValue(node_event.nodeKey, 'y', node_event.extra.position.top);
-    this.diagramToolkit.repaint();
+    var x = node_event.extra.position.left;
+    var y = node_event.extra.position.top;
+    this.linkManager.moveNode(node_event.nodeKey, x, y);
+    return true;
   },
 
-  handleNodeDeleted: function(node_event) {
+  onNodeDeleted: function(node_event) {
     if (this.ignoringEvents) { return; }
-    this.removeNode(node_event.nodeKey);
+    this.linkManager.removeNode(node_event.nodeKey);
     return true;
   },
 
@@ -64,23 +64,37 @@ var LinkView = React.createClass({
   },
 
   handleNodeAdd: function(nodeData) {
-    var nodes = this.state.nodes;
-    nodes.push(nodeData);
+    var nodes = this.linkManager.getNodes();
     this.setState({nodes: nodes});
     return true;
   },
 
+  handleNodeMove: function(nodeData) {
+    var nodes = this.linkManager.getNodes();
+    this.setState({nodes: nodes});
+    this.diagramToolkit.repaint();
+    return true;
+  },
+
+  handleNodeRm: function() {
+    var nodes = this.linkManager.getNodes();
+    this.setState({nodes: nodes});
+  },
+
   // TODO, can we get rid of this?
   _nodeForName: function(name) {
+    if (!this.refs[name]) { 
+      return false
+    }
     return this.refs[name].getDOMNode();
   },
 
-  updateNodeValue: function(name, key, value) {
+  _updateNodeValue: function(name, key, value) {
     var changed = 0;
     var nodes = this.state.nodes;
     this.state.nodes.forEach(function(node) {
       if(node.key == name) {
-        node.data[key] = value;
+        node[key] = value;
         changed = changed + 1;
       }
     });
@@ -117,43 +131,25 @@ var LinkView = React.createClass({
     var links = this.state.links;
     links.forEach(function(l) {
       // TODO move the bellow junk into Node class.
+
       var source         = this._nodeForName(l.sourceNode);
       var target         = this._nodeForName(l.targetNode);
+
       var label          = l.title;
       var color          = l.color;
       var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
       var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
-      this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
+      if (source && target) {
+        this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
+      }
     }.bind(this));
   },
 
-  removeLinksForNode: function(nodeKey) {
-    var links = this.state.links;
-    var newLinks = links.filter(function(link) {
-      if (nodeKey === link.sourceNode || nodeKey === link.targetNode) {
-        return false;
-      }
-      return true;
-    });
-    this.setState({links: newLinks});
-  },
 
-  removeNode: function(nodeKey) {
-    var nodes = this.state.nodes;
-    var newNodes = nodes.filter(function (node) {
-      if (nodeKey === node.key) { 
-        return false;
-      }
-      return true;
-    });
-    this.removeLinksForNode(nodeKey);
-    this.setState({nodes: newNodes});
-  },
-  
 
   render: function() {
-    var moveHandler = this.handleNodeMoved;
-    var deleteHandler = this.handleNodeDeleted;
+    var moveHandler = this.onNodeMoved;
+    var deleteHandler = this.onNodeDeleted;
     var linkManager = this.linkManager;
     var linkData = this.state.links;
     var nodeData = this.state.nodes;
@@ -161,7 +157,7 @@ var LinkView = React.createClass({
       return (
         <Node 
           key={node.key} 
-          data={node.data}
+          data={node}
           nodeKey={node.key}
           ref={node.key} 
           onMove={moveHandler}

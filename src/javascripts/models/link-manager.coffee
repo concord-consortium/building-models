@@ -3,6 +3,7 @@ log      = require 'loglevel'
 $        = require 'jquery'
 Importer = require '../importer'
 Link     = require './link'
+DiagramNode = require './Node'
 
 # LinkManager is the logical manager of Nodes and Links.
 class LinkManager
@@ -14,7 +15,7 @@ class LinkManager
 
   constructor: (context) ->
     @linkKeys  = {}
-    @nodeDoms  = {}
+    @nodeKeys  = {}
     @linkListeners = []
     @nodeListeners = []
     
@@ -29,11 +30,14 @@ class LinkManager
   getLinks: () ->
     return (value for key, value of @linkKeys)
 
+  getNodes: () ->
+    return (value for key, value of @nodeKeys)
+
   hasLink: (link) ->
     @linkKeys[link.terminalKey()]?
 
-  hasNode: (nodeinfo) ->
-    return false # for now...
+  hasNode: (node) ->
+    return @nodeKeys[node.key]
 
   importLink: (linkSpec) ->
     link = new Link(linkSpec)
@@ -48,16 +52,31 @@ class LinkManager
       return true
     return false
 
+  importNode: (nodeSpec) ->
+    node = new DiagramNode(nodeSpec.data, nodeSpec.key)
+    @addNode(node)
+
   addNode: (node) ->
     unless @hasNode(node)
-      for listener in @linkListeners
+      @nodeKeys[node.key] = node
+      for listener in @nodeListeners
         log.info("notifying of new Node")
         listener.handleNodeAdd(node)
       return true
     return false
+  
+  moveNode: (nodeKey, x,y ) ->
+    node = @nodeKeys[nodeKey]
+    return unless node
+    node.x = x
+    node.y = y
+    for listener in @nodeListeners
+      log.info("notifying of NodeMove")
+      listener.handleNodeMove(node)
+    
 
   _nameForNode: (node) ->
-    @nodeDoms[node]
+    @nodeKeys[node]
 
 
   newLinkFromEvent: (info) ->
@@ -77,7 +96,22 @@ class LinkManager
       title: title
     return true
 
+  removeLinksForNode: (nodeKey) ->
+    links = @getLinks()
+    newLinks = links.filter (link) =>
+      if (nodeKey == link.sourceNode || nodeKey == link.targetNode)
+        return false
+      return true
 
+
+  removeNode: (nodeKey) ->
+    node = @nodeKeys[nodeKey]
+    delete @nodeKeys[nodeKey]
+    this.removeLinksForNode(nodeKey)
+    for listener in @nodeListeners
+      log.info("notifying of deleted Node")
+      listener.handleNodeRm(node)
+  
   loadData: (url) =>
     log.info("loading local data")
     log.info("url " + url)

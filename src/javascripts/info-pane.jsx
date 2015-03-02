@@ -49,17 +49,17 @@ var InfoPane = React.createClass({
         return (
           <span className = "node-link">
             <span className = "node-link-name"> {title} </span>
-            <span className = "node-link-node"> {remote_node.data.title} </span>
+            <span className = "node-link-node"> {remote_node.title} </span>
           </span>
         )
       });
 
       return (
         <div className="nodePanel">
-          <div id="info-node-{node.key}" className = "node-key"> {node.data.title} 
+          <div id="info-node-{node.key}" className = "node-key"> {node.title} 
             &nbsp; @(
-              <span className="node-location-x">{node.data.x}
-              </span>x<span className="node-location-y">{node.data.y}</span>
+              <span className="node-location-x">{node.x}
+              </span>x<span className="node-location-y">{node.y}</span>
             )
             {link_display_data}
           </div>
