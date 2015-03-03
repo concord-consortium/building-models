@@ -358,7 +358,7 @@
   System.register(...);
 }); */
 
-('javascripts/building-models', function(System) {
+('javascripts/graph-view', function(System) {
 
 System.register("npm:process@0.10.0/browser", [], true, function(require, exports, module) {
   var global = System.global,
@@ -4007,87 +4007,6 @@ System.register("npm:react@0.12.2/lib/onlyChild", ["npm:react@0.12.2/lib/ReactEl
 
 
 
-System.register("javascripts/diagram-node", ["npm:react@0.12.2"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var React = require("npm:react@0.12.2");
-  var DiagramNode = React.createClass({
-    displayName: "DiagramNode",
-    componentDidMount: function() {
-      var $elem = $(this.getDOMNode());
-      var linkManager = this.props.linkManager;
-      var nodeKey = this.props.nodeKey;
-      var movedHandler = this.doMove;
-      $elem.draggable({drag: movedHandler});
-      if (linkManager) {
-        linkManger.registerNode($elem, nodeKey);
-      }
-    },
-    propTypes: {
-      onDelete: React.PropTypes.func,
-      onMove: React.PropTypes.func,
-      onSelect: React.PropTypes.func,
-      nodeKey: React.PropTypes.string
-    },
-    getDefaultProps: function() {
-      var _log = function(msg) {
-        console.log(msg);
-      };
-      return {
-        onMove: function() {
-          _log("internal move handler");
-        },
-        onStop: function() {
-          _log("internal move handler");
-        },
-        onDelete: function() {
-          _log("internal on-delete handler");
-        },
-        onSelect: function() {
-          _log("internal select handler");
-        }
-      };
-    },
-    doMove: function(evt, extra) {
-      this.props.onMove({
-        nodeKey: this.props.nodeKey,
-        reactComponent: this,
-        domElement: this.getDOMNode(),
-        syntheticEvent: evt,
-        extra: extra
-      });
-    },
-    doDelete: function(evt, extra) {
-      this.props.onDelete({
-        nodeKey: this.props.nodeKey,
-        reactComponent: this,
-        domElement: this.getDOMNode(),
-        syntheticEvent: evt
-      });
-    },
-    render: function() {
-      var style = {
-        top: this.props.data.y,
-        left: this.props.data.x
-      };
-      var deleteHandler = this.doDelete;
-      return (React.createElement("div", {
-        className: "elm",
-        style: style
-      }, React.createElement("div", {className: "img-background"}, React.createElement("div", {
-        className: "delete-box",
-        onClick: deleteHandler
-      }, React.createElement("i", {className: "fa fa-times-circle"})), React.createElement("img", {src: this.props.data.image})), React.createElement("div", {className: "node-title"}, this.props.data.title)));
-    }
-  });
-  module.exports = DiagramNode;
-  global.define = __define;
-  return module.exports;
-});
-
-
-
 System.register("javascripts/info-pane", ["npm:react@0.12.2"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -4147,18 +4066,99 @@ System.register("javascripts/info-pane", ["npm:react@0.12.2"], true, function(re
 
 
 
+System.register("javascripts/node-view", ["npm:react@0.12.2"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var DiagramNode = React.createClass({
+    displayName: "DiagramNode",
+    componentDidMount: function() {
+      var $elem = $(this.getDOMNode());
+      var nodeKey = this.props.nodeKey;
+      var movedHandler = this.doMove;
+      $elem.draggable({
+        drag: movedHandler,
+        containment: "parent"
+      });
+    },
+    propTypes: {
+      onDelete: React.PropTypes.func,
+      onMove: React.PropTypes.func,
+      onSelect: React.PropTypes.func,
+      nodeKey: React.PropTypes.string
+    },
+    getDefaultProps: function() {
+      var _log = function(msg) {
+        console.log(msg);
+      };
+      return {
+        onMove: function() {
+          _log("internal move handler");
+        },
+        onStop: function() {
+          _log("internal move handler");
+        },
+        onDelete: function() {
+          _log("internal on-delete handler");
+        },
+        onSelect: function() {
+          _log("internal select handler");
+        }
+      };
+    },
+    doMove: function(evt, extra) {
+      this.props.onMove({
+        nodeKey: this.props.nodeKey,
+        reactComponent: this,
+        domElement: this.getDOMNode(),
+        syntheticEvent: evt,
+        extra: extra
+      });
+    },
+    doDelete: function(evt, extra) {
+      this.props.onDelete({
+        nodeKey: this.props.nodeKey,
+        reactComponent: this,
+        domElement: this.getDOMNode(),
+        syntheticEvent: evt
+      });
+    },
+    render: function() {
+      var style = {
+        top: this.props.data.y,
+        left: this.props.data.x
+      };
+      var nodeKey = this.props.nodeKey;
+      var deleteHandler = this.doDelete;
+      return (React.createElement("div", {
+        className: "elm",
+        style: style,
+        "data-node-key": nodeKey
+      }, React.createElement("div", {className: "img-background"}, React.createElement("div", {
+        className: "delete-box",
+        onClick: deleteHandler
+      }, React.createElement("i", {className: "fa fa-times-circle"})), React.createElement("img", {src: this.props.data.image})), React.createElement("div", {className: "node-title"}, this.props.data.title)));
+    }
+  });
+  module.exports = DiagramNode;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("javascripts/importer", [], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  function Importer(_system) {
-    this.system = _system;
+  function Importer(system) {
+    this.system = system;
     this.importNodes = function(importNodes) {
       var newNodes = [];
       var node = null;
       for (var key in importNodes) {
         data = importNodes[key];
-        debugger;
         this.system.importNode({
           'key': key,
           'data': data
@@ -4188,23 +4188,6 @@ System.register("javascripts/importer", [], true, function(require, exports, mod
     };
   }
   module.exports = Importer;
-  global.define = __define;
-  return module.exports;
-});
-
-
-
-System.register("javascripts/id-generator", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var ids = {};
-  var idgen = function(scopeName) {
-    ids[scopeName] = ids[scopeName] || 0;
-    ids[scopeName] = ids[scopeName] + 1;
-    return scopeName + "-" + ids[scopeName];
-  };
-  module.exports = idgen;
   global.define = __define;
   return module.exports;
 });
@@ -31821,6 +31804,171 @@ System.register("npm:react@0.12.2/lib/Danger", ["npm:react@0.12.2/lib/ExecutionE
 
 
 
+System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-view", "javascripts/info-pane", "javascripts/importer", "javascripts/models/link-manager", "javascripts/js_plumb_diagram_toolkit", "github:components/jquery@2.1.3", "github:components/jqueryui@1.11.3", "npm:lodash@3.3.1", "npm:loglevel@1.2.0"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var Node = require("javascripts/node-view");
+  var InfoPane = require("javascripts/info-pane");
+  var Importer = require("javascripts/importer");
+  var NodeList = require("javascripts/models/link-manager");
+  var DiagramTookkit = require("javascripts/js_plumb_diagram_toolkit");
+  var $ = require("github:components/jquery@2.1.3");
+  var $UI = require("github:components/jqueryui@1.11.3");
+  var _ = require("npm:lodash@3.3.1");
+  log = require("npm:loglevel@1.2.0");
+  var LinkView = React.createClass({
+    displayName: "LinkView",
+    componentDidMount: function() {
+      this._bindDiagramToolkit();
+      this.linkManager = this.props.linkManager;
+      this.linkManager.addLinkListener(this);
+      this.linkManager.addNodeListener(this);
+      this.linkManager.loadData(this.props.url);
+    },
+    getInitialState: function() {
+      return {
+        nodes: [],
+        links: []
+      };
+    },
+    componentWillUpdate: function() {
+      if (this.diagramToolkit && this.diagramToolkit.clear) {
+        this.diagramToolkit.clear();
+      }
+    },
+    componentDidUpdate: function() {
+      this._updateToolkit();
+    },
+    onNodeMoved: function(node_event) {
+      if (this.ignoringEvents) {
+        return ;
+      }
+      var x = node_event.extra.position.left;
+      var y = node_event.extra.position.top;
+      this.linkManager.moveNode(node_event.nodeKey, x, y);
+      return true;
+    },
+    onNodeDeleted: function(node_event) {
+      if (this.ignoringEvents) {
+        return ;
+      }
+      this.linkManager.removeNode(node_event.nodeKey);
+      return true;
+    },
+    handleConnect: function(info, evnt) {
+      if (this.ignoringEvents) {
+        return ;
+      }
+      this.linkManager.newLinkFromEvent(info, evnt);
+      return true;
+    },
+    handleLinkAdd: function(info, evnt) {
+      var links = this.linkManager.getLinks();
+      this.setState({links: links});
+      return true;
+    },
+    handleNodeAdd: function(nodeData) {
+      var nodes = this.linkManager.getNodes();
+      this.setState({nodes: nodes});
+      return true;
+    },
+    handleNodeMove: function(nodeData) {
+      var nodes = this.linkManager.getNodes();
+      this.setState({nodes: nodes});
+      this.diagramToolkit.repaint();
+      return true;
+    },
+    handleNodeRm: function() {
+      var nodes = this.linkManager.getNodes();
+      this.setState({nodes: nodes});
+    },
+    _nodeForName: function(name) {
+      if (!this.refs[name]) {
+        return false;
+      }
+      return this.refs[name].getDOMNode();
+    },
+    _updateNodeValue: function(name, key, value) {
+      var changed = 0;
+      var nodes = this.state.nodes;
+      this.state.nodes.forEach(function(node) {
+        if (node.key == name) {
+          node[key] = value;
+          changed = changed + 1;
+        }
+      });
+      if (changed > 0) {
+        this.setState({nodes: nodes});
+      }
+    },
+    _bindDiagramToolkit: function() {
+      var container = $(this.getDOMNode()).find(".container");
+      var opts = {
+        Container: container[0],
+        handleConnect: this.handleConnect.bind(this)
+      };
+      this.diagramToolkit = new DiagramTookkit(container, opts);
+      this._updateToolkit();
+    },
+    _updateToolkit: function() {
+      if (this.diagramToolkit) {
+        this.ignoringEvents = true;
+        this.diagramToolkit.supspendDrawing();
+        this._redrawLinks();
+        this._redrawTargets();
+        this.diagramToolkit.resumeDrawing();
+        this.ignoringEvents = false;
+      }
+    },
+    _redrawTargets: function() {
+      this.diagramToolkit.makeTarget($(".elm"));
+    },
+    _redrawLinks: function() {
+      var links = this.state.links;
+      links.forEach(function(l) {
+        var source = this._nodeForName(l.sourceNode.key);
+        var target = this._nodeForName(l.targetNode.key);
+        var label = l.title;
+        var color = l.color;
+        var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
+        var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
+        if (source && target) {
+          this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
+        }
+      }.bind(this));
+    },
+    render: function() {
+      var moveHandler = this.onNodeMoved;
+      var deleteHandler = this.onNodeDeleted;
+      var linkData = this.state.links;
+      var nodeData = this.state.nodes;
+      var nodes = this.state.nodes.map(function(node) {
+        return (React.createElement(Node, {
+          key: node.key,
+          data: node,
+          nodeKey: node.key,
+          ref: node.key,
+          onMove: moveHandler,
+          onDelete: deleteHandler
+        }));
+      });
+      return (React.createElement("div", {className: "building-models"}, React.createElement("div", {className: "container"}, nodes), React.createElement(InfoPane, {
+        title: "Info Pane",
+        ref: "info",
+        nodes: nodeData,
+        links: linkData
+      })));
+    }
+  });
+  module.exports = LinkView;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("npm:react@0.12.2/lib/invariant", ["github:jspm/nodelibs-process@0.1.1"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -32833,217 +32981,52 @@ System.register("npm:react@0.12.2", ["npm:react@0.12.2/react"], true, function(r
 
 
 
-System.register("javascripts/building-models", ["npm:react@0.12.2", "javascripts/diagram-node", "javascripts/info-pane", "javascripts/importer", "javascripts/id-generator", "javascripts/models/link-manager", "javascripts/models/link", "javascripts/js_plumb_diagram_toolkit", "github:components/jquery@2.1.3", "github:components/jqueryui@1.11.3"], true, function(require, exports, module) {
+System.register("javascripts/graph-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "github:components/jqueryui@1.11.3"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
   var React = require("npm:react@0.12.2");
-  var Node = require("javascripts/diagram-node");
   var InfoPane = require("javascripts/info-pane");
-  var Importer = require("javascripts/importer");
-  var idGenerator = require("javascripts/id-generator");
-  var NodeList = require("javascripts/models/link-manager");
-  var Link = require("javascripts/models/link");
-  var DiagramTookkit = require("javascripts/js_plumb_diagram_toolkit");
+  var LinkView = require("javascripts/link-view");
+  var LinkManager = require("javascripts/models/link-manager");
+  var _ = require("npm:lodash@3.3.1");
+  var Log = require("npm:loglevel@1.2.0");
   var $ = require("github:components/jquery@2.1.3");
-  require("github:components/jqueryui@1.11.3");
-  var LinkView = React.createClass({
-    displayName: "LinkView",
+  var $UI = require("github:components/jqueryui@1.11.3");
+  Log.setLevel(Log.levels.TRACE);
+  var GraphView = React.createClass({
+    displayName: "GraphView",
     getInitialState: function() {
-      this.nodeList = new NodeList();
-      return {
-        nodes: [],
-        links: []
-      };
+      var state = {};
+      return state;
     },
-    componentWillUpdate: function() {
-      if (this.diagramToolkit && this.diagramToolkit.clear) {
-        this.diagramToolkit.clear();
-      }
-    },
+    componentWillUpdate: function() {},
     componentDidUpdate: function() {
-      this._updateToolkit();
-    },
-    handleNodeMoved: function(node_event) {
-      if (this.ignoringEvents) {
-        return ;
-      }
-      this.updateNodeValue(node_event.nodeKey, 'x', node_event.extra.position.left);
-      this.updateNodeValue(node_event.nodeKey, 'y', node_event.extra.position.top);
-      this.diagramToolkit.repaint();
-    },
-    handleNodeDeleted: function(node_event) {
-      if (this.ignoringEvents) {
-        return ;
-      }
-      this.removeNode(node_event.nodeKey);
-    },
-    handleConnect: function(info, evnt) {
-      if (this.ignoringEvents) {
-        return ;
-      }
-      var newLink = {};
-      newLink.key = idGenerator("LinkView.link");
-      var startNode = document.getElementById(info.sourceId);
-      var endNode = document.getElementById(info.targetId);
-      var startName = this._nameForNode(startNode);
-      var endName = this._nameForNode(endNode);
-      var startTerminal = (info.connection.endpoints[0].anchor.type == "Top") ? "a" : "b";
-      var endTerminal = (info.connection.endpoints[1].anchor.type == "Top") ? "a" : "b";
-      var data = {
-        sourceNode: startName,
-        targetNode: endName,
-        sourceTerminal: startTerminal,
-        targetTerminal: endTerminal,
-        color: '#fea',
-        title: 'untitlted'
-      };
-      l = new Link(data);
-      console.log(l.terminalKey());
-      this.addLink(new Link(data));
-    },
-    _nodeForName: function(name) {
-      return this.refs[name].getDOMNode();
-    },
-    _nameForNode: function(domNode) {
-      for (var ref in this.refs) {
-        if (domNode == this.refs[ref].getDOMNode()) {
-          return ref;
-        }
-      }
-      return undefined;
-    },
-    updateNodeValue: function(name, key, value) {
-      var changed = 0;
-      var nodes = this.state.nodes;
-      this.state.nodes.forEach(function(node) {
-        if (node.key == name) {
-          node.data[key] = value;
-          changed = changed + 1;
-        }
-      });
-      if (changed > 0) {
-        this.setState({nodes: nodes});
-      }
-    },
-    _bindDiagramToolkit: function() {
-      var opts = {
-        handleConnect: this.handleConnect.bind(this),
-        handleDisconnect: this.handleDisconnect
-      };
-      this.diagramToolkit = new DiagramTookkit('#container', opts);
-      this._updateToolkit();
-    },
-    _updateToolkit: function() {
-      if (this.diagramToolkit) {
-        this.ignoringEvents = true;
-        this.diagramToolkit.supspendDrawing();
-        this._redrawLinks();
-        this._redrawTargets();
-        this.diagramToolkit.resumeDrawing();
-        this.ignoringEvents = false;
-      }
-    },
-    _redrawTargets: function() {
-      this.diagramToolkit.makeTarget($(".elm"));
-    },
-    _redrawLinks: function() {
-      this.state.links.map(function(l) {
-        var source = this._nodeForName(l.sourceNode);
-        var target = this._nodeForName(l.targetNode);
-        var label = l.title;
-        var color = l.color;
-        var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
-        var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
-        this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
-      }.bind(this));
-    },
-    loadLocalData: function(callback) {
-      $.ajax({
-        url: this.props.localUrl,
-        dataType: 'json',
-        success: function(data) {
-          var importer = new Importer(this);
-          importer.importData(data);
-          this._bindDiagramToolkit();
-        }.bind(this),
-        error: function(xhr, status, err) {
-          console.error(this.props.url, status, err.toString());
-        }.bind(this)
-      });
+      Log.info("Did Update: GraphView ");
     },
     componentDidMount: function() {
-      this.loadLocalData();
-    },
-    addNode: function(newNode) {
-      var nodes = this.state.nodes;
-      nodes.push(newNode);
-      this.setState({nodes: nodes});
-    },
-    removeLinksForNode: function(nodeKey) {
-      var links = this.state.links;
-      var newLinks = links.filter(function(link) {
-        if (nodeKey === link.sourceNode || nodeKey === link.targetNode) {
-          return false;
-        }
-        return true;
-      });
-      this.setState({links: newLinks});
-    },
-    removeNode: function(nodeKey) {
-      var nodes = this.state.nodes;
-      var newNodes = nodes.filter(function(node) {
-        if (nodeKey === node.key) {
-          return false;
-        }
-        return true;
-      });
-      this.removeLinksForNode(nodeKey);
-      this.setState({nodes: newNodes});
-    },
-    addLink: function(data) {
-      var newLink = new Link(data);
-      if (this.nodeList.addLink(newLink)) {
-        var links = this.state.links;
-        links.push(newLink);
-        this.setState({links: links});
-      }
+      Log.info("Did mount: GraphView ");
     },
     render: function() {
-      var moveHandler = this.handleNodeMoved;
-      var deleteHandler = this.handleNodeDeleted;
-      var linkData = this.state.links;
-      var nodeData = this.state.nodes;
-      var nodes = this.state.nodes.map(function(node) {
-        return (React.createElement(Node, {
-          key: node.key,
-          data: node.data,
-          nodeKey: node.key,
-          ref: node.key,
-          onMove: moveHandler,
-          onDelete: deleteHandler
-        }));
-      });
-      return (React.createElement("div", {className: "building-models"}, React.createElement("div", {
-        id: "container",
-        className: "my-container"
-      }, nodes), React.createElement(InfoPane, {
-        title: "Info Pane",
-        ref: "info",
-        nodes: nodeData,
-        links: linkData
-      })));
+      var url = "my_system_state.json";
+      var linkManager = this.props.linkManager;
+      return (React.createElement(LinkView, {
+        url: url,
+        className: "my-system",
+        linkManager: linkManager
+      }));
     }
   });
-  jsPlumb.ready(function() {
-    remote_url = "http://mysystem_sc.dev.concord.org/mysystem_designs/7e5c26385bbe26b9643ff84de9005cb6";
-    local_url = "my_system_state.json";
-    React.render(React.createElement(LinkView, {
-      localUrl: local_url,
-      className: "my-system"
-    }), document.getElementById('building-models'));
-  });
-  module.exports = LinkView;
+  var linkManager = LinkManager.instance('building-models');
+  React.render(React.createElement(GraphView, {
+    className: "my-system",
+    linkManager: linkManager
+  }), document.getElementById('building-models'));
+  React.render(React.createElement(GraphView, {
+    className: "my-system",
+    linkManager: linkManager
+  }), document.getElementById('building-models2'));
+  module.exports = GraphView;
   global.define = __define;
   return module.exports;
 });
