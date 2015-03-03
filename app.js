@@ -4151,8 +4151,8 @@ System.register("javascripts/importer", [], true, function(require, exports, mod
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  function Importer(system) {
-    this.system = system;
+  function Importer(_system) {
+    this.system = _system;
     this.importNodes = function(importNodes) {
       var newNodes = [];
       var node = null;
