@@ -43,11 +43,16 @@ var InfoPane = React.createClass({
       var title = _node.title;
       return (
         <div className="nodePanel">
-          <div id="info-node-{node.key}" className = "node-key"> {title} 
-            &nbsp; @(
-              <span className="node-location-x">{x}
-              </span>x<span className="node-location-y">{y}</span>
+          <div id="info-node-{node.key}" className = "node-key"> 
+            <span className="node-name">{title} </span>
+            &nbsp; 
+            <span className="dimensions">
+              @(
+                <span className="node-location-x">{x}
+                </span>x<span className="node-location-y">{y}</span>
             )
+            </span>
+            &nbsp;
             {infoString}
           </div>
         </div>
@@ -56,8 +61,7 @@ var InfoPane = React.createClass({
 
     return (
       <div className="info-pane">
-        <div className="info-title">{this.props.title}</div>
-        #{nodes}
+        {nodes}
       </div>
     );
   }
