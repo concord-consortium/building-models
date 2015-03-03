@@ -4127,24 +4127,17 @@ System.register("javascripts/info-pane", ["npm:react@0.12.2"], true, function(re
     },
     render: function() {
       var self = this;
-      var nodes = self.props.nodes.map(function(node) {
-        var outlinks = self.props.links.filter(function(link) {
-          if (link.sourceNode == node.key) {
-            return true;
-          }
-          return false;
-        });
-        var link_display_data = outlinks.map(function(link) {
-          var remote_node = self._linked_node(link.key);
-          var title = link.title;
-          return (React.createElement("span", {className: "node-link"}, React.createElement("span", {className: "node-link-name"}, " ", title, " "), React.createElement("span", {className: "node-link-node"}, " ", remote_node.data.title, " ")));
-        });
+      var nodes = self.props.nodes.map(function(_node) {
+        var infoString = _node.infoString();
+        var x = _node.x;
+        var y = _node.y;
+        var title = _node.title;
         return (React.createElement("div", {className: "nodePanel"}, React.createElement("div", {
           id: "info-node-{node.key}",
           className: "node-key"
-        }, " ", node.data.title, "  @(", React.createElement("span", {className: "node-location-x"}, node.data.x), "x", React.createElement("span", {className: "node-location-y"}, node.data.y), ")", link_display_data)));
+        }, React.createElement("span", {className: "node-name"}, title, " "), " ", React.createElement("span", {className: "dimensions"}, "@(", React.createElement("span", {className: "node-location-x"}, x), "x", React.createElement("span", {className: "node-location-y"}, y), ")"), " ", infoString)));
       });
-      return (React.createElement("div", {className: "info-pane"}, React.createElement("div", {className: "info-title"}, this.props.title), "#", nodes));
+      return (React.createElement("div", {className: "info-pane"}, nodes));
     }
   });
   module.exports = InfoPane;
@@ -4165,7 +4158,7 @@ System.register("javascripts/importer", [], true, function(require, exports, mod
       var node = null;
       for (var key in importNodes) {
         data = importNodes[key];
-        this.system.addNode({
+        this.system.importNode({
           'key': key,
           'data': data
         });
@@ -14349,6 +14342,138 @@ System.register("javascripts/models/graph-primitive", [], true, function(require
       return GraphPrimitive;
     })();
     module.exports = GraphPrimitive;
+  }).call(this);
+  global.define = __define;
+  return module.exports;
+});
+
+
+
+System.register("javascripts/models/Node", ["npm:lodash@3.3.1", "npm:loglevel@1.2.0", "javascripts/models/graph-primitive"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  (function() {
+    var GraphPrimitive,
+        Node,
+        _,
+        log,
+        extend = function(child, parent) {
+          for (var key in parent) {
+            if (hasProp.call(parent, key))
+              child[key] = parent[key];
+          }
+          function ctor() {
+            this.constructor = child;
+          }
+          ctor.prototype = parent.prototype;
+          child.prototype = new ctor();
+          child.__super__ = parent.prototype;
+          return child;
+        },
+        hasProp = {}.hasOwnProperty;
+    _ = require("npm:lodash@3.3.1");
+    log = require("npm:loglevel@1.2.0");
+    GraphPrimitive = require("javascripts/models/graph-primitive");
+    Node = (function(superClass) {
+      extend(Node, superClass);
+      function Node(nodeSpec, key) {
+        if (nodeSpec == null) {
+          nodeSpec = {
+            x: 0,
+            y: 0,
+            title: "untitled",
+            image: null
+          };
+        }
+        Node.__super__.constructor.call(this);
+        if (key) {
+          this.key = key;
+        }
+        this.links = [];
+        this.x = nodeSpec.x;
+        this.y = nodeSpec.y;
+        this.title = nodeSpec.title;
+        this.image = nodeSpec.image;
+      }
+      Node.prototype.type = function() {
+        return "Node";
+      };
+      Node.prototype.addLink = function(link) {
+        if (link.sourceNode === this || link.targetNode === this) {
+          if (_.contains(this.links, link)) {
+            throw new Error("Duplicate link for Node:" + this.id);
+          }
+          return this.links.push(link);
+        } else {
+          throw new Error("Bad link for Node:" + this.id);
+        }
+      };
+      Node.prototype.outLinks = function() {
+        return _.filter(this.links, (function(_this) {
+          return function(link) {
+            if (link.sourceNode === _this) {
+              return true;
+            }
+            return false;
+          };
+        })(this));
+      };
+      Node.prototype.inLinks = function() {
+        return _.filter(this.links, (function(_this) {
+          return function(link) {
+            if (link.targetNode === _this) {
+              return true;
+            }
+            return false;
+          };
+        })(this));
+      };
+      Node.prototype.infoString = function() {
+        var link,
+            linkNamer,
+            outs;
+        linkNamer = (function(_this) {
+          return function(link) {
+            return " --" + link.title + "-->[" + link.targetNode.title + "]";
+          };
+        })(this);
+        outs = (function() {
+          var i,
+              len,
+              ref,
+              results;
+          ref = this.outLinks();
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            link = ref[i];
+            results.push(linkNamer(link));
+          }
+          return results;
+        }).call(this);
+        return this.title + " " + outs;
+      };
+      Node.prototype.downstreamNodes = function() {
+        var visit,
+            visitedNodes;
+        visitedNodes = [];
+        visit = function(node) {
+          log.info("visiting node: " + node.id);
+          visitedNodes.push(node);
+          return _.each(node.outLinks(), function(link) {
+            var downstreamNode;
+            downstreamNode = link.targetNode;
+            if (!_.contains(visitedNodes, downstreamNode)) {
+              return visit(downstreamNode);
+            }
+          });
+        };
+        visit(this);
+        return _.without(visitedNodes, this);
+      };
+      return Node;
+    })(GraphPrimitive);
+    module.exports = Node;
   }).call(this);
   global.define = __define;
   return module.exports;
@@ -28554,13 +28679,12 @@ System.register("javascripts/models/link", ["javascripts/models/graph-primitive"
         (base1 = this.options).title || (base1.title = "untitled");
         ref = this.options, this.sourceNode = ref.sourceNode, this.sourceTerminal = ref.sourceTerminal, this.targetNode = ref.targetNode, this.targetTerminal = ref.targetTerminal, this.color = ref.color, this.title = ref.title;
         Link.__super__.constructor.call(this);
-        this.valid = false;
       }
       Link.prototype.type = function() {
         return "Link";
       };
       Link.prototype.terminalKey = function() {
-        return this.sourceNode + "[" + this.sourceTerminal + "] ---" + this.title + "---> " + this.targetNode + "[" + this.targetTerminal + "]";
+        return this.sourceNode.key + "[" + this.sourceTerminal + "] ---" + this.title + "---> " + this.targetNode.key + "[" + this.targetTerminal + "]";
       };
       Link.prototype.nodeKey = function() {
         return this.sourceNode + " ---" + this.title + "---> " + this.targetNode;
@@ -30798,12 +30922,13 @@ System.register("npm:react@0.12.2/lib/ReactDefaultPerf", ["npm:react@0.12.2/lib/
 
 
 
-System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "javascripts/importer", "javascripts/models/link"], true, function(require, exports, module) {
+System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "javascripts/importer", "javascripts/models/link", "javascripts/models/Node"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
   (function() {
     var $,
+        DiagramNode,
         Importer,
         Link,
         LinkManager,
@@ -30819,6 +30944,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
     $ = require("github:components/jquery@2.1.3");
     Importer = require("javascripts/importer");
     Link = require("javascripts/models/link");
+    DiagramNode = require("javascripts/models/Node");
     LinkManager = (function() {
       LinkManager.instances = {};
       LinkManager.instance = function(context) {
@@ -30829,7 +30955,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
       function LinkManager(context) {
         this.loadData = bind(this.loadData, this);
         this.linkKeys = {};
-        this.nodeDoms = {};
+        this.nodeKeys = {};
         this.linkListeners = [];
         this.nodeListeners = [];
       }
@@ -30856,14 +30982,35 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
           return results;
         }).call(this);
       };
+      LinkManager.prototype.getNodes = function() {
+        var key,
+            value;
+        return (function() {
+          var ref,
+              results;
+          ref = this.nodeKeys;
+          results = [];
+          for (key in ref) {
+            value = ref[key];
+            results.push(value);
+          }
+          return results;
+        }).call(this);
+      };
       LinkManager.prototype.hasLink = function(link) {
         return this.linkKeys[link.terminalKey()] != null;
       };
-      LinkManager.prototype.hasNode = function(nodeinfo) {
-        return false;
+      LinkManager.prototype.hasNode = function(node) {
+        return this.nodeKeys[node.key];
       };
       LinkManager.prototype.importLink = function(linkSpec) {
-        var link;
+        var link,
+            sourceNode,
+            targetNode;
+        sourceNode = this.nodeKeys[linkSpec.sourceNode];
+        targetNode = this.nodeKeys[linkSpec.targetNode];
+        linkSpec.sourceNode = sourceNode;
+        linkSpec.targetNode = targetNode;
         link = new Link(linkSpec);
         return this.addLink(link);
       };
@@ -30874,6 +31021,8 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             ref;
         if (!this.hasLink(link)) {
           this.linkKeys[link.terminalKey()] = link;
+          this.nodeKeys[link.sourceNode.key].addLink(link);
+          this.nodeKeys[link.targetNode.key].addLink(link);
           ref = this.linkListeners;
           for (i = 0, len = ref.length; i < len; i++) {
             listener = ref[i];
@@ -30884,13 +31033,19 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         }
         return false;
       };
+      LinkManager.prototype.importNode = function(nodeSpec) {
+        var node;
+        node = new DiagramNode(nodeSpec.data, nodeSpec.key);
+        return this.addNode(node);
+      };
       LinkManager.prototype.addNode = function(node) {
         var i,
             len,
             listener,
             ref;
         if (!this.hasNode(node)) {
-          ref = this.linkListeners;
+          this.nodeKeys[node.key] = node;
+          ref = this.nodeListeners;
           for (i = 0, len = ref.length; i < len; i++) {
             listener = ref[i];
             log.info("notifying of new Node");
@@ -30900,8 +31055,30 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         }
         return false;
       };
+      LinkManager.prototype.moveNode = function(nodeKey, x, y) {
+        var i,
+            len,
+            listener,
+            node,
+            ref,
+            results;
+        node = this.nodeKeys[nodeKey];
+        if (!node) {
+          return ;
+        }
+        node.x = x;
+        node.y = y;
+        ref = this.nodeListeners;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          listener = ref[i];
+          log.info("notifying of NodeMove");
+          results.push(listener.handleNodeMove(node));
+        }
+        return results;
+      };
       LinkManager.prototype._nameForNode = function(node) {
-        return this.nodeDoms[node];
+        return this.nodeKeys[node];
       };
       LinkManager.prototype.newLinkFromEvent = function(info) {
         var color,
@@ -30927,6 +31104,38 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
           title: title
         });
         return true;
+      };
+      LinkManager.prototype.removeLinksForNode = function(nodeKey) {
+        var links,
+            newLinks;
+        links = this.getLinks();
+        return newLinks = links.filter((function(_this) {
+          return function(link) {
+            if (nodeKey === link.sourceNode || nodeKey === link.targetNode) {
+              return false;
+            }
+            return true;
+          };
+        })(this));
+      };
+      LinkManager.prototype.removeNode = function(nodeKey) {
+        var i,
+            len,
+            listener,
+            node,
+            ref,
+            results;
+        node = this.nodeKeys[nodeKey];
+        delete this.nodeKeys[nodeKey];
+        this.removeLinksForNode(nodeKey);
+        ref = this.nodeListeners;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          listener = ref[i];
+          log.info("notifying of deleted Node");
+          results.push(listener.handleNodeRm(node));
+        }
+        return results;
       };
       LinkManager.prototype.loadData = function(url) {
         log.info("loading local data");
