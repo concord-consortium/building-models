@@ -4158,6 +4158,7 @@ System.register("javascripts/importer", [], true, function(require, exports, mod
       var node = null;
       for (var key in importNodes) {
         data = importNodes[key];
+        debugger;
         this.system.importNode({
           'key': key,
           'data': data
