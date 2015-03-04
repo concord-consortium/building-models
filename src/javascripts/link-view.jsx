@@ -127,7 +127,8 @@ var LinkView = React.createClass({
   },
 
   _redrawTargets: function() {
-    this.diagramToolkit.makeTarget($(".elm"));
+    var targetSources = $(this.getDOMNode()).find(".elm");
+    this.diagramToolkit.makeTarget(targetSources);
   },
 
   _redrawLinks: function() {

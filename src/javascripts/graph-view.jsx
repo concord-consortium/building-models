@@ -35,14 +35,14 @@ var GraphView = React.createClass({
 });
 
 var linkManager = LinkManager.instance('building-models');
-
-React.render(
-  <GraphView className="my-system" linkManager={linkManager}/>,
-  document.getElementById('building-models')
-);
-React.render(
-  <GraphView className="my-system" linkManager={linkManager}/>,
-  document.getElementById('building-models2')
-);
-
+jsPlumb.bind("ready", function() {
+  React.render(
+    <GraphView className="my-system" linkManager={linkManager}/>,
+    document.getElementById('building-models')
+  );
+  React.render(
+    <GraphView className="my-system" linkManager={linkManager}/>,
+    document.getElementById('building-models2')
+  );
+});
 module.exports = GraphView;
