@@ -33018,14 +33018,16 @@ System.register("javascripts/graph-view", ["npm:react@0.12.2", "javascripts/info
     }
   });
   var linkManager = LinkManager.instance('building-models');
-  React.render(React.createElement(GraphView, {
-    className: "my-system",
-    linkManager: linkManager
-  }), document.getElementById('building-models'));
-  React.render(React.createElement(GraphView, {
-    className: "my-system",
-    linkManager: linkManager
-  }), document.getElementById('building-models2'));
+  jsPlumb.bind("ready", function() {
+    React.render(React.createElement(GraphView, {
+      className: "my-system",
+      linkManager: linkManager
+    }), document.getElementById('building-models'));
+    React.render(React.createElement(GraphView, {
+      className: "my-system",
+      linkManager: linkManager
+    }), document.getElementById('building-models2'));
+  });
   module.exports = GraphView;
   global.define = __define;
   return module.exports;
