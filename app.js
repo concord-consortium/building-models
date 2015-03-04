@@ -30979,12 +30979,22 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
         containment: "parent"
       });
       $elem.dblclick(function() {
-        this.handleSelected();
+        this.handleSelected(true);
+      }.bind(this));
+      $elem.click(function() {
+        selected = this.props.selected;
+        if (!selected) {
+          this.handleSelected(false);
+        }
       }.bind(this));
     },
-    handleSelected: function() {
+    handleSelected: function(actually_select) {
+      var selectionKey = 'dont-select-anything';
       if (this.props.linkManager) {
-        this.props.linkManager.selectNode(this.props.nodeKey);
+        if (actually_select) {
+          selectionKey = this.props.nodeKey;
+        }
+        this.props.linkManager.selectNode(selectionKey);
       }
     },
     propTypes: {
@@ -31221,10 +31231,14 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             listener,
             ref,
             results;
-        this.selectedNode.selected = false;
+        if (this.selectedNode) {
+          this.selectedNode.selected = false;
+        }
         this.selectedNode = this.nodeKeys[nodeKey];
-        this.selectedNode.selected = true;
-        log.info("Selection happened for " + nodeKey + " -- " + this.selectedNode.title);
+        if (this.selectedNode) {
+          this.selectedNode.selected = true;
+          log.info("Selection happened for " + nodeKey + " -- " + this.selectedNode.title);
+        }
         ref = this.selectionListeners;
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
@@ -33243,9 +33257,6 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       var linkManager = this.props.linkManager;
       var selectedNode = this.state.selectedNode;
       var onNodeChanged = function(node, title, image) {
-        log.info("node changed: " + node);
-        log.info("node changed: " + title);
-        log.info("node changed: " + image);
         linkManager.changeNode(title, image);
       };
       return (React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
@@ -33254,10 +33265,10 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       }), React.createElement(LinkView, {
         url: url,
         linkManager: linkManager
-      }), React.createElement(NodeWell, null), React.createElement(NodeEditView, {
+      }), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
         node: selectedNode,
         onNodeChanged: onNodeChanged
-      })));
+      }))));
     }
   });
   var linkManager = LinkManager.instance('building-models');
