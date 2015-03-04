@@ -30,7 +30,7 @@ cd $HERE
 gulp build-all &&\
 
 # 3) Bundle our app using jspm
-jspm bundle-sfx javascripts/graph-view dist/app.js &&\
+jspm bundle-sfx javascripts/app-view dist/app.js &&\
 
 # 4) Copy files
 cp -r ./src/assets/* $DISTDIR &&\

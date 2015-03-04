@@ -18,6 +18,8 @@ class LinkManager
     @nodeKeys  = {}
     @linkListeners = []
     @nodeListeners = []
+    @selectionListeners = []
+    @selectedNode = {}
     
   addLinkListener: (listener) ->
     log.info("adding link listener")
@@ -26,6 +28,10 @@ class LinkManager
   addNodeListener: (listener) ->
     log.info("adding node listener")
     @nodeListeners.push listener
+
+  addSelectionListener: (listener) ->
+    log.info("adding selection listener #{listener}")
+    @selectionListeners.push listener
 
   getLinks: () ->
     return (value for key, value of @linkKeys)
@@ -81,8 +87,20 @@ class LinkManager
       listener.handleNodeMove(node)
     
   selectNode: (nodeKey) ->
+    @selectedNode.selected = false
     @selectedNode = @nodeKeys[nodeKey]
+    @selectedNode.selected = true
     log.info "Selection happened for #{nodeKey} -- #{@selectedNode.title}"
+    for listener in @selectionListeners
+      listener({node:@selectedNode, connection:null})
+
+  changeNode: (title, image) ->
+    if (@selectedNode)
+      log.info "Change  for #{@selectedNode.title} (#{title}, #{image}"
+      @selectedNode.title = title;
+      @selectedNode.image = image;
+      for listener in @selectionListeners
+        listener({node:@selectedNode, connection:null})
 
   _nameForNode: (node) ->
     @nodeKeys[node]

@@ -182,6 +182,7 @@ var LinkView = React.createClass({
         <Node 
           key={node.key} 
           data={node}
+          selected = {node.selected}
           nodeKey={node.key}
           ref={node.key} 
           onMove={moveHandler}

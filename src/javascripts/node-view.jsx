@@ -64,9 +64,13 @@ var DiagramNode = React.createClass({
     };
     var nodeKey=  this.props.nodeKey;
     var deleteHandler = this.doDelete;
+    var className = "elm";
+    if (this.props.selected) {
+      className = className + " selected";
+    }
 
     return (
-      <div className="elm" style={style} data-node-key={nodeKey}>
+      <div className={className} style={style} data-node-key={nodeKey}>
         <div className="img-background">
           <div className="delete-box" onClick={deleteHandler}>
             <i className="fa fa-times-circle"></i>

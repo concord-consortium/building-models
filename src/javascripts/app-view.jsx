@@ -12,7 +12,10 @@ log.setLevel(log.levels.TRACE);
 
 var AppView = React.createClass({
   getInitialState: function() { 
-    var state = {};
+    var state = {
+      selectedNode: null,
+      selectedConnection: null
+    };
     return state;
   },
 
@@ -24,18 +27,31 @@ var AppView = React.createClass({
   },
 
   componentDidMount: function() {
-    log.info("Did mount: AppView ");
+    var linkManager = this.props.linkManager;
+    linkManager.addSelectionListener(function(selections) {
+      var selectedNode = selections.node;
+      var selectedConnection = selections.connection;
+      this.setState({selectedNode: selectedNode});
+      log.info("updated selections: + selections");
+    }.bind(this));
   },
 
   render: function() {
     var url = "my_system_state.json";
     var linkManager = this.props.linkManager;
+    var selectedNode = this.state.selectedNode;
+    var onNodeChanged = function(node,title,image) {
+      log.info("node changed: " + node);
+      log.info("node changed: " + title);
+      log.info("node changed: " + image);
+      linkManager.changeNode(title,image);
+    };
     return (
       <div className="flow-box">
         <LinkView url={url} linkManager={linkManager}/>
         <LinkView url={url} linkManager={linkManager}/>
         <NodeWell />
-        <NodeEditView />
+        <NodeEditView node={selectedNode} onNodeChanged={onNodeChanged}/>
       </div>
     );
   }
