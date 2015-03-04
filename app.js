@@ -4066,82 +4066,129 @@ System.register("javascripts/info-pane", ["npm:react@0.12.2"], true, function(re
 
 
 
-System.register("javascripts/node-view", ["npm:react@0.12.2"], true, function(require, exports, module) {
+System.register("npm:loglevel@1.2.0/lib/loglevel", [], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  var React = require("npm:react@0.12.2");
-  var DiagramNode = React.createClass({
-    displayName: "DiagramNode",
-    componentDidMount: function() {
-      var $elem = $(this.getDOMNode());
-      var nodeKey = this.props.nodeKey;
-      var movedHandler = this.doMove;
-      $elem.draggable({
-        drag: movedHandler,
-        containment: "parent"
-      });
-    },
-    propTypes: {
-      onDelete: React.PropTypes.func,
-      onMove: React.PropTypes.func,
-      onSelect: React.PropTypes.func,
-      nodeKey: React.PropTypes.string
-    },
-    getDefaultProps: function() {
-      var _log = function(msg) {
-        console.log(msg);
-      };
-      return {
-        onMove: function() {
-          _log("internal move handler");
-        },
-        onStop: function() {
-          _log("internal move handler");
-        },
-        onDelete: function() {
-          _log("internal on-delete handler");
-        },
-        onSelect: function() {
-          _log("internal select handler");
+  "format cjs";
+  (function(root, definition) {
+    if (typeof module === 'object' && module.exports && typeof require === 'function') {
+      module.exports = definition();
+    } else if (typeof define === 'function' && typeof define.amd === 'object') {
+      define(definition);
+    } else {
+      root.log = definition();
+    }
+  }(this, function() {
+    var self = {};
+    var noop = function() {};
+    var undefinedType = "undefined";
+    function realMethod(methodName) {
+      if (typeof console === undefinedType) {
+        return false;
+      } else if (console[methodName] !== undefined) {
+        return bindMethod(console, methodName);
+      } else if (console.log !== undefined) {
+        return bindMethod(console, 'log');
+      } else {
+        return noop;
+      }
+    }
+    function bindMethod(obj, methodName) {
+      var method = obj[methodName];
+      if (typeof method.bind === 'function') {
+        return method.bind(obj);
+      } else {
+        try {
+          return Function.prototype.bind.call(method, obj);
+        } catch (e) {
+          return function() {
+            return Function.prototype.apply.apply(method, [obj, arguments]);
+          };
+        }
+      }
+    }
+    function enableLoggingWhenConsoleArrives(methodName, level) {
+      return function() {
+        if (typeof console !== undefinedType) {
+          replaceLoggingMethods(level);
+          self[methodName].apply(self, arguments);
         }
       };
-    },
-    doMove: function(evt, extra) {
-      this.props.onMove({
-        nodeKey: this.props.nodeKey,
-        reactComponent: this,
-        domElement: this.getDOMNode(),
-        syntheticEvent: evt,
-        extra: extra
-      });
-    },
-    doDelete: function(evt, extra) {
-      this.props.onDelete({
-        nodeKey: this.props.nodeKey,
-        reactComponent: this,
-        domElement: this.getDOMNode(),
-        syntheticEvent: evt
-      });
-    },
-    render: function() {
-      var style = {
-        top: this.props.data.y,
-        left: this.props.data.x
-      };
-      var nodeKey = this.props.nodeKey;
-      var deleteHandler = this.doDelete;
-      return (React.createElement("div", {
-        className: "elm",
-        style: style,
-        "data-node-key": nodeKey
-      }, React.createElement("div", {className: "img-background"}, React.createElement("div", {
-        className: "delete-box",
-        onClick: deleteHandler
-      }, React.createElement("i", {className: "fa fa-times-circle"})), React.createElement("img", {src: this.props.data.image})), React.createElement("div", {className: "node-title"}, this.props.data.title)));
     }
-  });
-  module.exports = DiagramNode;
+    var logMethods = ["trace", "debug", "info", "warn", "error"];
+    function replaceLoggingMethods(level) {
+      for (var i = 0; i < logMethods.length; i++) {
+        var methodName = logMethods[i];
+        self[methodName] = (i < level) ? noop : self.methodFactory(methodName, level);
+      }
+    }
+    function persistLevelIfPossible(levelNum) {
+      var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
+      try {
+        window.localStorage['loglevel'] = levelName;
+        return ;
+      } catch (ignore) {}
+      try {
+        window.document.cookie = "loglevel=" + levelName + ";";
+      } catch (ignore) {}
+    }
+    function loadPersistedLevel() {
+      var storedLevel;
+      try {
+        storedLevel = window.localStorage['loglevel'];
+      } catch (ignore) {}
+      if (typeof storedLevel === undefinedType) {
+        try {
+          storedLevel = /loglevel=([^;]+)/.exec(window.document.cookie)[1];
+        } catch (ignore) {}
+      }
+      if (self.levels[storedLevel] === undefined) {
+        storedLevel = "WARN";
+      }
+      self.setLevel(self.levels[storedLevel]);
+    }
+    self.levels = {
+      "TRACE": 0,
+      "DEBUG": 1,
+      "INFO": 2,
+      "WARN": 3,
+      "ERROR": 4,
+      "SILENT": 5
+    };
+    self.methodFactory = function(methodName, level) {
+      return realMethod(methodName) || enableLoggingWhenConsoleArrives(methodName, level);
+    };
+    self.setLevel = function(level) {
+      if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) {
+        level = self.levels[level.toUpperCase()];
+      }
+      if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) {
+        persistLevelIfPossible(level);
+        replaceLoggingMethods(level);
+        if (typeof console === undefinedType && level < self.levels.SILENT) {
+          return "No console available for logging";
+        }
+      } else {
+        throw "log.setLevel() called with invalid level: " + level;
+      }
+    };
+    self.enableAll = function() {
+      self.setLevel(self.levels.TRACE);
+    };
+    self.disableAll = function() {
+      self.setLevel(self.levels.SILENT);
+    };
+    var _log = (typeof window !== undefinedType) ? window.log : undefined;
+    self.noConflict = function() {
+      if (typeof window !== undefinedType && window.log === self) {
+        window.log = _log;
+      }
+      return self;
+    };
+    loadPersistedLevel();
+    return self;
+  }));
   global.define = __define;
   return module.exports;
 });
@@ -8239,135 +8286,6 @@ System.register("npm:lodash@3.3.1/index", ["github:jspm/nodelibs-process@0.1.1"]
       }
     }.call(this));
   })(require("github:jspm/nodelibs-process@0.1.1"));
-  global.define = __define;
-  return module.exports;
-});
-
-
-
-System.register("npm:loglevel@1.2.0/lib/loglevel", [], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  "format cjs";
-  (function(root, definition) {
-    if (typeof module === 'object' && module.exports && typeof require === 'function') {
-      module.exports = definition();
-    } else if (typeof define === 'function' && typeof define.amd === 'object') {
-      define(definition);
-    } else {
-      root.log = definition();
-    }
-  }(this, function() {
-    var self = {};
-    var noop = function() {};
-    var undefinedType = "undefined";
-    function realMethod(methodName) {
-      if (typeof console === undefinedType) {
-        return false;
-      } else if (console[methodName] !== undefined) {
-        return bindMethod(console, methodName);
-      } else if (console.log !== undefined) {
-        return bindMethod(console, 'log');
-      } else {
-        return noop;
-      }
-    }
-    function bindMethod(obj, methodName) {
-      var method = obj[methodName];
-      if (typeof method.bind === 'function') {
-        return method.bind(obj);
-      } else {
-        try {
-          return Function.prototype.bind.call(method, obj);
-        } catch (e) {
-          return function() {
-            return Function.prototype.apply.apply(method, [obj, arguments]);
-          };
-        }
-      }
-    }
-    function enableLoggingWhenConsoleArrives(methodName, level) {
-      return function() {
-        if (typeof console !== undefinedType) {
-          replaceLoggingMethods(level);
-          self[methodName].apply(self, arguments);
-        }
-      };
-    }
-    var logMethods = ["trace", "debug", "info", "warn", "error"];
-    function replaceLoggingMethods(level) {
-      for (var i = 0; i < logMethods.length; i++) {
-        var methodName = logMethods[i];
-        self[methodName] = (i < level) ? noop : self.methodFactory(methodName, level);
-      }
-    }
-    function persistLevelIfPossible(levelNum) {
-      var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
-      try {
-        window.localStorage['loglevel'] = levelName;
-        return ;
-      } catch (ignore) {}
-      try {
-        window.document.cookie = "loglevel=" + levelName + ";";
-      } catch (ignore) {}
-    }
-    function loadPersistedLevel() {
-      var storedLevel;
-      try {
-        storedLevel = window.localStorage['loglevel'];
-      } catch (ignore) {}
-      if (typeof storedLevel === undefinedType) {
-        try {
-          storedLevel = /loglevel=([^;]+)/.exec(window.document.cookie)[1];
-        } catch (ignore) {}
-      }
-      if (self.levels[storedLevel] === undefined) {
-        storedLevel = "WARN";
-      }
-      self.setLevel(self.levels[storedLevel]);
-    }
-    self.levels = {
-      "TRACE": 0,
-      "DEBUG": 1,
-      "INFO": 2,
-      "WARN": 3,
-      "ERROR": 4,
-      "SILENT": 5
-    };
-    self.methodFactory = function(methodName, level) {
-      return realMethod(methodName) || enableLoggingWhenConsoleArrives(methodName, level);
-    };
-    self.setLevel = function(level) {
-      if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) {
-        level = self.levels[level.toUpperCase()];
-      }
-      if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) {
-        persistLevelIfPossible(level);
-        replaceLoggingMethods(level);
-        if (typeof console === undefinedType && level < self.levels.SILENT) {
-          return "No console available for logging";
-        }
-      } else {
-        throw "log.setLevel() called with invalid level: " + level;
-      }
-    };
-    self.enableAll = function() {
-      self.setLevel(self.levels.TRACE);
-    };
-    self.disableAll = function() {
-      self.setLevel(self.levels.SILENT);
-    };
-    var _log = (typeof window !== undefinedType) ? window.log : undefined;
-    self.noConflict = function() {
-      if (typeof window !== undefinedType && window.log === self) {
-        window.log = _log;
-      }
-      return self;
-    };
-    loadPersistedLevel();
-    return self;
-  }));
   global.define = __define;
   return module.exports;
 });
@@ -14322,6 +14240,7 @@ System.register("javascripts/models/graph-primitive", [], true, function(require
       };
       function GraphPrimitive() {
         this.id = GraphPrimitive.nextID(this.type());
+        this.key = this.id;
       }
       return GraphPrimitive;
     })();
@@ -26620,6 +26539,47 @@ System.register("github:components/jqueryui@1.11.3/jquery-ui", ["github:componen
 
 
 
+System.register("javascripts/proto-node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "npm:lodash@3.3.1", "github:components/jquery@2.1.3"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  log = require("npm:loglevel@1.2.0");
+  _ = require("npm:lodash@3.3.1");
+  $ = require("github:components/jquery@2.1.3");
+  var ProtoNodeView = React.createClass({
+    displayName: "ProtoNodeView",
+    componentDidMount: function() {
+      var $elem = $(this.getDOMNode());
+      var movedHandler = this.doMove;
+      $elem.draggable({
+        drag: movedHandler,
+        revert: true,
+        revertDuration: 100,
+        opacity: 0.35
+      });
+    },
+    doMove: function(evt, extra) {},
+    render: function() {
+      var key = this.props.key;
+      var title = this.props.title;
+      var image = this.props.image;
+      var deleteHandler = this.doDelete;
+      return (React.createElement("div", {
+        className: "proto-node",
+        "data-node-key": key,
+        "data-image": image,
+        "data-title": title
+      }, React.createElement("div", {className: "img-background"}, React.createElement("img", {src: image})), React.createElement("div", {className: "node-title"}, title)));
+    }
+  });
+  module.exports = ProtoNodeView;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("npm:process@0.10.0", ["npm:process@0.10.0/browser"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -28598,22 +28558,22 @@ System.register("npm:react@0.12.2/lib/ReactServerRendering", ["npm:react@0.12.2/
 
 
 
-System.register("npm:lodash@3.3.1", ["npm:lodash@3.3.1/index"], true, function(require, exports, module) {
+System.register("npm:loglevel@1.2.0", ["npm:loglevel@1.2.0/lib/loglevel"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  module.exports = require("npm:lodash@3.3.1/index");
+  module.exports = require("npm:loglevel@1.2.0/lib/loglevel");
   global.define = __define;
   return module.exports;
 });
 
 
 
-System.register("npm:loglevel@1.2.0", ["npm:loglevel@1.2.0/lib/loglevel"], true, function(require, exports, module) {
+System.register("npm:lodash@3.3.1", ["npm:lodash@3.3.1/index"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  module.exports = require("npm:loglevel@1.2.0/lib/loglevel");
+  module.exports = require("npm:lodash@3.3.1/index");
   global.define = __define;
   return module.exports;
 });
@@ -28694,6 +28654,46 @@ System.register("github:components/jqueryui@1.11.3", ["github:components/jqueryu
       __define = global.define;
   global.define = undefined;
   module.exports = require("github:components/jqueryui@1.11.3/jquery-ui");
+  global.define = __define;
+  return module.exports;
+});
+
+
+
+System.register("javascripts/node-well-view", ["npm:react@0.12.2", "javascripts/proto-node-view"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var ProtoNodeView = require("javascripts/proto-node-view");
+  var protoNodes = [{
+    "title": "Egg",
+    "image": "https://dl.dropboxusercontent.com/u/73403/mysystem/images/egg2.png"
+  }, {
+    "title": "Chick",
+    "image": "http://www.charlieschickencompany.com/IMAGES/pic5_09.jpg"
+  }, {
+    "title": "Chicken",
+    "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg"
+  }];
+  var NodeWell = React.createClass({
+    displayName: "NodeWell",
+    getInitialState: function() {
+      return {nodes: []};
+    },
+    render: function() {
+      var self = this;
+      var nodeViews = protoNodes.map(function(node) {
+        return (React.createElement(ProtoNodeView, {
+          title: node.title,
+          key: node.title,
+          image: node.image
+        }));
+      });
+      return (React.createElement("div", {className: "node-well"}, nodeViews));
+    }
+  });
+  module.exports = NodeWell;
   global.define = __define;
   return module.exports;
 });
@@ -30906,6 +30906,86 @@ System.register("npm:react@0.12.2/lib/ReactDefaultPerf", ["npm:react@0.12.2/lib/
 
 
 
+System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var log = require("npm:loglevel@1.2.0");
+  var DiagramNode = React.createClass({
+    displayName: "DiagramNode",
+    componentDidMount: function() {
+      var $elem = $(this.getDOMNode());
+      var nodeKey = this.props.nodeKey;
+      var movedHandler = this.doMove;
+      $elem.draggable({
+        drag: movedHandler,
+        containment: "parent"
+      });
+    },
+    propTypes: {
+      onDelete: React.PropTypes.func,
+      onMove: React.PropTypes.func,
+      onSelect: React.PropTypes.func,
+      nodeKey: React.PropTypes.string
+    },
+    getDefaultProps: function() {
+      return {
+        onMove: function() {
+          log.info("internal move handler");
+        },
+        onStop: function() {
+          log.info("internal move handler");
+        },
+        onDelete: function() {
+          log.info("internal on-delete handler");
+        },
+        onSelect: function() {
+          log.info("internal select handler");
+        }
+      };
+    },
+    doMove: function(evt, extra) {
+      this.props.onMove({
+        nodeKey: this.props.nodeKey,
+        reactComponent: this,
+        domElement: this.getDOMNode(),
+        syntheticEvent: evt,
+        extra: extra
+      });
+    },
+    doDelete: function(evt, extra) {
+      this.props.onDelete({
+        nodeKey: this.props.nodeKey,
+        reactComponent: this,
+        domElement: this.getDOMNode(),
+        syntheticEvent: evt
+      });
+    },
+    render: function() {
+      var style = {
+        top: this.props.data.y,
+        left: this.props.data.x
+      };
+      var nodeKey = this.props.nodeKey;
+      var deleteHandler = this.doDelete;
+      return (React.createElement("div", {
+        className: "elm",
+        style: style,
+        "data-node-key": nodeKey
+      }, React.createElement("div", {className: "img-background"}, React.createElement("div", {
+        className: "delete-box",
+        onClick: deleteHandler
+      }, React.createElement("i", {className: "fa fa-times-circle"})), React.createElement("img", {src: this.props.data.image})), React.createElement("div", {className: "node-title"}, this.props.data.title)));
+    }
+  });
+  module.exports = DiagramNode;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "javascripts/importer", "javascripts/models/link", "javascripts/models/Node"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -31826,6 +31906,25 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
       this.linkManager.addLinkListener(this);
       this.linkManager.addNodeListener(this);
       this.linkManager.loadData(this.props.url);
+      var comp = this.getDOMNode();
+      $(comp).find(".container").droppable({
+        accept: '.proto-node',
+        hoverClass: "ui-state-highlight",
+        drop: this.addNode
+      });
+    },
+    addNode: function(event, ui) {
+      var nodeData = ui.draggable.data();
+      var offset = $(this.getDOMNode()).offset();
+      var x = ui.offset.left - offset.left;
+      var y = ui.offset.top - offset.top;
+      var nodeProps = {
+        x: x,
+        y: y,
+        title: nodeData.title,
+        image: nodeData.image
+      };
+      var node = this.linkManager.importNode({data: nodeProps});
     },
     getInitialState: function() {
       return {
@@ -32982,13 +33081,14 @@ System.register("npm:react@0.12.2", ["npm:react@0.12.2/react"], true, function(r
 
 
 
-System.register("javascripts/graph-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "github:components/jqueryui@1.11.3"], true, function(require, exports, module) {
+System.register("javascripts/graph-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "github:components/jqueryui@1.11.3"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
   var React = require("npm:react@0.12.2");
   var InfoPane = require("javascripts/info-pane");
   var LinkView = require("javascripts/link-view");
+  var NodeWell = require("javascripts/node-well-view");
   var LinkManager = require("javascripts/models/link-manager");
   var _ = require("npm:lodash@3.3.1");
   var Log = require("npm:loglevel@1.2.0");
@@ -33023,11 +33123,12 @@ System.register("javascripts/graph-view", ["npm:react@0.12.2", "javascripts/info
     React.render(React.createElement(GraphView, {
       className: "my-system",
       linkManager: linkManager
-    }), document.getElementById('building-models'));
+    }), $('#building-models')[0]);
     React.render(React.createElement(GraphView, {
       className: "my-system",
       linkManager: linkManager
-    }), document.getElementById('building-models2'));
+    }), $('#building-models2')[0]);
+    React.render(React.createElement(NodeWell, null), $('#node-well')[0]);
   });
   module.exports = GraphView;
   global.define = __define;
