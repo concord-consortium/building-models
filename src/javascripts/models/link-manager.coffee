@@ -82,15 +82,18 @@ class LinkManager
     return unless node
     node.x = x
     node.y = y
+    # @selectNode(nodeKey)
     for listener in @nodeListeners
       log.info("notifying of NodeMove")
       listener.handleNodeMove(node)
     
   selectNode: (nodeKey) ->
-    @selectedNode.selected = false
+    if @selectedNode
+      @selectedNode.selected = false
     @selectedNode = @nodeKeys[nodeKey]
-    @selectedNode.selected = true
-    log.info "Selection happened for #{nodeKey} -- #{@selectedNode.title}"
+    if @selectedNode
+      @selectedNode.selected = true
+      log.info "Selection happened for #{nodeKey} -- #{@selectedNode.title}"
     for listener in @selectionListeners
       listener({node:@selectedNode, connection:null})
 

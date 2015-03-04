@@ -49,7 +49,7 @@ var NodeEditView = React.createClass({
     }
     else {
       return (
-        <div className="node-edit-view"/>
+        <div className="node-edit-view hidden"/>
       )
     }
   }

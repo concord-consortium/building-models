@@ -12,13 +12,23 @@ var DiagramNode = React.createClass({
       containment: "parent"
     });
     $elem.dblclick(function() {
-      this.handleSelected();
+      this.handleSelected(true);
+    }.bind(this));
+    $elem.click(function() {
+      selected = this.props.selected;
+      if(!selected) {
+        this.handleSelected(false);
+      }
     }.bind(this));
   },
 
-  handleSelected: function() {
+  handleSelected: function(actually_select) {
+    var selectionKey = 'dont-select-anything';
     if (this.props.linkManager) {
-      this.props.linkManager.selectNode(this.props.nodeKey);
+      if(actually_select) {
+        selectionKey = this.props.nodeKey;
+      }
+      this.props.linkManager.selectNode(selectionKey);
     }
   },
 
