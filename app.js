@@ -26587,19 +26587,42 @@ System.register("javascripts/node-edit-view", ["npm:react@0.12.2"], true, functi
   var React = require("npm:react@0.12.2");
   var NodeEditView = React.createClass({
     displayName: "NodeEditView",
+    notifyChange: function(title, image) {
+      var changeListener = this.props.onNodeChanged;
+      var node = this.props.node;
+      if (changeListener) {
+        changeListener(node, title, image);
+      }
+    },
+    changeTitle: function(evnt) {
+      var node = this.props.node;
+      var image = node.image;
+      var title = evnt.target.value;
+      this.notifyChange(title, image);
+    },
+    changeImage: function(evnt) {
+      var node = this.props.node;
+      var image = evnt.target.value;
+      var title = node.title;
+      this.notifyChange(title, image);
+    },
     render: function() {
       var node = this.props.node;
       if (node) {
         var title = node.title;
         var image = node.image;
-        return (React.createElement("div", {className: "node-edit-view"}, React.createElement("span", {className: "edit-title"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
+        var changeTitle = this.changeTitle;
+        var changeImage = this.changeImage;
+        return (React.createElement("div", {className: "node-edit-view"}, React.createElement("h2", null, " Editing ", title, " "), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
           type: "text",
           name: "title",
-          value: title
-        })), React.createElement("span", {className: "edit-image"}, React.createElement("label", {name: "image"}, "Image (url)"), React.createElement("input", {
+          value: title,
+          onChange: changeTitle
+        })), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "image"}, "Image (url)"), React.createElement("input", {
           type: "text",
           name: "image",
-          value: image
+          value: image,
+          onChange: changeImage
         }))));
       } else {
         return (React.createElement("div", {className: "node-edit-view"}));
@@ -31010,8 +31033,12 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
       };
       var nodeKey = this.props.nodeKey;
       var deleteHandler = this.doDelete;
+      var className = "elm";
+      if (this.props.selected) {
+        className = className + " selected";
+      }
       return (React.createElement("div", {
-        className: "elm",
+        className: className,
         style: style,
         "data-node-key": nodeKey
       }, React.createElement("div", {className: "img-background"}, React.createElement("div", {
@@ -31063,6 +31090,8 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         this.nodeKeys = {};
         this.linkListeners = [];
         this.nodeListeners = [];
+        this.selectionListeners = [];
+        this.selectedNode = {};
       }
       LinkManager.prototype.addLinkListener = function(listener) {
         log.info("adding link listener");
@@ -31071,6 +31100,10 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
       LinkManager.prototype.addNodeListener = function(listener) {
         log.info("adding node listener");
         return this.nodeListeners.push(listener);
+      };
+      LinkManager.prototype.addSelectionListener = function(listener) {
+        log.info("adding selection listener " + listener);
+        return this.selectionListeners.push(listener);
       };
       LinkManager.prototype.getLinks = function() {
         var key,
@@ -31183,8 +31216,47 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         return results;
       };
       LinkManager.prototype.selectNode = function(nodeKey) {
+        var i,
+            len,
+            listener,
+            ref,
+            results;
+        this.selectedNode.selected = false;
         this.selectedNode = this.nodeKeys[nodeKey];
-        return log.info("Selection happened for " + nodeKey + " -- " + this.selectedNode.title);
+        this.selectedNode.selected = true;
+        log.info("Selection happened for " + nodeKey + " -- " + this.selectedNode.title);
+        ref = this.selectionListeners;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          listener = ref[i];
+          results.push(listener({
+            node: this.selectedNode,
+            connection: null
+          }));
+        }
+        return results;
+      };
+      LinkManager.prototype.changeNode = function(title, image) {
+        var i,
+            len,
+            listener,
+            ref,
+            results;
+        if (this.selectedNode) {
+          log.info("Change  for " + this.selectedNode.title + " (" + title + ", " + image);
+          this.selectedNode.title = title;
+          this.selectedNode.image = image;
+          ref = this.selectionListeners;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            listener = ref[i];
+            results.push(listener({
+              node: this.selectedNode,
+              connection: null
+            }));
+          }
+          return results;
+        }
       };
       LinkManager.prototype._nameForNode = function(node) {
         return this.nodeKeys[node];
@@ -32094,6 +32166,7 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
         return (React.createElement(Node, {
           key: node.key,
           data: node,
+          selected: node.selected,
           nodeKey: node.key,
           ref: node.key,
           onMove: moveHandler,
@@ -33146,7 +33219,10 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
   var AppView = React.createClass({
     displayName: "AppView",
     getInitialState: function() {
-      var state = {};
+      var state = {
+        selectedNode: null,
+        selectedConnection: null
+      };
       return state;
     },
     componentWillUpdate: function() {},
@@ -33154,18 +33230,34 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       log.info("Did Update: AppView ");
     },
     componentDidMount: function() {
-      log.info("Did mount: AppView ");
+      var linkManager = this.props.linkManager;
+      linkManager.addSelectionListener(function(selections) {
+        var selectedNode = selections.node;
+        var selectedConnection = selections.connection;
+        this.setState({selectedNode: selectedNode});
+        log.info("updated selections: + selections");
+      }.bind(this));
     },
     render: function() {
       var url = "my_system_state.json";
       var linkManager = this.props.linkManager;
+      var selectedNode = this.state.selectedNode;
+      var onNodeChanged = function(node, title, image) {
+        log.info("node changed: " + node);
+        log.info("node changed: " + title);
+        log.info("node changed: " + image);
+        linkManager.changeNode(title, image);
+      };
       return (React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
         url: url,
         linkManager: linkManager
       }), React.createElement(LinkView, {
         url: url,
         linkManager: linkManager
-      }), React.createElement(NodeWell, null), React.createElement(NodeEditView, null)));
+      }), React.createElement(NodeWell, null), React.createElement(NodeEditView, {
+        node: selectedNode,
+        onNodeChanged: onNodeChanged
+      })));
     }
   });
   var linkManager = LinkManager.instance('building-models');
