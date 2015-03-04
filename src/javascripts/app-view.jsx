@@ -10,7 +10,7 @@ var $           = require('jquery');
 var $UI         = require('jquery-ui');
 log.setLevel(log.levels.TRACE);
 
-var GraphView = React.createClass({
+var AppView = React.createClass({
   getInitialState: function() { 
     var state = {};
     return state;
@@ -20,39 +20,33 @@ var GraphView = React.createClass({
   },
 
   componentDidUpdate: function() {
-    log.info("Did Update: GraphView ");
+    log.info("Did Update: AppView ");
   },
 
   componentDidMount: function() {
-    log.info("Did mount: GraphView ");
+    log.info("Did mount: AppView ");
   },
 
   render: function() {
     var url = "my_system_state.json";
     var linkManager = this.props.linkManager;
     return (
-      <LinkView url={url} className="my-system" linkManager={linkManager}/>
+      <div className="flow-box">
+        <LinkView url={url} linkManager={linkManager}/>
+        <LinkView url={url} linkManager={linkManager}/>
+        <NodeWell />
+        <NodeEditView />
+      </div>
     );
   }
 });
 
 var linkManager = LinkManager.instance('building-models');
 jsPlumb.bind("ready", function() {
+  // debugger;
   React.render(
-    <GraphView className="my-system" linkManager={linkManager}/>,
-    $('#building-models')[0]
-  );
-  React.render(
-    <GraphView className="my-system" linkManager={linkManager}/>,
-    $('#building-models2')[0]
-  );
-  React.render(
-    <NodeWell />,
-    $('#node-well')[0]
-  );
-  React.render(
-    <NodeEditView />,
-    $('#node-edit-container')[0]
+    <AppView linkManager={linkManager}/>,
+    $('#app')[0]
   );
 });
-module.exports = GraphView;
+module.exports = AppView;
