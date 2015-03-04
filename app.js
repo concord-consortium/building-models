@@ -31923,7 +31923,8 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
       }
     },
     _redrawTargets: function() {
-      this.diagramToolkit.makeTarget($(".elm"));
+      var targetSources = $(this.getDOMNode()).find(".elm");
+      this.diagramToolkit.makeTarget(targetSources);
     },
     _redrawLinks: function() {
       var links = this.state.links;
