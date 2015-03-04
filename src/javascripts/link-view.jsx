@@ -174,6 +174,7 @@ var LinkView = React.createClass({
   render: function() {
     var moveHandler = this.onNodeMoved;
     var deleteHandler = this.onNodeDeleted;
+    var linkManager = this.linkManager;
     var linkData = this.state.links;
     var nodeData = this.state.nodes;
     var nodes = this.state.nodes.map(function(node) {
@@ -184,7 +185,8 @@ var LinkView = React.createClass({
           nodeKey={node.key}
           ref={node.key} 
           onMove={moveHandler}
-          onDelete={deleteHandler}/>
+          onDelete={deleteHandler}
+          linkManager={linkManager}/>
       );
     });
     return (

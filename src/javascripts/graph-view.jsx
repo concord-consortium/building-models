@@ -2,12 +2,13 @@ var React       = require('react');
 var InfoPane    = require('./info-pane');
 var LinkView    = require('./link-view');
 var NodeWell    = require('./node-well-view');
+var NodeEditView= require('./node-edit-view');
 var LinkManager = require('./models/link-manager');
 var _           = require('lodash');
-var Log         = require('loglevel');
+var log         = require('loglevel');
 var $           = require('jquery');
 var $UI         = require('jquery-ui');
-Log.setLevel(Log.levels.TRACE);
+log.setLevel(log.levels.TRACE);
 
 var GraphView = React.createClass({
   getInitialState: function() { 
@@ -19,11 +20,11 @@ var GraphView = React.createClass({
   },
 
   componentDidUpdate: function() {
-    Log.info("Did Update: GraphView ");
+    log.info("Did Update: GraphView ");
   },
 
   componentDidMount: function() {
-    Log.info("Did mount: GraphView ");
+    log.info("Did mount: GraphView ");
   },
 
   render: function() {
@@ -48,6 +49,10 @@ jsPlumb.bind("ready", function() {
   React.render(
     <NodeWell />,
     $('#node-well')[0]
+  );
+  React.render(
+    <NodeEditView />,
+    $('#node-edit-container')[0]
   );
 });
 module.exports = GraphView;

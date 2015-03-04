@@ -80,6 +80,9 @@ class LinkManager
       log.info("notifying of NodeMove")
       listener.handleNodeMove(node)
     
+  selectNode: (nodeKey) ->
+    @selectedNode = @nodeKeys[nodeKey]
+    log.info "Selection happened for #{nodeKey} -- #{@selectedNode.title}"
 
   _nameForNode: (node) ->
     @nodeKeys[node]

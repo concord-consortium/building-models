@@ -11,6 +11,15 @@ var DiagramNode = React.createClass({
       drag: movedHandler,
       containment: "parent"
     });
+    $elem.dblclick(function() {
+      this.handleSelected();
+    }.bind(this));
+  },
+
+  handleSelected: function() {
+    if (this.props.linkManager) {
+      this.props.linkManager.selectNode(this.props.nodeKey);
+    }
   },
 
   propTypes: {
