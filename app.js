@@ -26625,7 +26625,7 @@ System.register("javascripts/node-edit-view", ["npm:react@0.12.2"], true, functi
           onChange: changeImage
         }))));
       } else {
-        return (React.createElement("div", {className: "node-edit-view"}));
+        return (React.createElement("div", {className: "node-edit-view hidden"}));
       }
     }
   });
