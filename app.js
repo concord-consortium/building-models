@@ -358,7 +358,7 @@
   System.register(...);
 }); */
 
-('javascripts/graph-view', function(System) {
+('javascripts/app-view', function(System) {
 
 System.register("npm:process@0.10.0/browser", [], true, function(require, exports, module) {
   var global = System.global,
@@ -26580,6 +26580,39 @@ System.register("javascripts/proto-node-view", ["npm:react@0.12.2", "npm:logleve
 
 
 
+System.register("javascripts/node-edit-view", ["npm:react@0.12.2"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var NodeEditView = React.createClass({
+    displayName: "NodeEditView",
+    render: function() {
+      var node = this.props.node;
+      if (node) {
+        var title = node.title;
+        var image = node.image;
+        return (React.createElement("div", {className: "node-edit-view"}, React.createElement("span", {className: "edit-title"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
+          type: "text",
+          name: "title",
+          value: title
+        })), React.createElement("span", {className: "edit-image"}, React.createElement("label", {name: "image"}, "Image (url)"), React.createElement("input", {
+          type: "text",
+          name: "image",
+          value: image
+        }))));
+      } else {
+        return (React.createElement("div", {className: "node-edit-view"}));
+      }
+    }
+  });
+  module.exports = NodeEditView;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("npm:process@0.10.0", ["npm:process@0.10.0/browser"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -30922,6 +30955,14 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
         drag: movedHandler,
         containment: "parent"
       });
+      $elem.dblclick(function() {
+        this.handleSelected();
+      }.bind(this));
+    },
+    handleSelected: function() {
+      if (this.props.linkManager) {
+        this.props.linkManager.selectNode(this.props.nodeKey);
+      }
     },
     propTypes: {
       onDelete: React.PropTypes.func,
@@ -31140,6 +31181,10 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
           results.push(listener.handleNodeMove(node));
         }
         return results;
+      };
+      LinkManager.prototype.selectNode = function(nodeKey) {
+        this.selectedNode = this.nodeKeys[nodeKey];
+        return log.info("Selection happened for " + nodeKey + " -- " + this.selectedNode.title);
       };
       LinkManager.prototype._nameForNode = function(node) {
         return this.nodeKeys[node];
@@ -32042,6 +32087,7 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
     render: function() {
       var moveHandler = this.onNodeMoved;
       var deleteHandler = this.onNodeDeleted;
+      var linkManager = this.linkManager;
       var linkData = this.state.links;
       var nodeData = this.state.nodes;
       var nodes = this.state.nodes.map(function(node) {
@@ -32051,10 +32097,11 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
           nodeKey: node.key,
           ref: node.key,
           onMove: moveHandler,
-          onDelete: deleteHandler
+          onDelete: deleteHandler,
+          linkManager: linkManager
         }));
       });
-      return (React.createElement("div", {className: "building-models"}, React.createElement("div", {className: "container"}, nodes), React.createElement(InfoPane, {
+      return (React.createElement("div", {className: "bm-container"}, React.createElement("div", {className: "container"}, nodes), React.createElement(InfoPane, {
         title: "Info Pane",
         ref: "info",
         nodes: nodeData,
@@ -33081,7 +33128,7 @@ System.register("npm:react@0.12.2", ["npm:react@0.12.2/react"], true, function(r
 
 
 
-System.register("javascripts/graph-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "github:components/jqueryui@1.11.3"], true, function(require, exports, module) {
+System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/node-edit-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "github:components/jquery@2.1.3", "github:components/jqueryui@1.11.3"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -33089,48 +33136,43 @@ System.register("javascripts/graph-view", ["npm:react@0.12.2", "javascripts/info
   var InfoPane = require("javascripts/info-pane");
   var LinkView = require("javascripts/link-view");
   var NodeWell = require("javascripts/node-well-view");
+  var NodeEditView = require("javascripts/node-edit-view");
   var LinkManager = require("javascripts/models/link-manager");
   var _ = require("npm:lodash@3.3.1");
-  var Log = require("npm:loglevel@1.2.0");
+  var log = require("npm:loglevel@1.2.0");
   var $ = require("github:components/jquery@2.1.3");
   var $UI = require("github:components/jqueryui@1.11.3");
-  Log.setLevel(Log.levels.TRACE);
-  var GraphView = React.createClass({
-    displayName: "GraphView",
+  log.setLevel(log.levels.TRACE);
+  var AppView = React.createClass({
+    displayName: "AppView",
     getInitialState: function() {
       var state = {};
       return state;
     },
     componentWillUpdate: function() {},
     componentDidUpdate: function() {
-      Log.info("Did Update: GraphView ");
+      log.info("Did Update: AppView ");
     },
     componentDidMount: function() {
-      Log.info("Did mount: GraphView ");
+      log.info("Did mount: AppView ");
     },
     render: function() {
       var url = "my_system_state.json";
       var linkManager = this.props.linkManager;
-      return (React.createElement(LinkView, {
+      return (React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
         url: url,
-        className: "my-system",
         linkManager: linkManager
-      }));
+      }), React.createElement(LinkView, {
+        url: url,
+        linkManager: linkManager
+      }), React.createElement(NodeWell, null), React.createElement(NodeEditView, null)));
     }
   });
   var linkManager = LinkManager.instance('building-models');
   jsPlumb.bind("ready", function() {
-    React.render(React.createElement(GraphView, {
-      className: "my-system",
-      linkManager: linkManager
-    }), $('#building-models')[0]);
-    React.render(React.createElement(GraphView, {
-      className: "my-system",
-      linkManager: linkManager
-    }), $('#building-models2')[0]);
-    React.render(React.createElement(NodeWell, null), $('#node-well')[0]);
+    React.render(React.createElement(AppView, {linkManager: linkManager}), $('#app')[0]);
   });
-  module.exports = GraphView;
+  module.exports = AppView;
   global.define = __define;
   return module.exports;
 });
