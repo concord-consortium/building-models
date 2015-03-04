@@ -1,6 +1,7 @@
 var React       = require('react');
-var DiagramNode = React.createClass({
+var log         = require('loglevel');
 
+var DiagramNode = React.createClass({
   componentDidMount: function() {
     var $elem        = $(this.getDOMNode());
     var nodeKey      = this.props.nodeKey;
@@ -20,12 +21,11 @@ var DiagramNode = React.createClass({
   },
 
   getDefaultProps: function() {
-    var _log = function(msg) { console.log(msg); };
     return {
-      onMove:   function() { _log("internal move handler");      },
-      onStop:   function() { _log("internal move handler");      },
-      onDelete: function() { _log("internal on-delete handler"); },
-      onSelect: function() { _log("internal select handler");    }
+      onMove:   function() { log.info("internal move handler");      },
+      onStop:   function() { log.info("internal move handler");      },
+      onDelete: function() { log.info("internal on-delete handler"); },
+      onSelect: function() { log.info("internal select handler");    }
     };
   },
 

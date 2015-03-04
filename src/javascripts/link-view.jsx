@@ -7,7 +7,7 @@ var DiagramTookkit = require('./js_plumb_diagram_toolkit');
 var $              = require('jquery');
 var $UI            = require('jquery-ui');
 var _              = require('lodash');
-log            = require('loglevel')
+log                = require('loglevel');
 
 
 var LinkView = React.createClass({
@@ -18,6 +18,26 @@ var LinkView = React.createClass({
     this.linkManager.addLinkListener(this);
     this.linkManager.addNodeListener(this);
     this.linkManager.loadData(this.props.url);
+    var comp = this.getDOMNode();
+    $(comp).find(".container").droppable({
+      accept: '.proto-node',
+      hoverClass: "ui-state-highlight",
+      drop: this.addNode,
+    });
+  },
+
+  addNode: function(event, ui) {
+    var nodeData = ui.draggable.data();
+    var offset = $(this.getDOMNode()).offset();
+    var x = ui.offset.left - offset.left;
+    var y = ui.offset.top - offset.top;
+    var nodeProps = {
+      x: x,
+      y: y,
+      title: nodeData.title,
+      image: nodeData.image
+    };
+    var node = this.linkManager.importNode({data:nodeProps});
   },
 
   getInitialState: function() { 

@@ -1,6 +1,7 @@
 var React       = require('react');
 var InfoPane    = require('./info-pane');
 var LinkView    = require('./link-view');
+var NodeWell    = require('./node-well-view');
 var LinkManager = require('./models/link-manager');
 var _           = require('lodash');
 var Log         = require('loglevel');
@@ -38,11 +39,15 @@ var linkManager = LinkManager.instance('building-models');
 jsPlumb.bind("ready", function() {
   React.render(
     <GraphView className="my-system" linkManager={linkManager}/>,
-    document.getElementById('building-models')
+    $('#building-models')[0]
   );
   React.render(
     <GraphView className="my-system" linkManager={linkManager}/>,
-    document.getElementById('building-models2')
+    $('#building-models2')[0]
+  );
+  React.render(
+    <NodeWell />,
+    $('#node-well')[0]
   );
 });
 module.exports = GraphView;
