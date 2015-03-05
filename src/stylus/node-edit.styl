@@ -2,14 +2,23 @@
   padding 2em
   margin 2em
   box-shadow 4px 4px 10px hsla(1,0,0,0.2)
+  border-radius 10px
+  min-width  100px
+  text-align right
+  width 400px
+  
   display flex
   flex-direction column
   flex-wrap wrap
   justify-content flex-end
   align-content space-around
-  border-radius 10px
-  min-width  100px
-  text-align right
+  
+  display -webkit-flex
+  -webkit-flex-direction column
+  -webkit-flex-wrap wrap
+  -webkit-justify-content flex-end
+  -webkit-align-content space-around
+
   &.hidden
     display none
   label

@@ -11,7 +11,8 @@ var ProtoNodeView   = React.createClass({
     $elem.draggable({
       drag: movedHandler,
       revert: true,
-      revertDuration: 100,
+      helper: "clone",
+      revertDuration: 0,
       opacity: 0.35
     });
   },
