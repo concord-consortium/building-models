@@ -26555,7 +26555,8 @@ System.register("javascripts/proto-node-view", ["npm:react@0.12.2", "npm:logleve
       $elem.draggable({
         drag: movedHandler,
         revert: true,
-        revertDuration: 100,
+        helper: "clone",
+        revertDuration: 0,
         opacity: 0.35
       });
     },

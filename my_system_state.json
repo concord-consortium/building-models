@@ -35,8 +35,8 @@
     "MySystem.Node-0001": {
       "title": "Egg",
       "image": "https://dl.dropboxusercontent.com/u/73403/mysystem/images/egg2.png",
-      "x": 102,
-      "y": 199,
+      "x": 20,
+      "y": 150,
       "nodeType": "77bebab6-637e-4094-ba1c-d1330a675642",
       "guid": "MySystem.Node-0001",
       "outLinks": [
@@ -49,8 +49,8 @@
     "MySystem.Node-0002": {
       "title": "Chick",
       "image": "http://www.charlieschickencompany.com/IMAGES/pic5_09.jpg",
-      "x": 283,
-      "y": 195,
+      "x": 200,
+      "y": 150,
       "nodeType": "4c0b8202-769c-475a-954e-4d55e6f23faf",
       "guid": "MySystem.Node-0002",
       "inLinks": [
@@ -63,8 +63,8 @@
     "MySystem.Node-0003": {
       "title": "Chicken",
       "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg",
-      "x": 428,
-      "y": 199,
+      "x": 380,
+      "y": 150,
       "nodeType": "0b316a1b-1526-4ece-aa63-c07315dd92aa",
       "guid": "MySystem.Node-0003",
       "inLinks": [
