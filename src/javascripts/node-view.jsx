@@ -1,5 +1,6 @@
 var React       = require('react');
 var log         = require('loglevel');
+var $           = require('./vendor/touchpunch');
 
 var DiagramNode = React.createClass({
   componentDidMount: function() {

@@ -4,8 +4,7 @@ var InfoPane    = require('./info-pane');
 var Importer    = require('./importer');
 var NodeList    = require('./models/link-manager');
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
-var $              = require('jquery');
-var $UI            = require('jquery-ui');
+var $              = require('./vendor/touchpunch');
 var _              = require('lodash');
 log                = require('loglevel');
 

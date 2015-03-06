@@ -1,7 +1,7 @@
 var React    = require('react');
 log          = require('loglevel');
 _            = require('lodash');
-$            = require('jquery');
+$            = require('./vendor/touchpunch');
 
 var ProtoNodeView   = React.createClass({
   
