@@ -12,15 +12,19 @@ var DiagramNode = React.createClass({
       drag: movedHandler,
       containment: "parent"
     });
-    $elem.bind('dblclick doubletap', function() {
+
+    var selectCallback = function() {
       this.handleSelected(true);
-    }.bind(this));
-    $elem.click(function() {
+    }.bind(this);
+    
+    var deselectCallback = function() {
       selected = this.props.selected;
       if(!selected) {
         this.handleSelected(false);
       }
-    }.bind(this));
+    }.bind(this);
+
+    $elem.bind('mouseup touchend', selectCallback);
   },
 
   handleSelected: function(actually_select) {

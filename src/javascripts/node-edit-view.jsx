@@ -8,6 +8,7 @@ var NodeEditView = React.createClass({
       changeListener(node,title,image);
     }
   },
+  
   changeTitle: function(evnt) {
     var node = this.props.node;
     var image = node.image;

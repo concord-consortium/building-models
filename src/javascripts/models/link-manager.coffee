@@ -98,12 +98,26 @@ class LinkManager
       listener({node:@selectedNode, connection:null})
 
   changeNode: (title, image) ->
-    if (@selectedNode)
-      log.info "Change  for #{@selectedNode.title} (#{title}, #{image}"
-      @selectedNode.title = title;
-      @selectedNode.image = image;
+    if @selectedNode
+      log.info "Change  for #{@selectedNode.title}"
+      @selectedNode.title = title
+      @selectedNode.image = image
       for listener in @selectionListeners
         listener({node:@selectedNode, connection:null})
+ 
+  selectLink: (link) ->
+    @selectedLink = link
+    log.info "Selection happened for #{link} (#{link.title})"
+    for listener in @selectionListeners
+      listener({node:null, connection:@selectedLink})
+
+  changeLink: (title, color) ->
+    if @selectedLink
+      log.info "Change  for #{@selectedLink.title}"
+      @selectedLink.title = title
+      @selectedLink.color = color
+      for listener in @selectionListeners
+        listener({node:null, connection:@selectedLink})
 
   _nameForNode: (node) ->
     @nodeKeys[node]
@@ -125,6 +139,9 @@ class LinkManager
       color: color,
       title: title
     return true
+
+  selectLinkFromEvent: (info) ->
+
 
   removeLinksForNode: (nodeKey) ->
     links = @getLinks()

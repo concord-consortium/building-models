@@ -3,6 +3,7 @@ var InfoPane    = require('./info-pane');
 var LinkView    = require('./link-view');
 var NodeWell    = require('./node-well-view');
 var NodeEditView= require('./node-edit-view');
+var LinkEditView= require('./link-edit-view');
 var LinkManager = require('./models/link-manager');
 var _           = require('lodash');
 var log         = require('loglevel');
@@ -32,6 +33,7 @@ var AppView = React.createClass({
       var selectedNode = selections.node;
       var selectedConnection = selections.connection;
       this.setState({selectedNode: selectedNode});
+      this.setState({selectedConnection: selectedConnection});
       log.info("updated selections: + selections");
     }.bind(this));
   },
@@ -40,8 +42,12 @@ var AppView = React.createClass({
     var url = "my_system_state.json";
     var linkManager = this.props.linkManager;
     var selectedNode = this.state.selectedNode;
+    var selectedConnection = this.state.selectedConnection;
     var onNodeChanged = function(node,title,image) {
       linkManager.changeNode(title,image);
+    };
+    var onLinkChanged = function(link, title, color) {
+      linkManager.changeLink(title,color);
     };
     return (
       <div className = "app">
@@ -51,6 +57,7 @@ var AppView = React.createClass({
         <div className="bottomTools">
           <NodeWell />
           <NodeEditView node={selectedNode} onNodeChanged={onNodeChanged}/>
+          <LinkEditView link={selectedConnection} onLinkChanged={onLinkChanged}/>
         </div>
       </div>
     );

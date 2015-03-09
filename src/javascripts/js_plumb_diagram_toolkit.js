@@ -19,7 +19,13 @@ function DiagramToolkit(domContext, options) {
     }
     return true;
   };
-  
+
+  this.handleClick = function(connection, evnt) {
+    if (this.options.handleClick) {
+      this.options.handleClick(connection,evnt);
+    }
+  },
+
   this.handleDisconnect = function(info,evnt) {
     if (this.options.handleDisconnect) {
       return this.options.handleDisconnect(info, evnt);
@@ -91,14 +97,16 @@ function DiagramToolkit(domContext, options) {
     $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
   };
 
-  this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
-    this.kit.connect({
+  this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
+    var connection = this.kit.connect({
       source: source,
       target: target,
       anchors: [source_terminal || "Top", target_terminal || "Bottom"],
       paintStyle: this._paintStyle(color),
       overlays: this._overlays(label)
     });
+    connection.bind("click", this.handleClick.bind(this));
+    connection.linkModel = linkModel;
   };
 
   this.setSuspendDrawing = function(shouldwestop) {

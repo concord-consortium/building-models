@@ -76,6 +76,11 @@ var LinkView = React.createClass({
     return true;
   },
 
+  handleClick: function(connection, evnt) {
+    if (this.ignoringEvents) { return; }
+    this.linkManager.selectLink(connection.linkModel);
+  },
+
   handleLinkAdd: function(info,evnt) {
     var links = this.linkManager.getLinks();
     this.setState({links: links});
@@ -89,6 +94,9 @@ var LinkView = React.createClass({
   },
 
   handleNodeMove: function(nodeData) {
+    // TODO: PERF: we could look up the dom elem
+    // for that node, and then just tell the
+    // toolkit to repaint the links for that one elem...
     var nodes = this.linkManager.getNodes();
     this.setState({nodes: nodes});
     this.diagramToolkit.repaint();
@@ -128,7 +136,8 @@ var LinkView = React.createClass({
     var container = $(this.getDOMNode()).find(".container");
     var opts = {
       Container: container[0],
-      handleConnect: this.handleConnect.bind(this)
+      handleConnect: this.handleConnect.bind(this),
+      handleClick: this.handleClick.bind(this)
     };
     this.diagramToolkit = new DiagramTookkit(container, opts);
     this._updateToolkit();
@@ -163,7 +172,7 @@ var LinkView = React.createClass({
       var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
       var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
       if (source && target) {
-        this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
+        this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal, l);
       }
     }.bind(this));
   },

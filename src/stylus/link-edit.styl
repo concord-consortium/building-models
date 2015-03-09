@@ -1,0 +1,47 @@
+.link-edit-view
+  padding 2em
+  margin 2em
+  box-shadow 4px 4px 10px hsla(1,0,0,0.2)
+  border-radius 10px
+  min-width  100px
+  text-align right
+  width 400px
+  
+  display flex
+  flex-direction column
+  flex-wrap wrap
+  justify-content flex-end
+  align-content space-around
+  
+  display -webkit-flex
+  -webkit-flex-direction column
+  -webkit-flex-wrap wrap
+  -webkit-justify-content flex-end
+  -webkit-align-content space-around
+
+  .row
+    margin 1em
+    display flex
+    flex-direction row
+    flex-wrap wrap
+    justify-content space-around
+    align-content space-around
+    
+    display -webkit-flex
+    -webkit-flex-direction row
+    -webkit-flex-wrap wrap
+    -webkit-justify-content space-around
+    -webkit-align-content space-around
+
+  &.hidden
+    display none
+  label
+    font-weight bold
+    margin-right 2em
+  input
+    min-width: 300px
+  
+  .colorChoice
+    width 20px
+    height 20px
+    border-radius 4px
