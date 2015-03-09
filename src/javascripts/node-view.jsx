@@ -12,7 +12,7 @@ var DiagramNode = React.createClass({
       drag: movedHandler,
       containment: "parent"
     });
-    $elem.dblclick(function() {
+    $elem.bind('dblclick doubletap', function() {
       this.handleSelected(true);
     }.bind(this));
     $elem.click(function() {
@@ -79,6 +79,11 @@ var DiagramNode = React.createClass({
     if (this.props.selected) {
       className = className + " selected";
     }
+    var imgSrc = this.props.data.image;
+    var imageTag = "";
+    if (imgSrc.length > 0) {
+      imageTag = (<img src={imgSrc}/>)
+    };
 
     return (
       <div className={className} style={style} data-node-key={nodeKey}>
@@ -86,9 +91,9 @@ var DiagramNode = React.createClass({
           <div className="delete-box" onClick={deleteHandler}>
             <i className="fa fa-times-circle"></i>
           </div>
-          <img src={this.props.data.image}/>
+          {imageTag}
+          <div className="node-title">{this.props.data.title}</div>
         </div>
-        <div className="node-title">{this.props.data.title}</div>
       </div>
     );
   }

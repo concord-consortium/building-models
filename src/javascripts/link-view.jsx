@@ -194,8 +194,6 @@ var LinkView = React.createClass({
         <div className="container">
           {nodes}
         </div>
-        <InfoPane title="Info Pane" ref="info" nodes={nodeData} links={linkData}>
-        </InfoPane>
       </div>
     );
   }

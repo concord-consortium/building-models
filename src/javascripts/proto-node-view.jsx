@@ -24,13 +24,16 @@ var ProtoNodeView   = React.createClass({
     var title   = this.props.title;
     var image   = this.props.image;
     var deleteHandler = this.doDelete;
+    var imageTag = "";
+    if (image.length > 0) {
+      imageTag = (<img src={image}/>)
+    };
 
     return (
       <div className="proto-node" data-node-key={key} data-image={image} data-title={title}>
         <div className="img-background">
-          <img src={image}/>
+          {imageTag}
         </div>
-        <div className="node-title">{title}</div>
       </div>
     );
   }

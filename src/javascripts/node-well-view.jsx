@@ -11,6 +11,9 @@ var protoNodes =[
   },{
     "title": "Chicken",
     "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg",
+  },{
+    "title": "blank",
+    "image": ""
   }];
 
 
@@ -25,7 +28,7 @@ var NodeWell = React.createClass({
  
     var nodeViews = protoNodes.map(function(node) {
       return (
-        <ProtoNodeView title={node.title} key={node.title} image={node.image}/>
+        <ProtoNodeView key={node.title} image={node.image}/>
       );
     });
     return (

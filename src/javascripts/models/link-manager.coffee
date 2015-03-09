@@ -115,8 +115,8 @@ class LinkManager
     endKey   = $(info.target).data('node-key') || 'undefined'
     startTerminal = if info.connection.endpoints[0].anchor.type == "Top" then "a" else "b"
     endTerminal   = if info.connection.endpoints[1].anchor.type == "Top" then "a" else "b"
-    color = info.color || '#fea'
-    title = info.title || 'untitled'
+    color = info.color || '#233'
+    title = info.title || ''
     @importLink
       sourceNode:startKey,
       targetNode:endKey,

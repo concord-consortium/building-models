@@ -5,7 +5,7 @@ function DiagramToolkit(domContext, options) {
   this.options = options || {};
   this.domContex = domContext;
   this.type      = 'jsPlumbWrappingDiagramToolkit';
-  this.color     = this.options.color || "#222" ;
+  this.color     = this.options.color || "#233" ;
   this.lineWidth = this.options.lineWidth || 6;    
   this.kit       = jsPlumb.getInstance({ Container: domContext});
 
@@ -79,15 +79,17 @@ function DiagramToolkit(domContext, options) {
     
   this._overlays = function(label) {
     var _label = label || "";
-    return ([ 
-      [ "Arrow", { location: 1.0 }],
-      [ "Label", { location: 0.4, label:_label, cssClass: "label"} ]
-    ]);
+    var hasLabel = label.length > 0;
+    var results = [[ "Arrow", { location: 1.0 }]];
+    if (hasLabel) {
+      results.push(["Label", { location: 0.4, label:_label, cssClass: "label"}]);
+    }
+    return results;
   };
 
   this._clean_borked_endpoints = function() {
     $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
-  }
+  };
 
   this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
     this.kit.connect({

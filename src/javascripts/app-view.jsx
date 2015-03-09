@@ -44,9 +44,10 @@ var AppView = React.createClass({
       linkManager.changeNode(title,image);
     };
     return (
-      <div className="flow-box">
-        <LinkView url={url} linkManager={linkManager}/>
-        <LinkView url={url} linkManager={linkManager}/>
+      <div className = "app">
+        <div className="flow-box">
+          <LinkView url={url} linkManager={linkManager}/>
+        </div>
         <div className="bottomTools">
           <NodeWell />
           <NodeEditView node={selectedNode} onNodeChanged={onNodeChanged}/>

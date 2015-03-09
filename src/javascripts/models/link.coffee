@@ -2,8 +2,8 @@ GraphPrimitive = require('./graph-primitive')
 
 class Link extends GraphPrimitive
   constructor: (@options={}) ->
-    @options.color ||= "red"
-    @options.title ||= "untitled"
+    @options.color ||= "#233"
+    @options.title ||= ""
     { @sourceNode, @sourceTerminal ,@targetNode, @targetTerminal, @color, @title} = @options
     super()
 
