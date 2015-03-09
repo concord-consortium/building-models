@@ -31046,9 +31046,43 @@ System.register("javascripts/vendor/touchpunch", ["github:components/jquery@2.1.
       _mouseDestroy.call(self);
     };
   };
+  var DoubleTap = function($) {
+    var isiOS = false;
+    var agent = navigator.userAgent.toLowerCase();
+    if (agent.indexOf('iphone') >= 0 || agent.indexOf('ipad') >= 0) {
+      isiOS = true;
+    }
+    $.fn.doubletap = function(onDoubleTapCallback, onTapCallback, delay) {
+      var eventName,
+          action;
+      delay = delay == null ? 500 : delay;
+      eventName = isiOS == true ? 'touchend' : 'click';
+      $(this).bind(eventName, function(event) {
+        var now = new Date().getTime();
+        var lastTouch = $(this).data('lastTouch') || now + 1;
+        var delta = now - lastTouch;
+        clearTimeout(action);
+        if (delta < 500 && delta > 0) {
+          if (onDoubleTapCallback != null && typeof onDoubleTapCallback == 'function') {
+            onDoubleTapCallback(event);
+          }
+        } else {
+          $(this).data('lastTouch', now);
+          action = setTimeout(function(evt) {
+            if (onTapCallback != null && typeof onTapCallback == 'function') {
+              onTapCallback(evt);
+            }
+            clearTimeout(action);
+          }, delay, [event]);
+        }
+        $(this).data('lastTouch', now);
+      });
+    };
+  };
   jQuery = require("github:components/jquery@2.1.3");
   jQueryUI = require("github:components/jqueryui@1.11.3");
   TouchPunch(jQuery);
+  DoubleTap(jQuery);
   module.exports = jQuery;
   global.define = __define;
   return module.exports;
@@ -32024,15 +32058,16 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
         drag: movedHandler,
         containment: "parent"
       });
-      $elem.bind('dblclick doubletap', function() {
+      var doubleTapCallback = function() {
         this.handleSelected(true);
-      }.bind(this));
-      $elem.click(function() {
+      }.bind(this);
+      var singleTapCallback = function() {
         selected = this.props.selected;
         if (!selected) {
           this.handleSelected(false);
         }
-      }.bind(this));
+      }.bind(this);
+      $elem.doubletap(doubleTapCallback, singleTapCallback);
     },
     handleSelected: function(actually_select) {
       var selectionKey = 'dont-select-anything';
