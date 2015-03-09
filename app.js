@@ -32024,7 +32024,7 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
         drag: movedHandler,
         containment: "parent"
       });
-      $elem.dblclick(function() {
+      $elem.bind('dblclick doubletap', function() {
         this.handleSelected(true);
       }.bind(this));
       $elem.click(function() {
