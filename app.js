@@ -26447,7 +26447,11 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       }
       return true;
     };
-    this.handleDisconnect = function(info, evnt) {
+    this.handleClick = function(connection, evnt) {
+      if (this.options.handleClick) {
+        this.options.handleClick(connection, evnt);
+      }
+    }, this.handleDisconnect = function(info, evnt) {
       if (this.options.handleDisconnect) {
         return this.options.handleDisconnect(info, evnt);
       }
@@ -26514,14 +26518,16 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
     this._clean_borked_endpoints = function() {
       $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
     };
-    this.addLink = function(source, target, label, color, source_terminal, target_terminal) {
-      this.kit.connect({
+    this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
+      var connection = this.kit.connect({
         source: source,
         target: target,
         anchors: [source_terminal || "Top", target_terminal || "Bottom"],
         paintStyle: this._paintStyle(color),
         overlays: this._overlays(label)
       });
+      connection.bind("click", this.handleClick.bind(this));
+      connection.linkModel = linkModel;
     };
     this.setSuspendDrawing = function(shouldwestop) {
       if (!shouldwestop) {
@@ -26641,6 +26647,78 @@ System.register("javascripts/node-edit-view", ["npm:react@0.12.2"], true, functi
     }
   });
   module.exports = NodeEditView;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
+System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var palettes = [['#4D6A6D', '#798478', "#A0A083", "#C9ADA1", "#EAE0CC"], ['#351431', '#775253', "#BDC696", "#D1D3C4", "#DFE0DC"], ['#D6F49D', '#EAD637', "#CBA328", "#230C0F", "#A2D3C2"]];
+  var LinkEditView = React.createClass({
+    displayName: "LinkEditView",
+    notifyChange: function(title, color) {
+      var changeListener = this.props.onLinkChanged;
+      var link = this.props.link;
+      if (changeListener) {
+        changeListener(link, title, color);
+      }
+    },
+    changeTitle: function(evnt) {
+      var link = this.props.link;
+      var color = link.color;
+      var title = evnt.target.value;
+      this.notifyChange(title, color);
+    },
+    changeColor: function(color) {
+      var link = this.props.link;
+      var title = link.title;
+      this.notifyChange(title, color);
+    },
+    render: function() {
+      var link = this.props.link;
+      if (link) {
+        var title = link.title;
+        var color = link.color;
+        var changeTitle = this.changeTitle;
+        var changeColor = this.changeColor;
+        var paletteNo = 2;
+        var deleteLink = function(evnt) {
+          alert("link deleted");
+        };
+        var pickColor = function(evnt) {
+          var color = $(evnt.target).css('background-color');
+          this.changeColor(color);
+        }.bind(this);
+        var palette = palettes[paletteNo].map(function(colorCode) {
+          var style = {"background-color": colorCode};
+          return (React.createElement("div", {
+            className: "colorChoice",
+            style: style,
+            onClick: pickColor
+          }));
+        });
+        var deleteButton = (React.createElement("button", {
+          type: "button",
+          className: "delete",
+          onClick: deleteLink
+        }, " delete this link"));
+        return (React.createElement("div", {className: "link-edit-view"}, React.createElement("h2", null, " Editing \"", title, "\" "), React.createElement("div", {className: "row"}, deleteButton), React.createElement("div", {className: "row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
+          type: "text",
+          name: "title",
+          value: title,
+          onChange: changeTitle
+        })), React.createElement("div", {className: "row"}, React.createElement("label", {name: "color"}, "Color"), palette)));
+      } else {
+        return (React.createElement("div", {className: "link-edit-view hidden"}));
+      }
+    }
+  });
+  module.exports = LinkEditView;
   global.define = __define;
   return module.exports;
 });
@@ -31046,43 +31124,9 @@ System.register("javascripts/vendor/touchpunch", ["github:components/jquery@2.1.
       _mouseDestroy.call(self);
     };
   };
-  var DoubleTap = function($) {
-    var isiOS = false;
-    var agent = navigator.userAgent.toLowerCase();
-    if (agent.indexOf('iphone') >= 0 || agent.indexOf('ipad') >= 0) {
-      isiOS = true;
-    }
-    $.fn.doubletap = function(onDoubleTapCallback, onTapCallback, delay) {
-      var eventName,
-          action;
-      delay = delay == null ? 500 : delay;
-      eventName = isiOS == true ? 'touchend' : 'click';
-      $(this).bind(eventName, function(event) {
-        var now = new Date().getTime();
-        var lastTouch = $(this).data('lastTouch') || now + 1;
-        var delta = now - lastTouch;
-        clearTimeout(action);
-        if (delta < 500 && delta > 0) {
-          if (onDoubleTapCallback != null && typeof onDoubleTapCallback == 'function') {
-            onDoubleTapCallback(event);
-          }
-        } else {
-          $(this).data('lastTouch', now);
-          action = setTimeout(function(evt) {
-            if (onTapCallback != null && typeof onTapCallback == 'function') {
-              onTapCallback(evt);
-            }
-            clearTimeout(action);
-          }, delay, [event]);
-        }
-        $(this).data('lastTouch', now);
-      });
-    };
-  };
   jQuery = require("github:components/jquery@2.1.3");
   jQueryUI = require("github:components/jqueryui@1.11.3");
   TouchPunch(jQuery);
-  DoubleTap(jQuery);
   module.exports = jQuery;
   global.define = __define;
   return module.exports;
@@ -31283,7 +31327,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             ref,
             results;
         if (this.selectedNode) {
-          log.info("Change  for " + this.selectedNode.title + " (" + title + ", " + image);
+          log.info("Change  for " + this.selectedNode.title);
           this.selectedNode.title = title;
           this.selectedNode.image = image;
           ref = this.selectionListeners;
@@ -31293,6 +31337,47 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             results.push(listener({
               node: this.selectedNode,
               connection: null
+            }));
+          }
+          return results;
+        }
+      };
+      LinkManager.prototype.selectLink = function(link) {
+        var i,
+            len,
+            listener,
+            ref,
+            results;
+        this.selectedLink = link;
+        log.info("Selection happened for " + link + " (" + link.title + ")");
+        ref = this.selectionListeners;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          listener = ref[i];
+          results.push(listener({
+            node: null,
+            connection: this.selectedLink
+          }));
+        }
+        return results;
+      };
+      LinkManager.prototype.changeLink = function(title, color) {
+        var i,
+            len,
+            listener,
+            ref,
+            results;
+        if (this.selectedLink) {
+          log.info("Change  for " + this.selectedLink.title);
+          this.selectedLink.title = title;
+          this.selectedLink.color = color;
+          ref = this.selectionListeners;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            listener = ref[i];
+            results.push(listener({
+              node: null,
+              connection: this.selectedLink
             }));
           }
           return results;
@@ -31326,6 +31411,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         });
         return true;
       };
+      LinkManager.prototype.selectLinkFromEvent = function(info) {};
       LinkManager.prototype.removeLinksForNode = function(nodeKey) {
         var links,
             newLinks;
@@ -32067,7 +32153,6 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
           this.handleSelected(false);
         }
       }.bind(this);
-      $elem.doubletap(selectCallback, selectCallback);
       $elem.bind('mouseup touchend', selectCallback);
     },
     handleSelected: function(actually_select) {
@@ -32443,6 +32528,12 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
       this.linkManager.newLinkFromEvent(info, evnt);
       return true;
     },
+    handleClick: function(connection, evnt) {
+      if (this.ignoringEvents) {
+        return ;
+      }
+      this.linkManager.selectLink(connection.linkModel);
+    },
     handleLinkAdd: function(info, evnt) {
       var links = this.linkManager.getLinks();
       this.setState({links: links});
@@ -32486,7 +32577,8 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
       var container = $(this.getDOMNode()).find(".container");
       var opts = {
         Container: container[0],
-        handleConnect: this.handleConnect.bind(this)
+        handleConnect: this.handleConnect.bind(this),
+        handleClick: this.handleClick.bind(this)
       };
       this.diagramToolkit = new DiagramTookkit(container, opts);
       this._updateToolkit();
@@ -32515,7 +32607,7 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
         var sourceTerminal = (l.sourceTerminal == "a") ? "Top" : "Bottom";
         var targetTerminal = (l.targetTerminal == "a") ? "Top" : "Bottom";
         if (source && target) {
-          this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal);
+          this.diagramToolkit.addLink(source, target, label, color, sourceTerminal, targetTerminal, l);
         }
       }.bind(this));
     },
@@ -33346,7 +33438,7 @@ System.register("npm:react@0.12.2", ["npm:react@0.12.2/react"], true, function(r
 
 
 
-System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/node-edit-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
+System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/node-edit-view", "javascripts/link-edit-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -33355,6 +33447,7 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
   var LinkView = require("javascripts/link-view");
   var NodeWell = require("javascripts/node-well-view");
   var NodeEditView = require("javascripts/node-edit-view");
+  var LinkEditView = require("javascripts/link-edit-view");
   var LinkManager = require("javascripts/models/link-manager");
   var _ = require("npm:lodash@3.3.1");
   var log = require("npm:loglevel@1.2.0");
@@ -33379,6 +33472,7 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
         var selectedNode = selections.node;
         var selectedConnection = selections.connection;
         this.setState({selectedNode: selectedNode});
+        this.setState({selectedConnection: selectedConnection});
         log.info("updated selections: + selections");
       }.bind(this));
     },
@@ -33386,8 +33480,12 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       var url = "my_system_state.json";
       var linkManager = this.props.linkManager;
       var selectedNode = this.state.selectedNode;
+      var selectedConnection = this.state.selectedConnection;
       var onNodeChanged = function(node, title, image) {
         linkManager.changeNode(title, image);
+      };
+      var onLinkChanged = function(link, title, color) {
+        linkManager.changeLink(title, color);
       };
       return (React.createElement("div", {className: "app"}, React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
         url: url,
@@ -33395,6 +33493,9 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       })), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
         node: selectedNode,
         onNodeChanged: onNodeChanged
+      }), React.createElement(LinkEditView, {
+        link: selectedConnection,
+        onLinkChanged: onLinkChanged
       }))));
     }
   });
