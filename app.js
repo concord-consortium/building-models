@@ -26435,7 +26435,7 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
     this.options = options || {};
     this.domContex = domContext;
     this.type = 'jsPlumbWrappingDiagramToolkit';
-    this.color = this.options.color || "#222";
+    this.color = this.options.color || "#233";
     this.lineWidth = this.options.lineWidth || 6;
     this.kit = jsPlumb.getInstance({Container: domContext});
     this.registerListeners = function() {
@@ -26500,11 +26500,16 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
     };
     this._overlays = function(label) {
       var _label = label || "";
-      return ([["Arrow", {location: 1.0}], ["Label", {
-        location: 0.4,
-        label: _label,
-        cssClass: "label"
-      }]]);
+      var hasLabel = label.length > 0;
+      var results = [["Arrow", {location: 1.0}]];
+      if (hasLabel) {
+        results.push(["Label", {
+          location: 0.4,
+          label: _label,
+          cssClass: "label"
+        }]);
+      }
+      return results;
     };
     this._clean_borked_endpoints = function() {
       $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
@@ -26566,12 +26571,17 @@ System.register("javascripts/proto-node-view", ["npm:react@0.12.2", "npm:logleve
       var title = this.props.title;
       var image = this.props.image;
       var deleteHandler = this.doDelete;
+      var imageTag = "";
+      if (image.length > 0) {
+        imageTag = (React.createElement("img", {src: image}));
+      }
+      ;
       return (React.createElement("div", {
         className: "proto-node",
         "data-node-key": key,
         "data-image": image,
         "data-title": title
-      }, React.createElement("div", {className: "img-background"}, React.createElement("img", {src: image})), React.createElement("div", {className: "node-title"}, title)));
+      }, React.createElement("div", {className: "img-background"}, imageTag)));
     }
   });
   module.exports = ProtoNodeView;
@@ -28687,8 +28697,8 @@ System.register("javascripts/models/link", ["javascripts/models/graph-primitive"
             base1,
             ref;
         this.options = options != null ? options : {};
-        (base = this.options).color || (base.color = "red");
-        (base1 = this.options).title || (base1.title = "untitled");
+        (base = this.options).color || (base.color = "#233");
+        (base1 = this.options).title || (base1.title = "");
         ref = this.options, this.sourceNode = ref.sourceNode, this.sourceTerminal = ref.sourceTerminal, this.targetNode = ref.targetNode, this.targetTerminal = ref.targetTerminal, this.color = ref.color, this.title = ref.title;
         Link.__super__.constructor.call(this);
       }
@@ -28732,6 +28742,9 @@ System.register("javascripts/node-well-view", ["npm:react@0.12.2", "javascripts/
   }, {
     "title": "Chicken",
     "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg"
+  }, {
+    "title": "blank",
+    "image": ""
   }];
   var NodeWell = React.createClass({
     displayName: "NodeWell",
@@ -28742,7 +28755,6 @@ System.register("javascripts/node-well-view", ["npm:react@0.12.2", "javascripts/
       var self = this;
       var nodeViews = protoNodes.map(function(node) {
         return (React.createElement(ProtoNodeView, {
-          title: node.title,
           key: node.title,
           image: node.image
         }));
@@ -31268,8 +31280,8 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         endKey = $(info.target).data('node-key') || 'undefined';
         startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
         endTerminal = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
-        color = info.color || '#fea';
-        title = info.title || 'untitled';
+        color = info.color || '#233';
+        title = info.title || '';
         this.importLink({
           sourceNode: startKey,
           targetNode: endKey,
@@ -32081,6 +32093,12 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
       if (this.props.selected) {
         className = className + " selected";
       }
+      var imgSrc = this.props.data.image;
+      var imageTag = "";
+      if (imgSrc.length > 0) {
+        imageTag = (React.createElement("img", {src: imgSrc}));
+      }
+      ;
       return (React.createElement("div", {
         className: className,
         style: style,
@@ -32088,7 +32106,7 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
       }, React.createElement("div", {className: "img-background"}, React.createElement("div", {
         className: "delete-box",
         onClick: deleteHandler
-      }, React.createElement("i", {className: "fa fa-times-circle"})), React.createElement("img", {src: this.props.data.image})), React.createElement("div", {className: "node-title"}, this.props.data.title)));
+      }, React.createElement("i", {className: "fa fa-times-circle"})), imageTag, React.createElement("div", {className: "node-title"}, this.props.data.title))));
     }
   });
   module.exports = DiagramNode;
@@ -32483,12 +32501,7 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
           linkManager: linkManager
         }));
       });
-      return (React.createElement("div", {className: "bm-container"}, React.createElement("div", {className: "container"}, nodes), React.createElement(InfoPane, {
-        title: "Info Pane",
-        ref: "info",
-        nodes: nodeData,
-        links: linkData
-      })));
+      return (React.createElement("div", {className: "bm-container"}, React.createElement("div", {className: "container"}, nodes)));
     }
   });
   module.exports = LinkView;
@@ -33340,13 +33353,10 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       var onNodeChanged = function(node, title, image) {
         linkManager.changeNode(title, image);
       };
-      return (React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
+      return (React.createElement("div", {className: "app"}, React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
         url: url,
         linkManager: linkManager
-      }), React.createElement(LinkView, {
-        url: url,
-        linkManager: linkManager
-      }), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
+      })), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
         node: selectedNode,
         onNodeChanged: onNodeChanged
       }))));
