@@ -32058,16 +32058,17 @@ System.register("javascripts/node-view", ["npm:react@0.12.2", "npm:loglevel@1.2.
         drag: movedHandler,
         containment: "parent"
       });
-      var doubleTapCallback = function() {
+      var selectCallback = function() {
         this.handleSelected(true);
       }.bind(this);
-      var singleTapCallback = function() {
+      var deselectCallback = function() {
         selected = this.props.selected;
         if (!selected) {
           this.handleSelected(false);
         }
       }.bind(this);
-      $elem.doubletap(doubleTapCallback, singleTapCallback);
+      $elem.doubletap(selectCallback, selectCallback);
+      $elem.bind('mouseup touchend', selectCallback);
     },
     handleSelected: function(actually_select) {
       var selectionKey = 'dont-select-anything';
