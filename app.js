@@ -26451,7 +26451,7 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       if (this.options.handleClick) {
         this.options.handleClick(connection, evnt);
       }
-    }, this.handleDisconnect = function(info, evnt) {
+    }, this.handleLabelClick = function(label, evnt) {}, this.handleDisconnect = function(info, evnt) {
       if (this.options.handleDisconnect) {
         return this.options.handleDisconnect(info, evnt);
       }
@@ -26502,15 +26502,23 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
         lineWidth: _line_width
       });
     };
-    this._overlays = function(label) {
+    this._overlays = function(label, selected) {
       var _label = label || "";
       var hasLabel = label.length > 0;
-      var results = [["Arrow", {location: 1.0}]];
+      var cssClass = "label";
+      if (selected) {
+        cssClass = cssClass + " selected";
+      }
+      var results = [["Arrow", {
+        location: 1.0,
+        events: {click: this.handleLabelClick}
+      }]];
       if (hasLabel) {
         results.push(["Label", {
           location: 0.4,
+          events: {click: this.handleLabelClick},
           label: _label,
-          cssClass: "label"
+          cssClass: cssClass
         }]);
       }
       return results;
@@ -26519,12 +26527,17 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
     };
     this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
+      var paintStyle = this._paintStyle(color);
+      var selected = linkModel.selected;
+      if (selected) {
+        paintStyle.lineWidth = paintStyle.lineWidth * 1.2;
+      }
       var connection = this.kit.connect({
         source: source,
         target: target,
         anchors: [source_terminal || "Top", target_terminal || "Bottom"],
-        paintStyle: this._paintStyle(color),
-        overlays: this._overlays(label)
+        paintStyle: paintStyle,
+        overlays: this._overlays(label, selected)
       });
       connection.bind("click", this.handleClick.bind(this));
       connection.linkModel = linkModel;
@@ -26630,7 +26643,7 @@ System.register("javascripts/node-edit-view", ["npm:react@0.12.2"], true, functi
         var image = node.image;
         var changeTitle = this.changeTitle;
         var changeImage = this.changeImage;
-        return (React.createElement("div", {className: "node-edit-view"}, React.createElement("h2", null, " Editing ", title, " "), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
+        return (React.createElement("div", {className: "node-edit-view"}, React.createElement("h2", null, title), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
           type: "text",
           name: "title",
           value: title,
@@ -26661,11 +26674,12 @@ System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, functi
   var palettes = [['#4D6A6D', '#798478', "#A0A083", "#C9ADA1", "#EAE0CC"], ['#351431', '#775253', "#BDC696", "#D1D3C4", "#DFE0DC"], ['#D6F49D', '#EAD637', "#CBA328", "#230C0F", "#A2D3C2"]];
   var LinkEditView = React.createClass({
     displayName: "LinkEditView",
-    notifyChange: function(title, color) {
+    notifyChange: function(title, color, deleted) {
+      deleted = !!deleted;
       var changeListener = this.props.onLinkChanged;
       var link = this.props.link;
       if (changeListener) {
-        changeListener(link, title, color);
+        changeListener(link, title, color, deleted);
       }
     },
     changeTitle: function(evnt) {
@@ -26688,8 +26702,8 @@ System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, functi
         var changeColor = this.changeColor;
         var paletteNo = 2;
         var deleteLink = function(evnt) {
-          alert("link deleted");
-        };
+          this.notifyChange(title, color, true);
+        }.bind(this);
         var pickColor = function(evnt) {
           var color = $(evnt.target).css('background-color');
           this.changeColor(color);
@@ -26707,7 +26721,7 @@ System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, functi
           className: "delete",
           onClick: deleteLink
         }, " delete this link"));
-        return (React.createElement("div", {className: "link-edit-view"}, React.createElement("h2", null, " Editing \"", title, "\" "), React.createElement("div", {className: "row"}, deleteButton), React.createElement("div", {className: "row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
+        return (React.createElement("div", {className: "link-edit-view"}, React.createElement("h2", null, title), React.createElement("div", {className: "row"}, deleteButton), React.createElement("div", {className: "row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
           type: "text",
           name: "title",
           value: title,
@@ -28770,12 +28784,13 @@ System.register("javascripts/models/link", ["javascripts/models/graph-primitive"
     GraphPrimitive = require("javascripts/models/graph-primitive");
     Link = (function(superClass) {
       extend(Link, superClass);
+      Link.defaultColor = "#777";
       function Link(options) {
         var base,
             base1,
             ref;
         this.options = options != null ? options : {};
-        (base = this.options).color || (base.color = "#233");
+        (base = this.options).color || (base.color = Link.defaultColor);
         (base1 = this.options).title || (base1.title = "");
         ref = this.options, this.sourceNode = ref.sourceNode, this.sourceTerminal = ref.sourceTerminal, this.targetNode = ref.targetNode, this.targetTerminal = ref.targetTerminal, this.color = ref.color, this.title = ref.title;
         Link.__super__.constructor.call(this);
@@ -31247,6 +31262,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             log.info("notifying of new link: " + (link.terminalKey()));
             listener.handleLinkAdd(link);
           }
+          this.selectLink(link);
           return true;
         }
         return false;
@@ -31269,6 +31285,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             log.info("notifying of new Node");
             listener.handleNodeAdd(node);
           }
+          this.selectNode(node.key);
           return true;
         }
         return false;
@@ -31348,8 +31365,11 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             listener,
             ref,
             results;
+        if (this.selectedLink) {
+          this.selectedLink.selected = false;
+        }
         this.selectedLink = link;
-        log.info("Selection happened for " + link + " (" + link.title + ")");
+        link.selected = true;
         ref = this.selectionListeners;
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
@@ -31361,7 +31381,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         }
         return results;
       };
-      LinkManager.prototype.changeLink = function(title, color) {
+      LinkManager.prototype.changeLink = function(title, color, deleted) {
         var i,
             len,
             listener,
@@ -31369,49 +31389,80 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             results;
         if (this.selectedLink) {
           log.info("Change  for " + this.selectedLink.title);
-          this.selectedLink.title = title;
-          this.selectedLink.color = color;
-          ref = this.selectionListeners;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            listener = ref[i];
-            results.push(listener({
-              node: null,
-              connection: this.selectedLink
-            }));
+          if (deleted) {
+            return this.removeSelectedLink();
+          } else {
+            delete this.linkKeys[this.selectedLink.terminalKey()];
+            this.selectedLink.title = title;
+            this.linkKeys[this.selectedLink.terminalKey()] = this.selectedLink;
+            this.selectedLink.color = color;
+            ref = this.selectionListeners;
+            results = [];
+            for (i = 0, len = ref.length; i < len; i++) {
+              listener = ref[i];
+              results.push(listener({
+                node: null,
+                connection: this.selectedLink
+              }));
+            }
+            return results;
           }
-          return results;
         }
       };
       LinkManager.prototype._nameForNode = function(node) {
         return this.nodeKeys[node];
       };
       LinkManager.prototype.newLinkFromEvent = function(info) {
-        var color,
-            endKey,
+        var endKey,
             endTerminal,
             newLink,
             startKey,
-            startTerminal,
-            title;
+            startTerminal;
         newLink = {};
         startKey = $(info.source).data('node-key') || 'undefined';
         endKey = $(info.target).data('node-key') || 'undefined';
         startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
         endTerminal = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
-        color = info.color || '#233';
-        title = info.title || '';
         this.importLink({
           sourceNode: startKey,
           targetNode: endKey,
           sourceTerminal: startTerminal,
           targetTerminal: endTerminal,
-          color: color,
-          title: title
+          color: info.color,
+          title: info.title
         });
         return true;
       };
-      LinkManager.prototype.selectLinkFromEvent = function(info) {};
+      LinkManager.prototype.removeSelectedLink = function() {
+        var i,
+            j,
+            key,
+            len,
+            len1,
+            listener,
+            ref,
+            ref1,
+            results;
+        key = this.selectedLink.terminalKey();
+        delete this.linkKeys[key];
+        ref = this.linkListeners;
+        for (i = 0, len = ref.length; i < len; i++) {
+          listener = ref[i];
+          log.info("notifying of deleted Link");
+          listener.handleLinkRm(this.selectedLink);
+        }
+        this.selectedLink = null;
+        ref1 = this.selectionListeners;
+        results = [];
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          listener = ref1[j];
+          results.push(listener({
+            node: null,
+            connection: null
+          }));
+        }
+        return results;
+      };
       LinkManager.prototype.removeLinksForNode = function(nodeKey) {
         var links,
             newLinks;
@@ -31427,20 +31478,32 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
       };
       LinkManager.prototype.removeNode = function(nodeKey) {
         var i,
+            j,
             len,
+            len1,
             listener,
             node,
             ref,
+            ref1,
             results;
         node = this.nodeKeys[nodeKey];
         delete this.nodeKeys[nodeKey];
         this.removeLinksForNode(nodeKey);
         ref = this.nodeListeners;
-        results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           listener = ref[i];
           log.info("notifying of deleted Node");
-          results.push(listener.handleNodeRm(node));
+          listener.handleNodeRm(node);
+        }
+        this.selectedNode = null;
+        ref1 = this.selectionListeners;
+        results = [];
+        for (j = 0, len1 = ref1.length; j < len1; j++) {
+          listener = ref1[j];
+          results.push(listener({
+            node: null,
+            connection: null
+          }));
         }
         return results;
       };
@@ -32539,6 +32602,10 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
       this.setState({links: links});
       return true;
     },
+    handleLinkRm: function() {
+      var links = this.linkManager.getLinks();
+      this.setState({links: links});
+    },
     handleNodeAdd: function(nodeData) {
       var nodes = this.linkManager.getNodes();
       this.setState({nodes: nodes});
@@ -33484,8 +33551,8 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       var onNodeChanged = function(node, title, image) {
         linkManager.changeNode(title, image);
       };
-      var onLinkChanged = function(link, title, color) {
-        linkManager.changeLink(title, color);
+      var onLinkChanged = function(link, title, color, deleted) {
+        linkManager.changeLink(title, color, deleted);
       };
       return (React.createElement("div", {className: "app"}, React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
         url: url,
