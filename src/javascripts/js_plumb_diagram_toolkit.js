@@ -25,7 +25,10 @@ function DiagramToolkit(domContext, options) {
       this.options.handleClick(connection,evnt);
     }
   },
-
+  this.handleLabelClick = function(label, evnt) {
+    // TODO:  how can we do this?
+    // this.options.handleClick(label.component,evnt);
+  },
   this.handleDisconnect = function(info,evnt) {
     if (this.options.handleDisconnect) {
       return this.options.handleDisconnect(info, evnt);
@@ -83,12 +86,23 @@ function DiagramToolkit(domContext, options) {
     });
   };
     
-  this._overlays = function(label) {
+  this._overlays = function(label, selected) {
     var _label = label || "";
     var hasLabel = label.length > 0;
-    var results = [[ "Arrow", { location: 1.0 }]];
+    var cssClass = "label";
+    if (selected) {
+      cssClass = cssClass + " selected";
+    }
+    var results = [[ "Arrow", { 
+      location: 1.0,
+      events: { click: this.handleLabelClick }
+    }]];
     if (hasLabel) {
-      results.push(["Label", { location: 0.4, label:_label, cssClass: "label"}]);
+      results.push(["Label", { 
+        location: 0.4, 
+        events: { click: this.handleLabelClick },
+        label:_label, 
+        cssClass: cssClass}]);
     }
     return results;
   };
@@ -98,12 +112,17 @@ function DiagramToolkit(domContext, options) {
   };
 
   this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
+    var paintStyle = this._paintStyle(color);
+    var selected = linkModel.selected;
+    if(selected) {
+      paintStyle.lineWidth = paintStyle.lineWidth * 1.2;
+    }
     var connection = this.kit.connect({
       source: source,
       target: target,
       anchors: [source_terminal || "Top", target_terminal || "Bottom"],
-      paintStyle: this._paintStyle(color),
-      overlays: this._overlays(label)
+      paintStyle: paintStyle,
+      overlays: this._overlays(label,selected)
     });
     connection.bind("click", this.handleClick.bind(this));
     connection.linkModel = linkModel;

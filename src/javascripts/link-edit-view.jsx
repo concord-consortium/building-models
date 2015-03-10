@@ -6,10 +6,11 @@ var palettes    = [
 ];
 var LinkEditView = React.createClass({
 
-  notifyChange: function(title, color) {
+  notifyChange: function(title, color, deleted) {
+    deleted = !!deleted;
     var changeListener = this.props.onLinkChanged;
     var link = this.props.link;
-    if (changeListener) { changeListener(link, title, color); }
+    if (changeListener) { changeListener(link, title, color, deleted); }
   },
   
   changeTitle: function(evnt) {
@@ -35,8 +36,8 @@ var LinkEditView = React.createClass({
       var paletteNo = 2;
 
       var deleteLink = function(evnt) {
-        alert("link deleted");
-      };
+        this.notifyChange(title,color,true);
+      }.bind(this);
 
       var pickColor = function(evnt){ 
         var color = $(evnt.target).css('background-color');
@@ -51,7 +52,7 @@ var LinkEditView = React.createClass({
       var deleteButton = (<button type='button' className="delete" onClick={deleteLink}> delete this link</button>);
       return (
         <div className="link-edit-view">
-          <h2> Editing "{title}" </h2>
+          <h2>{title}</h2>
           <div className="row">
             {deleteButton}
           </div>

@@ -61,6 +61,7 @@ class LinkManager
       for listener in @linkListeners
         log.info "notifying of new link: #{link.terminalKey()}"
         listener.handleLinkAdd(link)
+      @selectLink(link)  
       return true
     return false
 
@@ -74,7 +75,9 @@ class LinkManager
       for listener in @nodeListeners
         log.info("notifying of new Node")
         listener.handleNodeAdd(node)
+      @selectNode(node.key)        
       return true
+      
     return false
   
   moveNode: (nodeKey, x,y ) ->
@@ -106,18 +109,25 @@ class LinkManager
         listener({node:@selectedNode, connection:null})
  
   selectLink: (link) ->
+    if @selectedLink
+      @selectedLink.selected = false
     @selectedLink = link
-    log.info "Selection happened for #{link} (#{link.title})"
+    link.selected = true
     for listener in @selectionListeners
       listener({node:null, connection:@selectedLink})
 
-  changeLink: (title, color) ->
+  changeLink: (title, color, deleted) ->
     if @selectedLink
       log.info "Change  for #{@selectedLink.title}"
-      @selectedLink.title = title
-      @selectedLink.color = color
-      for listener in @selectionListeners
-        listener({node:null, connection:@selectedLink})
+      if deleted
+        @removeSelectedLink()
+      else
+        delete @linkKeys[@selectedLink.terminalKey()]
+        @selectedLink.title = title
+        @linkKeys[@selectedLink.terminalKey()] = @selectedLink;
+        @selectedLink.color = color
+        for listener in @selectionListeners
+          listener({node:null, connection:@selectedLink})
 
   _nameForNode: (node) ->
     @nodeKeys[node]
@@ -138,8 +148,15 @@ class LinkManager
       title: info.title
     return true
 
-  selectLinkFromEvent: (info) ->
-
+  removeSelectedLink: () ->
+    key = @selectedLink.terminalKey()
+    delete @linkKeys[key]
+    for listener in @linkListeners
+      log.info("notifying of deleted Link")
+      listener.handleLinkRm(@selectedLink)
+    @selectedLink = null
+    for listener in @selectionListeners
+      listener({node:null, connection:null})
 
   removeLinksForNode: (nodeKey) ->
     links = @getLinks()
@@ -147,6 +164,7 @@ class LinkManager
       if (nodeKey == link.sourceNode || nodeKey == link.targetNode)
         return false
       return true
+    # pretty sure we are supposed to remove the old links here.
 
 
   removeNode: (nodeKey) ->
@@ -156,7 +174,10 @@ class LinkManager
     for listener in @nodeListeners
       log.info("notifying of deleted Node")
       listener.handleNodeRm(node)
-  
+    @selectedNode = null
+    for listener in @selectionListeners
+      listener({node:null, connection:null})
+
   loadData: (url) =>
     log.info("loading local data")
     log.info("url " + url)

@@ -46,8 +46,8 @@ var AppView = React.createClass({
     var onNodeChanged = function(node,title,image) {
       linkManager.changeNode(title,image);
     };
-    var onLinkChanged = function(link, title, color) {
-      linkManager.changeLink(title,color);
+    var onLinkChanged = function(link, title, color, deleted) {
+      linkManager.changeLink(title,color,deleted);
     };
     return (
       <div className = "app">

@@ -87,6 +87,11 @@ var LinkView = React.createClass({
     return true;
   },
 
+  handleLinkRm: function() {
+    var links = this.linkManager.getLinks();
+    this.setState({links: links});
+  },
+
   handleNodeAdd: function(nodeData) {
     var nodes = this.linkManager.getNodes();
     this.setState({nodes: nodes});

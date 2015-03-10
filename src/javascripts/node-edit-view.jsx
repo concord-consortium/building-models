@@ -32,7 +32,7 @@ var NodeEditView = React.createClass({
       var changeImage = this.changeImage;
       return (
         <div className="node-edit-view">
-          <h2> Editing {title} </h2>
+          <h2>{title}</h2>
           <div className="edit-row">
             <label name="title">
               Title
