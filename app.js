@@ -32696,7 +32696,7 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
           linkManager: linkManager
         }));
       });
-      return (React.createElement("div", {className: "bm-container"}, React.createElement("div", {className: "container"}, nodes)));
+      return (React.createElement("div", {className: "link-view"}, React.createElement("div", {className: "container"}, nodes)));
     }
   });
   module.exports = LinkView;
