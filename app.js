@@ -28797,10 +28797,10 @@ System.register("javascripts/models/link", ["javascripts/models/graph-primitive"
         return "Link";
       };
       Link.prototype.terminalKey = function() {
-        return this.sourceNode.key + "[" + this.sourceTerminal + "] ---" + this.title + "---> " + this.targetNode.key + "[" + this.targetTerminal + "]";
+        return this.sourceNode.key + "[" + this.sourceTerminal + "] ---" + this.key + "---> " + this.targetNode.key + "[" + this.targetTerminal + "]";
       };
       Link.prototype.nodeKey = function() {
-        return this.sourceNode + " ---" + this.title + "---> " + this.targetNode;
+        return this.sourceNode + " ---" + this.key + "---> " + this.targetNode;
       };
       Link.prototype.outs = function() {
         return [this.targetNode];
@@ -31390,9 +31390,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
           if (deleted) {
             return this.removeSelectedLink();
           } else {
-            delete this.linkKeys[this.selectedLink.terminalKey()];
             this.selectedLink.title = title;
-            this.linkKeys[this.selectedLink.terminalKey()] = this.selectedLink;
             this.selectedLink.color = color;
             ref = this.selectionListeners;
             results = [];
