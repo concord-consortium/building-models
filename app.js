@@ -26711,6 +26711,7 @@ System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, functi
           return (React.createElement("div", {
             className: "colorChoice",
             style: style,
+            onTouchEnd: pickColor,
             onClick: pickColor
           }));
         });
