@@ -22167,15 +22167,21 @@ System.register("javascripts/importer", [], true, function(require, exports, mod
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  function Importer(system) {
+  function MySystemImporter(system) {
     this.system = system;
+    this.importData = function(data) {
+      var importNodes = data['nodes'];
+      var importLinks = data['links'];
+      this.importNodes(importNodes);
+      this.importLinks(importLinks);
+    };
     this.importNodes = function(importNodes) {
       var newNodes = [];
       var node = null;
-      for (var key in importNodes) {
-        data = importNodes[key];
+      for (var index in importNodes) {
+        data = importNodes[index];
         this.system.importNode({
-          'key': key,
+          'key': data.key,
           'data': data
         });
       }
@@ -22186,23 +22192,17 @@ System.register("javascripts/importer", [], true, function(require, exports, mod
       for (var key in links) {
         data = links[key];
         this.system.importLink({
-          sourceNode: data.startNode,
-          targetNode: data.endNode,
-          sourceTerminal: data.startTerminal,
-          targetTerminal: data.endTerminal,
-          title: data.text,
+          sourceNode: data.sourceNodeKey,
+          targetNode: data.targetNodeKey,
+          sourceTerminal: data.sourceTerminal,
+          targetTerminal: data.targetTerminal,
+          title: data.title,
           color: data.color
         });
       }
     };
-    this.importData = function(mySystemFormat) {
-      var importNodes = mySystemFormat['MySystem.Node'];
-      var importLinks = mySystemFormat['MySystem.Link'];
-      this.importNodes(importNodes);
-      this.importLinks(importLinks);
-    };
   }
-  module.exports = Importer;
+  module.exports = MySystemImporter;
   global.define = __define;
   return module.exports;
 });
@@ -26416,6 +26416,15 @@ System.register("javascripts/models/Node", ["npm:lodash@3.3.1", "npm:loglevel@1.
         visit(this);
         return _.without(visitedNodes, this);
       };
+      Node.prototype.toExport = function() {
+        return {
+          title: this.title,
+          x: this.x,
+          y: this.y,
+          image: this.image,
+          key: this.key
+        };
+      };
       return Node;
     })(GraphPrimitive);
     module.exports = Node;
@@ -28809,6 +28818,20 @@ System.register("javascripts/models/link", ["javascripts/models/graph-primitive"
       Link.prototype.ins = function() {
         return [this.sourceNode];
       };
+      Link.prototype.toExport = function() {
+        var sourceNodeKey,
+            targetNodeKey;
+        sourceNodeKey = this.sourceNode.key;
+        targetNodeKey = this.targetNode.key;
+        return {
+          "title": this.title,
+          "color": this.color,
+          "sourceNodeKey": sourceNodeKey,
+          "sourceTerminal": this.sourceTerminal,
+          "targetNodeKey": targetNodeKey,
+          "targetTerminal": this.targetTerminal
+        };
+      };
       return Link;
     })(GraphPrimitive);
     module.exports = Link;
@@ -31179,7 +31202,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         return this.instances[context];
       };
       function LinkManager(context) {
-        this.loadData = bind(this.loadData, this);
+        this.loadDataFromUrl = bind(this.loadDataFromUrl, this);
         this.linkKeys = {};
         this.nodeKeys = {};
         this.linkListeners = [];
@@ -31508,7 +31531,13 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         }
         return results;
       };
-      LinkManager.prototype.loadData = function(url) {
+      LinkManager.prototype.loadData = function(data) {
+        var importer;
+        log.info("json success");
+        importer = new Importer(this);
+        return importer.importData(data);
+      };
+      LinkManager.prototype.loadDataFromUrl = function(url) {
         log.info("loading local data");
         log.info("url " + url);
         return $.ajax({
@@ -31516,17 +31545,49 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
           dataType: 'json',
           success: (function(_this) {
             return function(data) {
-              var importer;
-              log.info("json success");
-              log.info(data);
-              importer = new Importer(_this);
-              return importer.importData(data);
+              return _this.loadData(data);
             };
           })(this),
           error: function(xhr, status, err) {
             return log.error(url, status, err.toString());
           }
         });
+      };
+      LinkManager.prototype.serialize = function() {
+        var key,
+            link,
+            linkExports,
+            node,
+            nodeExports;
+        nodeExports = (function() {
+          var ref,
+              results;
+          ref = this.nodeKeys;
+          results = [];
+          for (key in ref) {
+            node = ref[key];
+            results.push(node.toExport());
+          }
+          return results;
+        }).call(this);
+        linkExports = (function() {
+          var ref,
+              results;
+          ref = this.linkKeys;
+          results = [];
+          for (key in ref) {
+            link = ref[key];
+            results.push(link.toExport());
+          }
+          return results;
+        }).call(this);
+        return {
+          nodes: nodeExports,
+          links: linkExports
+        };
+      };
+      LinkManager.prototype.toJsonString = function() {
+        return JSON.stringify(this.serialize());
       };
       return LinkManager;
     })();
@@ -32534,7 +32595,6 @@ System.register("javascripts/link-view", ["npm:react@0.12.2", "javascripts/node-
       this.linkManager = this.props.linkManager;
       this.linkManager.addLinkListener(this);
       this.linkManager.addNodeListener(this);
-      this.linkManager.loadData(this.props.url);
       var comp = this.getDOMNode();
       $(comp).find(".container").droppable({
         accept: '.proto-node',
@@ -33536,6 +33596,7 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
     },
     componentDidMount: function() {
       var linkManager = this.props.linkManager;
+      var data = this.props.data;
       linkManager.addSelectionListener(function(selections) {
         var selectedNode = selections.node;
         var selectedConnection = selections.connection;
@@ -33543,22 +33604,32 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
         this.setState({selectedConnection: selectedConnection});
         log.info("updated selections: + selections");
       }.bind(this));
+      if (data && data.length > 0) {
+        debugger;
+        linkManager.loadData(JSON.parse(data));
+      } else {
+        linkManager.loadDataFromUrl(this.props.url);
+      }
+    },
+    openLink: function() {
+      var linkManager = this.props.linkManager;
+      var json = linkManager.toJsonString();
+      var encoded = encodeURIComponent(json);
+      var url = window.location.protocol + "//" + window.location.host + "/?data=" + encoded;
+      window.open(url);
     },
     render: function() {
-      var url = "my_system_state.json";
       var linkManager = this.props.linkManager;
       var selectedNode = this.state.selectedNode;
       var selectedConnection = this.state.selectedConnection;
       var onNodeChanged = function(node, title, image) {
         linkManager.changeNode(title, image);
-      };
+      }.bind(this);
       var onLinkChanged = function(link, title, color, deleted) {
         linkManager.changeLink(title, color, deleted);
       };
-      return (React.createElement("div", {className: "app"}, React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {
-        url: url,
-        linkManager: linkManager
-      })), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
+      var _openLink = this.openLink.bind(this);
+      return (React.createElement("div", {className: "app"}, React.createElement("div", {className: "linkArea"}, React.createElement("a", {onClick: _openLink}, "A link to your graph")), React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {linkManager: linkManager})), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
         node: selectedNode,
         onNodeChanged: onNodeChanged
       }), React.createElement(LinkEditView, {
@@ -33568,8 +33639,20 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
     }
   });
   var linkManager = LinkManager.instance('building-models');
+  var url = "serialized.json";
+  function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
   jsPlumb.bind("ready", function() {
-    React.render(React.createElement(AppView, {linkManager: linkManager}), $('#app')[0]);
+    var data = getParameterByName('data');
+    React.render(React.createElement(AppView, {
+      url: url,
+      linkManager: linkManager,
+      data: data
+    }), $('#app')[0]);
   });
   module.exports = AppView;
   global.define = __define;

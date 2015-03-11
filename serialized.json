@@ -1,0 +1,28 @@
+{
+    "nodes": [
+        {
+            "title": "a",
+            "x": 10,
+            "y": 10,
+            "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg",
+            "key": "a"
+        },
+        {
+            "title": "b",
+            "x": 20,
+            "y": 20,
+            "image": "https://dl.dropboxusercontent.com/u/73403/mysystem/images/egg2.png",
+            "key": "b"
+        }
+    ],
+    "links": [
+        {
+            "title": "",
+            "color": "#777",
+            "sourceNodeKey": "a",
+            "sourceTerminal": "b",
+            "targetNodeKey": "b",
+            "targetTerminal": "a"
+        }
+    ]
+}
