@@ -26523,9 +26523,6 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       }
       return results;
     };
-    this._clean_borked_endpoints = function() {
-      $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
-    };
     this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
       var paintStyle = this._paintStyle(color);
       var selected = linkModel.selected;
@@ -26543,9 +26540,6 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       connection.linkModel = linkModel;
     };
     this.setSuspendDrawing = function(shouldwestop) {
-      if (!shouldwestop) {
-        this._clean_borked_endpoints();
-      }
       this.kit.setSuspendDrawing(shouldwestop, !shouldwestop);
     };
     this.supspendDrawing = function() {
@@ -31433,18 +31427,21 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         });
         return true;
       };
+      LinkManager.prototype.removelink = function(link) {
+        var key;
+        key = link.terminalKey();
+        return delete this.linkKeys[key];
+      };
       LinkManager.prototype.removeSelectedLink = function() {
         var i,
             j,
-            key,
             len,
             len1,
             listener,
             ref,
             ref1,
             results;
-        key = this.selectedLink.terminalKey();
-        delete this.linkKeys[key];
+        this.removelink(this.selectedLink);
         ref = this.linkListeners;
         for (i = 0, len = ref.length; i < len; i++) {
           listener = ref[i];
@@ -31463,18 +31460,19 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         }
         return results;
       };
-      LinkManager.prototype.removeLinksForNode = function(nodeKey) {
-        var links,
-            newLinks;
-        links = this.getLinks();
-        return newLinks = links.filter((function(_this) {
-          return function(link) {
-            if (nodeKey === link.sourceNode || nodeKey === link.targetNode) {
-              return false;
-            }
-            return true;
-          };
-        })(this));
+      LinkManager.prototype.removeLinksForNode = function(node) {
+        var i,
+            len,
+            link,
+            ref,
+            results;
+        ref = node.links;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          link = ref[i];
+          results.push(this.removelink(link));
+        }
+        return results;
       };
       LinkManager.prototype.removeNode = function(nodeKey) {
         var i,
@@ -31488,7 +31486,7 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             results;
         node = this.nodeKeys[nodeKey];
         delete this.nodeKeys[nodeKey];
-        this.removeLinksForNode(nodeKey);
+        this.removeLinksForNode(node);
         ref = this.nodeListeners;
         for (i = 0, len = ref.length; i < len; i++) {
           listener = ref[i];
