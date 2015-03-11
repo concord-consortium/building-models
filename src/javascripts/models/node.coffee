@@ -60,7 +60,7 @@ class Node extends GraphPrimitive
       title: @title,
       x: @x,
       y: @y,
-      image:@image,
+      image: @image,
       key: @key
     }
 module.exports = Node
