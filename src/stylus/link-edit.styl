@@ -5,7 +5,6 @@
   border-radius 10px
   min-width  100px
   text-align right
-  width 400px
   
   display flex
   flex-direction column
@@ -20,28 +19,18 @@
   -webkit-align-content space-around
 
   .row
-    margin 1em
-    display flex
-    flex-direction row
-    flex-wrap wrap
-    justify-content space-around
-    align-content space-around
-    
-    display -webkit-flex
-    -webkit-flex-direction row
-    -webkit-flex-wrap wrap
-    -webkit-justify-content space-around
-    -webkit-align-content space-around
+    margin 0.5em
 
   &.hidden
     display none
   label
     font-weight bold
     margin-right 2em
-  input
-    min-width: 300px
   
   .colorChoice
+    display inline-block
+    vertical-align bottom
+    margin 2px
     width 20px
     height 20px
     border-radius 4px
