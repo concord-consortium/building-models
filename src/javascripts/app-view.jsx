@@ -36,10 +36,10 @@ var AppView = React.createClass({
       this.setState({selectedConnection: selectedConnection});
       log.info("updated selections: + selections");
     }.bind(this));
+    linkManager.loadDataFromUrl(this.props.url);
   },
 
   render: function() {
-    var url = "my_system_state.json";
     var linkManager = this.props.linkManager;
     var selectedNode = this.state.selectedNode;
     var selectedConnection = this.state.selectedConnection;
@@ -52,7 +52,7 @@ var AppView = React.createClass({
     return (
       <div className = "app">
         <div className="flow-box">
-          <LinkView url={url} linkManager={linkManager}/>
+          <LinkView linkManager={linkManager}/>
         </div>
         <div className="bottomTools">
           <NodeWell />
@@ -65,11 +65,14 @@ var AppView = React.createClass({
 });
 
 var linkManager = LinkManager.instance('building-models');
+var url = "my_system_state.json";
+
 jsPlumb.bind("ready", function() {
   // debugger;
   React.render(
-    <AppView linkManager={linkManager}/>,
+    <AppView url={url} linkManager={linkManager}/>,
     $('#app')[0]
   );
 });
+
 module.exports = AppView;

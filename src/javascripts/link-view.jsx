@@ -16,7 +16,7 @@ var LinkView = React.createClass({
     this.linkManager = this.props.linkManager;
     this.linkManager.addLinkListener(this);
     this.linkManager.addNodeListener(this);
-    this.linkManager.loadData(this.props.url);
+    this.linkManager.loadDataFromUrl(this.props.url);
     var comp = this.getDOMNode();
     $(comp).find(".container").droppable({
       accept: '.proto-node',

@@ -1,7 +1,7 @@
 _        = require 'lodash'
 log      = require 'loglevel'
 $        = require 'jquery'
-Importer = require '../importer'
+Importer = require '../mysystem-importer'
 Link     = require './link'
 DiagramNode = require './Node'
 
@@ -174,21 +174,22 @@ class LinkManager
     for listener in @selectionListeners
       listener({node:null, connection:null})
 
-  loadData: (url) =>
+  loadData: (data) ->
+    log.info "json success"
+    importer = new Importer(@)
+    importer.importData(data)
+
+  loadDataFromUrl: (url) =>
     log.info("loading local data")
     log.info("url " + url)
     $.ajax {
       url: url,
       dataType: 'json',
       success: (data) =>
-        log.info "json success"
-        log.info data
-        importer = new Importer(@)
-        importer.importData(data)
+        @loadData(data)
       error: (xhr, status, err) ->
         log.error(url, status, err.toString())
       }
-        
 
   toJsonString: () ->
     nodeExports = for key,node of @nodeKeys
