@@ -204,7 +204,7 @@ var LinkView = React.createClass({
       );
     });
     return (
-      <div className="bm-container">
+      <div className="link-view">
         <div className="container">
           {nodes}
         </div>
