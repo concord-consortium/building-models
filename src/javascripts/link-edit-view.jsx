@@ -46,7 +46,7 @@ var LinkEditView = React.createClass({
       
       var palette = palettes[paletteNo].map(function(colorCode) {
         var style = {"background-color": colorCode};
-        return (<div className="colorChoice" style={style} onClick={pickColor} />)
+        return (<div className="colorChoice" style={style} onTouchEnd={pickColor} onClick={pickColor} />)
       });
 
       var deleteButton = (<button type='button' className="delete" onClick={deleteLink}> delete this link</button>);
