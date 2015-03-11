@@ -41,7 +41,7 @@ var NodeEditView = React.createClass({
           </div>
           <div className="edit-row">
             <label name="image">
-              Image (url)
+              Image
             </label>
             <input type="text" name="image" value={image} onChange={changeImage}/>
           </div>

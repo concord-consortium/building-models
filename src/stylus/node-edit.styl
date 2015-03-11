@@ -1,18 +1,21 @@
 .node-edit-view
   padding 1em
   margin 0.5em
+  margin-bottom 2em
   box-shadow 4px 4px 10px hsla(1,0,0,0.2)
   border-radius 10px
   min-width  100px
-  text-align right
+  text-align left
   
   display flex
+  flex 1 0 0
   flex-direction column
   flex-wrap wrap
   justify-content flex-start
   align-content space-around
   
   display -webkit-flex
+  -webkit-flex 1 0 0
   -webkit-flex-direction column
   -webkit-flex-wrap wrap
   -webkit-justify-content flex-start
@@ -22,6 +25,7 @@
     display none
   .edit-row
     padding 0.2em
+    white-space nowrap
   label
     font-weight bold
-    margin-right 2em
+    margin-right 1.5em
