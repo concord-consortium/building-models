@@ -26646,7 +26646,7 @@ System.register("javascripts/node-edit-view", ["npm:react@0.12.2"], true, functi
           name: "title",
           value: title,
           onChange: changeTitle
-        })), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "image"}, "Image (url)"), React.createElement("input", {
+        })), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "image"}, "Image"), React.createElement("input", {
           type: "text",
           name: "image",
           value: image,
