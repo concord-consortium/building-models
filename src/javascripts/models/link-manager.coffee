@@ -122,9 +122,7 @@ class LinkManager
       if deleted
         @removeSelectedLink()
       else
-        delete @linkKeys[@selectedLink.terminalKey()]
         @selectedLink.title = title
-        @linkKeys[@selectedLink.terminalKey()] = @selectedLink;
         @selectedLink.color = color
         for listener in @selectionListeners
           listener({node:null, connection:@selectedLink})
