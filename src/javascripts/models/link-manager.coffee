@@ -191,16 +191,18 @@ class LinkManager
         log.error(url, status, err.toString())
       }
 
-  toJsonString: () ->
+  serialize: () ->
     nodeExports = for key,node of @nodeKeys
       node.toExport()
     linkExports = for key,link of @linkKeys
       link.toExport()
-    
-    JSON.stringify({
+    return {
       nodes: nodeExports,
       links: linkExports
-    })
+    }
+
+  toJsonString: () ->
+    JSON.stringify(@serialize())
     
 
 module.exports = LinkManager

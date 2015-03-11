@@ -29,6 +29,8 @@ var AppView = React.createClass({
 
   componentDidMount: function() {
     var linkManager = this.props.linkManager;
+    var data = this.props.data;
+
     linkManager.addSelectionListener(function(selections) {
       var selectedNode = selections.node;
       var selectedConnection = selections.connection;
@@ -36,7 +38,23 @@ var AppView = React.createClass({
       this.setState({selectedConnection: selectedConnection});
       log.info("updated selections: + selections");
     }.bind(this));
-    linkManager.loadDataFromUrl(this.props.url);
+  
+    if(data && data.length > 0) {
+      debugger
+      linkManager.loadData(JSON.parse(data));
+    }
+    else {
+      linkManager.loadDataFromUrl(this.props.url);
+    }
+
+  },
+
+  openLink: function() {
+    var linkManager = this.props.linkManager;
+    var json = linkManager.toJsonString();
+    var encoded = encodeURIComponent(json);
+    var url = window.location.protocol +"//" + window.location.host + "/?data=" + encoded;
+    window.open(url);
   },
 
   render: function() {
@@ -45,12 +63,18 @@ var AppView = React.createClass({
     var selectedConnection = this.state.selectedConnection;
     var onNodeChanged = function(node,title,image) {
       linkManager.changeNode(title,image);
-    };
+    }.bind(this);
+
     var onLinkChanged = function(link, title, color, deleted) {
       linkManager.changeLink(title,color,deleted);
     };
+    
+    var _openLink = this.openLink.bind(this);
     return (
       <div className = "app">
+        <div className="linkArea">
+          <a onClick={_openLink} >A link to your graph</a>
+        </div>
         <div className="flow-box">
           <LinkView linkManager={linkManager}/>
         </div>
@@ -66,11 +90,19 @@ var AppView = React.createClass({
 
 var linkManager = LinkManager.instance('building-models');
 var url = "serialized.json";
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 
 jsPlumb.bind("ready", function() {
   // debugger;
+  var data = getParameterByName('data');
+
   React.render(
-    <AppView url={url} linkManager={linkManager}/>,
+    <AppView url={url} linkManager={linkManager} data={data}/>,
     $('#app')[0]
   );
 });

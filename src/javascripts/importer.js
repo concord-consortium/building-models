@@ -28,7 +28,7 @@ function MySystemImporter(system) {
         targetNode: data.targetNodeKey,
         sourceTerminal: data.sourceTerminal,
         targetTerminal: data.targetTerminal,
-        title: data.text,
+        title: data.title,
         color: data.color
       });
     }
