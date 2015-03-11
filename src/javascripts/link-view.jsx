@@ -167,7 +167,7 @@ var LinkView = React.createClass({
   _redrawLinks: function() {
     var links = this.state.links;
     links.forEach(function(l) {
-      // TODO move the bellow junk into Node class.
+      // TODO move the operations bellow into Node class.
 
       var source         = this._nodeForName(l.sourceNode.key);
       var target         = this._nodeForName(l.targetNode.key);

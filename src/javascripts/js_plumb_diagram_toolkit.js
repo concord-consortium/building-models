@@ -107,10 +107,6 @@ function DiagramToolkit(domContext, options) {
     return results;
   };
 
-  this._clean_borked_endpoints = function() {
-    $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
-  };
-
   this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
     var paintStyle = this._paintStyle(color);
     var selected = linkModel.selected;
@@ -129,9 +125,6 @@ function DiagramToolkit(domContext, options) {
   };
 
   this.setSuspendDrawing = function(shouldwestop) {
-    if (!shouldwestop) {
-      this._clean_borked_endpoints();
-    }
     this.kit.setSuspendDrawing(shouldwestop,!shouldwestop);
   };
 

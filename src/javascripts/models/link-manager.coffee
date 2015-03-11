@@ -148,9 +148,12 @@ class LinkManager
       title: info.title
     return true
 
-  removeSelectedLink: () ->
-    key = @selectedLink.terminalKey()
+  removelink: (link) ->
+    key = link.terminalKey()
     delete @linkKeys[key]
+
+  removeSelectedLink: () ->
+    @removelink(@selectedLink)
     for listener in @linkListeners
       log.info("notifying of deleted Link")
       listener.handleLinkRm(@selectedLink)
@@ -158,19 +161,14 @@ class LinkManager
     for listener in @selectionListeners
       listener({node:null, connection:null})
 
-  removeLinksForNode: (nodeKey) ->
-    links = @getLinks()
-    newLinks = links.filter (link) =>
-      if (nodeKey == link.sourceNode || nodeKey == link.targetNode)
-        return false
-      return true
-    # pretty sure we are supposed to remove the old links here.
+  removeLinksForNode: (node) ->
+    @removelink(link) for link in node.links
 
 
   removeNode: (nodeKey) ->
     node = @nodeKeys[nodeKey]
     delete @nodeKeys[nodeKey]
-    this.removeLinksForNode(nodeKey)
+    this.removeLinksForNode(node)
     for listener in @nodeListeners
       log.info("notifying of deleted Node")
       listener.handleNodeRm(node)
