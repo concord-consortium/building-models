@@ -1,7 +1,7 @@
 _        = require 'lodash'
 log      = require 'loglevel'
 $        = require 'jquery'
-Importer = require '../mysystem-importer'
+Importer = require '../importer'
 Link     = require './link'
 DiagramNode = require './Node'
 

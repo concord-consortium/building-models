@@ -180,7 +180,7 @@ describe 'Node', () ->
         @serializedForm = """{"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}]}"""
       
       describe "toJsonString", () ->
-        it "should exist", () ->
+        it "should include nodes and links", () ->
           expectedValue = "{}"
           @nodeA.key.should.equal("a")
           @linkManager.addLink(@newLink)
@@ -188,7 +188,15 @@ describe 'Node', () ->
           @linkManager.toJsonString().should.match(/"nodes":/)
           @linkManager.toJsonString().should.match(/"links":/)
           @linkManager.toJsonString().should.equal(@serializedForm)
-
+      
+      describe "loadData", () ->
+        beforeEach () ->
+          @linkManager = new LinkManager()
+        it "should read the serialized data without error", () ->
+          data = JSON.parse(@serializedForm)
+          @linkManager.loadData(data)
+          @linkManager.nodeKeys.should.have.any.keys("a")
+          @linkManager.nodeKeys.should.have.any.keys("b")
 
          
 

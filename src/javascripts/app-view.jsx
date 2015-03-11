@@ -65,7 +65,7 @@ var AppView = React.createClass({
 });
 
 var linkManager = LinkManager.instance('building-models');
-var url = "my_system_state.json";
+var url = "serialized.json";
 
 jsPlumb.bind("ready", function() {
   // debugger;
