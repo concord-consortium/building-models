@@ -190,4 +190,16 @@ class LinkManager
       }
         
 
+  toJsonString: () ->
+    nodeExports = for key,node of @nodeKeys
+      node.toExport()
+    linkExports = for key,link of @linkKeys
+      link.toExport()
+    
+    JSON.stringify({
+      nodes: nodeExports,
+      links: linkExports
+    })
+    
+
 module.exports = LinkManager

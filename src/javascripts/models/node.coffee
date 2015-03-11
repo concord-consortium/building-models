@@ -55,4 +55,12 @@ class Node extends GraphPrimitive
     visit(@)
     _.without(visitedNodes, @) # remove ourself from the results.
 
+  toExport: () ->
+    {   
+      title: @title,
+      x: @x,
+      y: @y,
+      image:@image,
+      key: @key
+    }
 module.exports = Node

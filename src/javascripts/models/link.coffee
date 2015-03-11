@@ -18,5 +18,18 @@ class Link extends GraphPrimitive
     [@targetNode]
   ins: () ->
     [@sourceNode]
+  
+  toExport: () ->
+    sourceNodeKey = @sourceNode.key
+    targetNodeKey = @targetNode.key
+    {
+      "title": @title,
+      "color": @color,
+      "sourceNodeKey": sourceNodeKey,
+      "sourceTerminal": @sourceTerminal,
+      "targetNodeKey": targetNodeKey,
+      "targetTerminal": @targetTerminal
+    }
+
 
 module.exports = Link

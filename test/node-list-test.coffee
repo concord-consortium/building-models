@@ -138,34 +138,57 @@ describe 'Node', () ->
 
   describe "LinkManager", () ->
     beforeEach () ->
-      @nodeA = new Node({}, 'a')
-      @nodeB = new Node({}, 'b')
-      @nodeList = new LinkManager()
-      @nodeList.addNode(@nodeA);
-      @nodeList.addNode(@nodeB);
-      @newLink =
-        terminalKey: () -> 'newLink'
+      @nodeA = new Node({title: "a", x:10, y:10}, 'a')
+      @nodeB = new Node({title: "b", x:20, y:20}, 'b')
+      @linkManager = new LinkManager()
+      @linkManager.addNode(@nodeA);
+      @linkManager.addNode(@nodeB);
+      
+      @newLink = new Link({
         sourceNode: @nodeA
         targetNode: @nodeB
-      @otherNewLink =
-        terminalKey: () -> 'otherNewLink'
+        targetTerminal: "a"
+        sourceTerminal: "b"
+      })
+      @newLink.terminalKey = () ->
+        "newLink"
+
+      @otherNewLink = new Link({
         sourceNode: @nodeB
         targetNode: @nodeA
+      })
+      @otherNewLink.terminalKey = () ->
+        "otherNewLink"
 
     describe "addLink", () ->
       describe "When the link doesn't already exist", () ->
         it "should add a new link", () ->
-          should.not.exist @nodeList.linkKeys['newLink']
-          @nodeList.addLink(@newLink).should.equal(true)
-          @nodeList.addLink(@otherNewLink).should.equal(true)
-          @nodeList.linkKeys['newLink'].should.equal(@newLink)
-          @nodeList.linkKeys['otherNewLink'].should.equal(@otherNewLink)
+          should.not.exist @linkManager.linkKeys['newLink']
+          @linkManager.addLink(@newLink).should.equal(true)
+          @linkManager.addLink(@otherNewLink).should.equal(true)
+          @linkManager.linkKeys['newLink'].should.equal(@newLink)
+          @linkManager.linkKeys['otherNewLink'].should.equal(@otherNewLink)
       describe "When the link does already exist", () ->
         beforeEach () ->
-          @nodeList.linkKeys['newLink'] = 'oldValue'
+          @linkManager.linkKeys['newLink'] = 'oldValue'
         it "should not add the new link", () ->
-          @nodeList.addLink(@newLink).should.equal(false)
-          @nodeList.linkKeys['newLink'].should.equal('oldValue')
-           
+          @linkManager.addLink(@newLink).should.equal(false)
+          @linkManager.linkKeys['newLink'].should.equal('oldValue')
+    
+    describe "Serialization", () ->
+      beforeEach () ->
+        @serializedForm = """{"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}]}"""
+      
+      describe "toJsonString", () ->
+        it "should exist", () ->
+          expectedValue = "{}"
+          @nodeA.key.should.equal("a")
+          @linkManager.addLink(@newLink)
+          @linkManager.nodeKeys["a"].should.equal(@nodeA)
+          @linkManager.toJsonString().should.match(/"nodes":/)
+          @linkManager.toJsonString().should.match(/"links":/)
+          @linkManager.toJsonString().should.equal(@serializedForm)
+
+
          
 
