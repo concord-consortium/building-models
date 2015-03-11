@@ -26523,6 +26523,7 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       }
       return results;
     };
+    this._clean_borked_endpoints = function() {};
     this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
       var paintStyle = this._paintStyle(color);
       var selected = linkModel.selected;
@@ -26540,6 +26541,9 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       connection.linkModel = linkModel;
     };
     this.setSuspendDrawing = function(shouldwestop) {
+      if (!shouldwestop) {
+        this._clean_borked_endpoints();
+      }
       this.kit.setSuspendDrawing(shouldwestop, !shouldwestop);
     };
     this.supspendDrawing = function() {
