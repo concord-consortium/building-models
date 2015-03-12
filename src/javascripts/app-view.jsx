@@ -40,7 +40,6 @@ var AppView = React.createClass({
     }.bind(this));
   
     if(data && data.length > 0) {
-      debugger
       linkManager.loadData(JSON.parse(data));
     }
     else {
@@ -53,7 +52,8 @@ var AppView = React.createClass({
     var linkManager = this.props.linkManager;
     var json = linkManager.toJsonString();
     var encoded = encodeURIComponent(json);
-    var url = window.location.protocol +"//" + window.location.host + "/?data=" + encoded;
+    var url = window.location.protocol +"//" + window.location.host +
+      window.location.pathname + "?data=" + encoded;
     window.open(url);
   },
 
