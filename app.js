@@ -26747,6 +26747,48 @@ System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, functi
 
 
 
+System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var log = require("npm:loglevel@1.2.0");
+  var $ = require("javascripts/vendor/touchpunch");
+  log.setLevel(log.levels.TRACE);
+  var StatusMenu = React.createClass({
+    displayName: "StatusMenu",
+    getInitialState: function() {
+      var state = {};
+      return state;
+    },
+    componentWillUpdate: function() {},
+    componentDidUpdate: function() {},
+    componentDidMount: function() {},
+    openLink: function() {
+      if (this.props.getData) {
+        var json = this.props.getData();
+        var encoded = encodeURIComponent(json);
+        var url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + encoded;
+        window.open(url);
+      }
+    },
+    render: function() {
+      var openLink = this.openLink.bind(this);
+      var title = this.props.title || "Building Models";
+      var linkText = this.props.linkText || "Link to my model";
+      return (React.createElement("div", {className: "status-menu"}, React.createElement("div", {className: "title"}, title), React.createElement("div", {
+        className: "open-data-url",
+        onClick: openLink
+      }, linkText)));
+    }
+  });
+  module.exports = StatusMenu;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("npm:process@0.10.0", ["npm:process@0.10.0/browser"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -33566,7 +33608,7 @@ System.register("npm:react@0.12.2", ["npm:react@0.12.2/react"], true, function(r
 
 
 
-System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/node-edit-view", "javascripts/link-edit-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
+System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/node-edit-view", "javascripts/link-edit-view", "javascripts/status-menu-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -33576,6 +33618,7 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
   var NodeWell = require("javascripts/node-well-view");
   var NodeEditView = require("javascripts/node-edit-view");
   var LinkEditView = require("javascripts/link-edit-view");
+  var StatusMenu = require("javascripts/status-menu-view");
   var LinkManager = require("javascripts/models/link-manager");
   var _ = require("npm:lodash@3.3.1");
   var log = require("npm:loglevel@1.2.0");
@@ -33610,12 +33653,9 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
         linkManager.loadDataFromUrl(this.props.url);
       }
     },
-    openLink: function() {
+    getData: function() {
       var linkManager = this.props.linkManager;
-      var json = linkManager.toJsonString();
-      var encoded = encodeURIComponent(json);
-      var url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + encoded;
-      window.open(url);
+      return linkManager.toJsonString();
     },
     render: function() {
       var linkManager = this.props.linkManager;
@@ -33627,8 +33667,8 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       var onLinkChanged = function(link, title, color, deleted) {
         linkManager.changeLink(title, color, deleted);
       };
-      var _openLink = this.openLink.bind(this);
-      return (React.createElement("div", {className: "app"}, React.createElement("div", {className: "linkArea"}, React.createElement("a", {onClick: _openLink}, "A link to your graph")), React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {linkManager: linkManager})), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
+      var getData = this.getData.bind(this);
+      return (React.createElement("div", {className: "app"}, React.createElement(StatusMenu, {getData: getData}), React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {linkManager: linkManager})), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
         node: selectedNode,
         onNodeChanged: onNodeChanged
       }), React.createElement(LinkEditView, {
