@@ -33605,7 +33605,6 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
         log.info("updated selections: + selections");
       }.bind(this));
       if (data && data.length > 0) {
-        debugger;
         linkManager.loadData(JSON.parse(data));
       } else {
         linkManager.loadDataFromUrl(this.props.url);
@@ -33615,7 +33614,7 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       var linkManager = this.props.linkManager;
       var json = linkManager.toJsonString();
       var encoded = encodeURIComponent(json);
-      var url = window.location.protocol + "//" + window.location.host + "/?data=" + encoded;
+      var url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + encoded;
       window.open(url);
     },
     render: function() {
