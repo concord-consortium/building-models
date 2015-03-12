@@ -4,6 +4,7 @@ var LinkView    = require('./link-view');
 var NodeWell    = require('./node-well-view');
 var NodeEditView= require('./node-edit-view');
 var LinkEditView= require('./link-edit-view');
+var StatusMenu  = require('./status-menu-view');
 var LinkManager = require('./models/link-manager');
 var _           = require('lodash');
 var log         = require('loglevel');
@@ -48,13 +49,9 @@ var AppView = React.createClass({
 
   },
 
-  openLink: function() {
+  getData: function() {
     var linkManager = this.props.linkManager;
-    var json = linkManager.toJsonString();
-    var encoded = encodeURIComponent(json);
-    var url = window.location.protocol +"//" + window.location.host +
-      window.location.pathname + "?data=" + encoded;
-    window.open(url);
+    return linkManager.toJsonString();
   },
 
   render: function() {
@@ -69,12 +66,10 @@ var AppView = React.createClass({
       linkManager.changeLink(title,color,deleted);
     };
     
-    var _openLink = this.openLink.bind(this);
+    var getData = this.getData.bind(this);
     return (
       <div className = "app">
-        <div className="linkArea">
-          <a onClick={_openLink} >A link to your graph</a>
-        </div>
+        <StatusMenu getData={getData} />
         <div className="flow-box">
           <LinkView linkManager={linkManager}/>
         </div>
