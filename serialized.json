@@ -1,26 +1,49 @@
 {
     "nodes": [
         {
-            "title": "a",
-            "x": 10,
-            "y": 10,
+            "title": "Chicken",
+            "x": 381,
+            "y": 79,
             "image": "http://news.ucdavis.edu/photos_images/news_images/03_2011/chicken_lg.jpg",
             "key": "a"
         },
         {
-            "title": "b",
-            "x": 20,
-            "y": 20,
+            "title": "Egg",
+            "x": 90,
+            "y": 74,
             "image": "https://dl.dropboxusercontent.com/u/73403/mysystem/images/egg2.png",
             "key": "b"
+        },
+        {
+            "title": "Chick",
+            "x": 231.15625,
+            "y": 77.1875,
+            "image": "http://www.charlieschickencompany.com/IMAGES/pic5_09.jpg",
+            "key": "Node-3"
         }
     ],
     "links": [
         {
-            "title": "",
+            "title": "Becomes a",
             "color": "#777",
-            "sourceNodeKey": "a",
+            "sourceNodeKey": "b",
             "sourceTerminal": "b",
+            "targetNodeKey": "Node-3",
+            "targetTerminal": "b"
+        },
+        {
+            "title": "Becomes a",
+            "color": "#777",
+            "sourceNodeKey": "Node-3",
+            "sourceTerminal": "b",
+            "targetNodeKey": "a",
+            "targetTerminal": "b"
+        },
+        {
+            "title": "Makes an",
+            "color": "rgb(162, 211, 194)",
+            "sourceNodeKey": "a",
+            "sourceTerminal": "a",
             "targetNodeKey": "b",
             "targetTerminal": "a"
         }
