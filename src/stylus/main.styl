@@ -16,40 +16,49 @@ body
   
 .content-box
   text-align center
-  height: 100%;
+  height 100%
   
-
-.flow-box
-  padding 0px
+#app
+  .app
+    min-height 100vh
+    width 100%
+    
+    display flex
+    flex-direction column
+    flex-wrap nowrap
+    justify-content stretch
+    align-content stretch
+    align-items flex-end
   
-  display flex
-  flex-direction row
-  flex-wrap wrap
-  justify-content space-between
-  align-content space-around
-  
-  
-  display -webkit-flex
-  -webkit-flex-direction row
-  -webkit-flex-wrap wrap
-  -webkit-justify-content space-between
-  -webkit-align-content space-around
-
-  
-  
+    display -webkit-flex
+    -webkit-flex-direction column
+    -webkit-flex-wrap nowrap
+    -webkit-justify-content stretch
+    -webkit-align-content stretch
+    -webkit-align-items flex-end
+    
 .bottomTools
+  width 100%
+  
   display flex
+  flex 2 0 220
+  
   flex-direction row
   flex-wrap nowrap
-  justify-content space-around
-  align-content flex-end
-  align-items space-around
+  justify-content stretch
+  align-self flex-end
+  align-content stetch
+  align-items space-between
   
   display -webkit-flex
+  -webkit-flex 2 0 220
+  
   -webkit-flex-direction row
   -webkit-flex-wrap nowrap
-  -webkit-justify-content space-between
-  -webkit-align-content flex-end
-  -webkit-align-items space-around
+  -webkit-justify-content stretch
+  -webkit-align-self flex-end
+  -webkit-align-content stetch
+  -webkit-align-items space-between
+
   
   

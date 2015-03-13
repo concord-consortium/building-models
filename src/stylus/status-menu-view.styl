@@ -1,27 +1,10 @@
-#navmenu
-  padding 4px
-  width 100%
-  font-size 14px
-  color #fff
-  background-color black
-  a
-    text-decoration none
-    color #fff
-    padding-left 4em
-    &:hover
-      text-decoration underline
-
 .status-menu
   margin 0px
   padding 0.5em
   font-size 14px
   color white
   background-color #444
-  display flex
-  flex-direction row
-  flex-wrap wrap
-  justify-content space-between
-  align-content baseline
+  
   .title
     font-size 18px
     color hsla(0,0,100,1)
@@ -31,7 +14,18 @@
     text-decoration underline
     cursor pointer
     
+
+  flex 1 0 18px
+  display flex
+  align-self stretch
+  align-content baseline
+  flex-direction row
+  flex-wrap wrap
+  justify-content space-between
+
   display -webkit-flex
+  -webkit-align-self stretch
+  -webkit-flex 1 0 18px
   -webkit-flex-direction row
   -webkit-flex-wrap wrap
   -webkit-justify-content space-between
