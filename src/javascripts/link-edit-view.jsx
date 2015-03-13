@@ -53,16 +53,16 @@ var LinkEditView = React.createClass({
       return (
         <div className="link-edit-view">
           <h2>{title}</h2>
-          <div className="row">
+          <div className="edit-row">
             {deleteButton}
           </div>
-          <div className="row">
+          <div className="edit-row">
             <label name="title">
               Title
             </label>
             <input type="text" name="title" value={title} onChange={changeTitle}/>
           </div>
-          <div className="row">
+          <div className="edit-row">
             <label name="color">
               Color
             </label>
