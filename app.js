@@ -26729,12 +26729,12 @@ System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, functi
           className: "delete",
           onClick: deleteLink
         }, " delete this link"));
-        return (React.createElement("div", {className: "link-edit-view"}, React.createElement("h2", null, title), React.createElement("div", {className: "row"}, deleteButton), React.createElement("div", {className: "row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
+        return (React.createElement("div", {className: "link-edit-view"}, React.createElement("h2", null, title), React.createElement("div", {className: "edit-row"}, deleteButton), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "title"}, "Title"), React.createElement("input", {
           type: "text",
           name: "title",
           value: title,
           onChange: changeTitle
-        })), React.createElement("div", {className: "row"}, React.createElement("label", {name: "color"}, "Color"), palette)));
+        })), React.createElement("div", {className: "edit-row"}, React.createElement("label", {name: "color"}, "Color"), palette)));
       } else {
         return (React.createElement("div", {className: "link-edit-view hidden"}));
       }
@@ -33668,7 +33668,7 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
         linkManager.changeLink(title, color, deleted);
       };
       var getData = this.getData.bind(this);
-      return (React.createElement("div", {className: "app"}, React.createElement(StatusMenu, {getData: getData}), React.createElement("div", {className: "flow-box"}, React.createElement(LinkView, {linkManager: linkManager})), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
+      return (React.createElement("div", {className: "app"}, React.createElement(StatusMenu, {getData: getData}), React.createElement(LinkView, {linkManager: linkManager}), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
         node: selectedNode,
         onNodeChanged: onNodeChanged
       }), React.createElement(LinkEditView, {
