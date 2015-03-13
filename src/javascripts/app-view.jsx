@@ -70,11 +70,9 @@ var AppView = React.createClass({
     return (
       <div className = "app">
         <StatusMenu getData={getData} />
-        <div className="flow-box">
-          <LinkView linkManager={linkManager}/>
-        </div>
+        <LinkView linkManager={linkManager}/>
         <div className="bottomTools">
-          <NodeWell />
+          <NodeWell />  
           <NodeEditView node={selectedNode} onNodeChanged={onNodeChanged}/>
           <LinkEditView link={selectedConnection} onLinkChanged={onLinkChanged}/>
         </div>
