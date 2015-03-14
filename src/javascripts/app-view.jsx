@@ -8,6 +8,7 @@ var LinkManager = require('./models/link-manager');
 var _           = require('lodash');
 var log         = require('loglevel');
 var $           = require('./vendor/touchpunch');
+var GoogleDriveIO = require ('./google-drive-io');
 
 log.setLevel(log.levels.TRACE);
 
@@ -57,6 +58,29 @@ var AppView = React.createClass({
     window.open(url);
   },
 
+  saveToGDrive: function() {
+    var googleDrive = new GoogleDriveIO();
+    var filename = this.filename;
+    console.log('Proposing to save to "' + filename + '"');
+    if (!filename || filename.length === 0) {
+      filename = 'model';
+    }
+    if (!/.*\.json$/.test(filename)) {
+      filename += '.json';
+    }
+    console.log('Saving to "' + filename + '"');
+    googleDrive.upload({fileName: filename, mimeType: 'application/json'},
+      linkManager.toJsonString());
+  },
+  authorize: function() {
+    var googleDrive = new GoogleDriveIO();
+    googleDrive.authorize();
+  },
+  filename: "",
+  changeFilename: function(evnt) {
+    console.log('Changing filename: ' + evnt.target.value);
+    this.filename = evnt.target.value;
+  },
   render: function() {
     var linkManager = this.props.linkManager;
     var selectedNode = this.state.selectedNode;
@@ -70,10 +94,16 @@ var AppView = React.createClass({
     };
     
     var _openLink = this.openLink.bind(this);
+    var _saveToGDrive = this.saveToGDrive.bind(this);
+    var _authorize = this.authorize.bind(this);
+    var _changeFilename = this.changeFilename.bind(this);
     return (
       <div className = "app">
         <div className="linkArea">
-          <a onClick={_openLink} >A link to your graph</a>
+          <button id="authorize" onClick={_authorize}>Authorize for Google Drive</button>
+          <label>Filename: <input type="text" onChange={_changeFilename} id="filename"/></label>
+          <button id="send" onClick={_saveToGDrive}>Save to Google Drive</button>
+          <button onClick={_openLink} >A link to your graph</button>
         </div>
         <div className="flow-box">
           <LinkView linkManager={linkManager}/>
