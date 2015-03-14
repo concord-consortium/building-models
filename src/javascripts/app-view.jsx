@@ -4,6 +4,7 @@ var LinkView    = require('./link-view');
 var NodeWell    = require('./node-well-view');
 var NodeEditView= require('./node-edit-view');
 var LinkEditView= require('./link-edit-view');
+var StatusMenu  = require('./status-menu-view');
 var LinkManager = require('./models/link-manager');
 var _           = require('lodash');
 var log         = require('loglevel');
@@ -49,38 +50,11 @@ var AppView = React.createClass({
 
   },
 
-  openLink: function() {
+  getData: function() {
     var linkManager = this.props.linkManager;
-    var json = linkManager.toJsonString();
-    var encoded = encodeURIComponent(json);
-    var url = window.location.protocol +"//" + window.location.host +
-      window.location.pathname + "?data=" + encoded;
-    window.open(url);
+    return linkManager.toJsonString();
   },
 
-  saveToGDrive: function() {
-    var googleDrive = new GoogleDriveIO();
-    var filename = this.filename;
-    console.log('Proposing to save to "' + filename + '"');
-    if (!filename || filename.length === 0) {
-      filename = 'model';
-    }
-    if (!/.*\.json$/.test(filename)) {
-      filename += '.json';
-    }
-    console.log('Saving to "' + filename + '"');
-    googleDrive.upload({fileName: filename, mimeType: 'application/json'},
-      linkManager.toJsonString());
-  },
-  authorize: function() {
-    var googleDrive = new GoogleDriveIO();
-    googleDrive.authorize();
-  },
-  filename: "",
-  changeFilename: function(evnt) {
-    console.log('Changing filename: ' + evnt.target.value);
-    this.filename = evnt.target.value;
-  },
   render: function() {
     var linkManager = this.props.linkManager;
     var selectedNode = this.state.selectedNode;
@@ -93,23 +67,13 @@ var AppView = React.createClass({
       linkManager.changeLink(title,color,deleted);
     };
     
-    var _openLink = this.openLink.bind(this);
-    var _saveToGDrive = this.saveToGDrive.bind(this);
-    var _authorize = this.authorize.bind(this);
-    var _changeFilename = this.changeFilename.bind(this);
+    var getData = this.getData.bind(this);
     return (
       <div className = "app">
-        <div className="linkArea">
-          <button id="authorize" onClick={_authorize}>Authorize for Google Drive</button>
-          <label>Filename: <input type="text" onChange={_changeFilename} id="filename"/></label>
-          <button id="send" onClick={_saveToGDrive}>Save to Google Drive</button>
-          <button onClick={_openLink} >A link to your graph</button>
-        </div>
-        <div className="flow-box">
-          <LinkView linkManager={linkManager}/>
-        </div>
+        <StatusMenu getData={getData} />
+        <LinkView linkManager={linkManager}/>
         <div className="bottomTools">
-          <NodeWell />
+          <NodeWell />  
           <NodeEditView node={selectedNode} onNodeChanged={onNodeChanged}/>
           <LinkEditView link={selectedConnection} onLinkChanged={onLinkChanged}/>
         </div>
