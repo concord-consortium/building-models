@@ -9,7 +9,6 @@ var LinkManager = require('./models/link-manager');
 var _           = require('lodash');
 var log         = require('loglevel');
 var $           = require('./vendor/touchpunch');
-var GoogleDriveIO = require ('./google-drive-io');
 
 log.setLevel(log.levels.TRACE);
 

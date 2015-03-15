@@ -1,5 +1,6 @@
 var React       = require('react');
 var log         = require('loglevel');
+var GoogleDriveIO = require ('./google-drive-io');
 var $           = require('./vendor/touchpunch');
 
 log.setLevel(log.levels.TRACE);
@@ -27,18 +28,23 @@ var StatusMenu = React.createClass({
   },
 
   saveToGDrive: function() {
-    var googleDrive = new GoogleDriveIO();
-    var filename = this.filename;
-    console.log('Proposing to save to "' + filename + '"');
-    if (!filename || filename.length === 0) {
-      filename = 'model';
+    if (this.props.getData) {
+      var json = this.props.getData();
+      var googleDrive = new GoogleDriveIO();
+      var filename = this.filename;
+      console.log('Proposing to save to "' + filename + '"');
+      if (!filename || filename.length === 0) {
+        filename = 'model';
+      }
+      if (!/.*\.json$/.test(filename)) {
+        filename += '.json';
+      }
+      console.log('Saving to "' + filename + '"');
+      googleDrive.upload({
+          fileName: filename,
+          mimeType: 'application/json'
+        }, json);
     }
-    if (!/.*\.json$/.test(filename)) {
-      filename += '.json';
-    }
-    console.log('Saving to "' + filename + '"');
-    googleDrive.upload({fileName: filename, mimeType: 'application/json'},
-      linkManager.toJsonString());
   },
 
   authorize: function() {
