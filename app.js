@@ -26747,86 +26747,6 @@ System.register("javascripts/link-edit-view", ["npm:react@0.12.2"], true, functi
 
 
 
-System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
-  var global = System.global,
-      __define = global.define;
-  global.define = undefined;
-  var React = require("npm:react@0.12.2");
-  var log = require("npm:loglevel@1.2.0");
-  var $ = require("javascripts/vendor/touchpunch");
-  log.setLevel(log.levels.TRACE);
-  var StatusMenu = React.createClass({
-    displayName: "StatusMenu",
-    getInitialState: function() {
-      var state = {};
-      return state;
-    },
-    componentWillUpdate: function() {},
-    componentDidUpdate: function() {},
-    componentDidMount: function() {},
-    filename: "",
-    openLink: function() {
-      if (this.props.getData) {
-        var json = this.props.getData();
-        var encoded = encodeURIComponent(json);
-        var url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + encoded;
-        window.open(url);
-      }
-    },
-    saveToGDrive: function() {
-      var googleDrive = new GoogleDriveIO();
-      var filename = this.filename;
-      console.log('Proposing to save to "' + filename + '"');
-      if (!filename || filename.length === 0) {
-        filename = 'model';
-      }
-      if (!/.*\.json$/.test(filename)) {
-        filename += '.json';
-      }
-      console.log('Saving to "' + filename + '"');
-      googleDrive.upload({
-        fileName: filename,
-        mimeType: 'application/json'
-      }, linkManager.toJsonString());
-    },
-    authorize: function() {
-      var googleDrive = new GoogleDriveIO();
-      googleDrive.authorize();
-    },
-    changeFilename: function(evnt) {
-      console.log('Changing filename: ' + evnt.target.value);
-      this.filename = evnt.target.value;
-    },
-    render: function() {
-      var openLink = this.openLink.bind(this);
-      var title = this.props.title || "Building Models";
-      var linkText = this.props.linkText || "Link to my model";
-      var saveToGDrive = this.saveToGDrive.bind(this);
-      var authorize = this.authorize.bind(this);
-      var changeFilename = this.changeFilename.bind(this);
-      return (React.createElement("div", {className: "status-menu"}, React.createElement("div", {className: "title"}, title), React.createElement("div", {className: "file-dialog-view"}, React.createElement("button", {
-        id: "authorize",
-        onClick: authorize
-      }, "Authorize for Google Drive"), React.createElement("label", null, "Filename: ", React.createElement("input", {
-        type: "text",
-        onChange: changeFilename,
-        id: "filename"
-      })), React.createElement("button", {
-        id: "send",
-        onClick: saveToGDrive
-      }, "Save to Google Drive")), React.createElement("div", {
-        className: "open-data-url",
-        onClick: openLink
-      }, linkText)));
-    }
-  });
-  module.exports = StatusMenu;
-  global.define = __define;
-  return module.exports;
-});
-
-
-
 System.register("javascripts/google-drive-io", [], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -29044,6 +28964,90 @@ System.register("javascripts/node-well-view", ["npm:react@0.12.2", "javascripts/
     }
   });
   module.exports = NodeWell;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
+System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/google-drive-io", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var log = require("npm:loglevel@1.2.0");
+  var GoogleDriveIO = require("javascripts/google-drive-io");
+  var $ = require("javascripts/vendor/touchpunch");
+  log.setLevel(log.levels.TRACE);
+  var StatusMenu = React.createClass({
+    displayName: "StatusMenu",
+    getInitialState: function() {
+      var state = {};
+      return state;
+    },
+    componentWillUpdate: function() {},
+    componentDidUpdate: function() {},
+    componentDidMount: function() {},
+    filename: "",
+    openLink: function() {
+      if (this.props.getData) {
+        var json = this.props.getData();
+        var encoded = encodeURIComponent(json);
+        var url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + encoded;
+        window.open(url);
+      }
+    },
+    saveToGDrive: function() {
+      if (this.props.getData) {
+        var json = this.props.getData();
+        var googleDrive = new GoogleDriveIO();
+        var filename = this.filename;
+        console.log('Proposing to save to "' + filename + '"');
+        if (!filename || filename.length === 0) {
+          filename = 'model';
+        }
+        if (!/.*\.json$/.test(filename)) {
+          filename += '.json';
+        }
+        console.log('Saving to "' + filename + '"');
+        googleDrive.upload({
+          fileName: filename,
+          mimeType: 'application/json'
+        }, json);
+      }
+    },
+    authorize: function() {
+      var googleDrive = new GoogleDriveIO();
+      googleDrive.authorize();
+    },
+    changeFilename: function(evnt) {
+      console.log('Changing filename: ' + evnt.target.value);
+      this.filename = evnt.target.value;
+    },
+    render: function() {
+      var openLink = this.openLink.bind(this);
+      var title = this.props.title || "Building Models";
+      var linkText = this.props.linkText || "Link to my model";
+      var saveToGDrive = this.saveToGDrive.bind(this);
+      var authorize = this.authorize.bind(this);
+      var changeFilename = this.changeFilename.bind(this);
+      return (React.createElement("div", {className: "status-menu"}, React.createElement("div", {className: "title"}, title), React.createElement("div", {className: "file-dialog-view"}, React.createElement("button", {
+        id: "authorize",
+        onClick: authorize
+      }, "Authorize for Google Drive"), React.createElement("label", null, "Filename: ", React.createElement("input", {
+        type: "text",
+        onChange: changeFilename,
+        id: "filename"
+      })), React.createElement("button", {
+        id: "send",
+        onClick: saveToGDrive
+      }, "Save to Google Drive")), React.createElement("div", {
+        className: "open-data-url",
+        onClick: openLink
+      }, linkText)));
+    }
+  });
+  module.exports = StatusMenu;
   global.define = __define;
   return module.exports;
 });
@@ -33732,7 +33736,7 @@ System.register("npm:react@0.12.2", ["npm:react@0.12.2/react"], true, function(r
 
 
 
-System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/node-edit-view", "javascripts/link-edit-view", "javascripts/status-menu-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch", "javascripts/google-drive-io"], true, function(require, exports, module) {
+System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-pane", "javascripts/link-view", "javascripts/node-well-view", "javascripts/node-edit-view", "javascripts/link-edit-view", "javascripts/status-menu-view", "javascripts/models/link-manager", "npm:lodash@3.3.1", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
@@ -33747,7 +33751,6 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
   var _ = require("npm:lodash@3.3.1");
   var log = require("npm:loglevel@1.2.0");
   var $ = require("javascripts/vendor/touchpunch");
-  var GoogleDriveIO = require("javascripts/google-drive-io");
   log.setLevel(log.levels.TRACE);
   var AppView = React.createClass({
     displayName: "AppView",
