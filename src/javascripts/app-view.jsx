@@ -28,10 +28,21 @@ var AppView = React.createClass({
     log.info("Did Update: AppView ");
   },
 
+  setupDeleteKeyHandler: function(linkManager) {
+    var deleteFunction = linkManager.deleteSelected.bind(linkManager);
+    $(window).on("keydown", function (e) {
+      if (e.which === 8 && !$(e.target).is("input, textarea")) {
+        e.preventDefault();
+        deleteFunction();
+      }
+    });
+  },
+
   componentDidMount: function() {
     var linkManager = this.props.linkManager;
     var data = this.props.data;
 
+    this.setupDeleteKeyHandler(linkManager);
     linkManager.addSelectionListener(function(selections) {
       var selectedNode = selections.node;
       var selectedConnection = selections.connection;

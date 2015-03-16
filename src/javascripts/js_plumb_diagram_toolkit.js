@@ -50,7 +50,7 @@ function DiagramToolkit(domContext, options) {
       connector:[ "Bezier"],
       anchor: "Top",
       paintStyle: this._paintStyle(),
-      maxConnections: -1,
+      maxConnections: -1
     };
     
     this.kit.addEndpoint(div,opts);
@@ -108,7 +108,7 @@ function DiagramToolkit(domContext, options) {
   };
 
   this._clean_borked_endpoints = function() {
-    // $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
+    $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
   };
 
   this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
