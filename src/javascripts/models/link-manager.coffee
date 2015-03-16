@@ -93,6 +93,10 @@ class LinkManager
   selectNode: (nodeKey) ->
     if @selectedNode
       @selectedNode.selected = false
+    # TODO: do this better:
+    if @selectedLink
+      @selectedLink.selected = false
+      @selectedLink = null
     @selectedNode = @nodeKeys[nodeKey]
     if @selectedNode
       @selectedNode.selected = true
@@ -111,6 +115,10 @@ class LinkManager
   selectLink: (link) ->
     if @selectedLink
       @selectedLink.selected = false
+    # TODO: better selection management.
+    if @selectedNode
+      @selectedNode.selected = false
+      @selectedNode = null
     @selectedLink = link
     link.selected = true
     for listener in @selectionListeners
@@ -150,14 +158,27 @@ class LinkManager
     key = link.terminalKey()
     delete @linkKeys[key]
 
+  deleteSelected: () ->
+    log.info "Deleting selected items"
+    @removeSelectedLink()
+    @removeSelectedNode()
+
+  
+  removeSelectedNode: () ->
+    if @selectedNode
+      @removeNode(@selectedNode.key)
+      for listener in @selectionListeners
+        listener({node:null, connection:null})
+
   removeSelectedLink: () ->
-    @removelink(@selectedLink)
-    for listener in @linkListeners
-      log.info("notifying of deleted Link")
-      listener.handleLinkRm(@selectedLink)
-    @selectedLink = null
-    for listener in @selectionListeners
-      listener({node:null, connection:null})
+    if @selectedLink
+      @removelink(@selectedLink)
+      for listener in @linkListeners
+        log.info("notifying of deleted Link")
+        listener.handleLinkRm(@selectedLink)
+      @selectedLink = null
+      for listener in @selectionListeners
+        listener({node:null, connection:null})
 
   removeLinksForNode: (node) ->
     @removelink(link) for link in node.links
