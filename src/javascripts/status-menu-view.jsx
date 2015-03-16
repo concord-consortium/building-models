@@ -1,6 +1,7 @@
 var React       = require('react');
 var log         = require('loglevel');
 var $           = require('./vendor/touchpunch');
+var GoogleDriveIO = require ('./google-drive-io');
 
 log.setLevel(log.levels.TRACE);
 

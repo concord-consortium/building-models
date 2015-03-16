@@ -2,7 +2,7 @@
  * Created by jsandoe on 3/13/15.
  */
 function GoogleDriveIO () {
-  var CLIENT_ID = '208150541162-ualm6vo05t7ui1bgr6gofvl5qd176dh8.apps.googleusercontent.com',
+  var CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com',
     SCOPES = 'https://www.googleapis.com/auth/drive';
 
   this.authorize = function () {
