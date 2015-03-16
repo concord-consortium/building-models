@@ -30,14 +30,13 @@ var StatusMenu = React.createClass({
   saveToGDrive: function() {
     var googleDrive = new GoogleDriveIO();
     var filename = this.filename;
-    console.log('Proposing to save to "' + filename + '"');
     if (!filename || filename.length === 0) {
       filename = 'model';
     }
     if (!/.*\.json$/.test(filename)) {
       filename += '.json';
     }
-    console.log('Saving to "' + filename + '"');
+    log.info('Saving to "' + filename + '"');
     googleDrive.upload({fileName: filename, mimeType: 'application/json'},
       linkManager.toJsonString());
   },
@@ -48,8 +47,6 @@ var StatusMenu = React.createClass({
   },
 
   changeFilename: function(evnt) {
-    console.log('Changing filename: ' + evnt.target.value);
-    this.filename = evnt.target.value;
   },
 
   render: function() {
