@@ -13,14 +13,20 @@ var GoogleFileView = React.createClass({
   },
   componentDidMount: function() {
     var googleDrive = new GoogleDriveIO();
-    googleDrive.authorize(true,  function (token) {
+    var callback =function (token) {
       if (token && !token.error) {
         this.setState({authStatus: 'authorized'});
       } else {
         this.setState({authStatus: 'unauthorized'});
         console.error("Google Drive Authorization failed:" + error);
       }
-    }.bind(this));
+    }.bind(this);
+  
+    // TODO: Something better?
+    // we need to wait for gapi to finish initing.
+    setTimeout(function() {
+      googleDrive.authorize(true,  callback);
+    }, 2000);
   },
   saveToGDrive: function() {
     var googleDrive = new GoogleDriveIO();
