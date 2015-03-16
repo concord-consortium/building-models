@@ -28988,14 +28988,17 @@ System.register("javascripts/google-file-view", ["npm:react@0.12.2", "npm:loglev
     },
     componentDidMount: function() {
       var googleDrive = new GoogleDriveIO();
-      googleDrive.authorize(true, function(token) {
+      var callback = function(token) {
         if (token && !token.error) {
           this.setState({authStatus: 'authorized'});
         } else {
           this.setState({authStatus: 'unauthorized'});
           console.error("Google Drive Authorization failed:" + error);
         }
-      }.bind(this));
+      }.bind(this);
+      setTimeout(function() {
+        googleDrive.authorize(true, callback);
+      }, 2000);
     },
     saveToGDrive: function() {
       var googleDrive = new GoogleDriveIO();
