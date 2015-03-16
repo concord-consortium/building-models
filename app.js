@@ -26532,7 +26532,9 @@ System.register("javascripts/js_plumb_diagram_toolkit", ["javascripts/vendor/tou
       }
       return results;
     };
-    this._clean_borked_endpoints = function() {};
+    this._clean_borked_endpoints = function() {
+      $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
+    };
     this.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
       var paintStyle = this._paintStyle(color);
       var selected = linkModel.selected;
