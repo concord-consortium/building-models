@@ -31515,6 +31515,10 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         if (this.selectedNode) {
           this.selectedNode.selected = false;
         }
+        if (this.selectedLink) {
+          this.selectedLink.selected = false;
+          this.selectedLink = null;
+        }
         this.selectedNode = this.nodeKeys[nodeKey];
         if (this.selectedNode) {
           this.selectedNode.selected = true;
@@ -31561,6 +31565,10 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             results;
         if (this.selectedLink) {
           this.selectedLink.selected = false;
+        }
+        if (this.selectedNode) {
+          this.selectedNode.selected = false;
+          this.selectedNode = null;
         }
         this.selectedLink = link;
         link.selected = true;
@@ -31630,6 +31638,31 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
         key = link.terminalKey();
         return delete this.linkKeys[key];
       };
+      LinkManager.prototype.deleteSelected = function() {
+        log.info("Deleting selected items");
+        this.removeSelectedLink();
+        return this.removeSelectedNode();
+      };
+      LinkManager.prototype.removeSelectedNode = function() {
+        var i,
+            len,
+            listener,
+            ref,
+            results;
+        if (this.selectedNode) {
+          this.removeNode(this.selectedNode.key);
+          ref = this.selectionListeners;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            listener = ref[i];
+            results.push(listener({
+              node: null,
+              connection: null
+            }));
+          }
+          return results;
+        }
+      };
       LinkManager.prototype.removeSelectedLink = function() {
         var i,
             j,
@@ -31639,24 +31672,26 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
             ref,
             ref1,
             results;
-        this.removelink(this.selectedLink);
-        ref = this.linkListeners;
-        for (i = 0, len = ref.length; i < len; i++) {
-          listener = ref[i];
-          log.info("notifying of deleted Link");
-          listener.handleLinkRm(this.selectedLink);
+        if (this.selectedLink) {
+          this.removelink(this.selectedLink);
+          ref = this.linkListeners;
+          for (i = 0, len = ref.length; i < len; i++) {
+            listener = ref[i];
+            log.info("notifying of deleted Link");
+            listener.handleLinkRm(this.selectedLink);
+          }
+          this.selectedLink = null;
+          ref1 = this.selectionListeners;
+          results = [];
+          for (j = 0, len1 = ref1.length; j < len1; j++) {
+            listener = ref1[j];
+            results.push(listener({
+              node: null,
+              connection: null
+            }));
+          }
+          return results;
         }
-        this.selectedLink = null;
-        ref1 = this.selectionListeners;
-        results = [];
-        for (j = 0, len1 = ref1.length; j < len1; j++) {
-          listener = ref1[j];
-          results.push(listener({
-            node: null,
-            connection: null
-          }));
-        }
-        return results;
       };
       LinkManager.prototype.removeLinksForNode = function(node) {
         var i,
@@ -33767,9 +33802,19 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
     componentDidUpdate: function() {
       log.info("Did Update: AppView ");
     },
+    setupDeleteKeyHandler: function(linkManager) {
+      var deleteFunction = linkManager.deleteSelected.bind(linkManager);
+      $(document).on("keyup", function(e) {
+        if (e.which === 8 && !$(e.target).is("input, textarea")) {
+          e.preventDefault();
+          deleteFunction();
+        }
+      });
+    },
     componentDidMount: function() {
       var linkManager = this.props.linkManager;
       var data = this.props.data;
+      this.setupDeleteKeyHandler(linkManager);
       linkManager.addSelectionListener(function(selections) {
         var selectedNode = selections.node;
         var selectedConnection = selections.connection;
