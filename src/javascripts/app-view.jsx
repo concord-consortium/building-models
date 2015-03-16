@@ -80,7 +80,7 @@ var AppView = React.createClass({
     var getData = this.getData.bind(this);
     return (
       <div className = "app">
-        <StatusMenu getData={getData} />
+        <StatusMenu linkManager={linkManager} getData={getData} />
         <LinkView linkManager={linkManager}/>
         <div className="bottomTools">
           <NodeWell />  

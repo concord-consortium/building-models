@@ -5,13 +5,11 @@ function GoogleDriveIO () {
   var CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com',
     SCOPES = 'https://www.googleapis.com/auth/drive';
 
-  this.authorize = function () {
+  this.authorize = function (immediate, callback) {
+    var isImmediate = immediate || false;
+
     gapi.auth.authorize({ 'client_id': CLIENT_ID, 'scope': SCOPES,
-      'immediate': false }, function (token) {
-      if (token && token.error) {
-        console.error("Google Drive Authorization failed:" + error);
-      }
-    });
+      'immediate': isImmediate }, callback);
   };
 
   /**
