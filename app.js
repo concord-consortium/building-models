@@ -33806,7 +33806,6 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
       var deleteFunction = linkManager.deleteSelected.bind(linkManager);
       $(window).on("keydown", function(e) {
         if (e.which === 8 && !$(e.target).is("input, textarea")) {
-          debugger;
           e.preventDefault();
           deleteFunction();
         }
