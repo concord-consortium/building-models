@@ -26752,7 +26752,7 @@ System.register("javascripts/google-drive-io", [], true, function(require, expor
       __define = global.define;
   global.define = undefined;
   function GoogleDriveIO() {
-    var CLIENT_ID = '208150541162-ualm6vo05t7ui1bgr6gofvl5qd176dh8.apps.googleusercontent.com',
+    var CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com',
         SCOPES = 'https://www.googleapis.com/auth/drive';
     this.authorize = function() {
       gapi.auth.authorize({
@@ -28970,25 +28970,27 @@ System.register("javascripts/node-well-view", ["npm:react@0.12.2", "javascripts/
 
 
 
-System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/google-drive-io", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
+System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch", "javascripts/google-drive-io"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
   var React = require("npm:react@0.12.2");
   var log = require("npm:loglevel@1.2.0");
-  var GoogleDriveIO = require("javascripts/google-drive-io");
   var $ = require("javascripts/vendor/touchpunch");
+  var GoogleDriveIO = require("javascripts/google-drive-io");
   log.setLevel(log.levels.TRACE);
   var StatusMenu = React.createClass({
     displayName: "StatusMenu",
     getInitialState: function() {
-      var state = {};
+      var state = {filename: "model"};
       return state;
     },
     componentWillUpdate: function() {},
     componentDidUpdate: function() {},
     componentDidMount: function() {},
-    filename: "",
+    dataJson: function() {
+      return this.props.getData();
+    },
     openLink: function() {
       if (this.props.getData) {
         var json = this.props.getData();
@@ -28998,47 +29000,47 @@ System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglev
       }
     },
     saveToGDrive: function() {
-      if (this.props.getData) {
-        var json = this.props.getData();
-        var googleDrive = new GoogleDriveIO();
-        var filename = this.filename;
-        console.log('Proposing to save to "' + filename + '"');
-        if (!filename || filename.length === 0) {
-          filename = 'model';
-        }
-        if (!/.*\.json$/.test(filename)) {
-          filename += '.json';
-        }
-        console.log('Saving to "' + filename + '"');
-        googleDrive.upload({
-          fileName: filename,
-          mimeType: 'application/json'
-        }, json);
+      var googleDrive = new GoogleDriveIO();
+      var filename = this.state.filename;
+      var json = this.dataJson();
+      log.info('Proposing to save to "' + filename + '"');
+      if (!filename || filename.length === 0) {
+        filename = 'model';
       }
+      if (!/.*\.json$/.test(filename)) {
+        filename += '.json';
+      }
+      log.info('Saving to "' + filename + '"');
+      googleDrive.upload({
+        fileName: filename,
+        mimeType: 'application/json'
+      }, json);
     },
     authorize: function() {
       var googleDrive = new GoogleDriveIO();
       googleDrive.authorize();
     },
     changeFilename: function(evnt) {
-      console.log('Changing filename: ' + evnt.target.value);
-      this.filename = evnt.target.value;
+      log.info('Changing filename: ' + evnt.target.value);
+      this.setState({filename: evnt.target.value});
     },
     render: function() {
-      var openLink = this.openLink.bind(this);
+      var openLink = this.openLink;
       var title = this.props.title || "Building Models";
       var linkText = this.props.linkText || "Link to my model";
-      var saveToGDrive = this.saveToGDrive.bind(this);
-      var authorize = this.authorize.bind(this);
-      var changeFilename = this.changeFilename.bind(this);
+      var saveToGDrive = this.saveToGDrive;
+      var authorize = this.authorize;
+      var changeFilename = this.changeFilename;
+      var fileName = this.state.filename;
       return (React.createElement("div", {className: "status-menu"}, React.createElement("div", {className: "title"}, title), React.createElement("div", {className: "file-dialog-view"}, React.createElement("button", {
         id: "authorize",
         onClick: authorize
-      }, "Authorize for Google Drive"), React.createElement("label", null, "Filename: ", React.createElement("input", {
+      }, "Authorize for Google Drive"), React.createElement("label", null, "Filename: "), React.createElement("input", {
         type: "text",
         onChange: changeFilename,
+        value: fileName,
         id: "filename"
-      })), React.createElement("button", {
+      }), React.createElement("button", {
         id: "send",
         onClick: saveToGDrive
       }, "Save to Google Drive")), React.createElement("div", {

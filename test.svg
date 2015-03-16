@@ -1,0 +1,13 @@
+<svg style="position:absolute;left:134.2px;top:13.200000000000003px" width="313.6" height="76.6" pointer-events="none" position="absolute" version="1.1" xmlns="http://www.w3.org/1999/xhtml" class="_jsPlumb_connector">
+
+  <path d="M 0 0 C 10 -50 282 -45 292 5 " 
+    transform="translate(10.799999999999999,60.8)" 
+    pointer-events="visibleStroke" 
+    version="1.1" 
+    xmlns="http://www.w3.org/1999/xhtml" 
+    fill="none" 
+    stroke="#a2d3c2" 
+    style="" 
+    stroke-width="7.199999999999999"></path><path pointer-events="all" version="1.1" xmlns="http://www.w3.org/1999/xhtml" d="M0,0 L20.647673889257916,-8.583330528580204 L8.151834698683958,-9.423332268647448 L5.521939910690585,-21.668137428554452 L0,0" class="" stroke="rgb(162, 211, 194)" fill="rgb(162, 211, 194)" transform="translate(10.799999999999999,60.8)"></path>
+
+</svg>
