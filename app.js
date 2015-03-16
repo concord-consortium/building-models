@@ -26756,16 +26756,13 @@ System.register("javascripts/google-drive-io", [], true, function(require, expor
   function GoogleDriveIO() {
     var CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com',
         SCOPES = 'https://www.googleapis.com/auth/drive';
-    this.authorize = function() {
+    this.authorize = function(immediate, callback) {
+      var isImmediate = immediate || false;
       gapi.auth.authorize({
         'client_id': CLIENT_ID,
         'scope': SCOPES,
-        'immediate': false
-      }, function(token) {
-        if (token && token.error) {
-          console.error("Google Drive Authorization failed:" + error);
-        }
-      });
+        'immediate': isImmediate
+      }, callback);
     };
     this.upload = function(fileSpec, contents) {
       function handleAuthResult(authResult) {
@@ -28972,39 +28969,38 @@ System.register("javascripts/node-well-view", ["npm:react@0.12.2", "javascripts/
 
 
 
-System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch", "javascripts/google-drive-io"], true, function(require, exports, module) {
+System.register("javascripts/google-file-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/google-drive-io", "javascripts/vendor/touchpunch"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
   var React = require("npm:react@0.12.2");
   var log = require("npm:loglevel@1.2.0");
-  var $ = require("javascripts/vendor/touchpunch");
   var GoogleDriveIO = require("javascripts/google-drive-io");
-  log.setLevel(log.levels.TRACE);
-  var StatusMenu = React.createClass({
-    displayName: "StatusMenu",
+  var $ = require("javascripts/vendor/touchpunch");
+  var GoogleFileView = React.createClass({
+    displayName: "GoogleFileView",
     getInitialState: function() {
-      var state = {filename: "model"};
+      var state = {
+        filename: "model",
+        authStatus: "unknown"
+      };
       return state;
     },
-    componentWillUpdate: function() {},
-    componentDidUpdate: function() {},
-    componentDidMount: function() {},
-    dataJson: function() {
-      return this.props.getData();
-    },
-    openLink: function() {
-      if (this.props.getData) {
-        var json = this.props.getData();
-        var encoded = encodeURIComponent(json);
-        var url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + encoded;
-        window.open(url);
-      }
+    componentDidMount: function() {
+      var googleDrive = new GoogleDriveIO();
+      googleDrive.authorize(true, function(token) {
+        if (token && !token.error) {
+          this.setState({authStatus: 'authorized'});
+        } else {
+          this.setState({authStatus: 'unauthorized'});
+          console.error("Google Drive Authorization failed:" + error);
+        }
+      }.bind(this));
     },
     saveToGDrive: function() {
       var googleDrive = new GoogleDriveIO();
       var filename = this.state.filename;
-      var json = this.dataJson();
+      var json = this.props.linkManager.toJsonString();
       log.info('Proposing to save to "' + filename + '"');
       if (!filename || filename.length === 0) {
         filename = 'model';
@@ -29020,38 +29016,43 @@ System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglev
     },
     authorize: function() {
       var googleDrive = new GoogleDriveIO();
-      googleDrive.authorize();
+      googleDrive.authorize(false, function(token) {
+        if (token && token.error) {
+          console.error("Google Drive Authorization failed:" + error);
+        }
+      });
     },
     changeFilename: function(evnt) {
       log.info('Changing filename: ' + evnt.target.value);
       this.setState({filename: evnt.target.value});
     },
     render: function() {
-      var openLink = this.openLink;
-      var title = this.props.title || "Building Models";
-      var linkText = this.props.linkText || "Link to my model";
-      var saveToGDrive = this.saveToGDrive;
-      var authorize = this.authorize;
       var changeFilename = this.changeFilename;
+      var authorize = this.authorize;
       var fileName = this.state.filename;
-      return (React.createElement("div", {className: "status-menu"}, React.createElement("div", {className: "title"}, title), React.createElement("div", {className: "file-dialog-view"}, React.createElement("button", {
-        id: "authorize",
-        onClick: authorize
-      }, "Authorize for Google Drive"), React.createElement("label", null, "Filename: "), React.createElement("input", {
-        type: "text",
-        onChange: changeFilename,
-        value: fileName,
-        id: "filename"
-      }), React.createElement("button", {
-        id: "send",
-        onClick: saveToGDrive
-      }, "Save to Google Drive")), React.createElement("div", {
-        className: "open-data-url",
-        onClick: openLink
-      }, linkText)));
+      var saveToGDrive = this.saveToGDrive;
+      var authStatus = this.state.authStatus;
+      var display = '';
+      if (authStatus === 'authorized') {
+        display = (React.createElement("div", {className: "file-dialog-view"}, React.createElement("label", null, "Filename: "), React.createElement("input", {
+          type: "text",
+          onChange: changeFilename,
+          value: fileName,
+          id: "filename"
+        }), React.createElement("button", {
+          id: "send",
+          onClick: saveToGDrive
+        }, "Save to Google Drive")));
+      } else if (authStatus = 'unauthorized') {
+        display = (React.createElement("div", {className: "file-dialog-view"}, React.createElement("button", {
+          id: "authorize",
+          onClick: authorize
+        }, "Authorize for Google Drive")));
+      }
+      return (display);
     }
   });
-  module.exports = StatusMenu;
+  module.exports = GoogleFileView;
   global.define = __define;
   return module.exports;
 });
@@ -31808,6 +31809,53 @@ System.register("javascripts/models/link-manager", ["npm:lodash@3.3.1", "npm:log
 
 
 
+System.register("javascripts/status-menu-view", ["npm:react@0.12.2", "npm:loglevel@1.2.0", "javascripts/vendor/touchpunch", "javascripts/google-file-view"], true, function(require, exports, module) {
+  var global = System.global,
+      __define = global.define;
+  global.define = undefined;
+  var React = require("npm:react@0.12.2");
+  var log = require("npm:loglevel@1.2.0");
+  var $ = require("javascripts/vendor/touchpunch");
+  var GoogleFileView = require("javascripts/google-file-view");
+  log.setLevel(log.levels.TRACE);
+  var StatusMenu = React.createClass({
+    displayName: "StatusMenu",
+    getInitialState: function() {
+      var state = {};
+      return state;
+    },
+    componentWillUpdate: function() {},
+    componentDidUpdate: function() {},
+    componentDidMount: function() {},
+    dataJson: function() {
+      return this.props.getData();
+    },
+    openLink: function() {
+      if (this.props.getData) {
+        var json = this.props.getData();
+        var encoded = encodeURIComponent(json);
+        var url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + encoded;
+        window.open(url);
+      }
+    },
+    render: function() {
+      var openLink = this.openLink;
+      var linkManager = this.props.linkManager;
+      var title = this.props.title || "Building Models";
+      var linkText = this.props.linkText || "Link to my model";
+      return (React.createElement("div", {className: "status-menu"}, React.createElement("div", {className: "title"}, title), React.createElement(GoogleFileView, {linkManager: linkManager}), React.createElement("div", {
+        className: "open-data-url",
+        onClick: openLink
+      }, linkText)));
+    }
+  });
+  module.exports = StatusMenu;
+  global.define = __define;
+  return module.exports;
+});
+
+
+
 System.register("github:jspm/nodelibs-process@0.1.1", ["github:jspm/nodelibs-process@0.1.1/index"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
@@ -33845,7 +33893,10 @@ System.register("javascripts/app-view", ["npm:react@0.12.2", "javascripts/info-p
         linkManager.changeLink(title, color, deleted);
       };
       var getData = this.getData.bind(this);
-      return (React.createElement("div", {className: "app"}, React.createElement(StatusMenu, {getData: getData}), React.createElement(LinkView, {linkManager: linkManager}), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
+      return (React.createElement("div", {className: "app"}, React.createElement(StatusMenu, {
+        linkManager: linkManager,
+        getData: getData
+      }), React.createElement(LinkView, {linkManager: linkManager}), React.createElement("div", {className: "bottomTools"}, React.createElement(NodeWell, null), React.createElement(NodeEditView, {
         node: selectedNode,
         onNodeChanged: onNodeChanged
       }), React.createElement(LinkEditView, {
