@@ -30,7 +30,7 @@ var AppView = React.createClass({
 
   setupDeleteKeyHandler: function(linkManager) {
     var deleteFunction = linkManager.deleteSelected.bind(linkManager);
-    $(document).on("keyup", function (e) {
+    $(window).on("keydown", function (e) {
       if (e.which === 8 && !$(e.target).is("input, textarea")) {
         e.preventDefault();
         deleteFunction();
