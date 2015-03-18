@@ -26755,14 +26755,58 @@ System.register("javascripts/google-drive-io", [], true, function(require, expor
   global.define = undefined;
   function GoogleDriveIO() {
     var CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com',
+        APP_ID = '1095918012594',
+        DEVELOPERKEY = 'AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA',
         SCOPES = 'https://www.googleapis.com/auth/drive';
-    this.authorize = function(immediate, callback) {
+    this.pickerApiLoaded = false;
+    this.oauthToken = null;
+    this.loadPicker = function(loadCallback) {
+      gapi.load('auth', {'callback': this.authorize(true, loadCallback)});
+      gapi.load('picker', {'callback': this.onPickerApiLoad});
+    }.bind(this);
+    this.onPickerApiLoad = function() {
+      this.pickerApiLoaded = true;
+    }.bind(this);
+    this.authorize = function(immediate, _callback) {
       var isImmediate = immediate || false;
+      var self = this;
+      var callback = function(authResult) {
+        if (authResult && !authResult.error) {
+          self.oauthToken = authResult.access_token;
+        }
+        _callback(authResult);
+      };
       gapi.auth.authorize({
         'client_id': CLIENT_ID,
         'scope': SCOPES,
         'immediate': isImmediate
       }, callback);
+    };
+    this.showSave = function(pickerCallback) {
+      if (this.pickerApiLoaded && this.oauthToken) {
+        var successCallback = function(jsonResp, rawResp) {
+          debugger;
+        }.bind(this);
+        var failCallback = function(jsonResp, rawResp) {
+          debugger;
+        }.bind(this);
+        var pickerCallback = function(data, etc) {
+          var picked = data.action === 'picked';
+          if (picked) {
+            var url = data.docs[0].url;
+            if (url) {
+              debugger;
+            }
+          }
+        }.bind(this);
+        var view = new google.picker.View(google.picker.ViewId.DOCS);
+        view.setMimeTypes("application/json");
+        var picker = new google.picker.PickerBuilder().enableFeature(google.picker.Feature.NAV_HIDDEN).enableFeature(google.picker.Feature.MULTISELECT_ENABLED).setAppId(APP_ID).setOAuthToken(this.oauthToken).setOrigin(window.location.protocol + '//' + window.location.host).addView(view).addView(new google.picker.DocsUploadView()).setDeveloperKey(DEVELOPERKEY).setCallback(pickerCallback).build();
+        picker.setVisible(true);
+      } else {
+        console.log('big fail!');
+        debugger;
+      }
     };
     this.upload = function(fileSpec, contents) {
       function handleAuthResult(authResult) {
@@ -28987,7 +29031,7 @@ System.register("javascripts/google-file-view", ["npm:react@0.12.2", "npm:loglev
       return state;
     },
     componentDidMount: function() {
-      var googleDrive = new GoogleDriveIO();
+      this.googleDrive = new GoogleDriveIO();
       var callback = function(token) {
         if (token && !token.error) {
           this.setState({authStatus: 'authorized'});
@@ -28997,29 +29041,14 @@ System.register("javascripts/google-file-view", ["npm:react@0.12.2", "npm:loglev
         }
       }.bind(this);
       setTimeout(function() {
-        googleDrive.authorize(true, callback);
-      }, 2000);
+        this.googleDrive.loadPicker(callback);
+      }.bind(this), 2000);
     },
     saveToGDrive: function() {
-      var googleDrive = new GoogleDriveIO();
-      var filename = this.state.filename;
-      var json = this.props.linkManager.toJsonString();
-      log.info('Proposing to save to "' + filename + '"');
-      if (!filename || filename.length === 0) {
-        filename = 'model';
-      }
-      if (!/.*\.json$/.test(filename)) {
-        filename += '.json';
-      }
-      log.info('Saving to "' + filename + '"');
-      googleDrive.upload({
-        fileName: filename,
-        mimeType: 'application/json'
-      }, json);
+      this.googleDrive.showSave();
     },
     authorize: function() {
-      var googleDrive = new GoogleDriveIO();
-      googleDrive.authorize(false, function(token) {
+      this.googleDrive.authorize(false, function(token) {
         if (token && token.error) {
           console.error("Google Drive Authorization failed:" + error);
         }
