@@ -26796,6 +26796,7 @@ System.register("javascripts/google-drive-io", [], true, function(require, expor
             var url = data.docs[0].url;
             if (url) {
               debugger;
+              gapi.client.request({path: url}).execute(successCallback, failCallback);
             }
           }
         }.bind(this);
