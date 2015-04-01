@@ -1,9 +1,6 @@
-_        = require 'lodash'
-log      = require 'loglevel'
-$        = require 'jquery'
 Importer = require '../importer'
-Link     = require './link'
-DiagramNode = require './Node'
+Link     = require './link.coffee'
+DiagramNode = require './node.coffee'
 
 # LinkManager is the logical manager of Nodes and Links.
 class LinkManager

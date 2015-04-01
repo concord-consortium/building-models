@@ -1,6 +1,4 @@
-_              = require('lodash')
-log            = require('loglevel')
-GraphPrimitive = require('./graph-primitive')
+GraphPrimitive = require('./graph-primitive.coffee')
 
 class Node extends GraphPrimitive
   constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null},key) ->

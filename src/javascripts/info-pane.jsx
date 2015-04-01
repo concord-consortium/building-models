@@ -1,4 +1,3 @@
-var React       = require('react');
 var InfoPane = React.createClass({
   getInitialState: function() { 
     return {

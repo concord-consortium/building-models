@@ -1,4 +1,3 @@
-var $ = require('./vendor/touchpunch');
 // Purpose of this class: Provide an abstraction over our
 // chosen diagramming toolkit.  
 function DiagramToolkit(domContext, options) {

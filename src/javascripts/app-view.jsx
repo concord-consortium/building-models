@@ -1,14 +1,10 @@
-var React       = require('react');
-var InfoPane    = require('./info-pane');
-var LinkView    = require('./link-view');
-var NodeWell    = require('./node-well-view');
-var NodeEditView= require('./node-edit-view');
-var LinkEditView= require('./link-edit-view');
-var StatusMenu  = require('./status-menu-view');
-var LinkManager = require('./models/link-manager');
-var _           = require('lodash');
-var log         = require('loglevel');
-var $           = require('./vendor/touchpunch');
+var InfoPane    = require('./info-pane.jsx');
+var LinkView    = require('./link-view.jsx');
+var NodeWell    = require('./node-well-view.jsx');
+var NodeEditView= require('./node-edit-view.jsx');
+var LinkEditView= require('./link-edit-view.jsx');
+var StatusMenu  = require('./status-menu-view.jsx');
+var LinkManager = require('./models/link-manager.coffee');
 
 log.setLevel(log.levels.TRACE);
 
@@ -93,7 +89,7 @@ var AppView = React.createClass({
 });
 
 var linkManager = LinkManager.instance('building-models');
-var url = "serialized.json";
+var url = "json/serialized.json";
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),

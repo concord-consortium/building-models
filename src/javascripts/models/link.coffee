@@ -1,4 +1,4 @@
-GraphPrimitive = require('./graph-primitive')
+GraphPrimitive = require('./graph-primitive.coffee')
 
 class Link extends GraphPrimitive
   @defaultColor: "#777"

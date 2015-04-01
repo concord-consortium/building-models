@@ -27,20 +27,9 @@ fi
 cd $HERE
 
 # 2) Build our project using gulp:
-gulp build-all &&\
+gulp build-all --production --buildInfo '$SHA built on $DATE' &&\
 
-# 3) Bundle our app using jspm
-jspm bundle-sfx javascripts/app-view dist/app.js &&\
-
-# 4) Copy files
-cp -r ./src/assets/* $DISTDIR &&\
-sed "s/__BUILD_INFO__/$SHA built on $DATE/g" $DISTDIR/index_production.html > $DISTDIR/index.html &&\
-cp ./public/css/app.css $DISTDIR/css/app.css &&\
-cp ./src/javascripts/jsPlumb.js $DISTDIR/jsPlumb.js &&\
-cp ./public/jspm_packages/system.js $DISTDIR/system.js &&\
-cp ./public/jspm_packages/es6-module-loader.js $DISTDIR/es6-module-loader.js &&\
-
-# # 5) Commit and push
+# 3) Commit and push
 cd $DISTDIR
 git add * &&\
 git commit -a -m "deployment for $SHA built on $DATE" &&\
