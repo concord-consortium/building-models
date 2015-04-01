@@ -1,13 +1,8 @@
-var React       = require('react');
-var Node        = require('./node-view');
-var InfoPane    = require('./info-pane');
+var Node        = require('./node-view.jsx');
+var InfoPane    = require('./info-pane.jsx');
 var Importer    = require('./importer');
-var NodeList    = require('./models/link-manager');
+var NodeList    = require('./models/link-manager.coffee');
 var DiagramTookkit = require('./js_plumb_diagram_toolkit');
-var $              = require('./vendor/touchpunch');
-var _              = require('lodash');
-log                = require('loglevel');
-
 
 var LinkView = React.createClass({
   

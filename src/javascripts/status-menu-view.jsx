@@ -1,7 +1,4 @@
-var React       = require('react');
-var log         = require('loglevel');
-var $           = require('./vendor/touchpunch');
-var GoogleFileView = require('./google-file-view');
+var GoogleFileView = require('./google-file-view.jsx');
 
 log.setLevel(log.levels.TRACE);
 

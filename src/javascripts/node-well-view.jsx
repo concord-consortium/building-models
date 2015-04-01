@@ -1,5 +1,4 @@
-var React         = require('react');
-var ProtoNodeView = require('./proto-node-view');
+var ProtoNodeView = require('./proto-node-view.jsx');
 
 var protoNodes =[
   {

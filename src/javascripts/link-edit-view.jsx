@@ -1,4 +1,3 @@
-var React       = require('react');
 var palettes    = [
   ['#4D6A6D','#798478', "#A0A083", "#C9ADA1", "#EAE0CC"],
   ['#351431','#775253', "#BDC696", "#D1D3C4", "#DFE0DC"],

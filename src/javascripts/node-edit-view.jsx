@@ -1,4 +1,3 @@
-var React       = require('react');
 var NodeEditView = React.createClass({
 
   notifyChange: function(title,image) {

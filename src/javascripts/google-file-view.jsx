@@ -1,10 +1,7 @@
 /**
  * Created by jsandoe on 3/16/15.
  */
-var React       = require('react');
-var log         = require('loglevel');
 var GoogleDriveIO = require ('./google-drive-io');
-var $           = require('./vendor/touchpunch');
 
 var GoogleFileView = React.createClass({
   getInitialState: function() {

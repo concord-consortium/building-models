@@ -23,7 +23,6 @@ Thumbs.db
 
 # Packages folder.
 node_modules/
-public/jspm_packages/
 
 # Brunch folder for temporary files.
 tmp/
@@ -31,9 +30,8 @@ tmp/
 # The dist folder
 dist/
 
-# the public folder
-public/
+# the dev folder
+dev/
 
 # except jspm config
-!public/config.js
 building-models.sublime-workspace
