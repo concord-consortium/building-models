@@ -1,16 +1,15 @@
 var gulp        = require('gulp');
 var browserify  = require('browserify');
 var source      = require("vinyl-source-stream");
-var reactify    = require('reactify');
 var coffeeify   = require('coffeeify');
 var production  = require('../config').production;
 var config      = require('../config').browserify;
 
 gulp.task('browserify-app', function(){
   var b = browserify({
-    debug: !production
+    debug: !production,
+    extensions: ['.coffee']
   });
-  b.transform(reactify);
   b.transform(coffeeify);
   b.add(config.app.src);
   return b.bundle()
