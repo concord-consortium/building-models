@@ -1,14 +1,14 @@
-Importer = require '../importer'
-Link     = require './link.coffee'
-DiagramNode = require './node.coffee'
+Importer = require '../utils/importer'
+Link     = require './link'
+DiagramNode = require './node'
 
 # LinkManager is the logical manager of Nodes and Links.
-class LinkManager
-  @instances = {} # map of context -> instance
+module.exports = class LinkManager
+  @instances: {} # map of context -> instance
   
-  @.instance  = (context) ->
-    @instances[context] ||= new @(context)
-    @instances[context]
+  @instance: (context) ->
+    LinkManager.instances[context] ?= new LinkManager context
+    LinkManager.instances[context]
 
   constructor: (context) ->
     @linkKeys  = {}
@@ -30,17 +30,17 @@ class LinkManager
     log.info("adding selection listener #{listener}")
     @selectionListeners.push listener
 
-  getLinks: () ->
-    return (value for key, value of @linkKeys)
+  getLinks: ->
+    (value for key, value of @linkKeys)
 
-  getNodes: () ->
-    return (value for key, value of @nodeKeys)
+  getNodes: ->
+    (value for key, value of @nodeKeys)
 
   hasLink: (link) ->
     @linkKeys[link.terminalKey()]?
 
   hasNode: (node) ->
-    return @nodeKeys[node.key]
+    @nodeKeys[node.key]?
 
   importLink: (linkSpec) ->
     sourceNode = @nodeKeys[linkSpec.sourceNode]
@@ -51,7 +51,7 @@ class LinkManager
     @addLink(link)
 
   addLink: (link) ->
-    unless @hasLink(link)
+    unless @hasLink link
       @linkKeys[link.terminalKey()] = link
       @nodeKeys[link.sourceNode.key].addLink(link)
       @nodeKeys[link.targetNode.key].addLink(link)
@@ -67,7 +67,7 @@ class LinkManager
     @addNode(node)
 
   addNode: (node) ->
-    unless @hasNode(node)
+    unless @hasNode node
       @nodeKeys[node.key] = node
       for listener in @nodeListeners
         log.info("notifying of new Node")
@@ -155,19 +155,19 @@ class LinkManager
     key = link.terminalKey()
     delete @linkKeys[key]
 
-  deleteSelected: () ->
+  deleteSelected: ->
     log.info "Deleting selected items"
     @removeSelectedLink()
     @removeSelectedNode()
 
   
-  removeSelectedNode: () ->
+  removeSelectedNode: ->
     if @selectedNode
       @removeNode(@selectedNode.key)
       for listener in @selectionListeners
         listener({node:null, connection:null})
 
-  removeSelectedLink: () ->
+  removeSelectedLink: ->
     if @selectedLink
       @removelink(@selectedLink)
       for listener in @linkListeners
@@ -209,7 +209,7 @@ class LinkManager
         log.error(url, status, err.toString())
       }
 
-  serialize: () ->
+  serialize: ->
     nodeExports = for key,node of @nodeKeys
       node.toExport()
     linkExports = for key,link of @linkKeys
@@ -219,8 +219,8 @@ class LinkManager
       links: linkExports
     }
 
-  toJsonString: () ->
+  toJsonString: ->
     JSON.stringify(@serialize())
     
 
-module.exports = LinkManager
+

@@ -14,13 +14,13 @@ module.exports = {
   },
   browserify: {
     app: {
-      watch: [src + '/javascripts/**/*.*', '!' + src + '/javascripts/globals.coffee'],
-      src: src + '/javascripts/app-view.jsx',
+      watch: [src + '/code/**/*.*', '!' + src + '/code/globals.coffee'],
+      src: src + '/code/app.coffee',
       dest: dest + '/js/'
     },
     globals: {
-      watch: [src + '/javascripts/globals.coffee'],
-      src: src + '/javascripts/globals.coffee',
+      watch: src + '/code/globals.coffee',
+      src: src + '/code/globals.coffee',
       dest: dest + '/js/'
     }
   },

@@ -1,3 +1,6 @@
+global._ = require 'lodash'
+global.log = require 'loglevel'
+
 chai = require('chai')
 chai.config.includeStack = true
 
@@ -5,13 +8,12 @@ expect         = chai.expect
 should         = chai.should()
 Sinon          = require('sinon')
 
-requireModel = (name) -> require "#{__dirname}/../src/javascripts/models/graph-primitive"
+requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 
 GraphPrimitive = requireModel 'graph-primitive'
 Link           = requireModel 'link'
 Node           = requireModel 'node'
 LinkManager    = requireModel 'link-manager'
-
 
 describe 'GraphPrimitive', () ->
   it 'GraphPrimitive should exists', () ->
@@ -19,7 +21,7 @@ describe 'GraphPrimitive', () ->
   
   describe 'the type', () ->
     undertest = new GraphPrimitive()
-    undertest.type().should.equal('GraphPrimitive')
+    undertest.type.should.equal('GraphPrimitive')
   
   describe 'the id', () ->
     beforeEach () ->
