@@ -16,10 +16,10 @@ module.exports = class GoogleDriveIO
       encoding = if part.encoding then "\r\nContent-Transfer-Encoding: #{part.encoding}" else ''
       "#{type}#{encoding}\r\n\r\n#{part.message}"
     ).join '') + "\r\n--#{boundary}--"
-    
+
   sendFile: (fileSpec, contents, callback) ->
     boundary = '-------314159265358979323846'
-    contentType = fileSpec.mimeType || 'application/octet-stream'
+    contentType = fileSpec.mimeType or 'application/octet-stream'
     metadata =
       'title': fileSpec.fileName
       'mimeType': contentType
@@ -27,25 +27,25 @@ module.exports = class GoogleDriveIO
       {
         fileType: contentType
         message: JSON.stringify metadata
-      }, 
+      },
       {
         fileType: 'application/json'
         message: contents
       }
     ]
     multipartRequestBody = @makeMultipartBody parts, boundary
-    
+
     request = gapi.client.request
       path: '/upload/drive/v2/files'
       method: 'POST'
-      params: 
+      params:
         uploadType: 'multipart'
       headers:
-       'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+        'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
       body: multipartRequestBody
 
     request.execute callback or ((file) -> console.log file)
-  
+
   upload: (fileSpec, contents) ->
     @authorize true, (token) =>
       if token and not token.error

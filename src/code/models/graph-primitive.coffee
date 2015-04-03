@@ -14,6 +14,6 @@ module.exports = class GraphPrimitive
 
   type: 'GraphPrimitive'
 
-  constructor: () ->
+  constructor: ->
     @id = GraphPrimitive.nextID @type
     @key= @id

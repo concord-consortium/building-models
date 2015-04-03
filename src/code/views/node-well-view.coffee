@@ -7,7 +7,7 @@ protoNodes = [
     'title': 'Egg',
     'image': 'img/nodes/egg.png'
   },
-  {  
+  {
     'title': 'Chick'
     'image': 'img/nodes/chick.jpg'
   },
@@ -19,7 +19,7 @@ protoNodes = [
     'title': ''
     'image': ''
   }
-];
+]
 
 module.exports = React.createClass
 
@@ -27,7 +27,7 @@ module.exports = React.createClass
 
   getInitialState: ->
     nodes: []
- 
+
   render: ->
     (div {className: 'node-well'},
       for node, i in protoNodes

@@ -24,6 +24,10 @@ module.exports = {
       dest: dest + '/js/'
     }
   },
+  coffeelint: {
+    watch: src + '/code/**/*.coffee',
+    src: src + '/code/**/*.coffee',
+  },
   assets: {
     watch: src + '/assets/**/*.*',
     src: src + '/assets/**/*.*',

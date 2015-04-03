@@ -32,5 +32,8 @@
     "gulp-replace": "^0.5.3",
     "gulp-if": "^1.2.5",
     "coffee-script": "^1.9.1"
+    "gulp-if": "^1.2.5",
+    "gulp-coffeelint": "^0.4.0",
+    "beepbeep": "^1.2.0"
   }
 }

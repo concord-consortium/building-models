@@ -5,7 +5,7 @@ DiagramNode = require './node'
 # LinkManager is the logical manager of Nodes and Links.
 module.exports = class LinkManager
   @instances: {} # map of context -> instance
-  
+
   @instance: (context) ->
     LinkManager.instances[context] ?= new LinkManager context
     LinkManager.instances[context]
@@ -17,7 +17,7 @@ module.exports = class LinkManager
     @nodeListeners = []
     @selectionListeners = []
     @selectedNode = {}
-    
+
   addLinkListener: (listener) ->
     log.info("adding link listener")
     @linkListeners.push listener
@@ -58,7 +58,7 @@ module.exports = class LinkManager
       for listener in @linkListeners
         log.info "notifying of new link: #{link.terminalKey()}"
         listener.handleLinkAdd(link)
-      @selectLink(link)  
+      @selectLink(link)
       return true
     return false
 
@@ -72,11 +72,10 @@ module.exports = class LinkManager
       for listener in @nodeListeners
         log.info("notifying of new Node")
         listener.handleNodeAdd(node)
-      @selectNode(node.key)        
+      @selectNode(node.key)
       return true
-      
     return false
-  
+
   moveNode: (nodeKey, x,y ) ->
     node = @nodeKeys[nodeKey]
     return unless node
@@ -86,7 +85,7 @@ module.exports = class LinkManager
     for listener in @nodeListeners
       log.info("notifying of NodeMove")
       listener.handleNodeMove(node)
-    
+
   selectNode: (nodeKey) ->
     if @selectedNode
       @selectedNode.selected = false
@@ -108,7 +107,7 @@ module.exports = class LinkManager
       @selectedNode.image = image
       for listener in @selectionListeners
         listener({node:@selectedNode, connection:null})
- 
+
   selectLink: (link) ->
     if @selectedLink
       @selectedLink.selected = false
@@ -135,13 +134,12 @@ module.exports = class LinkManager
   _nameForNode: (node) ->
     @nodeKeys[node]
 
-
   newLinkFromEvent: (info) ->
     newLink = {}
-    startKey = $(info.source).data('node-key') || 'undefined'
-    endKey   = $(info.target).data('node-key') || 'undefined'
-    startTerminal = if info.connection.endpoints[0].anchor.type == "Top" then "a" else "b"
-    endTerminal   = if info.connection.endpoints[1].anchor.type == "Top" then "a" else "b"
+    startKey = $(info.source).data('node-key') or 'undefined'
+    endKey   = $(info.target).data('node-key') or 'undefined'
+    startTerminal = if info.connection.endpoints[0].anchor.type is "Top" then "a" else "b"
+    endTerminal   = if info.connection.endpoints[1].anchor.type is "Top" then "a" else "b"
     @importLink
       sourceNode:startKey,
       targetNode:endKey,
@@ -149,7 +147,7 @@ module.exports = class LinkManager
       targetTerminal: endTerminal,
       color: info.color,
       title: info.title
-    return true
+    true
 
   removelink: (link) ->
     key = link.terminalKey()
@@ -160,7 +158,6 @@ module.exports = class LinkManager
     @removeSelectedLink()
     @removeSelectedNode()
 
-  
   removeSelectedNode: ->
     if @selectedNode
       @removeNode(@selectedNode.key)
@@ -179,7 +176,6 @@ module.exports = class LinkManager
 
   removeLinksForNode: (node) ->
     @removelink(link) for link in node.links
-
 
   removeNode: (nodeKey) ->
     node = @nodeKeys[nodeKey]
@@ -200,14 +196,13 @@ module.exports = class LinkManager
   loadDataFromUrl: (url) =>
     log.info("loading local data")
     log.info("url " + url)
-    $.ajax {
+    $.ajax
       url: url,
       dataType: 'json',
       success: (data) =>
         @loadData(data)
       error: (xhr, status, err) ->
         log.error(url, status, err.toString())
-      }
 
   serialize: ->
     nodeExports = for key,node of @nodeKeys
@@ -215,12 +210,10 @@ module.exports = class LinkManager
     linkExports = for key,link of @linkKeys
       link.toExport()
     return {
-      nodes: nodeExports,
+      nodes: nodeExports
       links: linkExports
     }
-
+    
   toJsonString: ->
     JSON.stringify(@serialize())
     
-
-
