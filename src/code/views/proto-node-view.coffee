@@ -12,7 +12,7 @@ module.exports = React.createClass
       revertDuration: 0
       opacity: 0.35
   
-  doMove: ->
+  doMove: -> undefined
   
   render: ->
     (div {className: 'proto-node', ref: 'node', 'data-node-key': @props.key, 'data-image': @props.image, 'data-title': @props.title},

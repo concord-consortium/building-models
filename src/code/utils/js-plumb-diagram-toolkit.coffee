@@ -1,4 +1,4 @@
-# Purpose of this class: Provide an abstraction over our chosen diagramming toolkit.  
+# Purpose of this class: Provide an abstraction over our chosen diagramming toolkit.
 
 module.exports = class DiagramToolkit
 
@@ -24,11 +24,12 @@ module.exports = class DiagramToolkit
 
   handleClick: (connection, evnt) ->
     @options.handleClick? connection, evnt
-    
+
   handleLabelClick: (label, evnt) ->
     # TODO:  how can we do this?
     # @options.handleClick? label.component, evnt
-    
+    undefined
+
   handleDisconnect: (info, evnt) ->
     return (@options.handleDisconnect? info, evnt) or true
 
@@ -39,7 +40,7 @@ module.exports = class DiagramToolkit
 
   makeTarget: (div) ->
     opts = (anchor) =>
-      isTarget: true 
+      isTarget: true
       isSource: true
       endpoint: @_endpointOptions
       connector: ['Bezier']
@@ -60,21 +61,21 @@ module.exports = class DiagramToolkit
   _paintStyle: (color) ->
     strokeStyle: color or @color,
     lineWidth: @lineWidth
-    
+
   _overlays: (label, selected) ->
-    results = [['Arrow', { 
+    results = [['Arrow', {
       location: 1.0,
       events: { click: @handleLabelClick }
     }]]
     if label?.length > 0
-      results.push ['Label', { 
-        location: 0.4, 
+      results.push ['Label', {
+        location: 0.4,
         events: { click: @handleLabelClick },
         label: label or '',
         cssClass: "label#{if selected then ' selected' else ''}"
       }]
     results
-    
+
   _clean_borked_endpoints: ->
     $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove()
 
@@ -82,8 +83,8 @@ module.exports = class DiagramToolkit
     paintStyle = @_paintStyle color
     if linkModel.selected
       paintStyle.lineWidth = paintStyle.lineWidth * 1.2
-      
-    connection = @kit.connect 
+
+    connection = @kit.connect
       source: source
       target: target
       anchors: [source_terminal or "Top", target_terminal or "Bottom"]
@@ -98,8 +99,8 @@ module.exports = class DiagramToolkit
     @kit.setSuspendDrawing shouldwestop, not shouldwestop
 
   supspendDrawing: ->
-    @setSuspendDrawing true 
-  
+    @setSuspendDrawing true
+
   resumeDrawing: ->
     @setSuspendDrawing false
 

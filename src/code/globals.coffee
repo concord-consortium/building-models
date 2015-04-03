@@ -1,4 +1,4 @@
-# global vars 
+# global vars
 
 global.$ = require './vendor/touchpunch.js'
 global.React = require 'react'

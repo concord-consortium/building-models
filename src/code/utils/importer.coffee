@@ -1,14 +1,15 @@
 module.exports = class MySystemImporter
 
   constructor: (@system) ->
-  
+    undefined
+
   importData: (data) ->
     @importNodes data.nodes
     @importLinks data.links
 
   importNodes: (importNodes) ->
     for data in importNodes
-      @system.importNode 
+      @system.importNode
         key: data.key
         data: data
 

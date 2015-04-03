@@ -3,7 +3,7 @@
 module.exports = React.createClass
 
   displayName: 'NodeView'
-  
+
   componentDidMount: ->
     $elem = $(@refs.node.getDOMNode())
     $elem.draggable
@@ -17,7 +17,7 @@ module.exports = React.createClass
       selectionKey = if actually_select then @props.nodeKey else 'dont-select-anything'
       @props.linkManager.selectNode selectionKey
 
-  propTypes: 
+  propTypes:
     onDelete: React.PropTypes.func
     onMove: React.PropTypes.func
     onSelect: React.PropTypes.func
@@ -48,7 +48,7 @@ module.exports = React.createClass
     style =
       top: @props.data.y
       left: @props.data.x
-      
+
     (div {className: "elm#{if @props.selected then ' selected' else ''}", ref: 'node', style: style, 'data-node-key': @props.nodeKey},
       (div {className: 'img-background'},
         (div {className: 'delete-box', onClick: @doDelete},
