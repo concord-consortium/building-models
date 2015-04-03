@@ -7,6 +7,9 @@
     "type": "git",
     "url": "https://github.com/concord-consortium/building-models"
   },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha"
+  },
   "dependencies": {
     "lodash": "^3.3.0",
     "loglevel": "^1.2.0",
@@ -27,6 +30,7 @@
     "require-dir": "^0.1.0",
     "yargs": "^3.6.0",
     "gulp-replace": "^0.5.3",
-    "gulp-if": "^1.2.5"
+    "gulp-if": "^1.2.5",
+    "coffee-script": "^1.9.1"
   }
 }
