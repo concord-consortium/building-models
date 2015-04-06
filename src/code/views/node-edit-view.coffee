@@ -1,4 +1,4 @@
-{div, h2, label, input} = React.DOM
+{div, h2, label, input, select, option} = React.DOM
 
 module.exports = React.createClass
 
@@ -20,7 +20,10 @@ module.exports = React.createClass
         )
         (div {className: 'edit-row'},
           (label {name: 'image'}, 'Image')
-          (input {type: 'text', name: 'image', value: @props.node.image, onChange: @changeImage})
+          (select {name: 'image', value: @props.node.image, onChange: @changeImage},
+            for node, i in @props.protoNodes
+              (option {key: i, value: node.image}, node.title)
+          )
         )
       )
     else

@@ -2,25 +2,6 @@ ProtoNodeView = React.createFactory require './proto-node-view'
 
 {div} = React.DOM
 
-protoNodes = [
-  {
-    'title': 'Egg',
-    'image': 'img/nodes/egg.png'
-  },
-  {
-    'title': 'Chick'
-    'image': 'img/nodes/chick.jpg'
-  },
-  {
-    'title': 'Chicken'
-    'image': 'img/nodes/chicken.jpg'
-  },
-  {
-    'title': ''
-    'image': ''
-  }
-]
-
 module.exports = React.createClass
 
   displayName: 'NodeWell'
@@ -30,6 +11,6 @@ module.exports = React.createClass
 
   render: ->
     (div {className: 'node-well'},
-      for node, i in protoNodes
+      for node, i in @props.protoNodes
         (ProtoNodeView {key: i, image: node.image, title: node.title})
     )
