@@ -733,6 +733,7 @@ var MySystemImporter;
 module.exports = MySystemImporter = (function() {
   function MySystemImporter(system) {
     this.system = system;
+    void 0;
   }
 
   MySystemImporter.prototype.importData = function(data) {
@@ -823,7 +824,10 @@ module.exports = DiagramToolkit = (function() {
     return typeof (base = this.options).handleClick === "function" ? base.handleClick(connection, evnt) : void 0;
   };
 
-  DiagramToolkit.prototype.handleLabelClick = function(label, evnt) {};
+  DiagramToolkit.prototype.handleLabelClick = function(label, evnt) {
+    var base;
+    return typeof (base = this.options).handleClick === "function" ? base.handleClick(label.component, evnt) : void 0;
+  };
 
   DiagramToolkit.prototype.handleDisconnect = function(info, evnt) {
     var base;
@@ -883,7 +887,7 @@ module.exports = DiagramToolkit = (function() {
         'Arrow', {
           location: 1.0,
           events: {
-            click: this.handleLabelClick
+            click: this.handleLabelClick.bind(this)
           }
         }
       ]
@@ -893,7 +897,7 @@ module.exports = DiagramToolkit = (function() {
         'Label', {
           location: 0.4,
           events: {
-            click: this.handleLabelClick
+            click: this.handleLabelClick.bind(this)
           },
           label: label || '',
           cssClass: "label" + (selected ? ' selected' : '')
@@ -946,7 +950,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 },{}],9:[function(require,module,exports){
-var LinkEditView, LinkView, NodeEditView, NodeWell, StatusMenu, div;
+var LinkEditView, LinkView, NodeEditView, NodeWell, StatusMenu, div, protoNodes;
 
 LinkView = React.createFactory(require('./link-view'));
 
@@ -961,6 +965,22 @@ StatusMenu = React.createFactory(require('./status-menu-view'));
 div = React.DOM.div;
 
 log.setLevel(log.levels.TRACE);
+
+protoNodes = [
+  {
+    'title': 'Egg',
+    'image': 'img/nodes/egg.png'
+  }, {
+    'title': 'Chick',
+    'image': 'img/nodes/chick.jpg'
+  }, {
+    'title': 'Chicken',
+    'image': 'img/nodes/chicken.jpg'
+  }, {
+    'title': '',
+    'image': ''
+  }
+];
 
 module.exports = React.createClass({
   displayName: 'App',
@@ -1027,9 +1047,12 @@ module.exports = React.createClass({
       linkManager: this.props.linkManager
     }), div({
       className: 'bottomTools'
-    }, NodeWell({}), NodeEditView({
+    }, NodeWell({
+      protoNodes: protoNodes
+    }), NodeEditView({
       node: this.state.selectedNode,
-      onNodeChanged: this.onNodeChanged
+      onNodeChanged: this.onNodeChanged,
+      protoNodes: protoNodes
     }), LinkEditView({
       link: this.state.selectedConnection,
       onLinkChanged: this.onLinkChanged
@@ -1430,9 +1453,9 @@ module.exports = React.createClass({
 
 
 },{"../models/link-manager":3,"../utils/importer":7,"../utils/js-plumb-diagram-toolkit":8,"./node-view":14}],13:[function(require,module,exports){
-var div, h2, input, label, ref;
+var div, h2, input, label, option, ref, select;
 
-ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input;
+ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option;
 
 module.exports = React.createClass({
   displayName: 'NodeEdit',
@@ -1445,6 +1468,7 @@ module.exports = React.createClass({
     return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, this.props.node.title, e.target.value) : void 0;
   },
   render: function() {
+    var i, node;
     if (this.props.node) {
       return div({
         className: 'node-edit-view'
@@ -1461,12 +1485,23 @@ module.exports = React.createClass({
         className: 'edit-row'
       }, label({
         name: 'image'
-      }, 'Image'), input({
-        type: 'text',
+      }, 'Image'), select({
         name: 'image',
         value: this.props.node.image,
         onChange: this.changeImage
-      })));
+      }, (function() {
+        var j, len, ref1, results;
+        ref1 = this.props.protoNodes;
+        results = [];
+        for (i = j = 0, len = ref1.length; j < len; i = ++j) {
+          node = ref1[i];
+          results.push(option({
+            key: i,
+            value: node.image
+          }, node.title));
+        }
+        return results;
+      }).call(this))));
     } else {
       return div({
         className: 'node-edit-view hidden'
@@ -1572,27 +1607,11 @@ module.exports = React.createClass({
 
 
 },{}],15:[function(require,module,exports){
-var ProtoNodeView, div, protoNodes;
+var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
 
 div = React.DOM.div;
-
-protoNodes = [
-  {
-    'title': 'Egg',
-    'image': 'img/nodes/egg.png'
-  }, {
-    'title': 'Chick',
-    'image': 'img/nodes/chick.jpg'
-  }, {
-    'title': 'Chicken',
-    'image': 'img/nodes/chicken.jpg'
-  }, {
-    'title': '',
-    'image': ''
-  }
-];
 
 module.exports = React.createClass({
   displayName: 'NodeWell',
@@ -1606,10 +1625,11 @@ module.exports = React.createClass({
     return div({
       className: 'node-well'
     }, (function() {
-      var j, len, results;
+      var j, len, ref, results;
+      ref = this.props.protoNodes;
       results = [];
-      for (i = j = 0, len = protoNodes.length; j < len; i = ++j) {
-        node = protoNodes[i];
+      for (i = j = 0, len = ref.length; j < len; i = ++j) {
+        node = ref[i];
         results.push(ProtoNodeView({
           key: i,
           image: node.image,
@@ -1617,7 +1637,7 @@ module.exports = React.createClass({
         }));
       }
       return results;
-    })());
+    }).call(this));
   }
 });
 
@@ -1639,7 +1659,9 @@ module.exports = React.createClass({
       opacity: 0.35
     });
   },
-  doMove: function() {},
+  doMove: function() {
+    return void 0;
+  },
   render: function() {
     var ref1;
     return div({
