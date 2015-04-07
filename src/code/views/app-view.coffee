@@ -8,6 +8,26 @@ StatusMenu  = React.createFactory require './status-menu-view'
 
 log.setLevel log.levels.TRACE
 
+
+protoNodes = [
+  {
+    'title': 'Egg',
+    'image': 'img/nodes/egg.png'
+  },
+  {
+    'title': 'Chick'
+    'image': 'img/nodes/chick.jpg'
+  },
+  {
+    'title': 'Chicken'
+    'image': 'img/nodes/chicken.jpg'
+  },
+  {
+    'title': ''
+    'image': ''
+  }
+]
+
 module.exports = React.createClass
 
   displayName: 'App'
@@ -60,8 +80,8 @@ module.exports = React.createClass
       (StatusMenu {linkManager: @props.linkManager, getData: @getData})
       (LinkView {linkManager: @props.linkManager})
       (div {className: 'bottomTools'},
-        (NodeWell {})
-        (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged})
+        (NodeWell {protoNodes: protoNodes})
+        (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged, protoNodes: protoNodes})
         (LinkEditView {link: @state.selectedConnection, onLinkChanged: @onLinkChanged})
       )
     )
