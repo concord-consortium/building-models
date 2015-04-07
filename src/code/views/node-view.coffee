@@ -54,7 +54,7 @@ module.exports = React.createClass
         (div {className: 'delete-box', onClick: @doDelete},
           (i {className: 'fa fa-times-circle'})
         )
-        (if @props.data.image?.length > 0 then (img {src: @props.data.image}) else null)
+        (if @props.data.image?.length > 0 and @props.data.image isnt '#remote' then (img {src: @props.data.image}) else null)
         (div {className: 'node-title'}, @props.data.title)
       )
     )

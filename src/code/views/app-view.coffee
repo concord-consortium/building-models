@@ -8,26 +8,6 @@ StatusMenu  = React.createFactory require './status-menu-view'
 
 log.setLevel log.levels.TRACE
 
-
-protoNodes = [
-  {
-    'title': 'Egg',
-    'image': 'img/nodes/egg.png'
-  },
-  {
-    'title': 'Chick'
-    'image': 'img/nodes/chick.jpg'
-  },
-  {
-    'title': 'Chicken'
-    'image': 'img/nodes/chicken.jpg'
-  },
-  {
-    'title': ''
-    'image': ''
-  }
-]
-
 module.exports = React.createClass
 
   displayName: 'App'
@@ -35,6 +15,7 @@ module.exports = React.createClass
   getInitialState: ->
     selectedNode: null
     selectedConnection: null
+    protoNodes: require './proto-nodes'
 
   componentDidUpdate: ->
     log.info 'Did Update: AppView'
@@ -51,13 +32,13 @@ module.exports = React.createClass
 
   componentDidMount: ->
     @addDeleteKeyHandler true
-    
+
     @props.linkManager.addSelectionListener (selections) =>
       @setState
         selectedNode: selections.node
         selectedConnection: selections.connection
       log.info 'updated selections: + selections'
-  
+
     if @props.data?.length > 0
       @props.linkManager.loadData JSON.parse @props.data
     else
@@ -65,7 +46,7 @@ module.exports = React.createClass
 
   componentDidUnmount: ->
     @addDeleteKeyHandler false
-  
+
   getData: ->
     @props.linkManager.toJsonString()
 
@@ -74,14 +55,30 @@ module.exports = React.createClass
 
   onLinkChanged: (link, title, color, deleted) ->
     @props.linkManager.changeLink title,color, deleted
-  
+
+  onAddRemoteImage: (image) ->
+    # make sure this is a new image
+    if not _.find @state.protoNodes, {image: image}
+      # add the image before the empty image
+      protoNodes = @state.protoNodes.slice 0
+      emptyPos = _.findIndex protoNodes, {image: ''}
+      protoNodes.splice (if emptyPos is -1 then protoNodes.length else emptyPos), 0,
+        type: 'remote'
+        title: ''
+        image: image
+      @setState protoNodes: protoNodes
+
+  onNodeWellClicked: (image) ->
+    if @state.selectedNode
+      @props.linkManager.changeNode @state.selectedNode.title, image
+
   render: ->
     (div {className: 'app'},
       (StatusMenu {linkManager: @props.linkManager, getData: @getData})
       (LinkView {linkManager: @props.linkManager})
       (div {className: 'bottomTools'},
-        (NodeWell {protoNodes: protoNodes})
-        (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged, protoNodes: protoNodes})
+        (NodeWell {protoNodes: @state.protoNodes, onNodeClicked: @onNodeWellClicked })
+        (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged, protoNodes: @state.protoNodes, onAddRemoteImage: @onAddRemoteImage})
         (LinkEditView {link: @state.selectedConnection, onLinkChanged: @onLinkChanged})
       )
     )
