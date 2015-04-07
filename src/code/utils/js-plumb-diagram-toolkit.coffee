@@ -26,9 +26,7 @@ module.exports = class DiagramToolkit
     @options.handleClick? connection, evnt
 
   handleLabelClick: (label, evnt) ->
-    # TODO:  how can we do this?
-    # @options.handleClick? label.component, evnt
-    undefined
+    @options.handleClick? label.component, evnt
 
   handleDisconnect: (info, evnt) ->
     return (@options.handleDisconnect? info, evnt) or true
@@ -65,12 +63,12 @@ module.exports = class DiagramToolkit
   _overlays: (label, selected) ->
     results = [['Arrow', {
       location: 1.0,
-      events: { click: @handleLabelClick }
+      events: { click: @handleLabelClick.bind @ }
     }]]
     if label?.length > 0
       results.push ['Label', {
         location: 0.4,
-        events: { click: @handleLabelClick },
+        events: { click: @handleLabelClick.bind @ },
         label: label or '',
         cssClass: "label#{if selected then ' selected' else ''}"
       }]
