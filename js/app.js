@@ -950,7 +950,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 },{}],9:[function(require,module,exports){
-var LinkEditView, LinkView, NodeEditView, NodeWell, StatusMenu, div, protoNodes;
+var LinkEditView, LinkView, NodeEditView, NodeWell, StatusMenu, div;
 
 LinkView = React.createFactory(require('./link-view'));
 
@@ -966,28 +966,13 @@ div = React.DOM.div;
 
 log.setLevel(log.levels.TRACE);
 
-protoNodes = [
-  {
-    'title': 'Egg',
-    'image': 'img/nodes/egg.png'
-  }, {
-    'title': 'Chick',
-    'image': 'img/nodes/chick.jpg'
-  }, {
-    'title': 'Chicken',
-    'image': 'img/nodes/chicken.jpg'
-  }, {
-    'title': '',
-    'image': ''
-  }
-];
-
 module.exports = React.createClass({
   displayName: 'App',
   getInitialState: function() {
     return {
       selectedNode: null,
-      selectedConnection: null
+      selectedConnection: null,
+      protoNodes: require('./proto-nodes')
     };
   },
   componentDidUpdate: function() {
@@ -1037,6 +1022,30 @@ module.exports = React.createClass({
   onLinkChanged: function(link, title, color, deleted) {
     return this.props.linkManager.changeLink(title, color, deleted);
   },
+  onAddRemoteImage: function(image) {
+    var emptyPos, protoNodes;
+    if (!_.find(this.state.protoNodes, {
+      image: image
+    })) {
+      protoNodes = this.state.protoNodes.slice(0);
+      emptyPos = _.findIndex(protoNodes, {
+        image: ''
+      });
+      protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
+        type: 'remote',
+        title: '',
+        image: image
+      });
+      return this.setState({
+        protoNodes: protoNodes
+      });
+    }
+  },
+  onNodeWellClicked: function(image) {
+    if (this.state.selectedNode) {
+      return this.props.linkManager.changeNode(this.state.selectedNode.title, image);
+    }
+  },
   render: function() {
     return div({
       className: 'app'
@@ -1048,11 +1057,13 @@ module.exports = React.createClass({
     }), div({
       className: 'bottomTools'
     }, NodeWell({
-      protoNodes: protoNodes
+      protoNodes: this.state.protoNodes,
+      onNodeClicked: this.onNodeWellClicked
     }), NodeEditView({
       node: this.state.selectedNode,
       onNodeChanged: this.onNodeChanged,
-      protoNodes: protoNodes
+      protoNodes: this.state.protoNodes,
+      onAddRemoteImage: this.onAddRemoteImage
     }), LinkEditView({
       link: this.state.selectedConnection,
       onLinkChanged: this.onLinkChanged
@@ -1062,7 +1073,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-edit-view":11,"./link-view":12,"./node-edit-view":13,"./node-well-view":15,"./status-menu-view":17}],10:[function(require,module,exports){
+},{"./link-edit-view":11,"./link-view":12,"./node-edit-view":13,"./node-well-view":15,"./proto-nodes":17,"./status-menu-view":18}],10:[function(require,module,exports){
 var GoogleDriveIO, button, div, input, label, ref;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -1453,9 +1464,9 @@ module.exports = React.createClass({
 
 
 },{"../models/link-manager":3,"../utils/importer":7,"../utils/js-plumb-diagram-toolkit":8,"./node-view":14}],13:[function(require,module,exports){
-var div, h2, input, label, option, ref, select;
+var button, div, h2, input, label, optgroup, option, ref, select;
 
-ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option;
+ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
 
 module.exports = React.createClass({
   displayName: 'NodeEdit',
@@ -1467,6 +1478,29 @@ module.exports = React.createClass({
     var base;
     return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, this.props.node.title, e.target.value) : void 0;
   },
+  addRemote: function(e) {
+    var img, ref1, src;
+    src = $.trim(((ref1 = this.refs.remoteUrl) != null ? ref1.getDOMNode().value : void 0) || '');
+    if (src.length > 0) {
+      img = new Image;
+      img.onload = (function(_this) {
+        return function() {
+          var base, base1;
+          if (typeof (base = _this.props).onNodeChanged === "function") {
+            base.onNodeChanged(_this.props.node, _this.props.node.title, src);
+          }
+          return typeof (base1 = _this.props).onAddRemoteImage === "function" ? base1.onAddRemoteImage(src) : void 0;
+        };
+      })(this);
+      img.onerror = (function(_this) {
+        return function() {
+          alert("Sorry, could not load " + src);
+          return _this.refs.remoteUrl.getDOMNode().focus();
+        };
+      })(this);
+      return img.src = src;
+    }
+  },
   render: function() {
     var i, node;
     if (this.props.node) {
@@ -1475,7 +1509,7 @@ module.exports = React.createClass({
       }, h2({}, this.props.node.title), div({
         className: 'edit-row'
       }, label({
-        name: 'title'
+        htmlFor: 'title'
       }, 'Title'), input({
         type: 'text',
         name: 'title',
@@ -1484,24 +1518,67 @@ module.exports = React.createClass({
       })), div({
         className: 'edit-row'
       }, label({
-        name: 'image'
+        htmlFor: 'image'
       }, 'Image'), select({
         name: 'image',
         value: this.props.node.image,
         onChange: this.changeImage
+      }, optgroup({
+        label: 'Built-In'
       }, (function() {
         var j, len, ref1, results;
         ref1 = this.props.protoNodes;
         results = [];
         for (i = j = 0, len = ref1.length; j < len; i = ++j) {
           node = ref1[i];
-          results.push(option({
-            key: i,
-            value: node.image
-          }, node.title));
+          if (node.type === 'builtin') {
+            results.push(option({
+              key: i,
+              value: node.image
+            }, node.title.length > 0 ? node.title : '(none)'));
+          } else {
+            results.push(void 0);
+          }
         }
         return results;
-      }).call(this))));
+      }).call(this)), optgroup({
+        label: 'Remote'
+      }, (function() {
+        var j, len, ref1, results;
+        ref1 = this.props.protoNodes;
+        results = [];
+        for (i = j = 0, len = ref1.length; j < len; i = ++j) {
+          node = ref1[i];
+          if (node.type === 'remote') {
+            results.push(option({
+              key: i,
+              value: node.image
+            }, node.image));
+          } else {
+            results.push(void 0);
+          }
+        }
+        return results;
+      }).call(this), option({
+        key: i,
+        value: '#remote'
+      }, 'Add Remote...')))), this.props.node.image === '#remote' ? div({}, div({
+        className: 'edit-row'
+      }, label({
+        htmlFor: 'remoteUrl'
+      }, 'URL'), input({
+        type: 'text',
+        ref: 'remoteUrl',
+        name: 'remoteUrl',
+        placeholder: 'Remote image url'
+      })), div({
+        className: 'edit-row'
+      }, label({
+        htmlFor: 'save'
+      }, ''), button({
+        name: 'save',
+        onClick: this.addRemote
+      }, 'Add Remote Image'))) : void 0);
     } else {
       return div({
         className: 'node-edit-view hidden'
@@ -1596,7 +1673,7 @@ module.exports = React.createClass({
       onClick: this.doDelete
     }, i({
       className: 'fa fa-times-circle'
-    })), (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 ? img({
+    })), (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== '#remote' ? img({
       src: this.props.data.image
     }) : null), div({
       className: 'node-title'
@@ -1633,7 +1710,8 @@ module.exports = React.createClass({
         results.push(ProtoNodeView({
           key: i,
           image: node.image,
-          title: node.title
+          title: node.title,
+          onNodeClicked: this.props.onNodeClicked
         }));
       }
       return results;
@@ -1662,11 +1740,16 @@ module.exports = React.createClass({
   doMove: function() {
     return void 0;
   },
+  onClick: function() {
+    var base;
+    return typeof (base = this.props).onNodeClicked === "function" ? base.onNodeClicked(this.props.image) : void 0;
+  },
   render: function() {
     var ref1;
     return div({
       className: 'proto-node',
       ref: 'node',
+      onClick: this.onClick,
       'data-node-key': this.props.key,
       'data-image': this.props.image,
       'data-title': this.props.title
@@ -1681,6 +1764,33 @@ module.exports = React.createClass({
 
 
 },{}],17:[function(require,module,exports){
+module.exports = [
+  {
+    "id": "1",
+    "type": "builtin",
+    "title": "Egg",
+    "image": "img/nodes/egg.png"
+  }, {
+    "id": "2",
+    "type": "builtin",
+    "title": "Chick",
+    "image": "img/nodes/chick.jpg"
+  }, {
+    "id": "3",
+    "type": "builtin",
+    "title": "Chicken",
+    "image": "img/nodes/chicken.jpg"
+  }, {
+    "id": "4",
+    "type": "builtin",
+    "title": "",
+    "image": ""
+  }
+];
+
+
+
+},{}],18:[function(require,module,exports){
 var GoogleFileView, div;
 
 GoogleFileView = React.createFactory(require('./google-file-view'));
