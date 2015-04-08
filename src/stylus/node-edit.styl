@@ -1,15 +1,21 @@
 .node-edit-view
   min-width  100px
   text-align left
-  
+
   flex 1 0 0
-  -webkit-flex 1 0 0 
-  
+  -webkit-flex 1 0 0
+
+  h2
+    margin-bottom 5px
+
   &.hidden
     display none
   .edit-row
     padding 0.2em
     white-space nowrap
   label
+    display inline-block
+    width 45px
     font-weight bold
-    margin-right 1.5em
+  input, select
+    width 175px
