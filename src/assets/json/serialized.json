@@ -1,4 +1,6 @@
 {
+    "version": 0.1,
+    "filename": "Sample Model",
     "nodes": [
         {
             "title": "Chicken",

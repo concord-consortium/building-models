@@ -12,5 +12,5 @@ module.exports = React.createClass
   render: ->
     (div {className: 'node-well'},
       for node, i in @props.protoNodes
-        (ProtoNodeView {key: i, image: node.image, title: node.title, onNodeClicked: @props.onNodeClicked})
+        (ProtoNodeView {key: i, image: node.image, title: node.title})
     )

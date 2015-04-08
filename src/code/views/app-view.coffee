@@ -16,6 +16,7 @@ module.exports = React.createClass
     selectedNode: null
     selectedConnection: null
     protoNodes: require './proto-nodes'
+    filename: null
 
   componentDidUpdate: ->
     log.info 'Did Update: AppView'
@@ -32,12 +33,37 @@ module.exports = React.createClass
 
   componentDidMount: ->
     @addDeleteKeyHandler true
+    
+    updatePalette = (node) =>
+      if node?.image.match /^https?:/
+        # make sure this is a new image
+        if not _.find @state.protoNodes, {image: node.image}
+          # add the image before the empty image
+          protoNodes = @state.protoNodes.slice 0
+          emptyPos = _.findIndex protoNodes, {image: ''}
+          protoNodes.splice (if emptyPos is -1 then protoNodes.length else emptyPos), 0,
+            title: ''
+            image: node.image
+          @setState protoNodes: protoNodes
 
     @props.linkManager.addSelectionListener (selections) =>
       @setState
         selectedNode: selections.node
         selectedConnection: selections.connection
+      updatePalette selections.node
       log.info 'updated selections: + selections'
+      
+    @props.linkManager.addLoadListener (data) =>
+      # reload the palette
+      if data.palette
+        @setState protoNodes: data.palette
+      else
+        @setState protoNodes: (require './proto-nodes')
+        for node in data.nodes
+          updatePalette node
+          
+    @props.linkManager.addFilenameListener (filename) =>
+      @setState filename: filename
 
     if @props.data?.length > 0
       @props.linkManager.loadData JSON.parse @props.data
@@ -48,7 +74,7 @@ module.exports = React.createClass
     @addDeleteKeyHandler false
 
   getData: ->
-    @props.linkManager.toJsonString()
+    @props.linkManager.toJsonString @state.protoNodes
 
   onNodeChanged: (node,title,image) ->
     @props.linkManager.changeNode title, image
@@ -56,29 +82,13 @@ module.exports = React.createClass
   onLinkChanged: (link, title, color, deleted) ->
     @props.linkManager.changeLink title,color, deleted
 
-  onAddRemoteImage: (image) ->
-    # make sure this is a new image
-    if not _.find @state.protoNodes, {image: image}
-      # add the image before the empty image
-      protoNodes = @state.protoNodes.slice 0
-      emptyPos = _.findIndex protoNodes, {image: ''}
-      protoNodes.splice (if emptyPos is -1 then protoNodes.length else emptyPos), 0,
-        type: 'remote'
-        title: ''
-        image: image
-      @setState protoNodes: protoNodes
-
-  onNodeWellClicked: (image) ->
-    if @state.selectedNode
-      @props.linkManager.changeNode @state.selectedNode.title, image
-
   render: ->
     (div {className: 'app'},
-      (StatusMenu {linkManager: @props.linkManager, getData: @getData})
+      (StatusMenu {linkManager: @props.linkManager, getData: @getData, filename: @state.filename})
       (LinkView {linkManager: @props.linkManager})
       (div {className: 'bottomTools'},
-        (NodeWell {protoNodes: @state.protoNodes, onNodeClicked: @onNodeWellClicked })
-        (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged, protoNodes: @state.protoNodes, onAddRemoteImage: @onAddRemoteImage})
+        (NodeWell {protoNodes: @state.protoNodes})
+        (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged, protoNodes: @state.protoNodes})
         (LinkEditView {link: @state.selectedConnection, onLinkChanged: @onLinkChanged})
       )
     )

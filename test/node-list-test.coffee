@@ -181,7 +181,7 @@ describe 'Node', () ->
     
     describe "Serialization", () ->
       beforeEach () ->
-        @serializedForm = """{"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}]}"""
+        @serializedForm = """{"version":0.1,"filename":null,"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}]}"""
       
       describe "toJsonString", () ->
         it "should include nodes and links", () ->
