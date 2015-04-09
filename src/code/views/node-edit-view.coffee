@@ -16,7 +16,6 @@ module.exports = React.createClass
       img = new Image
       img.onload = =>
         @props.onNodeChanged? @props.node, @props.node.title, src
-        @props.onAddRemoteImage? src
       img.onerror = =>
         alert "Sorry, could not load #{src}"
         @refs.remoteUrl.getDOMNode().focus()
@@ -35,12 +34,12 @@ module.exports = React.createClass
           (select {name: 'image', value: @props.node.image, onChange: @changeImage},
             (optgroup {label: 'Built-In'},
               for node, i in @props.protoNodes
-                if node.type is 'builtin'
+                if not node.image.match /^https?/
                   (option {key: i, value: node.image}, if node.title.length > 0 then node.title else '(none)')
             )
             (optgroup {label: 'Remote'},
               for node, i in @props.protoNodes
-                if node.type is 'remote'
+                if node.image.match /^https?/
                   (option {key: i, value: node.image}, node.image)
               (option {key: i, value: '#remote'}, 'Add Remote...')
             )

@@ -16,6 +16,9 @@ module.exports = class LinkManager
     @linkListeners = []
     @nodeListeners = []
     @selectionListeners = []
+    @loadListeners = []
+    @filename = null
+    @filenameListeners = []
     @selectedNode = {}
 
   addLinkListener: (listener) ->
@@ -30,6 +33,19 @@ module.exports = class LinkManager
     log.info("adding selection listener #{listener}")
     @selectionListeners.push listener
 
+  addLoadListener: (listener) ->
+    log.info("adding load listener #{listener}")
+    @loadListeners.push listener
+
+  addFilenameListener: (listener) ->
+    log.info("adding filename listener #{listener}")
+    @filenameListeners.push listener
+    
+  setFilename: (filename) ->
+    @filename = filename
+    for listener in @filenameListeners
+      listener filename
+    
   getLinks: ->
     (value for key, value of @linkKeys)
 
@@ -153,6 +169,11 @@ module.exports = class LinkManager
     key = link.terminalKey()
     delete @linkKeys[key]
 
+  deleteAll: ->
+    for node of @nodeKeys
+      @removeNode node
+    @setFilename 'New Model'
+
   deleteSelected: ->
     log.info "Deleting selected items"
     @removeSelectedLink()
@@ -192,6 +213,9 @@ module.exports = class LinkManager
     log.info "json success"
     importer = new Importer(@)
     importer.importData(data)
+    @setFilename data.filename or 'New Model'
+    for listener in @loadListeners
+      listener data
 
   loadDataFromUrl: (url) =>
     log.info("loading local data")
@@ -204,16 +228,18 @@ module.exports = class LinkManager
       error: (xhr, status, err) ->
         log.error(url, status, err.toString())
 
-  serialize: ->
+  serialize: (palette) ->
     nodeExports = for key,node of @nodeKeys
       node.toExport()
     linkExports = for key,link of @linkKeys
       link.toExport()
     return {
+      version: 0.1
+      filename: @filename
+      palette: palette
       nodes: nodeExports
       links: linkExports
     }
-    
-  toJsonString: ->
-    JSON.stringify(@serialize())
-    
+
+  toJsonString: (palette) ->
+    JSON.stringify @serialize palette

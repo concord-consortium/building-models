@@ -6,7 +6,7 @@ log.setLevel log.levels.TRACE
 
 module.exports = React.createClass
   displayName: 'StatusMenu',
-  
+
   openLink: ->
     if @props.getData
       window.open "#{window.location.protocol}//#{window.location.host}#{window.location.pathname}?data=#{encodeURIComponent @props.getData()}"
@@ -14,6 +14,6 @@ module.exports = React.createClass
   render: ->
     (div {className: 'status-menu'},
       (div {className: 'title'}, @props.title or 'Building Models')
-      (GoogleFileView {linkManager: @props.linkManager})
+      (GoogleFileView {linkManager: @props.linkManager, getData: @props.getData, filename: @props.filename})
       (div {className: 'open-data-url', onClick: @openLink}, @props.linkText or 'Link to my model')
     )
