@@ -88,6 +88,9 @@ module.exports = LinkManager = (function() {
     this.linkListeners = [];
     this.nodeListeners = [];
     this.selectionListeners = [];
+    this.loadListeners = [];
+    this.filename = null;
+    this.filenameListeners = [];
     this.selectedNode = {};
   }
 
@@ -104,6 +107,28 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype.addSelectionListener = function(listener) {
     log.info("adding selection listener " + listener);
     return this.selectionListeners.push(listener);
+  };
+
+  LinkManager.prototype.addLoadListener = function(listener) {
+    log.info("adding load listener " + listener);
+    return this.loadListeners.push(listener);
+  };
+
+  LinkManager.prototype.addFilenameListener = function(listener) {
+    log.info("adding filename listener " + listener);
+    return this.filenameListeners.push(listener);
+  };
+
+  LinkManager.prototype.setFilename = function(filename) {
+    var i, len, listener, ref, results;
+    this.filename = filename;
+    ref = this.filenameListeners;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      listener = ref[i];
+      results.push(listener(filename));
+    }
+    return results;
   };
 
   LinkManager.prototype.getLinks = function() {
@@ -323,6 +348,14 @@ module.exports = LinkManager = (function() {
     return delete this.linkKeys[key];
   };
 
+  LinkManager.prototype.deleteAll = function() {
+    var node;
+    for (node in this.nodeKeys) {
+      this.removeNode(node);
+    }
+    return this.setFilename('New Model');
+  };
+
   LinkManager.prototype.deleteSelected = function() {
     log.info("Deleting selected items");
     this.removeSelectedLink();
@@ -406,10 +439,18 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.loadData = function(data) {
-    var importer;
+    var i, importer, len, listener, ref, results;
     log.info("json success");
     importer = new Importer(this);
-    return importer.importData(data);
+    importer.importData(data);
+    this.setFilename(data.filename || 'New Model');
+    ref = this.loadListeners;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      listener = ref[i];
+      results.push(listener(data));
+    }
+    return results;
   };
 
   LinkManager.prototype.loadDataFromUrl = function(url) {
@@ -429,7 +470,7 @@ module.exports = LinkManager = (function() {
     });
   };
 
-  LinkManager.prototype.serialize = function() {
+  LinkManager.prototype.serialize = function(palette) {
     var key, link, linkExports, node, nodeExports;
     nodeExports = (function() {
       var ref, results;
@@ -452,13 +493,16 @@ module.exports = LinkManager = (function() {
       return results;
     }).call(this);
     return {
+      version: 0.1,
+      filename: this.filename,
+      palette: palette,
       nodes: nodeExports,
       links: linkExports
     };
   };
 
-  LinkManager.prototype.toJsonString = function() {
-    return JSON.stringify(this.serialize());
+  LinkManager.prototype.toJsonString = function(palette) {
+    return JSON.stringify(this.serialize(palette));
   };
 
   return LinkManager;
@@ -644,9 +688,15 @@ var GoogleDriveIO;
 module.exports = GoogleDriveIO = (function() {
   function GoogleDriveIO() {}
 
+  GoogleDriveIO.prototype.APP_ID = '1095918012594';
+
+  GoogleDriveIO.prototype.DEVELOPER_KEY = 'AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA';
+
   GoogleDriveIO.prototype.CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com';
 
   GoogleDriveIO.prototype.SCOPES = 'https://www.googleapis.com/auth/drive';
+
+  GoogleDriveIO.prototype.authorized = false;
 
   GoogleDriveIO.prototype.authorize = function(immediate, callback) {
     var args;
@@ -655,70 +705,133 @@ module.exports = GoogleDriveIO = (function() {
       'scope': this.SCOPES,
       'immediate': immediate || false
     };
-    return gapi.auth.authorize(args, callback);
+    return gapi.auth.authorize(args, (function(_this) {
+      return function(token) {
+        var err;
+        if (callback) {
+          err = (!token ? 'Unable to authorize' : token.error ? token.error : null);
+          _this.authorized = err === null;
+          return callback(err, token);
+        }
+      };
+    })(this));
   };
 
   GoogleDriveIO.prototype.makeMultipartBody = function(parts, boundary) {
-    var encoding, part, type;
+    var part;
     return (((function() {
       var i, len, results;
       results = [];
       for (i = 0, len = parts.length; i < len; i++) {
         part = parts[i];
-        type = "\r\n--" + boundary + "\r\nContent-Type: " + part.fileType;
-        encoding = part.encoding ? "\r\nContent-Transfer-Encoding: " + part.encoding : '';
-        results.push("" + type + encoding + "\r\n\r\n" + part.message);
+        results.push("\r\n--" + boundary + "\r\nContent-Type: application/json\r\n\r\n" + part);
       }
       return results;
     })()).join('')) + ("\r\n--" + boundary + "--");
   };
 
   GoogleDriveIO.prototype.sendFile = function(fileSpec, contents, callback) {
-    var boundary, contentType, metadata, multipartRequestBody, parts, request;
+    var boundary, metadata, method, path, ref, request;
     boundary = '-------314159265358979323846';
-    contentType = fileSpec.mimeType || 'application/octet-stream';
-    metadata = {
-      'title': fileSpec.fileName,
-      'mimeType': contentType
-    };
-    parts = [
-      {
-        fileType: contentType,
-        message: JSON.stringify(metadata)
-      }, {
-        fileType: 'application/json',
-        message: contents
-      }
-    ];
-    multipartRequestBody = this.makeMultipartBody(parts, boundary);
+    metadata = JSON.stringify({
+      title: fileSpec.fileName,
+      mimeType: 'application/json'
+    });
+    ref = fileSpec.fileId ? ['PUT', "/upload/drive/v2/files/" + fileSpec.fileId] : ['POST', '/upload/drive/v2/files'], method = ref[0], path = ref[1];
     request = gapi.client.request({
-      path: '/upload/drive/v2/files',
-      method: 'POST',
+      path: path,
+      method: method,
       params: {
-        uploadType: 'multipart'
+        uploadType: 'multipart',
+        alt: 'json'
       },
       headers: {
         'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
       },
-      body: multipartRequestBody
+      body: this.makeMultipartBody([metadata, contents], boundary)
     });
-    return request.execute(callback || (function(file) {
-      return console.log(file);
-    }));
+    return request.execute(function(file) {
+      if (callback) {
+        if (file) {
+          return callback(null, file);
+        } else {
+          return callback('Unabled to upload file');
+        }
+      }
+    });
   };
 
-  GoogleDriveIO.prototype.upload = function(fileSpec, contents) {
-    return this.authorize(true, (function(_this) {
-      return function(token) {
-        if (token && !token.error) {
+  GoogleDriveIO.prototype.upload = function(fileSpec, contents, callback) {
+    return this.authorize(this.authorized, (function(_this) {
+      return function(err) {
+        if (!err) {
           return gapi.client.load('drive', 'v2', function() {
-            return _this.sendFile(fileSpec, contents);
+            return _this.sendFile(fileSpec, contents, callback);
           });
         } else {
-          return console.log("No authorization. Upload failed for file: " + fileSpec.fileName);
+          return callback("No authorization. Upload failed for file: " + fileSpec.fileName);
         }
       };
     })(this));
+  };
+
+  GoogleDriveIO.prototype.download = function(fileSpec, callback) {
+    return this.authorize(this.authorized, function(err, token) {
+      if (err) {
+        return callback(err);
+      } else {
+        return gapi.client.load('drive', 'v2', function() {
+          var request;
+          request = gapi.client.drive.files.get({
+            fileId: fileSpec.id
+          });
+          return request.execute(function(file) {
+            var xhr;
+            if (file != null ? file.downloadUrl : void 0) {
+              xhr = new XMLHttpRequest();
+              xhr.open('GET', file.downloadUrl);
+              xhr.setRequestHeader('Authorization', "Bearer " + token.access_token);
+              xhr.onload = function() {
+                var e, json;
+                try {
+                  json = JSON.parse(xhr.responseText);
+                } catch (_error) {
+                  e = _error;
+                  callback(e);
+                  return;
+                }
+                return callback(null, json);
+              };
+              xhr.onerror = function() {
+                return callback("Unable to download " + file.downloadUrl);
+              };
+              return xhr.send();
+            } else {
+              return callback("Unable to get download url");
+            }
+          });
+        });
+      }
+    });
+  };
+
+  GoogleDriveIO.prototype.filePicker = function(callback) {
+    return this.authorize(this.authorized, function(err, token) {
+      if (err) {
+        return callback(err);
+      } else {
+        return gapi.load('picker', {
+          callback: function() {
+            var picker, pickerCallback;
+            pickerCallback = function(data, etc) {
+              return callback(null, data.action === 'picked' ? data.docs[0] : null);
+            };
+            picker = new google.picker.PickerBuilder().addView(google.picker.ViewId.DOCS).setOAuthToken(token.access_token).setCallback(pickerCallback).build();
+            return picker.setVisible(true);
+          }
+        });
+      }
+    });
   };
 
   return GoogleDriveIO;
@@ -972,7 +1085,8 @@ module.exports = React.createClass({
     return {
       selectedNode: null,
       selectedConnection: null,
-      protoNodes: require('./proto-nodes')
+      protoNodes: require('./proto-nodes'),
+      filename: null
     };
   },
   componentDidUpdate: function() {
@@ -993,15 +1107,66 @@ module.exports = React.createClass({
     }
   },
   componentDidMount: function() {
-    var ref;
+    var ref, updatePalette;
     this.addDeleteKeyHandler(true);
+    updatePalette = (function(_this) {
+      return function(node) {
+        var emptyPos, protoNodes;
+        if (node != null ? node.image.match(/^https?:/) : void 0) {
+          if (!_.find(_this.state.protoNodes, {
+            image: node.image
+          })) {
+            protoNodes = _this.state.protoNodes.slice(0);
+            emptyPos = _.findIndex(protoNodes, {
+              image: ''
+            });
+            protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
+              title: '',
+              image: node.image
+            });
+            return _this.setState({
+              protoNodes: protoNodes
+            });
+          }
+        }
+      };
+    })(this);
     this.props.linkManager.addSelectionListener((function(_this) {
       return function(selections) {
         _this.setState({
           selectedNode: selections.node,
           selectedConnection: selections.connection
         });
+        updatePalette(selections.node);
         return log.info('updated selections: + selections');
+      };
+    })(this));
+    this.props.linkManager.addLoadListener((function(_this) {
+      return function(data) {
+        var i, len, node, ref, results;
+        if (data.palette) {
+          return _this.setState({
+            protoNodes: data.palette
+          });
+        } else {
+          _this.setState({
+            protoNodes: require('./proto-nodes')
+          });
+          ref = data.nodes;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            node = ref[i];
+            results.push(updatePalette(node));
+          }
+          return results;
+        }
+      };
+    })(this));
+    this.props.linkManager.addFilenameListener((function(_this) {
+      return function(filename) {
+        return _this.setState({
+          filename: filename
+        });
       };
     })(this));
     if (((ref = this.props.data) != null ? ref.length : void 0) > 0) {
@@ -1014,7 +1179,7 @@ module.exports = React.createClass({
     return this.addDeleteKeyHandler(false);
   },
   getData: function() {
-    return this.props.linkManager.toJsonString();
+    return this.props.linkManager.toJsonString(this.state.protoNodes);
   },
   onNodeChanged: function(node, title, image) {
     return this.props.linkManager.changeNode(title, image);
@@ -1022,48 +1187,23 @@ module.exports = React.createClass({
   onLinkChanged: function(link, title, color, deleted) {
     return this.props.linkManager.changeLink(title, color, deleted);
   },
-  onAddRemoteImage: function(image) {
-    var emptyPos, protoNodes;
-    if (!_.find(this.state.protoNodes, {
-      image: image
-    })) {
-      protoNodes = this.state.protoNodes.slice(0);
-      emptyPos = _.findIndex(protoNodes, {
-        image: ''
-      });
-      protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
-        type: 'remote',
-        title: '',
-        image: image
-      });
-      return this.setState({
-        protoNodes: protoNodes
-      });
-    }
-  },
-  onNodeWellClicked: function(image) {
-    if (this.state.selectedNode) {
-      return this.props.linkManager.changeNode(this.state.selectedNode.title, image);
-    }
-  },
   render: function() {
     return div({
       className: 'app'
     }, StatusMenu({
       linkManager: this.props.linkManager,
-      getData: this.getData
+      getData: this.getData,
+      filename: this.state.filename
     }), LinkView({
       linkManager: this.props.linkManager
     }), div({
       className: 'bottomTools'
     }, NodeWell({
-      protoNodes: this.state.protoNodes,
-      onNodeClicked: this.onNodeWellClicked
+      protoNodes: this.state.protoNodes
     }), NodeEditView({
       node: this.state.selectedNode,
       onNodeChanged: this.onNodeChanged,
-      protoNodes: this.state.protoNodes,
-      onAddRemoteImage: this.onAddRemoteImage
+      protoNodes: this.state.protoNodes
     }), LinkEditView({
       link: this.state.selectedConnection,
       onLinkChanged: this.onLinkChanged
@@ -1084,94 +1224,112 @@ module.exports = React.createClass({
   displayName: 'GoogleFileView',
   getInitialState: function() {
     return {
-      filename: 'model',
-      authStatus: 'unknown'
+      gapiLoaded: false,
+      fileId: null,
+      action: 'Checking authorization...'
     };
   },
   componentDidMount: function() {
-    var googleDrive, waitForGAPI;
-    googleDrive = new GoogleDriveIO();
-    waitForGAPI = (function(_this) {
+    var waitForAuthCheck;
+    this.googleDrive = new GoogleDriveIO();
+    waitForAuthCheck = (function(_this) {
       return function() {
         var ref1;
         if (typeof gapi !== "undefined" && gapi !== null ? (ref1 = gapi.auth) != null ? ref1.authorize : void 0 : void 0) {
-          return _this.authorize(true);
+          return _this.googleDrive.authorize(true, function() {
+            return _this.setState({
+              gapiLoaded: true,
+              action: null
+            });
+          });
         } else {
-          return setTimeout(waitForGAPI, 10);
+          return setTimeout(waitForAuthCheck, 10);
         }
       };
     })(this);
-    return waitForGAPI();
+    return waitForAuthCheck();
   },
-  saveToGDrive: function() {
-    var filename, googleDrive;
-    googleDrive = new GoogleDriveIO();
-    filename = this.state.filename;
-    log.info("Proposing to save to '" + filename + "'");
-    if (!filename || filename.length === 0) {
-      filename = 'model';
+  newFile: function() {
+    if (confirm('Are you sure?')) {
+      this.props.linkManager.deleteAll();
+      return this.setState({
+        fileId: null
+      });
     }
-    if (!/\.json$/.test(filename)) {
-      filename += '.json';
-    }
-    log.info("Saving to '" + filename + "'");
-    return googleDrive.upload({
-      fileName: filename,
-      mimeType: 'application/json'
-    }, this.props.linkManager.toJsonString());
   },
-  authorize: function(immediate) {
-    var googleDrive;
-    googleDrive = new GoogleDriveIO();
-    return googleDrive.authorize(immediate, (function(_this) {
-      return function(token) {
-        if (token && !token.error) {
-          return _this.setState({
-            authStatus: 'authorized'
-          });
-        } else {
+  openFile: function() {
+    return this.googleDrive.filePicker((function(_this) {
+      return function(err, fileSpec) {
+        if (err) {
+          return alert(err);
+        } else if (fileSpec) {
           _this.setState({
-            authStatus: 'unauthorized'
+            action: 'Downloading...'
           });
-          return console.error("Google Drive Authorization failed: " + ((token != null ? token.error : void 0) || 'Unknown error'));
+          return _this.googleDrive.download(fileSpec, function(err, data) {
+            if (err) {
+              alert(err);
+              return _this.setState({
+                action: null
+              });
+            } else {
+              _this.setState({
+                fileId: fileSpec.id,
+                action: null
+              });
+              _this.props.linkManager.deleteAll();
+              return _this.props.linkManager.loadData(data);
+            }
+          });
         }
       };
     })(this));
   },
-  changeFilename: function(e) {
-    log.info("Changing filename: " + e.target.value);
-    return this.setState({
-      filename: e.target.value
-    });
+  saveFile: function() {
+    var fileId, filename;
+    filename = $.trim((prompt('Filename', this.props.filename)) || '');
+    if (filename.length > 0) {
+      this.setState({
+        action: 'Uploading...'
+      });
+      this.props.linkManager.setFilename(filename);
+      fileId = filename === this.props.filename ? this.state.fileId : null;
+      return this.googleDrive.upload({
+        fileName: filename,
+        fileId: fileId
+      }, this.props.getData(), (function(_this) {
+        return function(err, fileSpec) {
+          if (err) {
+            alert(err);
+            return _this.setState({
+              action: null
+            });
+          } else {
+            return _this.setState({
+              fileId: fileSpec.id,
+              action: null
+            });
+          }
+        };
+      })(this));
+    }
   },
   render: function() {
-    switch (this.state.authStatus) {
-      case 'authorized':
-        return div({
-          className: 'file-dialog-view'
-        }, label({}, 'Filename:'), input({
-          type: 'text',
-          onChange: this.changeFilename,
-          value: this.state.fileName,
-          id: 'filename'
-        }), button({
-          id: 'send',
-          onClick: this.saveToGDrive
-        }, 'Save to Google Drive'));
-      case 'unauthorized':
-        return div({
-          className: 'file-dialog-view'
-        }, button({
-          id: 'authorize',
-          onClick: ((function(_this) {
-            return function() {
-              return _this.authorize(false);
-            };
-          })(this))
-        }, 'Authorize for Google Drive'));
-      default:
-        return null;
-    }
+    return div({
+      className: 'file-dialog-view'
+    }, div({
+      className: 'filename'
+    }, this.state.action ? this.state.action : this.props.filename), div({
+      className: 'buttons'
+    }, button({
+      onClick: this.newFile
+    }, 'New'), button({
+      onClick: this.openFile,
+      disabled: !this.state.gapiLoaded
+    }, 'Open'), button({
+      onClick: this.saveFile,
+      disabled: !this.state.gapiLoaded
+    }, 'Save')));
   }
 });
 
@@ -1485,11 +1643,8 @@ module.exports = React.createClass({
       img = new Image;
       img.onload = (function(_this) {
         return function() {
-          var base, base1;
-          if (typeof (base = _this.props).onNodeChanged === "function") {
-            base.onNodeChanged(_this.props.node, _this.props.node.title, src);
-          }
-          return typeof (base1 = _this.props).onAddRemoteImage === "function" ? base1.onAddRemoteImage(src) : void 0;
+          var base;
+          return typeof (base = _this.props).onNodeChanged === "function" ? base.onNodeChanged(_this.props.node, _this.props.node.title, src) : void 0;
         };
       })(this);
       img.onerror = (function(_this) {
@@ -1531,7 +1686,7 @@ module.exports = React.createClass({
         results = [];
         for (i = j = 0, len = ref1.length; j < len; i = ++j) {
           node = ref1[i];
-          if (node.type === 'builtin') {
+          if (!node.image.match(/^https?/)) {
             results.push(option({
               key: i,
               value: node.image
@@ -1549,7 +1704,7 @@ module.exports = React.createClass({
         results = [];
         for (i = j = 0, len = ref1.length; j < len; i = ++j) {
           node = ref1[i];
-          if (node.type === 'remote') {
+          if (node.image.match(/^https?/)) {
             results.push(option({
               key: i,
               value: node.image
@@ -1710,8 +1865,7 @@ module.exports = React.createClass({
         results.push(ProtoNodeView({
           key: i,
           image: node.image,
-          title: node.title,
-          onNodeClicked: this.props.onNodeClicked
+          title: node.title
         }));
       }
       return results;
@@ -1767,22 +1921,18 @@ module.exports = React.createClass({
 module.exports = [
   {
     "id": "1",
-    "type": "builtin",
     "title": "Egg",
     "image": "img/nodes/egg.png"
   }, {
     "id": "2",
-    "type": "builtin",
     "title": "Chick",
     "image": "img/nodes/chick.jpg"
   }, {
     "id": "3",
-    "type": "builtin",
     "title": "Chicken",
     "image": "img/nodes/chicken.jpg"
   }, {
     "id": "4",
-    "type": "builtin",
     "title": "",
     "image": ""
   }
@@ -1812,7 +1962,9 @@ module.exports = React.createClass({
     }, div({
       className: 'title'
     }, this.props.title || 'Building Models'), GoogleFileView({
-      linkManager: this.props.linkManager
+      linkManager: this.props.linkManager,
+      getData: this.props.getData,
+      filename: this.props.filename
     }), div({
       className: 'open-data-url',
       onClick: this.openLink
