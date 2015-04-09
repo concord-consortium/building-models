@@ -1,0 +1,88 @@
+<html>
+<head>
+  <title>Building Models Wireframes: IFrame</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="build-info" content="$SHA built on $DATE" >
+  <style>
+    body {
+      font: 12px Arial, Helvetica, sans-serif;
+    }
+    iframe {
+      border: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #container {
+      border: 3px solid #000;
+      width: 600px;
+      height: 500px;
+      position: relative;
+      min-height: 24px;
+      min-width: 24px;
+    }
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #f00;
+      opacity: 0;
+      display: none;
+      cursor: se-resize;
+    }
+    #resize-handle {
+      width: 24px;
+      height: 24px;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      cursor: se-resize;
+    }
+  </style>
+</head>
+<body>
+  <p>
+    Drag the bottom right thumb to resize. Currently <span id="size">600x500</span>.
+  </p>
+  <div id="container">
+    <iframe src="standalone.html"></iframe>
+    <img id="resize-handle" src="../img/wireframes/resize_handle.gif" />
+  </div>
+  <div id="overlay"></div>
+  <script src="../js/globals.js"></script>
+  <script>
+    var $container = $("#container"),
+        $overlay = $("#overlay"),
+        $resizeHandle = $("#resize-handle"),
+        $size = $("#size"),
+        $window = $(window),
+        mouseMove = function (e) {
+          var width = Math.max(24, startWidth + (e.clientX - startX)),
+              height = Math.max(24, startHeight + (e.clientY - startY));
+          $container.width(width);
+          $container.height(height);
+          $size.html(width + "x" + height);
+        },
+        mouseUp = function (e) {
+          $window.off('mousemove', mouseMove);
+          $window.off('mouseup', mouseUp);
+          $overlay.hide();
+        },
+        startX, startY, startWidth, startHeight;
+    
+    $resizeHandle.on('mousedown', function (e) {
+      startX = e.clientX;
+      startY = e.clientY;
+      startWidth = $container.width();
+      startHeight = $container.height();
+      $overlay.show();
+      $window.on('mousemove', mouseMove);
+      $window.on('mouseup', mouseUp);
+    });
+  </script>
+</body>
+</html>
