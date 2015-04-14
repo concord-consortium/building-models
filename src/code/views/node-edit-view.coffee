@@ -22,6 +22,17 @@ module.exports = React.createClass
       img.src = src
 
   render: ->
+    builtInNodes = []
+    droppedNodes = []
+    remoteNodes = []
+    for node, i in @props.protoNodes
+      if not node.image.match /^(https?|data):/
+        builtInNodes.push node
+      else if node.image.match /^data:/
+        droppedNodes.push node
+      else if node.image.match /^https?:/
+        remoteNodes.push node
+    
     if @props.node
       (div {className: 'node-edit-view'},
         (h2 {}, @props.node.title)
@@ -33,14 +44,17 @@ module.exports = React.createClass
           (label {htmlFor: 'image'}, 'Image')
           (select {name: 'image', value: @props.node.image, onChange: @changeImage},
             (optgroup {label: 'Built-In'},
-              for node, i in @props.protoNodes
-                if not node.image.match /^https?/
-                  (option {key: i, value: node.image}, if node.title.length > 0 then node.title else '(none)')
+              for node, i in builtInNodes
+                (option {key: i, value: node.image}, if node.title.length > 0 then node.title else '(none)')
             )
+            if droppedNodes.length > 0
+              (optgroup {label: 'Dropped'},
+                for node, i in droppedNodes
+                  (option {key: i, value: node.image}, node.title or node.image)
+              )
             (optgroup {label: 'Remote'},
-              for node, i in @props.protoNodes
-                if node.image.match /^https?/
-                  (option {key: i, value: node.image}, node.image)
+              for node, i in remoteNodes
+                (option {key: i, value: node.image}, node.image)
               (option {key: i, value: '#remote'}, 'Add Remote...')
             )
           )

@@ -35,14 +35,14 @@ module.exports = React.createClass
     @addDeleteKeyHandler true
     
     updatePalette = (node) =>
-      if node?.image.match /^https?:/
+      if node?.image.match /^(https?|data):/
         # make sure this is a new image
         if not _.find @state.protoNodes, {image: node.image}
           # add the image before the empty image
           protoNodes = @state.protoNodes.slice 0
           emptyPos = _.findIndex protoNodes, {image: ''}
           protoNodes.splice (if emptyPos is -1 then protoNodes.length else emptyPos), 0,
-            title: ''
+            title: node.title or ''
             image: node.image
           @setState protoNodes: protoNodes
 

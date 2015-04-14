@@ -1,7 +1,8 @@
-Node           = React.createFactory require './node-view'
-Importer       = require '../utils/importer'
-NodeList       = require '../models/link-manager'
-DiagramToolkit = require '../utils/js-plumb-diagram-toolkit'
+Node             = React.createFactory require './node-view'
+Importer         = require '../utils/importer'
+NodeList         = require '../models/link-manager'
+DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
+DropImageHandler = require '../utils/drop-image-handler'
 
 {div} = React.DOM
 
@@ -25,6 +26,10 @@ module.exports = React.createClass
       accept: '.proto-node'
       hoverClass: "ui-state-highlight"
       drop: @addNode
+      
+    @dropImageHandler = new DropImageHandler
+      maxWidth: 100
+      maxHeight: 100
 
   addNode: (e, ui) ->
     {title, image} = ui.draggable.data()
@@ -39,6 +44,7 @@ module.exports = React.createClass
   getInitialState: ->
     nodes: []
     links: []
+    canDrop: false
 
   componentWillUpdate: ->
     @diagramToolkit?.clear?()
@@ -128,8 +134,37 @@ module.exports = React.createClass
         targetTerminal = if link.targetTerminal is 'a' then 'Top' else 'Bottom'
         @diagramToolkit.addLink source, target, link.title, link.color, sourceTerminal, targetTerminal, link
 
+  
+  onDragOver: (e) ->
+    if not @state.canDrop
+      @setState canDrop: true
+    e.preventDefault()
+    
+  onDragLeave: (e) ->
+    @setState canDrop: false
+    e.preventDefault()
+    
+  onDrop: (e) ->
+    @setState canDrop: false
+    e.preventDefault()
+    
+    # figure out where to drop files
+    offset = $(@refs.linkView.getDOMNode()).offset()
+    dropPos =
+      x: e.clientX - offset.left
+      y: e.clientY - offset.top
+      
+    # get the files
+    @dropImageHandler.handleDrop e, (file) =>
+      @props.linkManager.importNode
+        data:
+          x: dropPos.x
+          y: dropPos.y
+          title: file.title
+          image: file.image
+  
   render: ->
-    (div {className: 'link-view', ref: 'linkView'},
+    (div {className: "link-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container'},
         for node in @state.nodes
           (Node {
