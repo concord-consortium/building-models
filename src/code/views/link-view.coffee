@@ -164,9 +164,14 @@ module.exports = React.createClass
           title: file.title
           image: file.image
 
+  onContainerClicked: (e) ->
+    if e.target is @refs.container.getDOMNode()
+      # deselect links when background is clicked
+      @props.linkManager.selectLink null
+
   render: ->
     (div {className: "link-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
-      (div {className: 'container', ref: 'container'},
+      (div {className: 'container', ref: 'container', onClick: @onContainerClicked},
         for node in @state.nodes
           (Node {
             key: node.key
