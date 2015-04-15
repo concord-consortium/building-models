@@ -9,7 +9,7 @@ getParameterByName = (name) ->
 
 jsPlumb.bind 'ready', ->
   appView = AppView
-    url: '../json/serialized.json'
+    url: 'json/serialized.json'
     linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
   React.render appView, $('#wireframe-app')[0]
