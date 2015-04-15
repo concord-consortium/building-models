@@ -5,4 +5,6 @@ module.exports = React.createClass
   displayName: 'Placeholder'
   
   render: ->
-    (div {className: "wireframe-placeholder #{@props.className}"}, @props.label)
+    (div {className: "wireframe-placeholder #{@props.className}"},
+      (div {className: 'wireframe-placeholder-content'}, @props.label)
+    )
