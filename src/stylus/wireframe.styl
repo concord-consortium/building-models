@@ -1,23 +1,76 @@
+global-nav-height = 45px
+palette-and-actions-height = 45px
+
+enable-flex(direction, wrap = 'nowrap', justify = 'stretch', alignContent = 'stretch', alignItems = 'flex-end')
+  display flex
+  flex-direction direction
+  flex-wrap wrap
+  justify-content justify
+  align-content alignContent
+  align-items alignItems
+  
+  display -webkit-flex
+  -webkit-flex-direction direction
+  -webkit-flex-wrap wrap
+  -webkit-justify-content justify
+  -webkit-align-content alignContent
+  -webkit-align-items alignItems
+  
+absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 'auto', width = 'auto')
+  position absolute
+  top top
+  left left
+  right right
+  bottom bottom
+  height height
+  width width
+    
 #wireframe-app
   .wireframe-app
-    min-height 100vh
-    width 100%
+    absolute(0, 0, 0, 0)
+    text-align left
     
-    display flex
-    flex-direction column
-    flex-wrap nowrap
-    justify-content center
-    align-content stretch
-    align-items center
+  .wireframe-non-placeholder
+    background-color #fff
   
-    display -webkit-flex
-    -webkit-flex-direction column
-    -webkit-flex-wrap nowrap
-    -webkit-justify-content center
-    -webkit-align-content stretch
-    -webkit-align-items center
+  .wireframe-placeholder
+    border 1px solid #333
+    text-align center
+    vertical-align center
     
+  .wireframe-workspace
+    absolute(top: global-nav-height, left: 0, right: 0, bottom: 0)
+    
+  .wireframe-iframed-workspace
+    absolute(top: 0, left: 0, right: 0, bottom: 0)
+  
+  .wireframe-global-nav
+    absolute(top: 0, left: 0, right: 0, height: global-nav-height)
+    
+    .wireframe-global-nav-content-filename
+      margin 15px
+      text-decoration: line-through
+      
+    .wireframe-global-nav-content-username
+      margin 15px 0
+      float right
+      text-decoration: line-through
 
-
+    .wireframe-global-nav-content-help
+      margin 15px
+      float right
+      text-decoration: line-through
+  
+  .wireframe-component-palette
+    absolute(top: 0, left: 0, right: 70%, height: palette-and-actions-height)
+  
+  .wireframe-document-actions
+    absolute(top: 0, left: 30%, right: 0, height: palette-and-actions-height)
+    
+  .wireframe-canvas
+    absolute(top: palette-and-actions-height, left: 0, right: 30%, bottom: 0)
+    
+  .wireframe-inspector-panel
+    absolute(top: palette-and-actions-height, left: 70%, right: 0, bottom: 0)
   
   
