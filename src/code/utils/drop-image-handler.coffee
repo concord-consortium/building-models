@@ -6,7 +6,6 @@ module.exports = class DropImageHandler
   _resizeImage: (filename, src, callback) ->
     img = document.createElement 'img'
     img.src = src
-    img.setAttribute 'crossOrigin', 'anonymous'
     img.onload = =>
       canvas = document.createElement 'canvas'
       {width, height} = img
@@ -37,6 +36,7 @@ module.exports = class DropImageHandler
     else
       url = e.dataTransfer.getData 'URL'
       if url
-        alert 'Sorry dragging images from other web pages is not supported yet.\n\nYou can drag images saved locally on your computer.'
-        # TODO: create image server to avoid CORS problems?
-        # @_resizeImage '', url, callback
+        callback
+          name: ''
+          title: ''
+          image: url
