@@ -132,7 +132,7 @@ module.exports = class LinkManager
       @selectedNode.selected = false
       @selectedNode = null
     @selectedLink = link
-    link.selected = true
+    link?.selected = true
     for listener in @selectionListeners
       listener({node:null, connection:@selectedLink})
 
