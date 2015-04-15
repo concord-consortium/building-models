@@ -33,7 +33,7 @@ module.exports = React.createClass
 
   componentDidMount: ->
     @addDeleteKeyHandler true
-    
+
     updatePalette = (node) =>
       if node?.image.match /^(https?|data):/
         # make sure this is a new image
@@ -52,7 +52,7 @@ module.exports = React.createClass
         selectedConnection: selections.connection
       updatePalette selections.node
       log.info 'updated selections: + selections'
-      
+
     @props.linkManager.addLoadListener (data) =>
       # reload the palette
       if data.palette
@@ -61,7 +61,7 @@ module.exports = React.createClass
         @setState protoNodes: (require './proto-nodes')
         for node in data.nodes
           updatePalette node
-          
+
     @props.linkManager.addFilenameListener (filename) =>
       @setState filename: filename
 
@@ -85,7 +85,7 @@ module.exports = React.createClass
   render: ->
     (div {className: 'app'},
       (StatusMenu {linkManager: @props.linkManager, getData: @getData, filename: @state.filename})
-      (LinkView {linkManager: @props.linkManager})
+      (LinkView {linkManager: @props.linkManager, selectedLink: @state.selectedConnection})
       (div {className: 'bottomTools'},
         (NodeWell {protoNodes: @state.protoNodes})
         (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged, protoNodes: @state.protoNodes})

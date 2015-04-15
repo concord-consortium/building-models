@@ -9,24 +9,24 @@ DropImageHandler = require '../utils/drop-image-handler'
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  
+
   componentDidMount: ->
     $container = $(@refs.container.getDOMNode())
-    
+
     @diagramToolkit = new DiagramToolkit $container,
       Container: $container[0],
       handleConnect: @handleConnect
       handleClick: @handleClick
     @_updateToolkit()
-    
+
     @props.linkManager.addLinkListener @
     @props.linkManager.addNodeListener @
-    
+
     $container.droppable
       accept: '.proto-node'
       hoverClass: "ui-state-highlight"
       drop: @addNode
-      
+
     @dropImageHandler = new DropImageHandler
       maxWidth: 100
       maxHeight: 100
@@ -51,7 +51,7 @@ module.exports = React.createClass
 
   componentDidUpdate: ->
     @_updateToolkit()
-    
+
   handleEvent: (handler) ->
     if @ignoringEvents
       false
@@ -132,28 +132,29 @@ module.exports = React.createClass
       if source and target
         sourceTerminal = if link.sourceTerminal is 'a' then 'Top' else 'Bottom'
         targetTerminal = if link.targetTerminal is 'a' then 'Top' else 'Bottom'
-        @diagramToolkit.addLink source, target, link.title, link.color, sourceTerminal, targetTerminal, link
+        color = if link is @props.selectedLink then '#ff3' else link.color
+        @diagramToolkit.addLink source, target, link.title, color, sourceTerminal, targetTerminal, link
 
-  
+
   onDragOver: (e) ->
     if not @state.canDrop
       @setState canDrop: true
     e.preventDefault()
-    
+
   onDragLeave: (e) ->
     @setState canDrop: false
     e.preventDefault()
-    
+
   onDrop: (e) ->
     @setState canDrop: false
     e.preventDefault()
-    
+
     # figure out where to drop files
     offset = $(@refs.linkView.getDOMNode()).offset()
     dropPos =
       x: e.clientX - offset.left
       y: e.clientY - offset.top
-      
+
     # get the files
     @dropImageHandler.handleDrop e, (file) =>
       @props.linkManager.importNode
@@ -162,7 +163,7 @@ module.exports = React.createClass
           y: dropPos.y
           title: file.title
           image: file.image
-  
+
   render: ->
     (div {className: "link-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container'},
