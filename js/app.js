@@ -29,7 +29,121 @@ jsPlumb.bind('ready', function() {
 
 
 
-},{"./models/link-manager":3,"./views/app-view":10}],2:[function(require,module,exports){
+},{"./models/link-manager":4,"./views/app-view":11}],2:[function(require,module,exports){
+module.exports = {
+  getInitialAppViewState: function(subState) {
+    var mixinState;
+    mixinState = {
+      selectedNode: null,
+      selectedConnection: null,
+      protoNodes: require('../views/proto-nodes'),
+      filename: null
+    };
+    return _.extend(mixinState, subState);
+  },
+  componentDidUpdate: function() {
+    return log.info('Did Update: AppView');
+  },
+  addDeleteKeyHandler: function(add) {
+    var deleteFunction;
+    if (add) {
+      deleteFunction = this.props.linkManager.deleteSelected.bind(this.props.linkManager);
+      return $(window).on('keydown', function(e) {
+        if (e.which === 8 && !$(e.target).is('input, textarea')) {
+          e.preventDefault();
+          return deleteFunction();
+        }
+      });
+    } else {
+      return $(window).off('keydown');
+    }
+  },
+  componentDidMount: function() {
+    var ref, updatePalette;
+    this.addDeleteKeyHandler(true);
+    updatePalette = (function(_this) {
+      return function(node) {
+        var emptyPos, protoNodes;
+        if (node != null ? node.image.match(/^(https?|data):/) : void 0) {
+          if (!_.find(_this.state.protoNodes, {
+            image: node.image
+          })) {
+            protoNodes = _this.state.protoNodes.slice(0);
+            emptyPos = _.findIndex(protoNodes, {
+              image: ''
+            });
+            protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
+              title: node.title || '',
+              image: node.image
+            });
+            return _this.setState({
+              protoNodes: protoNodes
+            });
+          }
+        }
+      };
+    })(this);
+    this.props.linkManager.addSelectionListener((function(_this) {
+      return function(selections) {
+        _this.setState({
+          selectedNode: selections.node,
+          selectedConnection: selections.connection
+        });
+        updatePalette(selections.node);
+        return log.info('updated selections: + selections');
+      };
+    })(this));
+    this.props.linkManager.addLoadListener((function(_this) {
+      return function(data) {
+        var i, len, node, ref, results;
+        if (data.palette) {
+          return _this.setState({
+            protoNodes: data.palette
+          });
+        } else {
+          _this.setState({
+            protoNodes: require('../views/proto-nodes')
+          });
+          ref = data.nodes;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            node = ref[i];
+            results.push(updatePalette(node));
+          }
+          return results;
+        }
+      };
+    })(this));
+    this.props.linkManager.addFilenameListener((function(_this) {
+      return function(filename) {
+        return _this.setState({
+          filename: filename
+        });
+      };
+    })(this));
+    if (((ref = this.props.data) != null ? ref.length : void 0) > 0) {
+      return this.props.linkManager.loadData(JSON.parse(this.props.data));
+    } else {
+      return this.props.linkManager.loadDataFromUrl(this.props.url);
+    }
+  },
+  componentDidUnmount: function() {
+    return this.addDeleteKeyHandler(false);
+  },
+  getData: function() {
+    return this.props.linkManager.toJsonString(this.state.protoNodes);
+  },
+  onNodeChanged: function(node, title, image) {
+    return this.props.linkManager.changeNode(title, image);
+  },
+  onLinkChanged: function(link, title, color, deleted) {
+    return this.props.linkManager.changeLink(title, color, deleted);
+  }
+};
+
+
+
+},{"../views/proto-nodes":19}],3:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -60,7 +174,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var DiagramNode, Importer, Link, LinkManager,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -513,7 +627,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../utils/importer":8,"./link":4,"./node":5}],4:[function(require,module,exports){
+},{"../utils/importer":9,"./link":5,"./node":6}],5:[function(require,module,exports){
 var GraphPrimitive, Link,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -573,7 +687,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":2}],5:[function(require,module,exports){
+},{"./graph-primitive":3}],6:[function(require,module,exports){
 var GraphPrimitive, Node,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -684,7 +798,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"./graph-primitive.coffee":2}],6:[function(require,module,exports){
+},{"./graph-primitive.coffee":3}],7:[function(require,module,exports){
 var DropImageHandler;
 
 module.exports = DropImageHandler = (function() {
@@ -762,7 +876,7 @@ module.exports = DropImageHandler = (function() {
 
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -920,7 +1034,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -970,7 +1084,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -1142,7 +1256,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var LinkEditView, LinkView, NodeEditView, NodeWell, StatusMenu, div;
 
 LinkView = React.createFactory(require('./link-view'));
@@ -1161,111 +1275,14 @@ log.setLevel(log.levels.TRACE);
 
 module.exports = React.createClass({
   displayName: 'App',
+  mixins: [require('../mixins/app-view')],
   getInitialState: function() {
-    return {
+    return this.getInitialAppViewState({
       selectedNode: null,
       selectedConnection: null,
       protoNodes: require('./proto-nodes'),
       filename: null
-    };
-  },
-  componentDidUpdate: function() {
-    return log.info('Did Update: AppView');
-  },
-  addDeleteKeyHandler: function(add) {
-    var deleteFunction;
-    if (add) {
-      deleteFunction = this.props.linkManager.deleteSelected.bind(this.props.linkManager);
-      return $(window).on('keydown', function(e) {
-        if (e.which === 8 && !$(e.target).is('input, textarea')) {
-          e.preventDefault();
-          return deleteFunction();
-        }
-      });
-    } else {
-      return $(window).off('keydown');
-    }
-  },
-  componentDidMount: function() {
-    var ref, updatePalette;
-    this.addDeleteKeyHandler(true);
-    updatePalette = (function(_this) {
-      return function(node) {
-        var emptyPos, protoNodes;
-        if (node != null ? node.image.match(/^(https?|data):/) : void 0) {
-          if (!_.find(_this.state.protoNodes, {
-            image: node.image
-          })) {
-            protoNodes = _this.state.protoNodes.slice(0);
-            emptyPos = _.findIndex(protoNodes, {
-              image: ''
-            });
-            protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
-              title: node.title || '',
-              image: node.image
-            });
-            return _this.setState({
-              protoNodes: protoNodes
-            });
-          }
-        }
-      };
-    })(this);
-    this.props.linkManager.addSelectionListener((function(_this) {
-      return function(selections) {
-        _this.setState({
-          selectedNode: selections.node,
-          selectedConnection: selections.connection
-        });
-        updatePalette(selections.node);
-        return log.info('updated selections: + selections');
-      };
-    })(this));
-    this.props.linkManager.addLoadListener((function(_this) {
-      return function(data) {
-        var i, len, node, ref, results;
-        if (data.palette) {
-          return _this.setState({
-            protoNodes: data.palette
-          });
-        } else {
-          _this.setState({
-            protoNodes: require('./proto-nodes')
-          });
-          ref = data.nodes;
-          results = [];
-          for (i = 0, len = ref.length; i < len; i++) {
-            node = ref[i];
-            results.push(updatePalette(node));
-          }
-          return results;
-        }
-      };
-    })(this));
-    this.props.linkManager.addFilenameListener((function(_this) {
-      return function(filename) {
-        return _this.setState({
-          filename: filename
-        });
-      };
-    })(this));
-    if (((ref = this.props.data) != null ? ref.length : void 0) > 0) {
-      return this.props.linkManager.loadData(JSON.parse(this.props.data));
-    } else {
-      return this.props.linkManager.loadDataFromUrl(this.props.url);
-    }
-  },
-  componentDidUnmount: function() {
-    return this.addDeleteKeyHandler(false);
-  },
-  getData: function() {
-    return this.props.linkManager.toJsonString(this.state.protoNodes);
-  },
-  onNodeChanged: function(node, title, image) {
-    return this.props.linkManager.changeNode(title, image);
-  },
-  onLinkChanged: function(link, title, color, deleted) {
-    return this.props.linkManager.changeLink(title, color, deleted);
+    });
   },
   render: function() {
     return div({
@@ -1294,7 +1311,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-edit-view":12,"./link-view":13,"./node-edit-view":14,"./node-well-view":16,"./proto-nodes":18,"./status-menu-view":19}],11:[function(require,module,exports){
+},{"../mixins/app-view":2,"./link-edit-view":13,"./link-view":14,"./node-edit-view":15,"./node-well-view":17,"./proto-nodes":19,"./status-menu-view":20}],12:[function(require,module,exports){
 var GoogleDriveIO, button, div, input, label, ref;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -1416,7 +1433,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/google-drive-io":7}],12:[function(require,module,exports){
+},{"../utils/google-drive-io":8}],13:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -1491,7 +1508,7 @@ module.exports = React.createClass({
 
 
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
@@ -1757,7 +1774,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":3,"../utils/drop-image-handler":6,"../utils/importer":8,"../utils/js-plumb-diagram-toolkit":9,"./node-view":15}],14:[function(require,module,exports){
+},{"../models/link-manager":4,"../utils/drop-image-handler":7,"../utils/importer":9,"../utils/js-plumb-diagram-toolkit":10,"./node-view":16}],15:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -1897,7 +1914,7 @@ module.exports = React.createClass({
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -1991,7 +2008,7 @@ module.exports = React.createClass({
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -2028,7 +2045,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":17}],17:[function(require,module,exports){
+},{"./proto-node-view":18}],18:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2070,7 +2087,7 @@ module.exports = React.createClass({
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -2093,7 +2110,7 @@ module.exports = [
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var GoogleFileView, div;
 
 GoogleFileView = React.createFactory(require('./google-file-view'));
@@ -2127,4 +2144,4 @@ module.exports = React.createClass({
 
 
 
-},{"./google-file-view":11}]},{},[1]);
+},{"./google-file-view":12}]},{},[1]);
