@@ -29,7 +29,7 @@ jsPlumb.bind('ready', function() {
 
 
 
-},{"./models/link-manager":3,"./views/app-view":9}],2:[function(require,module,exports){
+},{"./models/link-manager":3,"./views/app-view":10}],2:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -284,7 +284,9 @@ module.exports = LinkManager = (function() {
       this.selectedNode = null;
     }
     this.selectedLink = link;
-    link.selected = true;
+    if (link != null) {
+      link.selected = true;
+    }
     ref = this.selectionListeners;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -511,7 +513,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../utils/importer":7,"./link":4,"./node":5}],4:[function(require,module,exports){
+},{"../utils/importer":8,"./link":4,"./node":5}],4:[function(require,module,exports){
 var GraphPrimitive, Link,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -683,6 +685,84 @@ module.exports = Node = (function(superClass) {
 
 
 },{"./graph-primitive.coffee":2}],6:[function(require,module,exports){
+var DropImageHandler;
+
+module.exports = DropImageHandler = (function() {
+  function DropImageHandler(options) {
+    this.maxWidth = options.maxWidth, this.maxHeight = options.maxHeight;
+  }
+
+  DropImageHandler.prototype._resizeImage = function(filename, src, callback) {
+    var img;
+    img = document.createElement('img');
+    img.src = src;
+    return img.onload = (function(_this) {
+      return function() {
+        var canvas, height, width;
+        canvas = document.createElement('canvas');
+        width = img.width, height = img.height;
+        if (width > height) {
+          if (width > _this.maxWidth) {
+            height *= _this.maxWidth / width;
+            width = _this.maxWidth;
+          }
+        } else {
+          if (height > _this.maxHeight) {
+            width *= _this.maxHeight / height;
+            height = _this.maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        return callback({
+          name: filename,
+          title: (filename.split('.'))[0],
+          image: canvas.toDataURL('image/png')
+        });
+      };
+    })(this);
+  };
+
+  DropImageHandler.prototype.handleDrop = function(e, callback) {
+    var file, i, len, reader, ref, results, url;
+    if (e.dataTransfer.files.length > 0) {
+      ref = e.dataTransfer.files;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        file = ref[i];
+        if (/^image\//.test(file.type)) {
+          reader = new FileReader();
+          reader.addEventListener('loadend', (function(_this) {
+            return function(e) {
+              return _this._resizeImage(file.name, e.target.result, callback);
+            };
+          })(this));
+          results.push(reader.readAsDataURL(file));
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    } else {
+      url = e.dataTransfer.getData('URL');
+      if (url) {
+        return callback({
+          name: '',
+          title: '',
+          image: url
+        });
+      }
+    }
+  };
+
+  return DropImageHandler;
+
+})();
+
+
+
+},{}],7:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -840,7 +920,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -890,7 +970,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -1062,7 +1142,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var LinkEditView, LinkView, NodeEditView, NodeWell, StatusMenu, div;
 
 LinkView = React.createFactory(require('./link-view'));
@@ -1112,7 +1192,7 @@ module.exports = React.createClass({
     updatePalette = (function(_this) {
       return function(node) {
         var emptyPos, protoNodes;
-        if (node != null ? node.image.match(/^https?:/) : void 0) {
+        if (node != null ? node.image.match(/^(https?|data):/) : void 0) {
           if (!_.find(_this.state.protoNodes, {
             image: node.image
           })) {
@@ -1121,7 +1201,7 @@ module.exports = React.createClass({
               image: ''
             });
             protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
-              title: '',
+              title: node.title || '',
               image: node.image
             });
             return _this.setState({
@@ -1195,7 +1275,8 @@ module.exports = React.createClass({
       getData: this.getData,
       filename: this.state.filename
     }), LinkView({
-      linkManager: this.props.linkManager
+      linkManager: this.props.linkManager,
+      selectedLink: this.state.selectedConnection
     }), div({
       className: 'bottomTools'
     }, NodeWell({
@@ -1213,7 +1294,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-edit-view":11,"./link-view":12,"./node-edit-view":13,"./node-well-view":15,"./proto-nodes":17,"./status-menu-view":18}],10:[function(require,module,exports){
+},{"./link-edit-view":12,"./link-view":13,"./node-edit-view":14,"./node-well-view":16,"./proto-nodes":18,"./status-menu-view":19}],11:[function(require,module,exports){
 var GoogleDriveIO, button, div, input, label, ref;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -1335,7 +1416,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/google-drive-io":6}],11:[function(require,module,exports){
+},{"../utils/google-drive-io":7}],12:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -1410,8 +1491,8 @@ module.exports = React.createClass({
 
 
 
-},{}],12:[function(require,module,exports){
-var DiagramToolkit, Importer, Node, NodeList, div;
+},{}],13:[function(require,module,exports){
+var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
 
@@ -1420,6 +1501,8 @@ Importer = require('../utils/importer');
 NodeList = require('../models/link-manager');
 
 DiagramToolkit = require('../utils/js-plumb-diagram-toolkit');
+
+DropImageHandler = require('../utils/drop-image-handler');
 
 div = React.DOM.div;
 
@@ -1436,10 +1519,14 @@ module.exports = React.createClass({
     this._updateToolkit();
     this.props.linkManager.addLinkListener(this);
     this.props.linkManager.addNodeListener(this);
-    return $container.droppable({
+    $container.droppable({
       accept: '.proto-node',
       hoverClass: "ui-state-highlight",
       drop: this.addNode
+    });
+    return this.dropImageHandler = new DropImageHandler({
+      maxWidth: 100,
+      maxHeight: 100
     });
   },
   addNode: function(e, ui) {
@@ -1458,7 +1545,8 @@ module.exports = React.createClass({
   getInitialState: function() {
     return {
       nodes: [],
-      links: []
+      links: [],
+      canDrop: false
     };
   },
   componentWillUpdate: function() {
@@ -1572,7 +1660,7 @@ module.exports = React.createClass({
     return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find('.elm'));
   },
   _redrawLinks: function() {
-    var i, len, link, ref, results, source, sourceTerminal, target, targetTerminal;
+    var color, i, len, link, ref, results, source, sourceTerminal, target, targetTerminal;
     ref = this.state.links;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -1582,21 +1670,69 @@ module.exports = React.createClass({
       if (source && target) {
         sourceTerminal = link.sourceTerminal === 'a' ? 'Top' : 'Bottom';
         targetTerminal = link.targetTerminal === 'a' ? 'Top' : 'Bottom';
-        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, sourceTerminal, targetTerminal, link));
+        color = link === this.props.selectedLink ? '#ff3' : link.color;
+        results.push(this.diagramToolkit.addLink(source, target, link.title, color, sourceTerminal, targetTerminal, link));
       } else {
         results.push(void 0);
       }
     }
     return results;
   },
+  onDragOver: function(e) {
+    if (!this.state.canDrop) {
+      this.setState({
+        canDrop: true
+      });
+    }
+    return e.preventDefault();
+  },
+  onDragLeave: function(e) {
+    this.setState({
+      canDrop: false
+    });
+    return e.preventDefault();
+  },
+  onDrop: function(e) {
+    var dropPos, offset;
+    this.setState({
+      canDrop: false
+    });
+    e.preventDefault();
+    offset = $(this.refs.linkView.getDOMNode()).offset();
+    dropPos = {
+      x: e.clientX - offset.left,
+      y: e.clientY - offset.top
+    };
+    return this.dropImageHandler.handleDrop(e, (function(_this) {
+      return function(file) {
+        return _this.props.linkManager.importNode({
+          data: {
+            x: dropPos.x,
+            y: dropPos.y,
+            title: file.title,
+            image: file.image
+          }
+        });
+      };
+    })(this));
+  },
+  onContainerClicked: function(e) {
+    if (e.target === this.refs.container.getDOMNode()) {
+      return this.props.linkManager.selectLink(null);
+    }
+  },
   render: function() {
     var node;
     return div({
-      className: 'link-view',
-      ref: 'linkView'
+      className: "link-view " + (this.state.canDrop ? 'can-drop' : ''),
+      ref: 'linkView',
+      onDragOver: this.onDragOver,
+      onDrop: this.onDrop,
+      onDragLeave: this.onDragLeave
     }, div({
       className: 'container',
-      ref: 'container'
+      ref: 'container',
+      onClick: this.onContainerClicked
     }, (function() {
       var i, len, ref, results;
       ref = this.state.nodes;
@@ -1621,7 +1757,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":3,"../utils/importer":7,"../utils/js-plumb-diagram-toolkit":8,"./node-view":14}],13:[function(require,module,exports){
+},{"../models/link-manager":3,"../utils/drop-image-handler":6,"../utils/importer":8,"../utils/js-plumb-diagram-toolkit":9,"./node-view":15}],14:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -1657,7 +1793,21 @@ module.exports = React.createClass({
     }
   },
   render: function() {
-    var i, node;
+    var builtInNodes, droppedNodes, i, j, len, node, ref1, remoteNodes;
+    builtInNodes = [];
+    droppedNodes = [];
+    remoteNodes = [];
+    ref1 = this.props.protoNodes;
+    for (i = j = 0, len = ref1.length; j < len; i = ++j) {
+      node = ref1[i];
+      if (!node.image.match(/^(https?|data):/)) {
+        builtInNodes.push(node);
+      } else if (node.image.match(/^data:/)) {
+        droppedNodes.push(node);
+      } else if (node.image.match(/^https?:/)) {
+        remoteNodes.push(node);
+      }
+    }
     if (this.props.node) {
       return div({
         className: 'node-edit-view'
@@ -1681,40 +1831,43 @@ module.exports = React.createClass({
       }, optgroup({
         label: 'Built-In'
       }, (function() {
-        var j, len, ref1, results;
-        ref1 = this.props.protoNodes;
+        var k, len1, results;
         results = [];
-        for (i = j = 0, len = ref1.length; j < len; i = ++j) {
-          node = ref1[i];
-          if (!node.image.match(/^https?/)) {
-            results.push(option({
-              key: i,
-              value: node.image
-            }, node.title.length > 0 ? node.title : '(none)'));
-          } else {
-            results.push(void 0);
-          }
+        for (i = k = 0, len1 = builtInNodes.length; k < len1; i = ++k) {
+          node = builtInNodes[i];
+          results.push(option({
+            key: i,
+            value: node.image
+          }, node.title.length > 0 ? node.title : '(none)'));
         }
         return results;
-      }).call(this)), optgroup({
+      })()), droppedNodes.length > 0 ? optgroup({
+        label: 'Dropped'
+      }, (function() {
+        var k, len1, results;
+        results = [];
+        for (i = k = 0, len1 = droppedNodes.length; k < len1; i = ++k) {
+          node = droppedNodes[i];
+          results.push(option({
+            key: i,
+            value: node.image
+          }, node.title || node.image));
+        }
+        return results;
+      })()) : void 0, optgroup({
         label: 'Remote'
       }, (function() {
-        var j, len, ref1, results;
-        ref1 = this.props.protoNodes;
+        var k, len1, results;
         results = [];
-        for (i = j = 0, len = ref1.length; j < len; i = ++j) {
-          node = ref1[i];
-          if (node.image.match(/^https?/)) {
-            results.push(option({
-              key: i,
-              value: node.image
-            }, node.image));
-          } else {
-            results.push(void 0);
-          }
+        for (i = k = 0, len1 = remoteNodes.length; k < len1; i = ++k) {
+          node = remoteNodes[i];
+          results.push(option({
+            key: i,
+            value: node.image
+          }, node.image));
         }
         return results;
-      }).call(this), option({
+      })(), option({
         key: i,
         value: '#remote'
       }, 'Add Remote...')))), this.props.node.image === '#remote' ? div({}, div({
@@ -1744,7 +1897,7 @@ module.exports = React.createClass({
 
 
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -1838,7 +1991,7 @@ module.exports = React.createClass({
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -1875,7 +2028,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":16}],16:[function(require,module,exports){
+},{"./proto-node-view":17}],17:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -1917,7 +2070,7 @@ module.exports = React.createClass({
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -1940,7 +2093,7 @@ module.exports = [
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var GoogleFileView, div;
 
 GoogleFileView = React.createFactory(require('./google-file-view'));
@@ -1974,4 +2127,4 @@ module.exports = React.createClass({
 
 
 
-},{"./google-file-view":10}]},{},[1]);
+},{"./google-file-view":11}]},{},[1]);

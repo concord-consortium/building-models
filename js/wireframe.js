@@ -8,7 +8,11 @@ React.render(AppView(), $('#wireframe-app')[0]);
 
 
 },{"./views/wireframes/app-view":2}],2:[function(require,module,exports){
-var div;
+var GlobalNav, Placeholder, div;
+
+Placeholder = React.createFactory(require('./placeholder-view'));
+
+GlobalNav = React.createFactory(require('./global-nav-view'));
 
 div = React.DOM.div;
 
@@ -22,13 +26,70 @@ module.exports = React.createClass({
       iframed = true;
     }
     return {
-      iframed: iframed
+      iframed: iframed,
+      username: 'Jane Doe',
+      filename: 'Untitled Model'
     };
   },
   render: function() {
     return div({
       className: 'wireframe-app'
-    }, "Building Models " + (this.state.iframed ? 'iFramed' : 'Standalone') + " Wireframe Placeholder");
+    }, (!this.state.iframed ? GlobalNav({
+      filename: this.state.filename,
+      username: this.state.username
+    }) : null), div({
+      className: this.state.iframed ? 'wireframe-iframed-workspace' : 'wireframe-workspace'
+    }, Placeholder({
+      label: 'Component Palette',
+      className: 'wireframe-component-palette'
+    }), Placeholder({
+      label: 'Document Actions',
+      className: 'wireframe-document-actions'
+    }), Placeholder({
+      label: 'Canvas',
+      className: 'wireframe-canvas'
+    }), Placeholder({
+      label: 'Inspector Panel',
+      className: 'wireframe-inspector-panel'
+    })));
+  }
+});
+
+
+
+},{"./global-nav-view":3,"./placeholder-view":4}],3:[function(require,module,exports){
+var div;
+
+div = React.DOM.div;
+
+module.exports = React.createClass({
+  displayName: 'GlobalNav',
+  render: function() {
+    return div({
+      className: 'wireframe-global-nav wireframe-non-placeholder'
+    }, div({
+      className: 'wireframe-global-nav-content-help'
+    }, 'HELP'), div({
+      className: 'wireframe-global-nav-content-username'
+    }, this.props.username), div({
+      className: 'wireframe-global-nav-content-filename'
+    }, this.props.filename));
+  }
+});
+
+
+
+},{}],4:[function(require,module,exports){
+var div;
+
+div = React.DOM.div;
+
+module.exports = React.createClass({
+  displayName: 'Placeholder',
+  render: function() {
+    return div({
+      className: "wireframe-placeholder " + this.props.className
+    }, this.props.label);
   }
 });
 
