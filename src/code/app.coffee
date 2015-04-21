@@ -1,4 +1,5 @@
 AppView     = React.createFactory require './views/app-view'
+WireframeView  = React.createFactory require './views/wireframes/app-view'
 LinkManager = require './models/link-manager'
 
 getParameterByName = (name) ->
@@ -7,9 +8,15 @@ getParameterByName = (name) ->
   results = regex.exec(location.search)
   if results is null then "" else decodeURIComponent results[1].replace(/\+/g, ' ')
 
-jsPlumb.bind 'ready', ->
-  appView = AppView
+window.initApp = (wireframes=false) ->
+  opts =
     url: 'json/serialized.json'
     linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
-  React.render appView, $('#app')[0]
+  appView = AppView opts
+  elem = '#app'
+  if wireframes
+    appView = WireframeView opts
+    elem = '#wireframe-app'
+  jsPlumb.bind 'ready', ->
+    React.render appView, $(elem)[0]

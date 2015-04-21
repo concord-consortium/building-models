@@ -18,11 +18,6 @@ module.exports = {
       src: src + '/code/app.coffee',
       dest: dest + '/js/'
     },
-    wireframe: {
-      watch: [src + '/code/**/*.*', '!' + src + '/code/globals.coffee'],
-      src: src + '/code/wireframe.coffee',
-      dest: dest + '/js/'
-    },
     globals: {
       watch: src + '/code/globals.coffee',
       src: src + '/code/globals.coffee',
