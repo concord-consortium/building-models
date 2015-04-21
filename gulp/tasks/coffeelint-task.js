@@ -5,20 +5,7 @@ var config      = require('../config').coffeelint;
 
 gulp.task('coffeelint', function(){
   return gulp.src(config.src)
-    .pipe(coffeelint({
-      max_line_length: {
-        level: 'ignore'
-      },
-      no_empty_functions: {
-        level: 'warn'
-      },
-      no_empty_param_list: {
-        level: 'warn'
-      },
-      prefer_english_operator: {
-        level: 'warn'
-      }
-    }))
+    .pipe(coffeelint())
     .pipe(coffeelint.reporter())
     .pipe(coffeelint.reporter('fail'))
     .on('error', function () {
