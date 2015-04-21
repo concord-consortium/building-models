@@ -2,7 +2,7 @@ var argv = require('yargs').argv,
     production = !!argv.production,
     buildInfo = argv.buildInfo || 'development build (' + (new Date()) + ')',
     src = './src',
-    dest  = production ? './dist' : './dev'
+    dest  = production ? './dist' : './dev';
 
 module.exports = {
   production: production,
