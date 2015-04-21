@@ -2,21 +2,29 @@ global-nav-height = 45px
 palette-and-actions-height = 45px
 inspector-panel-width = 250px
 
-enable-flex(direction, wrap = 'nowrap', justify = 'stretch', alignContent = 'stretch', alignItems = 'flex-end')
+enable-flex(direction, wrap=nowrap, justify=space-between, alignContent=flex-end, alignItems=flex-end)
   display flex
   flex-direction direction
   flex-wrap wrap
   justify-content justify
   align-content alignContent
   align-items alignItems
-  
+
   display -webkit-flex
   -webkit-flex-direction direction
   -webkit-flex-wrap wrap
   -webkit-justify-content justify
   -webkit-align-content alignContent
   -webkit-align-items alignItems
-  
+
+flex-content(flex-grow=1, flex-shrink=0, flex-basis=10px)
+  flex-grow flex-grow
+  flex-shrink flex-shrink
+  flex-basis flex-basis
+  -webkit-flex-grow flex-grow
+  -webkit-flex-shrink flex-shrink
+  -webkit-flex-basis flex-basis
+
 absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 'auto', width = 'auto')
   position absolute
   top top
@@ -25,56 +33,62 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
   bottom bottom
   height height
   width width
-    
+
 #wireframe-app
+  .mockup-only
+    text-decoration line-through
+
   .wireframe-app
     absolute(0, 0, 0, 0)
     text-align left
-    
+
   .wireframe-non-placeholder
     background-color #fff
-  
+    display flex
+
   .wireframe-placeholder
     display flex
-    
+
   .wireframe-placeholder-content
     margin auto
-    
-  .wireframe-workspace
-    absolute(top: global-nav-height, left: 0, right: 0, bottom: 0)
-    overflow hidden
-    
-  .wireframe-iframed-workspace
-    absolute(top: 0, left: 0, right: 0, bottom: 0)
-    overflow hidden
-  
-  .wireframe-global-nav
-    absolute(top: 0, left: 0, right: 0, height: global-nav-height)
-    
-    .wireframe-global-nav-content-filename
-      margin 15px
-      text-decoration: line-through
-      
-    .wireframe-global-nav-content-username
-      margin 15px 0
-      float right
-      text-decoration: line-through
 
-    .wireframe-global-nav-content-help
-      margin 15px
-      float right
+  .wireframe-workspace
+    enable-flex(column)
+    padding-left 1em
+
+  .wireframe-iframed-workspace
+    enable-flex(column)
+    padding-left 1em
+
+  .wireframe-global-nav
+    padding 10px
+    height global-nav-height - 20px
+    width 100%
+    enable-flex(row)
+    span, i
+      padding-left 0.5em
+      padding-right 0.5em
+    .wireframe-global-nav-content-filename
+      flex-content()
+      text-decoration: line-throug
+    .wireframe-global-nav-name-and-help
       text-decoration: line-through
-  
+      flex-content(0,0,100)
+
+
+
   .wireframe-component-palette
-    absolute(top: 0, left: 0, right: 20%, height: palette-and-actions-height)
-    z-index 100
-    
+    height palette-and-actions-height
+    width 100%
+    enable-flex(row)
+
     .node-well
+      flex-content()
       padding 6px 5px
       flex-wrap nowrap
       -webkit-flex-wrap nowrap
       overflow auto
-      
+
       .proto-node
         margin 0 3px
         .img-background
@@ -83,13 +97,13 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
         img
           width 25px
           height 25px
-  
+
   .wireframe-document-actions
-    absolute(top: 0, left: 80%, right: 0, height: palette-and-actions-height)
-    
+
   .wireframe-canvas
-    absolute(top: palette-and-actions-height + 2, left: 0, right: inspector-panel-width, bottom: 0)
-    
+    enable-flex(row)
+    absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: inspector-panel-width, bottom: 0)
+
     .link-view
       position inherit
       width 100%
@@ -97,8 +111,9 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
       border-radius 0
       box-shadow none
       overflow auto
-    
+
   .wireframe-inspector-panel
-    absolute(top: palette-and-actions-height, right: 0, bottom: 0, width: inspector-panel-width)
-  
-  
+    absolute(top: palette-and-actions-height + 62, right: 0, bottom: 0, width: inspector-panel-width)
+    &.panel-collapsed
+      right (-1 * inspector-panel-width) + 20
+
