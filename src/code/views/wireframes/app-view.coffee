@@ -11,16 +11,16 @@ StatusMenu  = React.createFactory require '../status-menu-view'
 module.exports = React.createClass
 
   displayName: 'WirefameApp'
-  
+
   mixins: [require '../../mixins/app-view']
-  
+
   getInitialState: ->
-  
+
     try
       iframed = window.self isnt window.top
     catch
       iframed = true
-      
+
     @getInitialAppViewState
       iframed: iframed
       username: 'Jane Doe'
