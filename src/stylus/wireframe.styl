@@ -1,23 +1,119 @@
+global-nav-height = 45px
+palette-and-actions-height = 45px
+inspector-panel-width = 250px
+
+enable-flex(direction, wrap=nowrap, justify=space-between, alignContent=flex-end, alignItems=flex-end)
+  display flex
+  flex-direction direction
+  flex-wrap wrap
+  justify-content justify
+  align-content alignContent
+  align-items alignItems
+
+  display -webkit-flex
+  -webkit-flex-direction direction
+  -webkit-flex-wrap wrap
+  -webkit-justify-content justify
+  -webkit-align-content alignContent
+  -webkit-align-items alignItems
+
+flex-content(flex-grow=1, flex-shrink=0, flex-basis=10px)
+  flex-grow flex-grow
+  flex-shrink flex-shrink
+  flex-basis flex-basis
+  -webkit-flex-grow flex-grow
+  -webkit-flex-shrink flex-shrink
+  -webkit-flex-basis flex-basis
+
+absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 'auto', width = 'auto')
+  position absolute
+  top top
+  left left
+  right right
+  bottom bottom
+  height height
+  width width
+
 #wireframe-app
+  .mockup-only
+    text-decoration line-through
+
   .wireframe-app
-    min-height 100vh
-    width 100%
-    
+    absolute(0, 0, 0, 0)
+    text-align left
+
+  .wireframe-non-placeholder
+    background-color #fff
     display flex
-    flex-direction column
-    flex-wrap nowrap
-    justify-content center
-    align-content stretch
-    align-items center
-  
-    display -webkit-flex
-    -webkit-flex-direction column
-    -webkit-flex-wrap nowrap
-    -webkit-justify-content center
-    -webkit-align-content stretch
-    -webkit-align-items center
-    
+
+  .wireframe-placeholder
+    display flex
+
+  .wireframe-placeholder-content
+    margin auto
+
+  .wireframe-workspace
+    enable-flex(column)
+    padding-left 1em
+
+  .wireframe-iframed-workspace
+    enable-flex(column)
+    padding-left 1em
+
+  .wireframe-global-nav
+    padding 10px
+    height global-nav-height - 20px
+    width 100%
+    enable-flex(row)
+    span, i
+      padding-left 0.5em
+      padding-right 0.5em
+    .wireframe-global-nav-content-filename
+      flex-content()
+      text-decoration: line-throug
+    .wireframe-global-nav-name-and-help
+      text-decoration: line-through
+      flex-content(0,0,100)
 
 
-  
-  
+
+  .wireframe-component-palette
+    height palette-and-actions-height
+    width 100%
+    enable-flex(row)
+
+    .node-well
+      flex-content()
+      padding 6px 5px
+      flex-wrap nowrap
+      -webkit-flex-wrap nowrap
+      overflow auto
+
+      .proto-node
+        margin 0 3px
+        .img-background
+          width 30px
+          height 26px
+        img
+          width 25px
+          height 25px
+
+  .wireframe-document-actions
+
+  .wireframe-canvas
+    enable-flex(row)
+    absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: inspector-panel-width, bottom: 0)
+
+    .link-view
+      position inherit
+      width 100%
+      height 100%
+      border-radius 0
+      box-shadow none
+      overflow auto
+
+  .wireframe-inspector-panel
+    absolute(top: palette-and-actions-height + 62, right: 0, bottom: 0, width: inspector-panel-width)
+    &.panel-collapsed
+      right (-1 * inspector-panel-width) + 20
+

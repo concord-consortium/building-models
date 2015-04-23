@@ -2,7 +2,7 @@ var argv = require('yargs').argv,
     production = !!argv.production,
     buildInfo = argv.buildInfo || 'development build (' + (new Date()) + ')',
     src = './src',
-    dest  = production ? './dist' : './dev'
+    dest  = production ? './dist' : './dev';
 
 module.exports = {
   production: production,
@@ -16,11 +16,6 @@ module.exports = {
     app: {
       watch: [src + '/code/**/*.*', '!' + src + '/code/globals.coffee'],
       src: src + '/code/app.coffee',
-      dest: dest + '/js/'
-    },
-    wireframe: {
-      watch: [src + '/code/**/*.*', '!' + src + '/code/globals.coffee'],
-      src: src + '/code/wireframe.coffee',
       dest: dest + '/js/'
     },
     globals: {
