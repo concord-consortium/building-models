@@ -5,6 +5,7 @@ NodeWell    = React.createFactory require '../node-well-view'
 NodeEditView= React.createFactory require '../node-edit-view'
 LinkEditView= React.createFactory require '../link-edit-view'
 StatusMenu  = React.createFactory require '../status-menu-view'
+InspectorPanel = React.createFactory require './inspector-panel-view'
 
 {div} = React.DOM
 
@@ -28,14 +29,14 @@ module.exports = React.createClass
 
   render: ->
     (div {className: 'wireframe-app'},
-      if not @state.iframed
-        (GlobalNav
-          filename: @state.filename
-          username: @state.username
-          linkManager: @props.linkManager
-          getData: @getData
-        )
       (div {className: if @state.iframed then 'wireframe-iframed-workspace' else 'wireframe-workspace'},
+        if not @state.iframed
+          (GlobalNav
+            filename: @state.filename
+            username: @state.username
+            linkManager: @props.linkManager
+            getData: @getData
+          )
         (div {className: 'wireframe-component-palette'},
           (NodeWell {protoNodes: @state.protoNodes})
         )
@@ -43,11 +44,12 @@ module.exports = React.createClass
         (div {className: 'wireframe-canvas'},
           (LinkView {linkManager: @props.linkManager, selectedLink: @state.selectedConnection})
         )
-        (div {className: 'wireframe-inspector-panel'},
-          (div {style: {margin: 10}},
-            (NodeEditView {node: @state.selectedNode, onNodeChanged: @onNodeChanged, protoNodes: @state.protoNodes})
-            (LinkEditView {link: @state.selectedConnection, onLinkChanged: @onLinkChanged})
-          )
+        (InspectorPanel
+          node: @state.selectedNode
+          link: @state.selectedConnection
+          onNodeChanged: @onNodeChanged
+          onLinkChanged: @onLinkChanged
+          protoNodes: @state.protoNodes
         )
       )
     )
