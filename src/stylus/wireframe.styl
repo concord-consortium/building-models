@@ -70,9 +70,9 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
       padding-right 0.5em
     .wireframe-global-nav-content-filename
       flex-content()
-      text-decoration: line-throug
+      text-decoration line-throug
     .wireframe-global-nav-name-and-help
-      text-decoration: line-through
+      text-decoration line-through
       flex-content(0,0,100)
 
 
@@ -102,7 +102,7 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
 
   .wireframe-canvas
     enable-flex(row)
-    absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: inspector-panel-width, bottom: 0)
+    absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: 0, bottom: 0)
 
     .link-view
       position inherit
@@ -113,7 +113,24 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
       overflow auto
 
   .wireframe-inspector-panel
-    absolute(top: palette-and-actions-height + 62, right: 0, bottom: 0, width: inspector-panel-width)
-    &.panel-collapsed
-      right (-1 * inspector-panel-width) + 20
+    absolute(top: palette-and-actions-height + global-nav-height, right: 0, bottom: 0, width: inspector-panel-width)
+    right 0px
+    margin 0px
+    background-color white
+    z-order 10
+    transition 0.2s
+    .inspector-panel-toggle
+      height 100%
+      float left
+      margin 0px
+      padding 2px
+      padding-top 50%
+      cursor pointer
+      background-color #eee
+  .inspector-panel-content
+    margin 2em
+  .inspector-panel-collapsed
+    right (-1 * inspector-panel-width) + 15
+    width inspector-panel-width
+    transition 0.2s
 
