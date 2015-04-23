@@ -5,22 +5,30 @@ module.exports = React.createClass
 
   displayName: 'GlobalNav'
 
+  mixins: [require '../../mixins/google-file-interface']
+
+  getInitialState: ->
+    @getInitialAppViewState {}
+
+  componentDidMount: ->
+    @createGoogleDrive()
+  
   render: ->
     options = [
       name: 'New…',
-      action: @showNew,
+      action: @newFile,
     ,
       name: 'Open…',
-      action: @open,
+      action: @openFile
     ,
       name: 'Save…',
-      action: @save
+      action: @saveFile
     ,
       name: 'Save a Copy…',
-      action: @saveCopy,
+      action: false
     ,
       name: 'Advanced Settings …',
-      action: @advancedSettings,
+      action: false
     ,
       name: 'Rename',
       action: @rename

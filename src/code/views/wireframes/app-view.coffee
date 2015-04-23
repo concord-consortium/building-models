@@ -28,7 +28,13 @@ module.exports = React.createClass
 
   render: ->
     (div {className: 'wireframe-app'},
-      (if not @state.iframed then (GlobalNav {filename: @state.filename, username: @state.username}) else null)
+      if not @state.iframed
+        (GlobalNav
+          filename: @state.filename
+          username: @state.username
+          linkManager: @props.linkManager
+          getData: @getData
+        )
       (div {className: if @state.iframed then 'wireframe-iframed-workspace' else 'wireframe-workspace'},
         (div {className: 'wireframe-component-palette'},
           (NodeWell {protoNodes: @state.protoNodes})
