@@ -10,8 +10,8 @@ LinkManager = require('./models/link-manager');
 getParameterByName = function(name) {
   var regex, results;
   name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-  regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-  results = regex.exec(location.search);
+  regex = new RegExp("[#&]" + name + "=([^&]*)");
+  results = regex.exec(location.hash);
   if (results === null) {
     return "";
   } else {
@@ -2160,7 +2160,7 @@ module.exports = React.createClass({
   displayName: 'StatusMenu',
   openLink: function() {
     if (this.props.getData) {
-      return window.open(window.location.protocol + "//" + window.location.host + window.location.pathname + "?data=" + (encodeURIComponent(this.props.getData())));
+      return window.open(window.location.protocol + "//" + window.location.host + window.location.pathname + "#data=" + (encodeURIComponent(this.props.getData())));
     }
   },
   render: function() {
