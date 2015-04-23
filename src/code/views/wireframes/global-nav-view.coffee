@@ -38,6 +38,8 @@ module.exports = React.createClass
       (Dropdown {anchor: @props.filename, items: options, className:'wireframe-global-nav-content-filename'})
       (div {className: 'wireframe-global-nav-name-and-help'},
         (span {className: 'mockup-only'}, @props.username),
-        (span {className: 'mockup-only'}, "HELP")
+        (span {className: 'mockup-only'},
+          (i {className: 'fa fa-2x fa-question-circle'})
+        )
       )
     )
