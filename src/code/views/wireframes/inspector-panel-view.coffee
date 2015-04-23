@@ -8,7 +8,7 @@ module.exports = React.createClass
   displayName: 'InspectorPanelView'
 
   getInitialState: ->
-    expanded: false
+    expanded: true
 
   collapse: ->
     @setState {expanded: false}
