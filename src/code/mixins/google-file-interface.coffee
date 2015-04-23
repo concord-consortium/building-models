@@ -45,13 +45,16 @@ module.exports =
             @props.linkManager.deleteAll()
             @props.linkManager.loadData data
 
-  saveFile: ->
+  rename: ->
     filename = $.trim ((prompt 'Filename', @props.filename) or '')
     if filename.length > 0
-      @setState action: 'Uploading...'
-
-      # set the filename before serializing so it is saved in the data
       @props.linkManager.setFilename filename
+    return filename
+
+  saveFile: ->
+    filename = @rename()
+    if filename.length > 0
+      @setState action: 'Uploading...'
 
       # if this is a save of an existing file with the same name use the fileid
       fileId = if filename is @props.filename then @state.fileId else null
