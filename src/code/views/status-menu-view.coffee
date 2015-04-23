@@ -9,7 +9,7 @@ module.exports = React.createClass
 
   openLink: ->
     if @props.getData
-      window.open "#{window.location.protocol}//#{window.location.host}#{window.location.pathname}?data=#{encodeURIComponent @props.getData()}"
+      window.open "#{window.location.protocol}//#{window.location.host}#{window.location.pathname}#data=#{encodeURIComponent @props.getData()}"
 
   render: ->
     (div {className: 'status-menu'},
