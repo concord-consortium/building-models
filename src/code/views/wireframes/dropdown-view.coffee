@@ -38,7 +38,10 @@ module.exports = React.createClass
       (div {className: menuClass, onMouseLeave: @blur, onMouseEnter: @unblur},
         (ul {},
           for item in @props.items
-            (li {className: 'menuItem', onClick: select(item) }, item.name)
+            className = "menuItem"
+            if (not item.action)
+              className = "#{className} disabled"
+            (li {className: className, onClick: select(item) }, item.name)
         )
       )
     )
