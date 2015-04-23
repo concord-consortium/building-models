@@ -1,58 +1,51 @@
-border-radius()
-  -webkit-border-radius arguments
-  -moz-border-radius arguments
-  border-radius arguments
-
-box-shadow()
-  -webkit-box-shadow arguments
-  -moz-box-shadow arguments
-  box-shadow arguments
+@require 'mixins/**/*'
+@require 'components/**/**'
 
 body
   font 12px Helvetica, Arial, sans-serif
-  padding 0px 
+  padding 0px
   margin 0px
   background-color #eee
-  
+
 .content-box
   text-align center
   height 100%
-  
+
 #app
   .app
     min-height 100vh
     width 100%
-    
+
     display flex
     flex-direction column
     flex-wrap nowrap
     justify-content stretch
     align-content stretch
     align-items flex-end
-  
+
     display -webkit-flex
     -webkit-flex-direction column
     -webkit-flex-wrap nowrap
     -webkit-justify-content stretch
     -webkit-align-content stretch
     -webkit-align-items flex-end
-    
+
 .bottomTools
   width 100%
-  
+
   display flex
   flex 2 0 220
-  
+
   flex-direction row
   flex-wrap nowrap
   justify-content stretch
   align-self flex-end
   align-content stetch
   align-items space-between
-  
+
   display -webkit-flex
   -webkit-flex 2 0 220
-  
+
   -webkit-flex-direction row
   -webkit-flex-wrap nowrap
   -webkit-justify-content stretch
@@ -60,5 +53,5 @@ body
   -webkit-align-content stetch
   -webkit-align-items space-between
 
-  
-  
+
+

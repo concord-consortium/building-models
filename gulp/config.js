@@ -9,7 +9,7 @@ module.exports = {
   buildInfo: buildInfo,
   css: {
     watch: src + '/stylus/**/*.styl',
-    src: src + '/stylus/**/*.styl',
+    src: src + '/stylus/**/app.styl',
     dest: dest + '/css/'
   },
   browserify: {
