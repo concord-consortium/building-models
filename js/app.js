@@ -2438,21 +2438,22 @@ module.exports = React.createClass({
     });
   },
   render: function() {
-    var className;
+    var action, chevron, className;
     className = "wireframe-inspector-panel";
+    action = this.collapse;
+    chevron = 'fa fa-chevron-right';
     if (this.state.expanded === false) {
       className = className + " inspector-panel-collapsed";
+      action = this.expand;
+      chevron = 'fa fa-chevron-left';
     }
     return div({
       className: className
     }, div({
-      className: 'inspector-panel-toggle'
-    }, this.state.expanded === true ? i({
-      className: 'fa fa-chevron-right',
-      onClick: this.collapse
-    }) : i({
-      className: 'fa fa-chevron-left',
-      onClick: this.expand
+      className: 'inspector-panel-toggle',
+      onClick: action
+    }, i({
+      className: chevron
     })), div({
       className: "inspector-panel-content"
     }, NodeEditView({
