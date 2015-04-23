@@ -35,6 +35,6 @@ module.exports = React.createClass
       )
       (div {className: "inspector-panel-content"},
         (NodeEditView {node: @props.node, onNodeChanged: @props.onNodeChanged, protoNodes: @props.protoNodes})
-        (LinkEditView {link: @props.selectedConnection, onLinkChanged: @props.onLinkChanged})
+        (LinkEditView {link: @props.link, onLinkChanged: @props.onLinkChanged})
       )
     )
