@@ -18,20 +18,16 @@ module.exports = React.createClass
 
   render: ->
     className = "wireframe-inspector-panel"
+    action = @collapse
+    chevron = 'fa fa-chevron-right'
     if @state.expanded is false
       className = "#{className} inspector-panel-collapsed"
+      action = @expand
+      chevron = 'fa fa-chevron-left'
+
     (div {className: className},
-      (div {className: 'inspector-panel-toggle'},
-        if @state.expanded is true
-          (i
-            className: 'fa fa-chevron-right'
-            onClick: @collapse
-          )
-        else
-          (i
-            className: 'fa fa-chevron-left'
-            onClick: @expand
-          )
+      (div {className: 'inspector-panel-toggle', onClick: action},
+        (i className: chevron)
       )
       (div {className: "inspector-panel-content"},
         (NodeEditView {node: @props.node, onNodeChanged: @props.onNodeChanged, protoNodes: @props.protoNodes})

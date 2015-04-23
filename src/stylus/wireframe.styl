@@ -101,7 +101,6 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
   .wireframe-document-actions
 
   .wireframe-canvas
-    enable-flex(row)
     absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: 0, bottom: 0)
 
     .link-view
@@ -123,7 +122,8 @@ absolute(top = 'auto', left = 'auto', right = 'auto', bottom = 'auto', height = 
       height 100%
       float left
       margin 0px
-      padding 2px
+      margin-left -8px
+      padding 4px
       padding-top 50%
       cursor pointer
       background-color #eee
