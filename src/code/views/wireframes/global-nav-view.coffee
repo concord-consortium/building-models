@@ -36,6 +36,11 @@ module.exports = React.createClass
 
     (div {className: 'wireframe-global-nav wireframe-non-placeholder'},
       (Dropdown {anchor: @props.filename, items: options, className:'wireframe-global-nav-content-filename'})
+      if @state.action
+        (div {},
+          (i {className: "fa fa-cog fa-spin"})
+          @state.action
+        )
       (div {className: 'wireframe-global-nav-name-and-help'},
         (span {className: 'mockup-only'}, @props.username),
         (span {className: 'mockup-only'},
