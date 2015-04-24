@@ -1421,12 +1421,14 @@ module.exports = React.createClass({
       username: this.state.username,
       linkManager: this.props.linkManager,
       getData: this.getData
-    }) : void 0, NodeWell({
+    }) : void 0, div({
+      className: 'action-bar'
+    }, NodeWell({
       protoNodes: this.state.protoNodes
     }), Placeholder({
       label: 'Document Actions',
       className: 'document-actions'
-    }), div({
+    })), div({
       className: 'canvas'
     }, LinkView({
       linkManager: this.props.linkManager,
@@ -1664,23 +1666,19 @@ module.exports = React.createClass({
     });
   },
   render: function() {
-    var action, chevron, className;
+    var action, className;
     className = "inspector-panel";
     action = this.collapse;
-    chevron = 'fa fa-chevron-right';
     if (this.state.expanded === false) {
       className = className + " collapsed";
       action = this.expand;
-      chevron = 'fa fa-chevron-left';
     }
     return div({
       className: className
     }, div({
       className: 'inspector-panel-toggle',
       onClick: action
-    }, i({
-      className: chevron
-    })), div({
+    }), div({
       className: "inspector-panel-content"
     }, NodeEditView({
       node: this.props.node,
