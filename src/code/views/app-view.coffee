@@ -37,8 +37,10 @@ module.exports = React.createClass
             linkManager: @props.linkManager
             getData: @getData
           )
-        (NodeWell {protoNodes: @state.protoNodes})
-        (Placeholder {label: 'Document Actions', className: 'document-actions'})
+        (div {className: 'action-bar'},
+          (NodeWell {protoNodes: @state.protoNodes})
+          (Placeholder {label: 'Document Actions', className: 'document-actions'})
+        )
         (div {className: 'canvas'},
           (LinkView {linkManager: @props.linkManager, selectedLink: @state.selectedConnection})
         )

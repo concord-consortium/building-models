@@ -22,10 +22,13 @@ inspector-panel-inner-height = 500px
       padding 10px
       padding-top 15px
       cursor pointer
+      background-repeat no-repeat
+      background-position center
+      background-image url("/img/bb-chrome/chevron-right.png")
       background-color white
       transition 0.2s
       border-radius 5px 0px 0px 5px
-      box-shadow: -2px 0px 3px hsla(0,0,50,0.7) 
+      box-shadow: -1px 0px 2px hsla(0,0,50,0.5) 
       z-index 3
 
   .inspector-panel-content
@@ -39,11 +42,14 @@ inspector-panel-inner-height = 500px
       padding: 10px
       border-radius 0px 0px 0px 5px
       transition 0.2s
-      box-shadow: -2px 0px 3px hsla(0,0,50,0.7)
+      box-shadow: -1px 0px 2px hsla(0,0,50,0.3)
       z-index 2
 
   &.collapsed
     .inspector-panel-toggle
+      background-repeat no-repeat
+      background-position center
+      background-image url("/img/bb-chrome/chevron-left.png")
       right 0px
     .inspector-panel-content
       right -1 * inspector-panel-inner-width
