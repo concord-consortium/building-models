@@ -1,5 +1,4 @@
 AppView     = React.createFactory require './views/app-view'
-WireframeView  = React.createFactory require './views/wireframes/app-view'
 LinkManager = require './models/link-manager'
 
 getParameterByName = (name) ->
@@ -15,8 +14,5 @@ window.initApp = (wireframes=false) ->
     data: getParameterByName 'data'
   appView = AppView opts
   elem = '#app'
-  if wireframes
-    appView = WireframeView opts
-    elem = '#wireframe-app'
   jsPlumb.bind 'ready', ->
     React.render appView, $(elem)[0]

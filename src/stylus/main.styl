@@ -11,47 +11,30 @@ body
   text-align center
   height 100%
 
-#app
-  .app
-    min-height 100vh
-    width 100%
+.app
+  absolute(0, 0, 0, 0)
+  text-align left
 
-    display flex
-    flex-direction column
-    flex-wrap nowrap
-    justify-content stretch
-    align-content stretch
-    align-items flex-end
+.mockup-only
+  text-decoration line-through
 
-    display -webkit-flex
-    -webkit-flex-direction column
-    -webkit-flex-wrap nowrap
-    -webkit-justify-content stretch
-    -webkit-align-content stretch
-    -webkit-align-items flex-end
-
-.bottomTools
+.workspace
   width 100%
+  enable-flex(column)
 
-  display flex
-  flex 2 0 220
+.iframed-workspace
+  width 100%
+  enable-flex(column)
+  .canvas
+    top palette-and-actions-height
 
-  flex-direction row
-  flex-wrap nowrap
-  justify-content stretch
-  align-self flex-end
-  align-content stetch
-  align-items space-between
+.canvas
+  absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: 0, bottom: 0)
 
-  display -webkit-flex
-  -webkit-flex 2 0 220
-
-  -webkit-flex-direction row
-  -webkit-flex-wrap nowrap
-  -webkit-justify-content stretch
-  -webkit-align-self flex-end
-  -webkit-align-content stetch
-  -webkit-align-items space-between
-
-
-
+  .link-view
+    position inherit
+    width 100%
+    height 100%
+    border-radius 0
+    box-shadow none
+    overflow auto

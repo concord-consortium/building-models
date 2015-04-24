@@ -5,7 +5,7 @@ module.exports = React.createClass
 
   displayName: 'GlobalNav'
 
-  mixins: [require '../../mixins/google-file-interface']
+  mixins: [require '../mixins/google-file-interface']
 
   getInitialState: ->
     @getInitialAppViewState {}
@@ -34,14 +34,14 @@ module.exports = React.createClass
       action: @rename
      ]
 
-    (div {className: 'wireframe-global-nav wireframe-non-placeholder'},
-      (Dropdown {anchor: @props.filename, items: options, className:'wireframe-global-nav-content-filename'})
+    (div {className: 'global-nav non-placeholder'},
+      (Dropdown {anchor: @props.filename, items: options, className:'global-nav-content-filename'})
       if @state.action
         (div {},
           (i {className: "fa fa-cog fa-spin"})
           @state.action
         )
-      (div {className: 'wireframe-global-nav-name-and-help'},
+      (div {className: 'global-nav-name-and-help'},
         (span {className: 'mockup-only'}, @props.username),
         (span {className: 'mockup-only'},
           (i {className: 'fa fa-2x fa-question-circle'})

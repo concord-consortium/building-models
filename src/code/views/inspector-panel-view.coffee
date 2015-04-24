@@ -1,5 +1,5 @@
-NodeEditView= React.createFactory require '../node-edit-view'
-LinkEditView= React.createFactory require '../link-edit-view'
+NodeEditView= React.createFactory require './node-edit-view'
+LinkEditView= React.createFactory require './link-edit-view'
 
 {div, i} = React.DOM
 

@@ -4,7 +4,7 @@ node-well-collapsed-height= palette-and-actions-height
 node-well-tab-width = 45px
 node-well-tab-height = 30px
 
-.wireframe-iframed-workspace
+.iframed-workspace
   .top-node-palette
     top 0px
 
@@ -24,6 +24,8 @@ node-well-tab-height = 30px
   .node-well
     padding 1em
     z-index 2
+    display flex
+    enable-flex(row)
 
     .proto-node
       margin 0 3px
@@ -38,7 +40,7 @@ node-well-tab-height = 30px
     height node-well-collapsed-height
 
 
-.wireframe-iframed-workspace
+.iframed-workspace
   .top-node-palette-tab
     top: node-well-height
     &.collapsed

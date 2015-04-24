@@ -32,7 +32,7 @@ module.exports = React.createClass
         droppedNodes.push node
       else if node.image.match /^https?:/
         remoteNodes.push node
-    
+
     if @props.node
       (div {className: 'node-edit-view'},
         (h2 {}, @props.node.title)

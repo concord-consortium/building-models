@@ -13,7 +13,7 @@ module.exports = React.createClass
 
   notifyChange: (title, color, deleted) ->
     @props.onLinkChanged? @props.link, title, color, !!deleted
-  
+
   changeTitle: (e) ->
     @notifyChange e.target.value, @props.link.color
 
@@ -42,5 +42,5 @@ module.exports = React.createClass
       )
     else
       (div {className: 'link-edit-view hidden'})
-      
+
 

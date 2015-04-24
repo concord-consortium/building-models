@@ -1,0 +1,22 @@
+@require '../mixins/blender-box-colors'
+  .global-nav
+    width 100%
+    background-color dark-blue
+    padding  8px 0px 8px
+    color white
+    height global-nav-height
+    box-sizing border-box
+
+    enable-flex(row)
+
+    span, i
+      padding-left 0.5em
+      padding-right 0.5em
+
+    .global-nav-content-filename
+      flex-content()
+
+    .global-nav-name-and-help
+      color blue-gray
+      flex-content(0,0)
+      font-size 9px
