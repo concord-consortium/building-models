@@ -1,9 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var AppView, LinkManager, WireframeView, getParameterByName;
+var AppView, LinkManager, getParameterByName;
 
 AppView = React.createFactory(require('./views/app-view'));
-
-WireframeView = React.createFactory(require('./views/wireframes/app-view'));
 
 LinkManager = require('./models/link-manager');
 
@@ -31,10 +29,6 @@ window.initApp = function(wireframes) {
   };
   appView = AppView(opts);
   elem = '#app';
-  if (wireframes) {
-    appView = WireframeView(opts);
-    elem = '#wireframe-app';
-  }
   return jsPlumb.bind('ready', function() {
     return React.render(appView, $(elem)[0]);
   });
@@ -42,7 +36,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":5,"./views/app-view":12,"./views/wireframes/app-view":22}],2:[function(require,module,exports){
+},{"./models/link-manager":5,"./views/app-view":12}],2:[function(require,module,exports){
 module.exports = {
   getInitialAppViewState: function(subState) {
     var mixinState;
@@ -156,7 +150,7 @@ module.exports = {
 
 
 
-},{"../views/proto-nodes":20}],3:[function(require,module,exports){
+},{"../views/proto-nodes":24}],3:[function(require,module,exports){
 var GoogleDriveIO;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -1381,7 +1375,11 @@ module.exports = DiagramToolkit = (function() {
 
 
 },{}],12:[function(require,module,exports){
-var LinkEditView, LinkView, NodeEditView, NodeWell, StatusMenu, div;
+var GlobalNav, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, StatusMenu, div;
+
+Placeholder = React.createFactory(require('./placeholder-view'));
+
+GlobalNav = React.createFactory(require('./global-nav-view'));
 
 LinkView = React.createFactory(require('./link-view'));
 
@@ -1393,49 +1391,218 @@ LinkEditView = React.createFactory(require('./link-edit-view'));
 
 StatusMenu = React.createFactory(require('./status-menu-view'));
 
+InspectorPanel = React.createFactory(require('./inspector-panel-view'));
+
 div = React.DOM.div;
 
-log.setLevel(log.levels.TRACE);
-
 module.exports = React.createClass({
-  displayName: 'App',
+  displayName: 'WirefameApp',
   mixins: [require('../mixins/app-view')],
   getInitialState: function() {
+    var iframed;
+    try {
+      iframed = window.self !== window.top;
+    } catch (_error) {
+      iframed = true;
+    }
     return this.getInitialAppViewState({
-      selectedNode: null,
-      selectedConnection: null,
-      protoNodes: require('./proto-nodes'),
-      filename: null
+      iframed: iframed,
+      username: 'Jane Doe',
+      filename: 'Untitled Model'
     });
   },
   render: function() {
     return div({
       className: 'app'
-    }, StatusMenu({
+    }, div({
+      className: this.state.iframed ? 'iframed-workspace' : 'workspace'
+    }, !this.state.iframed ? GlobalNav({
+      filename: this.state.filename,
+      username: this.state.username,
       linkManager: this.props.linkManager,
-      getData: this.getData,
-      filename: this.state.filename
-    }), LinkView({
+      getData: this.getData
+    }) : void 0, NodeWell({
+      protoNodes: this.state.protoNodes
+    }), Placeholder({
+      label: 'Document Actions',
+      className: 'document-actions'
+    }), div({
+      className: 'canvas'
+    }, LinkView({
       linkManager: this.props.linkManager,
       selectedLink: this.state.selectedConnection
-    }), div({
-      className: 'bottomTools'
-    }, NodeWell({
-      protoNodes: this.state.protoNodes
-    }), NodeEditView({
+    })), InspectorPanel({
       node: this.state.selectedNode,
-      onNodeChanged: this.onNodeChanged,
-      protoNodes: this.state.protoNodes
-    }), LinkEditView({
       link: this.state.selectedConnection,
-      onLinkChanged: this.onLinkChanged
+      onNodeChanged: this.onNodeChanged,
+      onLinkChanged: this.onLinkChanged,
+      protoNodes: this.state.protoNodes
     })));
   }
 });
 
 
 
-},{"../mixins/app-view":2,"./link-edit-view":14,"./link-view":15,"./node-edit-view":16,"./node-well-view":18,"./proto-nodes":20,"./status-menu-view":21}],13:[function(require,module,exports){
+},{"../mixins/app-view":2,"./global-nav-view":14,"./inspector-panel-view":16,"./link-edit-view":17,"./link-view":18,"./node-edit-view":19,"./node-well-view":21,"./placeholder-view":22,"./status-menu-view":25}],13:[function(require,module,exports){
+var div, i, li, ref, span, ul;
+
+ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
+
+module.exports = React.createClass({
+  displayName: 'Dropdown',
+  getInitialState: function() {
+    return {
+      showingMenu: false,
+      timeout: null
+    };
+  },
+  blur: function() {
+    var timeout;
+    this.unblur();
+    timeout = setTimeout(((function(_this) {
+      return function() {
+        return _this.setState({
+          showingMenu: false
+        });
+      };
+    })(this)), 500);
+    return this.setState({
+      timeout: timeout
+    });
+  },
+  unblur: function() {
+    if (this.state.timeout) {
+      clearTimeout(this.state.timeout);
+    }
+    return this.setState({
+      timeout: null
+    });
+  },
+  select: function(item) {
+    var nextState;
+    nextState = !this.state.showingMenu;
+    this.setState({
+      showingMenu: nextState
+    });
+    if (item && item.action) {
+      return item.action();
+    } else if (item && item.name) {
+      return alert("no action for " + item.name);
+    }
+  },
+  render: function() {
+    var className, item, menuClass, select, showing;
+    showing = this.state.showingMenu;
+    menuClass = 'menu-hidden';
+    select = (function(_this) {
+      return function(item) {
+        return function() {
+          return _this.select(item);
+        };
+      };
+    })(this);
+    if (showing) {
+      menuClass = 'menu-showing';
+    }
+    return div({
+      className: 'menu'
+    }, span({
+      className: 'menu-anchor',
+      onClick: (function(_this) {
+        return function() {
+          return _this.select(null);
+        };
+      })(this)
+    }, this.props.anchor, i({
+      className: 'fa fa-caret-down'
+    })), div({
+      className: menuClass,
+      onMouseLeave: this.blur,
+      onMouseEnter: this.unblur
+    }, ul({}, (function() {
+      var j, len, ref1, results;
+      ref1 = this.props.items;
+      results = [];
+      for (j = 0, len = ref1.length; j < len; j++) {
+        item = ref1[j];
+        className = "menuItem";
+        if (!item.action) {
+          className = className + " disabled";
+        }
+        results.push(li({
+          className: className,
+          onClick: select(item)
+        }, item.name));
+      }
+      return results;
+    }).call(this))));
+  }
+});
+
+
+
+},{}],14:[function(require,module,exports){
+var Dropdown, div, i, ref, span;
+
+ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
+
+Dropdown = React.createFactory(require('./dropdown-view'));
+
+module.exports = React.createClass({
+  displayName: 'GlobalNav',
+  mixins: [require('../mixins/google-file-interface')],
+  getInitialState: function() {
+    return this.getInitialAppViewState({});
+  },
+  componentDidMount: function() {
+    return this.createGoogleDrive();
+  },
+  render: function() {
+    var options;
+    options = [
+      {
+        name: 'New…',
+        action: this.newFile
+      }, {
+        name: 'Open…',
+        action: this.openFile
+      }, {
+        name: 'Save…',
+        action: this.saveFile
+      }, {
+        name: 'Save a Copy…',
+        action: false
+      }, {
+        name: 'Advanced Settings …',
+        action: false
+      }, {
+        name: 'Rename',
+        action: this.rename
+      }
+    ];
+    return div({
+      className: 'global-nav non-placeholder'
+    }, Dropdown({
+      anchor: this.props.filename,
+      items: options,
+      className: 'global-nav-content-filename'
+    }), this.state.action ? div({}, i({
+      className: "fa fa-cog fa-spin"
+    }), this.state.action) : void 0, div({
+      className: 'global-nav-name-and-help'
+    }, span({
+      className: 'mockup-only'
+    }, this.props.username), span({
+      className: 'mockup-only'
+    }, i({
+      className: 'fa fa-2x fa-question-circle'
+    }))));
+  }
+});
+
+
+
+},{"../mixins/google-file-interface":3,"./dropdown-view":13}],15:[function(require,module,exports){
 var button, div, input, label, ref;
 
 ref = React.DOM, div = ref.div, label = ref.label, input = ref.input, button = ref.button;
@@ -1470,7 +1637,65 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":3}],14:[function(require,module,exports){
+},{"../mixins/google-file-interface":3}],16:[function(require,module,exports){
+var LinkEditView, NodeEditView, div, i, ref;
+
+NodeEditView = React.createFactory(require('./node-edit-view'));
+
+LinkEditView = React.createFactory(require('./link-edit-view'));
+
+ref = React.DOM, div = ref.div, i = ref.i;
+
+module.exports = React.createClass({
+  displayName: 'InspectorPanelView',
+  getInitialState: function() {
+    return {
+      expanded: true
+    };
+  },
+  collapse: function() {
+    return this.setState({
+      expanded: false
+    });
+  },
+  expand: function() {
+    return this.setState({
+      expanded: true
+    });
+  },
+  render: function() {
+    var action, chevron, className;
+    className = "inspector-panel";
+    action = this.collapse;
+    chevron = 'fa fa-chevron-right';
+    if (this.state.expanded === false) {
+      className = className + " collapsed";
+      action = this.expand;
+      chevron = 'fa fa-chevron-left';
+    }
+    return div({
+      className: className
+    }, div({
+      className: 'inspector-panel-toggle',
+      onClick: action
+    }, i({
+      className: chevron
+    })), div({
+      className: "inspector-panel-content"
+    }, NodeEditView({
+      node: this.props.node,
+      onNodeChanged: this.props.onNodeChanged,
+      protoNodes: this.props.protoNodes
+    }), LinkEditView({
+      link: this.props.link,
+      onLinkChanged: this.props.onLinkChanged
+    })));
+  }
+});
+
+
+
+},{"./link-edit-view":17,"./node-edit-view":19}],17:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -1545,7 +1770,7 @@ module.exports = React.createClass({
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
@@ -1811,7 +2036,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":17}],16:[function(require,module,exports){
+},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":20}],19:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -1951,7 +2176,7 @@ module.exports = React.createClass({
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -2045,7 +2270,7 @@ module.exports = React.createClass({
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -2056,12 +2281,40 @@ module.exports = React.createClass({
   displayName: 'NodeWell',
   getInitialState: function() {
     return {
-      nodes: []
+      nodes: [],
+      collapsed: true
     };
   },
+  collapse: function() {
+    return this.setState({
+      collapsed: true
+    });
+  },
+  expand: function() {
+    return this.setState({
+      collapsed: false
+    });
+  },
+  toggle: function() {
+    if (this.state.collapsed) {
+      return this.expand();
+    } else {
+      return this.collapse();
+    }
+  },
   render: function() {
-    var i, node;
+    var i, node, topNodePaletteClass, topNodeTabPaletteClass;
+    topNodePaletteClass = 'top-node-palette';
+    topNodeTabPaletteClass = 'top-node-palette-tab';
+    if (this.state.collapsed) {
+      topNodePaletteClass = 'top-node-palette collapsed';
+      topNodeTabPaletteClass = 'top-node-palette-tab collapsed';
+    }
     return div({
+      className: 'top-node-palette-wrapper'
+    }, div({
+      className: topNodePaletteClass
+    }, div({
       className: 'node-well'
     }, (function() {
       var j, len, ref, results;
@@ -2076,13 +2329,34 @@ module.exports = React.createClass({
         }));
       }
       return results;
-    }).call(this));
+    }).call(this))), div({
+      className: topNodeTabPaletteClass,
+      onClick: this.toggle
+    }));
   }
 });
 
 
 
-},{"./proto-node-view":19}],19:[function(require,module,exports){
+},{"./proto-node-view":23}],22:[function(require,module,exports){
+var div;
+
+div = React.DOM.div;
+
+module.exports = React.createClass({
+  displayName: 'Placeholder',
+  render: function() {
+    return div({
+      className: "placeholder " + this.props.className
+    }, div({
+      className: 'placeholder-content'
+    }, this.props.label));
+  }
+});
+
+
+
+},{}],23:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2124,7 +2398,7 @@ module.exports = React.createClass({
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -2147,7 +2421,7 @@ module.exports = [
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var GoogleFileView, div;
 
 GoogleFileView = React.createFactory(require('./google-file-view'));
@@ -2181,310 +2455,4 @@ module.exports = React.createClass({
 
 
 
-},{"./google-file-view":13}],22:[function(require,module,exports){
-var GlobalNav, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, StatusMenu, div;
-
-Placeholder = React.createFactory(require('./placeholder-view'));
-
-GlobalNav = React.createFactory(require('./global-nav-view'));
-
-LinkView = React.createFactory(require('../link-view'));
-
-NodeWell = React.createFactory(require('../node-well-view'));
-
-NodeEditView = React.createFactory(require('../node-edit-view'));
-
-LinkEditView = React.createFactory(require('../link-edit-view'));
-
-StatusMenu = React.createFactory(require('../status-menu-view'));
-
-InspectorPanel = React.createFactory(require('./inspector-panel-view'));
-
-div = React.DOM.div;
-
-module.exports = React.createClass({
-  displayName: 'WirefameApp',
-  mixins: [require('../../mixins/app-view')],
-  getInitialState: function() {
-    var iframed;
-    try {
-      iframed = window.self !== window.top;
-    } catch (_error) {
-      iframed = true;
-    }
-    return this.getInitialAppViewState({
-      iframed: iframed,
-      username: 'Jane Doe',
-      filename: 'Untitled Model'
-    });
-  },
-  render: function() {
-    return div({
-      className: 'wireframe-app'
-    }, div({
-      className: this.state.iframed ? 'wireframe-iframed-workspace' : 'wireframe-workspace'
-    }, !this.state.iframed ? GlobalNav({
-      filename: this.state.filename,
-      username: this.state.username,
-      linkManager: this.props.linkManager,
-      getData: this.getData
-    }) : void 0, div({
-      className: 'wireframe-component-palette'
-    }, NodeWell({
-      protoNodes: this.state.protoNodes
-    })), Placeholder({
-      label: 'Document Actions',
-      className: 'wireframe-document-actions'
-    }), div({
-      className: 'wireframe-canvas'
-    }, LinkView({
-      linkManager: this.props.linkManager,
-      selectedLink: this.state.selectedConnection
-    })), InspectorPanel({
-      node: this.state.selectedNode,
-      link: this.state.selectedConnection,
-      onNodeChanged: this.onNodeChanged,
-      onLinkChanged: this.onLinkChanged,
-      protoNodes: this.state.protoNodes
-    })));
-  }
-});
-
-
-
-},{"../../mixins/app-view":2,"../link-edit-view":14,"../link-view":15,"../node-edit-view":16,"../node-well-view":18,"../status-menu-view":21,"./global-nav-view":24,"./inspector-panel-view":25,"./placeholder-view":26}],23:[function(require,module,exports){
-var div, i, li, ref, span, ul;
-
-ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
-
-module.exports = React.createClass({
-  displayName: 'Dropdown',
-  getInitialState: function() {
-    return {
-      showingMenu: false,
-      timeout: null
-    };
-  },
-  blur: function() {
-    var timeout;
-    this.unblur();
-    timeout = setTimeout(((function(_this) {
-      return function() {
-        return _this.setState({
-          showingMenu: false
-        });
-      };
-    })(this)), 500);
-    return this.setState({
-      timeout: timeout
-    });
-  },
-  unblur: function() {
-    if (this.state.timeout) {
-      clearTimeout(this.state.timeout);
-    }
-    return this.setState({
-      timeout: null
-    });
-  },
-  select: function(item) {
-    var nextState;
-    nextState = !this.state.showingMenu;
-    this.setState({
-      showingMenu: nextState
-    });
-    if (item && item.action) {
-      return item.action();
-    } else if (item && item.name) {
-      return alert("no action for " + item.name);
-    }
-  },
-  render: function() {
-    var className, item, menuClass, select, showing;
-    showing = this.state.showingMenu;
-    menuClass = 'menu-hidden';
-    select = (function(_this) {
-      return function(item) {
-        return function() {
-          return _this.select(item);
-        };
-      };
-    })(this);
-    if (showing) {
-      menuClass = 'menu-showing';
-    }
-    return div({
-      className: 'menu'
-    }, span({
-      className: 'menu-anchor',
-      onClick: (function(_this) {
-        return function() {
-          return _this.select(null);
-        };
-      })(this)
-    }, this.props.anchor, i({
-      className: 'fa fa-caret-down'
-    })), div({
-      className: menuClass,
-      onMouseLeave: this.blur,
-      onMouseEnter: this.unblur
-    }, ul({}, (function() {
-      var j, len, ref1, results;
-      ref1 = this.props.items;
-      results = [];
-      for (j = 0, len = ref1.length; j < len; j++) {
-        item = ref1[j];
-        className = "menuItem";
-        if (!item.action) {
-          className = className + " disabled";
-        }
-        results.push(li({
-          className: className,
-          onClick: select(item)
-        }, item.name));
-      }
-      return results;
-    }).call(this))));
-  }
-});
-
-
-
-},{}],24:[function(require,module,exports){
-var Dropdown, div, i, ref, span;
-
-ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
-
-Dropdown = React.createFactory(require('./dropdown-view'));
-
-module.exports = React.createClass({
-  displayName: 'GlobalNav',
-  mixins: [require('../../mixins/google-file-interface')],
-  getInitialState: function() {
-    return this.getInitialAppViewState({});
-  },
-  componentDidMount: function() {
-    return this.createGoogleDrive();
-  },
-  render: function() {
-    var options;
-    options = [
-      {
-        name: 'New…',
-        action: this.newFile
-      }, {
-        name: 'Open…',
-        action: this.openFile
-      }, {
-        name: 'Save…',
-        action: this.saveFile
-      }, {
-        name: 'Save a Copy…',
-        action: false
-      }, {
-        name: 'Advanced Settings …',
-        action: false
-      }, {
-        name: 'Rename',
-        action: this.rename
-      }
-    ];
-    return div({
-      className: 'wireframe-global-nav wireframe-non-placeholder'
-    }, Dropdown({
-      anchor: this.props.filename,
-      items: options,
-      className: 'wireframe-global-nav-content-filename'
-    }), this.state.action ? div({}, i({
-      className: "fa fa-cog fa-spin"
-    }), this.state.action) : void 0, div({
-      className: 'wireframe-global-nav-name-and-help'
-    }, span({
-      className: 'mockup-only'
-    }, this.props.username), span({
-      className: 'mockup-only'
-    }, i({
-      className: 'fa fa-2x fa-question-circle'
-    }))));
-  }
-});
-
-
-
-},{"../../mixins/google-file-interface":3,"./dropdown-view":23}],25:[function(require,module,exports){
-var LinkEditView, NodeEditView, div, i, ref;
-
-NodeEditView = React.createFactory(require('../node-edit-view'));
-
-LinkEditView = React.createFactory(require('../link-edit-view'));
-
-ref = React.DOM, div = ref.div, i = ref.i;
-
-module.exports = React.createClass({
-  displayName: 'InspectorPanelView',
-  getInitialState: function() {
-    return {
-      expanded: true
-    };
-  },
-  collapse: function() {
-    return this.setState({
-      expanded: false
-    });
-  },
-  expand: function() {
-    return this.setState({
-      expanded: true
-    });
-  },
-  render: function() {
-    var action, chevron, className;
-    className = "wireframe-inspector-panel";
-    action = this.collapse;
-    chevron = 'fa fa-chevron-right';
-    if (this.state.expanded === false) {
-      className = className + " inspector-panel-collapsed";
-      action = this.expand;
-      chevron = 'fa fa-chevron-left';
-    }
-    return div({
-      className: className
-    }, div({
-      className: 'inspector-panel-toggle',
-      onClick: action
-    }, i({
-      className: chevron
-    })), div({
-      className: "inspector-panel-content"
-    }, NodeEditView({
-      node: this.props.node,
-      onNodeChanged: this.props.onNodeChanged,
-      protoNodes: this.props.protoNodes
-    }), LinkEditView({
-      link: this.props.link,
-      onLinkChanged: this.props.onLinkChanged
-    })));
-  }
-});
-
-
-
-},{"../link-edit-view":14,"../node-edit-view":16}],26:[function(require,module,exports){
-var div;
-
-div = React.DOM.div;
-
-module.exports = React.createClass({
-  displayName: 'Placeholder',
-  render: function() {
-    return div({
-      className: "wireframe-placeholder " + this.props.className
-    }, div({
-      className: 'wireframe-placeholder-content'
-    }, this.props.label));
-  }
-});
-
-
-
-},{}]},{},[1]);
+},{"./google-file-view":15}]},{},[1]);
