@@ -36,7 +36,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":5,"./views/app-view":14}],2:[function(require,module,exports){
+},{"./models/link-manager":5,"./views/app-view":12}],2:[function(require,module,exports){
 module.exports = {
   getInitialAppViewState: function(subState) {
     var mixinState;
@@ -150,7 +150,7 @@ module.exports = {
 
 
 
-},{"../views/proto-nodes":26}],3:[function(require,module,exports){
+},{"../views/proto-nodes":24}],3:[function(require,module,exports){
 var GoogleDriveIO;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -1375,47 +1375,6 @@ module.exports = DiagramToolkit = (function() {
 
 
 },{}],12:[function(require,module,exports){
-module.exports = {
-  "~MENU.SAVE": "Save …",
-  "~MENU.OPEN": "Open …",
-  "~MENU.NEW": "New …",
-  "~MENU.SAVE_AS": "Save as …",
-  "~MENU.SETTINGS": "Advanced Settings …",
-  "~NODE-EDIT.TITLE": "Title",
-  "~NODE-EDIT.IMAGE": "Image",
-  "~NODE-EDIT.BUILT_IN": "Built-In",
-  "~NODE-EDIT.DROPPED": "Dropped",
-  "~NODE-EDIT.REMOTE": "Remote",
-  "~NODE-EDIT.ADD_REMOTE": "Add remote",
-  "~LINK-EDIT.DELETE": "Delete this link",
-  "~LINK-EDIT.TITLE": "Title",
-  "~LINK-EDIT.COLOR": "Color"
-};
-
-
-
-},{}],13:[function(require,module,exports){
-var defaultLang, translate, translations;
-
-translations = {};
-
-translations['en'] = require('./lang/us-en');
-
-defaultLang = 'en';
-
-translate = function(key, lang) {
-  var ref;
-  if (lang == null) {
-    lang = defaultLang;
-  }
-  return ((ref = translations[lang]) != null ? ref[key] : void 0) || key;
-};
-
-module.exports = translate;
-
-
-
-},{"./lang/us-en":12}],14:[function(require,module,exports){
 var GlobalNav, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, StatusMenu, div;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
@@ -1486,7 +1445,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":2,"./global-nav-view":16,"./inspector-panel-view":18,"./link-edit-view":19,"./link-view":20,"./node-edit-view":21,"./node-well-view":23,"./placeholder-view":24,"./status-menu-view":27}],15:[function(require,module,exports){
+},{"../mixins/app-view":2,"./global-nav-view":14,"./inspector-panel-view":16,"./link-edit-view":17,"./link-view":18,"./node-edit-view":19,"./node-well-view":21,"./placeholder-view":22,"./status-menu-view":25}],13:[function(require,module,exports){
 var div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -1584,12 +1543,10 @@ module.exports = React.createClass({
 
 
 
-},{}],16:[function(require,module,exports){
-var Dropdown, div, i, ref, span, tr;
+},{}],14:[function(require,module,exports){
+var Dropdown, div, i, ref, span;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
-
-tr = require('../utils/translate');
 
 Dropdown = React.createFactory(require('./dropdown-view'));
 
@@ -1606,20 +1563,23 @@ module.exports = React.createClass({
     var options;
     options = [
       {
-        name: tr("~MENU.NEW"),
+        name: 'New…',
         action: this.newFile
       }, {
-        name: tr("~MENU.OPEN"),
+        name: 'Open…',
         action: this.openFile
       }, {
-        name: tr("~MENU.SAVE"),
+        name: 'Save…',
         action: this.saveFile
       }, {
-        name: tr("~MENU.SAVE_AS"),
+        name: 'Save a Copy…',
         action: false
       }, {
-        name: tr('~MENU.SETTINGS'),
+        name: 'Advanced Settings …',
         action: false
+      }, {
+        name: 'Rename',
+        action: this.rename
       }
     ];
     return div({
@@ -1644,7 +1604,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":3,"../utils/translate":13,"./dropdown-view":15}],17:[function(require,module,exports){
+},{"../mixins/google-file-interface":3,"./dropdown-view":13}],15:[function(require,module,exports){
 var button, div, input, label, ref;
 
 ref = React.DOM, div = ref.div, label = ref.label, input = ref.input, button = ref.button;
@@ -1679,7 +1639,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":3}],18:[function(require,module,exports){
+},{"../mixins/google-file-interface":3}],16:[function(require,module,exports){
 var LinkEditView, NodeEditView, div, i, ref;
 
 NodeEditView = React.createFactory(require('./node-edit-view'));
@@ -1733,12 +1693,10 @@ module.exports = React.createClass({
 
 
 
-},{"./link-edit-view":19,"./node-edit-view":21}],19:[function(require,module,exports){
-var button, div, h2, input, label, palette, palettes, ref, tr;
+},{"./link-edit-view":17,"./node-edit-view":19}],17:[function(require,module,exports){
+var button, div, h2, input, label, palette, palettes, ref;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
-
-tr = require("../utils/translate");
 
 palettes = [['#4D6A6D', '#798478', "#A0A083", "#C9ADA1", "#EAE0CC"], ['#351431', '#775253', "#BDC696", "#D1D3C4", "#DFE0DC"], ['#D6F49D', '#EAD637', "#CBA328", "#230C0F", "#A2D3C2"]];
 
@@ -1770,11 +1728,11 @@ module.exports = React.createClass({
         type: 'button',
         className: 'delete',
         onClick: this.deleteLink
-      }, tr("~LINK-EDIT.DELETE"))), div({
+      }, 'delete this link')), div({
         className: 'edit-row'
       }, label({
         name: 'title'
-      }, tr("~LINK-EDIT.TITLE")), input({
+      }, 'Title'), input({
         type: 'text',
         name: 'title',
         value: this.props.link.title,
@@ -1783,7 +1741,7 @@ module.exports = React.createClass({
         className: 'edit-row'
       }, label({
         name: 'color'
-      }, tr("~LINK-EDIT.COLOR")), (function() {
+      }, 'Color'), (function() {
         var j, len, results;
         results = [];
         for (i = j = 0, len = palette.length; j < len; i = ++j) {
@@ -1810,7 +1768,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":13}],20:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
@@ -2076,12 +2034,10 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":22}],21:[function(require,module,exports){
-var button, div, h2, input, label, optgroup, option, ref, select, tr;
+},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":20}],19:[function(require,module,exports){
+var button, div, h2, input, label, optgroup, option, ref, select;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
-
-tr = require("../utils/translate");
 
 module.exports = React.createClass({
   displayName: 'NodeEdit',
@@ -2136,7 +2092,7 @@ module.exports = React.createClass({
         className: 'edit-row'
       }, label({
         htmlFor: 'title'
-      }, tr("~NODE-EDIT.TITLE")), input({
+      }, 'Title'), input({
         type: 'text',
         name: 'title',
         value: this.props.node.title,
@@ -2145,12 +2101,12 @@ module.exports = React.createClass({
         className: 'edit-row'
       }, label({
         htmlFor: 'image'
-      }, tr("~NODE-EDIT.IMAGE")), select({
+      }, 'Image'), select({
         name: 'image',
         value: this.props.node.image,
         onChange: this.changeImage
       }, optgroup({
-        label: tr("~NODE-EDIT.BUILT_IN")
+        label: 'Built-In'
       }, (function() {
         var k, len1, results;
         results = [];
@@ -2163,7 +2119,7 @@ module.exports = React.createClass({
         }
         return results;
       })()), droppedNodes.length > 0 ? optgroup({
-        label: tr("~NODE-EDIT.DROPPED")
+        label: 'Dropped'
       }, (function() {
         var k, len1, results;
         results = [];
@@ -2191,7 +2147,7 @@ module.exports = React.createClass({
       })(), option({
         key: i,
         value: '#remote'
-      }, tr("~NODE-EDIT.ADD_REMOTE"))))), this.props.node.image === '#remote' ? div({}, div({
+      }, 'Add Remote...')))), this.props.node.image === '#remote' ? div({}, div({
         className: 'edit-row'
       }, label({
         htmlFor: 'remoteUrl'
@@ -2218,7 +2174,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":13}],22:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -2312,7 +2268,7 @@ module.exports = React.createClass({
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -2380,7 +2336,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":25}],24:[function(require,module,exports){
+},{"./proto-node-view":23}],22:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2398,7 +2354,7 @@ module.exports = React.createClass({
 
 
 
-},{}],25:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2440,7 +2396,7 @@ module.exports = React.createClass({
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -2463,7 +2419,7 @@ module.exports = [
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var GoogleFileView, div;
 
 GoogleFileView = React.createFactory(require('./google-file-view'));
@@ -2497,4 +2453,4 @@ module.exports = React.createClass({
 
 
 
-},{"./google-file-view":17}]},{},[1]);
+},{"./google-file-view":15}]},{},[1]);
