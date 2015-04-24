@@ -1,5 +1,5 @@
 {div, h2, label, input, select, option, optgroup, button} = React.DOM
-
+tr = require "../utils/translate"
 module.exports = React.createClass
 
   displayName: 'NodeEdit'
@@ -37,25 +37,27 @@ module.exports = React.createClass
       (div {className: 'node-edit-view'},
         (h2 {}, @props.node.title)
         (div {className: 'edit-row'},
-          (label {htmlFor: 'title'}, 'Title')
+          (label {htmlFor: 'title'}, tr "~NODE-EDIT.TITLE")
           (input {type: 'text', name: 'title', value: @props.node.title, onChange: @changeTitle})
         )
         (div {className: 'edit-row'},
-          (label {htmlFor: 'image'}, 'Image')
+          (label {htmlFor: 'image'}, tr "~NODE-EDIT.IMAGE")
           (select {name: 'image', value: @props.node.image, onChange: @changeImage},
-            (optgroup {label: 'Built-In'},
+            (optgroup {label: tr "~NODE-EDIT.BUILT_IN"},
               for node, i in builtInNodes
                 (option {key: i, value: node.image}, if node.title.length > 0 then node.title else '(none)')
             )
             if droppedNodes.length > 0
-              (optgroup {label: 'Dropped'},
+              (optgroup {label: tr "~NODE-EDIT.DROPPED" },
                 for node, i in droppedNodes
                   (option {key: i, value: node.image}, node.title or node.image)
               )
             (optgroup {label: 'Remote'},
               for node, i in remoteNodes
                 (option {key: i, value: node.image}, node.image)
-              (option {key: i, value: '#remote'}, 'Add Remote...')
+              (option {key: i, value: '#remote'},
+                tr "~NODE-EDIT.ADD_REMOTE"
+              )
             )
           )
         )
