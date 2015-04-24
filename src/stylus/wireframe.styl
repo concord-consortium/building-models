@@ -22,16 +22,18 @@
 
   .wireframe-workspace
     enable-flex(column)
-    padding-left 1em
 
   .wireframe-iframed-workspace
     enable-flex(column)
-    padding-left 1em
 
   .wireframe-global-nav
-    padding 10px
-    height global-nav-height - 20px
     width 100%
+    background-color dark-blue
+    padding  8px 0px 8px
+    color white
+    height global-nav-height
+    box-sizing border-box
+
     enable-flex(row)
 
     span, i
@@ -40,35 +42,16 @@
 
     .wireframe-global-nav-content-filename
       flex-content()
-      text-decoration line-throug
 
     .wireframe-global-nav-name-and-help
-      text-decoration line-through
-      flex-content(0,0,100)
+      color blue-gray
+      flex-content(0,0)
+      font-size 9px
 
-  .wireframe-component-palette
-    height palette-and-actions-height
-    width 100%
-    enable-flex(row)
 
-    .node-well
-      flex-content()
-      padding 6px 5px
-      flex-wrap nowrap
-      -webkit-flex-wrap nowrap
-      overflow auto
-
-      .proto-node
-        margin 0 3px
-        .img-background
-          width 30px
-          height 26px
-        img
-          width 25px
-          height 25px
-
-  .wireframe-document-actions
-
+  .wireframe-iframed-workspace
+    .wireframe-canvas
+      top palette-and-actions-height
   .wireframe-canvas
     absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: 0, bottom: 0)
 

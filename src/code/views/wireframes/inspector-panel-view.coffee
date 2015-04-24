@@ -17,11 +17,11 @@ module.exports = React.createClass
     @setState {expanded: true}
 
   render: ->
-    className = "wireframe-inspector-panel"
+    className = "inspector-panel"
     action = @collapse
     chevron = 'fa fa-chevron-right'
     if @state.expanded is false
-      className = "#{className} inspector-panel-collapsed"
+      className = "#{className} collapsed"
       action = @expand
       chevron = 'fa fa-chevron-left'
 

@@ -37,9 +37,7 @@ module.exports = React.createClass
             linkManager: @props.linkManager
             getData: @getData
           )
-        (div {className: 'wireframe-component-palette'},
-          (NodeWell {protoNodes: @state.protoNodes})
-        )
+        (NodeWell {protoNodes: @state.protoNodes})
         (Placeholder {label: 'Document Actions', className: 'wireframe-document-actions'})
         (div {className: 'wireframe-canvas'},
           (LinkView {linkManager: @props.linkManager, selectedLink: @state.selectedConnection})
