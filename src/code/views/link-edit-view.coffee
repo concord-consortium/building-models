@@ -1,4 +1,5 @@
 {div, h2, button, label, input} = React.DOM
+tr = require "../utils/translate"
 
 palettes = [
   ['#4D6A6D','#798478', "#A0A083", "#C9ADA1", "#EAE0CC"],
@@ -28,14 +29,14 @@ module.exports = React.createClass
       (div {className: 'link-edit-view'},
         (h2 {}, @props.link.title)
         (div {className: 'edit-row'},
-          (button {type: 'button', className: 'delete', onClick: @deleteLink}, 'delete this link')
+          (button {type: 'button', className: 'delete', onClick: @deleteLink}, tr "~LINK-EDIT.DELETE")
         )
         (div {className: 'edit-row'},
-          (label {name: 'title'}, 'Title')
+          (label {name: 'title'}, tr "~LINK-EDIT.TITLE")
           (input {type: 'text', name: 'title', value: @props.link.title, onChange: @changeTitle})
         )
         (div {className: 'edit-row'},
-          (label {name: 'color'}, 'Color')
+          (label {name: 'color'}, tr "~LINK-EDIT.COLOR")
           for colorCode, i in palette
             (div {className: 'colorChoice', key: i, style: {backgroundColor: colorCode}, onTouchEnd: @pickColor, onClick: @pickColor})
         )

@@ -1,4 +1,5 @@
 {div, i, span} = React.DOM
+tr = require '../utils/translate'
 
 Dropdown = React.createFactory require './dropdown-view'
 module.exports = React.createClass
@@ -15,23 +16,20 @@ module.exports = React.createClass
   
   render: ->
     options = [
-      name: 'New…',
-      action: @newFile,
+      name: tr "~MENU.NEW"
+      action: @newFile
     ,
-      name: 'Open…',
+      name: tr "~MENU.OPEN"
       action: @openFile
     ,
-      name: 'Save…',
+      name: tr "~MENU.SAVE"
       action: @saveFile
     ,
-      name: 'Save a Copy…',
+      name: tr "~MENU.SAVE_AS"
       action: false
     ,
-      name: 'Advanced Settings …',
+      name: tr '~MENU.SETTINGS'
       action: false
-    ,
-      name: 'Rename',
-      action: @rename
      ]
 
     (div {className: 'global-nav non-placeholder'},
