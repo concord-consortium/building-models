@@ -1,1 +1,40 @@
-@require 'main.styl'
+@require 'mixins/**/*'
+@require 'components/**/**'
+
+body
+  font 12px Helvetica, Arial, sans-serif
+  padding 0px
+  margin 0px
+  background-color #eee
+
+.content-box
+  text-align center
+  height 100%
+
+.app
+  absolute(0, 0, 0, 0)
+  text-align left
+
+.mockup-only
+  text-decoration line-through
+
+.workspace
+  width 100%
+  enable-flex(column)
+
+.iframed-workspace
+  width 100%
+  enable-flex(column)
+  .canvas
+    top palette-and-actions-height
+
+.canvas
+  absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: 0, bottom: 0)
+
+  .link-view
+    position inherit
+    width 100%
+    height 100%
+    border-radius 0
+    box-shadow none
+    overflow auto
