@@ -1,2 +1,30 @@
-@require 'main.styl'
-@require 'wireframe.styl'
+@require 'mixins/**/*'
+@require 'components/**/**'
+
+body
+  font 12px Helvetica, Arial, sans-serif
+  padding 0px
+  margin 0px
+  background-color #eee
+
+.content-box
+  text-align center
+  height 100%
+
+.app
+  absolute(0, 0, 0, 0)
+  text-align left
+
+.mockup-only
+  text-decoration line-through
+
+.workspace
+  width 100%
+  enable-flex(column)
+
+.iframed-workspace
+  width 100%
+  enable-flex(column)
+  .canvas
+    top palette-and-actions-height
+

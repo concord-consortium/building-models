@@ -1,18 +1,21 @@
+.canvas
+  absolute(top: palette-and-actions-height + global-nav-height, left: 0, right: 0, bottom: 0)
 
 .link-view
-  position relative
-  border-radius 8px
   margin 0px
-  box-shadow 4px 4px 10px hsla(1,0,0,0.2)
+  position inherit
+  width 100%
+  height 100%
   background-color #ddd
-  overflow hidden
+  background-image url("/img/bb-chrome/bg-horiz.png")
+  overflow auto
 
   flex 10 0 200px
   align-self stretch
-  
+
   -webkit-flex 10 0 200px
   -webkit-align-self stretch
-  
+
 .can-drop
   background-color yellow
 
@@ -20,7 +23,7 @@
   position absolute
   height 100%
   width 100%
-    
+
 .building-models
   padding 0px
   margin 0px

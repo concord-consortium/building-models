@@ -52,8 +52,8 @@
     Drag the bottom right thumb to resize. Currently <span id="size">600x500</span>.  Auto resize to <a href="800x600">800x600</a>, <a href="1024x768">1024x768</a>, <a href="1280x1024">1280x1024</a>, <a href="1366x768">1366x768</a>.
   </p>
   <div id="container">
-    <iframe src="standalone.html"></iframe>
-    <img id="resize-handle" src="img/wireframes/resize_handle.gif" />
+    <iframe src="index.html"></iframe>
+    <img id="resize-handle" src="img/wireframes/resize_handle.gif" alt='resize'/>
   </div>
   <div id="overlay"></div>
   <script src="js/globals.js"></script>
@@ -76,7 +76,7 @@
           $overlay.hide();
         },
         startX, startY, startWidth, startHeight;
-    
+
     $resizeHandle.on('mousedown', function (e) {
       startX = e.clientX;
       startY = e.clientY;
@@ -86,7 +86,7 @@
       $window.on('mousemove', mouseMove);
       $window.on('mouseup', mouseUp);
     });
-    
+
     $("a").on("click", function (e) {
       e.preventDefault();
       var parts = this.href.split("/"),

@@ -1,0 +1,56 @@
+inspector-panel-top = 225px
+inspector-panel-tab-width = 36px
+inspector-panel-tab-height = 45px
+inspector-panel-inner-width = 275px
+inspector-panel-inner-height = 500px
+
+  .inspector-panel
+    right 0px
+    margin 0px
+    background-color white
+    z-index 1
+    margin 0px
+    transition 0.2s
+
+    .inspector-panel-toggle
+      box-sizing border-box
+      position absolute
+      top: inspector-panel-top
+      height: inspector-panel-tab-height
+      width: inspector-panel-tab-width
+      right: inspector-panel-inner-width
+      padding 10px
+      padding-top 15px
+      cursor pointer
+      background-repeat no-repeat
+      background-position center
+      background-image url("/img/bb-chrome/chevron-right.png")
+      background-color white
+      transition 0.2s
+      border-radius 5px 0px 0px 5px
+      box-shadow: -1px 0px 2px hsla(0,0,50,0.5) 
+      z-index 3
+
+  .inspector-panel-content
+      box-sizing border-box
+      position absolute
+      top: inspector-panel-top
+      height: inspector-panel-inner-height
+      width: inspector-panel-inner-width
+      right: 0
+      background-color white
+      padding: 10px
+      border-radius 0px 0px 0px 5px
+      transition 0.2s
+      box-shadow: -1px 0px 2px hsla(0,0,50,0.3)
+      z-index 2
+
+  &.collapsed
+    .inspector-panel-toggle
+      background-repeat no-repeat
+      background-position center
+      background-image url("/img/bb-chrome/chevron-left.png")
+      right 0px
+    .inspector-panel-content
+      right -1 * inspector-panel-inner-width
+

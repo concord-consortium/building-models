@@ -1,6 +1,10 @@
+@require 'mixins/fonts'
 .menu
+  padding-left 10px
   .menu-anchor
     cursor pointer
+    blenderbox-label()
+    font-size 13px
 
 .menu-hidden
   display none
@@ -14,6 +18,7 @@
   position fixed
   min-width 150px
   z-index 1000
+  color dark-blue
   ul
     text-align left
     display block
