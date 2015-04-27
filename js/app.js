@@ -150,7 +150,7 @@ module.exports = {
 
 
 
-},{"../views/proto-nodes":26}],3:[function(require,module,exports){
+},{"../views/proto-nodes":25}],3:[function(require,module,exports){
 var GoogleDriveIO;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -1416,7 +1416,7 @@ module.exports = translate;
 
 
 },{"./lang/us-en":12}],14:[function(require,module,exports){
-var GlobalNav, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, StatusMenu, div;
+var GlobalNav, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, div;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
 
@@ -1429,8 +1429,6 @@ NodeWell = React.createFactory(require('./node-well-view'));
 NodeEditView = React.createFactory(require('./node-edit-view'));
 
 LinkEditView = React.createFactory(require('./link-edit-view'));
-
-StatusMenu = React.createFactory(require('./status-menu-view'));
 
 InspectorPanel = React.createFactory(require('./inspector-panel-view'));
 
@@ -1486,7 +1484,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":2,"./global-nav-view":16,"./inspector-panel-view":18,"./link-edit-view":19,"./link-view":20,"./node-edit-view":21,"./node-well-view":23,"./placeholder-view":24,"./status-menu-view":27}],15:[function(require,module,exports){
+},{"../mixins/app-view":2,"./global-nav-view":16,"./inspector-panel-view":17,"./link-edit-view":18,"./link-view":19,"./node-edit-view":20,"./node-well-view":22,"./placeholder-view":23}],15:[function(require,module,exports){
 var div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -1645,41 +1643,6 @@ module.exports = React.createClass({
 
 
 },{"../mixins/google-file-interface":3,"../utils/translate":13,"./dropdown-view":15}],17:[function(require,module,exports){
-var button, div, input, label, ref;
-
-ref = React.DOM, div = ref.div, label = ref.label, input = ref.input, button = ref.button;
-
-module.exports = React.createClass({
-  mixins: [require('../mixins/google-file-interface')],
-  displayName: 'GoogleFileView',
-  getInitialState: function() {
-    return this.getInitialAppViewState({});
-  },
-  componentDidMount: function() {
-    return this.createGoogleDrive();
-  },
-  render: function() {
-    return div({
-      className: 'file-dialog-view'
-    }, div({
-      className: 'filename'
-    }, this.state.action ? this.state.action : this.props.filename), div({
-      className: 'buttons'
-    }, button({
-      onClick: this.newFile
-    }, 'New'), button({
-      onClick: this.openFile,
-      disabled: !this.state.gapiLoaded
-    }, 'Open'), button({
-      onClick: this.saveFile,
-      disabled: !this.state.gapiLoaded
-    }, 'Save')));
-  }
-});
-
-
-
-},{"../mixins/google-file-interface":3}],18:[function(require,module,exports){
 var LinkEditView, NodeEditView, div, i, ref;
 
 NodeEditView = React.createFactory(require('./node-edit-view'));
@@ -1733,7 +1696,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-edit-view":19,"./node-edit-view":21}],19:[function(require,module,exports){
+},{"./link-edit-view":18,"./node-edit-view":20}],18:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -1810,7 +1773,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":13}],20:[function(require,module,exports){
+},{"../utils/translate":13}],19:[function(require,module,exports){
 var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
@@ -2076,7 +2039,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":22}],21:[function(require,module,exports){
+},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":21}],20:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -2218,7 +2181,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":13}],22:[function(require,module,exports){
+},{"../utils/translate":13}],21:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -2312,7 +2275,7 @@ module.exports = React.createClass({
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -2380,7 +2343,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":25}],24:[function(require,module,exports){
+},{"./proto-node-view":24}],23:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2398,7 +2361,7 @@ module.exports = React.createClass({
 
 
 
-},{}],25:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2422,7 +2385,9 @@ module.exports = React.createClass({
     return typeof (base = this.props).onNodeClicked === "function" ? base.onNodeClicked(this.props.image) : void 0;
   },
   render: function() {
-    var ref1;
+    var defaultImage, imageUrl, ref1;
+    defaultImage = "img/nodes/blank.png";
+    imageUrl = ((ref1 = this.props.image) != null ? ref1.length : void 0) > 0 ? this.props.image : defaultImage;
     return div({
       className: 'proto-node',
       ref: 'node',
@@ -2432,69 +2397,35 @@ module.exports = React.createClass({
       'data-title': this.props.title
     }, div({
       className: 'img-background'
-    }, ((ref1 = this.props.image) != null ? ref1.length : void 0) > 0 ? img({
-      src: this.props.image
-    }) : null));
+    }, img({
+      src: imageUrl
+    })));
   }
 });
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
+    "title": "",
+    "image": ""
+  }, {
+    "id": "2",
     "title": "Egg",
     "image": "img/nodes/egg.png"
   }, {
-    "id": "2",
+    "id": "3",
     "title": "Chick",
     "image": "img/nodes/chick.jpg"
   }, {
-    "id": "3",
+    "id": "4",
     "title": "Chicken",
     "image": "img/nodes/chicken.jpg"
-  }, {
-    "id": "4",
-    "title": "",
-    "image": ""
   }
 ];
 
 
 
-},{}],27:[function(require,module,exports){
-var GoogleFileView, div;
-
-GoogleFileView = React.createFactory(require('./google-file-view'));
-
-div = React.DOM.div;
-
-log.setLevel(log.levels.TRACE);
-
-module.exports = React.createClass({
-  displayName: 'StatusMenu',
-  openLink: function() {
-    if (this.props.getData) {
-      return window.open(window.location.protocol + "//" + window.location.host + window.location.pathname + "#data=" + (encodeURIComponent(this.props.getData())));
-    }
-  },
-  render: function() {
-    return div({
-      className: 'status-menu'
-    }, div({
-      className: 'title'
-    }, this.props.title || 'Building Models'), GoogleFileView({
-      linkManager: this.props.linkManager,
-      getData: this.props.getData,
-      filename: this.props.filename
-    }), div({
-      className: 'open-data-url',
-      onClick: this.openLink
-    }, this.props.linkText || 'Link to my model'));
-  }
-});
-
-
-
-},{"./google-file-view":17}]},{},[1]);
+},{}]},{},[1]);
