@@ -4,7 +4,6 @@ LinkView    = React.createFactory require './link-view'
 NodeWell    = React.createFactory require './node-well-view'
 NodeEditView= React.createFactory require './node-edit-view'
 LinkEditView= React.createFactory require './link-edit-view'
-StatusMenu  = React.createFactory require './status-menu-view'
 InspectorPanel = React.createFactory require './inspector-panel-view'
 
 {div} = React.DOM
