@@ -18,6 +18,10 @@ module.exports = React.createClass
     @props.onNodeClicked? @props.image
 
   render: ->
+    defaultImage = "img/nodes/blank.png"
+    imageUrl = if @props.image?.length > 0 then @props.image else defaultImage
     (div {className: 'proto-node', ref: 'node', onClick: @onClick, 'data-node-key': @props.key, 'data-image': @props.image, 'data-title': @props.title},
-      (div {className: 'img-background'}, if @props.image?.length > 0 then (img {src: @props.image}) else null)
+      (div {className: 'img-background'},
+        (img {src: imageUrl})
+      )
     )
