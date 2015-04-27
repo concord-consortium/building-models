@@ -1,5 +1,6 @@
-NodeEditView= React.createFactory require './node-edit-view'
-LinkEditView= React.createFactory require './link-edit-view'
+NodeEditView = React.createFactory require './node-edit-view'
+LinkEditView = React.createFactory require './link-edit-view'
+PaletteInspectorView = React.createFactory require './palette-inspector-view'
 
 {div, i} = React.DOM
 
@@ -26,7 +27,11 @@ module.exports = React.createClass
     (div {className: className},
       (div {className: 'inspector-panel-toggle', onClick: action})
       (div {className: "inspector-panel-content"},
-        (NodeEditView {node: @props.node, onNodeChanged: @props.onNodeChanged, protoNodes: @props.protoNodes})
-        (LinkEditView {link: @props.link, onLinkChanged: @props.onLinkChanged})
+        if @props.node
+          (NodeEditView {node: @props.node, onNodeChanged: @props.onNodeChanged, protoNodes: @props.protoNodes})
+        else if @props.link
+          (LinkEditView {link: @props.link, onLinkChanged: @props.onLinkChanged})
+        else
+          (PaletteInspectorView {protoNodes: @props.protoNodes, toggleImageBrowser: @props.toggleImageBrowser})
       )
     )

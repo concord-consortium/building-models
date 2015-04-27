@@ -20,27 +20,25 @@ module.exports =
           deleteFunction()
     else
       $(window).off 'keydown'
+      
+  addToPalette: (node) ->
+    if node?.image.match /^(https?|data):/
+      # make sure this is a new image
+      if not _.find @state.protoNodes, {image: node.image}
+        protoNodes = @state.protoNodes.slice 0
+        protoNodes.push
+          title: node.title or ''
+          image: node.image
+        @setState protoNodes: protoNodes
 
   componentDidMount: ->
     @addDeleteKeyHandler true
-
-    updatePalette = (node) =>
-      if node?.image.match /^(https?|data):/
-        # make sure this is a new image
-        if not _.find @state.protoNodes, {image: node.image}
-          # add the image before the empty image
-          protoNodes = @state.protoNodes.slice 0
-          emptyPos = _.findIndex protoNodes, {image: ''}
-          protoNodes.splice (if emptyPos is -1 then protoNodes.length else emptyPos), 0,
-            title: node.title or ''
-            image: node.image
-          @setState protoNodes: protoNodes
 
     @props.linkManager.addSelectionListener (selections) =>
       @setState
         selectedNode: selections.node
         selectedConnection: selections.connection
-      updatePalette selections.node
+      @addToPalette selections.node
       log.info 'updated selections: + selections'
 
     @props.linkManager.addLoadListener (data) =>
@@ -50,7 +48,7 @@ module.exports =
       else
         @setState protoNodes: (require '../views/proto-nodes')
         for node in data.nodes
-          updatePalette node
+          @addToPalette node
 
     @props.linkManager.addFilenameListener (filename) =>
       @setState filename: filename

@@ -33,45 +33,42 @@ module.exports = React.createClass
       else if node.image.match /^https?:/
         remoteNodes.push node
 
-    if @props.node
-      (div {className: 'node-edit-view'},
-        (h2 {}, @props.node.title)
-        (div {className: 'edit-row'},
-          (label {htmlFor: 'title'}, tr "~NODE-EDIT.TITLE")
-          (input {type: 'text', name: 'title', value: @props.node.title, onChange: @changeTitle})
-        )
-        (div {className: 'edit-row'},
-          (label {htmlFor: 'image'}, tr "~NODE-EDIT.IMAGE")
-          (select {name: 'image', value: @props.node.image, onChange: @changeImage},
-            (optgroup {label: tr "~NODE-EDIT.BUILT_IN"},
-              for node, i in builtInNodes
-                (option {key: i, value: node.image}, if node.title.length > 0 then node.title else '(none)')
-            )
-            if droppedNodes.length > 0
-              (optgroup {label: tr "~NODE-EDIT.DROPPED" },
-                for node, i in droppedNodes
-                  (option {key: i, value: node.image}, node.title or node.image)
-              )
-            (optgroup {label: 'Remote'},
-              for node, i in remoteNodes
-                (option {key: i, value: node.image}, node.image)
-              (option {key: i, value: '#remote'},
-                tr "~NODE-EDIT.ADD_REMOTE"
-              )
-            )
-          )
-        )
-        if @props.node.image is '#remote'
-          (div {},
-            (div {className: 'edit-row'},
-              (label {htmlFor: 'remoteUrl'}, 'URL')
-              (input {type: 'text', ref: 'remoteUrl', name: 'remoteUrl', placeholder: 'Remote image url'})
-            )
-            (div {className: 'edit-row'},
-              (label {htmlFor: 'save'}, '')
-              (button {name: 'save', onClick: @addRemote}, 'Add Remote Image')
-            )
-          )
+    (div {className: 'node-edit-view'},
+      (h2 {}, @props.node.title)
+      (div {className: 'edit-row'},
+        (label {htmlFor: 'title'}, tr "~NODE-EDIT.TITLE")
+        (input {type: 'text', name: 'title', value: @props.node.title, onChange: @changeTitle})
       )
-    else
-      (div {className: 'node-edit-view hidden'})
+      (div {className: 'edit-row'},
+        (label {htmlFor: 'image'}, tr "~NODE-EDIT.IMAGE")
+        (select {name: 'image', value: @props.node.image, onChange: @changeImage},
+          (optgroup {label: tr "~NODE-EDIT.BUILT_IN"},
+            for node, i in builtInNodes
+              (option {key: i, value: node.image}, if node.title.length > 0 then node.title else '(none)')
+          )
+          if droppedNodes.length > 0
+            (optgroup {label: tr "~NODE-EDIT.DROPPED" },
+              for node, i in droppedNodes
+                (option {key: i, value: node.image}, node.title or node.image)
+            )
+          (optgroup {label: 'Remote'},
+            for node, i in remoteNodes
+              (option {key: i, value: node.image}, node.image)
+            (option {key: i, value: '#remote'},
+              tr "~NODE-EDIT.ADD_REMOTE"
+            )
+          )
+        )
+      )
+      if @props.node.image is '#remote'
+        (div {},
+          (div {className: 'edit-row'},
+            (label {htmlFor: 'remoteUrl'}, 'URL')
+            (input {type: 'text', ref: 'remoteUrl', name: 'remoteUrl', placeholder: 'Remote image url'})
+          )
+          (div {className: 'edit-row'},
+            (label {htmlFor: 'save'}, '')
+            (button {name: 'save', onClick: @addRemote}, 'Add Remote Image')
+          )
+        )
+    )
