@@ -36,7 +36,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":5,"./views/app-view":14}],2:[function(require,module,exports){
+},{"./models/link-manager":5,"./views/app-view":15}],2:[function(require,module,exports){
 module.exports = {
   getInitialAppViewState: function(subState) {
     var mixinState;
@@ -65,38 +65,36 @@ module.exports = {
       return $(window).off('keydown');
     }
   },
+  addToPalette: function(node) {
+    var emptyPos, protoNodes;
+    if (node != null ? node.image.match(/^(https?|data):/) : void 0) {
+      if (!_.find(this.state.protoNodes, {
+        image: node.image
+      })) {
+        protoNodes = this.state.protoNodes.slice(0);
+        emptyPos = _.findIndex(protoNodes, {
+          image: ''
+        });
+        protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
+          title: node.title || '',
+          image: node.image
+        });
+        return this.setState({
+          protoNodes: protoNodes
+        });
+      }
+    }
+  },
   componentDidMount: function() {
-    var ref, updatePalette;
+    var ref;
     this.addDeleteKeyHandler(true);
-    updatePalette = (function(_this) {
-      return function(node) {
-        var emptyPos, protoNodes;
-        if (node != null ? node.image.match(/^(https?|data):/) : void 0) {
-          if (!_.find(_this.state.protoNodes, {
-            image: node.image
-          })) {
-            protoNodes = _this.state.protoNodes.slice(0);
-            emptyPos = _.findIndex(protoNodes, {
-              image: ''
-            });
-            protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
-              title: node.title || '',
-              image: node.image
-            });
-            return _this.setState({
-              protoNodes: protoNodes
-            });
-          }
-        }
-      };
-    })(this);
     this.props.linkManager.addSelectionListener((function(_this) {
       return function(selections) {
         _this.setState({
           selectedNode: selections.node,
           selectedConnection: selections.connection
         });
-        updatePalette(selections.node);
+        _this.addToPalette(selections.node);
         return log.info('updated selections: + selections');
       };
     })(this));
@@ -115,7 +113,7 @@ module.exports = {
           results = [];
           for (i = 0, len = ref.length; i < len; i++) {
             node = ref[i];
-            results.push(updatePalette(node));
+            results.push(_this.addToPalette(node));
           }
           return results;
         }
@@ -150,7 +148,7 @@ module.exports = {
 
 
 
-},{"../views/proto-nodes":25}],3:[function(require,module,exports){
+},{"../views/proto-nodes":31}],3:[function(require,module,exports){
 var GoogleDriveIO;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -1396,12 +1394,46 @@ module.exports = {
   "~NODE-EDIT.ADD_REMOTE": "Add remote",
   "~LINK-EDIT.DELETE": "Delete this link",
   "~LINK-EDIT.TITLE": "Title",
-  "~LINK-EDIT.COLOR": "Color"
+  "~LINK-EDIT.COLOR": "Color",
+  "~ADD-NEW-IMAGE.TITLE": "Add new image",
+  "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB": "Image Search",
+  "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
+  "~ADD-NEW-IMAGE.LINK-TAB": "Link"
 };
 
 
 
 },{}],13:[function(require,module,exports){
+var OpenClipArt;
+
+module.exports = OpenClipArt = {
+  jqXHR: null,
+  search: function(query, options, callback) {
+    var ref, url;
+    if ((ref = OpenClipArt.jqXHR) != null) {
+      ref.abort();
+    }
+    url = "https://openclipart.org/search/json/?query=" + (encodeURIComponent(query)) + "&amount=" + (options.limitResults ? 18 : 200);
+    return OpenClipArt.jqXHR = $.getJSON(url, function(data) {
+      var i, item, len, numMatches, ref1, ref2, results;
+      results = [];
+      numMatches = Math.min(parseInt((data != null ? (ref1 = data.info) != null ? ref1.results : void 0 : void 0) || '0', 10), 200);
+      ref2 = data != null ? data.payload : void 0;
+      for (i = 0, len = ref2.length; i < len; i++) {
+        item = ref2[i];
+        results.push({
+          title: item.title,
+          image: item.svg.url
+        });
+      }
+      return callback(results, numMatches);
+    });
+  }
+};
+
+
+
+},{}],14:[function(require,module,exports){
 var defaultLang, translate, translations;
 
 translations = {};
@@ -1422,8 +1454,8 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":12}],14:[function(require,module,exports){
-var GlobalNav, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, div;
+},{"./lang/us-en":12}],15:[function(require,module,exports){
+var GlobalNav, ImageBrowser, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, a, div, ref;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
 
@@ -1439,7 +1471,9 @@ LinkEditView = React.createFactory(require('./link-edit-view'));
 
 InspectorPanel = React.createFactory(require('./inspector-panel-view'));
 
-div = React.DOM.div;
+ImageBrowser = React.createFactory(require('./image-browser-view'));
+
+ref = React.DOM, div = ref.div, a = ref.a;
 
 module.exports = React.createClass({
   displayName: 'WirefameApp',
@@ -1455,6 +1489,11 @@ module.exports = React.createClass({
       iframed: iframed,
       username: 'Jane Doe',
       filename: 'Untitled Model'
+    });
+  },
+  toggleImageBrowser: function() {
+    return this.setState({
+      showImageBrowser: !this.state.showImageBrowser
     });
   },
   render: function() {
@@ -1484,14 +1523,19 @@ module.exports = React.createClass({
       link: this.state.selectedConnection,
       onNodeChanged: this.onNodeChanged,
       onLinkChanged: this.onLinkChanged,
-      protoNodes: this.state.protoNodes
-    })));
+      protoNodes: this.state.protoNodes,
+      toggleImageBrowser: this.toggleImageBrowser
+    }), this.state.showImageBrowser ? ImageBrowser({
+      protoNodes: this.state.protoNodes,
+      addToPalette: this.addToPalette,
+      close: this.toggleImageBrowser
+    }) : void 0));
   }
 });
 
 
 
-},{"../mixins/app-view":2,"./global-nav-view":16,"./inspector-panel-view":17,"./link-edit-view":18,"./link-view":19,"./node-edit-view":20,"./node-well-view":22,"./placeholder-view":23}],15:[function(require,module,exports){
+},{"../mixins/app-view":2,"./global-nav-view":17,"./image-browser-view":18,"./inspector-panel-view":19,"./link-edit-view":20,"./link-view":21,"./node-edit-view":25,"./node-well-view":27,"./placeholder-view":29}],16:[function(require,module,exports){
 var div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -1589,7 +1633,7 @@ module.exports = React.createClass({
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -1649,12 +1693,290 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":3,"../utils/translate":13,"./dropdown-view":15}],17:[function(require,module,exports){
-var LinkEditView, NodeEditView, div, i, ref;
+},{"../mixins/google-file-interface":3,"../utils/translate":14,"./dropdown-view":16}],18:[function(require,module,exports){
+var ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, button, div, i, img, input, ref, tr;
+
+ModalTabbedDialog = require('./modal-tabbed-dialog-view');
+
+ModalTabbedDialogFactory = React.createFactory(ModalTabbedDialog);
+
+OpenClipart = require('../utils/open-clipart');
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a;
+
+ImageSearchResult = React.createFactory(React.createClass({
+  displayName: 'ImageSearchResult',
+  getInitialState: function() {
+    return {
+      loaded: false
+    };
+  },
+  componentDidMount: function() {
+    var image;
+    image = new Image();
+    image.src = this.props.imageInfo.image;
+    return image.onload = (function(_this) {
+      return function() {
+        return _this.setState({
+          loaded: true
+        });
+      };
+    })(this);
+  },
+  clicked: function() {
+    return this.props.clicked(this.props.imageInfo);
+  },
+  render: function() {
+    var src;
+    src = this.state.loaded ? this.props.imageInfo.image : 'img/bb-chrome/spin.svg';
+    return img({
+      src: src,
+      onClick: this.clicked,
+      title: this.props.imageInfo.title
+    });
+  }
+}));
+
+PreviewImage = React.createFactory(React.createClass({
+  displayName: 'ImageSearchResult',
+  cancel: function(e) {
+    e.preventDefault();
+    return this.props.addImage(null);
+  },
+  addImage: function() {
+    return this.props.addImage(this.props.imageInfo);
+  },
+  render: function() {
+    return div({}, div({
+      className: 'image-browser-header'
+    }, 'Preview Your Image'), div({
+      className: 'image-browser-preview-image'
+    }, img({
+      src: this.props.imageInfo.image
+    }), a({
+      href: '#',
+      onClick: this.cancel
+    }, i({
+      className: "fa fa-close"
+    }), 'cancel')), div({
+      className: 'image-browser-preview-add-image'
+    }, button({
+      onClick: this.addImage
+    }, 'Add Image')), div({
+      style: {
+        clear: 'both',
+        marginTop: 10
+      }
+    }, 'TBD: Metadata'));
+  }
+}));
+
+ImageSearch = React.createFactory(React.createClass({
+  displayName: 'ImageSearch',
+  getInitialState: function() {
+    return {
+      searching: false,
+      searched: false,
+      internalLibrary: this.props.protoNodes,
+      internalResults: this.props.protoNodes,
+      externalResults: [],
+      selectedImage: null
+    };
+  },
+  changed: function() {
+    return this.search({
+      limitResults: true,
+      useTimeout: true
+    });
+  },
+  showAllMatches: function() {
+    return this.search({
+      limitResults: false,
+      useTimeout: false
+    });
+  },
+  search: function(options) {
+    var internalResults, query, queryRegEx, search, validQuery;
+    query = $.trim(this.refs.search.getDOMNode().value);
+    validQuery = query.length > 0;
+    queryRegEx = new RegExp(query, 'i');
+    internalResults = _.filter(this.props.protoNodes, function(node) {
+      return queryRegEx.test(node.title);
+    });
+    this.setState({
+      query: query,
+      searchable: validQuery,
+      searching: validQuery,
+      searchingAll: validQuery && !options.limitResults,
+      searched: false,
+      internalResults: internalResults,
+      externalResults: [],
+      numExternalMatches: 0
+    });
+    clearTimeout(this.searchTimeout);
+    search = (function(_this) {
+      return function() {
+        return OpenClipart.search(query, options, function(results, numMatches) {
+          return _this.setState({
+            searching: false,
+            searched: true,
+            externalResults: results,
+            numExternalMatches: numMatches
+          });
+        });
+      };
+    })(this);
+    if (options.useTimeout) {
+      return this.searchTimeout = setTimeout(search, 1000);
+    } else {
+      return search();
+    }
+  },
+  componentDidMount: function() {
+    return this.refs.search.getDOMNode().focus();
+  },
+  imageClicked: function(imageInfo) {
+    return this.setState({
+      selectedImage: imageInfo
+    });
+  },
+  addImage: function(imageInfo) {
+    if (imageInfo) {
+      this.props.addToPalette(imageInfo);
+    }
+    return this.setState({
+      selectedImage: null
+    });
+  },
+  render: function() {
+    var index, node, showNoResultsAlert;
+    showNoResultsAlert = this.state.searchable && this.state.searched && (this.state.internalResults.length + this.state.externalResults.length) === 0;
+    return div({
+      className: 'image-browser'
+    }, this.state.selectedImage ? PreviewImage({
+      imageInfo: this.state.selectedImage,
+      addImage: this.addImage
+    }) : div({}, div({
+      className: 'image-browser-form'
+    }, input({
+      ref: 'search',
+      placeholder: 'Search Internal Library and Openclipart.org',
+      value: this.state.query,
+      onChange: this.changed
+    }), button({}, 'Search')), showNoResultsAlert ? div({
+      className: 'modal-dialog-alert'
+    }, 'Sorry, no images found.  Try another search, or browse internal library images below.') : void 0, div({
+      className: 'image-browser-header'
+    }, 'Internal Library Images'), div({
+      className: 'image-browser-results'
+    }, (function() {
+      var j, len, ref1, results1;
+      if (this.state.internalResults.length === 0 && (this.state.searching || this.state.externalResults.length > 0)) {
+        return " No internal library results found for '" + this.state.query + "'";
+      } else {
+        ref1 = (showNoResultsAlert ? this.state.internalLibrary : this.state.internalResults);
+        results1 = [];
+        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
+          node = ref1[index];
+          if (node.image && !node.image.match(/^(https?|data):/)) {
+            if (node.image) {
+              results1.push(ImageSearchResult({
+                key: index,
+                imageInfo: node,
+                clicked: this.imageClicked
+              }));
+            } else {
+              results1.push(void 0);
+            }
+          } else {
+            results1.push(void 0);
+          }
+        }
+        return results1;
+      }
+    }).call(this)), this.state.searchable && !showNoResultsAlert ? div({}, div({
+      className: 'image-browser-header'
+    }, 'Openclipart.org Images'), div({
+      className: 'image-browser-results'
+    }, (function() {
+      var j, len, ref1, results1;
+      if (this.state.searching) {
+        return div({}, i({
+          className: "fa fa-cog fa-spin"
+        }), " Searching for " + (this.state.searchingAll ? 'all matches for ' : '') + "'" + this.state.query + "'...");
+      } else if (this.state.externalResults.length === 0) {
+        return " No openclipart.org results found for '" + this.state.query + "'";
+      } else {
+        ref1 = this.state.externalResults;
+        results1 = [];
+        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
+          node = ref1[index];
+          results1.push(ImageSearchResult({
+            key: index,
+            imageInfo: node,
+            clicked: this.imageClicked
+          }));
+        }
+        return results1;
+      }
+    }).call(this)), this.state.externalResults.length < this.state.numExternalMatches ? div({}, "Showing " + this.state.externalResults.length + " of " + this.state.numExternalMatches + " matches for '" + this.state.query + "'. ", a({
+      href: '#',
+      onClick: this.showAllMatches
+    }, 'Show all matches.')) : void 0) : void 0));
+  }
+}));
+
+MyComputer = React.createFactory(React.createClass({
+  displayName: 'MyComputer',
+  render: function() {
+    return div({}, 'My Computer: TBD');
+  }
+}));
+
+Link = React.createFactory(React.createClass({
+  displayName: 'Link',
+  render: function() {
+    return div({}, 'Link: TBD');
+  }
+}));
+
+module.exports = React.createClass({
+  displayName: 'Image Browser',
+  render: function() {
+    return ModalTabbedDialogFactory({
+      title: tr("~ADD-NEW-IMAGE.TITLE"),
+      close: this.props.close,
+      tabs: [
+        ModalTabbedDialog.Tab({
+          label: tr("~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"),
+          component: ImageSearch({
+            protoNodes: this.props.protoNodes,
+            addToPalette: this.props.addToPalette
+          })
+        }), ModalTabbedDialog.Tab({
+          label: tr("~ADD-NEW-IMAGE.MY-COMPUTER-TAB"),
+          component: MyComputer({})
+        }), ModalTabbedDialog.Tab({
+          label: tr("~ADD-NEW-IMAGE.LINK-TAB"),
+          component: Link({})
+        })
+      ]
+    });
+  }
+});
+
+
+
+},{"../utils/open-clipart":13,"../utils/translate":14,"./modal-tabbed-dialog-view":23}],19:[function(require,module,exports){
+var LinkEditView, NodeEditView, PaletteInspectorView, div, i, ref;
 
 NodeEditView = React.createFactory(require('./node-edit-view'));
 
 LinkEditView = React.createFactory(require('./link-edit-view'));
+
+PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
 
 ref = React.DOM, div = ref.div, i = ref.i;
 
@@ -1690,20 +2012,23 @@ module.exports = React.createClass({
       onClick: action
     }), div({
       className: "inspector-panel-content"
-    }, NodeEditView({
+    }, this.props.node ? NodeEditView({
       node: this.props.node,
       onNodeChanged: this.props.onNodeChanged,
       protoNodes: this.props.protoNodes
-    }), LinkEditView({
+    }) : this.props.link ? LinkEditView({
       link: this.props.link,
       onLinkChanged: this.props.onLinkChanged
+    }) : PaletteInspectorView({
+      protoNodes: this.props.protoNodes,
+      toggleImageBrowser: this.props.toggleImageBrowser
     })));
   }
 });
 
 
 
-},{"./link-edit-view":18,"./node-edit-view":20}],18:[function(require,module,exports){
+},{"./link-edit-view":20,"./node-edit-view":25,"./palette-inspector-view":28}],20:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -1731,56 +2056,50 @@ module.exports = React.createClass({
   },
   render: function() {
     var colorCode, i;
-    if (this.props.link) {
-      return div({
-        className: 'link-edit-view'
-      }, h2({}, this.props.link.title), div({
-        className: 'edit-row'
-      }, button({
-        type: 'button',
-        className: 'delete',
-        onClick: this.deleteLink
-      }, tr("~LINK-EDIT.DELETE"))), div({
-        className: 'edit-row'
-      }, label({
-        name: 'title'
-      }, tr("~LINK-EDIT.TITLE")), input({
-        type: 'text',
-        name: 'title',
-        value: this.props.link.title,
-        onChange: this.changeTitle
-      })), div({
-        className: 'edit-row'
-      }, label({
-        name: 'color'
-      }, tr("~LINK-EDIT.COLOR")), (function() {
-        var j, len, results;
-        results = [];
-        for (i = j = 0, len = palette.length; j < len; i = ++j) {
-          colorCode = palette[i];
-          results.push(div({
-            className: 'colorChoice',
-            key: i,
-            style: {
-              backgroundColor: colorCode
-            },
-            onTouchEnd: this.pickColor,
-            onClick: this.pickColor
-          }));
-        }
-        return results;
-      }).call(this)));
-    } else {
-      return div({
-        className: 'link-edit-view hidden'
-      });
-    }
+    return div({
+      className: 'link-edit-view'
+    }, h2({}, this.props.link.title), div({
+      className: 'edit-row'
+    }, button({
+      type: 'button',
+      className: 'delete',
+      onClick: this.deleteLink
+    }, tr("~LINK-EDIT.DELETE"))), div({
+      className: 'edit-row'
+    }, label({
+      name: 'title'
+    }, tr("~LINK-EDIT.TITLE")), input({
+      type: 'text',
+      name: 'title',
+      value: this.props.link.title,
+      onChange: this.changeTitle
+    })), div({
+      className: 'edit-row'
+    }, label({
+      name: 'color'
+    }, tr("~LINK-EDIT.COLOR")), (function() {
+      var j, len, results;
+      results = [];
+      for (i = j = 0, len = palette.length; j < len; i = ++j) {
+        colorCode = palette[i];
+        results.push(div({
+          className: 'colorChoice',
+          key: i,
+          style: {
+            backgroundColor: colorCode
+          },
+          onTouchEnd: this.pickColor,
+          onClick: this.pickColor
+        }));
+      }
+      return results;
+    }).call(this)));
   }
 });
 
 
 
-},{"../utils/translate":13}],19:[function(require,module,exports){
+},{"../utils/translate":14}],21:[function(require,module,exports){
 var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
@@ -2045,7 +2364,166 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":21}],20:[function(require,module,exports){
+},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":26}],22:[function(require,module,exports){
+var Modal, div, i, ref;
+
+Modal = React.createFactory(require('./modal-view'));
+
+ref = React.DOM, div = ref.div, i = ref.i;
+
+module.exports = React.createClass({
+  displayName: 'ModalDialog',
+  close: function() {
+    var base;
+    return typeof (base = this.props).close === "function" ? base.close() : void 0;
+  },
+  render: function() {
+    return Modal({
+      close: this.props.close
+    }, div({
+      className: 'modal-dialog'
+    }, div({
+      className: 'modal-dialog-wrapper'
+    }, div({
+      className: 'modal-dialog-title'
+    }, i({
+      className: "modal-dialog-title-close fa fa-close",
+      onClick: this.close
+    }), this.props.title || 'Untitled Dialog'), div({
+      className: 'modal-dialog-workspace'
+    }, this.props.children))));
+  }
+});
+
+
+
+},{"./modal-view":24}],23:[function(require,module,exports){
+var ModalDialog, Tab, TabInfo, a, div, li, ref, ul;
+
+ModalDialog = React.createFactory(require('./modal-dialog-view'));
+
+ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
+
+TabInfo = (function() {
+  function TabInfo(settings) {
+    if (settings == null) {
+      settings = {};
+    }
+    this.label = settings.label, this.component = settings.component;
+  }
+
+  return TabInfo;
+
+})();
+
+Tab = React.createFactory(React.createClass({
+  displayName: 'ModalTabbedDialogTab',
+  clicked: function(e) {
+    e.preventDefault();
+    return this.props.onSelected(this.props.index);
+  },
+  render: function() {
+    return li({
+      className: (this.props.selected ? 'tab-selected' : ''),
+      onClick: this.clicked
+    }, this.props.label);
+  }
+}));
+
+module.exports = React.createClass({
+  displayName: 'ModalTabbedDialog',
+  getInitialState: function() {
+    return {
+      selectedTabIndex: 0
+    };
+  },
+  statics: {
+    Tab: function(settings) {
+      return new TabInfo(settings);
+    }
+  },
+  selectedTab: function(index) {
+    return this.setState({
+      selectedTabIndex: index
+    });
+  },
+  render: function() {
+    var index, tab, tabs;
+    tabs = (function() {
+      var i, len, ref1, results;
+      ref1 = this.props.tabs;
+      results = [];
+      for (index = i = 0, len = ref1.length; i < len; index = ++i) {
+        tab = ref1[index];
+        results.push(Tab({
+          label: tab.label,
+          key: index,
+          index: index,
+          selected: index === this.state.selectedTabIndex,
+          onSelected: this.selectedTab
+        }));
+      }
+      return results;
+    }).call(this);
+    return ModalDialog({
+      title: this.props.title,
+      close: this.props.close
+    }, div({
+      className: 'modal-dialog-workspace-tabs'
+    }, ul({}, tabs)), div({
+      className: 'modal-dialog-workspace-tab-component'
+    }, (function() {
+      var i, len, ref1, results;
+      ref1 = this.props.tabs;
+      results = [];
+      for (index = i = 0, len = ref1.length; i < len; index = ++i) {
+        tab = ref1[index];
+        results.push(div({
+          style: {
+            display: index === this.state.selectedTabIndex ? 'block' : 'none'
+          }
+        }, tab.component));
+      }
+      return results;
+    }).call(this)));
+  }
+});
+
+
+
+},{"./modal-dialog-view":22}],24:[function(require,module,exports){
+var div;
+
+div = React.DOM.div;
+
+module.exports = React.createClass({
+  displayName: 'Modal',
+  watchForEscape: function(e) {
+    var base;
+    if (e.keyCode === 27) {
+      return typeof (base = this.props).close === "function" ? base.close() : void 0;
+    }
+  },
+  componentDidMount: function() {
+    return $(window).on('keyup', this.watchForEscape);
+  },
+  componentWillUnmount: function() {
+    return $(window).off('keyup', this.watchForEscape);
+  },
+  render: function() {
+    return div({
+      className: 'modal'
+    }, div({
+      className: 'modal-background'
+    }), div({
+      className: 'modal-content'
+    }, this.props.children));
+  }
+});
+
+
+
+},{}],25:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -2098,96 +2576,90 @@ module.exports = React.createClass({
         remoteNodes.push(node);
       }
     }
-    if (this.props.node) {
-      return div({
-        className: 'node-edit-view'
-      }, h2({}, this.props.node.title), div({
-        className: 'edit-row'
-      }, label({
-        htmlFor: 'title'
-      }, tr("~NODE-EDIT.TITLE")), input({
-        type: 'text',
-        name: 'title',
-        value: this.props.node.title,
-        onChange: this.changeTitle
-      })), div({
-        className: 'edit-row'
-      }, label({
-        htmlFor: 'image'
-      }, tr("~NODE-EDIT.IMAGE")), select({
-        name: 'image',
-        value: this.props.node.image,
-        onChange: this.changeImage
-      }, optgroup({
-        label: tr("~NODE-EDIT.BUILT_IN")
-      }, (function() {
-        var k, len1, results;
-        results = [];
-        for (i = k = 0, len1 = builtInNodes.length; k < len1; i = ++k) {
-          node = builtInNodes[i];
-          results.push(option({
-            key: i,
-            value: node.image
-          }, node.title.length > 0 ? node.title : '(none)'));
-        }
-        return results;
-      })()), droppedNodes.length > 0 ? optgroup({
-        label: tr("~NODE-EDIT.DROPPED")
-      }, (function() {
-        var k, len1, results;
-        results = [];
-        for (i = k = 0, len1 = droppedNodes.length; k < len1; i = ++k) {
-          node = droppedNodes[i];
-          results.push(option({
-            key: i,
-            value: node.image
-          }, node.title || node.image));
-        }
-        return results;
-      })()) : void 0, optgroup({
-        label: 'Remote'
-      }, (function() {
-        var k, len1, results;
-        results = [];
-        for (i = k = 0, len1 = remoteNodes.length; k < len1; i = ++k) {
-          node = remoteNodes[i];
-          results.push(option({
-            key: i,
-            value: node.image
-          }, node.image));
-        }
-        return results;
-      })(), option({
-        key: i,
-        value: '#remote'
-      }, tr("~NODE-EDIT.ADD_REMOTE"))))), this.props.node.image === '#remote' ? div({}, div({
-        className: 'edit-row'
-      }, label({
-        htmlFor: 'remoteUrl'
-      }, 'URL'), input({
-        type: 'text',
-        ref: 'remoteUrl',
-        name: 'remoteUrl',
-        placeholder: 'Remote image url'
-      })), div({
-        className: 'edit-row'
-      }, label({
-        htmlFor: 'save'
-      }, ''), button({
-        name: 'save',
-        onClick: this.addRemote
-      }, 'Add Remote Image'))) : void 0);
-    } else {
-      return div({
-        className: 'node-edit-view hidden'
-      });
-    }
+    return div({
+      className: 'node-edit-view'
+    }, h2({}, this.props.node.title), div({
+      className: 'edit-row'
+    }, label({
+      htmlFor: 'title'
+    }, tr("~NODE-EDIT.TITLE")), input({
+      type: 'text',
+      name: 'title',
+      value: this.props.node.title,
+      onChange: this.changeTitle
+    })), div({
+      className: 'edit-row'
+    }, label({
+      htmlFor: 'image'
+    }, tr("~NODE-EDIT.IMAGE")), select({
+      name: 'image',
+      value: this.props.node.image,
+      onChange: this.changeImage
+    }, optgroup({
+      label: tr("~NODE-EDIT.BUILT_IN")
+    }, (function() {
+      var k, len1, results;
+      results = [];
+      for (i = k = 0, len1 = builtInNodes.length; k < len1; i = ++k) {
+        node = builtInNodes[i];
+        results.push(option({
+          key: i,
+          value: node.image
+        }, node.title.length > 0 ? node.title : '(none)'));
+      }
+      return results;
+    })()), droppedNodes.length > 0 ? optgroup({
+      label: tr("~NODE-EDIT.DROPPED")
+    }, (function() {
+      var k, len1, results;
+      results = [];
+      for (i = k = 0, len1 = droppedNodes.length; k < len1; i = ++k) {
+        node = droppedNodes[i];
+        results.push(option({
+          key: i,
+          value: node.image
+        }, node.title || node.image));
+      }
+      return results;
+    })()) : void 0, optgroup({
+      label: 'Remote'
+    }, (function() {
+      var k, len1, results;
+      results = [];
+      for (i = k = 0, len1 = remoteNodes.length; k < len1; i = ++k) {
+        node = remoteNodes[i];
+        results.push(option({
+          key: i,
+          value: node.image
+        }, node.image));
+      }
+      return results;
+    })(), option({
+      key: i,
+      value: '#remote'
+    }, tr("~NODE-EDIT.ADD_REMOTE"))))), this.props.node.image === '#remote' ? div({}, div({
+      className: 'edit-row'
+    }, label({
+      htmlFor: 'remoteUrl'
+    }, 'URL'), input({
+      type: 'text',
+      ref: 'remoteUrl',
+      name: 'remoteUrl',
+      placeholder: 'Remote image url'
+    })), div({
+      className: 'edit-row'
+    }, label({
+      htmlFor: 'save'
+    }, ''), button({
+      name: 'save',
+      onClick: this.addRemote
+    }, 'Add Remote Image'))) : void 0);
   }
 });
 
 
 
-},{"../utils/translate":13}],21:[function(require,module,exports){
+},{"../utils/translate":14}],26:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -2281,7 +2753,7 @@ module.exports = React.createClass({
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -2349,7 +2821,110 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":24}],23:[function(require,module,exports){
+},{"./proto-node-view":30}],28:[function(require,module,exports){
+var PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
+
+ProtoNodeView = React.createFactory(require('./proto-node-view'));
+
+tr = require("../utils/translate");
+
+ref = React.DOM, div = ref.div, img = ref.img, i = ref.i, span = ref.span;
+
+PaletteImage = React.createFactory(React.createClass({
+  displayName: 'PaletteImage',
+  clicked: function() {
+    return this.props.onSelect(this.props.index);
+  },
+  render: function() {
+    return div({
+      className: 'palette-image'
+    }, ProtoNodeView({
+      key: this.props.index,
+      image: this.props.node.image,
+      title: this.props.node.title,
+      onNodeClicked: this.clicked
+    }), div({
+      className: 'palette-image-selected'
+    }, this.props.selected ? i({
+      className: "fa fa-check-circle"
+    }) : ''));
+  }
+}));
+
+module.exports = React.createClass({
+  displayName: 'PaletteInspector',
+  getInitialState: function() {
+    return {
+      selectedIndex: 0
+    };
+  },
+  imageSelected: function(index) {
+    return this.setState({
+      selectedIndex: index
+    });
+  },
+  scrollToBottom: function() {
+    var palette, ref1;
+    palette = (ref1 = this.refs.palette) != null ? ref1.getDOMNode() : void 0;
+    if (palette) {
+      return palette.scrollTop = palette.scrollHeight;
+    }
+  },
+  componentDidMount: function() {
+    return this.scrollToBottom();
+  },
+  componentDidUpdate: function(prevProps) {
+    if (JSON.stringify(prevProps.protoNodes) !== JSON.stringify(this.props.protoNodes)) {
+      return this.scrollToBottom();
+    }
+  },
+  render: function() {
+    var index, node;
+    return div({
+      className: 'palette-inspector'
+    }, div({
+      className: 'palette',
+      ref: 'palette'
+    }, div({}, (function() {
+      var j, len, ref1, results;
+      ref1 = this.props.protoNodes;
+      results = [];
+      for (index = j = 0, len = ref1.length; j < len; index = ++j) {
+        node = ref1[index];
+        if (node.image) {
+          results.push(PaletteImage({
+            node: node,
+            index: index,
+            selected: index === this.state.selectedIndex,
+            onSelect: this.imageSelected
+          }));
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    }).call(this), div({
+      className: 'palette-add-image',
+      onClick: this.props.toggleImageBrowser
+    }, i({
+      className: "fa fa-plus-circle"
+    }), 'Add new image'))), div({
+      className: 'palette-about-image'
+    }, div({
+      className: 'palette-about-image-title'
+    }, i({
+      className: "fa fa-info-circle"
+    }), span({}, 'About This Image'), img({
+      src: this.props.protoNodes[this.state.selectedIndex].image
+    })), div({
+      className: 'palette-about-image-info'
+    }, 'TBD')));
+  }
+});
+
+
+
+},{"../utils/translate":14,"./proto-node-view":30}],29:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2367,7 +2942,7 @@ module.exports = React.createClass({
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2380,7 +2955,9 @@ module.exports = React.createClass({
       revert: true,
       helper: 'clone',
       revertDuration: 0,
-      opacity: 0.35
+      opacity: 0.35,
+      appendTo: 'body',
+      zIndex: 1000
     });
   },
   doMove: function() {
@@ -2411,7 +2988,7 @@ module.exports = React.createClass({
 
 
 
-},{}],25:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
