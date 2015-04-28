@@ -4,7 +4,7 @@ Modal = React.createFactory require './modal-view'
 module.exports = React.createClass
 
   displayName: 'ModalDialog'
-  
+
   close: ->
     @props.close?()
 

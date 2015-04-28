@@ -15,7 +15,7 @@ module.exports =
   "~LINK-EDIT.DELETE": "Delete this link"
   "~LINK-EDIT.TITLE": "Title"
   "~LINK-EDIT.COLOR": "Color"
-  
+
   "~ADD-NEW-IMAGE.TITLE": "Add new image"
   "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB": "Image Search"
   "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer"

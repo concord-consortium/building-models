@@ -40,12 +40,12 @@ module.exports = class LinkManager
   addFilenameListener: (listener) ->
     log.info("adding filename listener #{listener}")
     @filenameListeners.push listener
-    
+
   setFilename: (filename) ->
     @filename = filename
     for listener in @filenameListeners
       listener filename
-    
+
   getLinks: ->
     (value for key, value of @linkKeys)
 

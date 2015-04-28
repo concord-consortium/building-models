@@ -37,5 +37,19 @@ module.exports = {
     watch: src + '/vendor/**/*.*',
     src: src + '/vendor/**/*.*',
     dest: dest + '/js/'
+  },
+  trim: {
+    assets: {
+      src: [src + '/assets/**/*.html', src + '/assets/**/*.json'],
+      dest: src + '/assets/'
+    },
+    code: {
+      src: src + '/code/**/*.*',
+      dest: src + '/code/'
+    },
+    stylus: {
+      src: src + '/stylus/**/*.*',
+      dest: src + '/stylus/'
+    }
   }
 };

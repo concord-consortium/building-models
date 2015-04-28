@@ -5,35 +5,35 @@ tab-border-radius = 5px
 
 .modal
   z-index 100
-  
+
   .modal-background
     absolute(0, 0, 0, 0)
     background-color #777
     opacity 0.5
-  
+
   .modal-content
     absolute(0, 0, 0, 0)
-    
+
     .modal-dialog
       absolute(0, 0, 0, 0)
       enable-flex(column, justify: center, alignItems: center)
-      
+
       .modal-dialog-wrapper
         width dialog-width
         min-height dialog-min-height
         background-color #fff
-        
+
         .modal-dialog-title
           blenderbox-label()
           color #fff
           background-color #0b4e5d
           padding 10px
           text-align center
-          
+
           .modal-dialog-title-close
             float right
             cursor pointer
-          
+
         .modal-dialog-workspace
           .modal-dialog-workspace-tabs
             float left
@@ -43,7 +43,7 @@ tab-border-radius = 5px
               margin 0
               list-style none
               padding-left 10px
-              li 
+              li
                 blenderbox-downcase()
                 -webkit-border-radius tab-border-radius
                 -moz-border-radius tab-border-radius
@@ -63,13 +63,13 @@ tab-border-radius = 5px
                   color #fff
                   background-color #72bca6
                   margin-right 0
-              
+
           .modal-dialog-workspace-tab-component
             margin-left dialog-tab-width
             border-left 5px solid #72bca6
             padding 20px
             min-height dialog-min-height
-            
+
           .modal-dialog-alert
             background #a00
             color #fff
@@ -78,5 +78,4 @@ tab-border-radius = 5px
             border-radius: tab-border-radius
             margin 20px 0
             padding 10px
-            
-      
+
