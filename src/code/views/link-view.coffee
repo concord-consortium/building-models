@@ -132,8 +132,7 @@ module.exports = React.createClass
       if source and target
         sourceTerminal = if link.sourceTerminal is 'a' then 'Top' else 'Bottom'
         targetTerminal = if link.targetTerminal is 'a' then 'Top' else 'Bottom'
-        color = if link is @props.selectedLink then '#ff3' else link.color
-        @diagramToolkit.addLink source, target, link.title, color, sourceTerminal, targetTerminal, link
+        @diagramToolkit.addLink source, target, link.title, link.color, sourceTerminal, targetTerminal, link
 
 
   onDragOver: (e) ->

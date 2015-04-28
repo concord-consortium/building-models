@@ -5,7 +5,7 @@ module.exports = class DiagramToolkit
   constructor: (@domContext, @options = {}) ->
     @type      = 'jsPlumbWrappingDiagramToolkit'
     @color     = @options.color or '#233'
-    @lineWidth = @options.lineWidth or 6
+    @lineWidth = @options.lineWidth or 2
     @kit       = jsPlumb.getInstance {Container: @domContext}
     @kit.importDefaults
       Connector:        ['Bezier', {curviness: 50}],
@@ -59,10 +59,14 @@ module.exports = class DiagramToolkit
   _paintStyle: (color) ->
     strokeStyle: color or @color,
     lineWidth: @lineWidth
+    outlineColor: "rgb(0,240,10)"
+    outlineWidth: "10px"
 
   _overlays: (label, selected) ->
     results = [['Arrow', {
-      location: 1.0,
+      location: 1.0
+      length: 10
+      width: 10
       events: { click: @handleLabelClick.bind @ }
     }]]
     if label?.length > 0
@@ -79,8 +83,11 @@ module.exports = class DiagramToolkit
 
   addLink: (source, target, label, color, source_terminal, target_terminal, linkModel) ->
     paintStyle = @_paintStyle color
+    paintStyle.outlineColor = "none"
+    paintStyle.outlineWidth = 20
     if linkModel.selected
-      paintStyle.lineWidth = paintStyle.lineWidth * 1.2
+      paintStyle.outlineColor = "yellow"
+      paintStyle.outlineWidth = 1
 
     connection = @kit.connect
       source: source
