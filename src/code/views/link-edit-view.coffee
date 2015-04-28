@@ -25,23 +25,20 @@ module.exports = React.createClass
     @notifyChange @props.link.title, $(e.target).css('background-color')
 
   render: ->
-    if this.props.link
-      (div {className: 'link-edit-view'},
-        (h2 {}, @props.link.title)
-        (div {className: 'edit-row'},
-          (button {type: 'button', className: 'delete', onClick: @deleteLink}, tr "~LINK-EDIT.DELETE")
-        )
-        (div {className: 'edit-row'},
-          (label {name: 'title'}, tr "~LINK-EDIT.TITLE")
-          (input {type: 'text', name: 'title', value: @props.link.title, onChange: @changeTitle})
-        )
-        (div {className: 'edit-row'},
-          (label {name: 'color'}, tr "~LINK-EDIT.COLOR")
-          for colorCode, i in palette
-            (div {className: 'colorChoice', key: i, style: {backgroundColor: colorCode}, onTouchEnd: @pickColor, onClick: @pickColor})
-        )
+    (div {className: 'link-edit-view'},
+      (h2 {}, @props.link.title)
+      (div {className: 'edit-row'},
+        (button {type: 'button', className: 'delete', onClick: @deleteLink}, tr "~LINK-EDIT.DELETE")
       )
-    else
-      (div {className: 'link-edit-view hidden'})
+      (div {className: 'edit-row'},
+        (label {name: 'title'}, tr "~LINK-EDIT.TITLE")
+        (input {type: 'text', name: 'title', value: @props.link.title, onChange: @changeTitle})
+      )
+      (div {className: 'edit-row'},
+        (label {name: 'color'}, tr "~LINK-EDIT.COLOR")
+        for colorCode, i in palette
+          (div {className: 'colorChoice', key: i, style: {backgroundColor: colorCode}, onTouchEnd: @pickColor, onClick: @pickColor})
+      )
+    )
 
 

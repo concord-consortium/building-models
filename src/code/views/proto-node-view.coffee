@@ -11,6 +11,8 @@ module.exports = React.createClass
       helper: 'clone'
       revertDuration: 0
       opacity: 0.35
+      appendTo: 'body'
+      zIndex: 1000
 
   doMove: -> undefined
 

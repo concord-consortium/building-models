@@ -5,8 +5,9 @@ NodeWell    = React.createFactory require './node-well-view'
 NodeEditView= React.createFactory require './node-edit-view'
 LinkEditView= React.createFactory require './link-edit-view'
 InspectorPanel = React.createFactory require './inspector-panel-view'
+ImageBrowser = React.createFactory require './image-browser-view'
 
-{div} = React.DOM
+{div, a} = React.DOM
 
 module.exports = React.createClass
 
@@ -25,6 +26,9 @@ module.exports = React.createClass
       iframed: iframed
       username: 'Jane Doe'
       filename: 'Untitled Model'
+
+  toggleImageBrowser: ->
+    @setState showImageBrowser: not @state.showImageBrowser
 
   render: ->
     (div {className: 'app'},
@@ -49,6 +53,9 @@ module.exports = React.createClass
           onNodeChanged: @onNodeChanged
           onLinkChanged: @onLinkChanged
           protoNodes: @state.protoNodes
+          toggleImageBrowser: @toggleImageBrowser
         )
+        if @state.showImageBrowser
+          (ImageBrowser {protoNodes: @state.protoNodes, addToPalette: @addToPalette, close: @toggleImageBrowser})
       )
     )
