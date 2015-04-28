@@ -2949,10 +2949,20 @@ ref = React.DOM, div = ref.div, img = ref.img;
 module.exports = React.createClass({
   displayName: 'ProtoNode',
   componentDidMount: function() {
+    var reactSafeClone;
+    reactSafeClone = function(e) {
+      var clone;
+      clone = $(this).clone(false);
+      clone.attr('data-reactid', null);
+      clone.find("*").each(function(i, v) {
+        return $(v).attr('data-reactid', null);
+      });
+      return clone;
+    };
     return $(this.refs.node.getDOMNode()).draggable({
       drag: this.doMove,
       revert: true,
-      helper: 'clone',
+      helper: reactSafeClone,
       revertDuration: 0,
       opacity: 0.35,
       appendTo: 'body',
