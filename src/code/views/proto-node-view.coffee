@@ -5,10 +5,16 @@ module.exports = React.createClass
   displayName: 'ProtoNode'
 
   componentDidMount: ->
+    reactSafeClone = (e) ->
+      clone = $(@).clone(false)
+      clone.attr('data-reactid', null)
+      clone.find("*").each (i,v) ->
+        $(v).attr('data-reactid', null)
+      clone
     $(@refs.node.getDOMNode()).draggable
       drag: @doMove
       revert: true
-      helper: 'clone'
+      helper: reactSafeClone
       revertDuration: 0
       opacity: 0.35
       appendTo: 'body'
