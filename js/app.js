@@ -1211,7 +1211,7 @@ module.exports = DiagramToolkit = (function() {
     this.options = options != null ? options : {};
     this.type = 'jsPlumbWrappingDiagramToolkit';
     this.color = this.options.color || '#233';
-    this.lineWidth = this.options.lineWidth || 6;
+    this.lineWidth = this.options.lineWidth || 2;
     this.kit = jsPlumb.getInstance({
       Container: this.domContext
     });
@@ -1301,7 +1301,9 @@ module.exports = DiagramToolkit = (function() {
   DiagramToolkit.prototype._paintStyle = function(color) {
     return {
       strokeStyle: color || this.color,
-      lineWidth: this.lineWidth
+      lineWidth: this.lineWidth,
+      outlineColor: "rgb(0,240,10)",
+      outlineWidth: "10px"
     };
   };
 
@@ -1311,6 +1313,8 @@ module.exports = DiagramToolkit = (function() {
       [
         'Arrow', {
           location: 1.0,
+          length: 10,
+          width: 10,
           events: {
             click: this.handleLabelClick.bind(this)
           }
@@ -1339,8 +1343,11 @@ module.exports = DiagramToolkit = (function() {
   DiagramToolkit.prototype.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
     var connection, paintStyle;
     paintStyle = this._paintStyle(color);
+    paintStyle.outlineColor = "none";
+    paintStyle.outlineWidth = 20;
     if (linkModel.selected) {
-      paintStyle.lineWidth = paintStyle.lineWidth * 1.2;
+      paintStyle.outlineColor = "yellow";
+      paintStyle.outlineWidth = 1;
     }
     connection = this.kit.connect({
       source: source,
@@ -1942,7 +1949,7 @@ module.exports = React.createClass({
     return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find('.elm'));
   },
   _redrawLinks: function() {
-    var color, i, len, link, ref, results, source, sourceTerminal, target, targetTerminal;
+    var i, len, link, ref, results, source, sourceTerminal, target, targetTerminal;
     ref = this.state.links;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -1952,8 +1959,7 @@ module.exports = React.createClass({
       if (source && target) {
         sourceTerminal = link.sourceTerminal === 'a' ? 'Top' : 'Bottom';
         targetTerminal = link.targetTerminal === 'a' ? 'Top' : 'Bottom';
-        color = link === this.props.selectedLink ? '#ff3' : link.color;
-        results.push(this.diagramToolkit.addLink(source, target, link.title, color, sourceTerminal, targetTerminal, link));
+        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, sourceTerminal, targetTerminal, link));
       } else {
         results.push(void 0);
       }
