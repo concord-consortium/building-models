@@ -66,16 +66,13 @@ module.exports = {
     }
   },
   addToPalette: function(node) {
-    var emptyPos, protoNodes;
+    var protoNodes;
     if (node != null ? node.image.match(/^(https?|data):/) : void 0) {
       if (!_.find(this.state.protoNodes, {
         image: node.image
       })) {
         protoNodes = this.state.protoNodes.slice(0);
-        emptyPos = _.findIndex(protoNodes, {
-          image: ''
-        });
-        protoNodes.splice((emptyPos === -1 ? protoNodes.length : emptyPos), 0, {
+        protoNodes.push({
           title: node.title || '',
           image: node.image
         });
@@ -2855,7 +2852,9 @@ module.exports = React.createClass({
   displayName: 'PaletteInspector',
   getInitialState: function() {
     return {
-      selectedIndex: 0
+      selectedIndex: _.findIndex(this.props.protoNodes, function(node) {
+        return node.image.length > 0;
+      })
     };
   },
   imageSelected: function(index) {
