@@ -2,8 +2,6 @@ Placeholder = React.createFactory require './placeholder-view'
 GlobalNav = React.createFactory require './global-nav-view'
 LinkView    = React.createFactory require './link-view'
 NodeWell    = React.createFactory require './node-well-view'
-NodeEditView= React.createFactory require './node-edit-view'
-LinkEditView= React.createFactory require './link-edit-view'
 InspectorPanel = React.createFactory require './inspector-panel-view'
 ImageBrowser = React.createFactory require './image-browser-view'
 

@@ -5,7 +5,7 @@ module.exports = class DiagramToolkit
   constructor: (@domContext, @options = {}) ->
     @type      = 'jsPlumbWrappingDiagramToolkit'
     @color     = @options.color or '#233'
-    @lineWidth = @options.lineWidth or 2
+    @lineWidth = @options.lineWidth or 1
     @kit       = jsPlumb.getInstance {Container: @domContext}
     @kit.importDefaults
       Connector:        ['Bezier', {curviness: 50}],
@@ -86,7 +86,7 @@ module.exports = class DiagramToolkit
     paintStyle.outlineColor = "none"
     paintStyle.outlineWidth = 20
     if linkModel.selected
-      paintStyle.outlineColor = "yellow"
+      paintStyle.outlineColor = "#f6bf33"
       paintStyle.outlineWidth = 1
 
     connection = @kit.connect

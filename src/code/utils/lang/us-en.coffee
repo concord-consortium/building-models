@@ -5,7 +5,8 @@ module.exports =
   "~MENU.SAVE_AS": "Save as …"
   "~MENU.SETTINGS": "Advanced Settings …"
 
-  "~NODE-EDIT.TITLE": "Title"
+  "~NODE-EDIT.TITLE": "Name"
+  "~NODE-EDIT.COLOR": "Color"
   "~NODE-EDIT.IMAGE": "Image"
   "~NODE-EDIT.BUILT_IN": "Built-In"
   "~NODE-EDIT.DROPPED": "Dropped"
