@@ -22,19 +22,19 @@ module.exports = React.createClass
 
   imageSelected: (index) ->
     @setState selectedIndex: index
-    
+
   scrollToBottom: ->
     palette = @refs.palette?.getDOMNode()
     if palette
       palette.scrollTop = palette.scrollHeight;
-  
+
   componentDidMount: ->
     @scrollToBottom()
-    
+
   componentDidUpdate: (prevProps) ->
     if JSON.stringify(prevProps.protoNodes) isnt JSON.stringify(@props.protoNodes)
       @scrollToBottom()
-      
+
   render: ->
     (div {className: 'palette-inspector'},
       (div {className: 'palette', ref: 'palette'},

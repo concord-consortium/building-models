@@ -4,7 +4,7 @@ module.exports = class GoogleDriveIO
   DEVELOPER_KEY: 'AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA'
   CLIENT_ID: '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com'
   SCOPES: 'https://www.googleapis.com/auth/drive'
-  
+
   authorized: false
 
   authorize: (immediate, callback) ->
@@ -34,19 +34,19 @@ module.exports = class GoogleDriveIO
     metadata = JSON.stringify
       title: fileSpec.fileName
       mimeType: 'application/json'
-    
+
     [method, path] = if fileSpec.fileId
       ['PUT', "/upload/drive/v2/files/#{fileSpec.fileId}"]
     else
       ['POST', '/upload/drive/v2/files']
-      
+
     request = gapi.client.request
       path: path
       method: method
       params: {uploadType: 'multipart', alt: 'json'}
       headers: {'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'}
       body: @makeMultipartBody [metadata, contents], boundary
-      
+
     request.execute (file) ->
       if callback
         if file

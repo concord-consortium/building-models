@@ -12,7 +12,7 @@ Tab = React.createFactory React.createClass
   clicked: (e) ->
     e.preventDefault()
     @props.onSelected @props.index
-    
+
   render: ->
     (li {className: (if @props.selected then 'tab-selected' else ''), onClick: @clicked}, @props.label)
 
@@ -25,7 +25,7 @@ module.exports = React.createClass
 
   statics:
     Tab: (settings) -> new TabInfo settings
-    
+
   selectedTab: (index) ->
     @setState selectedTabIndex: index
 

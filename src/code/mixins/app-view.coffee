@@ -20,7 +20,7 @@ module.exports =
           deleteFunction()
     else
       $(window).off 'keydown'
-      
+
   addToPalette: (node) ->
     if node?.image.match /^(https?|data):/
       # make sure this is a new image

@@ -1,11 +1,11 @@
 module.exports = OpenClipArt =
-  
+
   jqXHR: null
-  
+
   search: (query, options, callback) ->
     # abort the last request
     OpenClipArt.jqXHR?.abort()
-    
+
     url = "https://openclipart.org/search/json/?query=#{encodeURIComponent query}&amount=#{if options.limitResults then 18 else 200}" # 200 is max amount for api
     OpenClipArt.jqXHR = $.getJSON url, (data) ->
       results = []

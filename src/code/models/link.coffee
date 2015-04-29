@@ -3,7 +3,7 @@ GraphPrimitive = require './graph-primitive'
 module.exports = class Link extends GraphPrimitive
 
   @defaultColor: "#777"
-  
+
   constructor: (@options={}) ->
     @options.color ?= Link.defaultColor
     @options.title ?= ''
@@ -11,19 +11,19 @@ module.exports = class Link extends GraphPrimitive
     super()
 
   type: 'Link'
-  
+
   terminalKey: ->
     "#{@sourceNode.key}[#{@sourceTerminal}] ---#{@key}---> #{@targetNode.key}[#{@targetTerminal}]"
-    
+
   nodeKey: ->
     "#{@sourceNode} ---#{@key}---> #{@targetNode}"
-    
+
   outs: ->
     [@targetNode]
-    
+
   ins: ->
     [@sourceNode]
-  
+
   toExport: ->
     "title": @title
     "color": @color

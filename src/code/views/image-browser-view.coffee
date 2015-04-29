@@ -56,14 +56,14 @@ ImageSearch = React.createFactory React.createClass
 
   changed: ->
     @search limitResults: true, useTimeout: true
-  
+
   showAllMatches: ->
     @search limitResults: false, useTimeout: false
-    
+
   search: (options) ->
     query = $.trim @refs.search.getDOMNode().value
     validQuery = query.length > 0
-    
+
     queryRegEx = new RegExp query, 'i'
     internalResults = _.filter @props.protoNodes, (node) ->
       queryRegEx.test node.title
@@ -101,7 +101,7 @@ ImageSearch = React.createFactory React.createClass
     if imageInfo
       @props.addToPalette imageInfo
     @setState selectedImage: null
-    
+
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and (@state.internalResults.length + @state.externalResults.length) is 0
 

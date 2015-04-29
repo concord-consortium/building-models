@@ -2,7 +2,7 @@ module.exports = class DropImageHandler
 
   constructor: (options) ->
     {@maxWidth, @maxHeight} = options
-    
+
   _resizeImage: (filename, src, callback) ->
     img = document.createElement 'img'
     img.src = src
@@ -24,7 +24,7 @@ module.exports = class DropImageHandler
         name: filename
         title: (filename.split '.')[0]
         image: canvas.toDataURL 'image/png'
-    
+
   handleDrop: (e, callback) ->
     if e.dataTransfer.files.length > 0
       for file in e.dataTransfer.files

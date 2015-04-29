@@ -13,7 +13,7 @@ module.exports = React.createClass
 
   componentDidMount: ->
     @createGoogleDrive()
-  
+
   render: ->
     options = [
       name: tr "~MENU.NEW"

@@ -36,7 +36,7 @@ module.exports = class Node extends GraphPrimitive
 
   downstreamNodes: ->
     visitedNodes = []
-    
+
     visit = (node) ->
       log.info("visiting node: #{node.id}")
       visitedNodes.push node
