@@ -20,6 +20,7 @@ module.exports = class LinkManager
     @filename = null
     @filenameListeners = []
     @selectedNode = {}
+    @imageMetadataCache = {}
 
   addLinkListener: (listener) ->
     log.info("adding link listener")
@@ -214,6 +215,11 @@ module.exports = class LinkManager
     importer = new Importer(@)
     importer.importData(data)
     @setFilename data.filename or 'New Model'
+
+    if data.imageMetadata
+      _.forEach data.imageMetadata, (metadata, image) =>
+        @setImageMetadata image, metadata
+
     for listener in @loadListeners
       listener data
 
@@ -224,7 +230,7 @@ module.exports = class LinkManager
       url: url,
       dataType: 'json',
       success: (data) =>
-        @loadData(data)
+        @loadData data
       error: (xhr, status, err) ->
         log.error(url, status, err.toString())
 
@@ -233,13 +239,24 @@ module.exports = class LinkManager
       node.toExport()
     linkExports = for key,link of @linkKeys
       link.toExport()
+    imageMetadata = {}
+    _.forEach palette, (node) =>
+      if @imageMetadataCache[node.image]
+        imageMetadata[node.image] = @imageMetadataCache[node.image]
     return {
       version: 0.1
       filename: @filename
       palette: palette
       nodes: nodeExports
       links: linkExports
+      imageMetadata: imageMetadata
     }
 
   toJsonString: (palette) ->
     JSON.stringify @serialize palette
+
+  setImageMetadata: (image, metadata) ->
+    @imageMetadataCache[image] = metadata
+
+  getImageMetadata: (image) ->
+    @imageMetadataCache[image]

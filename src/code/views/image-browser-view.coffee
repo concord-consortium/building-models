@@ -1,9 +1,10 @@
 ModalTabbedDialog = require './modal-tabbed-dialog-view'
 ModalTabbedDialogFactory = React.createFactory ModalTabbedDialog
+ImageMetadata = React.createFactory require './image-metadata-view'
 OpenClipart = require '../utils/open-clipart'
 tr = require '../utils/translate'
 
-{div, input, button, img, i, a} = React.DOM
+{div, input, button, img, i, a, form} = React.DOM
 
 ImageSearchResult = React.createFactory React.createClass
   displayName: 'ImageSearchResult'
@@ -29,7 +30,7 @@ PreviewImage = React.createFactory React.createClass
     @props.addImage @props.imageInfo
   render: ->
     (div {},
-      (div {className: 'image-browser-header'}, 'Preview Your Image')
+      (div {className: 'image-browser-header'}, tr '~IMAGE-BROWSER.PREVIEW')
       (div {className: 'image-browser-preview-image'},
         (img {src: @props.imageInfo.image})
         (a {href: '#', onClick: @cancel},
@@ -38,9 +39,10 @@ PreviewImage = React.createFactory React.createClass
         )
       )
       (div {className: 'image-browser-preview-add-image'},
-        (button {onClick: @addImage}, 'Add Image')
+        (button {onClick: @addImage}, tr '~IMAGE-BROWSER.ADD_IMAGE')
       )
-      (div {style: {clear: 'both', marginTop: 10}}, 'TBD: Metadata')
+      if @props.imageInfo.metadata
+        (ImageMetadata {className: 'image-browser-preview-metadata', metadata: @props.imageInfo.metadata})
     )
 
 ImageSearch = React.createFactory React.createClass
@@ -54,11 +56,12 @@ ImageSearch = React.createFactory React.createClass
     externalResults: []
     selectedImage: null
 
-  changed: ->
-    @search limitResults: true, useTimeout: true
+  searchClicked: (e) ->
+    e.preventDefault()
+    @search limitResults: true
 
   showAllMatches: ->
-    @search limitResults: false, useTimeout: false
+    @search limitResults: false
 
   search: (options) ->
     query = $.trim @refs.search.getDOMNode().value
@@ -78,18 +81,12 @@ ImageSearch = React.createFactory React.createClass
       externalResults: []
       numExternalMatches: 0
 
-    clearTimeout @searchTimeout
-    search = =>
-      OpenClipart.search query, options, (results, numMatches) =>
-        @setState
-          searching: false
-          searched: true
-          externalResults: results
-          numExternalMatches: numMatches
-    if options.useTimeout
-      @searchTimeout = setTimeout search, 1000
-    else
-      search()
+    OpenClipart.search query, options, (results, numMatches) =>
+      @setState
+        searching: false
+        searched: true
+        externalResults: results
+        numExternalMatches: numMatches
 
   componentDidMount: ->
     @refs.search.getDOMNode().focus()
@@ -111,17 +108,19 @@ ImageSearch = React.createFactory React.createClass
       else
         (div {},
           (div {className: 'image-browser-form'},
-            (input {ref: 'search', placeholder: 'Search Internal Library and Openclipart.org', value: @state.query, onChange: @changed})
-            (button {}, 'Search')
+            (form {},
+              (input {type: 'text', ref: 'search', placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
+              (input {type: 'submit', value: 'Search', onClick: @searchClicked})
+            )
           ),
 
           if showNoResultsAlert
-            (div {className: 'modal-dialog-alert'}, 'Sorry, no images found.  Try another search, or browse internal library images below.')
+            (div {className: 'modal-dialog-alert'}, tr '~IMAGE-BROWSER.NO_IMAGES_FOUND')
 
-          (div {className: 'image-browser-header'}, 'Internal Library Images'),
+          (div {className: 'image-browser-header'}, tr '~IMAGE-BROWSER.LIBRARY_HEADER'),
           (div {className: 'image-browser-results'},
             if @state.internalResults.length is 0 and (@state.searching or @state.externalResults.length > 0)
-              " No internal library results found for '#{@state.query}'"
+              tr '~IMAGE-BROWSER.NO_INTERNAL_FOUND', query: @state.query
             else
               for node, index in (if showNoResultsAlert then @state.internalLibrary else @state.internalResults)
                 if node.image and not node.image.match /^(https?|data):/
@@ -130,23 +129,29 @@ ImageSearch = React.createFactory React.createClass
 
           if @state.searchable and not showNoResultsAlert
             (div {},
-              (div {className: 'image-browser-header'}, 'Openclipart.org Images'),
+              (div {className: 'image-browser-header'}, tr 'Openclipart.org Images'),
               (div {className: 'image-browser-results'},
                 if @state.searching
                   (div {},
                     (i {className: "fa fa-cog fa-spin"})
-                    " Searching for #{if @state.searchingAll then 'all matches for ' else ''}'#{@state.query}'..."
+                    ' '
+                    tr "~IMAGE-BROWSER.SEARCHING",
+                      scope: if @state.searchingAll then 'all matches for ' else ''
+                      query: @state.query
                   )
                 else if @state.externalResults.length is 0
-                  " No openclipart.org results found for '#{@state.query}'"
+                  tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
                 else
                   for node, index in @state.externalResults
                     (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked})
               )
               if @state.externalResults.length < @state.numExternalMatches
                 (div {},
-                  "Showing #{@state.externalResults.length} of #{@state.numExternalMatches} matches for '#{@state.query}'. "
-                  (a {href: '#', onClick: @showAllMatches}, 'Show all matches.')
+                  tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
+                    numResults: @state.externalResults.length
+                    numTotalResults: @state.numExternalMatches
+                    query: @state.query
+                  (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')
                 )
             )
         )
