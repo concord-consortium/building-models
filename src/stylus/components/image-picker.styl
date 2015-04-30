@@ -1,0 +1,57 @@
+.image-picker
+  display inline-block
+  box-sizing border-box
+  vertical-align top
+  width 75px
+  margin-top 12px
+  background-color white
+  padding-right 10px
+  border-radius 3px
+  box-shadow -1px 0px 2px hsla(0,0,50,0.4)
+  no-select()
+  .selected-image
+    margin 0px
+    padding 10px
+    background-image url("../img/bb-chrome/arrow-expand.svg")
+    background-position right center
+    background-repeat no-repeat
+    background-size 10px 10px
+    img
+      padding 4px
+      width 42px
+      height 42px
+  .image-choices
+    box-sizing border-box
+    margin 0px
+    padding 4px
+    background-color white
+    border-radius 0px 0px 2px 2px
+    display inline-block
+    vertical-align top
+    overflow hidden
+    cursor pointer
+    z-index 5
+    width 200px
+    margin-left -125px
+    enable-flex(wp:wrap)
+    no-select()
+    transition 0.1s
+    box-shadow 0px 1px 1px hsla(0,0,30,0.4)
+    &.closed
+      height 0px
+      padding 0px
+   img.image-choice
+     padding 0px
+     width 24px
+     height 24px
+   .image-choice
+      padding 4px
+      padding-bottom 12px
+      width 24px
+      height 24x
+      &.selected
+        background-color inherit
+        box-shadow none
+        background-image url('../img/bb-chrome/icon-checkmark.svg')
+        background-position bottom
+        background-repeat no-repeat

@@ -77,5 +77,8 @@ module.exports =
   onNodeChanged: (node,title,image) ->
     @props.linkManager.changeNode title, image
 
+  onNodeDelete: ->
+    @props.linkManager.deleteSelected()
+
   onLinkChanged: (link, title, color, deleted) ->
     @props.linkManager.changeLink title,color, deleted

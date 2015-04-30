@@ -51,6 +51,7 @@ module.exports = React.createClass
           link: @state.selectedConnection
           onNodeChanged: @onNodeChanged
           onLinkChanged: @onLinkChanged
+          onNodeDelete: @onNodeDelete
           protoNodes: @state.protoNodes
           toggleImageBrowser: @toggleImageBrowser
           linkManager: @props.linkManager

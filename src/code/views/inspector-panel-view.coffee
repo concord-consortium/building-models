@@ -28,7 +28,11 @@ module.exports = React.createClass
       (div {className: 'inspector-panel-toggle', onClick: action})
       (div {className: "inspector-panel-content"},
         if @props.node
-          (NodeInspectorView {node: @props.node, onNodeChanged: @props.onNodeChanged, protoNodes: @props.protoNodes})
+          (NodeInspectorView {
+            node: @props.node
+            onNodeChanged: @props.onNodeChanged
+            onNodeDelete: @props.onNodeDelete
+            protoNodes: @props.protoNodes})
         else if @props.link
           (LinkInspectorView {link: @props.link, onLinkChanged: @props.onLinkChanged})
         else
