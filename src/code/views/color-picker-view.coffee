@@ -36,6 +36,7 @@ module.exports = React.createClass
       className = 'color-choice'
       onClick = =>
         @select(name)
+        @props.onChange(color.color)
       if color.name is @state.selectedColor
         className = 'color-choice selected'
         onClick = -> {}

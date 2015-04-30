@@ -9,10 +9,13 @@ module.exports = React.createClass
   displayName: 'NodeInspectorView'
 
   changeTitle: (e) ->
-    @props.onNodeChanged? @props.node, e.target.value, @props.node.image
+    @props.onNodeChanged? @props.node, {title: e.target.value}
 
   changeImage: (node) ->
-    @props.onNodeChanged? @props.node, @props.node.title, node.image
+    @props.onNodeChanged? @props.node, {image: node.image}
+
+  changeColor: (color) ->
+    @props.onNodeChanged? @props.node, {color: color}
 
   delete: (e) ->
     @props.onNodeDelete? @props.node
@@ -33,7 +36,7 @@ module.exports = React.createClass
         )
         (div {className: 'edit-row'},
           (label {htmlFor: 'color'}, tr "~NODE-EDIT.COLOR")
-          (ColorPicker {type: 'text', name: 'title', value: @props.node.title, onChange: @changeTitle})
+          (ColorPicker {type: 'text', name: 'title', value: @props.node.title, onChange: @changeColor})
         )
         (div {className: 'edit-row'},
           (label {htmlFor: 'image'}, tr "~NODE-EDIT.IMAGE")

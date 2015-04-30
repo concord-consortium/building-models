@@ -74,8 +74,8 @@ module.exports =
   getData: ->
     @props.linkManager.toJsonString @state.protoNodes
 
-  onNodeChanged: (node,title,image) ->
-    @props.linkManager.changeNode title, image
+  onNodeChanged: (node, data) ->
+    @props.linkManager.changeNode data
 
   onNodeDelete: ->
     @props.linkManager.deleteSelected()

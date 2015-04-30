@@ -1,6 +1,17 @@
 GraphPrimitive = require './graph-primitive.coffee'
+tr = require '../utils/translate'
 
 module.exports = class Node extends GraphPrimitive
+  @colors:
+    yellow:
+      name: tr("~COLOR.YELLOW")
+      value: "#f7be33"
+    darkBlue:
+      name: tr("~COLOR.DARK_BLUE")
+      value: "#105262"
+    lightBlue:
+      name: tr("~COLOR.MED_BLUE")
+      value: "#72c0cc"
 
   constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null}, key) ->
     super()
@@ -11,9 +22,9 @@ module.exports = class Node extends GraphPrimitive
     @y = nodeSpec.y
     @title = nodeSpec.title
     @image = nodeSpec.image
+    @color = nodeSpec.color or Node.colors.lightBlue.value
 
   type: 'Node'
-
   addLink: (link) ->
     if link.sourceNode is @ or link.targetNode is @
       if _.contains @links, link
