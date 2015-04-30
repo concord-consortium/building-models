@@ -1499,7 +1499,11 @@ translate = function(key, vars, lang) {
   }
   translation = ((ref = translations[lang]) != null ? ref[key] : void 0) || key;
   return translation.replace(varRegExp, function(match, key) {
-    return vars[key] || ("'** UKNOWN KEY: " + key + " **");
+    if (vars.hasOwnProperty(key)) {
+      return vars[key];
+    } else {
+      return "'** UKNOWN KEY: " + key + " **";
+    }
   });
 };
 
@@ -2048,7 +2052,7 @@ ImageSearch = React.createFactory(React.createClass({
       if (this.state.searching) {
         return div({}, i({
           className: "fa fa-cog fa-spin"
-        }), tr("~IMAGE-BROWSER.SEARCHING", {
+        }), ' ', tr("~IMAGE-BROWSER.SEARCHING", {
           scope: this.state.searchingAll ? 'all matches for ' : '',
           query: this.state.query
         }));
