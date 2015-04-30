@@ -1,0 +1,24 @@
+.inspector-tabs
+  background-color white
+  height inspector-panel-tab-height
+  enable-flex(row, justify: flex-start)
+  box-shadow 1px 1px 1px med-blue
+  overflow visible
+  z-index 2
+  .inspector-tab
+    box-shadow none
+    margin-left 1em
+    color med-blue
+    blenderbox-label()
+    font-weight heavy
+    font-size 14
+    padding-bottom 0.3em
+    box-sizing border-box
+    margin-bottom -4px
+    border-bottom 4px solid hsla(0,0,50,0.0)
+    opacity 0.4
+    cursor pointer
+    &.selected
+      opacity 1.0
+      border-bottom 4px solid
+      background-color white

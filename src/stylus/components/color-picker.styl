@@ -1,0 +1,36 @@
+.color-picker
+  background-color white
+  padding 4px
+  width 100px
+  border-radius 2px
+  display inline-block
+  vertical-align top
+  margin-top 12px
+  overflow hidden
+  cursor pointer
+  no-select()
+  &.closed
+    .color-choice
+      display none
+      padding 0px
+      &.selected
+        display block
+  .color-choice
+    enable-flex(row,justify: flex-start)
+    padding 4px
+    .color-swatch
+      display inline-block
+      width 14px
+      border-radius 2px
+      height 14px
+    .color-label
+      padding-left 1em
+      vertical-align center
+      display inline-block
+    &.selected
+      background-color white
+      box-shadow none
+      background-image url('../img/bb-chrome/arrow-expand.svg')
+      background-position right center
+      background-repeat no-repeat
+      background-size 10px 10px
