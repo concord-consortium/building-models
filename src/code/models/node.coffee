@@ -22,6 +22,13 @@ module.exports = class Node extends GraphPrimitive
     else
       throw new Error "Bad link for Node:#{@.id}"
 
+  removeLink: (link) ->
+    if link.sourceNode is @ or link.targetNode is @
+      _.remove @links, (testLink) ->
+        return testLink is link
+    else
+      throw new Error "Bad link for Node:#{@.id}"
+
   outLinks: ->
     _.filter @links, (link) => link.sourceNode is @
 
