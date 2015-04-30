@@ -76,6 +76,9 @@ module.exports = {
           title: node.title || '',
           image: node.image
         });
+        if (node.metadata) {
+          this.props.linkManager.setImageMetadata(node.image, node.metadata);
+        }
         return this.setState({
           protoNodes: protoNodes
         });
@@ -145,7 +148,7 @@ module.exports = {
 
 
 
-},{"../views/proto-nodes":31}],3:[function(require,module,exports){
+},{"../views/proto-nodes":34}],3:[function(require,module,exports){
 var GoogleDriveIO;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -319,6 +322,7 @@ module.exports = LinkManager = (function() {
     this.filename = null;
     this.filenameListeners = [];
     this.selectedNode = {};
+    this.imageMetadataCache = {};
   }
 
   LinkManager.prototype.addLinkListener = function(listener) {
@@ -673,6 +677,13 @@ module.exports = LinkManager = (function() {
     importer = new Importer(this);
     importer.importData(data);
     this.setFilename(data.filename || 'New Model');
+    if (data.imageMetadata) {
+      _.forEach(data.imageMetadata, (function(_this) {
+        return function(metadata, image) {
+          return _this.setImageMetadata(image, metadata);
+        };
+      })(this));
+    }
     ref = this.loadListeners;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -700,7 +711,7 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.serialize = function(palette) {
-    var key, link, linkExports, node, nodeExports;
+    var imageMetadata, key, link, linkExports, node, nodeExports;
     nodeExports = (function() {
       var ref, results;
       ref = this.nodeKeys;
@@ -721,17 +732,34 @@ module.exports = LinkManager = (function() {
       }
       return results;
     }).call(this);
+    imageMetadata = {};
+    _.forEach(palette, (function(_this) {
+      return function(node) {
+        if (_this.imageMetadataCache[node.image]) {
+          return imageMetadata[node.image] = _this.imageMetadataCache[node.image];
+        }
+      };
+    })(this));
     return {
       version: 0.1,
       filename: this.filename,
       palette: palette,
       nodes: nodeExports,
-      links: linkExports
+      links: linkExports,
+      imageMetadata: imageMetadata
     };
   };
 
   LinkManager.prototype.toJsonString = function(palette) {
     return JSON.stringify(this.serialize(palette));
+  };
+
+  LinkManager.prototype.setImageMetadata = function(image, metadata) {
+    return this.imageMetadataCache[image] = metadata;
+  };
+
+  LinkManager.prototype.getImageMetadata = function(image) {
+    return this.imageMetadataCache[image];
   };
 
   return LinkManager;
@@ -1206,7 +1234,7 @@ module.exports = DiagramToolkit = (function() {
     this.options = options != null ? options : {};
     this.type = 'jsPlumbWrappingDiagramToolkit';
     this.color = this.options.color || '#233';
-    this.lineWidth = this.options.lineWidth || 2;
+    this.lineWidth = this.options.lineWidth || 1;
     this.kit = jsPlumb.getInstance({
       Container: this.domContext
     });
@@ -1341,7 +1369,7 @@ module.exports = DiagramToolkit = (function() {
     paintStyle.outlineColor = "none";
     paintStyle.outlineWidth = 20;
     if (linkModel.selected) {
-      paintStyle.outlineColor = "yellow";
+      paintStyle.outlineColor = "#f6bf33";
       paintStyle.outlineWidth = 1;
     }
     connection = this.kit.connect({
@@ -1383,7 +1411,8 @@ module.exports = {
   "~MENU.NEW": "New …",
   "~MENU.SAVE_AS": "Save as …",
   "~MENU.SETTINGS": "Advanced Settings …",
-  "~NODE-EDIT.TITLE": "Title",
+  "~NODE-EDIT.TITLE": "Name",
+  "~NODE-EDIT.COLOR": "Color",
   "~NODE-EDIT.IMAGE": "Image",
   "~NODE-EDIT.BUILT_IN": "Built-In",
   "~NODE-EDIT.DROPPED": "Dropped",
@@ -1395,7 +1424,22 @@ module.exports = {
   "~ADD-NEW-IMAGE.TITLE": "Add new image",
   "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB": "Image Search",
   "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
-  "~ADD-NEW-IMAGE.LINK-TAB": "Link"
+  "~ADD-NEW-IMAGE.LINK-TAB": "Link",
+  "~PALETTE-INSPECTOR.ADD_IMAGE": "Add new image",
+  "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
+  "~METADATA.TITLE": "Title",
+  "~METADATA.DESCRIPTION": "Description",
+  "~METADATA.MORE-INFO": "More info",
+  "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
+  "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
+  "~IMAGE-BROWSER.SEARCH_HEADER": "'Search Internal Library and Openclipart.org'",
+  "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.  Try another search, or browse internal library images below.",
+  "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images",
+  "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for '%{query}'",
+  "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}'%{query}'...",
+  "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for '%{query}'",
+  "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for '%{query}'. ",
+  "~IMAGE-BROWSER.SHOW_ALL": "Show all matches."
 };
 
 
@@ -1410,7 +1454,7 @@ module.exports = OpenClipArt = {
     if ((ref = OpenClipArt.jqXHR) != null) {
       ref.abort();
     }
-    url = "https://openclipart.org/search/json/?query=" + (encodeURIComponent(query)) + "&amount=" + (options.limitResults ? 18 : 200);
+    url = "https://openclipart.org/search/json/?query=" + (encodeURIComponent(query)) + "&sort=downloads&amount=" + (options.limitResults ? 18 : 200);
     return OpenClipArt.jqXHR = $.getJSON(url, function(data) {
       var i, item, len, numMatches, ref1, ref2, results;
       results = [];
@@ -1419,8 +1463,12 @@ module.exports = OpenClipArt = {
       for (i = 0, len = ref2.length; i < len; i++) {
         item = ref2[i];
         results.push({
-          title: item.title,
-          image: item.svg.url
+          image: item.svg.url,
+          metadata: {
+            title: item.title,
+            description: item.description,
+            link: item.detail_link
+          }
         });
       }
       return callback(results, numMatches);
@@ -1431,7 +1479,7 @@ module.exports = OpenClipArt = {
 
 
 },{}],14:[function(require,module,exports){
-var defaultLang, translate, translations;
+var defaultLang, translate, translations, varRegExp;
 
 translations = {};
 
@@ -1439,12 +1487,20 @@ translations['en'] = require('./lang/us-en');
 
 defaultLang = 'en';
 
-translate = function(key, lang) {
-  var ref;
+varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
+
+translate = function(key, vars, lang) {
+  var ref, translation;
+  if (vars == null) {
+    vars = {};
+  }
   if (lang == null) {
     lang = defaultLang;
   }
-  return ((ref = translations[lang]) != null ? ref[key] : void 0) || key;
+  translation = ((ref = translations[lang]) != null ? ref[key] : void 0) || key;
+  return translation.replace(varRegExp, function(match, key) {
+    return vars[key] || ("'** UKNOWN KEY: " + key + " **");
+  });
 };
 
 module.exports = translate;
@@ -1452,7 +1508,7 @@ module.exports = translate;
 
 
 },{"./lang/us-en":12}],15:[function(require,module,exports){
-var GlobalNav, ImageBrowser, InspectorPanel, LinkEditView, LinkView, NodeEditView, NodeWell, Placeholder, a, div, ref;
+var GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, a, div, ref;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
 
@@ -1461,10 +1517,6 @@ GlobalNav = React.createFactory(require('./global-nav-view'));
 LinkView = React.createFactory(require('./link-view'));
 
 NodeWell = React.createFactory(require('./node-well-view'));
-
-NodeEditView = React.createFactory(require('./node-edit-view'));
-
-LinkEditView = React.createFactory(require('./link-edit-view'));
 
 InspectorPanel = React.createFactory(require('./inspector-panel-view'));
 
@@ -1521,7 +1573,8 @@ module.exports = React.createClass({
       onNodeChanged: this.onNodeChanged,
       onLinkChanged: this.onLinkChanged,
       protoNodes: this.state.protoNodes,
-      toggleImageBrowser: this.toggleImageBrowser
+      toggleImageBrowser: this.toggleImageBrowser,
+      linkManager: this.props.linkManager
     }), this.state.showImageBrowser ? ImageBrowser({
       protoNodes: this.state.protoNodes,
       addToPalette: this.addToPalette,
@@ -1532,7 +1585,104 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":2,"./global-nav-view":17,"./image-browser-view":18,"./inspector-panel-view":19,"./link-edit-view":20,"./link-view":21,"./node-edit-view":25,"./node-well-view":27,"./placeholder-view":29}],16:[function(require,module,exports){
+},{"../mixins/app-view":2,"./global-nav-view":18,"./image-browser-view":19,"./inspector-panel-view":21,"./link-view":24,"./node-well-view":30,"./placeholder-view":32}],16:[function(require,module,exports){
+var div, tr;
+
+div = React.DOM.div;
+
+tr = require('../utils/translate');
+
+module.exports = React.createClass({
+  displayName: 'ColorPickerView',
+  getInitialState: function() {
+    return {
+      opened: false,
+      selectedColor: tr("yellow"),
+      colors: [
+        {
+          color: '#f5be32',
+          name: tr("yellow")
+        }, {
+          color: 'red',
+          name: tr("red")
+        }, {
+          color: 'gray',
+          name: tr("gray")
+        }
+      ]
+    };
+  },
+  select: function(colorName) {
+    return this.setState({
+      selectedColor: colorName
+    });
+  },
+  toggleOpen: function() {
+    return this.setState({
+      opened: !this.state.opened
+    });
+  },
+  className: function() {
+    if (this.state.opened) {
+      return "color-picker opened";
+    } else {
+      return "color-picker closed";
+    }
+  },
+  render: function() {
+    var attr, color, colorAttr, colors;
+    colors = this.state.colors;
+    colorAttr = (function(_this) {
+      return function(color) {
+        var className, name, onClick;
+        name = color.name;
+        className = 'color-choice';
+        onClick = function() {
+          return _this.select(name);
+        };
+        if (color.name === _this.state.selectedColor) {
+          className = 'color-choice selected';
+          onClick = function() {
+            return {};
+          };
+        }
+        return {
+          name: color.name,
+          color: color.color,
+          onClick: onClick,
+          className: className
+        };
+      };
+    })(this);
+    return div({
+      className: this.className(),
+      onClick: this.toggleOpen
+    }, (function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = colors.length; i < len; i++) {
+        color = colors[i];
+        attr = colorAttr(color);
+        results.push(div({
+          className: attr.className,
+          onClick: attr.onClick
+        }, div({
+          className: 'color-swatch',
+          style: {
+            'background-color': attr.color
+          }
+        }), div({
+          className: 'color-label'
+        }, attr.name)));
+      }
+      return results;
+    })());
+  }
+});
+
+
+
+},{"../utils/translate":14}],17:[function(require,module,exports){
 var div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -1630,7 +1780,7 @@ module.exports = React.createClass({
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -1690,18 +1840,20 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":3,"../utils/translate":14,"./dropdown-view":16}],18:[function(require,module,exports){
-var ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, button, div, i, img, input, ref, tr;
+},{"../mixins/google-file-interface":3,"../utils/translate":14,"./dropdown-view":17}],19:[function(require,module,exports){
+var ImageMetadata, ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, button, div, form, i, img, input, ref, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
 
 ModalTabbedDialogFactory = React.createFactory(ModalTabbedDialog);
 
+ImageMetadata = React.createFactory(require('./image-metadata-view'));
+
 OpenClipart = require('../utils/open-clipart');
 
 tr = require('../utils/translate');
 
-ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a;
+ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a, form = ref.form;
 
 ImageSearchResult = React.createFactory(React.createClass({
   displayName: 'ImageSearchResult',
@@ -1748,7 +1900,7 @@ PreviewImage = React.createFactory(React.createClass({
   render: function() {
     return div({}, div({
       className: 'image-browser-header'
-    }, 'Preview Your Image'), div({
+    }, tr('~IMAGE-BROWSER.PREVIEW')), div({
       className: 'image-browser-preview-image'
     }, img({
       src: this.props.imageInfo.image
@@ -1761,12 +1913,10 @@ PreviewImage = React.createFactory(React.createClass({
       className: 'image-browser-preview-add-image'
     }, button({
       onClick: this.addImage
-    }, 'Add Image')), div({
-      style: {
-        clear: 'both',
-        marginTop: 10
-      }
-    }, 'TBD: Metadata'));
+    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? ImageMetadata({
+      className: 'image-browser-preview-metadata',
+      metadata: this.props.imageInfo.metadata
+    }) : void 0);
   }
 }));
 
@@ -1782,20 +1932,19 @@ ImageSearch = React.createFactory(React.createClass({
       selectedImage: null
     };
   },
-  changed: function() {
+  searchClicked: function(e) {
+    e.preventDefault();
     return this.search({
-      limitResults: true,
-      useTimeout: true
+      limitResults: true
     });
   },
   showAllMatches: function() {
     return this.search({
-      limitResults: false,
-      useTimeout: false
+      limitResults: false
     });
   },
   search: function(options) {
-    var internalResults, query, queryRegEx, search, validQuery;
+    var internalResults, query, queryRegEx, validQuery;
     query = $.trim(this.refs.search.getDOMNode().value);
     validQuery = query.length > 0;
     queryRegEx = new RegExp(query, 'i');
@@ -1812,24 +1961,16 @@ ImageSearch = React.createFactory(React.createClass({
       externalResults: [],
       numExternalMatches: 0
     });
-    clearTimeout(this.searchTimeout);
-    search = (function(_this) {
-      return function() {
-        return OpenClipart.search(query, options, function(results, numMatches) {
-          return _this.setState({
-            searching: false,
-            searched: true,
-            externalResults: results,
-            numExternalMatches: numMatches
-          });
+    return OpenClipart.search(query, options, (function(_this) {
+      return function(results, numMatches) {
+        return _this.setState({
+          searching: false,
+          searched: true,
+          externalResults: results,
+          numExternalMatches: numMatches
         });
       };
-    })(this);
-    if (options.useTimeout) {
-      return this.searchTimeout = setTimeout(search, 1000);
-    } else {
-      return search();
-    }
+    })(this));
   },
   componentDidMount: function() {
     return this.refs.search.getDOMNode().focus();
@@ -1857,21 +1998,26 @@ ImageSearch = React.createFactory(React.createClass({
       addImage: this.addImage
     }) : div({}, div({
       className: 'image-browser-form'
-    }, input({
+    }, form({}, input({
+      type: 'text',
       ref: 'search',
-      placeholder: 'Search Internal Library and Openclipart.org',
-      value: this.state.query,
-      onChange: this.changed
-    }), button({}, 'Search')), showNoResultsAlert ? div({
+      placeholder: tr('~IMAGE-BROWSER.SEARCH_HEADER')
+    }), input({
+      type: 'submit',
+      value: 'Search',
+      onClick: this.searchClicked
+    }))), showNoResultsAlert ? div({
       className: 'modal-dialog-alert'
-    }, 'Sorry, no images found.  Try another search, or browse internal library images below.') : void 0, div({
+    }, tr('~IMAGE-BROWSER.NO_IMAGES_FOUND')) : void 0, div({
       className: 'image-browser-header'
-    }, 'Internal Library Images'), div({
+    }, tr('~IMAGE-BROWSER.LIBRARY_HEADER')), div({
       className: 'image-browser-results'
     }, (function() {
       var j, len, ref1, results1;
       if (this.state.internalResults.length === 0 && (this.state.searching || this.state.externalResults.length > 0)) {
-        return " No internal library results found for '" + this.state.query + "'";
+        return tr('~IMAGE-BROWSER.NO_INTERNAL_FOUND', {
+          query: this.state.query
+        });
       } else {
         ref1 = (showNoResultsAlert ? this.state.internalLibrary : this.state.internalResults);
         results1 = [];
@@ -1895,16 +2041,21 @@ ImageSearch = React.createFactory(React.createClass({
       }
     }).call(this)), this.state.searchable && !showNoResultsAlert ? div({}, div({
       className: 'image-browser-header'
-    }, 'Openclipart.org Images'), div({
+    }, tr('Openclipart.org Images')), div({
       className: 'image-browser-results'
     }, (function() {
       var j, len, ref1, results1;
       if (this.state.searching) {
         return div({}, i({
           className: "fa fa-cog fa-spin"
-        }), " Searching for " + (this.state.searchingAll ? 'all matches for ' : '') + "'" + this.state.query + "'...");
+        }), tr("~IMAGE-BROWSER.SEARCHING", {
+          scope: this.state.searchingAll ? 'all matches for ' : '',
+          query: this.state.query
+        }));
       } else if (this.state.externalResults.length === 0) {
-        return " No openclipart.org results found for '" + this.state.query + "'";
+        return tr('~IMAGE-BROWSER.NO_EXTERNAL_FOUND', {
+          query: this.state.query
+        });
       } else {
         ref1 = this.state.externalResults;
         results1 = [];
@@ -1918,10 +2069,14 @@ ImageSearch = React.createFactory(React.createClass({
         }
         return results1;
       }
-    }).call(this)), this.state.externalResults.length < this.state.numExternalMatches ? div({}, "Showing " + this.state.externalResults.length + " of " + this.state.numExternalMatches + " matches for '" + this.state.query + "'. ", a({
+    }).call(this)), this.state.externalResults.length < this.state.numExternalMatches ? div({}, tr('~IMAGE-BROWSER.SHOWING_N_OF_M', {
+      numResults: this.state.externalResults.length,
+      numTotalResults: this.state.numExternalMatches,
+      query: this.state.query
+    }), a({
       href: '#',
       onClick: this.showAllMatches
-    }, 'Show all matches.')) : void 0) : void 0));
+    }, tr('~IMAGE-BROWSER.SHOW_ALL'))) : void 0) : void 0));
   }
 }));
 
@@ -1966,12 +2121,46 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/open-clipart":13,"../utils/translate":14,"./modal-tabbed-dialog-view":23}],19:[function(require,module,exports){
-var LinkEditView, NodeEditView, PaletteInspectorView, div, i, ref;
+},{"../utils/open-clipart":13,"../utils/translate":14,"./image-metadata-view":20,"./modal-tabbed-dialog-view":26}],20:[function(require,module,exports){
+var a, div, ref, table, td, tr, xlat;
 
-NodeEditView = React.createFactory(require('./node-edit-view'));
+xlat = require('../utils/translate');
 
-LinkEditView = React.createFactory(require('./link-edit-view'));
+ref = React.DOM, div = ref.div, table = ref.table, tr = ref.tr, td = ref.td, a = ref.a;
+
+module.exports = React.createClass({
+  displayName: 'ImageMetadata',
+  getInitialState: function() {
+    return {
+      hostname: null
+    };
+  },
+  componentWillMount: function() {
+    var link;
+    link = document.createElement('a');
+    link.setAttribute('href', this.props.metadata.link);
+    return this.setState({
+      hostname: link.hostname
+    });
+  },
+  render: function() {
+    return div({
+      className: 'image-metadata'
+    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, this.props.metadata.title)), tr({}, td({}, xlat('~METADATA.DESCRIPTION')), td({}, this.props.metadata.description)), tr({}, td({}, xlat('~METADATA.MORE-INFO')), td({}, a({
+      href: this.props.metadata.link,
+      target: '_blank'
+    }, this.state.hostname)))));
+  }
+});
+
+
+
+},{"../utils/translate":14}],21:[function(require,module,exports){
+var LinkInspectorView, NodeInspectorView, PaletteInspectorView, div, i, ref;
+
+NodeInspectorView = React.createFactory(require('./node-inspector-view'));
+
+LinkInspectorView = React.createFactory(require('./link-inspector-view'));
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
 
@@ -2009,23 +2198,58 @@ module.exports = React.createClass({
       onClick: action
     }), div({
       className: "inspector-panel-content"
-    }, this.props.node ? NodeEditView({
+    }, this.props.node ? NodeInspectorView({
       node: this.props.node,
       onNodeChanged: this.props.onNodeChanged,
       protoNodes: this.props.protoNodes
-    }) : this.props.link ? LinkEditView({
+    }) : this.props.link ? LinkInspectorView({
       link: this.props.link,
       onLinkChanged: this.props.onLinkChanged
     }) : PaletteInspectorView({
       protoNodes: this.props.protoNodes,
-      toggleImageBrowser: this.props.toggleImageBrowser
+      toggleImageBrowser: this.props.toggleImageBrowser,
+      linkManager: this.props.linkManager
     })));
   }
 });
 
 
 
-},{"./link-edit-view":20,"./node-edit-view":25,"./palette-inspector-view":28}],20:[function(require,module,exports){
+},{"./link-inspector-view":23,"./node-inspector-view":28,"./palette-inspector-view":31}],22:[function(require,module,exports){
+var div;
+
+div = React.DOM.div;
+
+module.exports = React.createClass({
+  displayName: 'InspectorTabsView',
+  render: function() {
+    var tab;
+    return div({
+      className: 'inspector-tabs'
+    }, (function() {
+      var i, len, ref, results;
+      ref = this.props.tabs;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        tab = ref[i];
+        if (tab === this.props.selected) {
+          results.push(div({
+            className: 'inspector-tab selected'
+          }, tab));
+        } else {
+          results.push(div({
+            className: 'inspector-tab'
+          }, tab));
+        }
+      }
+      return results;
+    }).call(this));
+  }
+});
+
+
+
+},{}],23:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -2096,7 +2320,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":14}],21:[function(require,module,exports){
+},{"../utils/translate":14}],24:[function(require,module,exports){
 var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
@@ -2361,7 +2585,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":26}],22:[function(require,module,exports){
+},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":29}],25:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -2394,7 +2618,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":24}],23:[function(require,module,exports){
+},{"./modal-view":27}],26:[function(require,module,exports){
 var ModalDialog, Tab, TabInfo, a, div, li, ref, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -2488,7 +2712,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":22}],24:[function(require,module,exports){
+},{"./modal-dialog-view":25}],27:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2520,15 +2744,19 @@ module.exports = React.createClass({
 
 
 
-},{}],25:[function(require,module,exports){
-var button, div, h2, input, label, optgroup, option, ref, select, tr;
+},{}],28:[function(require,module,exports){
+var ColorPicker, NodeInspectorTabs, button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
 
 tr = require("../utils/translate");
 
+NodeInspectorTabs = React.createFactory(require('./inspector-tabs-view'));
+
+ColorPicker = React.createFactory(require('./color-picker-view'));
+
 module.exports = React.createClass({
-  displayName: 'NodeEdit',
+  displayName: 'NodeInspectorView',
   changeTitle: function(e) {
     var base;
     return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, e.target.value, this.props.node.image) : void 0;
@@ -2558,10 +2786,12 @@ module.exports = React.createClass({
     }
   },
   render: function() {
-    var builtInNodes, droppedNodes, i, j, len, node, ref1, remoteNodes;
+    var builtInNodes, droppedNodes, i, j, len, node, ref1, remoteNodes, selected, tabs;
     builtInNodes = [];
     droppedNodes = [];
     remoteNodes = [];
+    tabs = [tr('design'), tr('define')];
+    selected = tr('design');
     ref1 = this.props.protoNodes;
     for (i = j = 0, len = ref1.length; j < len; i = ++j) {
       node = ref1[i];
@@ -2574,12 +2804,26 @@ module.exports = React.createClass({
       }
     }
     return div({
-      className: 'node-edit-view'
-    }, h2({}, this.props.node.title), div({
+      className: 'node-inspector-view'
+    }, NodeInspectorTabs({
+      tabs: tabs,
+      selected: selected
+    }), div({
+      className: 'node-inspector-content'
+    }, div({
       className: 'edit-row'
     }, label({
       htmlFor: 'title'
     }, tr("~NODE-EDIT.TITLE")), input({
+      type: 'text',
+      name: 'title',
+      value: this.props.node.title,
+      onChange: this.changeTitle
+    })), div({
+      className: 'edit-row'
+    }, label({
+      htmlFor: 'color'
+    }, tr("~NODE-EDIT.COLOR")), ColorPicker({
       type: 'text',
       name: 'title',
       value: this.props.node.title,
@@ -2650,13 +2894,13 @@ module.exports = React.createClass({
     }, ''), button({
       name: 'save',
       onClick: this.addRemote
-    }, 'Add Remote Image'))) : void 0);
+    }, 'Add Remote Image'))) : void 0));
   }
 });
 
 
 
-},{"../utils/translate":14}],26:[function(require,module,exports){
+},{"../utils/translate":14,"./color-picker-view":16,"./inspector-tabs-view":22}],29:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -2750,7 +2994,7 @@ module.exports = React.createClass({
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -2818,10 +3062,12 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":30}],28:[function(require,module,exports){
-var PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
+},{"./proto-node-view":33}],31:[function(require,module,exports){
+var ImageMetadata, PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
+
+ImageMetadata = React.createFactory(require('./image-metadata-view'));
 
 tr = require("../utils/translate");
 
@@ -2878,7 +3124,9 @@ module.exports = React.createClass({
     }
   },
   render: function() {
-    var index, node;
+    var index, metadata, node, selectedImage;
+    selectedImage = this.props.protoNodes[this.state.selectedIndex].image;
+    metadata = this.props.linkManager.getImageMetadata(selectedImage);
     return div({
       className: 'palette-inspector'
     }, div({
@@ -2907,23 +3155,25 @@ module.exports = React.createClass({
       onClick: this.props.toggleImageBrowser
     }, i({
       className: "fa fa-plus-circle"
-    }), 'Add new image'))), div({
+    }), tr('~PALETTE-INSPECTOR.ADD_IMAGE')))), div({
       className: 'palette-about-image'
     }, div({
       className: 'palette-about-image-title'
     }, i({
       className: "fa fa-info-circle"
-    }), span({}, 'About This Image'), img({
-      src: this.props.protoNodes[this.state.selectedIndex].image
+    }), span({}, tr('~PALETTE-INSPECTOR.ABOUT_IMAGE')), img({
+      src: selectedImage
     })), div({
       className: 'palette-about-image-info'
-    }, 'TBD')));
+    }, metadata ? ImageMetadata({
+      metadata: metadata
+    }) : 'TDB: Add metadata for internal library images')));
   }
 });
 
 
 
-},{"../utils/translate":14,"./proto-node-view":30}],29:[function(require,module,exports){
+},{"../utils/translate":14,"./image-metadata-view":20,"./proto-node-view":33}],32:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2941,7 +3191,7 @@ module.exports = React.createClass({
 
 
 
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2997,7 +3247,7 @@ module.exports = React.createClass({
 
 
 
-},{}],31:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
