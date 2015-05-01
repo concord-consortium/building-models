@@ -32,6 +32,6 @@ module.exports = React.createClass
         else if @props.link
           (LinkInspectorView {link: @props.link, onLinkChanged: @props.onLinkChanged})
         else
-          (PaletteInspectorView {protoNodes: @props.protoNodes, toggleImageBrowser: @props.toggleImageBrowser})
+          (PaletteInspectorView {protoNodes: @props.protoNodes, toggleImageBrowser: @props.toggleImageBrowser, linkManager: @props.linkManager})
       )
     )

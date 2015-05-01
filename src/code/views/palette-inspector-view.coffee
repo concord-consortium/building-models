@@ -1,4 +1,5 @@
 ProtoNodeView = React.createFactory require './proto-node-view'
+ImageMetadata = React.createFactory require './image-metadata-view'
 tr = require "../utils/translate"
 
 {div, img, i, span} = React.DOM
@@ -36,6 +37,9 @@ module.exports = React.createClass
       @scrollToBottom()
 
   render: ->
+    selectedImage = @props.protoNodes[@state.selectedIndex].image
+    metadata = @props.linkManager.getImageMetadata selectedImage
+
     (div {className: 'palette-inspector'},
       (div {className: 'palette', ref: 'palette'},
         (div {},
@@ -44,16 +48,21 @@ module.exports = React.createClass
               (PaletteImage {node: node, index: index, selected: index is @state.selectedIndex, onSelect: @imageSelected})
           (div {className: 'palette-add-image', onClick: @props.toggleImageBrowser},
             (i {className: "fa fa-plus-circle"})
-            'Add new image'
+            tr '~PALETTE-INSPECTOR.ADD_IMAGE'
           )
         )
       )
       (div {className: 'palette-about-image'},
         (div {className: 'palette-about-image-title'},
           (i {className: "fa fa-info-circle"})
-          (span {}, 'About This Image')
-          (img {src: @props.protoNodes[@state.selectedIndex].image})
+          (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
+          (img {src: selectedImage})
         )
-        (div {className: 'palette-about-image-info'}, 'TBD')
+        (div {className: 'palette-about-image-info'},
+          if metadata
+            (ImageMetadata {metadata: metadata})
+          else
+            'TDB: Add metadata for internal library images'
+        )
       )
     )

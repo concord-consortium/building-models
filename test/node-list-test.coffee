@@ -18,27 +18,27 @@ LinkManager    = requireModel 'link-manager'
 describe 'GraphPrimitive', () ->
   it 'GraphPrimitive should exists', () ->
     GraphPrimitive.should.exist
-  
+
   describe 'the type', () ->
     undertest = new GraphPrimitive()
     undertest.type.should.equal('GraphPrimitive')
-  
+
   describe 'the id', () ->
     beforeEach () ->
       GraphPrimitive.reset_counters()
-    
+
     describe 'of a GraphPrimitive', () ->
       it 'should increment the counter, and use the type name (GraphPrimitive)', () ->
         undertest = new GraphPrimitive()
         undertest.id.should.equal('GraphPrimitive-1')
-    
+
     describe 'of a Link', () ->
       it 'should increment the counter, and use the type name (Link)', () ->
         undertest = new Link()
         undertest.id.should.equal('Link-1')
         secondLink = new Link()
         secondLink.id.should.equal('Link-2')
-    
+
     describe 'of a Node', () ->
       it 'should increment the counter, and use the type name (Node)', () ->
         undertest = new Node()
@@ -84,22 +84,22 @@ describe 'Node', () ->
         title: "link a"
         sourceNode: @node_a
         targetNode: @node_b
-      
+
       @link_b = new Link
         title: "link b"
         sourceNode: @node_a
         targetNode: @node_c
-      
+
       @link_c = new Link
         title: "link c"
         sourceNode: @node_b
         targetNode: @node_a
-      
+
       @link_without_a = new Link
         title: "link without a"
         sourceNode: @node_b
         targetNode: @node_c
-      
+
 
     describe 'rejecting bad links', () ->
       describe 'links that dont include itself', () ->
@@ -126,7 +126,7 @@ describe 'Node', () ->
         describe 'In Links', () ->
           it "should have 1 in link", () ->
             @node_a.inLinks().should.have.length(1)
-        
+
         describe 'outLinks', () ->
           it "should have 2 outlinks", () ->
             @node_a.outLinks().should.have.length(2)
@@ -147,7 +147,7 @@ describe 'Node', () ->
       @linkManager = new LinkManager()
       @linkManager.addNode(@nodeA);
       @linkManager.addNode(@nodeB);
-      
+
       @newLink = new Link({
         sourceNode: @nodeA
         targetNode: @nodeB
@@ -178,11 +178,11 @@ describe 'Node', () ->
         it "should not add the new link", () ->
           @linkManager.addLink(@newLink).should.equal(false)
           @linkManager.linkKeys['newLink'].should.equal('oldValue')
-    
+
     describe "Serialization", () ->
       beforeEach () ->
-        @serializedForm = """{"version":0.1,"filename":null,"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}]}"""
-      
+        @serializedForm = """{"version":0.1,"filename":null,"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}],"imageMetadata":{}}"""
+
       describe "toJsonString", () ->
         it "should include nodes and links", () ->
           expectedValue = "{}"
@@ -192,7 +192,7 @@ describe 'Node', () ->
           @linkManager.toJsonString().should.match(/"nodes":/)
           @linkManager.toJsonString().should.match(/"links":/)
           @linkManager.toJsonString().should.equal(@serializedForm)
-      
+
       describe "loadData", () ->
         beforeEach () ->
           @linkManager = new LinkManager()
@@ -202,5 +202,5 @@ describe 'Node', () ->
           @linkManager.nodeKeys.should.have.any.keys("a")
           @linkManager.nodeKeys.should.have.any.keys("b")
 
-         
+
 

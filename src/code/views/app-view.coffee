@@ -52,6 +52,7 @@ module.exports = React.createClass
           onLinkChanged: @onLinkChanged
           protoNodes: @state.protoNodes
           toggleImageBrowser: @toggleImageBrowser
+          linkManager: @props.linkManager
         )
         if @state.showImageBrowser
           (ImageBrowser {protoNodes: @state.protoNodes, addToPalette: @addToPalette, close: @toggleImageBrowser})

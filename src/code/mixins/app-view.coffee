@@ -29,6 +29,8 @@ module.exports =
         protoNodes.push
           title: node.title or ''
           image: node.image
+        if node.metadata
+          @props.linkManager.setImageMetadata node.image, node.metadata
         @setState protoNodes: protoNodes
 
   componentDidMount: ->
