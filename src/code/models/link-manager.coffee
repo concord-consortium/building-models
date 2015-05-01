@@ -166,7 +166,6 @@ module.exports = class LinkManager
     return unless node
     node.x = pos.left
     node.y = pos.top
-    # @selectNode(nodeKey)
     for listener in @nodeListeners
       log.info("notifying of NodeMove")
       listener.handleNodeMove(node)
@@ -192,8 +191,6 @@ module.exports = class LinkManager
         title: node.title
         image: node.image
         color: node.color
-
-      log.info "Change for #{@selectedNode.title}"
 
       @undoRedoManager.createAndExecuteCommand 'changeNode',
         execute: => @_changeNode node, data
