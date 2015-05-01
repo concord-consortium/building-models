@@ -11,7 +11,7 @@ module.exports = React.createClass
       drag: @doMove
       stop: @doStop
       containment: 'parent'
-    $elem.bind 'mouseup touchend', (=> @handleSelected true)
+    $elem.bind 'click touchend', (=> @handleSelected true)
 
   handleSelected: (actually_select) ->
     if @props.linkManager
@@ -57,14 +57,14 @@ module.exports = React.createClass
     style =
       top: @props.data.y
       left: @props.data.x
-
-    (div {className: "elm#{if @props.selected then ' selected' else ''}", ref: 'node', style: style, 'data-node-key': @props.nodeKey},
-      (div {className: 'img-background'},
-        (div {className: 'delete-box', onClick: @doDelete},
-          (i {className: 'fa fa-times-circle'})
-        )
+      'color': @props.data.color
+    className = "elm"
+    if @props.selected
+      className = "#{className} selected"
+    (div { className: className, ref: 'node', style: style, 'data-node-key': @props.nodeKey},
+      (div {className: "img-background"},
         (if @props.data.image?.length > 0 and @props.data.image isnt '#remote' then (img {src: @props.data.image}) else null)
-        (div {className: 'node-title'}, @props.data.title)
       )
+      (div {className: 'node-title'}, @props.data.title)
     )
 

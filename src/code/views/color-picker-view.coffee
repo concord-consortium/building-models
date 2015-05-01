@@ -1,6 +1,24 @@
 {div} = React.DOM
 tr = require '../utils/translate'
+Colors = require '../utils/colors'
 
+ColorChoice = React.createFactory React.createClass
+  displayName: 'ColorChoice'
+
+  selectColor: ->
+    @props.onChange @props.color
+
+  render: ->
+    name = @props.color.name
+    value = @props.color.value
+    className = 'color-choice'
+    if @props.selected is value
+      className = 'color-choice selected'
+
+    (div {className: className, onClick: @selectColor},
+      (div {className: 'color-swatch', style: {'background-color': value}})
+      (div {className: 'color-label'}, name)
+    )
 
 module.exports = React.createClass
 
@@ -8,16 +26,9 @@ module.exports = React.createClass
 
   getInitialState: ->
     opened: false
-    selectedColor: tr("yellow")
-    colors: [
-      {color: '#f5be32', name: tr("yellow")}
-      {color: 'red', name: tr("red")}
-      {color: 'gray', name: tr("gray")}
-    ]
 
-  select: (colorName) ->
-    @setState
-      selectedColor: colorName
+  select: (color) ->
+    @props.onChange(color.value)
 
   toggleOpen: ->
     @setState
@@ -30,26 +41,7 @@ module.exports = React.createClass
       "color-picker closed"
 
   render: ->
-    colors=@state.colors
-    colorAttr = (color) =>
-      name = color.name
-      className = 'color-choice'
-      onClick = =>
-        @select(name)
-      if color.name is @state.selectedColor
-        className = 'color-choice selected'
-        onClick = -> {}
-
-      name: color.name
-      color: color.color
-      onClick: onClick
-      className: className
-
     (div {className: @className(), onClick: @toggleOpen},
-      for color in colors
-        attr = colorAttr(color)
-        (div {className: attr.className, onClick: attr.onClick},
-          (div {className: 'color-swatch', style: {'background-color': attr.color}})
-          (div {className: 'color-label'}, attr.name)
-        )
+      for color in Colors
+        (ColorChoice {color: color, selected: @props.selected, onChange: @select})
     )

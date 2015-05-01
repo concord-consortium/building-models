@@ -12,8 +12,9 @@ module.exports =
   "~NODE-EDIT.DROPPED": "Dropped"
   "~NODE-EDIT.REMOTE": "Remote"
   "~NODE-EDIT.ADD_REMOTE": "Add remote"
+  "~NODE-EDIT.DELETE": "✖ Delete Component"
 
-  "~LINK-EDIT.DELETE": "Delete this link"
+  "~LINK-EDIT.DELETE": "✖ Delete Link"
   "~LINK-EDIT.TITLE": "Title"
   "~LINK-EDIT.COLOR": "Color"
 
@@ -42,4 +43,10 @@ module.exports =
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for '%{query}'"
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for '%{query}'. "
   "~IMAGE-BROWSER.SHOW_ALL": "Show all matches."
+
+
+  "~COLOR.YELLOW": "Yellow"
+  "~COLOR.DARK_BLUE": "Dark Blue"
+  "~COLOR.LIGHT_BLUE": "Light Blue"
+  "~COLOR.MED_BLUE": "Blue"
 

@@ -4,7 +4,6 @@
     min-width  100px
     text-align left
     background-color #ececec
-    height 100%
     flex 1 0 0
     -webkit-flex 1 0 0
 
@@ -21,6 +20,12 @@
       width 45px
       blenderbox-label()
       margin 1em
+      &.node-delete
+        color light-blue
+        cursor pointer
+        &:hover
+          color dark-blue
+          transition 0.1s
     input
       width 170px
       padding 0.5em

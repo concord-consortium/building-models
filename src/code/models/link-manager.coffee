@@ -166,7 +166,6 @@ module.exports = class LinkManager
     return unless node
     node.x = pos.left
     node.y = pos.top
-    # @selectNode(nodeKey)
     for listener in @nodeListeners
       log.info("notifying of NodeMove")
       listener.handleNodeMove(node)
@@ -185,21 +184,26 @@ module.exports = class LinkManager
     for listener in @selectionListeners
       listener({node:@selectedNode, connection:null})
 
-  changeNode: (title, image) ->
+  changeNode: (data) ->
     if @selectedNode
       node = @selectedNode
-      originalTitle = @selectedNode.title
-      originalImage = @selectedNode.image
-      @undoRedoManager.createAndExecuteCommand 'changeNode',
-        execute: => @_changeNode node, title, image
-        undo: => @_changeNode node, originalTitle, originalImage
+      originalData =
+        title: node.title
+        image: node.image
+        color: node.color
 
-  _changeNode: (node, title, image) ->
+      @undoRedoManager.createAndExecuteCommand 'changeNode',
+        execute: => @_changeNode node, data
+        undo: => @_changeNode node, originalData
+
+  _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
-    node.title = title
-    node.image = image
+    for key in ['title','image','color']
+      if data[key]
+        log.info "Change #{key} for #{node.title}"
+        node[key] = data[key]
     for listener in @selectionListeners
-      listener({node: node, connection:null})
+      listener({node:node, connection:null})
 
   selectLink: (link) ->
     if @selectedLink

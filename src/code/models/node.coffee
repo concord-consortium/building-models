@@ -1,4 +1,7 @@
-GraphPrimitive = require './graph-primitive.coffee'
+GraphPrimitive = require './graph-primitive'
+Colors = require '../utils/colors'
+
+tr = require '../utils/translate'
 
 module.exports = class Node extends GraphPrimitive
 
@@ -11,9 +14,9 @@ module.exports = class Node extends GraphPrimitive
     @y = nodeSpec.y
     @title = nodeSpec.title
     @image = nodeSpec.image
+    @color = nodeSpec.color or Colors[0].value
 
   type: 'Node'
-
   addLink: (link) ->
     if link.sourceNode is @ or link.targetNode is @
       if _.contains @links, link
