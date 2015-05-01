@@ -4,6 +4,7 @@ LinkView    = React.createFactory require './link-view'
 NodeWell    = React.createFactory require './node-well-view'
 InspectorPanel = React.createFactory require './inspector-panel-view'
 ImageBrowser = React.createFactory require './image-browser-view'
+DocumentActions    = React.createFactory require './document-actions-view'
 
 {div, a} = React.DOM
 
@@ -40,7 +41,7 @@ module.exports = React.createClass
           )
         (div {className: 'action-bar'},
           (NodeWell {protoNodes: @state.protoNodes})
-          (Placeholder {label: 'Document Actions', className: 'document-actions'})
+          (DocumentActions {linkManager: @props.linkManager})
         )
         (div {className: 'canvas'},
           (LinkView {linkManager: @props.linkManager, selectedLink: @state.selectedConnection})

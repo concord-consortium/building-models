@@ -66,3 +66,4 @@ module.exports =
           @setState
             fileId: fileSpec.id
             action: null
+          @props.linkManager.setSaved()

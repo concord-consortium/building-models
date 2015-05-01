@@ -9,6 +9,7 @@ module.exports = React.createClass
     $elem.draggable
       # grid: [ 10, 10 ]
       drag: @doMove
+      stop: @doStop
       containment: 'parent'
     $elem.bind 'mouseup touchend', (=> @handleSelected true)
 
@@ -31,6 +32,14 @@ module.exports = React.createClass
 
   doMove: (evt, extra) ->
     @props.onMove
+      nodeKey: @props.nodeKey
+      reactComponent: this
+      domElement: @refs.node.getDOMNode()
+      syntheticEvent: evt
+      extra: extra
+
+  doStop: (evt, extra) ->
+    @props.onMoveComplete
       nodeKey: @props.nodeKey
       reactComponent: this
       domElement: @refs.node.getDOMNode()

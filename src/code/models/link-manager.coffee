@@ -1,6 +1,7 @@
 Importer = require '../utils/importer'
 Link     = require './link'
 DiagramNode = require './node'
+UndoRedo = require '../utils/undo-redo'
 
 # LinkManager is the logical manager of Nodes and Links.
 module.exports = class LinkManager
@@ -21,6 +22,20 @@ module.exports = class LinkManager
     @filenameListeners = []
     @selectedNode = {}
     @imageMetadataCache = {}
+    @undoRedoManager = new UndoRedo.Manager debug: true
+
+  undo: ->
+    @undoRedoManager.undo()
+
+  redo: ->
+    @undoRedoManager.redo()
+
+  setSaved: ->
+    @undoRedoManager.save()
+
+  addChangeListener: (listener) ->
+    log.info("adding change listener")
+    @undoRedoManager.addChangeListener listener
 
   addLinkListener: (listener) ->
     log.info("adding link listener")
@@ -68,6 +83,11 @@ module.exports = class LinkManager
     @addLink(link)
 
   addLink: (link) ->
+    @undoRedoManager.createAndExecuteCommand 'addLink',
+      execute: => @_addLink link
+      undo: => @_removeLink link
+
+  _addLink: (link) ->
     unless @hasLink link
       @linkKeys[link.terminalKey()] = link
       @nodeKeys[link.sourceNode.key].addLink(link)
@@ -79,11 +99,43 @@ module.exports = class LinkManager
       return true
     return false
 
+  removeLink: (link) ->
+    @undoRedoManager.createAndExecuteCommand 'removeLink',
+      execute: => @_removeLink link
+      undo: => @_addLink link
+
+  _removeLink: (link) ->
+    delete @linkKeys[link.terminalKey()]
+    @nodeKeys[link.sourceNode.key]?.removeLink(link)
+    @nodeKeys[link.targetNode.key]?.removeLink(link)
+    for listener in @linkListeners
+      log.info("notifying of deleted Link")
+      listener.handleLinkRm(link)
+
   importNode: (nodeSpec) ->
     node = new DiagramNode(nodeSpec.data, nodeSpec.key)
     @addNode(node)
 
   addNode: (node) ->
+    @undoRedoManager.createAndExecuteCommand 'addNode',
+      execute: => @_addNode node
+      undo: => @_removeNode node
+
+  removeNode: (nodeKey) ->
+    node = @nodeKeys[nodeKey]
+
+    # create a copy of the list of links
+    links = node.links.slice()
+
+    @undoRedoManager.createAndExecuteCommand 'removeNode',
+      execute: =>
+        @_removeLink(link) for link in links
+        @_removeNode node
+      undo: =>
+        @_addNode node
+        @_addLink(link) for link in links
+
+  _addNode: (node) ->
     unless @hasNode node
       @nodeKeys[node.key] = node
       for listener in @nodeListeners
@@ -93,11 +145,27 @@ module.exports = class LinkManager
       return true
     return false
 
-  moveNode: (nodeKey, x,y ) ->
+  _removeNode: (node) ->
+    delete @nodeKeys[node.key]
+    for listener in @nodeListeners
+      log.info("notifying of deleted Node")
+      listener.handleNodeRm(node)
+    @selectedNode = null
+    for listener in @selectionListeners
+      listener({node:null, connection:null})
+
+  moveNodeCompleted: (nodeKey, pos, originalPos) ->
     node = @nodeKeys[nodeKey]
     return unless node
-    node.x = x
-    node.y = y
+    @undoRedoManager.createAndExecuteCommand 'moveNode',
+      execute: => @moveNode node.key, pos, originalPos
+      undo: => @moveNode node.key, originalPos, pos
+
+  moveNode: (nodeKey, pos, originalPos) ->
+    node = @nodeKeys[nodeKey]
+    return unless node
+    node.x = pos.left
+    node.y = pos.top
     # @selectNode(nodeKey)
     for listener in @nodeListeners
       log.info("notifying of NodeMove")
@@ -119,11 +187,19 @@ module.exports = class LinkManager
 
   changeNode: (title, image) ->
     if @selectedNode
-      log.info "Change  for #{@selectedNode.title}"
-      @selectedNode.title = title
-      @selectedNode.image = image
-      for listener in @selectionListeners
-        listener({node:@selectedNode, connection:null})
+      node = @selectedNode
+      originalTitle = @selectedNode.title
+      originalImage = @selectedNode.image
+      @undoRedoManager.createAndExecuteCommand 'changeNode',
+        execute: => @_changeNode node, title, image
+        undo: => @_changeNode node, originalTitle, originalImage
+
+  _changeNode: (node, title, image) ->
+    log.info "Change for #{node.title}"
+    node.title = title
+    node.image = image
+    for listener in @selectionListeners
+      listener({node: node, connection:null})
 
   selectLink: (link) ->
     if @selectedLink
@@ -138,15 +214,22 @@ module.exports = class LinkManager
       listener({node:null, connection:@selectedLink})
 
   changeLink: (title, color, deleted) ->
-    if @selectedLink
-      log.info "Change  for #{@selectedLink.title}"
-      if deleted
-        @removeSelectedLink()
-      else
-        @selectedLink.title = title
-        @selectedLink.color = color
-        for listener in @selectionListeners
-          listener({node:null, connection:@selectedLink})
+    if deleted
+      @removeSelectedLink()
+    else if @selectedLink
+      link = @selectedLink
+      originalTitle = @selectedLink.title
+      originalColor = @selectedLink.color
+      @undoRedoManager.createAndExecuteCommand 'changeLink',
+        execute: => @_changeLink link, title, color
+        undo: => @_changeLink link, originalTitle, originalColor
+
+  _changeLink: (link, title, color) ->
+    log.info "Change  for #{link.title}"
+    link.title = title
+    link.color = color
+    for listener in @selectionListeners
+      listener({node:null, connection:link})
 
   _nameForNode: (node) ->
     @nodeKeys[node]
@@ -166,14 +249,11 @@ module.exports = class LinkManager
       title: info.title
     true
 
-  removelink: (link) ->
-    key = link.terminalKey()
-    delete @linkKeys[key]
-
   deleteAll: ->
     for node of @nodeKeys
       @removeNode node
     @setFilename 'New Model'
+    @undoRedoManager.clearHistory()
 
   deleteSelected: ->
     log.info "Deleting selected items"
@@ -188,27 +268,13 @@ module.exports = class LinkManager
 
   removeSelectedLink: ->
     if @selectedLink
-      @removelink(@selectedLink)
-      for listener in @linkListeners
-        log.info("notifying of deleted Link")
-        listener.handleLinkRm(@selectedLink)
+      @removeLink(@selectedLink)
       @selectedLink = null
       for listener in @selectionListeners
         listener({node:null, connection:null})
 
   removeLinksForNode: (node) ->
-    @removelink(link) for link in node.links
-
-  removeNode: (nodeKey) ->
-    node = @nodeKeys[nodeKey]
-    delete @nodeKeys[nodeKey]
-    this.removeLinksForNode(node)
-    for listener in @nodeListeners
-      log.info("notifying of deleted Node")
-      listener.handleNodeRm(node)
-    @selectedNode = null
-    for listener in @selectionListeners
-      listener({node:null, connection:null})
+    @removeLink(link) for link in node.links
 
   loadData: (data) ->
     log.info "json success"
@@ -222,6 +288,7 @@ module.exports = class LinkManager
 
     for listener in @loadListeners
       listener data
+    @undoRedoManager.clearHistory()
 
   loadDataFromUrl: (url) =>
     log.info("loading local data")

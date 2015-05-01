@@ -61,8 +61,12 @@ module.exports = React.createClass
 
   onNodeMoved: (node_event) ->
     @handleEvent =>
+      @props.linkManager.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+
+  onNodeMoveComplete: (node_event) ->
+    @handleEvent =>
       {left, top} = node_event.extra.position
-      @props.linkManager.moveNode node_event.nodeKey, left, top
+      @props.linkManager.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
 
   onNodeDeleted: (node_event) ->
     @handleEvent =>
@@ -134,7 +138,6 @@ module.exports = React.createClass
         targetTerminal = if link.targetTerminal is 'a' then 'Top' else 'Bottom'
         @diagramToolkit.addLink source, target, link.title, link.color, sourceTerminal, targetTerminal, link
 
-
   onDragOver: (e) ->
     if not @state.canDrop
       @setState canDrop: true
@@ -179,6 +182,7 @@ module.exports = React.createClass
             nodeKey: node.key
             ref: node.key
             onMove: @onNodeMoved
+            onMoveComplete: @onNodeMoveComplete
             onDelete: @onNodeDeleted
             linkManager: @props.linkManager
           })

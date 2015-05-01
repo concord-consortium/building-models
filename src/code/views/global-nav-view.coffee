@@ -9,10 +9,16 @@ module.exports = React.createClass
   mixins: [require '../mixins/google-file-interface']
 
   getInitialState: ->
-    @getInitialAppViewState {}
+    @getInitialAppViewState
+      dirty: false
 
   componentDidMount: ->
     @createGoogleDrive()
+    @props.linkManager.addChangeListener @modelChanged
+
+  modelChanged: (status) ->
+    @setState
+      dirty: status.dirty
 
   render: ->
     options = [
@@ -32,8 +38,12 @@ module.exports = React.createClass
       action: false
      ]
 
-    (div {className: 'global-nav non-placeholder'},
-      (Dropdown {anchor: @props.filename, items: options, className:'global-nav-content-filename'})
+    (div {className: 'global-nav'},
+      (div {},
+        (Dropdown {anchor: @props.filename, items: options, className:'global-nav-content-filename'})
+        if @state.dirty
+          (span {className: 'global-nav-file-status'}, 'Unsaved')
+      )
       if @state.action
         (div {},
           (i {className: "fa fa-cog fa-spin"})
