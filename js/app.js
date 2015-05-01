@@ -36,7 +36,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":5,"./views/app-view":15}],2:[function(require,module,exports){
+},{"./models/link-manager":5,"./views/app-view":17}],2:[function(require,module,exports){
 module.exports = {
   getInitialAppViewState: function(subState) {
     var mixinState;
@@ -127,10 +127,26 @@ module.exports = {
       };
     })(this));
     if (((ref = this.props.data) != null ? ref.length : void 0) > 0) {
-      return this.props.linkManager.loadData(JSON.parse(this.props.data));
+      this.props.linkManager.loadData(JSON.parse(this.props.data));
     } else {
-      return this.props.linkManager.loadDataFromUrl(this.props.url);
+      this.props.linkManager.loadDataFromUrl(this.props.url);
     }
+    return ($(window)).on('keyup', (function(_this) {
+      return function(e) {
+        var y, z;
+        y = e.keyCode === 89;
+        z = e.keyCode === 90;
+        if (e.ctrlKey && (y || z)) {
+          e.preventDefault();
+          if (y) {
+            _this.props.linkManager.redo();
+          }
+          if (z) {
+            return _this.props.linkManager.undo();
+          }
+        }
+      };
+    })(this));
   },
   componentDidUnmount: function() {
     return this.addDeleteKeyHandler(false);
@@ -138,8 +154,11 @@ module.exports = {
   getData: function() {
     return this.props.linkManager.toJsonString(this.state.protoNodes);
   },
-  onNodeChanged: function(node, title, image) {
-    return this.props.linkManager.changeNode(title, image);
+  onNodeChanged: function(node, data) {
+    return this.props.linkManager.changeNode(data);
+  },
+  onNodeDelete: function() {
+    return this.props.linkManager.deleteSelected();
   },
   onLinkChanged: function(link, title, color, deleted) {
     return this.props.linkManager.changeLink(title, color, deleted);
@@ -148,7 +167,7 @@ module.exports = {
 
 
 
-},{"../views/proto-nodes":34}],3:[function(require,module,exports){
+},{"../views/proto-nodes":38}],3:[function(require,module,exports){
 var GoogleDriveIO;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -246,10 +265,11 @@ module.exports = {
               action: null
             });
           } else {
-            return _this.setState({
+            _this.setState({
               fileId: fileSpec.id,
               action: null
             });
+            return _this.props.linkManager.setSaved();
           }
         };
       })(this));
@@ -259,7 +279,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":9}],4:[function(require,module,exports){
+},{"../utils/google-drive-io":10}],4:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -291,7 +311,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 },{}],5:[function(require,module,exports){
-var DiagramNode, Importer, Link, LinkManager,
+var DiagramNode, Importer, Link, LinkManager, UndoRedo,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Importer = require('../utils/importer');
@@ -299,6 +319,8 @@ Importer = require('../utils/importer');
 Link = require('./link');
 
 DiagramNode = require('./node');
+
+UndoRedo = require('../utils/undo-redo');
 
 module.exports = LinkManager = (function() {
   LinkManager.instances = {};
@@ -323,7 +345,27 @@ module.exports = LinkManager = (function() {
     this.filenameListeners = [];
     this.selectedNode = {};
     this.imageMetadataCache = {};
+    this.undoRedoManager = new UndoRedo.Manager({
+      debug: true
+    });
   }
+
+  LinkManager.prototype.undo = function() {
+    return this.undoRedoManager.undo();
+  };
+
+  LinkManager.prototype.redo = function() {
+    return this.undoRedoManager.redo();
+  };
+
+  LinkManager.prototype.setSaved = function() {
+    return this.undoRedoManager.save();
+  };
+
+  LinkManager.prototype.addChangeListener = function(listener) {
+    log.info("adding change listener");
+    return this.undoRedoManager.addChangeListener(listener);
+  };
 
   LinkManager.prototype.addLinkListener = function(listener) {
     log.info("adding link listener");
@@ -403,6 +445,21 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.addLink = function(link) {
+    return this.undoRedoManager.createAndExecuteCommand('addLink', {
+      execute: (function(_this) {
+        return function() {
+          return _this._addLink(link);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this._removeLink(link);
+        };
+      })(this)
+    });
+  };
+
+  LinkManager.prototype._addLink = function(link) {
     var i, len, listener, ref;
     if (!this.hasLink(link)) {
       this.linkKeys[link.terminalKey()] = link;
@@ -420,6 +477,40 @@ module.exports = LinkManager = (function() {
     return false;
   };
 
+  LinkManager.prototype.removeLink = function(link) {
+    return this.undoRedoManager.createAndExecuteCommand('removeLink', {
+      execute: (function(_this) {
+        return function() {
+          return _this._removeLink(link);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this._addLink(link);
+        };
+      })(this)
+    });
+  };
+
+  LinkManager.prototype._removeLink = function(link) {
+    var i, len, listener, ref, ref1, ref2, results;
+    delete this.linkKeys[link.terminalKey()];
+    if ((ref = this.nodeKeys[link.sourceNode.key]) != null) {
+      ref.removeLink(link);
+    }
+    if ((ref1 = this.nodeKeys[link.targetNode.key]) != null) {
+      ref1.removeLink(link);
+    }
+    ref2 = this.linkListeners;
+    results = [];
+    for (i = 0, len = ref2.length; i < len; i++) {
+      listener = ref2[i];
+      log.info("notifying of deleted Link");
+      results.push(listener.handleLinkRm(link));
+    }
+    return results;
+  };
+
   LinkManager.prototype.importNode = function(nodeSpec) {
     var node;
     node = new DiagramNode(nodeSpec.data, nodeSpec.key);
@@ -427,6 +518,51 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.addNode = function(node) {
+    return this.undoRedoManager.createAndExecuteCommand('addNode', {
+      execute: (function(_this) {
+        return function() {
+          return _this._addNode(node);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this._removeNode(node);
+        };
+      })(this)
+    });
+  };
+
+  LinkManager.prototype.removeNode = function(nodeKey) {
+    var links, node;
+    node = this.nodeKeys[nodeKey];
+    links = node.links.slice();
+    return this.undoRedoManager.createAndExecuteCommand('removeNode', {
+      execute: (function(_this) {
+        return function() {
+          var i, len, link;
+          for (i = 0, len = links.length; i < len; i++) {
+            link = links[i];
+            _this._removeLink(link);
+          }
+          return _this._removeNode(node);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          var i, len, link, results;
+          _this._addNode(node);
+          results = [];
+          for (i = 0, len = links.length; i < len; i++) {
+            link = links[i];
+            results.push(_this._addLink(link));
+          }
+          return results;
+        };
+      })(this)
+    });
+  };
+
+  LinkManager.prototype._addNode = function(node) {
     var i, len, listener, ref;
     if (!this.hasNode(node)) {
       this.nodeKeys[node.key] = node;
@@ -442,14 +578,56 @@ module.exports = LinkManager = (function() {
     return false;
   };
 
-  LinkManager.prototype.moveNode = function(nodeKey, x, y) {
+  LinkManager.prototype._removeNode = function(node) {
+    var i, j, len, len1, listener, ref, ref1, results;
+    delete this.nodeKeys[node.key];
+    ref = this.nodeListeners;
+    for (i = 0, len = ref.length; i < len; i++) {
+      listener = ref[i];
+      log.info("notifying of deleted Node");
+      listener.handleNodeRm(node);
+    }
+    this.selectedNode = null;
+    ref1 = this.selectionListeners;
+    results = [];
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      listener = ref1[j];
+      results.push(listener({
+        node: null,
+        connection: null
+      }));
+    }
+    return results;
+  };
+
+  LinkManager.prototype.moveNodeCompleted = function(nodeKey, pos, originalPos) {
+    var node;
+    node = this.nodeKeys[nodeKey];
+    if (!node) {
+      return;
+    }
+    return this.undoRedoManager.createAndExecuteCommand('moveNode', {
+      execute: (function(_this) {
+        return function() {
+          return _this.moveNode(node.key, pos, originalPos);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this.moveNode(node.key, originalPos, pos);
+        };
+      })(this)
+    });
+  };
+
+  LinkManager.prototype.moveNode = function(nodeKey, pos, originalPos) {
     var i, len, listener, node, ref, results;
     node = this.nodeKeys[nodeKey];
     if (!node) {
       return;
     }
-    node.x = x;
-    node.y = y;
+    node.x = pos.left;
+    node.y = pos.top;
     ref = this.nodeListeners;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -486,23 +664,51 @@ module.exports = LinkManager = (function() {
     return results;
   };
 
-  LinkManager.prototype.changeNode = function(title, image) {
-    var i, len, listener, ref, results;
+  LinkManager.prototype.changeNode = function(data) {
+    var node, originalData;
     if (this.selectedNode) {
-      log.info("Change  for " + this.selectedNode.title);
-      this.selectedNode.title = title;
-      this.selectedNode.image = image;
-      ref = this.selectionListeners;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        listener = ref[i];
-        results.push(listener({
-          node: this.selectedNode,
-          connection: null
-        }));
-      }
-      return results;
+      node = this.selectedNode;
+      originalData = {
+        title: node.title,
+        image: node.image,
+        color: node.color
+      };
+      return this.undoRedoManager.createAndExecuteCommand('changeNode', {
+        execute: (function(_this) {
+          return function() {
+            return _this._changeNode(node, data);
+          };
+        })(this),
+        undo: (function(_this) {
+          return function() {
+            return _this._changeNode(node, originalData);
+          };
+        })(this)
+      });
     }
+  };
+
+  LinkManager.prototype._changeNode = function(node, data) {
+    var i, j, key, len, len1, listener, ref, ref1, results;
+    log.info("Change for " + node.title);
+    ref = ['title', 'image', 'color'];
+    for (i = 0, len = ref.length; i < len; i++) {
+      key = ref[i];
+      if (data[key]) {
+        log.info("Change " + key + " for " + node.title);
+        node[key] = data[key];
+      }
+    }
+    ref1 = this.selectionListeners;
+    results = [];
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      listener = ref1[j];
+      results.push(listener({
+        node: node,
+        connection: null
+      }));
+    }
+    return results;
   };
 
   LinkManager.prototype.selectLink = function(link) {
@@ -531,26 +737,43 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.changeLink = function(title, color, deleted) {
-    var i, len, listener, ref, results;
-    if (this.selectedLink) {
-      log.info("Change  for " + this.selectedLink.title);
-      if (deleted) {
-        return this.removeSelectedLink();
-      } else {
-        this.selectedLink.title = title;
-        this.selectedLink.color = color;
-        ref = this.selectionListeners;
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          listener = ref[i];
-          results.push(listener({
-            node: null,
-            connection: this.selectedLink
-          }));
-        }
-        return results;
-      }
+    var link, originalColor, originalTitle;
+    if (deleted) {
+      return this.removeSelectedLink();
+    } else if (this.selectedLink) {
+      link = this.selectedLink;
+      originalTitle = this.selectedLink.title;
+      originalColor = this.selectedLink.color;
+      return this.undoRedoManager.createAndExecuteCommand('changeLink', {
+        execute: (function(_this) {
+          return function() {
+            return _this._changeLink(link, title, color);
+          };
+        })(this),
+        undo: (function(_this) {
+          return function() {
+            return _this._changeLink(link, originalTitle, originalColor);
+          };
+        })(this)
+      });
     }
+  };
+
+  LinkManager.prototype._changeLink = function(link, title, color) {
+    var i, len, listener, ref, results;
+    log.info("Change  for " + link.title);
+    link.title = title;
+    link.color = color;
+    ref = this.selectionListeners;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      listener = ref[i];
+      results.push(listener({
+        node: null,
+        connection: link
+      }));
+    }
+    return results;
   };
 
   LinkManager.prototype._nameForNode = function(node) {
@@ -575,18 +798,13 @@ module.exports = LinkManager = (function() {
     return true;
   };
 
-  LinkManager.prototype.removelink = function(link) {
-    var key;
-    key = link.terminalKey();
-    return delete this.linkKeys[key];
-  };
-
   LinkManager.prototype.deleteAll = function() {
     var node;
     for (node in this.nodeKeys) {
       this.removeNode(node);
     }
-    return this.setFilename('New Model');
+    this.setFilename('New Model');
+    return this.undoRedoManager.clearHistory();
   };
 
   LinkManager.prototype.deleteSelected = function() {
@@ -613,20 +831,14 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.removeSelectedLink = function() {
-    var i, j, len, len1, listener, ref, ref1, results;
+    var i, len, listener, ref, results;
     if (this.selectedLink) {
-      this.removelink(this.selectedLink);
-      ref = this.linkListeners;
+      this.removeLink(this.selectedLink);
+      this.selectedLink = null;
+      ref = this.selectionListeners;
+      results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         listener = ref[i];
-        log.info("notifying of deleted Link");
-        listener.handleLinkRm(this.selectedLink);
-      }
-      this.selectedLink = null;
-      ref1 = this.selectionListeners;
-      results = [];
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        listener = ref1[j];
         results.push(listener({
           node: null,
           connection: null
@@ -642,37 +854,13 @@ module.exports = LinkManager = (function() {
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       link = ref[i];
-      results.push(this.removelink(link));
-    }
-    return results;
-  };
-
-  LinkManager.prototype.removeNode = function(nodeKey) {
-    var i, j, len, len1, listener, node, ref, ref1, results;
-    node = this.nodeKeys[nodeKey];
-    delete this.nodeKeys[nodeKey];
-    this.removeLinksForNode(node);
-    ref = this.nodeListeners;
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      log.info("notifying of deleted Node");
-      listener.handleNodeRm(node);
-    }
-    this.selectedNode = null;
-    ref1 = this.selectionListeners;
-    results = [];
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      listener = ref1[j];
-      results.push(listener({
-        node: null,
-        connection: null
-      }));
+      results.push(this.removeLink(link));
     }
     return results;
   };
 
   LinkManager.prototype.loadData = function(data) {
-    var i, importer, len, listener, ref, results;
+    var i, importer, len, listener, ref;
     log.info("json success");
     importer = new Importer(this);
     importer.importData(data);
@@ -685,12 +873,11 @@ module.exports = LinkManager = (function() {
       })(this));
     }
     ref = this.loadListeners;
-    results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       listener = ref[i];
-      results.push(listener(data));
+      listener(data);
     }
-    return results;
+    return this.undoRedoManager.clearHistory();
   };
 
   LinkManager.prototype.loadDataFromUrl = function(url) {
@@ -768,7 +955,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../utils/importer":10,"./link":6,"./node":7}],6:[function(require,module,exports){
+},{"../utils/importer":11,"../utils/undo-redo":16,"./link":6,"./node":7}],6:[function(require,module,exports){
 var GraphPrimitive, Link,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -829,11 +1016,15 @@ module.exports = Link = (function(superClass) {
 
 
 },{"./graph-primitive":4}],7:[function(require,module,exports){
-var GraphPrimitive, Node,
+var Colors, GraphPrimitive, Node, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
-GraphPrimitive = require('./graph-primitive.coffee');
+GraphPrimitive = require('./graph-primitive');
+
+Colors = require('../utils/colors');
+
+tr = require('../utils/translate');
 
 module.exports = Node = (function(superClass) {
   extend(Node, superClass);
@@ -856,6 +1047,7 @@ module.exports = Node = (function(superClass) {
     this.y = nodeSpec.y;
     this.title = nodeSpec.title;
     this.image = nodeSpec.image;
+    this.color = nodeSpec.color || Colors[0].value;
   }
 
   Node.prototype.type = 'Node';
@@ -866,6 +1058,16 @@ module.exports = Node = (function(superClass) {
         throw new Error("Duplicate link for Node:" + this.id);
       }
       return this.links.push(link);
+    } else {
+      throw new Error("Bad link for Node:" + this.id);
+    }
+  };
+
+  Node.prototype.removeLink = function(link) {
+    if (link.sourceNode === this || link.targetNode === this) {
+      return _.remove(this.links, function(testLink) {
+        return testLink === link;
+      });
     } else {
       throw new Error("Bad link for Node:" + this.id);
     }
@@ -939,7 +1141,27 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"./graph-primitive.coffee":4}],8:[function(require,module,exports){
+},{"../utils/colors":8,"../utils/translate":15,"./graph-primitive":4}],8:[function(require,module,exports){
+var tr;
+
+tr = require('./translate');
+
+module.exports = [
+  {
+    name: tr("~COLOR.YELLOW"),
+    value: "#f7be33"
+  }, {
+    name: tr("~COLOR.DARK_BLUE"),
+    value: "#105262"
+  }, {
+    name: tr("~COLOR.MED_BLUE"),
+    value: "#72c0cc"
+  }
+];
+
+
+
+},{"./translate":15}],9:[function(require,module,exports){
 var DropImageHandler;
 
 module.exports = DropImageHandler = (function() {
@@ -1017,7 +1239,7 @@ module.exports = DropImageHandler = (function() {
 
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -1175,7 +1397,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -1225,7 +1447,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -1404,7 +1626,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -1418,7 +1640,8 @@ module.exports = {
   "~NODE-EDIT.DROPPED": "Dropped",
   "~NODE-EDIT.REMOTE": "Remote",
   "~NODE-EDIT.ADD_REMOTE": "Add remote",
-  "~LINK-EDIT.DELETE": "Delete this link",
+  "~NODE-EDIT.DELETE": "✖ Delete Component",
+  "~LINK-EDIT.DELETE": "✖ Delete Link",
   "~LINK-EDIT.TITLE": "Title",
   "~LINK-EDIT.COLOR": "Color",
   "~ADD-NEW-IMAGE.TITLE": "Add new image",
@@ -1432,19 +1655,23 @@ module.exports = {
   "~METADATA.MORE-INFO": "More info",
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
-  "~IMAGE-BROWSER.SEARCH_HEADER": "'Search Internal Library and Openclipart.org'",
+  "~IMAGE-BROWSER.SEARCH_HEADER": "Search Internal Library and Openclipart.org",
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.  Try another search, or browse internal library images below.",
   "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images",
   "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for '%{query}'",
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}'%{query}'...",
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for '%{query}'",
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for '%{query}'. ",
-  "~IMAGE-BROWSER.SHOW_ALL": "Show all matches."
+  "~IMAGE-BROWSER.SHOW_ALL": "Show all matches.",
+  "~COLOR.YELLOW": "Yellow",
+  "~COLOR.DARK_BLUE": "Dark Blue",
+  "~COLOR.LIGHT_BLUE": "Light Blue",
+  "~COLOR.MED_BLUE": "Blue"
 };
 
 
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var OpenClipArt;
 
 module.exports = OpenClipArt = {
@@ -1478,7 +1705,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -1511,8 +1738,173 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":12}],15:[function(require,module,exports){
-var GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, a, div, ref;
+},{"./lang/us-en":13}],16:[function(require,module,exports){
+var Command, Manager;
+
+Manager = (function() {
+  function Manager(options) {
+    if (options == null) {
+      options = {};
+    }
+    this.debug = options.debug;
+    this.commands = [];
+    this.stackPosition = -1;
+    this.savePosition = -1;
+    this.changeListeners = [];
+  }
+
+  Manager.prototype.createAndExecuteCommand = function(name, methods) {
+    return this.execute(new Command(name, methods));
+  };
+
+  Manager.prototype.execute = function(command) {
+    var result;
+    this._clearRedo();
+    result = command.execute(this.debug);
+    this.commands.push(command);
+    this.stackPosition++;
+    this._changed();
+    if (this.debug) {
+      this.log();
+    }
+    return result;
+  };
+
+  Manager.prototype.undo = function() {
+    var result;
+    if (this.canUndo()) {
+      result = this.commands[this.stackPosition].undo(this.debug);
+      this.stackPosition--;
+      this._changed();
+      if (this.debug) {
+        this.log();
+      }
+      return result;
+    } else {
+      return false;
+    }
+  };
+
+  Manager.prototype.canUndo = function() {
+    return this.stackPosition >= 0;
+  };
+
+  Manager.prototype.redo = function() {
+    var result;
+    if (this.canRedo()) {
+      this.stackPosition++;
+      result = this.commands[this.stackPosition].redo(this.debug);
+      this._changed();
+      if (this.debug) {
+        this.log();
+      }
+      return result;
+    } else {
+      return false;
+    }
+  };
+
+  Manager.prototype.canRedo = function() {
+    return this.stackPosition < this.commands.length - 1;
+  };
+
+  Manager.prototype.save = function() {
+    this.savePosition = this.stackPosition;
+    return this._changed();
+  };
+
+  Manager.prototype.clearHistory = function() {
+    this.commands = [];
+    this.stackPosition = -1;
+    this.savePosition = -1;
+    this._changed();
+    if (this.debug) {
+      return this.log();
+    }
+  };
+
+  Manager.prototype.dirty = function() {
+    return this.stackPosition !== this.savePosition;
+  };
+
+  Manager.prototype.addChangeListener = function(listener) {
+    return this.changeListeners.push(listener);
+  };
+
+  Manager.prototype.log = function() {
+    log.info("Undo Stack: [" + ((_.pluck(this.commands.slice(0, this.stackPosition + 1), 'name')).join(', ')) + "]");
+    return log.info("Redo Stack: [" + ((_.pluck(this.commands.slice(this.stackPosition + 1), 'name')).join(', ')) + "]");
+  };
+
+  Manager.prototype._clearRedo = function() {
+    return this.commands = this.commands.slice(0, this.stackPosition + 1);
+  };
+
+  Manager.prototype._changed = function() {
+    var i, len, listener, ref, results, status;
+    if (this.changeListeners.length > 0) {
+      status = {
+        dirty: this.dirty(),
+        canUndo: this.canUndo(),
+        canRedo: this.canRedo()
+      };
+      ref = this.changeListeners;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        listener = ref[i];
+        results.push(listener(status));
+      }
+      return results;
+    }
+  };
+
+  return Manager;
+
+})();
+
+Command = (function() {
+  function Command(name1, methods1) {
+    this.name = name1;
+    this.methods = methods1;
+    void 0;
+  }
+
+  Command.prototype._call = function(method, debug, via) {
+    if (debug) {
+      log.info("Command: " + this.name + "." + method + "()" + (via ? " via " + via : ''));
+    }
+    if (this.methods.hasOwnProperty(method)) {
+      return this.methods[method]();
+    } else {
+      throw new Error("Undefined " + method + " method for " + this.name + " command");
+    }
+  };
+
+  Command.prototype.execute = function(debug) {
+    return this._call('execute', debug);
+  };
+
+  Command.prototype.undo = function(debug) {
+    return this._call('undo', debug);
+  };
+
+  Command.prototype.redo = function(debug) {
+    return this._call('execute', debug, 'redo');
+  };
+
+  return Command;
+
+})();
+
+module.exports = {
+  Manager: Manager,
+  Command: Command
+};
+
+
+
+},{}],17:[function(require,module,exports){
+var DocumentActions, GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, a, div, ref;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
 
@@ -1525,6 +1917,8 @@ NodeWell = React.createFactory(require('./node-well-view'));
 InspectorPanel = React.createFactory(require('./inspector-panel-view'));
 
 ImageBrowser = React.createFactory(require('./image-browser-view'));
+
+DocumentActions = React.createFactory(require('./document-actions-view'));
 
 ref = React.DOM, div = ref.div, a = ref.a;
 
@@ -1563,9 +1957,8 @@ module.exports = React.createClass({
       className: 'action-bar'
     }, NodeWell({
       protoNodes: this.state.protoNodes
-    }), Placeholder({
-      label: 'Document Actions',
-      className: 'document-actions'
+    }), DocumentActions({
+      linkManager: this.props.linkManager
     })), div({
       className: 'canvas'
     }, LinkView({
@@ -1576,6 +1969,7 @@ module.exports = React.createClass({
       link: this.state.selectedConnection,
       onNodeChanged: this.onNodeChanged,
       onLinkChanged: this.onLinkChanged,
+      onNodeDelete: this.onNodeDelete,
       protoNodes: this.state.protoNodes,
       toggleImageBrowser: this.toggleImageBrowser,
       linkManager: this.props.linkManager
@@ -1589,37 +1983,51 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":2,"./global-nav-view":18,"./image-browser-view":19,"./inspector-panel-view":21,"./link-view":24,"./node-well-view":30,"./placeholder-view":32}],16:[function(require,module,exports){
-var div, tr;
+},{"../mixins/app-view":2,"./document-actions-view":19,"./global-nav-view":21,"./image-browser-view":22,"./inspector-panel-view":25,"./link-view":28,"./node-well-view":34,"./placeholder-view":36}],18:[function(require,module,exports){
+var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
 
 tr = require('../utils/translate');
 
+Colors = require('../utils/colors');
+
+ColorChoice = React.createFactory(React.createClass({
+  displayName: 'ColorChoice',
+  selectColor: function() {
+    return this.props.onChange(this.props.color);
+  },
+  render: function() {
+    var className, name, value;
+    name = this.props.color.name;
+    value = this.props.color.value;
+    className = 'color-choice';
+    if (this.props.selected === value) {
+      className = 'color-choice selected';
+    }
+    return div({
+      className: className,
+      onClick: this.selectColor
+    }, div({
+      className: 'color-swatch',
+      style: {
+        'background-color': value
+      }
+    }), div({
+      className: 'color-label'
+    }, name));
+  }
+}));
+
 module.exports = React.createClass({
   displayName: 'ColorPickerView',
   getInitialState: function() {
     return {
-      opened: false,
-      selectedColor: tr("yellow"),
-      colors: [
-        {
-          color: '#f5be32',
-          name: tr("yellow")
-        }, {
-          color: 'red',
-          name: tr("red")
-        }, {
-          color: 'gray',
-          name: tr("gray")
-        }
-      ]
+      opened: false
     };
   },
-  select: function(colorName) {
-    return this.setState({
-      selectedColor: colorName
-    });
+  select: function(color) {
+    return this.props.onChange(color.value);
   },
   toggleOpen: function() {
     return this.setState({
@@ -1634,59 +2042,80 @@ module.exports = React.createClass({
     }
   },
   render: function() {
-    var attr, color, colorAttr, colors;
-    colors = this.state.colors;
-    colorAttr = (function(_this) {
-      return function(color) {
-        var className, name, onClick;
-        name = color.name;
-        className = 'color-choice';
-        onClick = function() {
-          return _this.select(name);
-        };
-        if (color.name === _this.state.selectedColor) {
-          className = 'color-choice selected';
-          onClick = function() {
-            return {};
-          };
-        }
-        return {
-          name: color.name,
-          color: color.color,
-          onClick: onClick,
-          className: className
-        };
-      };
-    })(this);
+    var color;
     return div({
       className: this.className(),
       onClick: this.toggleOpen
     }, (function() {
       var i, len, results;
       results = [];
-      for (i = 0, len = colors.length; i < len; i++) {
-        color = colors[i];
-        attr = colorAttr(color);
-        results.push(div({
-          className: attr.className,
-          onClick: attr.onClick
-        }, div({
-          className: 'color-swatch',
-          style: {
-            'background-color': attr.color
-          }
-        }), div({
-          className: 'color-label'
-        }, attr.name)));
+      for (i = 0, len = Colors.length; i < len; i++) {
+        color = Colors[i];
+        results.push(ColorChoice({
+          color: color,
+          selected: this.props.selected,
+          onChange: this.select
+        }));
       }
       return results;
-    })());
+    }).call(this));
   }
 });
 
 
 
-},{"../utils/translate":14}],17:[function(require,module,exports){
+},{"../utils/colors":8,"../utils/translate":15}],19:[function(require,module,exports){
+var div, ref, span;
+
+ref = React.DOM, div = ref.div, span = ref.span;
+
+module.exports = React.createClass({
+  displayName: 'DocumentActions',
+  getInitialState: function() {
+    return {
+      canRedo: false,
+      canUndo: false
+    };
+  },
+  componentDidMount: function() {
+    return this.props.linkManager.addChangeListener(this.modelChanged);
+  },
+  modelChanged: function(status) {
+    return this.setState({
+      canRedo: status.canRedo,
+      canUndo: status.canUndo
+    });
+  },
+  undoClicked: function() {
+    return this.props.linkManager.undo();
+  },
+  redoClicked: function() {
+    return this.props.linkManager.redo();
+  },
+  render: function() {
+    var buttonClass;
+    buttonClass = function(enabled) {
+      return "button-link " + (!enabled ? 'disabled' : '');
+    };
+    return div({
+      className: 'document-actions'
+    }, div({
+      className: 'undo-redo'
+    }, span({
+      className: buttonClass(this.state.canUndo),
+      onClick: this.undoClicked,
+      disabled: !this.state.canUndo
+    }, 'Undo'), span({
+      className: buttonClass(this.state.canRedo),
+      onClick: this.redoClicked,
+      disabled: !this.state.canRedo
+    }, 'Redo')));
+  }
+});
+
+
+
+},{}],20:[function(require,module,exports){
 var div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -1784,7 +2213,7 @@ module.exports = React.createClass({
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -1797,10 +2226,18 @@ module.exports = React.createClass({
   displayName: 'GlobalNav',
   mixins: [require('../mixins/google-file-interface')],
   getInitialState: function() {
-    return this.getInitialAppViewState({});
+    return this.getInitialAppViewState({
+      dirty: false
+    });
   },
   componentDidMount: function() {
-    return this.createGoogleDrive();
+    this.createGoogleDrive();
+    return this.props.linkManager.addChangeListener(this.modelChanged);
+  },
+  modelChanged: function(status) {
+    return this.setState({
+      dirty: status.dirty
+    });
   },
   render: function() {
     var options;
@@ -1823,12 +2260,14 @@ module.exports = React.createClass({
       }
     ];
     return div({
-      className: 'global-nav non-placeholder'
-    }, Dropdown({
+      className: 'global-nav'
+    }, div({}, Dropdown({
       anchor: this.props.filename,
       items: options,
       className: 'global-nav-content-filename'
-    }), this.state.action ? div({}, i({
+    }), this.state.dirty ? span({
+      className: 'global-nav-file-status'
+    }, 'Unsaved') : void 0), this.state.action ? div({}, i({
       className: "fa fa-cog fa-spin"
     }), this.state.action) : void 0, div({
       className: 'global-nav-name-and-help'
@@ -1844,7 +2283,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":3,"../utils/translate":14,"./dropdown-view":17}],19:[function(require,module,exports){
+},{"../mixins/google-file-interface":3,"../utils/translate":15,"./dropdown-view":20}],22:[function(require,module,exports){
 var ImageMetadata, ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, button, div, form, i, img, input, ref, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -2125,7 +2564,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/open-clipart":13,"../utils/translate":14,"./image-metadata-view":20,"./modal-tabbed-dialog-view":26}],20:[function(require,module,exports){
+},{"../utils/open-clipart":14,"../utils/translate":15,"./image-metadata-view":23,"./modal-tabbed-dialog-view":30}],23:[function(require,module,exports){
 var a, div, ref, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -2159,7 +2598,84 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":14}],21:[function(require,module,exports){
+},{"../utils/translate":15}],24:[function(require,module,exports){
+var ImgChoice, div, img, ref, tr;
+
+ref = React.DOM, div = ref.div, img = ref.img;
+
+tr = require('../utils/translate');
+
+ImgChoice = React.createFactory(React.createClass({
+  displayName: 'ImgChoice',
+  selectNode: function() {
+    return this.props.onChange(this.props.node);
+  },
+  render: function() {
+    var className;
+    className = "image-choice";
+    if (this.props.node.image === this.props.selected.image) {
+      className = "image-choice selected";
+    }
+    return div({
+      className: className,
+      onClick: this.selectNode
+    }, img({
+      src: this.props.node.image,
+      className: 'image-choice'
+    }));
+  }
+}));
+
+module.exports = React.createClass({
+  displayName: 'ImagePickerView',
+  getInitialState: function() {
+    return {
+      opened: false
+    };
+  },
+  toggleOpen: function() {
+    return this.setState({
+      opened: !this.state.opened
+    });
+  },
+  className: function() {
+    if (this.state.opened) {
+      return "image-choices opened";
+    } else {
+      return "image-choices closed";
+    }
+  },
+  render: function() {
+    var node;
+    return div({
+      onClick: this.toggleOpen,
+      className: 'image-picker'
+    }, div({
+      className: 'selected-image'
+    }, img({
+      src: this.props.selected.image
+    })), div({
+      className: this.className()
+    }, (function() {
+      var i, len, ref1, results;
+      ref1 = this.props.nodes;
+      results = [];
+      for (i = 0, len = ref1.length; i < len; i++) {
+        node = ref1[i];
+        results.push(ImgChoice({
+          node: node,
+          selected: this.props.selected,
+          onChange: this.props.onChange
+        }));
+      }
+      return results;
+    }).call(this)));
+  }
+});
+
+
+
+},{"../utils/translate":15}],25:[function(require,module,exports){
 var LinkInspectorView, NodeInspectorView, PaletteInspectorView, div, i, ref;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -2205,6 +2721,7 @@ module.exports = React.createClass({
     }, this.props.node ? NodeInspectorView({
       node: this.props.node,
       onNodeChanged: this.props.onNodeChanged,
+      onNodeDelete: this.props.onNodeDelete,
       protoNodes: this.props.protoNodes
     }) : this.props.link ? LinkInspectorView({
       link: this.props.link,
@@ -2219,7 +2736,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":23,"./node-inspector-view":28,"./palette-inspector-view":31}],22:[function(require,module,exports){
+},{"./link-inspector-view":27,"./node-inspector-view":32,"./palette-inspector-view":35}],26:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2253,12 +2770,14 @@ module.exports = React.createClass({
 
 
 
-},{}],23:[function(require,module,exports){
-var button, div, h2, input, label, palette, palettes, ref, tr;
+},{}],27:[function(require,module,exports){
+var InspectorTabs, button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
 
 tr = require("../utils/translate");
+
+InspectorTabs = React.createFactory(require('./inspector-tabs-view'));
 
 palettes = [['#4D6A6D', '#798478', "#A0A083", "#C9ADA1", "#EAE0CC"], ['#351431', '#775253', "#BDC696", "#D1D3C4", "#DFE0DC"], ['#D6F49D', '#EAD637', "#CBA328", "#230C0F", "#A2D3C2"]];
 
@@ -2280,16 +2799,17 @@ module.exports = React.createClass({
     return this.notifyChange(this.props.link.title, $(e.target).css('background-color'));
   },
   render: function() {
-    var colorCode, i;
+    var selected, tabs;
+    tabs = [tr('design'), tr('define')];
+    selected = tr('design');
     return div({
-      className: 'link-edit-view'
-    }, h2({}, this.props.link.title), div({
-      className: 'edit-row'
-    }, button({
-      type: 'button',
-      className: 'delete',
-      onClick: this.deleteLink
-    }, tr("~LINK-EDIT.DELETE"))), div({
+      className: 'link-inspector-view'
+    }, InspectorTabs({
+      tabs: tabs,
+      selected: selected
+    }), div({
+      className: 'link-inspector-content'
+    }, div({
       className: 'edit-row'
     }, label({
       name: 'title'
@@ -2301,30 +2821,15 @@ module.exports = React.createClass({
     })), div({
       className: 'edit-row'
     }, label({
-      name: 'color'
-    }, tr("~LINK-EDIT.COLOR")), (function() {
-      var j, len, results;
-      results = [];
-      for (i = j = 0, len = palette.length; j < len; i = ++j) {
-        colorCode = palette[i];
-        results.push(div({
-          className: 'colorChoice',
-          key: i,
-          style: {
-            backgroundColor: colorCode
-          },
-          onTouchEnd: this.pickColor,
-          onClick: this.pickColor
-        }));
-      }
-      return results;
-    }).call(this)));
+      className: 'link-delete',
+      onClick: this.deleteLink
+    }, tr("~LINK-EDIT.DELETE")))));
   }
 });
 
 
 
-},{"../utils/translate":14}],24:[function(require,module,exports){
+},{"../utils/translate":15,"./inspector-tabs-view":26}],28:[function(require,module,exports){
 var DiagramToolkit, DropImageHandler, Importer, Node, NodeList, div;
 
 Node = React.createFactory(require('./node-view'));
@@ -2400,9 +2905,16 @@ module.exports = React.createClass({
   onNodeMoved: function(node_event) {
     return this.handleEvent((function(_this) {
       return function() {
+        return _this.props.linkManager.moveNode(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
+      };
+    })(this));
+  },
+  onNodeMoveComplete: function(node_event) {
+    return this.handleEvent((function(_this) {
+      return function() {
         var left, ref, top;
         ref = node_event.extra.position, left = ref.left, top = ref.top;
-        return _this.props.linkManager.moveNode(node_event.nodeKey, left, top);
+        return _this.props.linkManager.moveNodeCompleted(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
       };
     })(this));
   },
@@ -2578,6 +3090,7 @@ module.exports = React.createClass({
           nodeKey: node.key,
           ref: node.key,
           onMove: this.onNodeMoved,
+          onMoveComplete: this.onNodeMoveComplete,
           onDelete: this.onNodeDeleted,
           linkManager: this.props.linkManager
         }));
@@ -2589,7 +3102,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":5,"../utils/drop-image-handler":8,"../utils/importer":10,"../utils/js-plumb-diagram-toolkit":11,"./node-view":29}],25:[function(require,module,exports){
+},{"../models/link-manager":5,"../utils/drop-image-handler":9,"../utils/importer":11,"../utils/js-plumb-diagram-toolkit":12,"./node-view":33}],29:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -2622,7 +3135,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":27}],26:[function(require,module,exports){
+},{"./modal-view":31}],30:[function(require,module,exports){
 var ModalDialog, Tab, TabInfo, a, div, li, ref, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -2716,7 +3229,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":25}],27:[function(require,module,exports){
+},{"./modal-dialog-view":29}],31:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2748,68 +3261,53 @@ module.exports = React.createClass({
 
 
 
-},{}],28:[function(require,module,exports){
-var ColorPicker, NodeInspectorTabs, button, div, h2, input, label, optgroup, option, ref, select, tr;
+},{}],32:[function(require,module,exports){
+var ColorPicker, ImagePickerView, InspectorTabs, button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
 
 tr = require("../utils/translate");
 
-NodeInspectorTabs = React.createFactory(require('./inspector-tabs-view'));
+InspectorTabs = React.createFactory(require('./inspector-tabs-view'));
 
 ColorPicker = React.createFactory(require('./color-picker-view'));
+
+ImagePickerView = React.createFactory(require('./image-picker-view'));
 
 module.exports = React.createClass({
   displayName: 'NodeInspectorView',
   changeTitle: function(e) {
     var base;
-    return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, e.target.value, this.props.node.image) : void 0;
+    return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, {
+      title: e.target.value
+    }) : void 0;
   },
-  changeImage: function(e) {
+  changeImage: function(node) {
     var base;
-    return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, this.props.node.title, e.target.value) : void 0;
+    return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, {
+      image: node.image
+    }) : void 0;
   },
-  addRemote: function(e) {
-    var img, ref1, src;
-    src = $.trim(((ref1 = this.refs.remoteUrl) != null ? ref1.getDOMNode().value : void 0) || '');
-    if (src.length > 0) {
-      img = new Image;
-      img.onload = (function(_this) {
-        return function() {
-          var base;
-          return typeof (base = _this.props).onNodeChanged === "function" ? base.onNodeChanged(_this.props.node, _this.props.node.title, src) : void 0;
-        };
-      })(this);
-      img.onerror = (function(_this) {
-        return function() {
-          alert("Sorry, could not load " + src);
-          return _this.refs.remoteUrl.getDOMNode().focus();
-        };
-      })(this);
-      return img.src = src;
-    }
+  changeColor: function(color) {
+    var base;
+    return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, {
+      color: color
+    }) : void 0;
+  },
+  "delete": function(e) {
+    var base;
+    return typeof (base = this.props).onNodeDelete === "function" ? base.onNodeDelete(this.props.node) : void 0;
   },
   render: function() {
-    var builtInNodes, droppedNodes, i, j, len, node, ref1, remoteNodes, selected, tabs;
+    var builtInNodes, droppedNodes, remoteNodes, selected, tabs;
     builtInNodes = [];
     droppedNodes = [];
     remoteNodes = [];
     tabs = [tr('design'), tr('define')];
     selected = tr('design');
-    ref1 = this.props.protoNodes;
-    for (i = j = 0, len = ref1.length; j < len; i = ++j) {
-      node = ref1[i];
-      if (!node.image.match(/^(https?|data):/)) {
-        builtInNodes.push(node);
-      } else if (node.image.match(/^data:/)) {
-        droppedNodes.push(node);
-      } else if (node.image.match(/^https?:/)) {
-        remoteNodes.push(node);
-      }
-    }
     return div({
       className: 'node-inspector-view'
-    }, NodeInspectorTabs({
+    }, InspectorTabs({
       tabs: tabs,
       selected: selected
     }), div({
@@ -2828,83 +3326,28 @@ module.exports = React.createClass({
     }, label({
       htmlFor: 'color'
     }, tr("~NODE-EDIT.COLOR")), ColorPicker({
-      type: 'text',
-      name: 'title',
-      value: this.props.node.title,
-      onChange: this.changeTitle
+      selected: this.props.node.color,
+      onChange: this.changeColor
     })), div({
       className: 'edit-row'
     }, label({
       htmlFor: 'image'
-    }, tr("~NODE-EDIT.IMAGE")), select({
-      name: 'image',
-      value: this.props.node.image,
+    }, tr("~NODE-EDIT.IMAGE")), ImagePickerView({
+      nodes: this.props.protoNodes,
+      selected: this.props.node,
       onChange: this.changeImage
-    }, optgroup({
-      label: tr("~NODE-EDIT.BUILT_IN")
-    }, (function() {
-      var k, len1, results;
-      results = [];
-      for (i = k = 0, len1 = builtInNodes.length; k < len1; i = ++k) {
-        node = builtInNodes[i];
-        results.push(option({
-          key: i,
-          value: node.image
-        }, node.title.length > 0 ? node.title : '(none)'));
-      }
-      return results;
-    })()), droppedNodes.length > 0 ? optgroup({
-      label: tr("~NODE-EDIT.DROPPED")
-    }, (function() {
-      var k, len1, results;
-      results = [];
-      for (i = k = 0, len1 = droppedNodes.length; k < len1; i = ++k) {
-        node = droppedNodes[i];
-        results.push(option({
-          key: i,
-          value: node.image
-        }, node.title || node.image));
-      }
-      return results;
-    })()) : void 0, optgroup({
-      label: 'Remote'
-    }, (function() {
-      var k, len1, results;
-      results = [];
-      for (i = k = 0, len1 = remoteNodes.length; k < len1; i = ++k) {
-        node = remoteNodes[i];
-        results.push(option({
-          key: i,
-          value: node.image
-        }, node.image));
-      }
-      return results;
-    })(), option({
-      key: i,
-      value: '#remote'
-    }, tr("~NODE-EDIT.ADD_REMOTE"))))), this.props.node.image === '#remote' ? div({}, div({
-      className: 'edit-row'
-    }, label({
-      htmlFor: 'remoteUrl'
-    }, 'URL'), input({
-      type: 'text',
-      ref: 'remoteUrl',
-      name: 'remoteUrl',
-      placeholder: 'Remote image url'
     })), div({
       className: 'edit-row'
     }, label({
-      htmlFor: 'save'
-    }, ''), button({
-      name: 'save',
-      onClick: this.addRemote
-    }, 'Add Remote Image'))) : void 0));
+      className: 'node-delete',
+      onClick: this["delete"]
+    }, tr("~NODE-EDIT.DELETE")))));
   }
 });
 
 
 
-},{"../utils/translate":14,"./color-picker-view":16,"./inspector-tabs-view":22}],29:[function(require,module,exports){
+},{"../utils/translate":15,"./color-picker-view":18,"./image-picker-view":24,"./inspector-tabs-view":26}],33:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -2916,9 +3359,10 @@ module.exports = React.createClass({
     $elem = $(this.refs.node.getDOMNode());
     $elem.draggable({
       drag: this.doMove,
+      stop: this.doStop,
       containment: 'parent'
     });
-    return $elem.bind('mouseup touchend', ((function(_this) {
+    return $elem.bind('click touchend', ((function(_this) {
       return function() {
         return _this.handleSelected(true);
       };
@@ -2962,6 +3406,15 @@ module.exports = React.createClass({
       extra: extra
     });
   },
+  doStop: function(evt, extra) {
+    return this.props.onMoveComplete({
+      nodeKey: this.props.nodeKey,
+      reactComponent: this,
+      domElement: this.refs.node.getDOMNode(),
+      syntheticEvent: evt,
+      extra: extra
+    });
+  },
   doDelete: function(evt) {
     return this.props.onDelete({
       nodeKey: this.props.nodeKey,
@@ -2971,34 +3424,34 @@ module.exports = React.createClass({
     });
   },
   render: function() {
-    var ref1, style;
+    var className, ref1, style;
     style = {
       top: this.props.data.y,
-      left: this.props.data.x
+      left: this.props.data.x,
+      'color': this.props.data.color
     };
+    className = "elm";
+    if (this.props.selected) {
+      className = className + " selected";
+    }
     return div({
-      className: "elm" + (this.props.selected ? ' selected' : ''),
+      className: className,
       ref: 'node',
       style: style,
       'data-node-key': this.props.nodeKey
     }, div({
-      className: 'img-background'
-    }, div({
-      className: 'delete-box',
-      onClick: this.doDelete
-    }, i({
-      className: 'fa fa-times-circle'
-    })), (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== '#remote' ? img({
+      className: "img-background"
+    }, (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== '#remote' ? img({
       src: this.props.data.image
-    }) : null), div({
+    }) : null)), div({
       className: 'node-title'
-    }, this.props.data.title)));
+    }, this.props.data.title));
   }
 });
 
 
 
-},{}],30:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -3066,7 +3519,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":33}],31:[function(require,module,exports){
+},{"./proto-node-view":37}],35:[function(require,module,exports){
 var ImageMetadata, PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -3177,7 +3630,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":14,"./image-metadata-view":20,"./proto-node-view":33}],32:[function(require,module,exports){
+},{"../utils/translate":15,"./image-metadata-view":23,"./proto-node-view":37}],36:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3195,7 +3648,7 @@ module.exports = React.createClass({
 
 
 
-},{}],33:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -3251,7 +3704,7 @@ module.exports = React.createClass({
 
 
 
-},{}],34:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
