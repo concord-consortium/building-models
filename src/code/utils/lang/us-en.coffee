@@ -14,7 +14,7 @@ module.exports =
   "~NODE-EDIT.ADD_REMOTE": "Add remote"
   "~NODE-EDIT.DELETE": "✖ Delete Component"
 
-  "~LINK-EDIT.DELETE": "Delete this link"
+  "~LINK-EDIT.DELETE": "✖ Delete Link"
   "~LINK-EDIT.TITLE": "Title"
   "~LINK-EDIT.COLOR": "Color"
 
