@@ -1,9 +1,8 @@
 {div, h2, label, input, select, option, optgroup, button} = React.DOM
 tr = require "../utils/translate"
-NodeInspectorTabs = React.createFactory require './inspector-tabs-view'
+InspectorTabs = React.createFactory require './inspector-tabs-view'
 ColorPicker = React.createFactory require './color-picker-view'
 ImagePickerView = React.createFactory require './image-picker-view'
-
 module.exports = React.createClass
 
   displayName: 'NodeInspectorView'
@@ -28,7 +27,7 @@ module.exports = React.createClass
     selected = tr('design')
 
     (div {className: 'node-inspector-view'},
-      (NodeInspectorTabs {tabs: tabs, selected: selected} )
+      (InspectorTabs {tabs: tabs, selected: selected} )
       (div {className: 'node-inspector-content'},
         (div {className: 'edit-row'},
           (label {htmlFor: 'title'}, tr "~NODE-EDIT.TITLE")
@@ -36,7 +35,7 @@ module.exports = React.createClass
         )
         (div {className: 'edit-row'},
           (label {htmlFor: 'color'}, tr "~NODE-EDIT.COLOR")
-          (ColorPicker {type: 'text', name: 'title', value: @props.node.title, onChange: @changeColor})
+          (ColorPicker {selected: @props.node.color,  onChange: @changeColor})
         )
         (div {className: 'edit-row'},
           (label {htmlFor: 'image'}, tr "~NODE-EDIT.IMAGE")

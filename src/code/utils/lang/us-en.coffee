@@ -44,3 +44,9 @@ module.exports =
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for '%{query}'. "
   "~IMAGE-BROWSER.SHOW_ALL": "Show all matches."
 
+
+  "~COLOR.YELLOW": "Yellow"
+  "~COLOR.DARK_BLUE": "Dark Blue"
+  "~COLOR.LIGHT_BLUE": "Light Blue"
+  "~COLOR.MED_BLUE": "Blue"
+
