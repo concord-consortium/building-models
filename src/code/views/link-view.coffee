@@ -25,7 +25,20 @@ module.exports = React.createClass
     $container.droppable
       accept: '.proto-node'
       hoverClass: "ui-state-highlight"
-      drop: @addNode
+      drop: (e, ui) =>
+        # this seems crazy but we can't get the real drop target from the event so we have to calculate it
+        # we also can't just make the inspector panel eat the drops because the container handler is called first
+        $panel = $ '.inspector-panel-content'
+        panel =
+          width: $panel.width()
+          height: $panel.height()
+          offset: $panel.offset()
+        inPanel = ui.offset.left >= panel.offset.left and
+                  ui.offset.top >= panel.offset.top and
+                  ui.offset.left <= panel.offset.left + panel.width and
+                  ui.offset.top <= panel.offset.top + panel.height
+        if not inPanel
+          @addNode e, ui
 
     @dropImageHandler = new DropImageHandler
       maxWidth: 100
