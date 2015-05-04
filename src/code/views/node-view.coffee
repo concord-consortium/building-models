@@ -64,6 +64,8 @@ module.exports = React.createClass
     (div { className: className, ref: 'node', style: style, 'data-node-key': @props.nodeKey},
       (div {className: "img-background"},
         (if @props.data.image?.length > 0 and @props.data.image isnt '#remote' then (img {src: @props.data.image}) else null)
+        if @props.selected
+          (div {className: 'connection-source', 'data-node-key': @props.nodeKey})
       )
       (div {className: 'node-title'}, @props.data.title)
     )
