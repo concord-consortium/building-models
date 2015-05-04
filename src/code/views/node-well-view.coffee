@@ -28,7 +28,7 @@ module.exports = React.createClass
     (div {className: 'top-node-palette-wrapper'},
       (div {className: topNodePaletteClass},
         (div {className: 'node-well'},
-          for node, i in @props.protoNodes
+          for node, i in @props.palette
             (ProtoNodeView {key: i, image: node.image, title: node.title})
         )
       )

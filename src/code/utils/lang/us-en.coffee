@@ -43,7 +43,7 @@ module.exports =
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for '%{query}'"
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for '%{query}'. "
   "~IMAGE-BROWSER.SHOW_ALL": "Show all matches."
-
+  "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette"
 
   "~COLOR.YELLOW": "Yellow"
   "~COLOR.DARK_BLUE": "Dark Blue"

@@ -19,7 +19,7 @@ module.exports = React.createClass
   displayName: 'PaletteInspector'
 
   getInitialState: ->
-    selectedIndex: _.findIndex @props.protoNodes, (node) -> node.image.length > 0
+    selectedIndex: _.findIndex @props.palette, (node) -> node.image.length > 0
 
   imageSelected: (index) ->
     @setState selectedIndex: index
@@ -33,17 +33,17 @@ module.exports = React.createClass
     @scrollToBottom()
 
   componentDidUpdate: (prevProps) ->
-    if JSON.stringify(prevProps.protoNodes) isnt JSON.stringify(@props.protoNodes)
+    if JSON.stringify(prevProps.palette) isnt JSON.stringify(@props.palette)
       @scrollToBottom()
 
   render: ->
-    selectedImage = @props.protoNodes[@state.selectedIndex].image
+    selectedImage = @props.palette[@state.selectedIndex].image
     metadata = @props.linkManager.getImageMetadata selectedImage
 
     (div {className: 'palette-inspector'},
       (div {className: 'palette', ref: 'palette'},
         (div {},
-          for node, index in @props.protoNodes
+          for node, index in @props.palette
             if node.image
               (PaletteImage {node: node, index: index, selected: index is @state.selectedIndex, onSelect: @imageSelected})
           (div {className: 'palette-add-image', onClick: @props.toggleImageBrowser},

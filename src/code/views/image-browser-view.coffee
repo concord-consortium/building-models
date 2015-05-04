@@ -20,7 +20,10 @@ ImageSearchResult = React.createFactory React.createClass
     @props.clicked @props.imageInfo
   render: ->
     src = if @state.loaded then @props.imageInfo.image else 'img/bb-chrome/spin.svg'
-    (img {src: src, onClick: @clicked, title: @props.imageInfo.title})
+    if @props.inPalette @props.imageInfo
+      (img {src: src, className: 'in-palette', title: (tr '~IMAGE-BROWSER.ALREADY-IN-PALETTE')})
+    else
+      (img {src: src, onClick: @clicked, title: @props.imageInfo.title})
 
 PreviewImage = React.createFactory React.createClass
   displayName: 'ImageSearchResult'
@@ -52,8 +55,8 @@ ImageSearch = React.createFactory React.createClass
   getInitialState: ->
     searching: false
     searched: false
-    internalLibrary: @props.protoNodes
-    internalResults: @props.protoNodes
+    internalLibrary: @props.internalLibrary
+    internalResults: []
     externalResults: []
     selectedImage: null
 
@@ -69,7 +72,7 @@ ImageSearch = React.createFactory React.createClass
     validQuery = query.length > 0
 
     queryRegEx = new RegExp query, 'i'
-    internalResults = _.filter @props.protoNodes, (node) ->
+    internalResults = _.filter @props.internalLibrary, (node) ->
       queryRegEx.test node.title
 
     @setState
@@ -96,7 +99,7 @@ ImageSearch = React.createFactory React.createClass
     @setState selectedImage: imageInfo
 
   addImage: (imageInfo) ->
-    if imageInfo
+    if imageInfo and not @props.inPalette imageInfo
       resizeImage imageInfo.image, (dataUrl) =>
         imageInfo.image = dataUrl
         @props.addToPalette imageInfo
@@ -125,9 +128,9 @@ ImageSearch = React.createFactory React.createClass
             if @state.internalResults.length is 0 and (@state.searching or @state.externalResults.length > 0)
               tr '~IMAGE-BROWSER.NO_INTERNAL_FOUND', query: @state.query
             else
-              for node, index in (if showNoResultsAlert then @state.internalLibrary else @state.internalResults)
-                if node.image and not node.image.match /^(https?|data):/
-                  (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked}) if node.image
+              for node, index in (if @state.internalResults.length is 0 then @state.internalLibrary else @state.internalResults)
+                if node.image
+                  (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked, inPalette: @props.inPalette}) if node.image
           )
 
           if @state.searchable and not showNoResultsAlert
@@ -146,7 +149,7 @@ ImageSearch = React.createFactory React.createClass
                   tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
                 else
                   for node, index in @state.externalResults
-                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked})
+                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked, inPalette: @props.inPalette})
               )
               if @state.externalResults.length < @state.numExternalMatches
                 (div {},
@@ -173,8 +176,14 @@ Link = React.createFactory React.createClass
 module.exports = React.createClass
   displayName: 'Image Browser'
   render: ->
+    imageSearch = ImageSearch
+      palette: @props.palette
+      internalLibrary: @props.internalLibrary
+      addToPalette: @props.addToPalette
+      inPalette: @props.inPalette
+
     (ModalTabbedDialogFactory {title: (tr "~ADD-NEW-IMAGE.TITLE"), close: @props.close, tabs: [
-      ModalTabbedDialog.Tab {label: (tr "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"), component: (ImageSearch {protoNodes: @props.protoNodes, addToPalette: @props.addToPalette})}
+      ModalTabbedDialog.Tab {label: (tr "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"), component: imageSearch}
       ModalTabbedDialog.Tab {label: (tr "~ADD-NEW-IMAGE.MY-COMPUTER-TAB"), component: (MyComputer {})}
       ModalTabbedDialog.Tab {label: (tr "~ADD-NEW-IMAGE.LINK-TAB"), component: (Link {})}
     ]})

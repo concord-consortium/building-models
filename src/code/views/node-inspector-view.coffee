@@ -39,7 +39,7 @@ module.exports = React.createClass
         )
         (div {className: 'edit-row'},
           (label {htmlFor: 'image'}, tr "~NODE-EDIT.IMAGE")
-          (ImagePickerView {nodes:@props.protoNodes, selected: @props.node, onChange: @changeImage})
+          (ImagePickerView {nodes:@props.palette, selected: @props.node, onChange: @changeImage})
         )
         (div {className: 'edit-row'},
           (label {className: 'node-delete', onClick: @delete}, tr("~NODE-EDIT.DELETE"))
