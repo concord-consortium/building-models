@@ -2,7 +2,7 @@ Node             = React.createFactory require './node-view'
 Importer         = require '../utils/importer'
 NodeList         = require '../models/link-manager'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
-DropImageHandler = require '../utils/drop-image-handler'
+dropImageHandler = require '../utils/drop-image-handler'
 
 {div} = React.DOM
 
@@ -39,10 +39,6 @@ module.exports = React.createClass
                   ui.offset.top <= panel.offset.top + panel.height
         if not inPanel
           @addNode e, ui
-
-    @dropImageHandler = new DropImageHandler
-      maxWidth: 100
-      maxHeight: 100
 
   addNode: (e, ui) ->
     {title, image} = ui.draggable.data()
@@ -171,7 +167,7 @@ module.exports = React.createClass
       y: e.clientY - offset.top
 
     # get the files
-    @dropImageHandler.handleDrop e, (file) =>
+    dropImageHandler e, (file) =>
       @props.linkManager.importNode
         data:
           x: dropPos.x
