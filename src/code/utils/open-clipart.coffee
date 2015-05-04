@@ -12,7 +12,7 @@ module.exports = OpenClipArt =
       numMatches = Math.min(parseInt(data?.info?.results or '0', 10), 200)
       for item in data?.payload
         results.push
-          image: item.svg.url
+          image: item.svg.png_thumb
           metadata:
             title: item.title
             description: item.description

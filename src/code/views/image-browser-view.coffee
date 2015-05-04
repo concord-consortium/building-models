@@ -3,6 +3,7 @@ ModalTabbedDialogFactory = React.createFactory ModalTabbedDialog
 ImageMetadata = React.createFactory require './image-metadata-view'
 OpenClipart = require '../utils/open-clipart'
 tr = require '../utils/translate'
+resizeImage = require '../utils/resize-image'
 
 {div, input, button, img, i, a, form} = React.DOM
 
@@ -96,7 +97,9 @@ ImageSearch = React.createFactory React.createClass
 
   addImage: (imageInfo) ->
     if imageInfo
-      @props.addToPalette imageInfo
+      resizeImage imageInfo.image, (dataUrl) =>
+        imageInfo.image = dataUrl
+        @props.addToPalette imageInfo
     @setState selectedImage: null
 
   render: ->
