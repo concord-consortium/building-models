@@ -40,7 +40,7 @@ module.exports = React.createClass
             getData: @getData
           )
         (div {className: 'action-bar'},
-          (NodeWell {protoNodes: @state.protoNodes})
+          (NodeWell {palette: @state.palette})
           (DocumentActions {linkManager: @props.linkManager})
         )
         (div {className: 'canvas'},
@@ -52,11 +52,17 @@ module.exports = React.createClass
           onNodeChanged: @onNodeChanged
           onLinkChanged: @onLinkChanged
           onNodeDelete: @onNodeDelete
-          protoNodes: @state.protoNodes
+          palette: @state.palette
           toggleImageBrowser: @toggleImageBrowser
           linkManager: @props.linkManager
         )
         if @state.showImageBrowser
-          (ImageBrowser {protoNodes: @state.protoNodes, addToPalette: @addToPalette, close: @toggleImageBrowser})
+          (ImageBrowser
+            internalLibrary: @state.internalLibrary
+            palette: @state.palette
+            addToPalette: @addToPalette
+            inPalette: @inPalette
+            close: @toggleImageBrowser
+          )
       )
     )

@@ -4,7 +4,8 @@ module.exports =
     mixinState =
       selectedNode: null
       selectedConnection: null
-      protoNodes: require '../views/proto-nodes'
+      palette: require '../data/initial-palette'
+      internalLibrary: require '../data/internal-library'
       filename: null
     _.extend mixinState, subState
 
@@ -24,14 +25,18 @@ module.exports =
   addToPalette: (node) ->
     if node?.image.match /^(https?|data):/
       # make sure this is a new image
-      if not _.find @state.protoNodes, {image: node.image}
-        protoNodes = @state.protoNodes.slice 0
-        protoNodes.push
+      if not @inPalette node
+        palette = @state.palette.slice 0
+        palette.push
           title: node.title or ''
           image: node.image
+          metadata: node.metadata
         if node.metadata
           @props.linkManager.setImageMetadata node.image, node.metadata
-        @setState protoNodes: protoNodes
+        @setState palette: palette
+
+  inPalette: (node) ->
+    (_.find @state.palette, {image: node.image}) or (node.metadata and (_.find @state.palette, {metadata: {link: node.metadata.link}}))
 
   componentDidMount: ->
     @addDeleteKeyHandler true
@@ -46,9 +51,9 @@ module.exports =
     @props.linkManager.addLoadListener (data) =>
       # reload the palette
       if data.palette
-        @setState protoNodes: data.palette
+        @setState palette: data.palette
       else
-        @setState protoNodes: (require '../views/proto-nodes')
+        @setState palette: (require '../data/initial-palette')
         for node in data.nodes
           @addToPalette node
 
@@ -72,7 +77,7 @@ module.exports =
     @addDeleteKeyHandler false
 
   getData: ->
-    @props.linkManager.toJsonString @state.protoNodes
+    @props.linkManager.toJsonString @state.palette
 
   onNodeChanged: (node, data) ->
     @props.linkManager.changeNode data
