@@ -34,7 +34,7 @@ module.exports = [
     "image": "img/nodes/cloud.png",
     "metadata": {
       "title": "Cloud",
-      "link": "http://pixabay.com/en/cloud-white-shapes-cloudscape-35567/"
+      "link": "https://openclipart.org/detail/17666/net wan cloud"
     }
   },
   {

@@ -36,7 +36,7 @@ module.exports =
         @setState palette: palette
 
   inPalette: (node) ->
-    (_.find @state.palette, {image: node.image}) or (node.metadata and (_.find @state.palette, {metadata: {link: node.metadata.link}}))
+    !!((_.find @state.palette, {image: node.image}) or (node.metadata and (_.find @state.palette, {metadata: {link: decodeURIComponent(node.metadata.link)}})))
 
   componentDidMount: ->
     @addDeleteKeyHandler true
