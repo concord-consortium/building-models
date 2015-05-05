@@ -1,3 +1,13 @@
+modal-button()
+  padding 15px
+  blenderbox-label()
+  font-weight bold
+  font-size 15px
+  color #fff
+  background-color #72bfca
+  border-radius(10px)
+  border 0
+
 .image-browser
 
   .image-browser-form
@@ -5,42 +15,58 @@
     input
       padding 5px
     input[type=text]
-      width 400px
+      width 220px
       margin-right 10px
-    button
-      padding 5px
+    input[type=submit]
+      modal-button()
 
   .image-browser-header
-    blenderbox-label()
+    blenderbox-downcase()
+    margin-bottom 20px
+    font-size 15px
 
   .image-browser-results
-    margin 10px
-    max-height 210px
+    margin 20px 0
+    max-height 220px
     overflow auto
     img
       width 50px
       height 50px
       display inline
-      margin 10px
+      margin 0 15px 15px 15px
       cursor pointer
 
     .in-palette
-      opacity 0.5
+      opacity 0.25
       cursor not-allowed
 
   .image-browser-preview-image
-    margin 20px 0
+    margin-bottom 20px
     display inline-block
     img
-      width 50px
-      height 50px
+      width 100px
+      height 100px
     a
+      blenderbox-label()
       display block
+      margin-top 10px
+      width 100px
+      text-align center
+      text-decoration none
+      color #72bfca
     span
       margin-left 3px
 
   .image-browser-preview-add-image
     margin-left 30px
     display inline-block
+
+    button
+      modal-button()
+      position relative
+      top -60px
+
+  .image-browser-preview-metadata
+    margin-top 40px
 
 

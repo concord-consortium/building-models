@@ -5,7 +5,7 @@ OpenClipart = require '../utils/open-clipart'
 tr = require '../utils/translate'
 resizeImage = require '../utils/resize-image'
 
-{div, input, button, img, i, a, form} = React.DOM
+{div, input, button, img, i, a, form, br} = React.DOM
 
 ImageSearchResult = React.createFactory React.createClass
   displayName: 'ImageSearchResult'
@@ -46,7 +46,9 @@ PreviewImage = React.createFactory React.createClass
         (button {onClick: @addImage}, tr '~IMAGE-BROWSER.ADD_IMAGE')
       )
       if @props.imageInfo.metadata
-        (ImageMetadata {className: 'image-browser-preview-metadata', metadata: @props.imageInfo.metadata})
+        (div {className: 'image-browser-preview-metadata'},
+          (ImageMetadata {className: 'image-browser-preview-metadata', metadata: @props.imageInfo.metadata})
+        )
     )
 
 ImageSearch = React.createFactory React.createClass
@@ -121,7 +123,11 @@ ImageSearch = React.createFactory React.createClass
           ),
 
           if showNoResultsAlert
-            (div {className: 'modal-dialog-alert'}, tr '~IMAGE-BROWSER.NO_IMAGES_FOUND')
+            (div {className: 'modal-dialog-alert'},
+              tr '~IMAGE-BROWSER.NO_IMAGES_FOUND'
+              (br {})
+              tr '~IMAGE-BROWSER.TRY_ANOTHER_SEARCH'
+            )
 
           (div {className: 'image-browser-header'}, tr '~IMAGE-BROWSER.LIBRARY_HEADER'),
           (div {className: 'image-browser-results'},
