@@ -1,6 +1,7 @@
-dialog-width = 700px
+
+dialog-width = 690px
 dialog-min-height = 300px
-dialog-tab-width = 150px
+dialog-tab-width = 247px
 tab-border-radius = 5px
 
 .modal
@@ -44,12 +45,13 @@ tab-border-radius = 5px
               list-style none
               padding-left 10px
               li
-                blenderbox-downcase()
+                blenderbox-modal-labels()
+                font-size 15px
                 -webkit-border-radius tab-border-radius
                 -moz-border-radius tab-border-radius
                 border-radius: tab-border-radius
-                margin 10px
-                padding 10px
+                margin 10px 26px 10px 30px
+                padding 15px
                 color #000
                 background-color #c8e7de
                 cursor pointer
@@ -67,15 +69,14 @@ tab-border-radius = 5px
           .modal-dialog-workspace-tab-component
             margin-left dialog-tab-width
             border-left 5px solid #72bca6
-            padding 20px
+            padding 50px 50px
             min-height dialog-min-height
 
           .modal-dialog-alert
-            background #a00
-            color #fff
-            -webkit-border-radius tab-border-radius
-            -moz-border-radius tab-border-radius
-            border-radius: tab-border-radius
-            margin 20px 0
-            padding 10px
+            blenderbox-modal-labels()
+            font-size 12px
+            color #d96835
+            margin 30px 0
+            text-align center
+            line-height 20px
 

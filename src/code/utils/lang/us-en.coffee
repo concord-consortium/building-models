@@ -30,13 +30,14 @@ module.exports =
   # views/image-metadata-view.coffee
   "~METADATA.TITLE": "Title"
   "~METADATA.DESCRIPTION": "Description"
-  "~METADATA.MORE-INFO": "More info"
+  "~METADATA.LINK": "Link"
 
   # views/image-browser-view.coffee
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image"
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image"
-  "~IMAGE-BROWSER.SEARCH_HEADER": "Search Internal Library and Openclipart.org"
-  "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.  Try another search, or browse internal library images below."
+  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images"
+  "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found."
+  "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below."
   "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images"
   "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for '%{query}'"
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}'%{query}'..."

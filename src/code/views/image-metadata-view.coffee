@@ -19,7 +19,7 @@ module.exports = React.createClass
     (div {className: 'image-metadata'},
       (table {},
         (tr {}, (td {}, xlat '~METADATA.TITLE'), (td {}, @props.metadata.title))
-        (tr {}, (td {}, xlat '~METADATA.DESCRIPTION'), (td {}, @props.metadata.description))
-        (tr {}, (td {}, xlat '~METADATA.MORE-INFO'), (td {}, (a {href: @props.metadata.link, target: '_blank'}, @state.hostname)))
+        #(tr {}, (td {}, xlat '~METADATA.DESCRIPTION'), (td {}, @props.metadata.description))
+        (tr {}, (td {}, xlat '~METADATA.LINK'), (td {}, (a {href: @props.metadata.link, target: '_blank'}, @state.hostname)))
       )
     )
