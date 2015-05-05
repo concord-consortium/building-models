@@ -43,5 +43,5 @@ module.exports = React.createClass
   render: ->
     (div {className: @className(), onClick: @toggleOpen},
       for color in Colors
-        (ColorChoice {color: color, selected: @props.selected, onChange: @select})
+        (ColorChoice {key: color.name, color: color, selected: @props.selected, onChange: @select})
     )
