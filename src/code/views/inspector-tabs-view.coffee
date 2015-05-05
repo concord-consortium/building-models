@@ -7,8 +7,8 @@ module.exports = React.createClass
     (div {className: 'inspector-tabs'},
       for tab in @props.tabs
         if tab is @props.selected
-          (div {className: 'inspector-tab selected'},tab)
+          (div {key: tab, className: 'inspector-tab selected'},tab)
         else
-          (div {className: 'inspector-tab'},tab)
+          (div {key: tab, className: 'inspector-tab'},tab)
 
     )

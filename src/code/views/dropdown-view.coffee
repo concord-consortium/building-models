@@ -41,7 +41,7 @@ module.exports = React.createClass
             className = "menuItem"
             if (not item.action)
               className = "#{className} disabled"
-            (li {className: className, onClick: select(item) }, item.name)
+            (li {key: item.name, className: className, onClick: select(item) }, item.name)
         )
       )
     )

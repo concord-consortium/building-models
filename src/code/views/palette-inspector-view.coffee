@@ -45,7 +45,7 @@ module.exports = React.createClass
         (div {},
           for node, index in @props.palette
             if node.image
-              (PaletteImage {node: node, index: index, selected: index is @state.selectedIndex, onSelect: @imageSelected})
+              (PaletteImage {key: node.id, node: node, index: index, selected: index is @state.selectedIndex, onSelect: @imageSelected})
           (div {className: 'palette-add-image', onClick: @props.toggleImageBrowser},
             (i {className: "fa fa-plus-circle"})
             tr '~PALETTE-INSPECTOR.ADD_IMAGE'

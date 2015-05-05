@@ -39,6 +39,6 @@ module.exports = React.createClass
       )
       (div {className: @className()},
         for node in @props.nodes
-          (ImgChoice {node: node, selected: @props.selected, onChange: @props.onChange})
+          (ImgChoice {key: node.id, node: node, selected: @props.selected, onChange: @props.onChange})
       )
     )
