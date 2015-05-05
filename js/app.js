@@ -36,93 +36,14 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":7,"./views/app-view":20}],2:[function(require,module,exports){
-module.exports = [
-  {
-    "id": "1",
-    "title": "",
-    "image": ""
-  }, {
-    "id": "2",
-    "title": "Egg",
-    "image": "img/nodes/egg.png"
-  }, {
-    "id": "3",
-    "title": "Chick",
-    "image": "img/nodes/chick.jpg"
-  }, {
-    "id": "4",
-    "title": "Chicken",
-    "image": "img/nodes/chicken.jpg"
-  }
-];
-
-
-
-},{}],3:[function(require,module,exports){
-module.exports = [
-  {
-    "id": "1",
-    "title": "",
-    "image": ""
-  }, {
-    "id": "2",
-    "title": "Egg",
-    "image": "img/nodes/egg.png"
-  }, {
-    "id": "3",
-    "title": "Chick",
-    "image": "img/nodes/chick.jpg"
-  }, {
-    "id": "4",
-    "title": "Chicken",
-    "image": "img/nodes/chicken.jpg"
-  }, {
-    "id": "5",
-    "title": "Tree",
-    "image": "img/nodes/tree.png",
-    "metadata": {
-      "title": "Tree",
-      "link": "http://commons.wikimedia.org/wiki/File:Tree-256x256.png"
-    }
-  }, {
-    "id": "6",
-    "title": "Cloud",
-    "image": "img/nodes/cloud.png",
-    "metadata": {
-      "title": "Cloud",
-      "link": "http://pixabay.com/en/cloud-white-shapes-cloudscape-35567/"
-    }
-  }, {
-    "id": "7",
-    "title": "Raindrops",
-    "image": "img/nodes/raindrops.png",
-    "metadata": {
-      "title": "Raindrops",
-      "link": "http://pixabay.com/en/cloudy-rainy-rain-drops-raindrops-98506/"
-    }
-  }, {
-    "id": "8",
-    "title": "Hill",
-    "image": "img/nodes/hill.png",
-    "metadata": {
-      "title": "Hill",
-      "link": "http://pixabay.com/en/hill-map-symbols-grass-topography-31597/"
-    }
-  }
-];
-
-
-
-},{}],4:[function(require,module,exports){
+},{"./models/link-manager":5,"./views/app-view":18}],2:[function(require,module,exports){
 module.exports = {
   getInitialAppViewState: function(subState) {
     var mixinState;
     mixinState = {
       selectedNode: null,
       selectedConnection: null,
-      palette: require('../data/initial-palette'),
-      internalLibrary: require('../data/internal-library'),
+      protoNodes: require('../views/proto-nodes'),
       filename: null
     };
     return _.extend(mixinState, subState);
@@ -145,32 +66,24 @@ module.exports = {
     }
   },
   addToPalette: function(node) {
-    var palette;
+    var protoNodes;
     if (node != null ? node.image.match(/^(https?|data):/) : void 0) {
-      if (!this.inPalette(node)) {
-        palette = this.state.palette.slice(0);
-        palette.push({
+      if (!_.find(this.state.protoNodes, {
+        image: node.image
+      })) {
+        protoNodes = this.state.protoNodes.slice(0);
+        protoNodes.push({
           title: node.title || '',
-          image: node.image,
-          metadata: node.metadata
+          image: node.image
         });
         if (node.metadata) {
           this.props.linkManager.setImageMetadata(node.image, node.metadata);
         }
         return this.setState({
-          palette: palette
+          protoNodes: protoNodes
         });
       }
     }
-  },
-  inPalette: function(node) {
-    return (_.find(this.state.palette, {
-      image: node.image
-    })) || (node.metadata && (_.find(this.state.palette, {
-      metadata: {
-        link: node.metadata.link
-      }
-    })));
   },
   componentDidMount: function() {
     var ref;
@@ -190,11 +103,11 @@ module.exports = {
         var i, len, node, ref, results;
         if (data.palette) {
           return _this.setState({
-            palette: data.palette
+            protoNodes: data.palette
           });
         } else {
           _this.setState({
-            palette: require('../data/initial-palette')
+            protoNodes: require('../views/proto-nodes')
           });
           ref = data.nodes;
           results = [];
@@ -239,7 +152,7 @@ module.exports = {
     return this.addDeleteKeyHandler(false);
   },
   getData: function() {
-    return this.props.linkManager.toJsonString(this.state.palette);
+    return this.props.linkManager.toJsonString(this.state.protoNodes);
   },
   onNodeChanged: function(node, data) {
     return this.props.linkManager.changeNode(data);
@@ -254,7 +167,7 @@ module.exports = {
 
 
 
-},{"../data/initial-palette":2,"../data/internal-library":3}],5:[function(require,module,exports){
+},{"../views/proto-nodes":39}],3:[function(require,module,exports){
 var GoogleDriveIO;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -366,7 +279,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":12}],6:[function(require,module,exports){
+},{"../utils/google-drive-io":10}],4:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -397,7 +310,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 
-},{}],7:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var DiagramNode, Importer, Link, LinkManager, UndoRedo,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1042,7 +955,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../utils/importer":13,"../utils/undo-redo":19,"./link":8,"./node":9}],8:[function(require,module,exports){
+},{"../utils/importer":11,"../utils/undo-redo":17,"./link":6,"./node":7}],6:[function(require,module,exports){
 var GraphPrimitive, Link,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1102,7 +1015,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":6}],9:[function(require,module,exports){
+},{"./graph-primitive":4}],7:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1228,7 +1141,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":10,"../utils/translate":18,"./graph-primitive":6}],10:[function(require,module,exports){
+},{"../utils/colors":8,"../utils/translate":16,"./graph-primitive":4}],8:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -1248,7 +1161,7 @@ module.exports = [
 
 
 
-},{"./translate":18}],11:[function(require,module,exports){
+},{"./translate":16}],9:[function(require,module,exports){
 var resizeImage;
 
 resizeImage = require('./resize-image');
@@ -1289,7 +1202,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"./resize-image":17}],12:[function(require,module,exports){
+},{"./resize-image":15}],10:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -1447,7 +1360,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],13:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -1497,7 +1410,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -1676,7 +1589,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -1702,18 +1615,18 @@ module.exports = {
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
   "~METADATA.TITLE": "Title",
   "~METADATA.DESCRIPTION": "Description",
-  "~METADATA.MORE-INFO": "More info",
+  "~METADATA.LINK": "Link",
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
-  "~IMAGE-BROWSER.SEARCH_HEADER": "Search Internal Library and Openclipart.org",
-  "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.  Try another search, or browse internal library images below.",
+  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
+  "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.",
+  "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below.",
   "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images",
   "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for '%{query}'",
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}'%{query}'...",
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for '%{query}'",
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for '%{query}'. ",
   "~IMAGE-BROWSER.SHOW_ALL": "Show all matches.",
-  "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette",
   "~COLOR.YELLOW": "Yellow",
   "~COLOR.DARK_BLUE": "Dark Blue",
   "~COLOR.LIGHT_BLUE": "Light Blue",
@@ -1722,8 +1635,10 @@ module.exports = {
 
 
 
-},{}],16:[function(require,module,exports){
-var OpenClipArt;
+},{}],14:[function(require,module,exports){
+var OpenClipArt, initialResultSize;
+
+initialResultSize = 12;
 
 module.exports = OpenClipArt = {
   jqXHR: null,
@@ -1732,7 +1647,7 @@ module.exports = OpenClipArt = {
     if ((ref = OpenClipArt.jqXHR) != null) {
       ref.abort();
     }
-    url = "https://openclipart.org/search/json/?query=" + (encodeURIComponent(query)) + "&sort=downloads&amount=" + (options.limitResults ? 18 : 200);
+    url = "https://openclipart.org/search/json/?query=" + (encodeURIComponent(query)) + "&sort=downloads&amount=" + (options.limitResults ? initialResultSize : 200);
     return OpenClipArt.jqXHR = $.getJSON(url, function(data) {
       var i, item, len, numMatches, ref1, ref2, results;
       results = [];
@@ -1756,7 +1671,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = function(src, callback) {
   var img, maxHeight, maxWidth;
   maxWidth = 100;
@@ -1788,7 +1703,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -1821,7 +1736,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":15}],19:[function(require,module,exports){
+},{"./lang/us-en":13}],17:[function(require,module,exports){
 var Command, Manager;
 
 Manager = (function() {
@@ -1986,7 +1901,7 @@ module.exports = {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var DocumentActions, GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, a, div, ref;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
@@ -2039,7 +1954,7 @@ module.exports = React.createClass({
     }) : void 0, div({
       className: 'action-bar'
     }, NodeWell({
-      palette: this.state.palette
+      protoNodes: this.state.protoNodes
     }), DocumentActions({
       linkManager: this.props.linkManager
     })), div({
@@ -2053,14 +1968,12 @@ module.exports = React.createClass({
       onNodeChanged: this.onNodeChanged,
       onLinkChanged: this.onLinkChanged,
       onNodeDelete: this.onNodeDelete,
-      palette: this.state.palette,
+      protoNodes: this.state.protoNodes,
       toggleImageBrowser: this.toggleImageBrowser,
       linkManager: this.props.linkManager
     }), this.state.showImageBrowser ? ImageBrowser({
-      internalLibrary: this.state.internalLibrary,
-      palette: this.state.palette,
+      protoNodes: this.state.protoNodes,
       addToPalette: this.addToPalette,
-      inPalette: this.inPalette,
       close: this.toggleImageBrowser
     }) : void 0));
   }
@@ -2068,7 +1981,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":4,"./document-actions-view":22,"./global-nav-view":24,"./image-browser-view":25,"./inspector-panel-view":28,"./link-view":31,"./node-well-view":37,"./placeholder-view":39}],21:[function(require,module,exports){
+},{"../mixins/app-view":2,"./document-actions-view":20,"./global-nav-view":22,"./image-browser-view":23,"./inspector-panel-view":26,"./link-view":29,"./node-well-view":35,"./placeholder-view":37}],19:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -2149,7 +2062,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":10,"../utils/translate":18}],22:[function(require,module,exports){
+},{"../utils/colors":8,"../utils/translate":16}],20:[function(require,module,exports){
 var div, ref, span;
 
 ref = React.DOM, div = ref.div, span = ref.span;
@@ -2200,7 +2113,7 @@ module.exports = React.createClass({
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -2298,7 +2211,7 @@ module.exports = React.createClass({
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -2368,8 +2281,8 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":5,"../utils/translate":18,"./dropdown-view":23}],25:[function(require,module,exports){
-var ImageMetadata, ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, button, div, form, i, img, input, ref, resizeImage, tr;
+},{"../mixins/google-file-interface":3,"../utils/translate":16,"./dropdown-view":21}],23:[function(require,module,exports){
+var ImageMetadata, ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, br, button, div, form, i, img, input, ref, resizeImage, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
 
@@ -2383,7 +2296,7 @@ tr = require('../utils/translate');
 
 resizeImage = require('../utils/resize-image');
 
-ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a, form = ref.form;
+ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a, form = ref.form, br = ref.br;
 
 ImageSearchResult = React.createFactory(React.createClass({
   displayName: 'ImageSearchResult',
@@ -2410,19 +2323,11 @@ ImageSearchResult = React.createFactory(React.createClass({
   render: function() {
     var src;
     src = this.state.loaded ? this.props.imageInfo.image : 'img/bb-chrome/spin.svg';
-    if (this.props.inPalette(this.props.imageInfo)) {
-      return img({
-        src: src,
-        className: 'in-palette',
-        title: tr('~IMAGE-BROWSER.ALREADY-IN-PALETTE')
-      });
-    } else {
-      return img({
-        src: src,
-        onClick: this.clicked,
-        title: this.props.imageInfo.title
-      });
-    }
+    return img({
+      src: src,
+      onClick: this.clicked,
+      title: this.props.imageInfo.title
+    });
   }
 }));
 
@@ -2451,10 +2356,12 @@ PreviewImage = React.createFactory(React.createClass({
       className: 'image-browser-preview-add-image'
     }, button({
       onClick: this.addImage
-    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? ImageMetadata({
+    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? div({
+      className: 'image-browser-preview-metadata'
+    }, ImageMetadata({
       className: 'image-browser-preview-metadata',
       metadata: this.props.imageInfo.metadata
-    }) : void 0);
+    })) : void 0);
   }
 }));
 
@@ -2464,8 +2371,8 @@ ImageSearch = React.createFactory(React.createClass({
     return {
       searching: false,
       searched: false,
-      internalLibrary: this.props.internalLibrary,
-      internalResults: [],
+      internalLibrary: this.props.protoNodes,
+      internalResults: this.props.protoNodes,
       externalResults: [],
       selectedImage: null
     };
@@ -2486,7 +2393,7 @@ ImageSearch = React.createFactory(React.createClass({
     query = $.trim(this.refs.search.getDOMNode().value);
     validQuery = query.length > 0;
     queryRegEx = new RegExp(query, 'i');
-    internalResults = _.filter(this.props.internalLibrary, function(node) {
+    internalResults = _.filter(this.props.protoNodes, function(node) {
       return queryRegEx.test(node.title);
     });
     this.setState({
@@ -2519,7 +2426,7 @@ ImageSearch = React.createFactory(React.createClass({
     });
   },
   addImage: function(imageInfo) {
-    if (imageInfo && !this.props.inPalette(imageInfo)) {
+    if (imageInfo) {
       resizeImage(imageInfo.image, (function(_this) {
         return function(dataUrl) {
           imageInfo.image = dataUrl;
@@ -2551,7 +2458,7 @@ ImageSearch = React.createFactory(React.createClass({
       onClick: this.searchClicked
     }))), showNoResultsAlert ? div({
       className: 'modal-dialog-alert'
-    }, tr('~IMAGE-BROWSER.NO_IMAGES_FOUND')) : void 0, div({
+    }, tr('~IMAGE-BROWSER.NO_IMAGES_FOUND'), br({}), tr('~IMAGE-BROWSER.TRY_ANOTHER_SEARCH')) : void 0, div({
       className: 'image-browser-header'
     }, tr('~IMAGE-BROWSER.LIBRARY_HEADER')), div({
       className: 'image-browser-results'
@@ -2562,17 +2469,16 @@ ImageSearch = React.createFactory(React.createClass({
           query: this.state.query
         });
       } else {
-        ref1 = (this.state.internalResults.length === 0 ? this.state.internalLibrary : this.state.internalResults);
+        ref1 = (showNoResultsAlert ? this.state.internalLibrary : this.state.internalResults);
         results1 = [];
         for (index = j = 0, len = ref1.length; j < len; index = ++j) {
           node = ref1[index];
-          if (node.image) {
+          if (node.image && !node.image.match(/^(https?|data):/)) {
             if (node.image) {
               results1.push(ImageSearchResult({
                 key: index,
                 imageInfo: node,
-                clicked: this.imageClicked,
-                inPalette: this.props.inPalette
+                clicked: this.imageClicked
               }));
             } else {
               results1.push(void 0);
@@ -2608,8 +2514,7 @@ ImageSearch = React.createFactory(React.createClass({
           results1.push(ImageSearchResult({
             key: index,
             imageInfo: node,
-            clicked: this.imageClicked,
-            inPalette: this.props.inPalette
+            clicked: this.imageClicked
           }));
         }
         return results1;
@@ -2642,20 +2547,16 @@ Link = React.createFactory(React.createClass({
 module.exports = React.createClass({
   displayName: 'Image Browser',
   render: function() {
-    var imageSearch;
-    imageSearch = ImageSearch({
-      palette: this.props.palette,
-      internalLibrary: this.props.internalLibrary,
-      addToPalette: this.props.addToPalette,
-      inPalette: this.props.inPalette
-    });
     return ModalTabbedDialogFactory({
       title: tr("~ADD-NEW-IMAGE.TITLE"),
       close: this.props.close,
       tabs: [
         ModalTabbedDialog.Tab({
           label: tr("~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"),
-          component: imageSearch
+          component: ImageSearch({
+            protoNodes: this.props.protoNodes,
+            addToPalette: this.props.addToPalette
+          })
         }), ModalTabbedDialog.Tab({
           label: tr("~ADD-NEW-IMAGE.MY-COMPUTER-TAB"),
           component: MyComputer({})
@@ -2670,7 +2571,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/open-clipart":16,"../utils/resize-image":17,"../utils/translate":18,"./image-metadata-view":26,"./modal-tabbed-dialog-view":33}],26:[function(require,module,exports){
+},{"../utils/open-clipart":14,"../utils/resize-image":15,"../utils/translate":16,"./image-metadata-view":24,"./modal-tabbed-dialog-view":31}],24:[function(require,module,exports){
 var a, div, ref, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -2695,7 +2596,7 @@ module.exports = React.createClass({
   render: function() {
     return div({
       className: 'image-metadata'
-    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, this.props.metadata.title)), tr({}, td({}, xlat('~METADATA.DESCRIPTION')), td({}, this.props.metadata.description)), tr({}, td({}, xlat('~METADATA.MORE-INFO')), td({}, a({
+    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, this.props.metadata.title)), tr({}, td({}, xlat('~METADATA.LINK')), td({}, a({
       href: this.props.metadata.link,
       target: '_blank'
     }, this.state.hostname)))));
@@ -2704,7 +2605,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18}],27:[function(require,module,exports){
+},{"../utils/translate":16}],25:[function(require,module,exports){
 var ImgChoice, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2781,7 +2682,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18}],28:[function(require,module,exports){
+},{"../utils/translate":16}],26:[function(require,module,exports){
 var LinkInspectorView, NodeInspectorView, PaletteInspectorView, div, i, ref;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -2828,12 +2729,12 @@ module.exports = React.createClass({
       node: this.props.node,
       onNodeChanged: this.props.onNodeChanged,
       onNodeDelete: this.props.onNodeDelete,
-      palette: this.props.palette
+      protoNodes: this.props.protoNodes
     }) : this.props.link ? LinkInspectorView({
       link: this.props.link,
       onLinkChanged: this.props.onLinkChanged
     }) : PaletteInspectorView({
-      palette: this.props.palette,
+      protoNodes: this.props.protoNodes,
       toggleImageBrowser: this.props.toggleImageBrowser,
       linkManager: this.props.linkManager
     })));
@@ -2842,7 +2743,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":30,"./node-inspector-view":35,"./palette-inspector-view":38}],29:[function(require,module,exports){
+},{"./link-inspector-view":28,"./node-inspector-view":33,"./palette-inspector-view":36}],27:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -2876,7 +2777,7 @@ module.exports = React.createClass({
 
 
 
-},{}],30:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var InspectorTabs, button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -2935,7 +2836,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18,"./inspector-tabs-view":29}],31:[function(require,module,exports){
+},{"../utils/translate":16,"./inspector-tabs-view":27}],29:[function(require,module,exports){
 var DiagramToolkit, Importer, Node, NodeList, div, dropImageHandler;
 
 Node = React.createFactory(require('./node-view'));
@@ -3218,7 +3119,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":7,"../utils/drop-image-handler":11,"../utils/importer":13,"../utils/js-plumb-diagram-toolkit":14,"./node-view":36}],32:[function(require,module,exports){
+},{"../models/link-manager":5,"../utils/drop-image-handler":9,"../utils/importer":11,"../utils/js-plumb-diagram-toolkit":12,"./node-view":34}],30:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -3251,7 +3152,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":34}],33:[function(require,module,exports){
+},{"./modal-view":32}],31:[function(require,module,exports){
 var ModalDialog, Tab, TabInfo, a, div, li, ref, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -3345,7 +3246,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":32}],34:[function(require,module,exports){
+},{"./modal-dialog-view":30}],32:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3377,7 +3278,7 @@ module.exports = React.createClass({
 
 
 
-},{}],35:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var ColorPicker, ImagePickerView, InspectorTabs, button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -3449,7 +3350,7 @@ module.exports = React.createClass({
     }, label({
       htmlFor: 'image'
     }, tr("~NODE-EDIT.IMAGE")), ImagePickerView({
-      nodes: this.props.palette,
+      nodes: this.props.protoNodes,
       selected: this.props.node,
       onChange: this.changeImage
     })), div({
@@ -3463,7 +3364,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18,"./color-picker-view":21,"./image-picker-view":27,"./inspector-tabs-view":29}],36:[function(require,module,exports){
+},{"../utils/translate":16,"./color-picker-view":19,"./image-picker-view":25,"./inspector-tabs-view":27}],34:[function(require,module,exports){
 var div, i, img, ref;
 
 ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
@@ -3567,7 +3468,7 @@ module.exports = React.createClass({
 
 
 
-},{}],37:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -3615,7 +3516,7 @@ module.exports = React.createClass({
       className: 'node-well'
     }, (function() {
       var j, len, ref, results;
-      ref = this.props.palette;
+      ref = this.props.protoNodes;
       results = [];
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
         node = ref[i];
@@ -3635,7 +3536,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":40}],38:[function(require,module,exports){
+},{"./proto-node-view":38}],36:[function(require,module,exports){
 var ImageMetadata, PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -3671,7 +3572,7 @@ module.exports = React.createClass({
   displayName: 'PaletteInspector',
   getInitialState: function() {
     return {
-      selectedIndex: _.findIndex(this.props.palette, function(node) {
+      selectedIndex: _.findIndex(this.props.protoNodes, function(node) {
         return node.image.length > 0;
       })
     };
@@ -3692,13 +3593,13 @@ module.exports = React.createClass({
     return this.scrollToBottom();
   },
   componentDidUpdate: function(prevProps) {
-    if (JSON.stringify(prevProps.palette) !== JSON.stringify(this.props.palette)) {
+    if (JSON.stringify(prevProps.protoNodes) !== JSON.stringify(this.props.protoNodes)) {
       return this.scrollToBottom();
     }
   },
   render: function() {
     var index, metadata, node, selectedImage;
-    selectedImage = this.props.palette[this.state.selectedIndex].image;
+    selectedImage = this.props.protoNodes[this.state.selectedIndex].image;
     metadata = this.props.linkManager.getImageMetadata(selectedImage);
     return div({
       className: 'palette-inspector'
@@ -3707,7 +3608,7 @@ module.exports = React.createClass({
       ref: 'palette'
     }, div({}, (function() {
       var j, len, ref1, results;
-      ref1 = this.props.palette;
+      ref1 = this.props.protoNodes;
       results = [];
       for (index = j = 0, len = ref1.length; j < len; index = ++j) {
         node = ref1[index];
@@ -3746,7 +3647,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18,"./image-metadata-view":26,"./proto-node-view":40}],39:[function(require,module,exports){
+},{"../utils/translate":16,"./image-metadata-view":24,"./proto-node-view":38}],37:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3764,7 +3665,7 @@ module.exports = React.createClass({
 
 
 
-},{}],40:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -3817,6 +3718,29 @@ module.exports = React.createClass({
     })));
   }
 });
+
+
+
+},{}],39:[function(require,module,exports){
+module.exports = [
+  {
+    "id": "1",
+    "title": "",
+    "image": ""
+  }, {
+    "id": "2",
+    "title": "Egg",
+    "image": "img/nodes/egg.png"
+  }, {
+    "id": "3",
+    "title": "Chick",
+    "image": "img/nodes/chick.jpg"
+  }, {
+    "id": "4",
+    "title": "Chicken",
+    "image": "img/nodes/chicken.jpg"
+  }
+];
 
 
 
