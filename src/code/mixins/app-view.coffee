@@ -68,7 +68,7 @@ module.exports =
     ($ window).on 'keyup', (e) =>
       y = e.keyCode is 89
       z = e.keyCode is 90
-      if e.ctrlKey and (y or z)
+      if (e.ctrlKey or e.metaKey) and (y or z)
         e.preventDefault()
         @props.linkManager.redo() if y
         @props.linkManager.undo() if z
