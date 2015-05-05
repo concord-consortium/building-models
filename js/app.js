@@ -1507,17 +1507,16 @@ module.exports = DiagramToolkit = (function() {
     this.type = 'jsPlumbWrappingDiagramToolkit';
     this.color = this.options.color || '#233';
     this.lineWidth = this.options.lineWidth || 1;
-    this.lineWidth = 1;
     this.kit = jsPlumb.getInstance({
       Container: this.domContext
     });
     this.kit.importDefaults({
       Connector: [
         'Bezier', {
-          curviness: 150
+          curviness: 50
         }
       ],
-      Anchors: ['Continuous'],
+      Anchors: ['TopCenter', 'BottomCenter'],
       Endpoint: this._endpointOptions,
       DragOptions: {
         cursor: 'pointer',
@@ -1561,38 +1560,27 @@ module.exports = DiagramToolkit = (function() {
 
   DiagramToolkit.prototype._endpointOptions = [
     "Dot", {
-      radius: 5
+      radius: 15
     }
   ];
 
-  DiagramToolkit.prototype.makeSource = function(div) {
-    return this.kit.addEndpoint(div, {
-      isSource: true,
-      endpoint: [
-        "Dot", {
-          radius: 10
-        }
-      ],
-      connector: ['Bezier'],
-      anchor: "Continuous",
-      paintStyle: this._paintStyle(),
-      maxConnections: -1
-    });
-  };
-
   DiagramToolkit.prototype.makeTarget = function(div) {
-    return this.kit.addEndpoint(div, {
-      isTarget: true,
-      endpoint: [
-        "Dot", {
-          radius: 5
-        }
-      ],
-      connector: ['Bezier'],
-      anchor: "Continuous",
-      paintStyle: this._paintStyle(),
-      maxConnections: -1
-    });
+    var opts;
+    opts = (function(_this) {
+      return function(anchor) {
+        return {
+          isTarget: true,
+          isSource: true,
+          endpoint: _this._endpointOptions,
+          connector: ['Bezier'],
+          anchor: anchor,
+          paintStyle: _this._paintStyle(),
+          maxConnections: -1
+        };
+      };
+    })(this);
+    this.kit.addEndpoint(div, opts('Top'));
+    return this.kit.addEndpoint(div, opts('Bottom'));
   };
 
   DiagramToolkit.prototype.clear = function() {
@@ -1631,7 +1619,7 @@ module.exports = DiagramToolkit = (function() {
     if ((label != null ? label.length : void 0) > 0) {
       results.push([
         'Label', {
-          location: 0.5,
+          location: 0.4,
           events: {
             click: this.handleLabelClick.bind(this)
           },
@@ -1659,7 +1647,7 @@ module.exports = DiagramToolkit = (function() {
     connection = this.kit.connect({
       source: source,
       target: target,
-      anchors: ["Continuous"],
+      anchors: [source_terminal || "Top", target_terminal || "Bottom"],
       paintStyle: paintStyle,
       overlays: this._overlays(label, linkModel.selected)
     });
@@ -1714,11 +1702,12 @@ module.exports = {
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
   "~METADATA.TITLE": "Title",
   "~METADATA.DESCRIPTION": "Description",
-  "~METADATA.MORE-INFO": "More info",
+  "~METADATA.LINK": "Link",
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
-  "~IMAGE-BROWSER.SEARCH_HEADER": "Search Internal Library and Openclipart.org",
-  "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.  Try another search, or browse internal library images below.",
+  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
+  "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.",
+  "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below.",
   "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images",
   "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for '%{query}'",
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}'%{query}'...",
@@ -1735,7 +1724,9 @@ module.exports = {
 
 
 },{}],16:[function(require,module,exports){
-var OpenClipArt;
+var OpenClipArt, initialResultSize;
+
+initialResultSize = 12;
 
 module.exports = OpenClipArt = {
   jqXHR: null,
@@ -1744,7 +1735,7 @@ module.exports = OpenClipArt = {
     if ((ref = OpenClipArt.jqXHR) != null) {
       ref.abort();
     }
-    url = "https://openclipart.org/search/json/?query=" + (encodeURIComponent(query)) + "&sort=downloads&amount=" + (options.limitResults ? 18 : 200);
+    url = "https://openclipart.org/search/json/?query=" + (encodeURIComponent(query)) + "&sort=downloads&amount=" + (options.limitResults ? initialResultSize : 200);
     return OpenClipArt.jqXHR = $.getJSON(url, function(data) {
       var i, item, len, numMatches, ref1, ref2, results;
       results = [];
@@ -2149,6 +2140,7 @@ module.exports = React.createClass({
       for (i = 0, len = Colors.length; i < len; i++) {
         color = Colors[i];
         results.push(ColorChoice({
+          key: color.name,
           color: color,
           selected: this.props.selected,
           onChange: this.select
@@ -2299,6 +2291,7 @@ module.exports = React.createClass({
           className = className + " disabled";
         }
         results.push(li({
+          key: item.name,
           className: className,
           onClick: select(item)
         }, item.name));
@@ -2381,7 +2374,7 @@ module.exports = React.createClass({
 
 
 },{"../mixins/google-file-interface":5,"../utils/translate":18,"./dropdown-view":23}],25:[function(require,module,exports){
-var ImageMetadata, ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, button, div, form, i, img, input, ref, resizeImage, tr;
+var ImageMetadata, ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, br, button, div, form, i, img, input, ref, resizeImage, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
 
@@ -2395,7 +2388,7 @@ tr = require('../utils/translate');
 
 resizeImage = require('../utils/resize-image');
 
-ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a, form = ref.form;
+ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a, form = ref.form, br = ref.br;
 
 ImageSearchResult = React.createFactory(React.createClass({
   displayName: 'ImageSearchResult',
@@ -2463,10 +2456,12 @@ PreviewImage = React.createFactory(React.createClass({
       className: 'image-browser-preview-add-image'
     }, button({
       onClick: this.addImage
-    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? ImageMetadata({
+    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? div({
+      className: 'image-browser-preview-metadata'
+    }, ImageMetadata({
       className: 'image-browser-preview-metadata',
       metadata: this.props.imageInfo.metadata
-    }) : void 0);
+    })) : void 0);
   }
 }));
 
@@ -2563,7 +2558,7 @@ ImageSearch = React.createFactory(React.createClass({
       onClick: this.searchClicked
     }))), showNoResultsAlert ? div({
       className: 'modal-dialog-alert'
-    }, tr('~IMAGE-BROWSER.NO_IMAGES_FOUND')) : void 0, div({
+    }, tr('~IMAGE-BROWSER.NO_IMAGES_FOUND'), br({}), tr('~IMAGE-BROWSER.TRY_ANOTHER_SEARCH')) : void 0, div({
       className: 'image-browser-header'
     }, tr('~IMAGE-BROWSER.LIBRARY_HEADER')), div({
       className: 'image-browser-results'
@@ -2707,7 +2702,7 @@ module.exports = React.createClass({
   render: function() {
     return div({
       className: 'image-metadata'
-    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, this.props.metadata.title)), tr({}, td({}, xlat('~METADATA.DESCRIPTION')), td({}, this.props.metadata.description)), tr({}, td({}, xlat('~METADATA.MORE-INFO')), td({}, a({
+    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, this.props.metadata.title)), tr({}, td({}, xlat('~METADATA.LINK')), td({}, a({
       href: this.props.metadata.link,
       target: '_blank'
     }, this.state.hostname)))));
@@ -2781,6 +2776,7 @@ module.exports = React.createClass({
       for (i = 0, len = ref1.length; i < len; i++) {
         node = ref1[i];
         results.push(ImgChoice({
+          key: node.id,
           node: node,
           selected: this.props.selected,
           onChange: this.props.onChange
@@ -2873,10 +2869,12 @@ module.exports = React.createClass({
         tab = ref[i];
         if (tab === this.props.selected) {
           results.push(div({
+            key: tab,
             className: 'inspector-tab selected'
           }, tab));
         } else {
           results.push(div({
+            key: tab,
             className: 'inspector-tab'
           }, tab));
         }
@@ -3130,11 +3128,10 @@ module.exports = React.createClass({
     }
   },
   _redrawTargets: function() {
-    this.diagramToolkit.makeSource($(this.refs.linkView.getDOMNode()).find('.connection-source'));
     return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find('.elm'));
   },
   _redrawLinks: function() {
-    var i, len, link, ref, results, source, target;
+    var i, len, link, ref, results, source, sourceTerminal, target, targetTerminal;
     ref = this.state.links;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -3142,7 +3139,9 @@ module.exports = React.createClass({
       source = this._nodeForName(link.sourceNode.key);
       target = this._nodeForName(link.targetNode.key);
       if (source && target) {
-        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, "unused-term", "unused-term", link));
+        sourceTerminal = link.sourceTerminal === 'a' ? 'Top' : 'Bottom';
+        targetTerminal = link.targetTerminal === 'a' ? 'Top' : 'Bottom';
+        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, sourceTerminal, targetTerminal, link));
       } else {
         results.push(void 0);
       }
@@ -3570,10 +3569,7 @@ module.exports = React.createClass({
       className: "img-background"
     }, (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== '#remote' ? img({
       src: this.props.data.image
-    }) : null), div({
-      className: 'connection-source',
-      'data-node-key': this.props.nodeKey
-    })), div({
+    }) : null)), div({
       className: 'node-title'
     }, this.props.data.title));
   }
@@ -3727,6 +3723,7 @@ module.exports = React.createClass({
         node = ref1[index];
         if (node.image) {
           results.push(PaletteImage({
+            key: node.id,
             node: node,
             index: index,
             selected: index === this.state.selectedIndex,
