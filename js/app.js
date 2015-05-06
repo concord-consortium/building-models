@@ -91,7 +91,7 @@ module.exports = [
     "image": "img/nodes/cloud.png",
     "metadata": {
       "title": "Cloud",
-      "link": "http://pixabay.com/en/cloud-white-shapes-cloudscape-35567/"
+      "link": "https://openclipart.org/detail/17666/net wan cloud"
     }
   }, {
     "id": "7",
@@ -164,13 +164,13 @@ module.exports = {
     }
   },
   inPalette: function(node) {
-    return (_.find(this.state.palette, {
+    return !!((_.find(this.state.palette, {
       image: node.image
     })) || (node.metadata && (_.find(this.state.palette, {
       metadata: {
-        link: node.metadata.link
+        link: decodeURIComponent(node.metadata.link)
       }
-    })));
+    }))));
   },
   componentDidMount: function() {
     var ref;
@@ -223,7 +223,7 @@ module.exports = {
         var y, z;
         y = e.keyCode === 89;
         z = e.keyCode === 90;
-        if (e.ctrlKey && (y || z)) {
+        if ((e.ctrlKey || e.metaKey) && (y || z)) {
           e.preventDefault();
           if (y) {
             _this.props.linkManager.redo();
@@ -1305,23 +1305,32 @@ module.exports = GoogleDriveIO = (function() {
 
   GoogleDriveIO.prototype.authorized = false;
 
+  GoogleDriveIO.prototype.token = null;
+
   GoogleDriveIO.prototype.authorize = function(immediate, callback) {
     var args;
-    args = {
-      'client_id': this.CLIENT_ID,
-      'scope': this.SCOPES,
-      'immediate': immediate || false
-    };
-    return gapi.auth.authorize(args, (function(_this) {
-      return function(token) {
-        var err;
-        if (callback) {
-          err = (!token ? 'Unable to authorize' : token.error ? token.error : null);
-          _this.authorized = err === null;
-          return callback(err, token);
-        }
+    if (this.token) {
+      return callback(null, this.token);
+    } else {
+      args = {
+        'client_id': this.CLIENT_ID,
+        'scope': this.SCOPES,
+        'immediate': immediate || false
       };
-    })(this));
+      return gapi.auth.authorize(args, (function(_this) {
+        return function(token) {
+          var err;
+          if (token && !token.error) {
+            _this.token = token;
+          }
+          if (callback) {
+            err = (!token ? 'Unable to authorize' : token.error ? token.error : null);
+            _this.authorized = err === null;
+            return callback(err, token);
+          }
+        };
+      })(this));
+    }
   };
 
   GoogleDriveIO.prototype.makeMultipartBody = function(parts, boundary) {
@@ -1709,10 +1718,10 @@ module.exports = {
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.",
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below.",
   "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images",
-  "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for '%{query}'",
-  "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}'%{query}'...",
-  "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for '%{query}'",
-  "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for '%{query}'. ",
+  "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for \"%{query}.\"",
+  "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}\"%{query}\"",
+  "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for \"%{query}.\"",
+  "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for \"%{query}.\" ",
   "~IMAGE-BROWSER.SHOW_ALL": "Show all matches.",
   "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette",
   "~COLOR.YELLOW": "Yellow",
