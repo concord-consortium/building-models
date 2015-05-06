@@ -65,13 +65,23 @@ module.exports =
     else
       @props.linkManager.loadDataFromUrl @props.url
 
-    ($ window).on 'keyup', (e) =>
-      y = e.keyCode is 89
-      z = e.keyCode is 90
-      if (e.ctrlKey or e.metaKey) and (y or z)
+    # cross platform undo/redo
+    ($ window).on 'keydown', (e) =>
+      y = (e.keyCode is 89) or (e.keyCode is 121)
+      z = (e.keyCode is 90) or (e.keyCode is 122)
+      return if not (y or z)
+      if e.metaKey
+        undo = z and not e.shiftKey
+        redo = z and e.shiftKey
+      else if e.ctrlKey
+        undo = z
+        redo = y
+      else
+        undo = redo = false
+      if undo or redo
         e.preventDefault()
-        @props.linkManager.redo() if y
-        @props.linkManager.undo() if z
+        @props.linkManager.redo() if redo
+        @props.linkManager.undo() if undo
 
   componentDidUnmount: ->
     @addDeleteKeyHandler false
