@@ -226,7 +226,6 @@ module.exports = {
         if (!(y || z)) {
           return;
         }
-        debugger;
         if (e.metaKey) {
           undo = z && !e.shiftKey;
           redo = z && e.shiftKey;
