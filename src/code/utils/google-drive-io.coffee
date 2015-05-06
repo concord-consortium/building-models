@@ -7,22 +7,29 @@ module.exports = class GoogleDriveIO
 
   authorized: false
 
+  token: null
+
   authorize: (immediate, callback) ->
-    args =
-      'client_id': @CLIENT_ID
-      'scope': @SCOPES
-      'immediate': immediate or false
-    gapi.auth.authorize args, (token) =>
-      if callback
-        err = (if not token
-          'Unable to authorize'
-        else if token.error
-          token.error
-        else
-          null
-        )
-        @authorized = err is null
-        callback err, token
+    if @token
+      callback null, @token
+    else
+      args =
+        'client_id': @CLIENT_ID
+        'scope': @SCOPES
+        'immediate': immediate or false
+      gapi.auth.authorize args, (token) =>
+        if token and not token.error
+          @token = token
+        if callback
+          err = (if not token
+            'Unable to authorize'
+          else if token.error
+            token.error
+          else
+            null
+          )
+          @authorized = err is null
+          callback err, token
 
   makeMultipartBody: (parts, boundary) ->
     ((for part in parts
