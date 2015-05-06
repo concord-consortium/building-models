@@ -16,6 +16,7 @@ module.exports = OpenClipArt =
         results.push
           image: item.svg.png_thumb
           metadata:
+            source: 'search'
             title: item.title
             description: item.description
             link: item.detail_link

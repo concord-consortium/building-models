@@ -1,11 +1,17 @@
 module.exports =
 
   getInitialAppViewState: (subState) ->
+
+    # load the metadata at startup
+    internalLibrary = require '../data/internal-library'
+    for node in internalLibrary
+      @props.linkManager.setImageMetadata node.image, node.metadata
+
     mixinState =
       selectedNode: null
       selectedConnection: null
       palette: require '../data/initial-palette'
-      internalLibrary: require '../data/internal-library'
+      internalLibrary: internalLibrary
       filename: null
     _.extend mixinState, subState
 
