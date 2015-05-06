@@ -11,6 +11,8 @@ module.exports = React.createClass
   getInitialState: ->
     @getInitialAppViewState
       dirty: false
+      canUndo: false
+      saved: false
 
   componentDidMount: ->
     @createGoogleDrive()
@@ -19,6 +21,8 @@ module.exports = React.createClass
   modelChanged: (status) ->
     @setState
       dirty: status.dirty
+      canUndo: status.canUndo
+      saved: status.saved
 
   render: ->
     options = [
@@ -34,9 +38,15 @@ module.exports = React.createClass
       name: tr "~MENU.SAVE_AS"
       action: false
     ,
+      name: tr "~MENU.REVERT_TO_ORIGINAL"
+      action: if @state.canUndo then @revertToOriginal else false
+    ,
+      name: tr "~MENU.REVERT_TO_LAST_SAVE"
+      action: if @state.saved and @state.dirty then @revertToLastSave else false
+    ,
       name: tr '~MENU.SETTINGS'
       action: false
-     ]
+    ]
 
     (div {className: 'global-nav'},
       (div {},
