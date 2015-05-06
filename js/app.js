@@ -220,15 +220,27 @@ module.exports = {
     }
     return ($(window)).on('keyup', (function(_this) {
       return function(e) {
-        var y, z;
-        y = e.keyCode === 89;
-        z = e.keyCode === 90;
-        if ((e.ctrlKey || e.metaKey) && (y || z)) {
+        var redo, undo, y, z;
+        y = (e.keyCode === 89) || (e.keyCode === 121);
+        z = (e.keyCode === 90) || (e.keyCode === 122);
+        if (!(y || z)) {
+          return;
+        }
+        if (e.metaKey) {
+          undo = z && !e.shiftKey;
+          redo = z && e.shiftKey;
+        } else if (e.ctrlKey) {
+          undo = z;
+          redo = y;
+        } else {
+          undo = redo = false;
+        }
+        if (undo || redo) {
           e.preventDefault();
-          if (y) {
+          if (redo) {
             _this.props.linkManager.redo();
           }
-          if (z) {
+          if (undo) {
             return _this.props.linkManager.undo();
           }
         }
