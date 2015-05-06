@@ -174,6 +174,8 @@ module.exports = React.createClass
           y: dropPos.y
           title: file.title
           image: file.image
+          metadata:
+            source: external
 
   onContainerClicked: (e) ->
     if e.target is @refs.container.getDOMNode()

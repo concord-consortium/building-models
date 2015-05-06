@@ -19,10 +19,31 @@ module.exports = React.createClass
   displayName: 'PaletteInspector'
 
   getInitialState: ->
-    selectedIndex: _.findIndex @props.palette, (node) -> node.image.length > 0
+    selectedIndex = _.findIndex @props.palette, (node) -> node.image.length > 0
+    selectedImage = @props.palette[selectedIndex].image
+
+    initialState =
+      selectedIndex: selectedIndex
+      selectedImage: selectedImage
+      metadata: @getMetadata selectedImage
 
   imageSelected: (index) ->
-    @setState selectedIndex: index
+    selectedImage = @props.palette[index].image
+
+    @setState
+      selectedIndex: index
+      selectedImage: selectedImage
+      metadata: @getMetadata selectedImage
+
+  getMetadata: (image) ->
+    metadata = @props.linkManager.getImageMetadata image
+    if not metadata
+      # if no metadata is found then this is a dropped image
+      metadata =
+        source: 'external'
+        title: ''
+        link: ''
+    metadata
 
   scrollToBottom: ->
     palette = @refs.palette?.getDOMNode()
@@ -36,10 +57,11 @@ module.exports = React.createClass
     if JSON.stringify(prevProps.palette) isnt JSON.stringify(@props.palette)
       @scrollToBottom()
 
-  render: ->
-    selectedImage = @props.palette[@state.selectedIndex].image
-    metadata = @props.linkManager.getImageMetadata selectedImage
+  setImageMetadata: (image, metadata) ->
+    @props.linkManager.setImageMetadata image, metadata
+    @setState metadata: metadata
 
+  render: ->
     (div {className: 'palette-inspector'},
       (div {className: 'palette', ref: 'palette'},
         (div {},
@@ -56,13 +78,14 @@ module.exports = React.createClass
         (div {className: 'palette-about-image-title'},
           (i {className: "fa fa-info-circle"})
           (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
-          (img {src: selectedImage})
+          (img {src: @state.selectedImage})
         )
-        (div {className: 'palette-about-image-info'},
-          if metadata
-            (ImageMetadata {metadata: metadata})
-          else
-            'TDB: Add metadata for internal library images'
-        )
+        if @state.selectedImage
+          (div {className: 'palette-about-image-info'},
+            if @state.metadata.source is 'internal'
+              'TDB: Add metadata for internal library images'
+            else
+              (ImageMetadata {metadata: @state.metadata, image: @state.selectedImage, setImageMetadata: @setImageMetadata})
+          )
       )
     )
