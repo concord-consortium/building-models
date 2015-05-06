@@ -62,26 +62,35 @@ module.exports = [
 },{}],3:[function(require,module,exports){
 module.exports = [
   {
-    "id": "1",
-    "title": "",
-    "image": ""
-  }, {
     "id": "2",
     "title": "Egg",
-    "image": "img/nodes/egg.png"
+    "image": "img/nodes/egg.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Egg"
+    }
   }, {
     "id": "3",
     "title": "Chick",
-    "image": "img/nodes/chick.jpg"
+    "image": "img/nodes/chick.jpg",
+    "metadata": {
+      "source": "internal",
+      "title": "Chick"
+    }
   }, {
     "id": "4",
     "title": "Chicken",
-    "image": "img/nodes/chicken.jpg"
+    "image": "img/nodes/chicken.jpg",
+    "metadata": {
+      "source": "internal",
+      "title": "Chicken"
+    }
   }, {
     "id": "5",
     "title": "Tree",
     "image": "img/nodes/tree.png",
     "metadata": {
+      "source": "internal",
       "title": "Tree",
       "link": "http://commons.wikimedia.org/wiki/File:Tree-256x256.png"
     }
@@ -90,6 +99,7 @@ module.exports = [
     "title": "Cloud",
     "image": "img/nodes/cloud.png",
     "metadata": {
+      "source": "internal",
       "title": "Cloud",
       "link": "https://openclipart.org/detail/17666/net wan cloud"
     }
@@ -98,6 +108,7 @@ module.exports = [
     "title": "Raindrops",
     "image": "img/nodes/raindrops.png",
     "metadata": {
+      "source": "internal",
       "title": "Raindrops",
       "link": "http://pixabay.com/en/cloudy-rainy-rain-drops-raindrops-98506/"
     }
@@ -106,6 +117,7 @@ module.exports = [
     "title": "Hill",
     "image": "img/nodes/hill.png",
     "metadata": {
+      "source": "internal",
       "title": "Hill",
       "link": "http://pixabay.com/en/hill-map-symbols-grass-topography-31597/"
     }
@@ -117,12 +129,17 @@ module.exports = [
 },{}],4:[function(require,module,exports){
 module.exports = {
   getInitialAppViewState: function(subState) {
-    var mixinState;
+    var i, internalLibrary, len, mixinState, node;
+    internalLibrary = require('../data/internal-library');
+    for (i = 0, len = internalLibrary.length; i < len; i++) {
+      node = internalLibrary[i];
+      this.props.linkManager.setImageMetadata(node.image, node.metadata);
+    }
     mixinState = {
       selectedNode: null,
       selectedConnection: null,
       palette: require('../data/initial-palette'),
-      internalLibrary: require('../data/internal-library'),
+      internalLibrary: internalLibrary,
       filename: null
     };
     return _.extend(mixinState, subState);
@@ -267,9 +284,11 @@ module.exports = {
 
 
 },{"../data/initial-palette":2,"../data/internal-library":3}],5:[function(require,module,exports){
-var GoogleDriveIO;
+var GoogleDriveIO, tr;
 
 GoogleDriveIO = require('../utils/google-drive-io');
+
+tr = require('../utils/translate');
 
 module.exports = {
   getInitialAppViewState: function(subState) {
@@ -277,7 +296,7 @@ module.exports = {
     mixinState = {
       gapiLoaded: false,
       fileId: null,
-      action: 'Checking authorization...'
+      action: tr("~FILE.CHECKING_AUTH")
     };
     return _.extend(mixinState, subState);
   },
@@ -302,7 +321,7 @@ module.exports = {
     return waitForAuthCheck();
   },
   newFile: function() {
-    if (confirm('Are you sure?')) {
+    if (confirm(tr("~FILE.CONFIRM"))) {
       this.props.linkManager.deleteAll();
       return this.setState({
         fileId: null
@@ -316,7 +335,7 @@ module.exports = {
           return alert(err);
         } else if (fileSpec) {
           _this.setState({
-            action: 'Downloading...'
+            action: tr("~FILE.DOWNLOADING")
           });
           return _this.googleDrive.download(fileSpec, function(err, data) {
             if (err) {
@@ -339,7 +358,7 @@ module.exports = {
   },
   rename: function() {
     var filename;
-    filename = $.trim((prompt('Filename', this.props.filename)) || '');
+    filename = $.trim((prompt(tr("~FILE.FILENAME"), this.props.filename)) || '');
     if (filename.length > 0) {
       this.props.linkManager.setFilename(filename);
     }
@@ -350,7 +369,7 @@ module.exports = {
     filename = this.rename();
     if (filename.length > 0) {
       this.setState({
-        action: 'Uploading...'
+        action: tr("~FILE.UPLOADING")
       });
       fileId = filename === this.props.filename ? this.state.fileId : null;
       return this.googleDrive.upload({
@@ -373,12 +392,22 @@ module.exports = {
         };
       })(this));
     }
+  },
+  revertToOriginal: function() {
+    if (confirm(tr("~FILE.CONFIRM_ORIGINAL_REVERT"))) {
+      return this.props.linkManager.revertToOriginal();
+    }
+  },
+  revertToLastSave: function() {
+    if (confirm(tr("~FILE.CONFIRM_LAST_SAVE_REVERT"))) {
+      return this.props.linkManager.revertToLastSave();
+    }
   }
 };
 
 
 
-},{"../utils/google-drive-io":12}],6:[function(require,module,exports){
+},{"../utils/google-drive-io":12,"../utils/translate":18}],6:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -459,6 +488,14 @@ module.exports = LinkManager = (function() {
 
   LinkManager.prototype.setSaved = function() {
     return this.undoRedoManager.save();
+  };
+
+  LinkManager.prototype.revertToOriginal = function() {
+    return this.undoRedoManager.revertToOriginal();
+  };
+
+  LinkManager.prototype.revertToLastSave = function() {
+    return this.undoRedoManager.revertToLastSave();
   };
 
   LinkManager.prototype.addChangeListener = function(listener) {
@@ -1703,6 +1740,8 @@ module.exports = {
   "~MENU.OPEN": "Open …",
   "~MENU.NEW": "New …",
   "~MENU.SAVE_AS": "Save as …",
+  "~MENU.REVERT_TO_ORIGINAL": "Revert To Original",
+  "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save",
   "~MENU.SETTINGS": "Advanced Settings …",
   "~NODE-EDIT.TITLE": "Name",
   "~NODE-EDIT.COLOR": "Color",
@@ -1739,7 +1778,14 @@ module.exports = {
   "~COLOR.YELLOW": "Yellow",
   "~COLOR.DARK_BLUE": "Dark Blue",
   "~COLOR.LIGHT_BLUE": "Light Blue",
-  "~COLOR.MED_BLUE": "Blue"
+  "~COLOR.MED_BLUE": "Blue",
+  "~FILE.CHECKING_AUTH": "Checking authorization...",
+  "~FILE.CONFIRM": "Are you sure?",
+  "~FILE.DOWNLOADING": "Downloading...",
+  "~FILE.FILENAME": "Filename",
+  "~FILE.UPLOADING": "Uploading...",
+  "~FILE.CONFIRM_ORIGINAL_REVERT": "Are you sure you want to revert to the original version?",
+  "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?"
 };
 
 
@@ -1767,6 +1813,7 @@ module.exports = OpenClipArt = {
         results.push({
           image: item.svg.png_thumb,
           metadata: {
+            source: 'search',
             title: item.title,
             description: item.description,
             link: item.detail_link
@@ -1934,6 +1981,36 @@ Manager = (function() {
     return this.stackPosition !== this.savePosition;
   };
 
+  Manager.prototype.saved = function() {
+    return this.savePosition !== -1;
+  };
+
+  Manager.prototype.revertToOriginal = function() {
+    var results;
+    results = [];
+    while (this.canUndo()) {
+      results.push(this.undo());
+    }
+    return results;
+  };
+
+  Manager.prototype.revertToLastSave = function() {
+    var results, results1;
+    if (this.stackPosition > this.savePosition) {
+      results = [];
+      while (this.dirty()) {
+        results.push(this.undo());
+      }
+      return results;
+    } else if (this.stackPosition < this.savePosition) {
+      results1 = [];
+      while (this.dirty()) {
+        results1.push(this.redo());
+      }
+      return results1;
+    }
+  };
+
   Manager.prototype.addChangeListener = function(listener) {
     return this.changeListeners.push(listener);
   };
@@ -1953,7 +2030,8 @@ Manager = (function() {
       status = {
         dirty: this.dirty(),
         canUndo: this.canUndo(),
-        canRedo: this.canRedo()
+        canRedo: this.canRedo(),
+        saved: this.saved()
       };
       ref = this.changeListeners;
       results = [];
@@ -2226,9 +2304,25 @@ module.exports = React.createClass({
 
 
 },{}],23:[function(require,module,exports){
-var div, i, li, ref, span, ul;
+var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
+
+DropdownItem = React.createFactory(React.createClass({
+  displayName: 'DropdownItem',
+  clicked: function() {
+    return this.props.select(this.props.item);
+  },
+  render: function() {
+    var className;
+    className = "menuItem " + (!this.props.item.action ? 'disabled' : '');
+    return li({
+      key: this.props.item.name,
+      className: className,
+      onClick: this.clicked
+    }, this.props.item.name);
+  }
+}));
 
 module.exports = React.createClass({
   displayName: 'Dropdown',
@@ -2268,14 +2362,11 @@ module.exports = React.createClass({
     });
     if (item && item.action) {
       return item.action();
-    } else if (item && item.name) {
-      return alert("no action for " + item.name);
     }
   },
   render: function() {
-    var className, item, menuClass, select, showing;
-    showing = this.state.showingMenu;
-    menuClass = 'menu-hidden';
+    var item, menuClass, select;
+    menuClass = this.state.showingMenu ? 'menu-showing' : 'menu-hidden';
     select = (function(_this) {
       return function(item) {
         return function() {
@@ -2283,9 +2374,6 @@ module.exports = React.createClass({
         };
       };
     })(this);
-    if (showing) {
-      menuClass = 'menu-showing';
-    }
     return div({
       className: 'menu'
     }, span({
@@ -2307,15 +2395,11 @@ module.exports = React.createClass({
       results = [];
       for (j = 0, len = ref1.length; j < len; j++) {
         item = ref1[j];
-        className = "menuItem";
-        if (!item.action) {
-          className = className + " disabled";
-        }
-        results.push(li({
+        results.push(DropdownItem({
           key: item.name,
-          className: className,
-          onClick: select(item)
-        }, item.name));
+          item: item,
+          select: this.select
+        }));
       }
       return results;
     }).call(this))));
@@ -2338,7 +2422,9 @@ module.exports = React.createClass({
   mixins: [require('../mixins/google-file-interface')],
   getInitialState: function() {
     return this.getInitialAppViewState({
-      dirty: false
+      dirty: false,
+      canUndo: false,
+      saved: false
     });
   },
   componentDidMount: function() {
@@ -2347,7 +2433,9 @@ module.exports = React.createClass({
   },
   modelChanged: function(status) {
     return this.setState({
-      dirty: status.dirty
+      dirty: status.dirty,
+      canUndo: status.canUndo,
+      saved: status.saved
     });
   },
   render: function() {
@@ -2365,6 +2453,12 @@ module.exports = React.createClass({
       }, {
         name: tr("~MENU.SAVE_AS"),
         action: false
+      }, {
+        name: tr("~MENU.REVERT_TO_ORIGINAL"),
+        action: this.state.canUndo ? this.revertToOriginal : false
+      }, {
+        name: tr("~MENU.REVERT_TO_LAST_SAVE"),
+        action: this.state.saved && this.state.dirty ? this.revertToLastSave : false
       }, {
         name: tr('~MENU.SETTINGS'),
         action: false
@@ -2699,11 +2793,11 @@ module.exports = React.createClass({
 
 
 },{"../utils/open-clipart":16,"../utils/resize-image":17,"../utils/translate":18,"./image-metadata-view":26,"./modal-tabbed-dialog-view":33}],26:[function(require,module,exports){
-var a, div, ref, table, td, tr, xlat;
+var a, div, input, ref, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
 
-ref = React.DOM, div = ref.div, table = ref.table, tr = ref.tr, td = ref.td, a = ref.a;
+ref = React.DOM, div = ref.div, table = ref.table, tr = ref.tr, td = ref.td, a = ref.a, input = ref.input;
 
 module.exports = React.createClass({
   displayName: 'ImageMetadata',
@@ -2720,13 +2814,36 @@ module.exports = React.createClass({
       hostname: link.hostname
     });
   },
+  changed: function() {
+    var metadata, newMetaData;
+    newMetaData = {
+      title: this.refs.title.getDOMNode().value,
+      link: this.refs.link.getDOMNode().value
+    };
+    metadata = _.extend(this.props.metadata, newMetaData);
+    return this.props.setImageMetadata(this.props.image, metadata);
+  },
   render: function() {
+    var link, ref1, title;
+    ref1 = this.props.metadata.source === 'external' ? [
+      input({
+        ref: 'title',
+        value: this.props.metadata.title,
+        onChange: this.changed
+      }), input({
+        ref: 'link',
+        value: this.props.metadata.link,
+        onChange: this.changed
+      })
+    ] : [
+      this.props.metadata.title, a({
+        href: this.props.metadata.link,
+        target: '_blank'
+      }, this.state.hostname)
+    ], title = ref1[0], link = ref1[1];
     return div({
       className: 'image-metadata'
-    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, this.props.metadata.title)), tr({}, td({}, xlat('~METADATA.LINK')), td({}, a({
-      href: this.props.metadata.link,
-      target: '_blank'
-    }, this.state.hostname)))));
+    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, title)), tr({}, td({}, xlat('~METADATA.LINK')), td({}, link))));
   }
 });
 
@@ -3201,7 +3318,10 @@ module.exports = React.createClass({
             x: dropPos.x,
             y: dropPos.y,
             title: file.title,
-            image: file.image
+            image: file.image,
+            metadata: {
+              source: external
+            }
           }
         });
       };
@@ -3701,16 +3821,37 @@ PaletteImage = React.createFactory(React.createClass({
 module.exports = React.createClass({
   displayName: 'PaletteInspector',
   getInitialState: function() {
-    return {
-      selectedIndex: _.findIndex(this.props.palette, function(node) {
-        return node.image.length > 0;
-      })
+    var initialState, selectedImage, selectedIndex;
+    selectedIndex = _.findIndex(this.props.palette, function(node) {
+      return node.image.length > 0;
+    });
+    selectedImage = this.props.palette[selectedIndex].image;
+    return initialState = {
+      selectedIndex: selectedIndex,
+      selectedImage: selectedImage,
+      metadata: this.getMetadata(selectedImage)
     };
   },
   imageSelected: function(index) {
+    var selectedImage;
+    selectedImage = this.props.palette[index].image;
     return this.setState({
-      selectedIndex: index
+      selectedIndex: index,
+      selectedImage: selectedImage,
+      metadata: this.getMetadata(selectedImage)
     });
+  },
+  getMetadata: function(image) {
+    var metadata;
+    metadata = this.props.linkManager.getImageMetadata(image);
+    if (!metadata) {
+      metadata = {
+        source: 'external',
+        title: '',
+        link: ''
+      };
+    }
+    return metadata;
   },
   scrollToBottom: function() {
     var palette, ref1;
@@ -3727,10 +3868,14 @@ module.exports = React.createClass({
       return this.scrollToBottom();
     }
   },
+  setImageMetadata: function(image, metadata) {
+    this.props.linkManager.setImageMetadata(image, metadata);
+    return this.setState({
+      metadata: metadata
+    });
+  },
   render: function() {
-    var index, metadata, node, selectedImage;
-    selectedImage = this.props.palette[this.state.selectedIndex].image;
-    metadata = this.props.linkManager.getImageMetadata(selectedImage);
+    var index, node;
     return div({
       className: 'palette-inspector'
     }, div({
@@ -3767,12 +3912,14 @@ module.exports = React.createClass({
     }, i({
       className: "fa fa-info-circle"
     }), span({}, tr('~PALETTE-INSPECTOR.ABOUT_IMAGE')), img({
-      src: selectedImage
-    })), div({
+      src: this.state.selectedImage
+    })), this.state.selectedImage ? div({
       className: 'palette-about-image-info'
-    }, metadata ? ImageMetadata({
-      metadata: metadata
-    }) : 'TDB: Add metadata for internal library images')));
+    }, this.state.metadata.source === 'internal' ? 'TDB: Add metadata for internal library images' : ImageMetadata({
+      metadata: this.state.metadata,
+      image: this.state.selectedImage,
+      setImageMetadata: this.setImageMetadata
+    })) : void 0));
   }
 });
 
