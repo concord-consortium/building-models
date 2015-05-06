@@ -218,7 +218,7 @@ module.exports = {
     } else {
       this.props.linkManager.loadDataFromUrl(this.props.url);
     }
-    return ($(window)).on('keyup', (function(_this) {
+    return ($(window)).on('keydown', (function(_this) {
       return function(e) {
         var redo, undo, y, z;
         y = (e.keyCode === 89) || (e.keyCode === 121);
