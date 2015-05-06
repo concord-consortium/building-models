@@ -1,16 +1,29 @@
 {div, i, span, ul, li} = React.DOM
 
+DropdownItem = React.createFactory React.createClass
+
+  displayName: 'DropdownItem'
+
+  clicked: ->
+    @props.select @props.item
+
+  render: ->
+    className = "menuItem #{if not @props.item.action then 'disabled' else ''}"
+    (li {key: @props.item.name, className: className, onClick: @clicked }, @props.item.name)
 
 module.exports = React.createClass
 
   displayName: 'Dropdown'
+
   getInitialState: ->
     showingMenu: false
     timeout: null
+
   blur: ->
     @unblur()
     timeout = setTimeout ( => @setState {showingMenu: false} ), 500
     @setState {timeout: timeout}
+
   unblur: ->
     if @state.timeout
       clearTimeout(@state.timeout)
@@ -21,15 +34,11 @@ module.exports = React.createClass
     @setState {showingMenu: nextState}
     if item and item.action
       item.action()
-    else if item and item.name
-      alert "no action for #{item.name}"
+
   render: ->
-    showing = @state.showingMenu
-    menuClass = 'menu-hidden'
+    menuClass = if @state.showingMenu then 'menu-showing' else 'menu-hidden'
     select = (item) =>
       ( => @select(item))
-    if showing
-      menuClass = 'menu-showing'
     (div {className: 'menu'},
       (span {className: 'menu-anchor', onClick: => @select(null)},
         @props.anchor
@@ -37,11 +46,7 @@ module.exports = React.createClass
       )
       (div {className: menuClass, onMouseLeave: @blur, onMouseEnter: @unblur},
         (ul {},
-          for item in @props.items
-            className = "menuItem"
-            if (not item.action)
-              className = "#{className} disabled"
-            (li {key: item.name, className: className, onClick: select(item) }, item.name)
+          (DropdownItem {key: item.name, item: item, select: @select}) for item in @props.items
         )
       )
     )

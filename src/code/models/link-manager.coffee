@@ -33,6 +33,12 @@ module.exports = class LinkManager
   setSaved: ->
     @undoRedoManager.save()
 
+  revertToOriginal: ->
+    @undoRedoManager.revertToOriginal()
+
+  revertToLastSave: ->
+    @undoRedoManager.revertToLastSave()
+
   addChangeListener: (listener) ->
     log.info("adding change listener")
     @undoRedoManager.addChangeListener listener

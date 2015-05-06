@@ -3,6 +3,9 @@ module.exports =
   "~MENU.OPEN": "Open …"
   "~MENU.NEW": "New …"
   "~MENU.SAVE_AS": "Save as …"
+  "~MENU.REVERT_TO_ORIGINAL": "Revert To Original"
+  "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save"
+
   "~MENU.SETTINGS": "Advanced Settings …"
 
   "~NODE-EDIT.TITLE": "Name"
@@ -51,3 +54,11 @@ module.exports =
   "~COLOR.LIGHT_BLUE": "Light Blue"
   "~COLOR.MED_BLUE": "Blue"
 
+  # google-file-interface
+  "~FILE.CHECKING_AUTH": "Checking authorization..."
+  "~FILE.CONFIRM": "Are you sure?"
+  "~FILE.DOWNLOADING": "Downloading..."
+  "~FILE.FILENAME": "Filename"
+  "~FILE.UPLOADING": "Uploading..."
+  "~FILE.CONFIRM_ORIGINAL_REVERT": "Are you sure you want to revert to the original version?"
+  "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?"

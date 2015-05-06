@@ -1,11 +1,12 @@
 GoogleDriveIO = require '../utils/google-drive-io'
+tr = require '../utils/translate'
 
 module.exports =
   getInitialAppViewState: (subState) ->
     mixinState =
       gapiLoaded: false
       fileId: null
-      action: 'Checking authorization...'
+      action: tr "~FILE.CHECKING_AUTH"
     _.extend mixinState, subState
 
   createGoogleDrive: ->
@@ -23,7 +24,7 @@ module.exports =
     waitForAuthCheck()
 
   newFile: ->
-    if confirm 'Are you sure?'
+    if confirm tr "~FILE.CONFIRM"
       @props.linkManager.deleteAll()
       @setState
         fileId: null
@@ -33,7 +34,7 @@ module.exports =
       if err
         alert err
       else if fileSpec
-        @setState action: 'Downloading...'
+        @setState action: tr "~FILE.DOWNLOADING"
         @googleDrive.download fileSpec, (err, data) =>
           if err
             alert err
@@ -46,7 +47,7 @@ module.exports =
             @props.linkManager.loadData data
 
   rename: ->
-    filename = $.trim ((prompt 'Filename', @props.filename) or '')
+    filename = $.trim ((prompt (tr "~FILE.FILENAME"), @props.filename) or '')
     if filename.length > 0
       @props.linkManager.setFilename filename
     return filename
@@ -54,7 +55,7 @@ module.exports =
   saveFile: ->
     filename = @rename()
     if filename.length > 0
-      @setState action: 'Uploading...'
+      @setState action: tr "~FILE.UPLOADING"
 
       # if this is a save of an existing file with the same name use the fileid
       fileId = if filename is @props.filename then @state.fileId else null
@@ -67,3 +68,11 @@ module.exports =
             fileId: fileSpec.id
             action: null
           @props.linkManager.setSaved()
+
+  revertToOriginal: ->
+    if confirm tr "~FILE.CONFIRM_ORIGINAL_REVERT"
+      @props.linkManager.revertToOriginal()
+
+  revertToLastSave: ->
+    if confirm tr "~FILE.CONFIRM_LAST_SAVE_REVERT"
+      @props.linkManager.revertToLastSave()

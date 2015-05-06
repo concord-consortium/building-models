@@ -60,6 +60,18 @@ class Manager
   dirty: ->
     return @stackPosition isnt @savePosition
 
+  saved: ->
+    @savePosition isnt -1
+
+  revertToOriginal: ->
+    @undo() while @canUndo()
+
+  revertToLastSave: ->
+    if @stackPosition > @savePosition
+      @undo() while @dirty()
+    else if @stackPosition < @savePosition
+      @redo() while @dirty()
+
   addChangeListener: (listener) ->
     @changeListeners.push listener
 
@@ -76,6 +88,7 @@ class Manager
         dirty: @dirty()
         canUndo: @canUndo()
         canRedo: @canRedo()
+        saved: @saved()
       for listener in @changeListeners
         listener status
 
