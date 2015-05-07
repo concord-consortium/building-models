@@ -1644,7 +1644,7 @@ module.exports = DiagramToolkit = (function() {
 
   DiagramToolkit.prototype.makeTarget = function(div) {
     var anchor, anchors, i, len, results1;
-    anchors = ["Top", "TopRight", "Right", "BottomRight", "Bottom", "BottomLeft", "Left", "TopLeft"];
+    anchors = ["TopLeft", "Top", "TopRight", "Right", "Left", "BottomLeft", "Bottom", "BottomRight"];
     results1 = [];
     for (i = 0, len = anchors.length; i < len; i++) {
       anchor = anchors[i];
@@ -1653,9 +1653,9 @@ module.exports = DiagramToolkit = (function() {
         connector: ["Bezier"],
         anchor: anchor,
         endpoint: [
-          "Dot", {
-            radius: 10,
-            height: 10,
+          "Rectangle", {
+            radius: 25,
+            height: 25,
             cssClass: "node-link-target"
           }
         ],
