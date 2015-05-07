@@ -1562,24 +1562,25 @@ module.exports = DiagramToolkit = (function() {
   function DiagramToolkit(domContext, options) {
     this.domContext = domContext;
     this.options = options != null ? options : {};
-    this.type = 'jsPlumbWrappingDiagramToolkit';
+    this.type = "jsPlumbWrappingDiagramToolkit";
     this.color = this.options.color || '#233';
     this.lineWidth = this.options.lineWidth || 1;
+    this.lineWidth = 1;
     this.kit = jsPlumb.getInstance({
       Container: this.domContext
     });
     this.kit.importDefaults({
       Connector: [
-        'Bezier', {
-          curviness: 50
+        "Bezier", {
+          curviness: 60
         }
       ],
-      Anchors: ['TopCenter', 'BottomCenter'],
-      Endpoint: this._endpointOptions,
+      Anchor: "Continuous",
       DragOptions: {
         cursor: 'pointer',
         zIndex: 2000
       },
+      ConnectionsDetachable: true,
       DoNotThrowErrors: false
     });
     this.registerListeners();
@@ -1622,23 +1623,49 @@ module.exports = DiagramToolkit = (function() {
     }
   ];
 
+  DiagramToolkit.prototype.makeSource = function(div) {
+    return this.kit.addEndpoint(div, {
+      isSource: true,
+      connector: ["Bezier"],
+      dropOptions: {
+        activeClass: "dragActive"
+      },
+      anchor: "Center",
+      endpoint: [
+        "Rectangle", {
+          width: 19,
+          height: 19,
+          cssClass: 'node-link-button'
+        }
+      ],
+      maxConnections: -1
+    });
+  };
+
   DiagramToolkit.prototype.makeTarget = function(div) {
-    var opts;
-    opts = (function(_this) {
-      return function(anchor) {
-        return {
-          isTarget: true,
-          isSource: true,
-          endpoint: _this._endpointOptions,
-          connector: ['Bezier'],
-          anchor: anchor,
-          paintStyle: _this._paintStyle(),
-          maxConnections: -1
-        };
-      };
-    })(this);
-    this.kit.addEndpoint(div, opts('Top'));
-    return this.kit.addEndpoint(div, opts('Bottom'));
+    var anchor, anchors, i, len, results1;
+    anchors = ["Top", "TopRight", "Right", "BottomRight", "Bottom", "BottomLeft", "Left", "TopLeft"];
+    results1 = [];
+    for (i = 0, len = anchors.length; i < len; i++) {
+      anchor = anchors[i];
+      results1.push(this.kit.addEndpoint(div, {
+        isTarget: true,
+        connector: ["Bezier"],
+        anchor: anchor,
+        endpoint: [
+          "Dot", {
+            radius: 10,
+            height: 10,
+            cssClass: "node-link-target"
+          }
+        ],
+        maxConnections: -1,
+        dropOptions: {
+          activeClass: "dragActive"
+        }
+      }));
+    }
+    return results1;
   };
 
   DiagramToolkit.prototype.clear = function() {
@@ -1647,7 +1674,7 @@ module.exports = DiagramToolkit = (function() {
       this.kit.reset();
       return this.registerListeners();
     } else {
-      return console.log('No kit defined');
+      return console.log("No kit defined");
     }
   };
 
@@ -1664,7 +1691,7 @@ module.exports = DiagramToolkit = (function() {
     var results;
     results = [
       [
-        'Arrow', {
+        "Arrow", {
           location: 1.0,
           length: 10,
           width: 10,
@@ -1676,8 +1703,8 @@ module.exports = DiagramToolkit = (function() {
     ];
     if ((label != null ? label.length : void 0) > 0) {
       results.push([
-        'Label', {
-          location: 0.4,
+        "Label", {
+          location: 0.5,
           events: {
             click: this.handleLabelClick.bind(this)
           },
@@ -1705,9 +1732,15 @@ module.exports = DiagramToolkit = (function() {
     connection = this.kit.connect({
       source: source,
       target: target,
-      anchors: [source_terminal || "Top", target_terminal || "Bottom"],
       paintStyle: paintStyle,
-      overlays: this._overlays(label, linkModel.selected)
+      overlays: this._overlays(label, linkModel.selected),
+      endpoint: [
+        "Rectangle", {
+          width: 10,
+          height: 10,
+          cssClass: 'node-link-target'
+        }
+      ]
     });
     connection.bind('click', this.handleClick.bind(this));
     return connection.linkModel = linkModel;
@@ -3266,10 +3299,11 @@ module.exports = React.createClass({
     }
   },
   _redrawTargets: function() {
+    this.diagramToolkit.makeSource($(this.refs.linkView.getDOMNode()).find('.connection-source'));
     return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find('.elm'));
   },
   _redrawLinks: function() {
-    var i, len, link, ref, results, source, sourceTerminal, target, targetTerminal;
+    var i, len, link, ref, results, source, target;
     ref = this.state.links;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -3277,9 +3311,7 @@ module.exports = React.createClass({
       source = this._nodeForName(link.sourceNode.key);
       target = this._nodeForName(link.targetNode.key);
       if (source && target) {
-        sourceTerminal = link.sourceTerminal === 'a' ? 'Top' : 'Bottom';
-        targetTerminal = link.targetTerminal === 'a' ? 'Top' : 'Bottom';
-        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, sourceTerminal, targetTerminal, link));
+        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, "unused-term", "unused-term", link));
       } else {
         results.push(void 0);
       }
@@ -3710,7 +3742,10 @@ module.exports = React.createClass({
       className: "img-background"
     }, (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== '#remote' ? img({
       src: this.props.data.image
-    }) : null)), div({
+    }) : null), this.props.selected ? div({
+      className: 'connection-source',
+      'data-node-key': this.props.nodeKey
+    }) : void 0), div({
       className: 'node-title'
     }, this.props.data.title));
   }
