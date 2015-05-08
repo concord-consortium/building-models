@@ -136,6 +136,7 @@ module.exports = React.createClass
       @ignoringEvents = false
 
   _redrawTargets: ->
+    @diagramToolkit.makeSource $(@refs.linkView.getDOMNode()).find('.connection-source')
     @diagramToolkit.makeTarget $(@refs.linkView.getDOMNode()).find '.elm'
 
   _redrawLinks: ->
@@ -143,9 +144,7 @@ module.exports = React.createClass
       source = @_nodeForName link.sourceNode.key
       target = @_nodeForName link.targetNode.key
       if source and target
-        sourceTerminal = if link.sourceTerminal is 'a' then 'Top' else 'Bottom'
-        targetTerminal = if link.targetTerminal is 'a' then 'Top' else 'Bottom'
-        @diagramToolkit.addLink source, target, link.title, link.color, sourceTerminal, targetTerminal, link
+        @diagramToolkit.addLink source, target, link.title, link.color, "unused-term", "unused-term", link
 
   onDragOver: (e) ->
     if not @state.canDrop

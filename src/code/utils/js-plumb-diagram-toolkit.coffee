@@ -3,15 +3,16 @@
 module.exports = class DiagramToolkit
 
   constructor: (@domContext, @options = {}) ->
-    @type      = 'jsPlumbWrappingDiagramToolkit'
+    @type      = "jsPlumbWrappingDiagramToolkit"
     @color     = @options.color or '#233'
     @lineWidth = @options.lineWidth or 1
+    @lineWidth = 1
     @kit       = jsPlumb.getInstance {Container: @domContext}
     @kit.importDefaults
-      Connector:        ['Bezier', {curviness: 50}],
-      Anchors:          ['TopCenter', 'BottomCenter'],
-      Endpoint:         @_endpointOptions,
+      Connector:        ["Bezier", {curviness: 60}],
+      Anchor:           "Continuous",
       DragOptions :     {cursor: 'pointer', zIndex:2000},
+      ConnectionsDetachable: true,
       DoNotThrowErrors: false
     @registerListeners()
 
@@ -36,17 +37,41 @@ module.exports = class DiagramToolkit
 
   _endpointOptions: [ "Dot", { radius:15 } ]
 
-  makeTarget: (div) ->
-    opts = (anchor) =>
-      isTarget: true
+  makeSource: (div) ->
+    @kit.addEndpoint(div,
       isSource: true
-      endpoint: @_endpointOptions
-      connector: ['Bezier']
-      anchor: anchor
-      paintStyle: @_paintStyle()
+      connector: ["Bezier"]
+      dropOptions:
+        activeClass: "dragActive"
+      anchor: "Center"
+      #paintStyle: @_paintStyle()
+      endpoint: ["Rectangle",
+        width: 19
+        height: 19
+        cssClass: 'node-link-button'
+      ]
       maxConnections: -1
-    @kit.addEndpoint div, (opts 'Top')
-    @kit.addEndpoint div, (opts 'Bottom')
+    )
+
+  makeTarget: (div) ->
+    anchors = [
+      "TopLeft", "Top","TopRight",
+      "Right", "Left",
+      "BottomLeft","Bottom", "BottomRight"]
+    for anchor in anchors
+      @kit.addEndpoint(div,
+        isTarget: true
+        connector: ["Bezier"]
+        anchor: anchor
+        endpoint: ["Rectangle",
+          radius: 25
+          height: 25
+          cssClass: "node-link-target"
+        ]
+        maxConnections: -1
+        dropOptions:
+          activeClass: "dragActive"
+     )
 
   clear: ->
     if @kit
@@ -54,7 +79,7 @@ module.exports = class DiagramToolkit
       @kit.reset()
       @registerListeners()
     else
-      console.log 'No kit defined'
+      log.info "No kit defined"
 
   _paintStyle: (color) ->
     strokeStyle: color or @color,
@@ -63,15 +88,15 @@ module.exports = class DiagramToolkit
     outlineWidth: "10px"
 
   _overlays: (label, selected) ->
-    results = [['Arrow', {
+    results = [["Arrow", {
       location: 1.0
       length: 10
       width: 10
       events: { click: @handleLabelClick.bind @ }
     }]]
     if label?.length > 0
-      results.push ['Label', {
-        location: 0.4,
+      results.push ["Label", {
+        location: 0.5,
         events: { click: @handleLabelClick.bind @ },
         label: label or '',
         cssClass: "label#{if selected then ' selected' else ''}"
@@ -92,9 +117,14 @@ module.exports = class DiagramToolkit
     connection = @kit.connect
       source: source
       target: target
-      anchors: [source_terminal or "Top", target_terminal or "Bottom"]
       paintStyle: paintStyle
       overlays: @_overlays label, linkModel.selected
+      endpoint: ["Rectangle",
+        width: 10
+        height: 10
+        cssClass: 'node-link-target'
+      ]
+
     connection.bind 'click', @handleClick.bind @
     connection.linkModel = linkModel
 
