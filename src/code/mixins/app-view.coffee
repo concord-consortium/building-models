@@ -78,7 +78,7 @@ module.exports =
       return if not (y or z)
       if e.metaKey
         undo = z and not e.shiftKey
-        redo = z and e.shiftKey
+        redo = (z and e.shiftKey) or y
       else if e.ctrlKey
         undo = z
         redo = y
