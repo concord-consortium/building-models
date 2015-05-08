@@ -79,7 +79,7 @@ module.exports = class DiagramToolkit
       @kit.reset()
       @registerListeners()
     else
-      console.log "No kit defined"
+      log.info "No kit defined"
 
   _paintStyle: (color) ->
     strokeStyle: color or @color,
