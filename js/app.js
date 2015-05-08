@@ -245,7 +245,7 @@ module.exports = {
         }
         if (e.metaKey) {
           undo = z && !e.shiftKey;
-          redo = z && e.shiftKey;
+          redo = (z && e.shiftKey) || y;
         } else if (e.ctrlKey) {
           undo = z;
           redo = y;
@@ -1674,7 +1674,7 @@ module.exports = DiagramToolkit = (function() {
       this.kit.reset();
       return this.registerListeners();
     } else {
-      return console.log("No kit defined");
+      return log.info("No kit defined");
     }
   };
 
