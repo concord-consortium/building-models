@@ -32,8 +32,8 @@ module.exports =
 
   # views/image-metadata-view.coffee
   "~METADATA.TITLE": "Title"
-  "~METADATA.DESCRIPTION": "Description"
   "~METADATA.LINK": "Link"
+  "~METADATA.CREDIT": "Credit"
 
   # views/image-browser-view.coffee
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image"

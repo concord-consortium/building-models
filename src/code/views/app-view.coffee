@@ -62,6 +62,7 @@ module.exports = React.createClass
             palette: @state.palette
             addToPalette: @addToPalette
             inPalette: @inPalette
+            inLibrary: @inLibrary
             close: @toggleImageBrowser
           )
       )

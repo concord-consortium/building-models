@@ -20,7 +20,7 @@ module.exports = React.createClass
 
   getInitialState: ->
     selectedIndex = _.findIndex @props.palette, (node) -> node.image.length > 0
-    selectedImage = @props.palette[selectedIndex].image
+    selectedImage = @props.palette[selectedIndex]?.image
 
     initialState =
       selectedIndex: selectedIndex
@@ -82,10 +82,7 @@ module.exports = React.createClass
         )
         if @state.selectedImage
           (div {className: 'palette-about-image-info'},
-            if @state.metadata.source is 'internal'
-              'TDB: Add metadata for internal library images'
-            else
-              (ImageMetadata {metadata: @state.metadata, image: @state.selectedImage, setImageMetadata: @setImageMetadata})
+            (ImageMetadata {metadata: @state.metadata, image: @state.selectedImage, setImageMetadata: @setImageMetadata})
           )
       )
     )

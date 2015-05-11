@@ -11,6 +11,9 @@ module.exports = (e, callback) ->
               name: file.name
               title: (file.name.split '.')[0]
               image: dataUrl
+              metadata:
+                source: 'external'
+                link: file.name
         reader.readAsDataURL file
   else
     url = e.dataTransfer.getData 'URL'
@@ -18,4 +21,7 @@ module.exports = (e, callback) ->
       name: ''
       title: ''
       image: url
+      metadata:
+        source: 'external'
+        link: url
 

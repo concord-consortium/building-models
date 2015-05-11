@@ -6,24 +6,30 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Egg",
+      "link": "https://openclipart.org/detail/166320/egg",
+      "license": "public domain"
     }
   },
   {
     "id": "3",
     "title": "Chick"
-    "image": "img/nodes/chick.jpg",
+    "image": "img/nodes/chick.png",
     "metadata": {
       "source": "internal",
       "title": "Chick",
+      "link": "https://openclipart.org/detail/131641/Funny%20Chick%20Cartoon%20Newborn",
+      "license": "public domain"
     }
   },
   {
     "id": "4",
     "title": "Chicken"
-    "image": "img/nodes/chicken.jpg",
+    "image": "img/nodes/chicken.png",
     "metadata": {
       "source": "internal",
       "title": "Chicken",
+      "link": "http://pixabay.com/en/rooster-cock-chicken-bird-farm-312602/",
+      "license": "public domain"
     }
   },
   {
@@ -33,7 +39,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Tree",
-      "link": "http://commons.wikimedia.org/wiki/File:Tree-256x256.png"
+      "link": "https://openclipart.org/detail/21735/tree",
+      "license": "public domain"
     }
   },
   {
@@ -43,7 +50,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Cloud",
-      "link": "https://openclipart.org/detail/17666/net wan cloud"
+      "link": "https://openclipart.org/detail/17666/net%20wan%20cloud",
+      "license": "public domain"
     }
   },
   {
@@ -53,7 +61,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Raindrops",
-      "link": "http://pixabay.com/en/cloudy-rainy-rain-drops-raindrops-98506/"
+      "link": "http://pixabay.com/en/cloudy-rainy-rain-drops-raindrops-98506/",
+      "license": "public domain"
     }
   },
   {
@@ -63,7 +72,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Hill",
-      "link": "http://pixabay.com/en/hill-map-symbols-grass-topography-31597/"
+      "link": "https://openclipart.org/detail/9437/RPG%20map%20symbols%3A%20hill",
+      "license": "public domain"
     }
   }
 ]
