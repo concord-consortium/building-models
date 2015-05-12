@@ -186,13 +186,13 @@ module.exports = class LinkManager
     @selectedNode = @nodeKeys[nodeKey]
     if @selectedNode
       @selectedNode.selected = true
-      log.info "Selection happened for #{nodeKey} -- #{@selectedNode.title}"
     for listener in @selectionListeners
+      log.info "Selection happened for #{nodeKey} -- #{@selectedNode.title}"
       listener({node:@selectedNode, connection:null})
 
-  changeNode: (data) ->
-    if @selectedNode
-      node = @selectedNode
+  changeNode: (data, node) ->
+    node = node or @selectedNode
+    if node
       originalData =
         title: node.title
         image: node.image
@@ -208,8 +208,17 @@ module.exports = class LinkManager
       if data[key]
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
-    for listener in @selectionListeners
-      listener({node:node, connection:null})
+    for listener in @nodeListeners
+      listener.handleNodeChange(node)
+    if node is @selectedNode
+      for listener in @selectionListeners
+        log.info "Selected node changed data: #{@selectedNode.title}"
+        listener({node:@selectedNode, connection:null})
+
+  changeNodeWithKey: (key, data) ->
+    node = @nodeKeys[ key ]
+    if node
+      @changeNode(data,node)
 
   selectLink: (link) ->
     if @selectedLink

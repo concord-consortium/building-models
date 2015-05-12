@@ -97,6 +97,10 @@ module.exports = React.createClass
     @setState links: @props.linkManager.getLinks()
     false
 
+  handleNodeChange: (nodeData) ->
+    @setState nodes: @props.linkManager.getNodes()
+    true
+
   handleNodeAdd: (nodeData) ->
     @setState nodes: @props.linkManager.getNodes()
     true
