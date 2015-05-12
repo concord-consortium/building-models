@@ -6,7 +6,7 @@
             "title": "Chicken",
             "x": 200,
             "y": 180,
-            "image": "img/nodes/chicken.jpg",
+            "image": "img/nodes/chicken.png",
             "key": "a"
         },
         {
@@ -20,7 +20,7 @@
             "title": "Chick",
             "x": 370,
             "y": 74,
-            "image": "img/nodes/chick.jpg",
+            "image": "img/nodes/chick.png",
             "key": "Node-3"
         }
     ],

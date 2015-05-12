@@ -167,14 +167,13 @@ module.exports = React.createClass
 
     # get the files
     dropImageHandler e, (file) =>
+      @props.linkManager.setImageMetadata file.image, file.metadata
       @props.linkManager.importNode
         data:
           x: dropPos.x
           y: dropPos.y
           title: file.title
           image: file.image
-          metadata:
-            source: external
 
   onContainerClicked: (e) ->
     if e.target is @refs.container.getDOMNode()

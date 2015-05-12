@@ -41,8 +41,14 @@ module.exports =
           @props.linkManager.setImageMetadata node.image, node.metadata
         @setState palette: palette
 
+  _nodeInUse: (node, collection) ->
+    !!((_.find collection, {image: node.image}) or (node.metadata and (_.find collection, {metadata: {link: node.metadata.link}})))
+
   inPalette: (node) ->
-    !!((_.find @state.palette, {image: node.image}) or (node.metadata and (_.find @state.palette, {metadata: {link: decodeURIComponent(node.metadata.link)}})))
+    @_nodeInUse node, @state.palette
+
+  inLibrary: (node) ->
+    @_nodeInUse node, @state.internalLibrary
 
   componentDidMount: ->
     @addDeleteKeyHandler true

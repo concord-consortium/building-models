@@ -20,7 +20,7 @@ ImageSearchResult = React.createFactory React.createClass
     @props.clicked @props.imageInfo
   render: ->
     src = if @state.loaded then @props.imageInfo.image else 'img/bb-chrome/spin.svg'
-    if @props.inPalette @props.imageInfo
+    if @props.disabled @props.imageInfo
       (img {src: src, className: 'in-palette', title: (tr '~IMAGE-BROWSER.ALREADY-IN-PALETTE')})
     else
       (img {src: src, onClick: @clicked, title: @props.imageInfo.title})
@@ -107,6 +107,12 @@ ImageSearch = React.createFactory React.createClass
         @props.addToPalette imageInfo
     @setState selectedImage: null
 
+  disabledInInternalLibrary: (node) ->
+    @props.inPalette node
+
+  disabledInExternalSearch: (node) ->
+    (@props.inPalette node) or (@props.inLibrary node)
+
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and (@state.internalResults.length + @state.externalResults.length) is 0
 
@@ -136,13 +142,13 @@ ImageSearch = React.createFactory React.createClass
             else
               for node, index in (if @state.internalResults.length is 0 then @state.internalLibrary else @state.internalResults)
                 if node.image
-                  (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked, inPalette: @props.inPalette}) if node.image
+                  (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked, disabled: @disabledInInternalLibrary}) if node.image
           )
 
           if @state.searchable and not showNoResultsAlert
             (div {},
               (div {className: 'image-browser-header'}, tr 'Openclipart.org Images'),
-              (div {className: 'image-browser-results'},
+              (div {className: "image-browser-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
                 if @state.searching
                   (div {},
                     (i {className: "fa fa-cog fa-spin"})
@@ -155,7 +161,7 @@ ImageSearch = React.createFactory React.createClass
                   tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
                 else
                   for node, index in @state.externalResults
-                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked, inPalette: @props.inPalette})
+                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageClicked, disabled: @disabledInExternalSearch})
               )
               if @state.externalResults.length < @state.numExternalMatches
                 (div {},
@@ -187,6 +193,7 @@ module.exports = React.createClass
       internalLibrary: @props.internalLibrary
       addToPalette: @props.addToPalette
       inPalette: @props.inPalette
+      inLibrary: @props.inLibrary
 
     (ModalTabbedDialogFactory {title: (tr "~ADD-NEW-IMAGE.TITLE"), close: @props.close, tabs: [
       ModalTabbedDialog.Tab {label: (tr "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"), component: imageSearch}
