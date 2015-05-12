@@ -1,6 +1,10 @@
-.image-browser
+.header
+  margin-bottom 20px
+  font-size 15px
 
-  .image-browser-form
+.image-search-dialog
+
+  .image-search-dialog-form
     margin-bottom 10px
     input
       padding 5px
@@ -10,11 +14,7 @@
     input[type=submit]
       modal-button()
 
-  .image-browser-header
-    margin-bottom 20px
-    font-size 15px
-
-  .image-browser-results
+  .image-search-dialog-results
     margin 20px 0
     max-height 220px
     overflow none
@@ -31,33 +31,40 @@
       opacity 0.25
       cursor not-allowed
 
-  .image-browser-preview-image
-    margin-bottom 20px
-    display inline-block
-    img
-      max-width 100px
-      max-height 100px
-    a
-      label-font()
-      display block
-      margin-top 10px
-      width 100px
-      text-align center
-      text-decoration none
-      color #72bfca
-    span
-      margin-left 3px
+.preview-image
+  margin-bottom 20px
+  display inline-block
+  img
+    max-width 100px
+    max-height 100px
+  a
+    label-font()
+    display block
+    margin-top 10px
+    width 100px
+    text-align center
+    text-decoration none
+    color #72bfca
+  span
+    margin-left 3px
 
-  .image-browser-preview-add-image
-    margin-left 30px
-    display inline-block
+.preview-add-image
+  margin-left 30px
+  display inline-block
 
-    button
-      modal-button()
-      position relative
-      top -60px
+  button
+    modal-button()
+    position relative
+    top -35px
 
-  .image-browser-preview-metadata
-    margin-top 40px
+.preview-metadata
+  margin-top 40px
 
-
+.link-dialog, .my-computer-dialog
+  input[type=text]
+    width 220px
+    margin-left 10px
+    padding 5px
+  input[type=submit]
+    modal-button()
+    margin-top 20px

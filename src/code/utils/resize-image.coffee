@@ -22,3 +22,6 @@ module.exports = (src, callback) ->
     canvas.getContext('2d').drawImage img, 0, 0, width, height
 
     callback canvas.toDataURL 'image/png'
+
+  img.onerror = (e) ->
+    callback src

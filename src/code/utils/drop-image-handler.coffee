@@ -1,9 +1,10 @@
 resizeImage = require './resize-image'
+hasValidImageExtension = require '../utils/has-valid-image-extension'
 
 module.exports = (e, callback) ->
   if e.dataTransfer.files.length > 0
     for file in e.dataTransfer.files
-      if /^image\//.test file.type
+      if hasValidImageExtension file.name
         reader = new FileReader()
         reader.addEventListener 'loadend', (e) ->
           resizeImage e.target.result, (dataUrl) ->
@@ -13,15 +14,15 @@ module.exports = (e, callback) ->
               image: dataUrl
               metadata:
                 source: 'external'
-                link: file.name
         reader.readAsDataURL file
   else
     url = e.dataTransfer.getData 'URL'
-    callback
-      name: ''
-      title: ''
-      image: url
-      metadata:
-        source: 'external'
-        link: url
+    if hasValidImageExtension url
+      callback
+        name: ''
+        title: ''
+        image: url
+        metadata:
+          source: 'external'
+          link: url
 
