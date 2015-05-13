@@ -54,23 +54,20 @@ module.exports = class DiagramToolkit
     )
 
   makeTarget: (div) ->
-    anchors = [
-      "TopLeft", "Top","TopRight",
-      "Right", "Left",
-      "BottomLeft","Bottom", "BottomRight"]
-    for anchor in anchors
-      @kit.addEndpoint(div,
-        isTarget: true
-        connector: ["Bezier"]
-        anchor: anchor
-        endpoint: ["Rectangle",
-          radius: 25
-          height: 25
-          cssClass: "node-link-target"
-        ]
-        maxConnections: -1
-        dropOptions:
-          activeClass: "dragActive"
+    size = 60
+    @kit.addEndpoint(div,
+      isTarget: true
+      isSource: false
+      connector: ["Bezier"]
+      anchor: "Center"
+      endpoint: ["Rectangle",
+        height: size
+        width: size
+        cssClass: "node-link-target"
+      ]
+      maxConnections: -1
+      dropOptions:
+        activeClass: "dragActive"
      )
 
   clear: ->
