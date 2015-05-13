@@ -9,8 +9,8 @@ NodeTitle = React.createFactory React.createClass
 
 
   componentWillUnmount: ->
-    # remove jQuery listeners
-    @inputElm().off()
+    if @props.isEditing
+      @inputElm().off()
 
   componentDidUpdate: ->
     if @props.isEditing
@@ -144,7 +144,9 @@ module.exports = React.createClass
         onClick: (=> @handleSelected true)
         onTouchend: (=> @handleSelected true)
         },
-        (if @props.data.image?.length > 0 and @props.data.image isnt "#remote" then (img {src: @props.data.image}) else null)
+        (div {className: "image-wrapper"},
+          (if @props.data.image?.length > 0 and @props.data.image isnt "#remote" then (img {src: @props.data.image}) else null)
+        )
         if @props.selected
           (div {className: "connection-source", "data-node-key": @props.nodeKey})
       )
