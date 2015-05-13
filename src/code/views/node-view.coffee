@@ -5,63 +5,62 @@ NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
 
   getDefaultProps: ->
-    isEditing: false
     defaultValue: tr "~NODE.UNTITLED"
 
-  getInitialState: ->
-    isEditing: @props.editing
-    title: @props.title
 
   componentWillUnmount: ->
     # remove jQuery listeners
-    $(@getDOMNode()).off()
+    @inputElm().off()
 
   componentDidUpdate: ->
-    $elem = $(@getDOMNode())
-    if @state.isEditing
+    if @props.isEditing
+      $elem =@inputElm()
       $elem.focus()
 
-    # switching btween div and input dom elements
-    # componentDidMount wasn"t adequate for
-    # registering this listener
-    $elem.off()
-    if @state.isEditing
+      $elem.off()
       enterKey = 13
       $elem.on "keyup", (e)=>
         if e.which is enterKey
           @finishEditing()
 
-  toggleEdit:(e) ->
-    @setState({isEditing: not @state.isEditing})
+  inputElm: ->
+    $(@refs.input.getDOMNode())
+
+  inputValue: ->
+    @inputElm().val()
 
   updateTitle: (e) ->
-    newTitle = $(@getDOMNode()).val()
+    newTitle = @inputValue()
     newTitle = if newTitle.length > 0 then newTitle else @props.defaultValue
     @props.onChange(newTitle)
 
   finishEditing: ->
     @updateTitle()
-    @setState({isEditing: false})
+    @props.onStopEditing()
 
   renderTitle: ->
-    (div {className: "node-title", onClick: @toggleEdit }, @props.title)
+    (div {className: "node-title", onClick: @props.onStartEditing }, @props.title)
 
   renderTitleInput: ->
+    displayValue = if @props.title is @props.defaultValue then "" else @props.title
     (input {
       type: "text"
+      ref: "input"
       className: "node-title"
       onChange: @updateTitle
-      value: @props.title
+      value: displayValue
       placeholder: @props.defaultValue
       onBlur: =>
         @finishEditing()
-    }, @props.title)
+    })
 
   render: ->
-    if @state.isEditing
-      @renderTitleInput()
-    else
-      @renderTitle()
+    (div {className: 'node-title'},
+      if @props.isEditing
+        @renderTitleInput()
+      else
+        @renderTitle()
+    )
 
 module.exports = React.createClass
 
@@ -122,6 +121,15 @@ module.exports = React.createClass
     log.info "Title is changing to #{newTitle}"
     @props.linkManager.changeNodeWithKey(@props.nodeKey, {title:newTitle})
 
+  startEditing: ->
+    @props.linkManager.setNodeViewState(@props.data, 'is-editing')
+
+  stopEditing: ->
+    @props.linkManager.setNodeViewState(null, 'is-editing')
+
+  isEditing: ->
+    @props.linkManager.nodeViewState(@props.data, 'is-editing')
+
   render: ->
     style =
       top: @props.data.y
@@ -141,9 +149,12 @@ module.exports = React.createClass
           (div {className: "connection-source", "data-node-key": @props.nodeKey})
       )
       (NodeTitle {
-        edit: @state.editingNodeTitle
+        isEditing: @props.linkManager.nodeViewState(@props.data, 'is-editing')
         title: @props.data.title
         onChange: @changeTitle
+        onStopEditing: @stopEditing
+        onStartEditing: @startEditing
+
       })
     )
 

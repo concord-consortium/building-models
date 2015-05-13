@@ -121,6 +121,7 @@ module.exports = class LinkManager
   importNode: (nodeSpec) ->
     node = new DiagramNode(nodeSpec.data, nodeSpec.key)
     @addNode(node)
+    node
 
   addNode: (node) ->
     @undoRedoManager.createAndExecuteCommand 'addNode',
@@ -147,7 +148,6 @@ module.exports = class LinkManager
       for listener in @nodeListeners
         log.info("notifying of new Node")
         listener.handleNodeAdd(node)
-      @selectNode(node.key)
       return true
     return false
 
@@ -156,9 +156,22 @@ module.exports = class LinkManager
     for listener in @nodeListeners
       log.info("notifying of deleted Node")
       listener.handleNodeRm(node)
-    @selectedNode = null
+    @selectNode(null)
     for listener in @selectionListeners
       listener({node:null, connection:null})
+
+  deleteNodeViewState: (context) ->
+    # remove the last one
+    delete @nodeViewStates[context]
+    @_notifyNodeChanged(null)
+
+  setNodeViewState: (node,context) ->
+    @deleteNodeViewState()
+    @nodeViewStates[context] = node
+    @_notifyNodeChanged(node)
+
+  nodeViewState: (node, context) ->
+    @nodeViewStates[context] is node
 
   moveNodeCompleted: (nodeKey, pos, originalPos) ->
     node = @nodeKeys[nodeKey]
@@ -176,22 +189,23 @@ module.exports = class LinkManager
       log.info("notifying of NodeMove")
       listener.handleNodeMove(node)
 
+  selectedNode: ->
+    @nodeViewStates.selected
+
   selectNode: (nodeKey) ->
-    if @selectedNode
-      @selectedNode.selected = false
-    # TODO: do this better:
-    if @selectedLink
-      @selectedLink.selected = false
-      @selectedLink = null
-    @selectedNode = @nodeKeys[nodeKey]
-    if @selectedNode
-      @selectedNode.selected = true
-    for listener in @selectionListeners
-      log.info "Selection happened for #{nodeKey} -- #{@selectedNode.title}"
-      listener({node:@selectedNode, connection:null})
+    selectedNode = @nodeKeys[nodeKey]
+    @setNodeViewState(selectedNode, "selected")
+    if @selectedNode()
+      for listener in @selectionListeners
+        log.info "Selection happened for #{nodeKey} -- #{@selectedNode().title}"
+        listener({node:selectedNode, connection:null})
+
+  _notifyNodeChanged: (node) ->
+    for listener in @nodeListeners
+      listener.handleNodeChange(node)
 
   changeNode: (data, node) ->
-    node = node or @selectedNode
+    node = node or @selectedNode()
     if node
       originalData =
         title: node.title
@@ -208,12 +222,11 @@ module.exports = class LinkManager
       if data[key]
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
-    for listener in @nodeListeners
-      listener.handleNodeChange(node)
-    if node is @selectedNode
+    @_notifyNodeChanged(node)
+    if node is @selectedNode()
       for listener in @selectionListeners
-        log.info "Selected node changed data: #{@selectedNode.title}"
-        listener({node:@selectedNode, connection:null})
+        log.info "Selected node changed data: #{@selectedNode().title}"
+        listener({node:@selectedNode(), connection:null})
 
   changeNodeWithKey: (key, data) ->
     node = @nodeKeys[ key ]
@@ -224,9 +237,7 @@ module.exports = class LinkManager
     if @selectedLink
       @selectedLink.selected = false
     # TODO: better selection management.
-    if @selectedNode
-      @selectedNode.selected = false
-      @selectedNode = null
+    delete @nodeViewStates.selected
     @selectedLink = link
     link?.selected = true
     for listener in @selectionListeners
@@ -280,8 +291,8 @@ module.exports = class LinkManager
     @removeSelectedNode()
 
   removeSelectedNode: ->
-    if @selectedNode
-      @removeNode(@selectedNode.key)
+    if @selectedNode()
+      @removeNode(@selectedNode().key)
       for listener in @selectionListeners
         listener({node:null, connection:null})
 
