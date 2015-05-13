@@ -3,6 +3,11 @@ $deleteColor = hsl(1,50%,50%)
 .elm
   *
     no-select()
+  input
+    -moz-user-select text
+    -webkit-user-select text
+    -ms-user-select text
+    user-select text
   position absolute
   margin 0px
   border-radius 5px
@@ -82,6 +87,7 @@ $deleteColor = hsl(1,50%,50%)
     margin-right auto
     cursor pointer
     margin-bottom 1.2em
+    word-wrap break-word
   .delete-box
     margin 2px
     padding 0px

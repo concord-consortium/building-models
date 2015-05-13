@@ -3,7 +3,7 @@ tr = require "../utils/translate"
 
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
-
+  maxTitleLength: 35
   getDefaultProps: ->
     defaultValue: tr "~NODE.UNTITLED"
 
@@ -31,6 +31,7 @@ NodeTitle = React.createFactory React.createClass
 
   updateTitle: (e) ->
     newTitle = @inputValue()
+    newTitle = newTitle.substr(0,@maxTitleLength)
     newTitle = if newTitle.length > 0 then newTitle else @props.defaultValue
     @props.onChange(newTitle)
 
@@ -49,6 +50,7 @@ NodeTitle = React.createFactory React.createClass
       className: "node-title"
       onChange: @updateTitle
       value: displayValue
+      maxlength: @maxTitleLength
       placeholder: @props.defaultValue
       onBlur: =>
         @finishEditing()
