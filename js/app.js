@@ -3732,15 +3732,17 @@ module.exports = React.createClass({
     };
     return dropImageHandler(e, (function(_this) {
       return function(file) {
+        var node;
         _this.props.linkManager.setImageMetadata(file.image, file.metadata);
-        return _this.props.linkManager.importNode({
+        node = _this.props.linkManager.importNode({
           data: {
             x: dropPos.x,
             y: dropPos.y,
-            title: file.title,
+            title: tr("~NODE.UNTITLED"),
             image: file.image
           }
         });
+        return _this.props.linkManager.setNodeViewState(node, 'is-editing');
       };
     })(this));
   },
@@ -4041,6 +4043,7 @@ tr = require("../utils/translate");
 
 NodeTitle = React.createFactory(React.createClass({
   displayName: "NodeTitle",
+  maxTitleLength: 35,
   getDefaultProps: function() {
     return {
       defaultValue: tr("~NODE.UNTITLED")
@@ -4076,6 +4079,7 @@ NodeTitle = React.createFactory(React.createClass({
   updateTitle: function(e) {
     var newTitle;
     newTitle = this.inputValue();
+    newTitle = newTitle.substr(0, this.maxTitleLength);
     newTitle = newTitle.length > 0 ? newTitle : this.props.defaultValue;
     return this.props.onChange(newTitle);
   },
@@ -4098,6 +4102,7 @@ NodeTitle = React.createFactory(React.createClass({
       className: "node-title",
       onChange: this.updateTitle,
       value: displayValue,
+      maxlength: this.maxTitleLength,
       placeholder: this.props.defaultValue,
       onBlur: (function(_this) {
         return function() {
