@@ -36,7 +36,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":7,"./views/app-view":20}],2:[function(require,module,exports){
+},{"./models/link-manager":9,"./views/app-view":23}],2:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -45,15 +45,33 @@ module.exports = [
   }, {
     "id": "2",
     "title": "Egg",
-    "image": "img/nodes/egg.png"
+    "image": "img/nodes/egg.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Egg",
+      "link": "https://openclipart.org/detail/166320/egg",
+      "license": "public domain"
+    }
   }, {
     "id": "3",
     "title": "Chick",
-    "image": "img/nodes/chick.jpg"
+    "image": "img/nodes/chick.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Chick",
+      "link": "https://openclipart.org/detail/131641/Funny%20Chick%20Cartoon%20Newborn/",
+      "license": "public domain"
+    }
   }, {
     "id": "4",
     "title": "Chicken",
-    "image": "img/nodes/chicken.jpg"
+    "image": "img/nodes/chicken.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Chicken",
+      "link": "http://pixabay.com/en/rooster-cock-chicken-bird-farm-312602",
+      "license": "public domain"
+    }
   }
 ];
 
@@ -67,23 +85,29 @@ module.exports = [
     "image": "img/nodes/egg.png",
     "metadata": {
       "source": "internal",
-      "title": "Egg"
+      "title": "Egg",
+      "link": "https://openclipart.org/detail/166320/egg",
+      "license": "public domain"
     }
   }, {
     "id": "3",
     "title": "Chick",
-    "image": "img/nodes/chick.jpg",
+    "image": "img/nodes/chick.png",
     "metadata": {
       "source": "internal",
-      "title": "Chick"
+      "title": "Chick",
+      "link": "https://openclipart.org/detail/131641/Funny%20Chick%20Cartoon%20Newborn",
+      "license": "public domain"
     }
   }, {
     "id": "4",
     "title": "Chicken",
-    "image": "img/nodes/chicken.jpg",
+    "image": "img/nodes/chicken.png",
     "metadata": {
       "source": "internal",
-      "title": "Chicken"
+      "title": "Chicken",
+      "link": "http://pixabay.com/en/rooster-cock-chicken-bird-farm-312602/",
+      "license": "public domain"
     }
   }, {
     "id": "5",
@@ -92,7 +116,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Tree",
-      "link": "http://commons.wikimedia.org/wiki/File:Tree-256x256.png"
+      "link": "https://openclipart.org/detail/21735/tree",
+      "license": "public domain"
     }
   }, {
     "id": "6",
@@ -101,7 +126,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Cloud",
-      "link": "https://openclipart.org/detail/17666/net wan cloud"
+      "link": "https://openclipart.org/detail/17666/net%20wan%20cloud",
+      "license": "public domain"
     }
   }, {
     "id": "7",
@@ -110,7 +136,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Raindrops",
-      "link": "http://pixabay.com/en/cloudy-rainy-rain-drops-raindrops-98506/"
+      "link": "http://pixabay.com/en/cloudy-rainy-rain-drops-raindrops-98506/",
+      "license": "public domain"
     }
   }, {
     "id": "8",
@@ -119,7 +146,8 @@ module.exports = [
     "metadata": {
       "source": "internal",
       "title": "Hill",
-      "link": "http://pixabay.com/en/hill-map-symbols-grass-topography-31597/"
+      "link": "https://openclipart.org/detail/9437/RPG%20map%20symbols%3A%20hill",
+      "license": "public domain"
     }
   }
 ];
@@ -127,6 +155,86 @@ module.exports = [
 
 
 },{}],4:[function(require,module,exports){
+var optgroup, option, ref;
+
+ref = React.DOM, option = ref.option, optgroup = ref.optgroup;
+
+module.exports = {
+  map: {
+    'public domain': {
+      label: 'Public Domain',
+      fullLabel: 'Public Domain',
+      link: 'http://en.wikipedia.org/wiki/Public_domain'
+    },
+    'creative commons': {
+      'cc by': {
+        label: 'Attribution Only',
+        fullLabel: 'Creative Commons: Attribution Only',
+        link: 'http://creativecommons.org/licenses/by/4.0'
+      },
+      'cc by-sa': {
+        label: 'ShareAlike',
+        fullLabel: 'Creative Commons: ShareAlike',
+        link: 'http://creativecommons.org/licenses/by-sa/4.0'
+      },
+      'cc by-nd': {
+        label: 'NoDerivatives',
+        fullLabel: 'Creative Commons: NoDerivatives',
+        link: 'http://creativecommons.org/licenses/by-nd/4.0'
+      },
+      'cc by-nc': {
+        label: 'NonCommercial (NC)',
+        fullLabel: 'Creative Commons: NonCommercial (NC)',
+        link: 'http://creativecommons.org/licenses/by-nc/4.0'
+      },
+      'cc by-nc-sa': {
+        label: 'NC-ShareAlike',
+        fullLabel: 'Creative Commons: NC-ShareAlike',
+        link: 'http://creativecommons.org/licenses/by-nc-sa/4.0'
+      },
+      'cc by-nc-nd': {
+        label: 'NC-NoDerivatives',
+        fullLabel: 'Creative Commons: NC-NoDerivatives',
+        link: 'http://creativecommons.org/licenses/by-nc-nd/4.0'
+      }
+    }
+  },
+  getLicense: function(slug) {
+    return this.map[slug] || this.map['creative commons'][slug] || {
+      label: 'n/a',
+      link: null
+    };
+  },
+  getLicenseLabel: function(slug) {
+    return (this.getLicense(slug)).label;
+  },
+  getRenderOptions: function(slug) {
+    var license;
+    return [
+      option({
+        value: 'public domain'
+      }, this.getLicenseLabel('public domain')), optgroup({
+        label: 'Creative Commons'
+      }, (function() {
+        var ref1, results;
+        ref1 = this.map['creative commons'];
+        results = [];
+        for (slug in ref1) {
+          license = ref1[slug];
+          results.push(option({
+            key: slug,
+            value: slug
+          }, license.label));
+        }
+        return results;
+      }).call(this))
+    ];
+  }
+};
+
+
+
+},{}],5:[function(require,module,exports){
 module.exports = {
   getInitialAppViewState: function(subState) {
     var i, internalLibrary, len, mixinState, node;
@@ -180,14 +288,20 @@ module.exports = {
       }
     }
   },
-  inPalette: function(node) {
-    return !!((_.find(this.state.palette, {
+  _nodeInUse: function(node, collection) {
+    return !!((_.find(collection, {
       image: node.image
-    })) || (node.metadata && (_.find(this.state.palette, {
+    })) || (node.metadata && (_.find(collection, {
       metadata: {
-        link: decodeURIComponent(node.metadata.link)
+        link: node.metadata.link
       }
     }))));
+  },
+  inPalette: function(node) {
+    return this._nodeInUse(node, this.state.palette);
+  },
+  inLibrary: function(node) {
+    return this._nodeInUse(node, this.state.internalLibrary);
   },
   componentDidMount: function() {
     var ref;
@@ -283,7 +397,7 @@ module.exports = {
 
 
 
-},{"../data/initial-palette":2,"../data/internal-library":3}],5:[function(require,module,exports){
+},{"../data/initial-palette":2,"../data/internal-library":3}],6:[function(require,module,exports){
 var GoogleDriveIO, tr;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -407,7 +521,59 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":12,"../utils/translate":18}],6:[function(require,module,exports){
+},{"../utils/google-drive-io":14,"../utils/translate":21}],7:[function(require,module,exports){
+var PreviewImage, hasValidImageExtension, resizeImage;
+
+PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
+
+hasValidImageExtension = require('../utils/has-valid-image-extension');
+
+resizeImage = require('../utils/resize-image');
+
+module.exports = {
+  getInitialImageDialogViewState: function(subState) {
+    var mixinState;
+    mixinState = {
+      selectedImage: null
+    };
+    return _.extend(mixinState, subState);
+  },
+  imageSelected: function(imageInfo) {
+    return this.setState({
+      selectedImage: imageInfo
+    });
+  },
+  imageDropped: function(imageInfo) {
+    return this.imageSelected(imageInfo);
+  },
+  addImage: function(imageInfo) {
+    if (imageInfo && !this.props.inPalette(imageInfo)) {
+      resizeImage(imageInfo.image, (function(_this) {
+        return function(dataUrl) {
+          imageInfo.image = dataUrl;
+          return _this.props.addToPalette(imageInfo);
+        };
+      })(this));
+    }
+    return this.setState({
+      selectedImage: null
+    });
+  },
+  hasValidImageExtension: function(imageName) {
+    return hasValidImageExtension(imageName);
+  },
+  renderPreviewImage: function() {
+    return PreviewImage({
+      imageInfo: this.state.selectedImage,
+      addImage: this.addImage,
+      linkManager: this.props.linkManager
+    });
+  }
+};
+
+
+
+},{"../utils/has-valid-image-extension":15,"../utils/resize-image":20,"../views/preview-image-dialog-view":47}],8:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -438,8 +604,8 @@ module.exports = GraphPrimitive = (function() {
 
 
 
-},{}],7:[function(require,module,exports){
-var DiagramNode, Importer, Link, LinkManager, UndoRedo,
+},{}],9:[function(require,module,exports){
+var DiagramNode, Importer, Link, LinkManager, UndoRedo, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Importer = require('../utils/importer');
@@ -449,6 +615,8 @@ Link = require('./link');
 DiagramNode = require('./node');
 
 UndoRedo = require('../utils/undo-redo');
+
+tr = require("../utils/translate");
 
 module.exports = LinkManager = (function() {
   LinkManager.instances = {};
@@ -465,13 +633,13 @@ module.exports = LinkManager = (function() {
     this.loadDataFromUrl = bind(this.loadDataFromUrl, this);
     this.linkKeys = {};
     this.nodeKeys = {};
+    this.nodeViewStates = {};
     this.linkListeners = [];
     this.nodeListeners = [];
     this.selectionListeners = [];
     this.loadListeners = [];
     this.filename = null;
     this.filenameListeners = [];
-    this.selectedNode = {};
     this.imageMetadataCache = {};
     this.undoRedoManager = new UndoRedo.Manager({
       debug: true
@@ -650,7 +818,8 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype.importNode = function(nodeSpec) {
     var node;
     node = new DiagramNode(nodeSpec.data, nodeSpec.key);
-    return this.addNode(node);
+    this.addNode(node);
+    return node;
   };
 
   LinkManager.prototype.addNode = function(node) {
@@ -708,7 +877,6 @@ module.exports = LinkManager = (function() {
         log.info("notifying of new Node");
         listener.handleNodeAdd(node);
       }
-      this.selectNode(node.key);
       return true;
     }
     return false;
@@ -723,7 +891,7 @@ module.exports = LinkManager = (function() {
       log.info("notifying of deleted Node");
       listener.handleNodeRm(node);
     }
-    this.selectedNode = null;
+    this.selectNode(null);
     ref1 = this.selectionListeners;
     results = [];
     for (j = 0, len1 = ref1.length; j < len1; j++) {
@@ -734,6 +902,21 @@ module.exports = LinkManager = (function() {
       }));
     }
     return results;
+  };
+
+  LinkManager.prototype.deleteNodeViewState = function(context) {
+    delete this.nodeViewStates[context];
+    return this._notifyNodeChanged(null);
+  };
+
+  LinkManager.prototype.setNodeViewState = function(node, context) {
+    this.deleteNodeViewState();
+    this.nodeViewStates[context] = node;
+    return this._notifyNodeChanged(node);
+  };
+
+  LinkManager.prototype.nodeViewState = function(node, context) {
+    return this.nodeViewStates[context] === node;
   };
 
   LinkManager.prototype.moveNodeCompleted = function(nodeKey, pos, originalPos) {
@@ -774,36 +957,44 @@ module.exports = LinkManager = (function() {
     return results;
   };
 
+  LinkManager.prototype.selectedNode = function() {
+    return this.nodeViewStates.selected;
+  };
+
   LinkManager.prototype.selectNode = function(nodeKey) {
+    var i, len, listener, ref, results, selectedNode;
+    selectedNode = this.nodeKeys[nodeKey];
+    this.setNodeViewState(selectedNode, "selected");
+    if (this.selectedNode()) {
+      ref = this.selectionListeners;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        listener = ref[i];
+        log.info("Selection happened for " + nodeKey + " -- " + (this.selectedNode().title));
+        results.push(listener({
+          node: selectedNode,
+          connection: null
+        }));
+      }
+      return results;
+    }
+  };
+
+  LinkManager.prototype._notifyNodeChanged = function(node) {
     var i, len, listener, ref, results;
-    if (this.selectedNode) {
-      this.selectedNode.selected = false;
-    }
-    if (this.selectedLink) {
-      this.selectedLink.selected = false;
-      this.selectedLink = null;
-    }
-    this.selectedNode = this.nodeKeys[nodeKey];
-    if (this.selectedNode) {
-      this.selectedNode.selected = true;
-      log.info("Selection happened for " + nodeKey + " -- " + this.selectedNode.title);
-    }
-    ref = this.selectionListeners;
+    ref = this.nodeListeners;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       listener = ref[i];
-      results.push(listener({
-        node: this.selectedNode,
-        connection: null
-      }));
+      results.push(listener.handleNodeChange(node));
     }
     return results;
   };
 
-  LinkManager.prototype.changeNode = function(data) {
-    var node, originalData;
-    if (this.selectedNode) {
-      node = this.selectedNode;
+  LinkManager.prototype.changeNode = function(data, node) {
+    var originalData;
+    node = node || this.selectedNode();
+    if (node) {
       originalData = {
         title: node.title,
         image: node.image,
@@ -835,16 +1026,28 @@ module.exports = LinkManager = (function() {
         node[key] = data[key];
       }
     }
-    ref1 = this.selectionListeners;
-    results = [];
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      listener = ref1[j];
-      results.push(listener({
-        node: node,
-        connection: null
-      }));
+    this._notifyNodeChanged(node);
+    if (node === this.selectedNode()) {
+      ref1 = this.selectionListeners;
+      results = [];
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        listener = ref1[j];
+        log.info("Selected node changed data: " + (this.selectedNode().title));
+        results.push(listener({
+          node: this.selectedNode(),
+          connection: null
+        }));
+      }
+      return results;
     }
-    return results;
+  };
+
+  LinkManager.prototype.changeNodeWithKey = function(key, data) {
+    var node;
+    node = this.nodeKeys[key];
+    if (node) {
+      return this.changeNode(data, node);
+    }
   };
 
   LinkManager.prototype.selectLink = function(link) {
@@ -852,10 +1055,7 @@ module.exports = LinkManager = (function() {
     if (this.selectedLink) {
       this.selectedLink.selected = false;
     }
-    if (this.selectedNode) {
-      this.selectedNode.selected = false;
-      this.selectedNode = null;
-    }
+    delete this.nodeViewStates.selected;
     this.selectedLink = link;
     if (link != null) {
       link.selected = true;
@@ -951,8 +1151,8 @@ module.exports = LinkManager = (function() {
 
   LinkManager.prototype.removeSelectedNode = function() {
     var i, len, listener, ref, results;
-    if (this.selectedNode) {
-      this.removeNode(this.selectedNode.key);
+    if (this.selectedNode()) {
+      this.removeNode(this.selectedNode().key);
       ref = this.selectionListeners;
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
@@ -1091,7 +1291,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../utils/importer":13,"../utils/undo-redo":19,"./link":8,"./node":9}],8:[function(require,module,exports){
+},{"../utils/importer":16,"../utils/translate":21,"../utils/undo-redo":22,"./link":10,"./node":11}],10:[function(require,module,exports){
 var GraphPrimitive, Link,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1151,7 +1351,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":6}],9:[function(require,module,exports){
+},{"./graph-primitive":8}],11:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1277,7 +1477,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":10,"../utils/translate":18,"./graph-primitive":6}],10:[function(require,module,exports){
+},{"../utils/colors":12,"../utils/translate":21,"./graph-primitive":8}],12:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -1297,10 +1497,12 @@ module.exports = [
 
 
 
-},{"./translate":18}],11:[function(require,module,exports){
-var resizeImage;
+},{"./translate":21}],13:[function(require,module,exports){
+var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
+
+hasValidImageExtension = require('../utils/has-valid-image-extension');
 
 module.exports = function(e, callback) {
   var file, i, len, reader, ref, results, url;
@@ -1309,14 +1511,17 @@ module.exports = function(e, callback) {
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       file = ref[i];
-      if (/^image\//.test(file.type)) {
+      if (hasValidImageExtension(file.name)) {
         reader = new FileReader();
         reader.addEventListener('loadend', function(e) {
           return resizeImage(e.target.result, function(dataUrl) {
             return callback({
               name: file.name,
               title: (file.name.split('.'))[0],
-              image: dataUrl
+              image: dataUrl,
+              metadata: {
+                source: 'external'
+              }
             });
           });
         });
@@ -1328,17 +1533,23 @@ module.exports = function(e, callback) {
     return results;
   } else {
     url = e.dataTransfer.getData('URL');
-    return callback({
-      name: '',
-      title: '',
-      image: url
-    });
+    if (hasValidImageExtension(url)) {
+      return callback({
+        name: '',
+        title: '',
+        image: url,
+        metadata: {
+          source: 'external',
+          link: url
+        }
+      });
+    }
   }
 };
 
 
 
-},{"./resize-image":17}],12:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":15,"./resize-image":20}],14:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -1505,7 +1716,26 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
+var tr;
+
+tr = require('./translate');
+
+module.exports = function(imageName) {
+  var extension, link, ref, valid;
+  link = document.createElement('a');
+  link.setAttribute('href', imageName);
+  ref = link.pathname.split('.'), extension = ref[ref.length - 1];
+  valid = (['gif', 'png', 'jpg', 'jpeg'].indexOf(extension)) !== -1;
+  if (!valid) {
+    alert(tr("~DROP.ONLY_IMAGES_ALLOWED"));
+  }
+  return valid;
+};
+
+
+
+},{"./translate":21}],16:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -1555,7 +1785,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -1767,7 +1997,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -1776,6 +2006,7 @@ module.exports = {
   "~MENU.REVERT_TO_ORIGINAL": "Revert To Original",
   "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save",
   "~MENU.SETTINGS": "Advanced Settings …",
+  "~NODE.UNTITLED": "Untitled",
   "~NODE-EDIT.TITLE": "Name",
   "~NODE-EDIT.COLOR": "Color",
   "~NODE-EDIT.IMAGE": "Image",
@@ -1794,8 +2025,8 @@ module.exports = {
   "~PALETTE-INSPECTOR.ADD_IMAGE": "Add new image",
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
   "~METADATA.TITLE": "Title",
-  "~METADATA.DESCRIPTION": "Description",
   "~METADATA.LINK": "Link",
+  "~METADATA.CREDIT": "Credit",
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
   "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
@@ -1808,6 +2039,14 @@ module.exports = {
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for \"%{query}.\" ",
   "~IMAGE-BROWSER.SHOW_ALL": "Show all matches.",
   "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette",
+  "~IMAGE-BROWSER.PLEASE_DROP_IMAGE": "Please drop an image or enter an image url",
+  "~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER": "Drop image from browser here",
+  "~IMAGE-BROWSER.TYPE_OR_PASTE_LINK": "Or type or paste a link to the image you want to use:",
+  "~IMAGE-BROWSER.IMAGE_URL": "Image URL",
+  "~IMAGE-BROWSER.PREVIEW_IMAGE": "Preview Image",
+  "~IMAGE-BROWSER.PLEASE_DROP_FILE": "Please select or drop a file",
+  "~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP": "Drop image from desktop here",
+  "~IMAGE-BROWSER.CHOOSE_FILE": "Or choose a file from your desktop:",
   "~COLOR.YELLOW": "Yellow",
   "~COLOR.DARK_BLUE": "Dark Blue",
   "~COLOR.LIGHT_BLUE": "Light Blue",
@@ -1818,12 +2057,15 @@ module.exports = {
   "~FILE.FILENAME": "Filename",
   "~FILE.UPLOADING": "Uploading...",
   "~FILE.CONFIRM_ORIGINAL_REVERT": "Are you sure you want to revert to the original version?",
-  "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?"
+  "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?",
+  "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
+  "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
+  "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)"
 };
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -1860,7 +2102,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports = function(src, callback) {
   var img, maxHeight, maxWidth;
   maxWidth = 100;
@@ -1868,7 +2110,7 @@ module.exports = function(src, callback) {
   img = document.createElement('img');
   img.setAttribute('crossOrigin', 'anonymous');
   img.src = src;
-  return img.onload = function() {
+  img.onload = function() {
     var canvas, height, width;
     canvas = document.createElement('canvas');
     width = img.width, height = img.height;
@@ -1888,11 +2130,14 @@ module.exports = function(src, callback) {
     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
     return callback(canvas.toDataURL('image/png'));
   };
+  return img.onerror = function(e) {
+    return callback(src);
+  };
 };
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -1925,7 +2170,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":15}],19:[function(require,module,exports){
+},{"./lang/us-en":18}],22:[function(require,module,exports){
 var Command, Manager;
 
 Manager = (function() {
@@ -2121,7 +2366,7 @@ module.exports = {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var DocumentActions, GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, a, div, ref;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
@@ -2196,6 +2441,8 @@ module.exports = React.createClass({
       palette: this.state.palette,
       addToPalette: this.addToPalette,
       inPalette: this.inPalette,
+      inLibrary: this.inLibrary,
+      linkManager: this.props.linkManager,
       close: this.toggleImageBrowser
     }) : void 0));
   }
@@ -2203,7 +2450,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":4,"./document-actions-view":22,"./global-nav-view":24,"./image-browser-view":25,"./inspector-panel-view":28,"./link-view":31,"./node-well-view":37,"./placeholder-view":39}],21:[function(require,module,exports){
+},{"../mixins/app-view":5,"./document-actions-view":25,"./global-nav-view":28,"./image-browser-view":29,"./inspector-panel-view":35,"./link-view":38,"./node-well-view":44,"./placeholder-view":46}],24:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -2285,7 +2532,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":10,"../utils/translate":18}],22:[function(require,module,exports){
+},{"../utils/colors":12,"../utils/translate":21}],25:[function(require,module,exports){
 var div, ref, span;
 
 ref = React.DOM, div = ref.div, span = ref.span;
@@ -2336,7 +2583,7 @@ module.exports = React.createClass({
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -2441,7 +2688,62 @@ module.exports = React.createClass({
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
+var div, dropImageHandler, p, ref, tr;
+
+dropImageHandler = require('../utils/drop-image-handler');
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, p = ref.p;
+
+module.exports = React.createClass({
+  displayName: 'DropZone',
+  getInitialState: function() {
+    return {
+      canDrop: false
+    };
+  },
+  onDragOver: function(e) {
+    if (!this.state.canDrop) {
+      this.setState({
+        canDrop: true
+      });
+    }
+    return e.preventDefault();
+  },
+  onDragLeave: function(e) {
+    this.setState({
+      canDrop: false
+    });
+    return e.preventDefault();
+  },
+  onDrop: function(e) {
+    this.setState({
+      canDrop: false
+    });
+    e.preventDefault();
+    return dropImageHandler(e, (function(_this) {
+      return function(file) {
+        return _this.props.dropped(file);
+      };
+    })(this));
+  },
+  render: function() {
+    return div({
+      className: "dropzone " + (this.state.canDrop ? 'can-drop' : ''),
+      onDragOver: this.onDragOver,
+      onDrop: this.onDrop,
+      onDragLeave: this.onDragLeave
+    }, p({
+      className: 'header'
+    }, this.props.header || (tr("~DROPZONE.DROP_IMAGES_HERE"))), p({}, tr("~DROPZONE.SQUARES_LOOK_BEST")));
+  }
+});
+
+
+
+},{"../utils/drop-image-handler":13,"../utils/translate":21}],28:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -2521,8 +2823,8 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":5,"../utils/translate":18,"./dropdown-view":23}],25:[function(require,module,exports){
-var ImageMetadata, ImageSearch, ImageSearchResult, Link, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputer, OpenClipart, PreviewImage, a, br, button, div, form, i, img, input, ref, resizeImage, tr;
+},{"../mixins/google-file-interface":6,"../utils/translate":21,"./dropdown-view":26}],29:[function(require,module,exports){
+var ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
 
@@ -2530,293 +2832,39 @@ ModalTabbedDialogFactory = React.createFactory(ModalTabbedDialog);
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
 
-OpenClipart = require('../utils/open-clipart');
+ImageSearchDialog = React.createFactory(require('./image-search-dialog-view'));
+
+MyComputerDialog = React.createFactory(require('./image-my-computer-dialog-view'));
+
+LinkDialog = React.createFactory(require('./image-link-dialog-view'));
 
 tr = require('../utils/translate');
-
-resizeImage = require('../utils/resize-image');
-
-ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a, form = ref.form, br = ref.br;
-
-ImageSearchResult = React.createFactory(React.createClass({
-  displayName: 'ImageSearchResult',
-  getInitialState: function() {
-    return {
-      loaded: false
-    };
-  },
-  componentDidMount: function() {
-    var image;
-    image = new Image();
-    image.src = this.props.imageInfo.image;
-    return image.onload = (function(_this) {
-      return function() {
-        return _this.setState({
-          loaded: true
-        });
-      };
-    })(this);
-  },
-  clicked: function() {
-    return this.props.clicked(this.props.imageInfo);
-  },
-  render: function() {
-    var src;
-    src = this.state.loaded ? this.props.imageInfo.image : 'img/bb-chrome/spin.svg';
-    if (this.props.inPalette(this.props.imageInfo)) {
-      return img({
-        src: src,
-        className: 'in-palette',
-        title: tr('~IMAGE-BROWSER.ALREADY-IN-PALETTE')
-      });
-    } else {
-      return img({
-        src: src,
-        onClick: this.clicked,
-        title: this.props.imageInfo.title
-      });
-    }
-  }
-}));
-
-PreviewImage = React.createFactory(React.createClass({
-  displayName: 'ImageSearchResult',
-  cancel: function(e) {
-    e.preventDefault();
-    return this.props.addImage(null);
-  },
-  addImage: function() {
-    return this.props.addImage(this.props.imageInfo);
-  },
-  render: function() {
-    return div({}, div({
-      className: 'image-browser-header'
-    }, tr('~IMAGE-BROWSER.PREVIEW')), div({
-      className: 'image-browser-preview-image'
-    }, img({
-      src: this.props.imageInfo.image
-    }), a({
-      href: '#',
-      onClick: this.cancel
-    }, i({
-      className: "fa fa-close"
-    }), 'cancel')), div({
-      className: 'image-browser-preview-add-image'
-    }, button({
-      onClick: this.addImage
-    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? div({
-      className: 'image-browser-preview-metadata'
-    }, ImageMetadata({
-      className: 'image-browser-preview-metadata',
-      metadata: this.props.imageInfo.metadata
-    })) : void 0);
-  }
-}));
-
-ImageSearch = React.createFactory(React.createClass({
-  displayName: 'ImageSearch',
-  getInitialState: function() {
-    return {
-      searching: false,
-      searched: false,
-      internalLibrary: this.props.internalLibrary,
-      internalResults: [],
-      externalResults: [],
-      selectedImage: null
-    };
-  },
-  searchClicked: function(e) {
-    e.preventDefault();
-    return this.search({
-      limitResults: true
-    });
-  },
-  showAllMatches: function() {
-    return this.search({
-      limitResults: false
-    });
-  },
-  search: function(options) {
-    var internalResults, query, queryRegEx, validQuery;
-    query = $.trim(this.refs.search.getDOMNode().value);
-    validQuery = query.length > 0;
-    queryRegEx = new RegExp(query, 'i');
-    internalResults = _.filter(this.props.internalLibrary, function(node) {
-      return queryRegEx.test(node.title);
-    });
-    this.setState({
-      query: query,
-      searchable: validQuery,
-      searching: validQuery,
-      searchingAll: validQuery && !options.limitResults,
-      searched: false,
-      internalResults: internalResults,
-      externalResults: [],
-      numExternalMatches: 0
-    });
-    return OpenClipart.search(query, options, (function(_this) {
-      return function(results, numMatches) {
-        return _this.setState({
-          searching: false,
-          searched: true,
-          externalResults: results,
-          numExternalMatches: numMatches
-        });
-      };
-    })(this));
-  },
-  componentDidMount: function() {
-    return this.refs.search.getDOMNode().focus();
-  },
-  imageClicked: function(imageInfo) {
-    return this.setState({
-      selectedImage: imageInfo
-    });
-  },
-  addImage: function(imageInfo) {
-    if (imageInfo && !this.props.inPalette(imageInfo)) {
-      resizeImage(imageInfo.image, (function(_this) {
-        return function(dataUrl) {
-          imageInfo.image = dataUrl;
-          return _this.props.addToPalette(imageInfo);
-        };
-      })(this));
-    }
-    return this.setState({
-      selectedImage: null
-    });
-  },
-  render: function() {
-    var index, node, showNoResultsAlert;
-    showNoResultsAlert = this.state.searchable && this.state.searched && (this.state.internalResults.length + this.state.externalResults.length) === 0;
-    return div({
-      className: 'image-browser'
-    }, this.state.selectedImage ? PreviewImage({
-      imageInfo: this.state.selectedImage,
-      addImage: this.addImage
-    }) : div({}, div({
-      className: 'image-browser-form'
-    }, form({}, input({
-      type: 'text',
-      ref: 'search',
-      placeholder: tr('~IMAGE-BROWSER.SEARCH_HEADER')
-    }), input({
-      type: 'submit',
-      value: 'Search',
-      onClick: this.searchClicked
-    }))), showNoResultsAlert ? div({
-      className: 'modal-dialog-alert'
-    }, tr('~IMAGE-BROWSER.NO_IMAGES_FOUND'), br({}), tr('~IMAGE-BROWSER.TRY_ANOTHER_SEARCH')) : void 0, div({
-      className: 'image-browser-header'
-    }, tr('~IMAGE-BROWSER.LIBRARY_HEADER')), div({
-      className: 'image-browser-results'
-    }, (function() {
-      var j, len, ref1, results1;
-      if (this.state.internalResults.length === 0 && (this.state.searching || this.state.externalResults.length > 0)) {
-        return tr('~IMAGE-BROWSER.NO_INTERNAL_FOUND', {
-          query: this.state.query
-        });
-      } else {
-        ref1 = (this.state.internalResults.length === 0 ? this.state.internalLibrary : this.state.internalResults);
-        results1 = [];
-        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
-          node = ref1[index];
-          if (node.image) {
-            if (node.image) {
-              results1.push(ImageSearchResult({
-                key: index,
-                imageInfo: node,
-                clicked: this.imageClicked,
-                inPalette: this.props.inPalette
-              }));
-            } else {
-              results1.push(void 0);
-            }
-          } else {
-            results1.push(void 0);
-          }
-        }
-        return results1;
-      }
-    }).call(this)), this.state.searchable && !showNoResultsAlert ? div({}, div({
-      className: 'image-browser-header'
-    }, tr('Openclipart.org Images')), div({
-      className: 'image-browser-results'
-    }, (function() {
-      var j, len, ref1, results1;
-      if (this.state.searching) {
-        return div({}, i({
-          className: "fa fa-cog fa-spin"
-        }), ' ', tr("~IMAGE-BROWSER.SEARCHING", {
-          scope: this.state.searchingAll ? 'all matches for ' : '',
-          query: this.state.query
-        }));
-      } else if (this.state.externalResults.length === 0) {
-        return tr('~IMAGE-BROWSER.NO_EXTERNAL_FOUND', {
-          query: this.state.query
-        });
-      } else {
-        ref1 = this.state.externalResults;
-        results1 = [];
-        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
-          node = ref1[index];
-          results1.push(ImageSearchResult({
-            key: index,
-            imageInfo: node,
-            clicked: this.imageClicked,
-            inPalette: this.props.inPalette
-          }));
-        }
-        return results1;
-      }
-    }).call(this)), this.state.externalResults.length < this.state.numExternalMatches ? div({}, tr('~IMAGE-BROWSER.SHOWING_N_OF_M', {
-      numResults: this.state.externalResults.length,
-      numTotalResults: this.state.numExternalMatches,
-      query: this.state.query
-    }), a({
-      href: '#',
-      onClick: this.showAllMatches
-    }, tr('~IMAGE-BROWSER.SHOW_ALL'))) : void 0) : void 0));
-  }
-}));
-
-MyComputer = React.createFactory(React.createClass({
-  displayName: 'MyComputer',
-  render: function() {
-    return div({}, 'My Computer: TBD');
-  }
-}));
-
-Link = React.createFactory(React.createClass({
-  displayName: 'Link',
-  render: function() {
-    return div({}, 'Link: TBD');
-  }
-}));
 
 module.exports = React.createClass({
   displayName: 'Image Browser',
   render: function() {
-    var imageSearch;
-    imageSearch = ImageSearch({
+    var props;
+    props = {
       palette: this.props.palette,
       internalLibrary: this.props.internalLibrary,
       addToPalette: this.props.addToPalette,
-      inPalette: this.props.inPalette
-    });
+      inPalette: this.props.inPalette,
+      inLibrary: this.props.inLibrary,
+      linkManager: this.props.linkManager
+    };
     return ModalTabbedDialogFactory({
       title: tr("~ADD-NEW-IMAGE.TITLE"),
       close: this.props.close,
       tabs: [
         ModalTabbedDialog.Tab({
           label: tr("~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"),
-          component: imageSearch
+          component: ImageSearchDialog(props)
         }), ModalTabbedDialog.Tab({
           label: tr("~ADD-NEW-IMAGE.MY-COMPUTER-TAB"),
-          component: MyComputer({})
+          component: MyComputerDialog(props)
         }), ModalTabbedDialog.Tab({
           label: tr("~ADD-NEW-IMAGE.LINK-TAB"),
-          component: Link({})
+          component: LinkDialog(props)
         })
       ]
     });
@@ -2825,12 +2873,64 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/open-clipart":16,"../utils/resize-image":17,"../utils/translate":18,"./image-metadata-view":26,"./modal-tabbed-dialog-view":33}],26:[function(require,module,exports){
-var a, div, input, ref, table, td, tr, xlat;
+},{"../utils/translate":21,"./image-link-dialog-view":30,"./image-metadata-view":31,"./image-my-computer-dialog-view":32,"./image-search-dialog-view":34,"./modal-tabbed-dialog-view":40}],30:[function(require,module,exports){
+var DropZone, div, input, p, ref, tr;
+
+DropZone = React.createFactory(require('./dropzone-view'));
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, p = ref.p, input = ref.input;
+
+module.exports = React.createClass({
+  displayName: 'Link',
+  mixins: [require('../mixins/image-dialog-view')],
+  getInitialState: function() {
+    return this.getInitialImageDialogViewState();
+  },
+  previewImage: function(e) {
+    var url;
+    e.preventDefault();
+    url = $.trim(this.refs.url.getDOMNode().value);
+    if (url.length === 0) {
+      return alert(tr("~IMAGE-BROWSER.PLEASE_DROP_IMAGE"));
+    } else if (this.hasValidImageExtension(url)) {
+      return this.imageSelected({
+        image: url,
+        metadata: {
+          source: 'external',
+          link: url
+        }
+      });
+    }
+  },
+  render: function() {
+    return div({
+      className: 'link-dialog'
+    }, this.state.selectedImage ? this.renderPreviewImage() : div({}, DropZone({
+      header: tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER"),
+      dropped: this.imageDropped
+    }), p({}, tr("~IMAGE-BROWSER.TYPE_OR_PASTE_LINK")), p({}, tr("~IMAGE-BROWSER.IMAGE_URL"), input({
+      ref: 'url',
+      type: 'text'
+    })), p({}, input({
+      type: 'submit',
+      onClick: this.previewImage,
+      value: tr("~IMAGE-BROWSER.PREVIEW_IMAGE")
+    }))));
+  }
+});
+
+
+
+},{"../mixins/image-dialog-view":7,"../utils/translate":21,"./dropzone-view":27}],31:[function(require,module,exports){
+var a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
 
-ref = React.DOM, div = ref.div, table = ref.table, tr = ref.tr, td = ref.td, a = ref.a, input = ref.input;
+licenses = require('../data/licenses');
+
+ref = React.DOM, div = ref.div, table = ref.table, tr = ref.tr, td = ref.td, a = ref.a, input = ref.input, select = ref.select, radio = ref.radio, p = ref.p;
 
 module.exports = React.createClass({
   displayName: 'ImageMetadata',
@@ -2839,50 +2939,123 @@ module.exports = React.createClass({
       hostname: null
     };
   },
-  componentWillMount: function() {
+  findHostname: function(props) {
     var link;
     link = document.createElement('a');
-    link.setAttribute('href', this.props.metadata.link);
+    link.setAttribute('href', props.metadata.link);
     return this.setState({
       hostname: link.hostname
     });
+  },
+  componentWillMount: function() {
+    return this.findHostname(this.props);
+  },
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.metadata.link !== this.props.metadata.link) {
+      return this.findHostname(nextProps);
+    }
   },
   changed: function() {
     var metadata, newMetaData;
     newMetaData = {
       title: this.refs.title.getDOMNode().value,
-      link: this.refs.link.getDOMNode().value
+      link: this.refs.link.getDOMNode().value,
+      license: this.refs.license.getDOMNode().value
     };
     metadata = _.extend(this.props.metadata, newMetaData);
     return this.props.setImageMetadata(this.props.image, metadata);
   },
   render: function() {
-    var link, ref1, title;
-    ref1 = this.props.metadata.source === 'external' ? [
-      input({
-        ref: 'title',
-        value: this.props.metadata.title,
-        onChange: this.changed
-      }), input({
-        ref: 'link',
-        value: this.props.metadata.link,
-        onChange: this.changed
-      })
-    ] : [
-      this.props.metadata.title, a({
-        href: this.props.metadata.link,
-        target: '_blank'
-      }, this.state.hostname)
-    ], title = ref1[0], link = ref1[1];
+    var license;
+    license = licenses.getLicense(this.props.metadata.license || 'public domain');
     return div({
       className: 'image-metadata'
-    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, title)), tr({}, td({}, xlat('~METADATA.LINK')), td({}, link))));
+    }, this.props.metadata.source === 'external' ? div({
+      key: 'external'
+    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, input({
+      ref: 'title',
+      value: this.props.metadata.title,
+      onChange: this.changed
+    }))), tr({}, td({}, xlat('~METADATA.LINK')), td({}, input({
+      ref: 'link',
+      value: this.props.metadata.link,
+      onChange: this.changed
+    }))), tr({}, td({}, xlat('~METADATA.CREDIT')), td({}, select({
+      ref: 'license',
+      value: this.props.metadata.license,
+      onChange: this.changed
+    }, licenses.getRenderOptions(this.props.metadata.license))))), p({
+      className: 'learn-more'
+    }, a({
+      href: license.link,
+      target: '_blank'
+    }, "Learn more about " + license.fullLabel))) : div({
+      key: 'internal'
+    }, p({}, div({}, "\"" + this.props.metadata.title + "\""), div({}, a({
+      href: this.props.metadata.link,
+      target: '_blank'
+    }, "See it on " + this.state.hostname))), p({}, div({}, 'License'), div({}, a({
+      href: license.link,
+      target: '_blank'
+    }, license.label)))));
   }
 });
 
 
 
-},{"../utils/translate":18}],27:[function(require,module,exports){
+},{"../data/licenses":4,"../utils/translate":21}],32:[function(require,module,exports){
+var DropZone, div, input, p, ref, tr;
+
+DropZone = React.createFactory(require('./dropzone-view'));
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, p = ref.p, input = ref.input;
+
+module.exports = React.createClass({
+  displayName: 'MyComputer',
+  mixins: [require('../mixins/image-dialog-view')],
+  getInitialState: function() {
+    return this.getInitialImageDialogViewState();
+  },
+  previewImage: function(e) {
+    var files, reader;
+    e.preventDefault();
+    files = this.refs.file.getDOMNode().files;
+    if (files.length === 0) {
+      return alert(tr("~IMAGE-BROWSER.PLEASE_DROP_FILE"));
+    } else if (this.hasValidImageExtension(files[0].name)) {
+      reader = new FileReader();
+      reader.onload = (function(_this) {
+        return function(e) {
+          return _this.imageSelected({
+            image: e.target.result,
+            metadata: {
+              source: 'external'
+            }
+          });
+        };
+      })(this);
+      return reader.readAsDataURL(files[0]);
+    }
+  },
+  render: function() {
+    return div({
+      className: 'my-computer-dialog'
+    }, this.state.selectedImage ? this.renderPreviewImage() : div({}, DropZone({
+      header: tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP"),
+      dropped: this.imageDropped
+    }), p({}, tr("~IMAGE-BROWSER.CHOOSE_FILE")), p({}, input({
+      ref: 'file',
+      type: 'file',
+      onChange: this.previewImage
+    }))));
+  }
+});
+
+
+
+},{"../mixins/image-dialog-view":7,"../utils/translate":21,"./dropzone-view":27}],33:[function(require,module,exports){
 var ImgChoice, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -2960,7 +3133,211 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18}],28:[function(require,module,exports){
+},{"../utils/translate":21}],34:[function(require,module,exports){
+var ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
+
+OpenClipart = require('../utils/open-clipart');
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, input = ref.input, button = ref.button, img = ref.img, i = ref.i, a = ref.a, form = ref.form, br = ref.br;
+
+ImageSearchResult = React.createFactory(React.createClass({
+  displayName: 'ImageSearchResult',
+  getInitialState: function() {
+    return {
+      loaded: false
+    };
+  },
+  componentDidMount: function() {
+    var image;
+    image = new Image();
+    image.src = this.props.imageInfo.image;
+    return image.onload = (function(_this) {
+      return function() {
+        return _this.setState({
+          loaded: true
+        });
+      };
+    })(this);
+  },
+  clicked: function() {
+    return this.props.clicked(this.props.imageInfo);
+  },
+  render: function() {
+    var src;
+    src = this.state.loaded ? this.props.imageInfo.image : 'img/bb-chrome/spin.svg';
+    if (this.props.isDisabled(this.props.imageInfo)) {
+      return img({
+        src: src,
+        className: 'in-palette',
+        title: tr('~IMAGE-BROWSER.ALREADY-IN-PALETTE')
+      });
+    } else {
+      return img({
+        src: src,
+        onClick: this.clicked,
+        title: this.props.imageInfo.title
+      });
+    }
+  }
+}));
+
+module.exports = React.createClass({
+  displayName: 'ImageSearch',
+  mixins: [require('../mixins/image-dialog-view')],
+  getInitialState: function() {
+    return this.getInitialImageDialogViewState({
+      searching: false,
+      searched: false,
+      internalLibrary: this.props.internalLibrary,
+      internalResults: [],
+      externalResults: []
+    });
+  },
+  searchClicked: function(e) {
+    e.preventDefault();
+    return this.search({
+      limitResults: true
+    });
+  },
+  showAllMatches: function() {
+    return this.search({
+      limitResults: false
+    });
+  },
+  search: function(options) {
+    var internalResults, query, queryRegEx, validQuery;
+    query = $.trim(this.refs.search.getDOMNode().value);
+    validQuery = query.length > 0;
+    queryRegEx = new RegExp(query, 'i');
+    internalResults = _.filter(this.props.internalLibrary, function(node) {
+      return queryRegEx.test(node.title);
+    });
+    this.setState({
+      query: query,
+      searchable: validQuery,
+      searching: validQuery,
+      searchingAll: validQuery && !options.limitResults,
+      searched: false,
+      internalResults: internalResults,
+      externalResults: [],
+      numExternalMatches: 0
+    });
+    return OpenClipart.search(query, options, (function(_this) {
+      return function(results, numMatches) {
+        return _this.setState({
+          searching: false,
+          searched: true,
+          externalResults: results,
+          numExternalMatches: numMatches
+        });
+      };
+    })(this));
+  },
+  componentDidMount: function() {
+    return this.refs.search.getDOMNode().focus();
+  },
+  isDisabledInInternalLibrary: function(node) {
+    return this.props.inPalette(node);
+  },
+  isDisabledInExternalSearch: function(node) {
+    return (this.props.inPalette(node)) || (this.props.inLibrary(node));
+  },
+  render: function() {
+    var index, node, showNoResultsAlert;
+    showNoResultsAlert = this.state.searchable && this.state.searched && (this.state.internalResults.length + this.state.externalResults.length) === 0;
+    return div({
+      className: 'image-search-dialog'
+    }, this.state.selectedImage ? this.renderPreviewImage() : div({}, div({
+      className: 'image-search-dialog-form'
+    }, form({}, input({
+      type: 'text',
+      ref: 'search',
+      placeholder: tr('~IMAGE-BROWSER.SEARCH_HEADER')
+    }), input({
+      type: 'submit',
+      value: 'Search',
+      onClick: this.searchClicked
+    }))), showNoResultsAlert ? div({
+      className: 'modal-dialog-alert'
+    }, tr('~IMAGE-BROWSER.NO_IMAGES_FOUND'), br({}), tr('~IMAGE-BROWSER.TRY_ANOTHER_SEARCH')) : void 0, div({
+      className: 'header'
+    }, tr('~IMAGE-BROWSER.LIBRARY_HEADER')), div({
+      className: 'image-search-dialog-results'
+    }, (function() {
+      var j, len, ref1, results1;
+      if (this.state.internalResults.length === 0 && (this.state.searching || this.state.externalResults.length > 0)) {
+        return tr('~IMAGE-BROWSER.NO_INTERNAL_FOUND', {
+          query: this.state.query
+        });
+      } else {
+        ref1 = (this.state.internalResults.length === 0 ? this.state.internalLibrary : this.state.internalResults);
+        results1 = [];
+        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
+          node = ref1[index];
+          if (node.image) {
+            if (node.image) {
+              results1.push(ImageSearchResult({
+                key: index,
+                imageInfo: node,
+                clicked: this.imageSelected,
+                isDisabled: this.isDisabledInInternalLibrary
+              }));
+            } else {
+              results1.push(void 0);
+            }
+          } else {
+            results1.push(void 0);
+          }
+        }
+        return results1;
+      }
+    }).call(this)), this.state.searchable && !showNoResultsAlert ? div({}, div({
+      className: 'header'
+    }, tr('Openclipart.org Images')), div({
+      className: "image-search-dialog-results " + (this.state.externalResults.length === this.state.numExternalMatches ? 'show-all' : '')
+    }, (function() {
+      var j, len, ref1, results1;
+      if (this.state.searching) {
+        return div({}, i({
+          className: "fa fa-cog fa-spin"
+        }), ' ', tr("~IMAGE-BROWSER.SEARCHING", {
+          scope: this.state.searchingAll ? 'all matches for ' : '',
+          query: this.state.query
+        }));
+      } else if (this.state.externalResults.length === 0) {
+        return tr('~IMAGE-BROWSER.NO_EXTERNAL_FOUND', {
+          query: this.state.query
+        });
+      } else {
+        ref1 = this.state.externalResults;
+        results1 = [];
+        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
+          node = ref1[index];
+          results1.push(ImageSearchResult({
+            key: index,
+            imageInfo: node,
+            clicked: this.imageSelected,
+            isDisabled: this.isDisabledInExternalSearch
+          }));
+        }
+        return results1;
+      }
+    }).call(this)), this.state.externalResults.length < this.state.numExternalMatches ? div({}, tr('~IMAGE-BROWSER.SHOWING_N_OF_M', {
+      numResults: this.state.externalResults.length,
+      numTotalResults: this.state.numExternalMatches,
+      query: this.state.query
+    }), a({
+      href: '#',
+      onClick: this.showAllMatches
+    }, tr('~IMAGE-BROWSER.SHOW_ALL'))) : void 0) : void 0));
+  }
+});
+
+
+
+},{"../mixins/image-dialog-view":7,"../utils/open-clipart":19,"../utils/translate":21}],35:[function(require,module,exports){
 var LinkInspectorView, NodeInspectorView, PaletteInspectorView, div, i, ref;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -3021,7 +3398,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":30,"./node-inspector-view":35,"./palette-inspector-view":38}],29:[function(require,module,exports){
+},{"./link-inspector-view":37,"./node-inspector-view":42,"./palette-inspector-view":45}],36:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3057,7 +3434,7 @@ module.exports = React.createClass({
 
 
 
-},{}],30:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var InspectorTabs, button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -3116,8 +3493,8 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18,"./inspector-tabs-view":29}],31:[function(require,module,exports){
-var DiagramToolkit, Importer, Node, NodeList, div, dropImageHandler;
+},{"../utils/translate":21,"./inspector-tabs-view":36}],38:[function(require,module,exports){
+var DiagramToolkit, Importer, Node, NodeList, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
 
@@ -3128,6 +3505,8 @@ NodeList = require('../models/link-manager');
 DiagramToolkit = require('../utils/js-plumb-diagram-toolkit');
 
 dropImageHandler = require('../utils/drop-image-handler');
+
+tr = require('../utils/translate');
 
 div = React.DOM.div;
 
@@ -3165,10 +3544,11 @@ module.exports = React.createClass({
     });
   },
   addNode: function(e, ui) {
-    var image, offset, ref, title;
+    var image, node, offset, ref, title;
     ref = ui.draggable.data(), title = ref.title, image = ref.image;
+    title = tr("~NODE.UNTITLED");
     offset = $(this.refs.linkView.getDOMNode()).offset();
-    return this.props.linkManager.importNode({
+    node = this.props.linkManager.importNode({
       data: {
         x: ui.offset.left - offset.left,
         y: ui.offset.top - offset.top,
@@ -3176,6 +3556,7 @@ module.exports = React.createClass({
         image: image
       }
     });
+    return this.props.linkManager.setNodeViewState(node, 'is-editing');
   },
   getInitialState: function() {
     return {
@@ -3247,6 +3628,12 @@ module.exports = React.createClass({
       links: this.props.linkManager.getLinks()
     });
     return false;
+  },
+  handleNodeChange: function(nodeData) {
+    this.setState({
+      nodes: this.props.linkManager.getNodes()
+    });
+    return true;
   },
   handleNodeAdd: function(nodeData) {
     this.setState({
@@ -3345,15 +3732,13 @@ module.exports = React.createClass({
     };
     return dropImageHandler(e, (function(_this) {
       return function(file) {
+        _this.props.linkManager.setImageMetadata(file.image, file.metadata);
         return _this.props.linkManager.importNode({
           data: {
             x: dropPos.x,
             y: dropPos.y,
             title: file.title,
-            image: file.image,
-            metadata: {
-              source: external
-            }
+            image: file.image
           }
         });
       };
@@ -3385,7 +3770,8 @@ module.exports = React.createClass({
         results.push(Node({
           key: node.key,
           data: node,
-          selected: node.selected,
+          selected: this.props.linkManager.nodeViewState(node, "selected"),
+          editTitle: this.props.linkManager.nodeViewState(node, "title-editing"),
           nodeKey: node.key,
           ref: node.key,
           onMove: this.onNodeMoved,
@@ -3401,7 +3787,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":7,"../utils/drop-image-handler":11,"../utils/importer":13,"../utils/js-plumb-diagram-toolkit":14,"./node-view":36}],32:[function(require,module,exports){
+},{"../models/link-manager":9,"../utils/drop-image-handler":13,"../utils/importer":16,"../utils/js-plumb-diagram-toolkit":17,"../utils/translate":21,"./node-view":43}],39:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -3434,7 +3820,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":34}],33:[function(require,module,exports){
+},{"./modal-view":41}],40:[function(require,module,exports){
 var ModalDialog, Tab, TabInfo, a, div, li, ref, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -3528,7 +3914,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":32}],34:[function(require,module,exports){
+},{"./modal-dialog-view":39}],41:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3560,7 +3946,7 @@ module.exports = React.createClass({
 
 
 
-},{}],35:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var ColorPicker, ImagePickerView, InspectorTabs, button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -3646,31 +4032,107 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18,"./color-picker-view":21,"./image-picker-view":27,"./inspector-tabs-view":29}],36:[function(require,module,exports){
-var div, i, img, ref;
+},{"../utils/translate":21,"./color-picker-view":24,"./image-picker-view":33,"./inspector-tabs-view":36}],43:[function(require,module,exports){
+var NodeTitle, div, i, img, input, ref, tr;
 
-ref = React.DOM, div = ref.div, i = ref.i, img = ref.img;
+ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img;
+
+tr = require("../utils/translate");
+
+NodeTitle = React.createFactory(React.createClass({
+  displayName: "NodeTitle",
+  getDefaultProps: function() {
+    return {
+      defaultValue: tr("~NODE.UNTITLED")
+    };
+  },
+  componentWillUnmount: function() {
+    if (this.props.isEditing) {
+      return this.inputElm().off();
+    }
+  },
+  componentDidUpdate: function() {
+    var $elem, enterKey;
+    if (this.props.isEditing) {
+      $elem = this.inputElm();
+      $elem.focus();
+      $elem.off();
+      enterKey = 13;
+      return $elem.on("keyup", (function(_this) {
+        return function(e) {
+          if (e.which === enterKey) {
+            return _this.finishEditing();
+          }
+        };
+      })(this));
+    }
+  },
+  inputElm: function() {
+    return $(this.refs.input.getDOMNode());
+  },
+  inputValue: function() {
+    return this.inputElm().val();
+  },
+  updateTitle: function(e) {
+    var newTitle;
+    newTitle = this.inputValue();
+    newTitle = newTitle.length > 0 ? newTitle : this.props.defaultValue;
+    return this.props.onChange(newTitle);
+  },
+  finishEditing: function() {
+    this.updateTitle();
+    return this.props.onStopEditing();
+  },
+  renderTitle: function() {
+    return div({
+      className: "node-title",
+      onClick: this.props.onStartEditing
+    }, this.props.title);
+  },
+  renderTitleInput: function() {
+    var displayValue;
+    displayValue = this.props.title === this.props.defaultValue ? "" : this.props.title;
+    return input({
+      type: "text",
+      ref: "input",
+      className: "node-title",
+      onChange: this.updateTitle,
+      value: displayValue,
+      placeholder: this.props.defaultValue,
+      onBlur: (function(_this) {
+        return function() {
+          return _this.finishEditing();
+        };
+      })(this)
+    });
+  },
+  render: function() {
+    return div({
+      className: 'node-title'
+    }, this.props.isEditing ? this.renderTitleInput() : this.renderTitle());
+  }
+}));
 
 module.exports = React.createClass({
-  displayName: 'NodeView',
+  displayName: "NodeView",
   componentDidMount: function() {
     var $elem;
     $elem = $(this.refs.node.getDOMNode());
-    $elem.draggable({
+    return $elem.draggable({
       drag: this.doMove,
       stop: this.doStop,
-      containment: 'parent'
+      containment: "parent"
     });
-    return $elem.bind('click touchend', ((function(_this) {
-      return function() {
-        return _this.handleSelected(true);
-      };
-    })(this)));
+  },
+  getInitialState: function() {
+    return {
+      editingNodeTitle: false
+    };
   },
   handleSelected: function(actually_select) {
     var selectionKey;
     if (this.props.linkManager) {
-      selectionKey = actually_select ? this.props.nodeKey : 'dont-select-anything';
+      selectionKey = actually_select ? this.props.nodeKey : "dont-select-anything";
       return this.props.linkManager.selectNode(selectionKey);
     }
   },
@@ -3683,16 +4145,16 @@ module.exports = React.createClass({
   getDefaultProps: function() {
     return {
       onMove: function() {
-        return log.info('internal move handler');
+        return log.info("internal move handler");
       },
       onStop: function() {
-        return log.info('internal move handler');
+        return log.info("internal move handler");
       },
       onDelete: function() {
-        return log.info('internal on-delete handler');
+        return log.info("internal on-delete handler");
       },
       onSelect: function() {
-        return log.info('internal select handler');
+        return log.info("internal select handler");
       }
     };
   },
@@ -3722,12 +4184,27 @@ module.exports = React.createClass({
       syntheticEvent: evt
     });
   },
+  changeTitle: function(newTitle) {
+    log.info("Title is changing to " + newTitle);
+    return this.props.linkManager.changeNodeWithKey(this.props.nodeKey, {
+      title: newTitle
+    });
+  },
+  startEditing: function() {
+    return this.props.linkManager.setNodeViewState(this.props.data, 'is-editing');
+  },
+  stopEditing: function() {
+    return this.props.linkManager.setNodeViewState(null, 'is-editing');
+  },
+  isEditing: function() {
+    return this.props.linkManager.nodeViewState(this.props.data, 'is-editing');
+  },
   render: function() {
     var className, ref1, style;
     style = {
       top: this.props.data.y,
       left: this.props.data.x,
-      'color': this.props.data.color
+      "color": this.props.data.color
     };
     className = "elm";
     if (this.props.selected) {
@@ -3735,25 +4212,41 @@ module.exports = React.createClass({
     }
     return div({
       className: className,
-      ref: 'node',
+      ref: "node",
       style: style,
-      'data-node-key': this.props.nodeKey
+      "data-node-key": this.props.nodeKey
     }, div({
-      className: "img-background"
-    }, (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== '#remote' ? img({
+      className: "img-background",
+      onClick: ((function(_this) {
+        return function() {
+          return _this.handleSelected(true);
+        };
+      })(this)),
+      onTouchend: ((function(_this) {
+        return function() {
+          return _this.handleSelected(true);
+        };
+      })(this))
+    }, div({
+      className: "image-wrapper"
+    }, (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== "#remote" ? img({
       src: this.props.data.image
-    }) : null), this.props.selected ? div({
-      className: 'connection-source',
-      'data-node-key': this.props.nodeKey
-    }) : void 0), div({
-      className: 'node-title'
-    }, this.props.data.title));
+    }) : null)), this.props.selected ? div({
+      className: "connection-source",
+      "data-node-key": this.props.nodeKey
+    }) : void 0), NodeTitle({
+      isEditing: this.props.linkManager.nodeViewState(this.props.data, 'is-editing'),
+      title: this.props.data.title,
+      onChange: this.changeTitle,
+      onStopEditing: this.stopEditing,
+      onStartEditing: this.startEditing
+    }));
   }
 });
 
 
 
-},{}],37:[function(require,module,exports){
+},{"../utils/translate":21}],44:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -3821,7 +4314,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":40}],38:[function(require,module,exports){
+},{"./proto-node-view":48}],45:[function(require,module,exports){
 var ImageMetadata, PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -3856,11 +4349,11 @@ PaletteImage = React.createFactory(React.createClass({
 module.exports = React.createClass({
   displayName: 'PaletteInspector',
   getInitialState: function() {
-    var initialState, selectedImage, selectedIndex;
+    var initialState, ref1, selectedImage, selectedIndex;
     selectedIndex = _.findIndex(this.props.palette, function(node) {
       return node.image.length > 0;
     });
-    selectedImage = this.props.palette[selectedIndex].image;
+    selectedImage = (ref1 = this.props.palette[selectedIndex]) != null ? ref1.image : void 0;
     return initialState = {
       selectedIndex: selectedIndex,
       selectedImage: selectedImage,
@@ -3950,7 +4443,7 @@ module.exports = React.createClass({
       src: this.state.selectedImage
     })), this.state.selectedImage ? div({
       className: 'palette-about-image-info'
-    }, this.state.metadata.source === 'internal' ? 'TDB: Add metadata for internal library images' : ImageMetadata({
+    }, ImageMetadata({
       metadata: this.state.metadata,
       image: this.state.selectedImage,
       setImageMetadata: this.setImageMetadata
@@ -3960,7 +4453,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":18,"./image-metadata-view":26,"./proto-node-view":40}],39:[function(require,module,exports){
+},{"../utils/translate":21,"./image-metadata-view":31,"./proto-node-view":48}],46:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3978,7 +4471,56 @@ module.exports = React.createClass({
 
 
 
-},{}],40:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
+var ImageMetadata, a, button, div, i, img, ref, tr;
+
+ImageMetadata = React.createFactory(require('./image-metadata-view'));
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, button = ref.button, img = ref.img, i = ref.i, a = ref.a;
+
+module.exports = React.createClass({
+  displayName: 'ImageSearchResult',
+  cancel: function(e) {
+    e.preventDefault();
+    return this.props.addImage(null);
+  },
+  addImage: function() {
+    return this.props.addImage(this.props.imageInfo);
+  },
+  setImageMetadata: function(image, metadata) {
+    return this.props.linkManager.setImageMetadata(image, metadata);
+  },
+  render: function() {
+    return div({}, div({
+      className: 'header'
+    }, tr('~IMAGE-BROWSER.PREVIEW')), div({
+      className: 'preview-image'
+    }, img({
+      src: this.props.imageInfo.image
+    }), a({
+      href: '#',
+      onClick: this.cancel
+    }, i({
+      className: "fa fa-close"
+    }), 'cancel')), div({
+      className: 'preview-add-image'
+    }, button({
+      onClick: this.addImage
+    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? div({
+      className: 'preview-metadata'
+    }, ImageMetadata({
+      className: 'image-browser-preview-metadata',
+      metadata: this.props.imageInfo.metadata,
+      setImageMetadata: this.setImageMetadata
+    })) : void 0);
+  }
+});
+
+
+
+},{"../utils/translate":21,"./image-metadata-view":31}],48:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
