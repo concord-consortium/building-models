@@ -177,12 +177,13 @@ module.exports = React.createClass
     # get the files
     dropImageHandler e, (file) =>
       @props.linkManager.setImageMetadata file.image, file.metadata
-      @props.linkManager.importNode
+      node = @props.linkManager.importNode
         data:
           x: dropPos.x
           y: dropPos.y
-          title: file.title
+          title: tr "~NODE.UNTITLED"
           image: file.image
+      @props.linkManager.setNodeViewState(node, 'is-editing')
 
   onContainerClicked: (e) ->
     if e.target is @refs.container.getDOMNode()
