@@ -63,6 +63,7 @@ module.exports = React.createClass
             addToPalette: @addToPalette
             inPalette: @inPalette
             inLibrary: @inLibrary
+            linkManager: @props.linkManager
             close: @toggleImageBrowser
           )
       )

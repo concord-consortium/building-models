@@ -49,6 +49,15 @@ module.exports =
   "~IMAGE-BROWSER.SHOW_ALL": "Show all matches."
   "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette"
 
+  "~IMAGE-BROWSER.PLEASE_DROP_IMAGE": "Please drop an image or enter an image url"
+  "~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER": "Drop image from browser here"
+  "~IMAGE-BROWSER.TYPE_OR_PASTE_LINK": "Or type or paste a link to the image you want to use:"
+  "~IMAGE-BROWSER.IMAGE_URL": "Image URL"
+  "~IMAGE-BROWSER.PREVIEW_IMAGE": "Preview Image"
+  "~IMAGE-BROWSER.PLEASE_DROP_FILE": "Please select or drop a file"
+  "~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP": "Drop image from desktop here"
+  "~IMAGE-BROWSER.CHOOSE_FILE": "Or choose a file from your desktop:"
+
   "~COLOR.YELLOW": "Yellow"
   "~COLOR.DARK_BLUE": "Dark Blue"
   "~COLOR.LIGHT_BLUE": "Light Blue"
@@ -62,3 +71,9 @@ module.exports =
   "~FILE.UPLOADING": "Uploading..."
   "~FILE.CONFIRM_ORIGINAL_REVERT": "Are you sure you want to revert to the original version?"
   "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?"
+
+  "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
+
+  "~DROPZONE.DROP_IMAGES_HERE": "Drop image here"
+  "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)"
+
