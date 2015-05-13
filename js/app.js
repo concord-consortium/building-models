@@ -1873,29 +1873,25 @@ module.exports = DiagramToolkit = (function() {
   };
 
   DiagramToolkit.prototype.makeTarget = function(div) {
-    var anchor, anchors, i, len, results1;
-    anchors = ["TopLeft", "Top", "TopRight", "Right", "Left", "BottomLeft", "Bottom", "BottomRight"];
-    results1 = [];
-    for (i = 0, len = anchors.length; i < len; i++) {
-      anchor = anchors[i];
-      results1.push(this.kit.addEndpoint(div, {
-        isTarget: true,
-        connector: ["Bezier"],
-        anchor: anchor,
-        endpoint: [
-          "Rectangle", {
-            radius: 25,
-            height: 25,
-            cssClass: "node-link-target"
-          }
-        ],
-        maxConnections: -1,
-        dropOptions: {
-          activeClass: "dragActive"
+    var size;
+    size = 60;
+    return this.kit.addEndpoint(div, {
+      isTarget: true,
+      isSource: false,
+      connector: ["Bezier"],
+      anchor: "Center",
+      endpoint: [
+        "Rectangle", {
+          height: size,
+          width: size,
+          cssClass: "node-link-target"
         }
-      }));
-    }
-    return results1;
+      ],
+      maxConnections: -1,
+      dropOptions: {
+        activeClass: "dragActive"
+      }
+    });
   };
 
   DiagramToolkit.prototype.clear = function() {
