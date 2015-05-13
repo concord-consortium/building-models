@@ -1,8 +1,8 @@
-Importer = require '../utils/importer'
-Link     = require './link'
+Importer    = require '../utils/importer'
+Link        = require './link'
 DiagramNode = require './node'
-UndoRedo = require '../utils/undo-redo'
-
+UndoRedo    = require '../utils/undo-redo'
+tr          = require "../utils/translate"
 # LinkManager is the logical manager of Nodes and Links.
 module.exports = class LinkManager
   @instances: {} # map of context -> instance
@@ -12,17 +12,17 @@ module.exports = class LinkManager
     LinkManager.instances[context]
 
   constructor: (context) ->
-    @linkKeys  = {}
-    @nodeKeys  = {}
-    @linkListeners = []
-    @nodeListeners = []
+    @linkKeys           = {}
+    @nodeKeys           = {}
+    @nodeViewStates     = {}
+    @linkListeners      = []
+    @nodeListeners      = []
     @selectionListeners = []
-    @loadListeners = []
-    @filename = null
-    @filenameListeners = []
-    @selectedNode = {}
+    @loadListeners      = []
+    @filename           = null
+    @filenameListeners  = []
     @imageMetadataCache = {}
-    @undoRedoManager = new UndoRedo.Manager debug: true
+    @undoRedoManager    = new UndoRedo.Manager debug: true
 
   undo: ->
     @undoRedoManager.undo()
