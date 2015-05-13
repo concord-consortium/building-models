@@ -3,6 +3,7 @@ Importer         = require '../utils/importer'
 NodeList         = require '../models/link-manager'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
+tr               = require '../utils/translate'
 
 {div} = React.DOM
 
@@ -42,13 +43,17 @@ module.exports = React.createClass
 
   addNode: (e, ui) ->
     {title, image} = ui.draggable.data()
+    # requirement change: new nodes are untitled
+    title = tr "~NODE.UNTITLED"
     offset = $(@refs.linkView.getDOMNode()).offset()
-    @props.linkManager.importNode
+    node = @props.linkManager.importNode
       data:
         x: ui.offset.left - offset.left
         y: ui.offset.top - offset.top
         title: title
         image: image
+    @props.linkManager.setNodeViewState(node, 'is-editing')
+
 
   getInitialState: ->
     nodes: []
@@ -96,6 +101,10 @@ module.exports = React.createClass
   handleLinkRm: ->
     @setState links: @props.linkManager.getLinks()
     false
+
+  handleNodeChange: (nodeData) ->
+    @setState nodes: @props.linkManager.getNodes()
+    true
 
   handleNodeAdd: (nodeData) ->
     @setState nodes: @props.linkManager.getNodes()
@@ -187,7 +196,8 @@ module.exports = React.createClass
           (Node {
             key: node.key
             data: node
-            selected: node.selected
+            selected: @props.linkManager.nodeViewState(node, "selected")
+            editTitle: @props.linkManager.nodeViewState(node, "title-editing")
             nodeKey: node.key
             ref: node.key
             onMove: @onNodeMoved

@@ -8,6 +8,7 @@ module.exports =
 
   "~MENU.SETTINGS": "Advanced Settings …"
 
+  "~NODE.UNTITLED": "Untitled"
   "~NODE-EDIT.TITLE": "Name"
   "~NODE-EDIT.COLOR": "Color"
   "~NODE-EDIT.IMAGE": "Image"
