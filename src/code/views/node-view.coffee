@@ -3,9 +3,8 @@ tr = require "../utils/translate"
 
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
-  maxTitleLength: 35
+  mixins: [require '../mixins/node-title']
   getDefaultProps: ->
-    defaultValue: tr "~NODE.UNTITLED"
 
 
   componentWillUnmount: ->
@@ -30,9 +29,7 @@ NodeTitle = React.createFactory React.createClass
     @inputElm().val()
 
   updateTitle: (e) ->
-    newTitle = @inputValue()
-    newTitle = newTitle.substr(0,@maxTitleLength)
-    newTitle = if newTitle.length > 0 then newTitle else @props.defaultValue
+    newTitle = @cleanupTitle(@inputValue())
     @props.onChange(newTitle)
 
   finishEditing: ->
@@ -43,15 +40,15 @@ NodeTitle = React.createFactory React.createClass
     (div {className: "node-title", onClick: @props.onStartEditing }, @props.title)
 
   renderTitleInput: ->
-    displayValue = if @props.title is @props.defaultValue then "" else @props.title
+    displayTitle = @displayTitleForInput(@props.title)
     (input {
       type: "text"
       ref: "input"
       className: "node-title"
       onChange: @updateTitle
-      value: displayValue
+      value: displayTitle
       maxlength: @maxTitleLength
-      placeholder: @props.defaultValue
+      placeholder: @titlePlaceholder()
       onBlur: =>
         @finishEditing()
     })
