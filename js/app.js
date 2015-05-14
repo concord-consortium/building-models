@@ -582,7 +582,10 @@ module.exports = {
   defaultTitle: function() {
     return tr("~NODE.UNTITLED");
   },
-  displayTitle: function(proposedTitle) {
+  titlePlaceholder: function() {
+    return this.defaultTitle();
+  },
+  displayTitleForInput: function(proposedTitle) {
     if (proposedTitle === this.defaultTitle()) {
       return "";
     } else {
@@ -4017,7 +4020,7 @@ module.exports = React.createClass({
     remoteNodes = [];
     tabs = [tr('design'), tr('define')];
     selected = tr('design');
-    displayTitle = this.displayTitle(this.props.node.title);
+    displayTitle = this.displayTitleForInput(this.props.node.title);
     return div({
       className: 'node-inspector-view'
     }, InspectorTabs({
@@ -4033,7 +4036,7 @@ module.exports = React.createClass({
       type: 'text',
       name: 'title',
       value: displayTitle,
-      placeholder: this.defaultTitle(),
+      placeholder: this.titlePlaceholder(),
       onChange: this.changeTitle
     })), div({
       className: 'edit-row'
@@ -4116,7 +4119,7 @@ NodeTitle = React.createFactory(React.createClass({
   },
   renderTitleInput: function() {
     var displayTitle;
-    displayTitle = this.displayTitle(this.props.title);
+    displayTitle = this.displayTitleForInput(this.props.title);
     return input({
       type: "text",
       ref: "input",
@@ -4124,7 +4127,7 @@ NodeTitle = React.createFactory(React.createClass({
       onChange: this.updateTitle,
       value: displayTitle,
       maxlength: this.maxTitleLength,
-      placeholder: this.defaultTitle(),
+      placeholder: this.titlePlaceholder(),
       onBlur: (function(_this) {
         return function() {
           return _this.finishEditing();
