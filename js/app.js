@@ -36,7 +36,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":9,"./views/app-view":23}],2:[function(require,module,exports){
+},{"./models/link-manager":10,"./views/app-view":24}],2:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -521,7 +521,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":14,"../utils/translate":21}],7:[function(require,module,exports){
+},{"../utils/google-drive-io":15,"../utils/translate":22}],7:[function(require,module,exports){
 var PreviewImage, hasValidImageExtension, resizeImage;
 
 PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
@@ -573,7 +573,34 @@ module.exports = {
 
 
 
-},{"../utils/has-valid-image-extension":15,"../utils/resize-image":20,"../views/preview-image-dialog-view":47}],8:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":16,"../utils/resize-image":21,"../views/preview-image-dialog-view":48}],8:[function(require,module,exports){
+var tr;
+
+tr = require("../utils/translate");
+
+module.exports = {
+  defaultTitle: function() {
+    return tr("~NODE.UNTITLED");
+  },
+  displayTitle: function(proposedTitle) {
+    if (proposedTitle === this.defaultTitle()) {
+      return "";
+    } else {
+      return proposedTitle;
+    }
+  },
+  maxTitleLength: function() {
+    return 35;
+  },
+  cleanupTitle: function(newTitle) {
+    newTitle = newTitle.substr(0, this.maxTitleLength());
+    return newTitle = newTitle.length > 0 ? newTitle : this.defaultTitle();
+  }
+};
+
+
+
+},{"../utils/translate":22}],9:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -604,7 +631,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var DiagramNode, Importer, Link, LinkManager, UndoRedo, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1291,7 +1318,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../utils/importer":16,"../utils/translate":21,"../utils/undo-redo":22,"./link":10,"./node":11}],10:[function(require,module,exports){
+},{"../utils/importer":17,"../utils/translate":22,"../utils/undo-redo":23,"./link":11,"./node":12}],11:[function(require,module,exports){
 var GraphPrimitive, Link,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1351,7 +1378,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":8}],11:[function(require,module,exports){
+},{"./graph-primitive":9}],12:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1477,7 +1504,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":12,"../utils/translate":21,"./graph-primitive":8}],12:[function(require,module,exports){
+},{"../utils/colors":13,"../utils/translate":22,"./graph-primitive":9}],13:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -1497,7 +1524,7 @@ module.exports = [
 
 
 
-},{"./translate":21}],13:[function(require,module,exports){
+},{"./translate":22}],14:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -1549,7 +1576,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":15,"./resize-image":20}],14:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":16,"./resize-image":21}],15:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -1716,7 +1743,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -1735,7 +1762,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":21}],16:[function(require,module,exports){
+},{"./translate":22}],17:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -1785,7 +1812,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -1993,7 +2020,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -2061,7 +2088,7 @@ module.exports = {
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -2098,7 +2125,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 module.exports = function(src, callback) {
   var img, maxHeight, maxWidth;
   maxWidth = 100;
@@ -2133,7 +2160,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -2166,7 +2193,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":18}],22:[function(require,module,exports){
+},{"./lang/us-en":19}],23:[function(require,module,exports){
 var Command, Manager;
 
 Manager = (function() {
@@ -2362,7 +2389,7 @@ module.exports = {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var DocumentActions, GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, a, div, ref;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
@@ -2446,7 +2473,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":5,"./document-actions-view":25,"./global-nav-view":28,"./image-browser-view":29,"./inspector-panel-view":35,"./link-view":38,"./node-well-view":44,"./placeholder-view":46}],24:[function(require,module,exports){
+},{"../mixins/app-view":5,"./document-actions-view":26,"./global-nav-view":29,"./image-browser-view":30,"./inspector-panel-view":36,"./link-view":39,"./node-well-view":45,"./placeholder-view":47}],25:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -2528,7 +2555,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":12,"../utils/translate":21}],25:[function(require,module,exports){
+},{"../utils/colors":13,"../utils/translate":22}],26:[function(require,module,exports){
 var div, ref, span;
 
 ref = React.DOM, div = ref.div, span = ref.span;
@@ -2579,7 +2606,7 @@ module.exports = React.createClass({
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -2684,7 +2711,7 @@ module.exports = React.createClass({
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -2739,7 +2766,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":13,"../utils/translate":21}],28:[function(require,module,exports){
+},{"../utils/drop-image-handler":14,"../utils/translate":22}],29:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -2819,7 +2846,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":6,"../utils/translate":21,"./dropdown-view":26}],29:[function(require,module,exports){
+},{"../mixins/google-file-interface":6,"../utils/translate":22,"./dropdown-view":27}],30:[function(require,module,exports){
 var ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -2869,7 +2896,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":21,"./image-link-dialog-view":30,"./image-metadata-view":31,"./image-my-computer-dialog-view":32,"./image-search-dialog-view":34,"./modal-tabbed-dialog-view":40}],30:[function(require,module,exports){
+},{"../utils/translate":22,"./image-link-dialog-view":31,"./image-metadata-view":32,"./image-my-computer-dialog-view":33,"./image-search-dialog-view":35,"./modal-tabbed-dialog-view":41}],31:[function(require,module,exports){
 var DropZone, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -2919,7 +2946,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":7,"../utils/translate":21,"./dropzone-view":27}],31:[function(require,module,exports){
+},{"../mixins/image-dialog-view":7,"../utils/translate":22,"./dropzone-view":28}],32:[function(require,module,exports){
 var a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -2999,7 +3026,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":4,"../utils/translate":21}],32:[function(require,module,exports){
+},{"../data/licenses":4,"../utils/translate":22}],33:[function(require,module,exports){
 var DropZone, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -3051,7 +3078,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":7,"../utils/translate":21,"./dropzone-view":27}],33:[function(require,module,exports){
+},{"../mixins/image-dialog-view":7,"../utils/translate":22,"./dropzone-view":28}],34:[function(require,module,exports){
 var ImgChoice, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -3129,7 +3156,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":21}],34:[function(require,module,exports){
+},{"../utils/translate":22}],35:[function(require,module,exports){
 var ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 OpenClipart = require('../utils/open-clipart');
@@ -3333,7 +3360,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":7,"../utils/open-clipart":19,"../utils/translate":21}],35:[function(require,module,exports){
+},{"../mixins/image-dialog-view":7,"../utils/open-clipart":20,"../utils/translate":22}],36:[function(require,module,exports){
 var LinkInspectorView, NodeInspectorView, PaletteInspectorView, div, i, ref;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -3394,7 +3421,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":37,"./node-inspector-view":42,"./palette-inspector-view":45}],36:[function(require,module,exports){
+},{"./link-inspector-view":38,"./node-inspector-view":43,"./palette-inspector-view":46}],37:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3430,7 +3457,7 @@ module.exports = React.createClass({
 
 
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var InspectorTabs, button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -3489,7 +3516,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":21,"./inspector-tabs-view":36}],38:[function(require,module,exports){
+},{"../utils/translate":22,"./inspector-tabs-view":37}],39:[function(require,module,exports){
 var DiagramToolkit, Importer, Node, NodeList, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -3785,7 +3812,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":9,"../utils/drop-image-handler":13,"../utils/importer":16,"../utils/js-plumb-diagram-toolkit":17,"../utils/translate":21,"./node-view":43}],39:[function(require,module,exports){
+},{"../models/link-manager":10,"../utils/drop-image-handler":14,"../utils/importer":17,"../utils/js-plumb-diagram-toolkit":18,"../utils/translate":22,"./node-view":44}],40:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -3818,7 +3845,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":41}],40:[function(require,module,exports){
+},{"./modal-view":42}],41:[function(require,module,exports){
 var ModalDialog, Tab, TabInfo, a, div, li, ref, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -3912,7 +3939,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":39}],41:[function(require,module,exports){
+},{"./modal-dialog-view":40}],42:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3944,7 +3971,7 @@ module.exports = React.createClass({
 
 
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var ColorPicker, ImagePickerView, InspectorTabs, button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -3959,10 +3986,12 @@ ImagePickerView = React.createFactory(require('./image-picker-view'));
 
 module.exports = React.createClass({
   displayName: 'NodeInspectorView',
+  mixins: [require("../mixins/node-title")],
   changeTitle: function(e) {
-    var base;
+    var base, newTitle;
+    newTitle = this.cleanupTitle(e.target.value);
     return typeof (base = this.props).onNodeChanged === "function" ? base.onNodeChanged(this.props.node, {
-      title: e.target.value
+      title: newTitle
     }) : void 0;
   },
   changeImage: function(node) {
@@ -3982,12 +4011,13 @@ module.exports = React.createClass({
     return typeof (base = this.props).onNodeDelete === "function" ? base.onNodeDelete(this.props.node) : void 0;
   },
   render: function() {
-    var builtInNodes, droppedNodes, remoteNodes, selected, tabs;
+    var builtInNodes, displayTitle, droppedNodes, remoteNodes, selected, tabs;
     builtInNodes = [];
     droppedNodes = [];
     remoteNodes = [];
     tabs = [tr('design'), tr('define')];
     selected = tr('design');
+    displayTitle = this.displayTitle(this.props.node.title);
     return div({
       className: 'node-inspector-view'
     }, InspectorTabs({
@@ -4002,7 +4032,8 @@ module.exports = React.createClass({
     }, tr("~NODE-EDIT.TITLE")), input({
       type: 'text',
       name: 'title',
-      value: this.props.node.title,
+      value: displayTitle,
+      placeholder: this.defaultTitle(),
       onChange: this.changeTitle
     })), div({
       className: 'edit-row'
@@ -4030,7 +4061,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":21,"./color-picker-view":24,"./image-picker-view":33,"./inspector-tabs-view":36}],43:[function(require,module,exports){
+},{"../mixins/node-title":8,"../utils/translate":22,"./color-picker-view":25,"./image-picker-view":34,"./inspector-tabs-view":37}],44:[function(require,module,exports){
 var NodeTitle, div, i, img, input, ref, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img;
@@ -4039,12 +4070,8 @@ tr = require("../utils/translate");
 
 NodeTitle = React.createFactory(React.createClass({
   displayName: "NodeTitle",
-  maxTitleLength: 35,
-  getDefaultProps: function() {
-    return {
-      defaultValue: tr("~NODE.UNTITLED")
-    };
-  },
+  mixins: [require('../mixins/node-title')],
+  getDefaultProps: function() {},
   componentWillUnmount: function() {
     if (this.props.isEditing) {
       return this.inputElm().off();
@@ -4074,9 +4101,7 @@ NodeTitle = React.createFactory(React.createClass({
   },
   updateTitle: function(e) {
     var newTitle;
-    newTitle = this.inputValue();
-    newTitle = newTitle.substr(0, this.maxTitleLength);
-    newTitle = newTitle.length > 0 ? newTitle : this.props.defaultValue;
+    newTitle = this.cleanupTitle(this.inputValue());
     return this.props.onChange(newTitle);
   },
   finishEditing: function() {
@@ -4090,16 +4115,16 @@ NodeTitle = React.createFactory(React.createClass({
     }, this.props.title);
   },
   renderTitleInput: function() {
-    var displayValue;
-    displayValue = this.props.title === this.props.defaultValue ? "" : this.props.title;
+    var displayTitle;
+    displayTitle = this.displayTitle(this.props.title);
     return input({
       type: "text",
       ref: "input",
       className: "node-title",
       onChange: this.updateTitle,
-      value: displayValue,
+      value: displayTitle,
       maxlength: this.maxTitleLength,
-      placeholder: this.props.defaultValue,
+      placeholder: this.defaultTitle(),
       onBlur: (function(_this) {
         return function() {
           return _this.finishEditing();
@@ -4247,7 +4272,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":21}],44:[function(require,module,exports){
+},{"../mixins/node-title":8,"../utils/translate":22}],45:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -4315,7 +4340,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":48}],45:[function(require,module,exports){
+},{"./proto-node-view":49}],46:[function(require,module,exports){
 var ImageMetadata, PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -4454,7 +4479,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":21,"./image-metadata-view":31,"./proto-node-view":48}],46:[function(require,module,exports){
+},{"../utils/translate":22,"./image-metadata-view":32,"./proto-node-view":49}],47:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -4472,7 +4497,7 @@ module.exports = React.createClass({
 
 
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 var ImageMetadata, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -4521,7 +4546,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":21,"./image-metadata-view":31}],48:[function(require,module,exports){
+},{"../utils/translate":22,"./image-metadata-view":32}],49:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
