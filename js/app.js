@@ -4137,7 +4137,7 @@ NodeTitle = React.createFactory(React.createClass({
   },
   render: function() {
     return div({
-      className: 'node-title'
+      className: 'node-title-box'
     }, this.props.isEditing ? this.renderTitleInput() : this.renderTitle());
   }
 }));
@@ -4561,6 +4561,8 @@ module.exports = React.createClass({
     reactSafeClone = function(e) {
       var clone;
       clone = $(this).clone(false);
+      clone.removeClass("proto-node");
+      clone.addClass("elm");
       clone.attr('data-reactid', null);
       clone.find("*").each(function(i, v) {
         return $(v).attr('data-reactid', null);
