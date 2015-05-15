@@ -4256,11 +4256,9 @@ module.exports = React.createClass({
           return _this.handleSelected(true);
         };
       })(this))
-    }, div({
-      className: "image-wrapper"
     }, (((ref1 = this.props.data.image) != null ? ref1.length : void 0) > 0 && this.props.data.image !== "#remote" ? img({
       src: this.props.data.image
-    }) : null)), this.props.selected ? div({
+    }) : null), this.props.selected ? div({
       className: "connection-source",
       "data-node-key": this.props.nodeKey
     }) : void 0), NodeTitle({
