@@ -34,7 +34,9 @@ $big-elm-height   = 164px
   overflow visible
 
   .img-background
-    padding 4px
+    enable-flex(direction:column, justify:center, alignItems:center)
+    position relative
+    padding 2px
     border-radius 5px
     background-color white
     border 2px solid
@@ -43,6 +45,11 @@ $big-elm-height   = 164px
     margin-right auto
     width $icon-width
     height $icon-width
+    img
+      max-width $img-size
+      max-height $img-size
+      margin 0px
+      padding 0px
 
   .connection-source
     position absolute
