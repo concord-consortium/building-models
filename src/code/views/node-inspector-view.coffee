@@ -6,9 +6,10 @@ ImagePickerView = React.createFactory require './image-picker-view'
 module.exports = React.createClass
 
   displayName: 'NodeInspectorView'
-
+  mixins: [require "../mixins/node-title"]
   changeTitle: (e) ->
-    @props.onNodeChanged? @props.node, {title: e.target.value}
+    newTitle = @cleanupTitle(e.target.value)
+    @props.onNodeChanged? @props.node, {title: newTitle}
 
   changeImage: (node) ->
     @props.onNodeChanged? @props.node, {image: node.image}
@@ -25,13 +26,14 @@ module.exports = React.createClass
     remoteNodes = []
     tabs = [tr('design'), tr('define')]
     selected = tr('design')
+    displayTitle = @displayTitleForInput(@props.node.title)
 
     (div {className: 'node-inspector-view'},
       (InspectorTabs {tabs: tabs, selected: selected} )
       (div {className: 'node-inspector-content'},
         (div {className: 'edit-row'},
           (label {htmlFor: 'title'}, tr "~NODE-EDIT.TITLE")
-          (input {type: 'text', name: 'title', value: @props.node.title, onChange: @changeTitle})
+          (input {type: 'text', name: 'title', value: displayTitle, placeholder: @titlePlaceholder(),  onChange: @changeTitle})
         )
         (div {className: 'edit-row'},
           (label {htmlFor: 'color'}, tr "~NODE-EDIT.COLOR")
