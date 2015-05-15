@@ -54,7 +54,7 @@ NodeTitle = React.createFactory React.createClass
     })
 
   render: ->
-    (div {className: 'node-title'},
+    (div {className: 'node-title-box'},
       if @props.isEditing
         @renderTitleInput()
       else
@@ -143,9 +143,7 @@ module.exports = React.createClass
         onClick: (=> @handleSelected true)
         onTouchend: (=> @handleSelected true)
         },
-        (div {className: "image-wrapper"},
-          (if @props.data.image?.length > 0 and @props.data.image isnt "#remote" then (img {src: @props.data.image}) else null)
-        )
+        (if @props.data.image?.length > 0 and @props.data.image isnt "#remote" then (img {src: @props.data.image}) else null)
         if @props.selected
           (div {className: "connection-source", "data-node-key": @props.nodeKey})
       )
