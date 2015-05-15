@@ -7,6 +7,8 @@ module.exports = React.createClass
   componentDidMount: ->
     reactSafeClone = (e) ->
       clone = $(@).clone(false)
+      clone.removeClass "proto-node"
+      clone.addClass "elm"
       clone.attr('data-reactid', null)
       clone.find("*").each (i,v) ->
         $(v).attr('data-reactid', null)
