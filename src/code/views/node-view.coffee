@@ -54,7 +54,7 @@ NodeTitle = React.createFactory React.createClass
     })
 
   render: ->
-    (div {className: 'node-title'},
+    (div {className: 'node-title-box'},
       if @props.isEditing
         @renderTitleInput()
       else

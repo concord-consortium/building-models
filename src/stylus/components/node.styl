@@ -1,6 +1,14 @@
-$deleteColor = hsl(1,50%,50%)
+$deleteColor      = hsl(1,50%,50%)
+
+$img-size         = 42px
+$icon-width       = 50px
+$small-elm-width  = 58px
+$big-elm-width    = 110px
+$node-title-width = 90px
+$big-elm-height   = 164px
 
 .elm
+  box-sizing border-box
   *
     no-select()
   input
@@ -13,6 +21,8 @@ $deleteColor = hsl(1,50%,50%)
   border-radius 5px
   background-color none
   text-align center
+  width $small-elm-width
+  overflow visible
   .img-background
     padding 2px
     border-radius 5px
@@ -21,19 +31,40 @@ $deleteColor = hsl(1,50%,50%)
     margin-bottom 9px
     margin-left auto
     margin-right auto
-    width 50px
-    height 50px
+    width $icon-width
+    height $icon-width
+
+  input
+    position relative
+    width $node-title-width
+
+  .connection-source
+    position absolute
+    background-color white
+    right -10px
+    top 10px
+    border-radius 18px
+    width 18px
+    height 18px
+    background-image url("../img/bb-chrome/btn-nodeLink.svg")
+    background-size 10px
+    background-position center
+    background-repeat no-repeat
+    border 2px solid
 
   &.selected
     box-shadow 2px 2px 2px hsla(0,0,0,0.2)
     border-radius 5px
     background-color white
     border 2px solid
-    height 164px
-    width 110px
-    margin-left -25px
-    margin-top -10px
+    height $big-elm-height
+    width $big-elm-width
+    margin-left (($big-elm-width - $icon-width) / -2.0)
+    margin-top -16px
     box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.25)
+    .node-title
+      margin-left auto
+      margin-right auto
     .img-background
       margin 1em
       border 2px solid hsla(0,0,100,0.0)
@@ -44,26 +75,15 @@ $deleteColor = hsl(1,50%,50%)
       border-radius 5px
       .image-wrapper
         padding 2px
-        width 50px
-        height 50px
+        width $img-size
+        height $img-size
         border-radius 5px
         border 2px solid
-
-
     .connection-source
-      position absolute
-      box-sizing padding-box
-      top 25px
-      background-color white
-      right 10px
-      border-radius 18px
-      width 18px
-      height 18px
-      background-image url("../img/bb-chrome/btn-nodeLink.svg")
-      background-size 10px
-      background-position center
-      background-repeat no-repeat
-      border 2px solid
+      top 20px
+      right 15px
+    input
+      left 0
     &:hover
       .img-background
         box-shadow none
@@ -74,20 +94,21 @@ $deleteColor = hsl(1,50%,50%)
       box-shadow 0px 1px 1px 0px rgba(0, 0, 0, 0.25)
 
   img
-    max-width 42px
-    max-height 42px
+    max-width $img-size
+    max-height $img-size
     padding 0px
     margin 0px
 
   .node-title
     default-font(size:10px)
     color dark
-    max-width 100px
-    margin-left auto
-    margin-right auto
+    width $node-title-width
+    margin-left (($node-title-width - $icon-width) / -2)
+    text-align center
     cursor pointer
-    margin-bottom 1.2em
+    margin-bottom 0.5em
     word-wrap break-word
+
   .delete-box
     margin 2px
     padding 0px
