@@ -1,10 +1,12 @@
-Importer    = require '../utils/importer'
-Link        = require './link'
-DiagramNode = require './node'
-UndoRedo    = require '../utils/undo-redo'
-tr          = require "../utils/translate"
+Importer         = require '../utils/importer'
+Link             = require './link'
+DiagramNode      = require './node'
+UndoRedo         = require '../utils/undo-redo'
+SelectionManager = require './selection-manager'
+tr               = require "../utils/translate"
+
 # LinkManager is the logical manager of Nodes and Links.
-module.exports = class LinkManager
+module.exports   = class LinkManager
   @instances: {} # map of context -> instance
 
   @instance: (context) ->
@@ -14,15 +16,15 @@ module.exports = class LinkManager
   constructor: (context) ->
     @linkKeys           = {}
     @nodeKeys           = {}
-    @nodeViewStates     = {}
     @linkListeners      = []
     @nodeListeners      = []
-    @selectionListeners = []
     @loadListeners      = []
     @filename           = null
     @filenameListeners  = []
     @imageMetadataCache = {}
+
     @undoRedoManager    = new UndoRedo.Manager debug: true
+    @selectionManager   = new SelectionManager()
 
   undo: ->
     @undoRedoManager.undo()
@@ -50,10 +52,6 @@ module.exports = class LinkManager
   addNodeListener: (listener) ->
     log.info("adding node listener")
     @nodeListeners.push listener
-
-  addSelectionListener: (listener) ->
-    log.info("adding selection listener #{listener}")
-    @selectionListeners.push listener
 
   addLoadListener: (listener) ->
     log.info("adding load listener #{listener}")
@@ -95,7 +93,6 @@ module.exports = class LinkManager
 
   _addLink: (link) ->
     if @hasLink link
-      @selectLink(null)
       return false
     else
       @linkKeys[link.terminalKey()] = link
@@ -104,7 +101,6 @@ module.exports = class LinkManager
       for listener in @linkListeners
         log.info "notifying of new link: #{link.terminalKey()}"
         listener.handleLinkAdd(link)
-      @selectLink(link)
       return true
 
   removeLink: (link) ->
@@ -158,22 +154,6 @@ module.exports = class LinkManager
     for listener in @nodeListeners
       log.info("notifying of deleted Node")
       listener.handleNodeRm(node)
-    @selectNode(null)
-    for listener in @selectionListeners
-      listener({node:null, connection:null})
-
-  deleteNodeViewState: (context) ->
-    # remove the last one
-    delete @nodeViewStates[context]
-    @_notifyNodeChanged(null)
-
-  setNodeViewState: (node,context) ->
-    @deleteNodeViewState()
-    @nodeViewStates[context] = node
-    @_notifyNodeChanged(node)
-
-  nodeViewState: (node, context) ->
-    @nodeViewStates[context] is node
 
   moveNodeCompleted: (nodeKey, pos, originalPos) ->
     node = @nodeKeys[nodeKey]
@@ -192,19 +172,22 @@ module.exports = class LinkManager
       listener.handleNodeMove(node)
 
   selectedNode: ->
-    @nodeViewStates.selected
+    @selectionManager.selection(SelectionManager.NodeInpsection)[0] or null
+
+  editingNode: ->
+    @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
+
+  editNode: (nodeKey) ->
+    @selectionManager.selectForTitleEditing(@nodeKeys[nodeKey])
 
   selectNode: (nodeKey) ->
-    selectedNode = @nodeKeys[nodeKey]
-    @setNodeViewState(selectedNode, "selected")
-    if @selectedNode()
-      for listener in @selectionListeners
-        log.info "Selection happened for #{nodeKey} -- #{@selectedNode().title}"
-        listener({node:selectedNode, connection:null})
+    @selectionManager.selectForInspection(@nodeKeys[nodeKey])
+
 
   _notifyNodeChanged: (node) ->
     for listener in @nodeListeners
       listener.handleNodeChange(node)
+    @_maybeChangeSelectedItem node
 
   changeNode: (data, node) ->
     node = node or @selectedNode()
@@ -225,10 +208,7 @@ module.exports = class LinkManager
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
     @_notifyNodeChanged(node)
-    if node is @selectedNode()
-      for listener in @selectionListeners
-        log.info "Selected node changed data: #{@selectedNode().title}"
-        listener({node:@selectedNode(), connection:null})
+
 
   changeNodeWithKey: (key, data) ->
     node = @nodeKeys[ key ]
@@ -236,32 +216,28 @@ module.exports = class LinkManager
       @changeNode(data,node)
 
   selectLink: (link) ->
-    if @selectedLink
-      @selectedLink.selected = false
-    # TODO: better selection management.
-    delete @nodeViewStates.selected
-    @selectedLink = link
-    link?.selected = true
-    for listener in @selectionListeners
-      listener({node:null, connection:@selectedLink})
+    @selectionManager.selectLink(link)
 
-  changeLink: (title, color, deleted) ->
+  changeLink: (link, title, color, deleted) ->
     if deleted
       @removeSelectedLink()
-    else if @selectedLink
-      link = @selectedLink
-      originalTitle = @selectedLink.title
-      originalColor = @selectedLink.color
+    else if link
+      originalTitle = link.title
+      originalColor = link.color
       @undoRedoManager.createAndExecuteCommand 'changeLink',
         execute: => @_changeLink link, title, color
         undo: => @_changeLink link, originalTitle, originalColor
+
+  _maybeChangeSelectedItem: (item) ->
+    # TODO: This is kind of hacky:
+    if @selectionManager.isSelected(item)
+      @selectionManager._notifySelectionChange()
 
   _changeLink: (link, title, color) ->
     log.info "Change  for #{link.title}"
     link.title = title
     link.color = color
-    for listener in @selectionListeners
-      listener({node:null, connection:link})
+    @_maybeChangeSelectedItem link
 
   _nameForNode: (node) ->
     @nodeKeys[node]
@@ -293,17 +269,17 @@ module.exports = class LinkManager
     @removeSelectedNode()
 
   removeSelectedNode: ->
-    if @selectedNode()
-      @removeNode(@selectedNode().key)
-      for listener in @selectionListeners
-        listener({node:null, connection:null})
+    nodeKey = @selectedNode()?.key
+    if nodeKey
+      @removeNode nodeKey
+      @selectionManager.clearSelection()
 
   removeSelectedLink: ->
-    if @selectedLink
-      @removeLink(@selectedLink)
-      @selectedLink = null
-      for listener in @selectionListeners
-        listener({node:null, connection:null})
+    selectedLink = @selectionManager.getLinkSelection()[0] or null
+    if selectedLink
+      @removeLink(selectedLink)
+      @selectionManager.clearLinkSelection()
+
 
   removeLinksForNode: (node) ->
     @removeLink(link) for link in node.links

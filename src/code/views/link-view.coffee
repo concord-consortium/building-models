@@ -15,13 +15,26 @@ module.exports = React.createClass
     $container = $(@refs.container.getDOMNode())
 
     @diagramToolkit = new DiagramToolkit $container,
-      Container: $container[0],
+      Container:     $container[0]
       handleConnect: @handleConnect
-      handleClick: @handleClick
-    @_updateToolkit()
+      handleClick:   @handleClick
 
     @props.linkManager.addLinkListener @
     @props.linkManager.addNodeListener @
+
+    @props.selectionManager.addSelectionListener (manager) =>
+      lastLinkSelection = @state.selectedLink
+      selectedNode      = manager.getInspection()[0] or null
+      editingNode       = manager.getTitleEditing()[0] or null
+      selectedLink      = manager.getLinkSelection()[0] or null
+
+      @setState
+        selectedNode: selectedNode
+        editingNode:  editingNode
+        selectedLink: selectedLink
+
+      if lastLinkSelection is not @state.selectedLink
+        @_updateToolkit()
 
     $container.droppable
       accept: '.proto-node'
@@ -34,10 +47,12 @@ module.exports = React.createClass
           width: $panel.width()
           height: $panel.height()
           offset: $panel.offset()
+
         inPanel = ui.offset.left >= panel.offset.left and
                   ui.offset.top >= panel.offset.top and
                   ui.offset.left <= panel.offset.left + panel.width and
                   ui.offset.top <= panel.offset.top + panel.height
+
         if not inPanel
           @addNode e, ui
 
@@ -52,12 +67,16 @@ module.exports = React.createClass
         y: ui.offset.top - offset.top
         title: title
         image: image
-    @props.linkManager.setNodeViewState(node, 'is-editing')
+    @props.linkManager.editNode(node.key)
+
 
 
   getInitialState: ->
     nodes: []
     links: []
+    selectedNode: null
+    editingNode: null
+    selectedLink: null
     canDrop: false
 
   componentWillUpdate: ->
@@ -152,8 +171,9 @@ module.exports = React.createClass
     for link in @state.links
       source = @_nodeForName link.sourceNode.key
       target = @_nodeForName link.targetNode.key
+      isSelected = @props.selectionManager.isSelected(link)
       if source and target
-        @diagramToolkit.addLink source, target, link.title, link.color, "unused-term", "unused-term", link
+        @diagramToolkit.addLink source, target, link.title, link.color, isSelected, link
 
   onDragOver: (e) ->
     if not @state.canDrop
@@ -183,12 +203,12 @@ module.exports = React.createClass
           y: dropPos.y
           title: tr "~NODE.UNTITLED"
           image: file.image
-      @props.linkManager.setNodeViewState(node, 'is-editing')
+      @props.linkManager.editNode(node.key)
 
   onContainerClicked: (e) ->
     if e.target is @refs.container.getDOMNode()
       # deselect links when background is clicked
-      @props.linkManager.selectLink null
+      @props.selectionManager.clearSelection()
 
   render: ->
     (div {className: "link-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
@@ -197,16 +217,15 @@ module.exports = React.createClass
           (Node {
             key: node.key
             data: node
-            selected: @props.linkManager.nodeViewState(node, "selected")
-            editTitle: @props.linkManager.nodeViewState(node, "title-editing")
+            selected: @state.selectedNode is node
+            editTitle: @state.editingNode is node
             nodeKey: node.key
             ref: node.key
             onMove: @onNodeMoved
             onMoveComplete: @onNodeMoveComplete
             onDelete: @onNodeDeleted
             linkManager: @props.linkManager
+            selectionManager: @props.selectionManager
           })
       )
     )
-
-

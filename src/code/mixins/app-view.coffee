@@ -52,13 +52,18 @@ module.exports =
 
   componentDidMount: ->
     @addDeleteKeyHandler true
-
-    @props.linkManager.addSelectionListener (selections) =>
+    @props.linkManager.selectionManager.addSelectionListener (manager) =>
+      selectedNode = manager.getInspection()[0] or null
+      editingNode  = manager.getTitleEditing()[0] or null
+      selectedLink = manager.getLinkSelection()[0] or null
+      
       @setState
-        selectedNode: selections.node
-        selectedConnection: selections.connection
-      @addToPalette selections.node
-      log.info 'updated selections: + selections'
+        selectedNode: selectedNode
+        editingNode: editingNode
+        selectedLink: selectedLink
+
+      @addToPalette selectedNode
+      log.info 'updated selections'
 
     @props.linkManager.addLoadListener (data) =>
       # reload the palette
@@ -108,4 +113,4 @@ module.exports =
     @props.linkManager.deleteSelected()
 
   onLinkChanged: (link, title, color, deleted) ->
-    @props.linkManager.changeLink title,color, deleted
+    @props.linkManager.changeLink link, title,color, deleted

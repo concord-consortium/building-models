@@ -77,9 +77,9 @@ module.exports = React.createClass
     editingNodeTitle: false
 
   handleSelected: (actually_select) ->
-    if @props.linkManager
+    if @props.selectionManager
       selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-      @props.linkManager.selectNode selectionKey
+      @props.selectionManager.selectForInspection(@props.data)
 
   propTypes:
     onDelete: React.PropTypes.func
@@ -121,13 +121,13 @@ module.exports = React.createClass
     @props.linkManager.changeNodeWithKey(@props.nodeKey, {title:newTitle})
 
   startEditing: ->
-    @props.linkManager.setNodeViewState(@props.data, 'is-editing')
+    @props.selectionManager.selectForTitleEditing(@props.data)
 
   stopEditing: ->
-    @props.linkManager.setNodeViewState(null, 'is-editing')
+    @props.selectionManager.clearTitleEditing()
 
   isEditing: ->
-    @props.linkManager.nodeViewState(@props.data, 'is-editing')
+    @props.selectionManager.isSelectedForTitleEditing(@props.data)
 
   render: ->
     style =
@@ -148,12 +148,10 @@ module.exports = React.createClass
           (div {className: "connection-source", "data-node-key": @props.nodeKey})
       )
       (NodeTitle {
-        isEditing: @props.linkManager.nodeViewState(@props.data, 'is-editing')
+        isEditing: @props.editTitle
         title: @props.data.title
         onChange: @changeTitle
         onStopEditing: @stopEditing
         onStartEditing: @startEditing
-
       })
     )
-
