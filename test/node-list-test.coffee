@@ -57,7 +57,7 @@ describe 'Link', ->
         title: 'unkown link'
       )
     it "should have a reasonable text based terminalKey", ->
-      @link.terminalKey().should.equal("source[a] ---Link-1---> target[b]")
+      @link.terminalKey().should.equal("source ------> target")
 
 describe 'Node', ->
   beforeEach ->

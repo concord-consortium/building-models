@@ -13,7 +13,7 @@ module.exports = class Link extends GraphPrimitive
   type: 'Link'
 
   terminalKey: ->
-    "#{@sourceNode.key}[#{@sourceTerminal}] ---#{@key}---> #{@targetNode.key}[#{@targetTerminal}]"
+    "#{@sourceNode.key} ------> #{@targetNode.key}"
 
   nodeKey: ->
     "#{@sourceNode} ---#{@key}---> #{@targetNode}"

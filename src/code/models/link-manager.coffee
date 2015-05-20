@@ -94,7 +94,10 @@ module.exports = class LinkManager
       undo: => @_removeLink link
 
   _addLink: (link) ->
-    unless @hasLink link
+    if @hasLink link
+      @selectLink(null)
+      return false
+    else
       @linkKeys[link.terminalKey()] = link
       @nodeKeys[link.sourceNode.key].addLink(link)
       @nodeKeys[link.targetNode.key].addLink(link)
@@ -103,7 +106,6 @@ module.exports = class LinkManager
         listener.handleLinkAdd(link)
       @selectLink(link)
       return true
-    return false
 
   removeLink: (link) ->
     @undoRedoManager.createAndExecuteCommand 'removeLink',
