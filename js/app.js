@@ -795,7 +795,10 @@ module.exports = LinkManager = (function() {
 
   LinkManager.prototype._addLink = function(link) {
     var i, len, listener, ref;
-    if (!this.hasLink(link)) {
+    if (this.hasLink(link)) {
+      this.selectLink(null);
+      return false;
+    } else {
       this.linkKeys[link.terminalKey()] = link;
       this.nodeKeys[link.sourceNode.key].addLink(link);
       this.nodeKeys[link.targetNode.key].addLink(link);
@@ -808,7 +811,6 @@ module.exports = LinkManager = (function() {
       this.selectLink(link);
       return true;
     }
-    return false;
   };
 
   LinkManager.prototype.removeLink = function(link) {
@@ -1349,7 +1351,7 @@ module.exports = Link = (function(superClass) {
   Link.prototype.type = 'Link';
 
   Link.prototype.terminalKey = function() {
-    return this.sourceNode.key + "[" + this.sourceTerminal + "] ---" + this.key + "---> " + this.targetNode.key + "[" + this.targetTerminal + "]";
+    return this.sourceNode.key + " ------> " + this.targetNode.key;
   };
 
   Link.prototype.nodeKey = function() {
