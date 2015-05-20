@@ -15,40 +15,40 @@ Link           = requireModel 'link'
 Node           = requireModel 'node'
 LinkManager    = requireModel 'link-manager'
 
-describe 'GraphPrimitive', () ->
-  it 'GraphPrimitive should exists', () ->
+describe 'GraphPrimitive', ->
+  it 'GraphPrimitive should exists', ->
     GraphPrimitive.should.exist
 
-  describe 'the type', () ->
+  describe 'the type', ->
     undertest = new GraphPrimitive()
     undertest.type.should.equal('GraphPrimitive')
 
-  describe 'the id', () ->
-    beforeEach () ->
+  describe 'the id', ->
+    beforeEach ->
       GraphPrimitive.reset_counters()
 
-    describe 'of a GraphPrimitive', () ->
-      it 'should increment the counter, and use the type name (GraphPrimitive)', () ->
+    describe 'of a GraphPrimitive', ->
+      it 'should increment the counter, and use the type name (GraphPrimitive)', ->
         undertest = new GraphPrimitive()
         undertest.id.should.equal('GraphPrimitive-1')
 
-    describe 'of a Link', () ->
-      it 'should increment the counter, and use the type name (Link)', () ->
+    describe 'of a Link', ->
+      it 'should increment the counter, and use the type name (Link)', ->
         undertest = new Link()
         undertest.id.should.equal('Link-1')
         secondLink = new Link()
         secondLink.id.should.equal('Link-2')
 
-    describe 'of a Node', () ->
-      it 'should increment the counter, and use the type name (Node)', () ->
+    describe 'of a Node', ->
+      it 'should increment the counter, and use the type name (Node)', ->
         undertest = new Node()
         undertest.id.should.equal('Node-1')
         secondNode = new Node()
         secondNode.id.should.equal('Node-2')
 
-describe 'Link', () ->
-  describe 'terminalKey', () ->
-    beforeEach () ->
+describe 'Link', ->
+  describe 'terminalKey', ->
+    beforeEach ->
       @link = new Link(
         sourceNode: {key: 'source'},
         sourceTerminal: 'a',
@@ -56,11 +56,11 @@ describe 'Link', () ->
         targetTerminal: 'b',
         title: 'unkown link'
       )
-    it "should have a reasonable text based terminalKey", () ->
+    it "should have a reasonable text based terminalKey", ->
       @link.terminalKey().should.equal("source[a] ---Link-1---> target[b]")
 
-describe 'Node', () ->
-  beforeEach () ->
+describe 'Node', ->
+  beforeEach ->
     @node_a = new Node({title: "Node a"},'a')
     @node_b = new Node({title: "Node b"},'b')
     @node_c = new Node({title: "Node c"},'c')
@@ -78,8 +78,8 @@ describe 'Node', () ->
                    |   |
                    +---+
   ###
-  describe 'its links', () ->
-    beforeEach () ->
+  describe 'its links', ->
+    beforeEach ->
       @link_a = new Link
         title: "link a"
         sourceNode: @node_a
@@ -101,52 +101,52 @@ describe 'Node', () ->
         targetNode: @node_c
 
 
-    describe 'rejecting bad links', () ->
-      describe 'links that dont include itself', () ->
-        it "it shouldn't add a link it doesn't belong to", ()->
-          fn = () =>
+    describe 'rejecting bad links', ->
+      describe 'links that dont include itself', ->
+        it "it shouldn't add a link it doesn't belong to",  ->
+          fn =  =>
             @node_a.addLink(@link_without_a)
           fn.should.throw("Bad link")
 
-      describe 'links that it already has', () ->
-        beforeEach () ->
+      describe 'links that it already has', ->
+        beforeEach ->
           @node_a.addLink(@link_a)
-        it 'should throw an error when re-linking', ()->
-          fn = () =>
+        it 'should throw an error when re-linking',  ->
+          fn =  =>
             @node_a.addLink(@link_a)
           fn.should.throw("Duplicate link")
 
-    describe 'sorting links', () ->
-      describe "a node with two out links, and one in link", () ->
-        beforeEach () ->
+    describe 'sorting links', ->
+      describe "a node with two out links, and one in link", ->
+        beforeEach ->
           @node_a.addLink(@link_a)
           @node_a.addLink(@link_b)
           @node_a.addLink(@link_c)
 
-        describe 'In Links', () ->
-          it "should have 1 in link", () ->
+        describe 'In Links', ->
+          it "should have 1 in link", ->
             @node_a.inLinks().should.have.length(1)
 
-        describe 'outLinks', () ->
-          it "should have 2 outlinks", () ->
+        describe 'outLinks', ->
+          it "should have 2 outlinks", ->
             @node_a.outLinks().should.have.length(2)
 
-        describe 'downstreamNodes', () ->
-          it "should have some nodes", () ->
+        describe 'downstreamNodes', ->
+          it "should have some nodes", ->
             @node_a.downstreamNodes().should.have.length(2)
 
-        describe '#infoString', () ->
-          it "should print a list of nodes its connected to", () ->
+        describe '#infoString', ->
+          it "should print a list of nodes its connected to", ->
             expected = "Node a  --link a-->[Node b], --link b-->[Node c]"
             @node_a.infoString().should.equal(expected)
 
-  describe "LinkManager", () ->
-    beforeEach () ->
+  describe "LinkManager", ->
+    beforeEach ->
       @nodeA = new Node({title: "a", x:10, y:10}, 'a')
       @nodeB = new Node({title: "b", x:20, y:20}, 'b')
       @linkManager = new LinkManager()
-      @linkManager.addNode(@nodeA);
-      @linkManager.addNode(@nodeB);
+      @linkManager.addNode @nodeA
+      @linkManager.addNode @nodeB
 
       @newLink = new Link({
         sourceNode: @nodeA
@@ -154,37 +154,37 @@ describe 'Node', () ->
         targetTerminal: "a"
         sourceTerminal: "b"
       })
-      @newLink.terminalKey = () ->
+      @newLink.terminalKey = ->
         "newLink"
 
       @otherNewLink = new Link({
         sourceNode: @nodeB
         targetNode: @nodeA
       })
-      @otherNewLink.terminalKey = () ->
+      @otherNewLink.terminalKey = ->
         "otherNewLink"
 
-    describe "addLink", () ->
-      describe "When the link doesn't already exist", () ->
-        it "should add a new link", () ->
+    describe "addLink", ->
+      describe "When the link doesn't already exist", ->
+        it "should add a new link", ->
           should.not.exist @linkManager.linkKeys['newLink']
           @linkManager.addLink(@newLink).should.equal(true)
           @linkManager.addLink(@otherNewLink).should.equal(true)
           @linkManager.linkKeys['newLink'].should.equal(@newLink)
           @linkManager.linkKeys['otherNewLink'].should.equal(@otherNewLink)
-      describe "When the link does already exist", () ->
-        beforeEach () ->
+      describe "When the link does already exist", ->
+        beforeEach ->
           @linkManager.linkKeys['newLink'] = 'oldValue'
-        it "should not add the new link", () ->
+        it "should not add the new link", ->
           @linkManager.addLink(@newLink).should.equal(false)
           @linkManager.linkKeys['newLink'].should.equal('oldValue')
 
-    describe "Serialization", () ->
-      beforeEach () ->
+    describe "Serialization", ->
+      beforeEach ->
         @serializedForm = """{"version":0.1,"filename":null,"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}],"imageMetadata":{}}"""
 
-      describe "toJsonString", () ->
-        it "should include nodes and links", () ->
+      describe "toJsonString", ->
+        it "should include nodes and links", ->
           expectedValue = "{}"
           @nodeA.key.should.equal("a")
           @linkManager.addLink(@newLink)
@@ -193,10 +193,10 @@ describe 'Node', () ->
           @linkManager.toJsonString().should.match(/"links":/)
           @linkManager.toJsonString().should.equal(@serializedForm)
 
-      describe "loadData", () ->
-        beforeEach () ->
+      describe "loadData", ->
+        beforeEach ->
           @linkManager = new LinkManager()
-        it "should read the serialized data without error", () ->
+        it "should read the serialized data without error", ->
           data = JSON.parse(@serializedForm)
           @linkManager.loadData(data)
           @linkManager.nodeKeys.should.have.any.keys("a")
