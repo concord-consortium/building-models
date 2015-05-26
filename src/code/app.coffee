@@ -1,5 +1,6 @@
 AppView     = React.createFactory require './views/app-view'
 LinkManager = require './models/link-manager'
+CodapConnect = require './utils/codap-connect'
 
 getParameterByName = (name) ->
   name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
@@ -14,5 +15,7 @@ window.initApp = (wireframes=false) ->
     data: getParameterByName 'data'
   appView = AppView opts
   elem = '#app'
+  codapConnect = new CodapConnect
+  codapConnect.init()
   jsPlumb.bind 'ready', ->
     React.render appView, $(elem)[0]
