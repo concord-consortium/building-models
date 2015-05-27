@@ -11,7 +11,7 @@ module.exports = class CodapConnect
   init: (linkManager, name) ->
     log.info 'CodapConnect initializing'
     @linkManager = linkManager
-    name && @name = name
+    name and @name = name
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'codap-game', window.parent )
