@@ -38,7 +38,8 @@ module.exports = class CodapConnect
 
       when 'restoreState'
         log.info 'Received restoreState request from CODAP.'
-#        @linkManager.
+        @linkManager.deleteAll()
+        @linkManager.loadData args.state
         iCallback
           success: true
       else
