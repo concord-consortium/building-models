@@ -8,8 +8,10 @@ module.exports = class CodapConnect
 
   initAccomplished: false
 
-  init: ->
+  init: (linkManager, name) ->
     log.info 'CodapConnect initializing'
+    @linkManager = linkManager
+    name && @name = name
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'codap-game', window.parent )
@@ -24,17 +26,23 @@ module.exports = class CodapConnect
         contextType: 'DG.DataContext'
     }, @initGameHandler)
 
-  codapRequestHandler: (iCmd, iCallback) ->
+  codapRequestHandler: (iCmd, iCallback) =>
     operation = iCmd.operation
-    if operation
-      args = iCmd.args
-      switch operation
-        when 'saveState'
-          log.info 'Received saveState request from CODAP.'
-        when 'restoreState'
-          log.info 'Received restoreState request from CODAP.'
-        else
-          log.info 'Unknown request received from CODAP: ' + operation
+    args = iCmd.args
+    switch operation
+      when 'saveState'
+        log.info 'Received saveState request from CODAP.'
+        iCallback
+          success: true
+          state: @linkManager.serialize require '../data/initial-palette'
 
-  initGameHandler: ->
+      when 'restoreState'
+        log.info 'Received restoreState request from CODAP.'
+#        @linkManager.
+        iCallback
+          success: true
+      else
+        log.info 'Unknown request received from CODAP: ' + operation
+
+  initGameHandler: =>
     @initAccomplished = true

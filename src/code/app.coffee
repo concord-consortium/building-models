@@ -16,6 +16,6 @@ window.initApp = (wireframes=false) ->
   appView = AppView opts
   elem = '#app'
   codapConnect = new CodapConnect
-  codapConnect.init()
+  codapConnect.init(opts.linkManager)
   jsPlumb.bind 'ready', ->
     React.render appView, $(elem)[0]
