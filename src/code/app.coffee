@@ -1,6 +1,6 @@
 AppView     = React.createFactory require './views/app-view'
 LinkManager = require './models/link-manager'
-CodapConnect = require './utils/codap-connect'
+CodapConnect = require './models/codap-connect'
 
 getParameterByName = (name) ->
   name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
@@ -13,9 +13,10 @@ window.initApp = (wireframes=false) ->
     url: 'json/serialized.json'
     linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
+
+  opts.codapConnect = new CodapConnect opts.linkManager
   appView = AppView opts
   elem = '#app'
-  codapConnect = new CodapConnect
-  codapConnect.init(opts.linkManager)
+
   jsPlumb.bind 'ready', ->
     React.render appView, $(elem)[0]

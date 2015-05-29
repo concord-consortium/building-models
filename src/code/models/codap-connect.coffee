@@ -8,7 +8,7 @@ module.exports = class CodapConnect
 
   initAccomplished: false
 
-  init: (linkManager, name) ->
+  constructor: (linkManager, name) ->
     log.info 'CodapConnect initializing'
     @linkManager = linkManager
     name and @name = name
@@ -26,13 +26,14 @@ module.exports = class CodapConnect
         contextType: 'DG.DataContext'
     }, @initGameHandler)
 
-  codapRequestHandler: (iCmd, iCallback) =>
-    operation = iCmd.operation
-    args = iCmd.args
+  codapRequestHandler: (cmd, callback) =>
+    operation = cmd.operation
+    args = cmd.args
+
     switch operation
       when 'saveState'
         log.info 'Received saveState request from CODAP.'
-        iCallback
+        callback
           success: true
           state: @linkManager.serialize require '../data/initial-palette'
 
@@ -40,7 +41,7 @@ module.exports = class CodapConnect
         log.info 'Received restoreState request from CODAP.'
         @linkManager.deleteAll()
         @linkManager.loadData args.state
-        iCallback
+        callback
           success: true
       else
         log.info 'Unknown request received from CODAP: ' + operation
