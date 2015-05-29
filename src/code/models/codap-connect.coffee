@@ -48,3 +48,28 @@ module.exports = class CodapConnect
 
   initGameHandler: =>
     @initAccomplished = true
+
+  #
+  # Requests a CODAP action, if the Building Models tool is configured to reside
+  # in CODAP. For actions that may be requested, see
+  # https://github.com/concord-consortium/codap/wiki/Data-Interactive-API .
+  #
+  # Similarly to the Google Drive API, this method will report results of its
+  # asynchronous request either by invoking the provided callback, or, if no
+  # callback is provided, will return a Promise.
+  #
+  # Example:
+  #   codapConnect.request('logAction', {formatStr: 'test message'}).then ->
+  #     log.info 'received log reply!'
+  #
+
+  request: (action, args, callback) ->
+    promise = new Promise (resolve, reject) =>
+      @codapPhone.call { action: action, args: args }, (reply) ->
+        if callback
+          callback reply
+        if reply && reply.success
+          resolve reply
+        else
+          reject 'CODAP request error'
+    promise
