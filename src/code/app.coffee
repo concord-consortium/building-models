@@ -14,9 +14,10 @@ window.initApp = (wireframes=false) ->
     linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
 
-  opts.codapConnect = new CodapConnect opts.linkManager
   appView = AppView opts
   elem = '#app'
 
   jsPlumb.bind 'ready', ->
     React.render appView, $(elem)[0]
+
+  opts.codapConnect = new CodapConnect opts.linkManager
