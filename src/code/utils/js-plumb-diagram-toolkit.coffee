@@ -103,11 +103,11 @@ module.exports = class DiagramToolkit
   _clean_borked_endpoints: ->
     $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove()
 
-  addLink: (source, target, label, color, source_terminal, target_terminal, linkModel) ->
+  addLink: (source, target, label, color, isSelected, linkModel) ->
     paintStyle = @_paintStyle color
     paintStyle.outlineColor = "none"
     paintStyle.outlineWidth = 20
-    if linkModel.selected
+    if isSelected
       paintStyle.outlineColor = "#f6bf33"
       paintStyle.outlineWidth = 1
 
@@ -115,7 +115,7 @@ module.exports = class DiagramToolkit
       source: source
       target: target
       paintStyle: paintStyle
-      overlays: @_overlays label, linkModel.selected
+      overlays: @_overlays label, isSelected
       endpoint: ["Rectangle",
         width: 10
         height: 10
@@ -135,5 +135,3 @@ module.exports = class DiagramToolkit
 
   resumeDrawing: ->
     @setSuspendDrawing false
-
-

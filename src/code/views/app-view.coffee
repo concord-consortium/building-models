@@ -44,11 +44,14 @@ module.exports = React.createClass
           (DocumentActions {linkManager: @props.linkManager})
         )
         (div {className: 'canvas'},
-          (LinkView {linkManager: @props.linkManager, selectedLink: @state.selectedConnection})
+          (LinkView {
+            linkManager: @props.linkManager,
+            selectionManager: @props.linkManager.selectionManager,
+            selectedLink: @state.selectedLink})
         )
         (InspectorPanel
           node: @state.selectedNode
-          link: @state.selectedConnection
+          link: @state.selectedLink
           onNodeChanged: @onNodeChanged
           onLinkChanged: @onLinkChanged
           onNodeDelete: @onNodeDelete
