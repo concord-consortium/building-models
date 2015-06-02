@@ -44,3 +44,10 @@ the compiled artifacts, which is less than ideal.
   * Check out new clone of this repo into dest, checking out the gh-pages branch by default
   * Run `gulp build-all` to generate all assets into ./dist/
   * Push changes up to gh-pages on github.
+
+## Deployment to AWS S3 bucket:
+
+* Install the s3_website gem using `bundle install`
+* Copy `./.env.sample` to `./.env`
+* Edit your AWS credentials in `./.env` -- this file should never go into version control.
+* Run `s3_website push` to deploy the code in `dist` to http://building-models-dev.concord.org/
