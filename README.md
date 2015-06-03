@@ -39,15 +39,15 @@ the compiled artifacts, which is less than ideal.
     * `./dev/` dir is fully auto-generated and served by HTTP server.  Write your code in `./src/` dir.
     * Place static files you want to be copied to `dev/` in `src/assets/`
 
-## Deployment to github pages:
+## Deployment of development version to github pages:
 * Run `./build.sh` and hope for the best. (It might be worth having a quick read `build.sh`, in the event that things go terribly wrong.  That script should be doing the following things):
   * Check out new clone of this repo into dest, checking out the gh-pages branch by default
   * Run `gulp build-all` to generate all assets into ./dist/
   * Push changes up to gh-pages on github.
 
-## Deployment to AWS S3 bucket:
+## Deployment to ivy.concord.org & building-models-app.concord.org
 
 * Install the s3_website gem using `bundle install`
 * Copy `./.env.sample` to `./.env`
 * Edit your AWS credentials in `./.env` -- this file should never go into version control.
-* Run `s3_website push` to deploy the code in `dist` to http://building-models-dev.concord.org/
+* Run `s3_website push` to deploy the code in `dist` to http://building-models-app.concord.org/ and http://ivy.concord.org/

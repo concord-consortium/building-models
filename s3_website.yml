@@ -1,6 +1,6 @@
 s3_id: <%= ENV['S3_ID'] %>
 s3_secret: <%= ENV['S3_SECRET'] %>
-s3_bucket: building-models-dev.concord.org
+s3_bucket: building-models-app.concord.org
 cloudfront_distribution_id: EGVC56LSD4VPJ
 s3_endpoint: ap-northeast-1
 
@@ -37,9 +37,12 @@ cloudfront_distribution_config:
   default_cache_behavior:
     min_TTL: <%= 60 * 60 * 24 %>
   aliases:
-    quantity: 1
+    quantity: 2
     items:
-      CNAME: building-models-dev.concord.org
+      CNAME0: building-models-app.concord.org
+      CNAME1: ivy.concord.org
+
+
 
 # cloudfront_invalidate_root: true
 
