@@ -36,7 +36,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/link-manager":10,"./views/app-view":24}],2:[function(require,module,exports){
+},{"./models/link-manager":10,"./views/app-view":25}],2:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -306,14 +306,19 @@ module.exports = {
   componentDidMount: function() {
     var ref;
     this.addDeleteKeyHandler(true);
-    this.props.linkManager.addSelectionListener((function(_this) {
-      return function(selections) {
+    this.props.linkManager.selectionManager.addSelectionListener((function(_this) {
+      return function(manager) {
+        var editingNode, selectedLink, selectedNode;
+        selectedNode = manager.getInspection()[0] || null;
+        editingNode = manager.getTitleEditing()[0] || null;
+        selectedLink = manager.getLinkSelection()[0] || null;
         _this.setState({
-          selectedNode: selections.node,
-          selectedConnection: selections.connection
+          selectedNode: selectedNode,
+          editingNode: editingNode,
+          selectedLink: selectedLink
         });
-        _this.addToPalette(selections.node);
-        return log.info('updated selections: + selections');
+        _this.addToPalette(selectedNode);
+        return log.info('updated selections');
       };
     })(this));
     this.props.linkManager.addLoadListener((function(_this) {
@@ -391,7 +396,7 @@ module.exports = {
     return this.props.linkManager.deleteSelected();
   },
   onLinkChanged: function(link, title, color, deleted) {
-    return this.props.linkManager.changeLink(title, color, deleted);
+    return this.props.linkManager.changeLink(link, title, color, deleted);
   }
 };
 
@@ -521,7 +526,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":15,"../utils/translate":22}],7:[function(require,module,exports){
+},{"../utils/google-drive-io":16,"../utils/translate":23}],7:[function(require,module,exports){
 var PreviewImage, hasValidImageExtension, resizeImage;
 
 PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
@@ -573,7 +578,7 @@ module.exports = {
 
 
 
-},{"../utils/has-valid-image-extension":16,"../utils/resize-image":21,"../views/preview-image-dialog-view":48}],8:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":17,"../utils/resize-image":22,"../views/preview-image-dialog-view":49}],8:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -603,7 +608,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":22}],9:[function(require,module,exports){
+},{"../utils/translate":23}],9:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -635,7 +640,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 },{}],10:[function(require,module,exports){
-var DiagramNode, Importer, Link, LinkManager, UndoRedo, tr,
+var DiagramNode, Importer, Link, LinkManager, SelectionManager, UndoRedo, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Importer = require('../utils/importer');
@@ -645,6 +650,8 @@ Link = require('./link');
 DiagramNode = require('./node');
 
 UndoRedo = require('../utils/undo-redo');
+
+SelectionManager = require('./selection-manager');
 
 tr = require("../utils/translate");
 
@@ -663,10 +670,8 @@ module.exports = LinkManager = (function() {
     this.loadDataFromUrl = bind(this.loadDataFromUrl, this);
     this.linkKeys = {};
     this.nodeKeys = {};
-    this.nodeViewStates = {};
     this.linkListeners = [];
     this.nodeListeners = [];
-    this.selectionListeners = [];
     this.loadListeners = [];
     this.filename = null;
     this.filenameListeners = [];
@@ -674,6 +679,7 @@ module.exports = LinkManager = (function() {
     this.undoRedoManager = new UndoRedo.Manager({
       debug: true
     });
+    this.selectionManager = new SelectionManager();
   }
 
   LinkManager.prototype.undo = function() {
@@ -709,11 +715,6 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype.addNodeListener = function(listener) {
     log.info("adding node listener");
     return this.nodeListeners.push(listener);
-  };
-
-  LinkManager.prototype.addSelectionListener = function(listener) {
-    log.info("adding selection listener " + listener);
-    return this.selectionListeners.push(listener);
   };
 
   LinkManager.prototype.addLoadListener = function(listener) {
@@ -796,7 +797,6 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype._addLink = function(link) {
     var i, len, listener, ref;
     if (this.hasLink(link)) {
-      this.selectLink(null);
       return false;
     } else {
       this.linkKeys[link.terminalKey()] = link;
@@ -808,7 +808,6 @@ module.exports = LinkManager = (function() {
         log.info("notifying of new link: " + (link.terminalKey()));
         listener.handleLinkAdd(link);
       }
-      this.selectLink(link);
       return true;
     }
   };
@@ -915,40 +914,16 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype._removeNode = function(node) {
-    var i, j, len, len1, listener, ref, ref1, results;
+    var i, len, listener, ref, results;
     delete this.nodeKeys[node.key];
     ref = this.nodeListeners;
+    results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       listener = ref[i];
       log.info("notifying of deleted Node");
-      listener.handleNodeRm(node);
-    }
-    this.selectNode(null);
-    ref1 = this.selectionListeners;
-    results = [];
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      listener = ref1[j];
-      results.push(listener({
-        node: null,
-        connection: null
-      }));
+      results.push(listener.handleNodeRm(node));
     }
     return results;
-  };
-
-  LinkManager.prototype.deleteNodeViewState = function(context) {
-    delete this.nodeViewStates[context];
-    return this._notifyNodeChanged(null);
-  };
-
-  LinkManager.prototype.setNodeViewState = function(node, context) {
-    this.deleteNodeViewState();
-    this.nodeViewStates[context] = node;
-    return this._notifyNodeChanged(node);
-  };
-
-  LinkManager.prototype.nodeViewState = function(node, context) {
-    return this.nodeViewStates[context] === node;
   };
 
   LinkManager.prototype.moveNodeCompleted = function(nodeKey, pos, originalPos) {
@@ -990,37 +965,29 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.selectedNode = function() {
-    return this.nodeViewStates.selected;
+    return this.selectionManager.selection(SelectionManager.NodeInpsection)[0] || null;
+  };
+
+  LinkManager.prototype.editingNode = function() {
+    return this.selectionManager.selection(SelectionManager.NodeTitleEditing)[0] || null;
+  };
+
+  LinkManager.prototype.editNode = function(nodeKey) {
+    return this.selectionManager.selectForTitleEditing(this.nodeKeys[nodeKey]);
   };
 
   LinkManager.prototype.selectNode = function(nodeKey) {
-    var i, len, listener, ref, results, selectedNode;
-    selectedNode = this.nodeKeys[nodeKey];
-    this.setNodeViewState(selectedNode, "selected");
-    if (this.selectedNode()) {
-      ref = this.selectionListeners;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        listener = ref[i];
-        log.info("Selection happened for " + nodeKey + " -- " + (this.selectedNode().title));
-        results.push(listener({
-          node: selectedNode,
-          connection: null
-        }));
-      }
-      return results;
-    }
+    return this.selectionManager.selectForInspection(this.nodeKeys[nodeKey]);
   };
 
   LinkManager.prototype._notifyNodeChanged = function(node) {
-    var i, len, listener, ref, results;
+    var i, len, listener, ref;
     ref = this.nodeListeners;
-    results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       listener = ref[i];
-      results.push(listener.handleNodeChange(node));
+      listener.handleNodeChange(node);
     }
-    return results;
+    return this._maybeChangeSelectedItem(node);
   };
 
   LinkManager.prototype.changeNode = function(data, node) {
@@ -1048,7 +1015,7 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype._changeNode = function(node, data) {
-    var i, j, key, len, len1, listener, ref, ref1, results;
+    var i, key, len, ref;
     log.info("Change for " + node.title);
     ref = ['title', 'image', 'color'];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -1058,20 +1025,7 @@ module.exports = LinkManager = (function() {
         node[key] = data[key];
       }
     }
-    this._notifyNodeChanged(node);
-    if (node === this.selectedNode()) {
-      ref1 = this.selectionListeners;
-      results = [];
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        listener = ref1[j];
-        log.info("Selected node changed data: " + (this.selectedNode().title));
-        results.push(listener({
-          node: this.selectedNode(),
-          connection: null
-        }));
-      }
-      return results;
-    }
+    return this._notifyNodeChanged(node);
   };
 
   LinkManager.prototype.changeNodeWithKey = function(key, data) {
@@ -1083,35 +1037,16 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.selectLink = function(link) {
-    var i, len, listener, ref, results;
-    if (this.selectedLink) {
-      this.selectedLink.selected = false;
-    }
-    delete this.nodeViewStates.selected;
-    this.selectedLink = link;
-    if (link != null) {
-      link.selected = true;
-    }
-    ref = this.selectionListeners;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      results.push(listener({
-        node: null,
-        connection: this.selectedLink
-      }));
-    }
-    return results;
+    return this.selectionManager.selectLink(link);
   };
 
-  LinkManager.prototype.changeLink = function(title, color, deleted) {
-    var link, originalColor, originalTitle;
+  LinkManager.prototype.changeLink = function(link, title, color, deleted) {
+    var originalColor, originalTitle;
     if (deleted) {
       return this.removeSelectedLink();
-    } else if (this.selectedLink) {
-      link = this.selectedLink;
-      originalTitle = this.selectedLink.title;
-      originalColor = this.selectedLink.color;
+    } else if (link) {
+      originalTitle = link.title;
+      originalColor = link.color;
       return this.undoRedoManager.createAndExecuteCommand('changeLink', {
         execute: (function(_this) {
           return function() {
@@ -1127,21 +1062,17 @@ module.exports = LinkManager = (function() {
     }
   };
 
+  LinkManager.prototype._maybeChangeSelectedItem = function(item) {
+    if (this.selectionManager.isSelected(item)) {
+      return this.selectionManager._notifySelectionChange();
+    }
+  };
+
   LinkManager.prototype._changeLink = function(link, title, color) {
-    var i, len, listener, ref, results;
     log.info("Change  for " + link.title);
     link.title = title;
     link.color = color;
-    ref = this.selectionListeners;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      results.push(listener({
-        node: null,
-        connection: link
-      }));
-    }
-    return results;
+    return this._maybeChangeSelectedItem(link);
   };
 
   LinkManager.prototype._nameForNode = function(node) {
@@ -1182,37 +1113,20 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.removeSelectedNode = function() {
-    var i, len, listener, ref, results;
-    if (this.selectedNode()) {
-      this.removeNode(this.selectedNode().key);
-      ref = this.selectionListeners;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        listener = ref[i];
-        results.push(listener({
-          node: null,
-          connection: null
-        }));
-      }
-      return results;
+    var nodeKey, ref;
+    nodeKey = (ref = this.selectedNode()) != null ? ref.key : void 0;
+    if (nodeKey) {
+      this.removeNode(nodeKey);
+      return this.selectionManager.clearSelection();
     }
   };
 
   LinkManager.prototype.removeSelectedLink = function() {
-    var i, len, listener, ref, results;
-    if (this.selectedLink) {
-      this.removeLink(this.selectedLink);
-      this.selectedLink = null;
-      ref = this.selectionListeners;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        listener = ref[i];
-        results.push(listener({
-          node: null,
-          connection: null
-        }));
-      }
-      return results;
+    var selectedLink;
+    selectedLink = this.selectionManager.getLinkSelection()[0] || null;
+    if (selectedLink) {
+      this.removeLink(selectedLink);
+      return this.selectionManager.clearLinkSelection();
     }
   };
 
@@ -1323,7 +1237,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../utils/importer":17,"../utils/translate":22,"../utils/undo-redo":23,"./link":11,"./node":12}],11:[function(require,module,exports){
+},{"../utils/importer":18,"../utils/translate":23,"../utils/undo-redo":24,"./link":11,"./node":12,"./selection-manager":13}],11:[function(require,module,exports){
 var GraphPrimitive, Link,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -1509,7 +1423,185 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":13,"../utils/translate":22,"./graph-primitive":9}],13:[function(require,module,exports){
+},{"../utils/colors":14,"../utils/translate":23,"./graph-primitive":9}],13:[function(require,module,exports){
+var DiagramNode, Importer, Link, SelectionManager, UndoRedo, tr;
+
+Importer = require('../utils/importer');
+
+Link = require('./link');
+
+DiagramNode = require('./node');
+
+UndoRedo = require('../utils/undo-redo');
+
+tr = require("../utils/translate");
+
+module.exports = SelectionManager = (function() {
+  SelectionManager.NodeTitleEditing = "NodeTitleEditing";
+
+  SelectionManager.NodeInpsection = "NodeInpsection";
+
+  SelectionManager.LinkSelection = "LinkSelection";
+
+  function SelectionManager() {
+    this.selections = [];
+    this.selectionListeners = [];
+  }
+
+  SelectionManager.prototype.addSelectionListener = function(listener) {
+    log.info("adding selection listener " + listener);
+    return this.selectionListeners.push(listener);
+  };
+
+  SelectionManager.prototype._notifySelectionChange = function() {
+    var j, len, listener, ref, results;
+    log.info("notifiying listeners");
+    ref = this.selectionListeners;
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      listener = ref[j];
+      results.push(listener(this));
+    }
+    return results;
+  };
+
+  SelectionManager.prototype.addToSelection = function(graphprimitive, context) {
+    var entry;
+    entry = {
+      graphprimitive: graphprimitive,
+      context: context,
+      key: graphprimitive.key
+    };
+    if (!this.isSelected(graphprimitive, context)) {
+      this.selections.push(entry);
+      return this._notifySelectionChange();
+    }
+  };
+
+  SelectionManager.prototype.selectOnly = function(graphprimitive, context) {
+    if (!this.isSelected(graphprimitive, context)) {
+      this.clearSelection(context);
+      return this.addToSelection(graphprimitive, context);
+    }
+  };
+
+  SelectionManager.prototype.selection = function(context) {
+    var where;
+    where = {};
+    if (context) {
+      where.context = context;
+    }
+    return _.chain(this.selections).where(where).map(function(obj, i) {
+      return obj.graphprimitive;
+    }).value();
+  };
+
+  SelectionManager.prototype.clearSelection = function(context) {
+    if (context == null) {
+      context = null;
+    }
+    return this._deselect({
+      context: context
+    });
+  };
+
+  SelectionManager.prototype.clearLinkSelection = function() {
+    return this.clearSelection(SelectionManager.LinkSelection);
+  };
+
+  SelectionManager.prototype.clearSelectionFor = function(graphprimitive, context) {
+    if (context == null) {
+      context = null;
+    }
+    return this._deselect({
+      key: graphprimitive.key,
+      context: context
+    });
+  };
+
+  SelectionManager.prototype.isSelected = function(graphprimitive, context) {
+    var found, where;
+    where = {
+      key: graphprimitive.key
+    };
+    if (context) {
+      where.context = context;
+    }
+    found = _.chain(this.selections).where(where).value();
+    return found.length > 0;
+  };
+
+  SelectionManager.prototype.selectForTitleEditing = function(graphprimitive) {
+    this.selectOnly(graphprimitive, SelectionManager.NodeTitleEditing);
+    if (!this.isSelectedForInspection(graphprimitive)) {
+      return this.clearInspection();
+    }
+  };
+
+  SelectionManager.prototype.clearTitleEditing = function() {
+    return this.clearSelection(SelectionManager.NodeTitleEditing);
+  };
+
+  SelectionManager.prototype.isSelectedForTitleEditing = function(graphprimitive) {
+    return this.isSelected(graphprimitive, SelectionManager.NodeTitleEditing);
+  };
+
+  SelectionManager.prototype.getTitleEditing = function() {
+    return this.selection(SelectionManager.NodeTitleEditing);
+  };
+
+  SelectionManager.prototype.selectForInspection = function(graphprimitive) {
+    this.selectOnly(graphprimitive, SelectionManager.NodeInpsection);
+    this.clearLinkSelection();
+    if (!this.isSelectedForTitleEditing(graphprimitive)) {
+      return this.clearTitleEditing();
+    }
+  };
+
+  SelectionManager.prototype.clearInspection = function() {
+    return this.clearSelection(SelectionManager.NodeInpsection);
+  };
+
+  SelectionManager.prototype.isSelectedForInspection = function(graphprimitive) {
+    return this.isSelected(graphprimitive, SelectionManager.NodeInpsection);
+  };
+
+  SelectionManager.prototype.getInspection = function() {
+    return this.selection(SelectionManager.NodeInpsection);
+  };
+
+  SelectionManager.prototype.getLinkSelection = function() {
+    return this.selection(SelectionManager.LinkSelection);
+  };
+
+  SelectionManager.prototype.selectLink = function(graphprimitive) {
+    this.clearInspection();
+    return this.selectOnly(graphprimitive, SelectionManager.LinkSelection);
+  };
+
+  SelectionManager.prototype._deselect = function(opts) {
+    var pickNonEmpty, removeCritereon;
+    pickNonEmpty = _.partial(_.pick, _, _.identity);
+    removeCritereon = pickNonEmpty(opts);
+    log.info(removeCritereon);
+    if (removeCritereon.context || removeCritereon.key) {
+      log.info("removing " + removeCritereon.key);
+      log.info("in collection " + (_.pluck(this.selections, 'key')));
+      _.remove(this.selections, removeCritereon);
+      log.info("in collection " + (_.pluck(this.selections, 'key')));
+    } else {
+      this.selections = [];
+    }
+    return this._notifySelectionChange();
+  };
+
+  return SelectionManager;
+
+})();
+
+
+
+},{"../utils/importer":18,"../utils/translate":23,"../utils/undo-redo":24,"./link":11,"./node":12}],14:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -1529,7 +1621,7 @@ module.exports = [
 
 
 
-},{"./translate":22}],14:[function(require,module,exports){
+},{"./translate":23}],15:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -1581,7 +1673,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":16,"./resize-image":21}],15:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":17,"./resize-image":22}],16:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -1748,7 +1840,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -1767,7 +1859,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":22}],17:[function(require,module,exports){
+},{"./translate":23}],18:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -1817,7 +1909,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -1978,12 +2070,12 @@ module.exports = DiagramToolkit = (function() {
     return $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove();
   };
 
-  DiagramToolkit.prototype.addLink = function(source, target, label, color, source_terminal, target_terminal, linkModel) {
+  DiagramToolkit.prototype.addLink = function(source, target, label, color, isSelected, linkModel) {
     var connection, paintStyle;
     paintStyle = this._paintStyle(color);
     paintStyle.outlineColor = "none";
     paintStyle.outlineWidth = 20;
-    if (linkModel.selected) {
+    if (isSelected) {
       paintStyle.outlineColor = "#f6bf33";
       paintStyle.outlineWidth = 1;
     }
@@ -1991,7 +2083,7 @@ module.exports = DiagramToolkit = (function() {
       source: source,
       target: target,
       paintStyle: paintStyle,
-      overlays: this._overlays(label, linkModel.selected),
+      overlays: this._overlays(label, isSelected),
       endpoint: [
         "Rectangle", {
           width: 10,
@@ -2025,7 +2117,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -2093,7 +2185,7 @@ module.exports = {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -2130,7 +2222,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 module.exports = function(src, callback) {
   var img, maxHeight, maxWidth;
   maxWidth = 100;
@@ -2165,7 +2257,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -2198,7 +2290,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":19}],23:[function(require,module,exports){
+},{"./lang/us-en":20}],24:[function(require,module,exports){
 var Command, Manager;
 
 Manager = (function() {
@@ -2394,7 +2486,7 @@ module.exports = {
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var DocumentActions, GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, a, div, ref;
 
 Placeholder = React.createFactory(require('./placeholder-view'));
@@ -2454,10 +2546,11 @@ module.exports = React.createClass({
       className: 'canvas'
     }, LinkView({
       linkManager: this.props.linkManager,
-      selectedLink: this.state.selectedConnection
+      selectionManager: this.props.linkManager.selectionManager,
+      selectedLink: this.state.selectedLink
     })), InspectorPanel({
       node: this.state.selectedNode,
-      link: this.state.selectedConnection,
+      link: this.state.selectedLink,
       onNodeChanged: this.onNodeChanged,
       onLinkChanged: this.onLinkChanged,
       onNodeDelete: this.onNodeDelete,
@@ -2478,7 +2571,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":5,"./document-actions-view":26,"./global-nav-view":29,"./image-browser-view":30,"./inspector-panel-view":36,"./link-view":39,"./node-well-view":45,"./placeholder-view":47}],25:[function(require,module,exports){
+},{"../mixins/app-view":5,"./document-actions-view":27,"./global-nav-view":30,"./image-browser-view":31,"./inspector-panel-view":37,"./link-view":40,"./node-well-view":46,"./placeholder-view":48}],26:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -2560,7 +2653,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":13,"../utils/translate":22}],26:[function(require,module,exports){
+},{"../utils/colors":14,"../utils/translate":23}],27:[function(require,module,exports){
 var div, ref, span;
 
 ref = React.DOM, div = ref.div, span = ref.span;
@@ -2611,7 +2704,7 @@ module.exports = React.createClass({
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -2716,7 +2809,7 @@ module.exports = React.createClass({
 
 
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -2771,7 +2864,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":14,"../utils/translate":22}],29:[function(require,module,exports){
+},{"../utils/drop-image-handler":15,"../utils/translate":23}],30:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -2851,7 +2944,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":6,"../utils/translate":22,"./dropdown-view":27}],30:[function(require,module,exports){
+},{"../mixins/google-file-interface":6,"../utils/translate":23,"./dropdown-view":28}],31:[function(require,module,exports){
 var ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -2901,7 +2994,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":22,"./image-link-dialog-view":31,"./image-metadata-view":32,"./image-my-computer-dialog-view":33,"./image-search-dialog-view":35,"./modal-tabbed-dialog-view":41}],31:[function(require,module,exports){
+},{"../utils/translate":23,"./image-link-dialog-view":32,"./image-metadata-view":33,"./image-my-computer-dialog-view":34,"./image-search-dialog-view":36,"./modal-tabbed-dialog-view":42}],32:[function(require,module,exports){
 var DropZone, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -2951,7 +3044,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":7,"../utils/translate":22,"./dropzone-view":28}],32:[function(require,module,exports){
+},{"../mixins/image-dialog-view":7,"../utils/translate":23,"./dropzone-view":29}],33:[function(require,module,exports){
 var a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -3031,7 +3124,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":4,"../utils/translate":22}],33:[function(require,module,exports){
+},{"../data/licenses":4,"../utils/translate":23}],34:[function(require,module,exports){
 var DropZone, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -3083,7 +3176,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":7,"../utils/translate":22,"./dropzone-view":28}],34:[function(require,module,exports){
+},{"../mixins/image-dialog-view":7,"../utils/translate":23,"./dropzone-view":29}],35:[function(require,module,exports){
 var ImgChoice, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -3161,7 +3254,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":22}],35:[function(require,module,exports){
+},{"../utils/translate":23}],36:[function(require,module,exports){
 var ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 OpenClipart = require('../utils/open-clipart');
@@ -3365,8 +3458,8 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":7,"../utils/open-clipart":20,"../utils/translate":22}],36:[function(require,module,exports){
-var LinkInspectorView, NodeInspectorView, PaletteInspectorView, div, i, ref;
+},{"../mixins/image-dialog-view":7,"../utils/open-clipart":21,"../utils/translate":23}],37:[function(require,module,exports){
+var LinkInspectorView, NodeInspectorView, PaletteInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
 
@@ -3374,41 +3467,107 @@ LinkInspectorView = React.createFactory(require('./link-inspector-view'));
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
 
-ref = React.DOM, div = ref.div, i = ref.i;
+ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
+
+ToolButton = React.createFactory(React.createClass({
+  displayName: 'toolButton',
+  render: function() {
+    var classes, name, onClick;
+    name = this.props.name;
+    onClick = (function(_this) {
+      return function() {
+        if (_this.props.onClick) {
+          return _this.props.onClick(_this.props.name);
+        }
+      };
+    })(this);
+    classes = "icon-" + name + " tool-button";
+    if (this.props.selected) {
+      classes = classes + " selected";
+    }
+    if (this.props.disabled) {
+      classes = classes + " disabled";
+    }
+    return div({
+      className: classes,
+      onClick: onClick
+    });
+  }
+}));
+
+ToolPanel = React.createFactory(React.createClass({
+  displayName: 'toolPanel',
+  buttonData: [
+    {
+      name: "plus",
+      shows: "add"
+    }, {
+      name: "brush",
+      shows: "design"
+    }, {
+      name: "ruler",
+      shows: "values"
+    }, {
+      name: "curve",
+      shows: "relations"
+    }
+  ],
+  buttonProps: function(button) {
+    return {
+      name: button.name,
+      shows: button.shows,
+      selected: this.props.nowShowing === button.shows,
+      onClick: (function(_this) {
+        return function() {
+          return _this.select(button.name);
+        };
+      })(this)
+    };
+  },
+  select: function(name) {
+    var button;
+    button = _.find(this.buttonData, {
+      name: name
+    });
+    if (button) {
+      if (this.props.nowShowing !== button.shows) {
+        return this.props.onNowShowing(button.shows);
+      } else {
+        return this.props.onNowShowing(null);
+      }
+    }
+  },
+  render: function() {
+    var buttonsView;
+    buttonsView = _.map(this.buttonData, (function(_this) {
+      return function(button) {
+        var props;
+        props = _this.buttonProps(button);
+        return ToolButton(props);
+      };
+    })(this));
+    return div({
+      className: 'tool-panel'
+    }, buttonsView);
+  }
+}));
 
 module.exports = React.createClass({
   displayName: 'InspectorPanelView',
   getInitialState: function() {
     return {
-      expanded: true
+      nowShowing: null
     };
   },
-  collapse: function() {
+  setShowing: function(item) {
     return this.setState({
-      expanded: false
+      nowShowing: item
     });
   },
-  expand: function() {
-    return this.setState({
-      expanded: true
-    });
-  },
-  render: function() {
-    var action, className;
-    className = "inspector-panel";
-    action = this.collapse;
-    if (this.state.expanded === false) {
-      className = className + " collapsed";
-      action = this.expand;
-    }
+  renderInspectors: function() {
     return div({
-      className: className
-    }, div({
-      className: 'inspector-panel-toggle',
-      onClick: action
-    }), div({
       className: "inspector-panel-content"
-    }, this.props.node ? NodeInspectorView({
+    }, this.state.nowShowing === 'design' ? this.props.node ? NodeInspectorView({
       node: this.props.node,
       onNodeChanged: this.props.onNodeChanged,
       onNodeDelete: this.props.onNodeDelete,
@@ -3416,17 +3575,32 @@ module.exports = React.createClass({
     }) : this.props.link ? LinkInspectorView({
       link: this.props.link,
       onLinkChanged: this.props.onLinkChanged
-    }) : PaletteInspectorView({
+    }) : void 0 : this.state.nowShowing === 'add' ? PaletteInspectorView({
       palette: this.props.palette,
       toggleImageBrowser: this.props.toggleImageBrowser,
       linkManager: this.props.linkManager
-    })));
+    }) : void 0);
+  },
+  render: function() {
+    var className;
+    className = "inspector-panel";
+    if (!this.state.nowShowing) {
+      className = className + " collapsed";
+    }
+    return div({
+      className: className
+    }, ToolPanel({
+      node: this.props.node,
+      link: this.props.link,
+      nowShowing: this.state.nowShowing,
+      onNowShowing: this.setShowing
+    }), this.renderInspectors());
   }
 });
 
 
 
-},{"./link-inspector-view":38,"./node-inspector-view":43,"./palette-inspector-view":46}],37:[function(require,module,exports){
+},{"./link-inspector-view":39,"./node-inspector-view":44,"./palette-inspector-view":47}],38:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3462,7 +3636,7 @@ module.exports = React.createClass({
 
 
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var InspectorTabs, button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -3496,11 +3670,8 @@ module.exports = React.createClass({
     selected = tr('design');
     return div({
       className: 'link-inspector-view'
-    }, InspectorTabs({
-      tabs: tabs,
-      selected: selected
-    }), div({
-      className: 'link-inspector-content'
+    }, div({
+      className: 'inspector-content'
     }, div({
       className: 'edit-row'
     }, label({
@@ -3521,7 +3692,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":22,"./inspector-tabs-view":37}],39:[function(require,module,exports){
+},{"../utils/translate":23,"./inspector-tabs-view":38}],40:[function(require,module,exports){
 var DiagramToolkit, Importer, Node, NodeList, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -3548,9 +3719,25 @@ module.exports = React.createClass({
       handleConnect: this.handleConnect,
       handleClick: this.handleClick
     });
-    this._updateToolkit();
     this.props.linkManager.addLinkListener(this);
     this.props.linkManager.addNodeListener(this);
+    this.props.selectionManager.addSelectionListener((function(_this) {
+      return function(manager) {
+        var editingNode, lastLinkSelection, selectedLink, selectedNode;
+        lastLinkSelection = _this.state.selectedLink;
+        selectedNode = manager.getInspection()[0] || null;
+        editingNode = manager.getTitleEditing()[0] || null;
+        selectedLink = manager.getLinkSelection()[0] || null;
+        _this.setState({
+          selectedNode: selectedNode,
+          editingNode: editingNode,
+          selectedLink: selectedLink
+        });
+        if (lastLinkSelection === !_this.state.selectedLink) {
+          return _this._updateToolkit();
+        }
+      };
+    })(this));
     return $container.droppable({
       accept: '.proto-node',
       hoverClass: "ui-state-highlight",
@@ -3584,12 +3771,15 @@ module.exports = React.createClass({
         image: image
       }
     });
-    return this.props.linkManager.setNodeViewState(node, 'is-editing');
+    return this.props.linkManager.editNode(node.key);
   },
   getInitialState: function() {
     return {
       nodes: [],
       links: [],
+      selectedNode: null,
+      editingNode: null,
+      selectedLink: null,
       canDrop: false
     };
   },
@@ -3718,15 +3908,16 @@ module.exports = React.createClass({
     return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find('.elm'));
   },
   _redrawLinks: function() {
-    var i, len, link, ref, results, source, target;
+    var i, isSelected, len, link, ref, results, source, target;
     ref = this.state.links;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       link = ref[i];
       source = this._nodeForName(link.sourceNode.key);
       target = this._nodeForName(link.targetNode.key);
+      isSelected = this.props.selectionManager.isSelected(link);
       if (source && target) {
-        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, "unused-term", "unused-term", link));
+        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, isSelected, link));
       } else {
         results.push(void 0);
       }
@@ -3770,13 +3961,13 @@ module.exports = React.createClass({
             image: file.image
           }
         });
-        return _this.props.linkManager.setNodeViewState(node, 'is-editing');
+        return _this.props.linkManager.editNode(node.key);
       };
     })(this));
   },
   onContainerClicked: function(e) {
     if (e.target === this.refs.container.getDOMNode()) {
-      return this.props.linkManager.selectLink(null);
+      return this.props.selectionManager.clearSelection();
     }
   },
   render: function() {
@@ -3800,14 +3991,15 @@ module.exports = React.createClass({
         results.push(Node({
           key: node.key,
           data: node,
-          selected: this.props.linkManager.nodeViewState(node, "selected"),
-          editTitle: this.props.linkManager.nodeViewState(node, "title-editing"),
+          selected: this.state.selectedNode === node,
+          editTitle: this.state.editingNode === node,
           nodeKey: node.key,
           ref: node.key,
           onMove: this.onNodeMoved,
           onMoveComplete: this.onNodeMoveComplete,
           onDelete: this.onNodeDeleted,
-          linkManager: this.props.linkManager
+          linkManager: this.props.linkManager,
+          selectionManager: this.props.selectionManager
         }));
       }
       return results;
@@ -3817,7 +4009,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":10,"../utils/drop-image-handler":14,"../utils/importer":17,"../utils/js-plumb-diagram-toolkit":18,"../utils/translate":22,"./node-view":44}],40:[function(require,module,exports){
+},{"../models/link-manager":10,"../utils/drop-image-handler":15,"../utils/importer":18,"../utils/js-plumb-diagram-toolkit":19,"../utils/translate":23,"./node-view":45}],41:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -3850,7 +4042,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":42}],41:[function(require,module,exports){
+},{"./modal-view":43}],42:[function(require,module,exports){
 var ModalDialog, Tab, TabInfo, a, div, li, ref, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -3944,7 +4136,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":40}],42:[function(require,module,exports){
+},{"./modal-dialog-view":41}],43:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -3976,7 +4168,7 @@ module.exports = React.createClass({
 
 
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var ColorPicker, ImagePickerView, InspectorTabs, button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -4025,11 +4217,8 @@ module.exports = React.createClass({
     displayTitle = this.displayTitleForInput(this.props.node.title);
     return div({
       className: 'node-inspector-view'
-    }, InspectorTabs({
-      tabs: tabs,
-      selected: selected
-    }), div({
-      className: 'node-inspector-content'
+    }, div({
+      className: 'inspector-content'
     }, div({
       className: 'edit-row'
     }, label({
@@ -4066,7 +4255,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":8,"../utils/translate":22,"./color-picker-view":25,"./image-picker-view":34,"./inspector-tabs-view":37}],44:[function(require,module,exports){
+},{"../mixins/node-title":8,"../utils/translate":23,"./color-picker-view":26,"./image-picker-view":35,"./inspector-tabs-view":38}],45:[function(require,module,exports){
 var NodeTitle, div, i, img, input, ref, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img;
@@ -4162,9 +4351,9 @@ module.exports = React.createClass({
   },
   handleSelected: function(actually_select) {
     var selectionKey;
-    if (this.props.linkManager) {
+    if (this.props.selectionManager) {
       selectionKey = actually_select ? this.props.nodeKey : "dont-select-anything";
-      return this.props.linkManager.selectNode(selectionKey);
+      return this.props.selectionManager.selectForInspection(this.props.data);
     }
   },
   propTypes: {
@@ -4222,13 +4411,13 @@ module.exports = React.createClass({
     });
   },
   startEditing: function() {
-    return this.props.linkManager.setNodeViewState(this.props.data, 'is-editing');
+    return this.props.selectionManager.selectForTitleEditing(this.props.data);
   },
   stopEditing: function() {
-    return this.props.linkManager.setNodeViewState(null, 'is-editing');
+    return this.props.selectionManager.clearTitleEditing();
   },
   isEditing: function() {
-    return this.props.linkManager.nodeViewState(this.props.data, 'is-editing');
+    return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
   },
   render: function() {
     var className, ref1, style;
@@ -4264,7 +4453,7 @@ module.exports = React.createClass({
       className: "connection-source",
       "data-node-key": this.props.nodeKey
     }) : void 0), NodeTitle({
-      isEditing: this.props.linkManager.nodeViewState(this.props.data, 'is-editing'),
+      isEditing: this.props.editTitle,
       title: this.props.data.title,
       onChange: this.changeTitle,
       onStopEditing: this.stopEditing,
@@ -4275,7 +4464,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":8,"../utils/translate":22}],45:[function(require,module,exports){
+},{"../mixins/node-title":8,"../utils/translate":23}],46:[function(require,module,exports){
 var ProtoNodeView, div;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -4343,7 +4532,7 @@ module.exports = React.createClass({
 
 
 
-},{"./proto-node-view":49}],46:[function(require,module,exports){
+},{"./proto-node-view":50}],47:[function(require,module,exports){
 var ImageMetadata, PaletteImage, ProtoNodeView, div, i, img, ref, span, tr;
 
 ProtoNodeView = React.createFactory(require('./proto-node-view'));
@@ -4482,7 +4671,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":22,"./image-metadata-view":32,"./proto-node-view":49}],47:[function(require,module,exports){
+},{"../utils/translate":23,"./image-metadata-view":33,"./proto-node-view":50}],48:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -4500,7 +4689,7 @@ module.exports = React.createClass({
 
 
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 var ImageMetadata, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -4549,7 +4738,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":22,"./image-metadata-view":32}],49:[function(require,module,exports){
+},{"../utils/translate":23,"./image-metadata-view":33}],50:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
