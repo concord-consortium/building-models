@@ -1,4 +1,12 @@
+inspector-panel-top = 225px
+inspector-panel-tab-width = 50px
+inspector-panel-tab-height = 195px
+inspector-panel-inner-width = 275px
+inspector-panel-inner-height = 500px
+
+
   .inspector-panel
+    box-sizing border-box
     right 0px
     margin 0px
     background-color white
@@ -6,97 +14,84 @@
     margin 0px
     transition 0.2s
 
-    .inspector-panel-toggle
-      box-sizing border-box
+    .tool-panel
+      .tool-button
+        box-sizing border-box
+        width 50px
+        height 50px
+        background-color white
+        font-size 50px
+        overflow hidden
+        color hsl(188, 98%, 31%)
+        text-shadow: 1px 1px hsla(0,0,50,0.5)
+        border-radius 5px
+        &:hover
+          color hsl(188, 92%, 26%)
+        &.selected
+          color hsl(202, 55%, 13%)
+        &.disabled
+          color hsl(188, 80%, 31%)
+          background-color hsl(188, 10%, 60%)
+          &:hover
+            color hsl(188, 98%, 31%)
+
       position absolute
+      background-color: hsl(188, 98%, 31%)
       top: inspector-panel-top
-      height: inspector-panel-tab-height
       width: inspector-panel-tab-width
-      right: inspector-panel-inner-width
-      padding 10px
-      padding-top 15px
+      right: 0px
       cursor pointer
-      background-repeat no-repeat
-      background-position center
-      background-image url("../img/bb-chrome/chevron-right.png")
-      background-color white
-      transition 0.2s
-      border-radius 5px 0px 0px 5px
+      border-radius 5px
       box-shadow: -2px 0px 2px hsla(0,0,50,0.5)
-      z-index 3
+      z-index 4
 
   .inspector-panel-content
       box-sizing border-box
       position absolute
-      top: inspector-panel-top
-      width: inspector-panel-inner-width
-      bottom: 50px
-      right: 0
-      background-color white
-      border-radius 0px 0px 0px 5px
+      top inspector-panel-top
+      width inspector-panel-inner-width
+      right 0
+      background-color bbgray
+      border-radius 5px
       transition 0.2s
-      box-shadow: -1px 0px 2px hsla(0,0,50,0.3)
+      box-shadow -1px 0px 2px hsla(0,0,50,0.3)
       z-index 2
-      overflow visible
-      .palette-inspector
-        pallete-size()
-          max-height 50px
-          max-width 50px
-        .palette
-          margin 10px
-          max-height 165px
-          overflow auto
-          .palette-image
-            float left
-            margin 8px
-            height 60px
-            .proto-node
-              pallete-size()
-              .img-background
-                pallete-size()
-                border none
-                padding 0
-                img
-                  pallete-size()
-            .palette-image-selected
-              text-align center
-              color #00889f
-              min-height 12px
-          .palette-add-image
-            pallete-size()
-            float left
-            margin 15px 11px
-            font-size 10px
-            text-align center
-            cursor pointer
-            border 2px dashed #a1d2d9
-            color #a1d2d9
-            i
-              display block
-              margin 5px
-              font-size 12px
+      padding-right 50px
+      overflow hidden
 
-        .palette-about-image
-          margin-top 10px
-          padding 15px 20px
-          background-color #ebebeb
-          .palette-about-image-title
-            i
-              color #00889f
-            span
-              label-font(weight: bold)
-              margin 0 5px
-            img
-              max-width 20px
-              max-height 20px
-              vertical-align text-bottom
-          .palette-about-image-info
-            margin-top 20px
-            line-height 1.75em
-            color #444444
-            a
-              color #72bfca
-              text-decoration none
+      .inspector-content
+        padding 1em
+        text-align left
+        background-color bbgray
+        flex 1 0 0
+        -webkit-flex 1 0 0
+        margin-right 1em
+        overflow hidden
+        h2
+          margin-bottom 5px
+
+        &.hidden
+          display none
+        .edit-row
+          padding 0.2em
+          white-space nowrap
+        label
+          display inline-block
+          width 45px
+          label-font()
+          margin 1em
+          &.node-delete, &.link-delete
+            color light-blue
+            cursor pointer
+            &:hover
+              color dark-blue
+              transition 0.1s
+        input
+          width 170px
+          padding 0.5em
+          border none
+          border-radius 3px
+
 
   &.collapsed
     .inspector-panel-toggle
