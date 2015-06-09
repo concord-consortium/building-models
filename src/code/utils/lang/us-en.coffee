@@ -22,7 +22,19 @@ module.exports =
   "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value"
   "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words. Switch to define with numbers."
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator"
-  
+
+  # views/relation-inspector-view.coffee
+  "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with numbers."
+
+  "~NODE-RELATION-EDIT.INCREASES": "increases"
+  "~NODE-RELATION-EDIT.DECREASES": "decreases"
+  "~NODE-RELATION-EDIT.BY": "by"
+  "~NODE-RELATION-EDIT.ABOUT_THE_SAME": "about the same"
+  "~NODE-RELATION-EDIT.A_LOT": "a lot"
+  "~NODE-RELATION-EDIT.A_LITTLE": "a little"
+  "~NODE-RELATION-EDIT.MORE_AND_MORE": "more and more"
+  "~NODE-RELATION-EDIT.LESS_AND_LESS": "less and less"
+
   "~LINK-EDIT.DELETE": "✖ Delete Link"
   "~LINK-EDIT.TITLE": "Title"
   "~LINK-EDIT.COLOR": "Color"

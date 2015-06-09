@@ -39,13 +39,13 @@ module.exports = React.createClass
     )
 
   renderTabs: ->
-    (div {className: 'modal-dialog-workspace-tabs'},
+    (div {className: 'workspace-tabs'},
       (ul {}, @renderTab(tab,index) for tab, index in @props.tabs)
     )
 
 
   renderSelectedPanel: ->
-    (div {className: 'modal-dialog-workspace-tab-component'},
+    (div {className: 'workspace-tab-component'},
       for tab, index in @props.tabs
         (div {
           style:

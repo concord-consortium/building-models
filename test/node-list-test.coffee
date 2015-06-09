@@ -131,6 +131,12 @@ describe 'Node', ->
           it "should have 2 outlinks", ->
             @node_a.outLinks().should.have.length(2)
 
+        describe 'inNodes', ->
+          it "should have 1 inNode", ->
+            @node_a.inNodes().should.have.length(1)
+          it "should include node_c", ->
+            @node_a.inNodes().should.include(@node_b)
+
         describe 'downstreamNodes', ->
           it "should have some nodes", ->
             @node_a.downstreamNodes().should.have.length(2)
@@ -201,6 +207,3 @@ describe 'Node', ->
           @linkManager.loadData(data)
           @linkManager.nodeKeys.should.have.any.keys("a")
           @linkManager.nodeKeys.should.have.any.keys("b")
-
-
-
