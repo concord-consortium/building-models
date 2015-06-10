@@ -9,7 +9,7 @@ module.exports = class CodapConnect
   initAccomplished: false
 
   constructor: (linkManager, name) ->
-    log.info 'CodapConnect initializing'
+    log.info 'CodapConnect: initializing'
     @linkManager = linkManager
     name and @name = name
 
@@ -48,7 +48,7 @@ module.exports = class CodapConnect
 
   initGameHandler: =>
     @initAccomplished = true
-
+    log.info 'CodapConnect: connection established.'
   #
   # Requests a CODAP action, if the Building Models tool is configured to reside
   # in CODAP. For actions that may be requested, see
@@ -68,7 +68,7 @@ module.exports = class CodapConnect
       @codapPhone.call { action: action, args: args }, (reply) ->
         if callback
           callback reply
-        if reply && reply.success
+        if reply and reply.success
           resolve reply
         else
           reject 'CODAP request error'
