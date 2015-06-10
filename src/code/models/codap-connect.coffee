@@ -1,4 +1,4 @@
-IframePhoneRpcEndpoint = require '../../vendor/iframe-phone-rpc-endpoint'
+IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
 
 module.exports = class CodapConnect
 
