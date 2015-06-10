@@ -48,7 +48,7 @@ module.exports = class CodapConnect
 
   initGameHandler: =>
     @initAccomplished = true
-    log.info 'CodapConnect: connection established.'
+  
   #
   # Requests a CODAP action, if the Building Models tool is configured to reside
   # in CODAP. For actions that may be requested, see
