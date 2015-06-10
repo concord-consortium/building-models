@@ -2,7 +2,7 @@ module.exports = [
   {
     "id": "1",
     "title": ""
-    "image": ""
+    "image": "img/nodes/blank.png"
   },
   {
     "id": "2",

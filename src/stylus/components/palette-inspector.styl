@@ -1,0 +1,63 @@
+.palette-inspector
+  background-color white
+  margin-top 0px
+  pallete-size()
+    max-height 50px
+    max-width 50px
+  .palette
+    margin 10px
+    padding-top 10px
+    margin-top 0px
+    max-height 165px
+    overflow auto
+    .palette-image
+      float left
+      margin 8px
+      height 60px
+      .proto-node
+        pallete-size()
+        .img-background
+          pallete-size()
+          border none
+          padding 0
+          img
+            pallete-size()
+      .palette-image-selected
+        text-align center
+        color #00889f
+        min-height 12px
+    .palette-add-image
+      pallete-size()
+      float left
+      margin 15px 11px
+      font-size 10px
+      text-align center
+      cursor pointer
+      border 2px dashed #a1d2d9
+      color #a1d2d9
+      i
+        display block
+        margin 5px
+        font-size 12px
+
+  .palette-about-image
+    margin-top 10px
+    padding 15px 20px
+    background-color #ebebeb
+    .palette-about-image-title
+      i
+        color #00889f
+      span
+        label-font(weight: bold)
+        margin 0 5px
+      img
+        max-width 20px
+        max-height 20px
+        vertical-align text-bottom
+    .palette-about-image-info
+      margin-top 20px
+      line-height 1.75em
+      color #444444
+      a
+        color #72bfca
+        text-decoration none

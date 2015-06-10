@@ -29,21 +29,15 @@ module.exports = React.createClass
     tabs = [tr('design'), tr('define')]
     selected = tr('design')
     (div {className: 'link-inspector-view'},
-      (InspectorTabs {tabs: tabs, selected: selected} )
-      (div {className: 'link-inspector-content'},
+      # Previous design comps
+      # (InspectorTabs {tabs: tabs, selected: selected} )
+      (div {className: 'inspector-content'},
         (div {className: 'edit-row'},
           (label {name: 'title'}, tr "~LINK-EDIT.TITLE")
           (input {type: 'text', name: 'title', value: @props.link.title, onChange: @changeTitle})
         )
-        # (div {className: 'edit-row'},
-        #   (label {name: 'color'}, tr "~LINK-EDIT.COLOR")
-        #   for colorCode, i in palette
-        #     (div {className: 'colorChoice', key: i, style: {backgroundColor: colorCode}, onTouchEnd: @pickColor, onClick: @pickColor})
-        # )
         (div {className: 'edit-row'},
           (label {className: 'link-delete', onClick: @deleteLink}, tr("~LINK-EDIT.DELETE"))
         )
       )
     )
-
-

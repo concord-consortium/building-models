@@ -29,8 +29,9 @@ module.exports = React.createClass
     displayTitle = @displayTitleForInput(@props.node.title)
 
     (div {className: 'node-inspector-view'},
-      (InspectorTabs {tabs: tabs, selected: selected} )
-      (div {className: 'node-inspector-content'},
+      # previous design comps:
+      # (InspectorTabs {tabs: tabs, selected: selected} )
+      (div {className: 'inspector-content'},
         (div {className: 'edit-row'},
           (label {htmlFor: 'title'}, tr "~NODE-EDIT.TITLE")
           (input {type: 'text', name: 'title', value: displayTitle, placeholder: @titlePlaceholder(),  onChange: @changeTitle})
