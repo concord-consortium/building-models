@@ -1,6 +1,6 @@
 {div, h2, label, span, input, p, i, select, option} = React.DOM
 
-Relationship = require "../models/relationship"
+RelationFactory = require "../models/relation-factory"
 tr = require "../utils/translate"
 
 module.exports = React.createClass
@@ -8,8 +8,8 @@ module.exports = React.createClass
   displayName: 'LinkRelationView'
 
   getInitialState: ->
-    increaseOrDecrease: Relationship.increase
-    amount: Relationship.aboutTheSame
+    increaseOrDecrease: RelationFactory.increase
+    amount: RelationFactory.aboutTheSame
 
   getDefaultProps: ->
     link:
@@ -20,19 +20,19 @@ module.exports = React.createClass
 
   updateIncreaseOrDecrease: (evt)->
     id = parseInt evt.target.value
-    selected = Relationship.vectors[id]
+    selected = RelationFactory.vectors[id]
     @setState
       increaseOrDecrease: selected
 
   updateAmount: (evt)->
     id = parseInt evt.target.value
-    selected = Relationship.scalars[id]
+    selected = RelationFactory.scalars[id]
     @setState
       amount: selected
 
   renderIncreaseOrDecreaseSelect: ->
     selected_id = @state.increaseOrDecrease.id
-    options = _.map Relationship.vectors, (opt) ->
+    options = _.map RelationFactory.vectors, (opt) ->
       if opt.id is selected_id
         (option {value: opt.id, selected: 'true'}, opt.text)
       else
@@ -45,7 +45,7 @@ module.exports = React.createClass
 
   renderAmountSelect: ->
     selected_id = @state.amount.id
-    options = _.map Relationship.scalars, (opt) ->
+    options = _.map RelationFactory.scalars, (opt) ->
       if opt.id is selected_id
         (option {value: opt.id, selected: 'true'}, opt.text)
       else
@@ -58,7 +58,7 @@ module.exports = React.createClass
     )
 
   render: ->
-    classname = Relationship.inconName(@state.increaseOrDecrease, @state.amount)
+    classname = RelationFactory.inconName(@state.increaseOrDecrease, @state.amount)
     (div {className: 'link-relation-view'},
       (span {}, "As #{@props.link.sourceNode.title} increases … ")
       (div {className: 'inspector-content group'},

@@ -8,53 +8,6 @@ module.exports = class Relationship
   @defaultGraphThumb: "TBD"
   @errValue:          -1
 
-  @increase:
-    id: 0
-    prefixIco: "inc"
-    text: tr "~NODE-RELATION-EDIT.INCREASES"
-
-  @decrease:
-    id: 1
-    prefixIco: "dec"
-    text: tr "~NODE-RELATION-EDIT.DECREASES"
-
-  @aboutTheSame:
-    id: 0
-    text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
-    postfixIco: "the-same"
-
-  @aLot:
-    id: 1
-    text: tr "~NODE-RELATION-EDIT.A_LOT"
-    postfixIco: "a-lot"
-
-  @aLittle:
-    id: 2
-    text: tr "~NODE-RELATION-EDIT.A_LITTLE"
-    postfixIco: "a-little"
-
-  @moreAndMore:
-    id: 3
-    text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
-    postfixIco: "more-and-more"
-
-  @lessAndLess:
-    id: 4
-    text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
-    postfixIco: "less-and-less"
-
-  @inconName: (incdec,amount)->
-    "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
-
-  @vectors = [Relationship.increase, Relationship.decrease]
-  @scalars = [
-    Relationship.aboutTheSame
-    Relationship.aLot
-    Relationship.aLittle
-    Relationship.moreAndMore
-    Relationship.lessAndLess
-  ]
-
 
   @defaultErrHandler: (error,expr,vars)->
     log.error "Error in eval: #{Error}"
