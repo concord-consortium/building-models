@@ -1,62 +1,15 @@
 {div, h2, label, span, input, p, i, select, option} = React.DOM
 
+Relationship = require "../models/relationship"
 tr = require "../utils/translate"
-
-relation =
-  increase:
-    id: 0
-    prefixIco: "inc"
-    text: tr "~NODE-RELATION-EDIT.INCREASES"
-
-  decrease:
-    id: 1
-    prefixIco: "dec"
-    text: tr "~NODE-RELATION-EDIT.DECREASES"
-
-  aboutTheSame:
-    id: 0
-    text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
-    postfixIco: "the-same"
-
-  aLot:
-    id: 1
-    text: tr "~NODE-RELATION-EDIT.A_LOT"
-    postfixIco: "a-lot"
-
-  aLittle:
-    id: 2
-    text: tr "~NODE-RELATION-EDIT.A_LITTLE"
-    postfixIco: "a-little"
-
-  moreAndMore:
-    id: 3
-    text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
-    postfixIco: "more-and-more"
-
-  lessAndLess:
-    id: 4
-    text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
-    postfixIco: "less-and-less"
-
-  inconName: (incdec,amount)->
-    "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
-
-relation.vectors = [relation.increase, relation.decrease]
-relation.scalars = [
-  relation.aboutTheSame
-  relation.aLot
-  relation.aLittle
-  relation.moreAndMore
-  relation.lessAndLess
-]
 
 module.exports = React.createClass
 
   displayName: 'LinkRelationView'
 
   getInitialState: ->
-    increaseOrDecrease: relation.increase
-    amount: relation.aboutTheSame
+    increaseOrDecrease: Relationship.increase
+    amount: Relationship.aboutTheSame
 
   getDefaultProps: ->
     link:
@@ -67,19 +20,19 @@ module.exports = React.createClass
 
   updateIncreaseOrDecrease: (evt)->
     id = parseInt evt.target.value
-    selected = relation.vectors[id]
+    selected = Relationship.vectors[id]
     @setState
       increaseOrDecrease: selected
 
   updateAmount: (evt)->
     id = parseInt evt.target.value
-    selected = relation.scalars[id]
+    selected = Relationship.scalars[id]
     @setState
       amount: selected
 
   renderIncreaseOrDecreaseSelect: ->
     selected_id = @state.increaseOrDecrease.id
-    options = _.map relation.vectors, (opt) ->
+    options = _.map Relationship.vectors, (opt) ->
       if opt.id is selected_id
         (option {value: opt.id, selected: 'true'}, opt.text)
       else
@@ -92,7 +45,7 @@ module.exports = React.createClass
 
   renderAmountSelect: ->
     selected_id = @state.amount.id
-    options = _.map relation.scalars, (opt) ->
+    options = _.map Relationship.scalars, (opt) ->
       if opt.id is selected_id
         (option {value: opt.id, selected: 'true'}, opt.text)
       else
@@ -105,7 +58,7 @@ module.exports = React.createClass
     )
 
   render: ->
-    classname = relation.inconName(@state.increaseOrDecrease, @state.amount)
+    classname = Relationship.inconName(@state.increaseOrDecrease, @state.amount)
     (div {className: 'link-relation-view'},
       (span {}, "As #{@props.link.sourceNode.title} increases … ")
       (div {className: 'inspector-content group'},

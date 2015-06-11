@@ -94,3 +94,5 @@ module.exports =
 
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here"
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)"
+
+  "~RELATIONSHIP.NO_RELATION": "No relation defined"
