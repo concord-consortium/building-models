@@ -7,7 +7,10 @@ module.exports = class Link extends GraphPrimitive
   constructor: (@options={}) ->
     @options.color ?= Link.defaultColor
     @options.title ?= ''
-    {@sourceNode, @sourceTerminal ,@targetNode, @targetTerminal, @color, @title} = @options
+    {
+      @sourceNode, @sourceTerminal, @targetNode, @targetTerminal,
+      @color, @title, @relation
+    } = @options
     super()
 
   type: 'Link'
@@ -31,5 +34,3 @@ module.exports = class Link extends GraphPrimitive
     "sourceTerminal": @sourceTerminal
     "targetNodeKey": @targetNode.key
     "targetTerminal": @targetTerminal
-
-
