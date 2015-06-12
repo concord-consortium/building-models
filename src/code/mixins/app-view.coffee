@@ -1,3 +1,5 @@
+Simulation = require "../models/simulation"
+
 module.exports =
 
   getInitialAppViewState: (subState) ->
@@ -114,3 +116,14 @@ module.exports =
 
   onLinkChanged: (link, title, color, deleted) ->
     @props.linkManager.changeLink link, title,color, deleted
+
+  runSimulation: ->
+    simulator = new Simulation
+      nodes: @props.linkManager.getNodes()
+      duration: 10
+      timeStep: 0.1
+      reportFunc: (report) ->
+        log.info report
+
+    simulator.run()
+    simulator.report()

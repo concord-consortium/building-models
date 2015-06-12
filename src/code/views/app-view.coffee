@@ -29,6 +29,7 @@ module.exports = React.createClass
   toggleImageBrowser: ->
     @setState showImageBrowser: not @state.showImageBrowser
 
+
   render: ->
     (div {className: 'app'},
       (div {className: if @state.iframed then 'iframed-workspace' else 'workspace'},
@@ -37,7 +38,8 @@ module.exports = React.createClass
             filename: @state.filename
             username: @state.username
             linkManager: @props.linkManager
-            getData: @getData
+            getData: @getData,
+            runSimulation: @runSimulation
           )
         (div {className: 'action-bar'},
           (NodeWell {palette: @state.palette})
