@@ -18,6 +18,11 @@ module.exports =
   "~NODE-EDIT.ADD_REMOTE": "Add remote"
   "~NODE-EDIT.DELETE": "✖ Delete Component"
 
+  # views/node-value-inspector-view.coffee
+  "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value"
+  "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words. Switch to define with numbers."
+  "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator"
+  
   "~LINK-EDIT.DELETE": "✖ Delete Link"
   "~LINK-EDIT.TITLE": "Title"
   "~LINK-EDIT.COLOR": "Color"
@@ -77,4 +82,3 @@ module.exports =
 
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here"
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)"
-
