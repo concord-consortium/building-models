@@ -2,14 +2,18 @@
 IntegrationFunction = (t) ->
   links = @inLinks()
   count = links.length
-  factor = 1 / count
   nextValue = 0
+
+  if count < 1
+    return @currentValue
+
+  @currentValue = 0
   _.each links, (link) =>
     sourceNode = link.sourceNode
     inV = sourceNode.previousValue
     outV = @previousValue
     nextValue = link.relation.evaluate(inV, outV)
-    @currentValue = nextValue * factor
+    @currentValue = @currentValue + (nextValue / count)
   @currentValue
 
 module.exports = class Simulation

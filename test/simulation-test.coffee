@@ -114,3 +114,82 @@ describe "Simulation", ->
               duration: scenario.duration
             simulation.run()
             nodeB.currentValue.should.equal scenario.result
+
+    describe "for a simple three node graph", ->
+      beforeEach ->
+        @nodeA    = new Node({initialValue: 10})
+        @nodeB    = new Node({initialValue: 20})
+        @nodeC    = new Node({initialValue: 0 })
+        @formula  = "in"
+        @arguments =
+          nodes: [@nodeA, @nodeB, @nodeC]
+          timeStep: 1
+          duration: 10
+
+        LinkNodes(@nodeA, @nodeC, @formula)
+        LinkNodes(@nodeB, @nodeC, @formula)
+        @simulation = new Simulation(@arguments)
+        @simulation.run()
+
+      describe "nodeA", ->
+        it "should be unaffected", ->
+          @nodeA.currentValue.should.equal 10
+
+      describe "nodeB", ->
+        it "should be unaffected", ->
+          @nodeB.currentValue.should.equal 20
+
+      describe "nodeC", ->
+        it "should average its imputs", ->
+          @nodeC.currentValue.should.equal 15
+
+
+    describe "for a three node cascade", ->
+      beforeEach ->
+        @nodeA    = new Node({initialValue: 10})
+        @nodeB    = new Node({initialValue: 20})
+        @nodeC    = new Node({initialValue: 0 })
+        @formula  = "in"
+        LinkNodes(@nodeA, @nodeB, @formula)
+        LinkNodes(@nodeB, @nodeC, @formula)
+
+        @arguments =
+          nodes: [@nodeA, @nodeB, @nodeC]
+          timeStep: 1
+          duration: 1
+
+      describe "after one step", ->
+        beforeEach ->
+          @arguments.duration = 1
+          @simulation = new Simulation(@arguments)
+          @simulation.run()
+
+        describe "nodeA", ->
+          it "should be unaffected", ->
+            @nodeA.currentValue.should.equal @nodeA.initialValue
+
+        describe "nodeB", ->
+          it "should be get A's previous value", ->
+            @nodeB.currentValue.should.equal @nodeA.initialValue
+
+        describe "nodeC", ->
+          it "should get B's previous value", ->
+            @nodeC.currentValue.should.equal @nodeB.initialValue
+
+      describe "after two steps", ->
+        beforeEach ->
+          @arguments.duration = 2
+          @simulation = new Simulation(@arguments)
+          @simulation.run()
+
+        describe "nodeA", ->
+          it "should be unaffected", ->
+            @nodeA.currentValue.should.equal @nodeA.initialValue
+
+        describe "nodeB", ->
+          it "should be get A's previous value", ->
+            @nodeB.currentValue.should.equal @nodeA.initialValue
+
+        describe "nodeC", ->
+          it "should get A's original value", ->
+            @nodeC.currentValue.should.equal @nodeA.initialValue
