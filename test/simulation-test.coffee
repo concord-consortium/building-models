@@ -193,3 +193,59 @@ describe "Simulation", ->
         describe "nodeC", ->
           it "should get A's original value", ->
             @nodeC.currentValue.should.equal @nodeA.initialValue
+
+  describe "report", ->
+    describe "for a simple graph A(10) -0.1-> B(0) for 10 itterations", ->
+      beforeEach ->
+        @nodeA    = new Node({name: "A", initialValue: 10})
+        @nodeB    = new Node({name: "B", initialValue: 0 })
+        @formula  = "out + 0.1 * in"
+        @report   = null
+        @arguments =
+          nodes: [@nodeA, @nodeB]
+          timeStep: 1
+          duration: 10
+          reportFunc: (report) =>
+            @report = report
+
+        LinkNodes(@nodeA, @nodeB, @formula)
+        @simulation = new Simulation(@arguments)
+        @simulation.run()
+        @report = @simulation.report()
+
+      describe "the report generated", ->
+
+        it "should exist", ->
+          @report.should.exist
+
+        describe "the meta-data", ->
+          beforeEach ->
+            @metaData = @report.simulation
+
+          it "should have some simulation details", ->
+            @metaData.should.exist
+            @metaData.steps.should.equal 10
+            @metaData.duration.should.equal 10
+            @metaData.timeStep.should.equal 1
+            @metaData.nodeCount.should.equal 2
+
+        describe "the simulation frames", ->
+          beforeEach ->
+            @frames = @report.frames
+            @firstFrame = @frames[0]
+            @lastFrame = @frames[9]
+
+          it "should have frames", ->
+            @frames.should.exist
+            @firstFrame.should.exist
+            @firstFrame.time.should.equal 1
+            @lastFrame.should.exist
+            @lastFrame.time.should.equal 10
+
+            @firstFrame.nodes.should.have.length 2
+            @firstFrame.nodes[0].value.should.equal 10
+            @firstFrame.nodes[1].value.should.equal 1
+
+            @lastFrame.nodes.should.have.length 2
+            @lastFrame.nodes[0].value.should.equal 10
+            @lastFrame.nodes[1].value.should.equal 10

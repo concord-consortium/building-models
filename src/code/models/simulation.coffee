@@ -18,11 +18,17 @@ IntegrationFunction = (t) ->
 
 module.exports = class Simulation
 
+  @defaultInitialValue = 50
+
+  @defaultReportFunc = (report) ->
+    log.info report
+
+
   constructor: (@opts={}) ->
     @nodes       = @opts.nodes      or []
     @duration    = @opts.duration   or 10.0
     @timeStep    = @opts.timeStep   or 0.1
-    @errHandler  = @opts.errHandler or Simulation.defaultErrHandler
+    @reportFunc  = @opts.reportFunc   or Simulation.defaultReportFunc
 
     @decorateNodes() # extend nodes with integration methods
 
@@ -33,7 +39,7 @@ module.exports = class Simulation
       @addIntegrateMethodTo node
 
   initiaLizeValues: (node) ->
-    node.initialValue  ?= 50
+    node.initialValue  ?= Simulation.defaultInitialValue
     node.currentValue  ?= node.initialValue
 
   nextStep: (node) ->
@@ -50,9 +56,36 @@ module.exports = class Simulation
   evaluateNode: (node, t) ->
     node.currentValue = node.integrate(t)
 
+  # create an object representation of the current timeStep
+  addReportFrame: (time) ->
+    newFrame =
+      time: time
+      nodes: _.map @nodes, (node) ->
+        title: node.title
+        value: node.currentValue
+    @reportFrames.push newFrame
+
+  # create envelope deata for the report
+  report: ->
+    steps = @duration / @timeStep
+    data =
+      simulation:
+        steps: steps
+        duration: @duration
+        timeStep: @timeStep
+        nodeCount: @nodes.length
+      frames: @reportFrames
+      endState: _.map @nodes, (node) ->
+        title: node.title
+        value: node.currentValue
+        initialValue: node.initialValue
+    @reportFunc(data)
+
   run: ->
     time = 0
+    @reportFrames = []
     while time < @duration
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
       _.each @nodes, (node) => @evaluateNode node, time
       time = time + @timeStep
+      @addReportFrame(time)
