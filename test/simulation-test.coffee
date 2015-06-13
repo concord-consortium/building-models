@@ -75,7 +75,7 @@ describe "Simulation", ->
             formula:  "in * 2"
             duration: 10
             timeStep: 0.2
-            result:   20
+            result:   4
           }
           {
             startA:   10
@@ -83,7 +83,7 @@ describe "Simulation", ->
             formula:  "in * 2"
             duration: 10
             timeStep: 0.2
-            result:   20
+            result:   4
           }
           {
             startA:   10
@@ -99,7 +99,7 @@ describe "Simulation", ->
             formula:  "out + out"
             duration: 4
             timeStep: 0.5
-            result:   256
+            result:   1
           }
         ]
       describe "each scenario", ->

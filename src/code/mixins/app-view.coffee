@@ -121,7 +121,7 @@ module.exports =
     simulator = new Simulation
       nodes: @props.linkManager.getNodes()
       duration: 10
-      timeStep: 0.1
+      timeStep: 1
       reportFunc: (report) ->
         log.info report
 

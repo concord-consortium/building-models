@@ -1,5 +1,5 @@
 
-IntegrationFunction = (t) ->
+IntegrationFunction = (t, timeStep) ->
   links = @inLinks()
   count = links.length
   nextValue = 0
@@ -12,7 +12,7 @@ IntegrationFunction = (t) ->
     sourceNode = link.sourceNode
     inV = sourceNode.previousValue
     outV = @previousValue
-    nextValue = link.relation.evaluate(inV, outV)
+    nextValue = link.relation.evaluate(inV, outV) * timeStep
     @currentValue = @currentValue + (nextValue / count)
   @currentValue
 
@@ -40,7 +40,7 @@ module.exports = class Simulation
 
   initiaLizeValues: (node) ->
     node.initialValue  ?= Simulation.defaultInitialValue
-    node.currentValue  ?= node.initialValue
+    node.currentValue  = node.initialValue
 
   nextStep: (node) ->
     node.previousValue = node.currentValue or node.initialValue
@@ -54,7 +54,7 @@ module.exports = class Simulation
 
   # for some integrators, timeIndex might matter
   evaluateNode: (node, t) ->
-    node.currentValue = node.integrate(t)
+    node.currentValue = node.integrate(t, @timeStep)
 
   # create an object representation of the current timeStep
   addReportFrame: (time) ->
@@ -80,10 +80,12 @@ module.exports = class Simulation
         value: node.currentValue
         initialValue: node.initialValue
     @reportFunc(data)
+    # TODO CLEANUP
 
   run: ->
     time = 0
     @reportFrames = []
+    _.each @nodes, (node) => @initiaLizeValues node
     while time < @duration
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
       _.each @nodes, (node) => @evaluateNode node, time
