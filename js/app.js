@@ -53970,7 +53970,7 @@ module.exports = {
     simulator = new Simulation({
       nodes: this.props.linkManager.getNodes(),
       duration: 10,
-      timeStep: 0.1,
+      timeStep: 1,
       reportFunc: function(report) {
         return log.info(report);
       }
@@ -55501,7 +55501,7 @@ module.exports = Simulation = (function() {
     if (node.initialValue == null) {
       node.initialValue = Simulation.defaultInitialValue;
     }
-    return node.currentValue != null ? node.currentValue : node.currentValue = node.initialValue;
+    return node.currentValue = node.initialValue;
   };
 
   Simulation.prototype.nextStep = function(node) {
@@ -55556,6 +55556,11 @@ module.exports = Simulation = (function() {
     var results, time;
     time = 0;
     this.reportFrames = [];
+    _.each(this.nodes, (function(_this) {
+      return function(node) {
+        return _this.initiaLizeValues(node);
+      };
+    })(this));
     results = [];
     while (time < this.duration) {
       _.each(this.nodes, (function(_this) {
