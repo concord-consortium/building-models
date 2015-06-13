@@ -58,7 +58,7 @@ module.exports =
       selectedNode = manager.getInspection()[0] or null
       editingNode  = manager.getTitleEditing()[0] or null
       selectedLink = manager.getLinkSelection()[0] or null
-      
+
       @setState
         selectedNode: selectedNode
         editingNode: editingNode
@@ -124,6 +124,11 @@ module.exports =
       timeStep: 1
       reportFunc: (report) ->
         log.info report
+        nodeInfo = (
+          _.map report.endState, (n) ->
+            "#{n.title} #{n.initialValue} → #{n.value}"
+        ).join("\n")
+        alert "Run for #{report.simulation.steps} steps\n#{nodeInfo}:"
 
     simulator.run()
     simulator.report()
