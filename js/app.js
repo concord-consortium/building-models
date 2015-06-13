@@ -53972,7 +53972,12 @@ module.exports = {
       duration: 10,
       timeStep: 1,
       reportFunc: function(report) {
-        return log.info(report);
+        var nodeInfo;
+        log.info(report);
+        nodeInfo = (_.map(report.endState, function(n) {
+          return n.title + " " + n.initialValue + " → " + n.value;
+        })).join("\n");
+        return alert("Run for " + report.simulation.steps + " steps\n" + nodeInfo + ":");
       }
     });
     simulator.run();
