@@ -53962,9 +53962,6 @@ module.exports = {
   onNodeDelete: function() {
     return this.props.linkManager.deleteSelected();
   },
-  onLinkChanged: function(link, title, color, deleted) {
-    return this.props.linkManager.changeLink(link, title, color, deleted);
-  },
   runSimulation: function() {
     var simulator;
     simulator = new Simulation({
@@ -54670,7 +54667,9 @@ module.exports = LinkManager = (function() {
       originalData = {
         title: node.title,
         image: node.image,
-        color: node.color
+        color: node.color,
+        initialValue: node.initialValue,
+        isAccumulator: node.isAccumulator
       };
       return this.undoRedoManager.createAndExecuteCommand('changeNode', {
         execute: (function(_this) {
@@ -54690,7 +54689,7 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype._changeNode = function(node, data) {
     var i, key, len, ref;
     log.info("Change for " + node.title);
-    ref = ['title', 'image', 'color'];
+    ref = ['title', 'image', 'color', 'initialValue', 'isAccumulator'];
     for (i = 0, len = ref.length; i < len; i++) {
       key = ref[i];
       if (data[key]) {
@@ -54713,22 +54712,28 @@ module.exports = LinkManager = (function() {
     return this.selectionManager.selectLink(link);
   };
 
-  LinkManager.prototype.changeLink = function(link, title, color, deleted) {
-    var originalColor, originalTitle;
-    if (deleted) {
+  LinkManager.prototype.changeLink = function(link, changes) {
+    var originalData;
+    if (changes == null) {
+      changes = {};
+    }
+    if (changes.deleted) {
       return this.removeSelectedLink();
     } else if (link) {
-      originalTitle = link.title;
-      originalColor = link.color;
+      originalData = {
+        title: link.title,
+        color: link.color,
+        relation: link.relation
+      };
       return this.undoRedoManager.createAndExecuteCommand('changeLink', {
         execute: (function(_this) {
           return function() {
-            return _this._changeLink(link, title, color);
+            return _this._changeLink(link, changes);
           };
         })(this),
         undo: (function(_this) {
           return function() {
-            return _this._changeLink(link, originalTitle, originalColor);
+            return _this._changeLink(link, originalData);
           };
         })(this)
       });
@@ -54741,10 +54746,17 @@ module.exports = LinkManager = (function() {
     }
   };
 
-  LinkManager.prototype._changeLink = function(link, title, color) {
+  LinkManager.prototype._changeLink = function(link, changes) {
+    var i, key, len, ref;
     log.info("Change  for " + link.title);
-    link.title = title;
-    link.color = color;
+    ref = ['title', 'color', 'relation'];
+    for (i = 0, len = ref.length; i < len; i++) {
+      key = ref[i];
+      if (changes[key]) {
+        log.info("Change " + key + " for " + link.title);
+        link[key] = changes[key];
+      }
+    }
     return this._maybeChangeSelectedItem(link);
   };
 
@@ -54925,7 +54937,7 @@ module.exports = Link = (function(superClass) {
   Link.defaultColor = "#777";
 
   Link.defaultRelation = new Relation({
-    formula: "out + in"
+    formula: "1 * in"
   });
 
   function Link(options) {
@@ -55000,7 +55012,8 @@ module.exports = Node = (function(superClass) {
         y: 0,
         title: "untitled",
         image: null,
-        initialValue: 50
+        initialValue: 50,
+        isAccumulator: false
       };
     }
     Node.__super__.constructor.call(this);
@@ -55008,7 +55021,13 @@ module.exports = Node = (function(superClass) {
       this.key = key;
     }
     this.links = [];
-    this.x = nodeSpec.x, this.y = nodeSpec.y, this.title = nodeSpec.title, this.image = nodeSpec.image, this.initialValue = nodeSpec.initialValue;
+    this.x = nodeSpec.x, this.y = nodeSpec.y, this.title = nodeSpec.title, this.image = nodeSpec.image, this.initialValue = nodeSpec.initialValue, this.isAccumulator = nodeSpec.isAccumulator;
+    if (this.initialValue == null) {
+      this.initialValue = 50;
+    }
+    if (this.isAccumulator == null) {
+      this.isAccumulator = false;
+    }
     if (this.color == null) {
       this.color = Colors[0].value;
     }
@@ -55126,14 +55145,14 @@ module.exports = RelationFactory = (function() {
     id: 0,
     prefixIco: "inc",
     text: tr("~NODE-RELATION-EDIT.INCREASES"),
-    formulaFrag: "out +"
+    formulaFrag: "1 *"
   };
 
   RelationFactory.decrease = {
     id: 1,
     prefixIco: "dec",
     text: tr("~NODE-RELATION-EDIT.DECREASES"),
-    formulaFrag: "out -"
+    formulaFrag: "-1 *"
   };
 
   RelationFactory.aboutTheSame = {
@@ -55171,7 +55190,7 @@ module.exports = RelationFactory = (function() {
     formulaFrag: "sqrt(in)"
   };
 
-  RelationFactory.inconName = function(incdec, amount) {
+  RelationFactory.iconName = function(incdec, amount) {
     return "icon-" + incdec.prefixIco + "-" + amount.postfixIco;
   };
 
@@ -55184,7 +55203,7 @@ module.exports = RelationFactory = (function() {
     name = vector.text + " " + scalar.text;
     formula = vector.formulaFrag + " " + scalar.formulaFrag;
     return new Relationship({
-      name: name,
+      text: name,
       formula: formula
     });
   };
@@ -55471,6 +55490,9 @@ IntegrationFunction = function(t, timeStep) {
       inV = sourceNode.previousValue;
       outV = _this.previousValue;
       nextValue = link.relation.evaluate(inV, outV) * timeStep;
+      if (_this.isAccumulator) {
+        nextValue = _this.previousValue + nextValue;
+      }
       return _this.currentValue = _this.currentValue + (nextValue / count);
     };
   })(this));
@@ -56555,7 +56577,6 @@ module.exports = React.createClass({
       node: this.state.selectedNode,
       link: this.state.selectedLink,
       onNodeChanged: this.onNodeChanged,
-      onLinkChanged: this.onLinkChanged,
       onNodeDelete: this.onNodeDelete,
       palette: this.state.palette,
       toggleImageBrowser: this.toggleImageBrowser,
@@ -57600,25 +57621,32 @@ module.exports = React.createClass({
     } else if (this.props.link) {
       return LinkInspectorView({
         link: this.props.link,
-        onLinkChanged: this.props.onLinkChanged
+        linkManager: this.props.linkManager
       });
     }
   },
   renderValueInspector: function() {
     if (this.props.node) {
-      return NodeValueInspectorView({});
+      return NodeValueInspectorView({
+        node: this.props.node,
+        linkManager: this.props.linkManager
+      });
     } else if (this.props.link) {
-      return LinkValueInspectorView({});
+      return LinkValueInspectorView({
+        link: this.props.link
+      });
     }
   },
   renderRelationInspector: function() {
     if (this.props.node) {
       return NodeRelationInspectorView({
-        node: this.props.node
+        node: this.props.node,
+        linkManager: this.props.linkManager
       });
     } else if (this.props.link) {
       return LinkRelationInspectorView({
-        link: this.props.link
+        link: this.props.link,
+        linkManager: this.props.linkManager
       });
     }
   },
@@ -57672,18 +57700,20 @@ palette = palettes[2];
 
 module.exports = React.createClass({
   displayName: 'LinkEditView',
-  notifyChange: function(title, color, deleted) {
-    var base;
-    return typeof (base = this.props).onLinkChanged === "function" ? base.onLinkChanged(this.props.link, title, color, !!deleted) : void 0;
-  },
   changeTitle: function(e) {
-    return this.notifyChange(e.target.value, this.props.link.color);
+    return this.props.linkManager.changeLink(this.props.link, {
+      title: e.target.value
+    });
   },
   deleteLink: function() {
-    return this.notifyChange(this.props.link.title, this.props.link.color, true);
+    return this.props.linkManager.changeLink(this.props.link, {
+      "delete": true
+    });
   },
   pickColor: function(e) {
-    return this.notifyChange(this.props.link.title, $(e.target).css('background-color'));
+    return this.props.linkManager.changeLink(this.props.link, {
+      color: $(e.target).css('background-color')
+    });
   },
   render: function() {
     var selected, tabs;
@@ -57724,11 +57754,8 @@ tr = require("../utils/translate");
 
 module.exports = React.createClass({
   displayName: 'LinkRelationView',
-  getInitialState: function() {
-    return {
-      increaseOrDecrease: RelationFactory.increase,
-      amount: RelationFactory.aboutTheSame
-    };
+  componentDidMount: function() {
+    return this.props.linkManager.addLinkListener(this);
   },
   getDefaultProps: function() {
     return {
@@ -57742,25 +57769,29 @@ module.exports = React.createClass({
       }
     };
   },
-  updateIncreaseOrDecrease: function(evt) {
-    var id, selected;
-    id = parseInt(evt.target.value);
-    selected = RelationFactory.vectors[id];
-    return this.setState({
-      increaseOrDecrease: selected
+  updateRelation: function() {
+    var link, relation, scalar, vector;
+    vector = this.getVector();
+    scalar = this.getScalar();
+    relation = RelationFactory.fromSelections(vector, scalar);
+    link = this.props.link;
+    return this.props.linkManager.changeLink(link, {
+      relation: relation
     });
   },
-  updateAmount: function(evt) {
-    var id, selected;
-    id = parseInt(evt.target.value);
-    selected = RelationFactory.scalars[id];
-    return this.setState({
-      amount: selected
-    });
+  getVector: function() {
+    var id;
+    id = parseInt(React.findDOMNode(this.refs.vector).value);
+    return RelationFactory.vectors[id];
   },
-  renderIncreaseOrDecreaseSelect: function() {
+  getScalar: function() {
+    var id;
+    id = parseInt(React.findDOMNode(this.refs.scalar).value);
+    return RelationFactory.scalars[id];
+  },
+  renderVector: function(increaseOrDecrease) {
     var options, selected_id;
-    selected_id = this.state.increaseOrDecrease.id;
+    selected_id = increaseOrDecrease.id;
     options = _.map(RelationFactory.vectors, function(opt) {
       if (opt.id === selected_id) {
         return option({
@@ -57777,12 +57808,13 @@ module.exports = React.createClass({
       className: "bb-select"
     }, label({}, this.props.link.targetNode.title + " "), select({
       className: "",
-      onChange: this.updateIncreaseOrDecrease
+      ref: "vector",
+      onChange: this.updateRelation
     }, options));
   },
-  renderAmountSelect: function() {
+  renderScalar: function(amount) {
     var options, selected_id;
-    selected_id = this.state.amount.id;
+    selected_id = amount.id;
     options = _.map(RelationFactory.scalars, function(opt) {
       if (opt.id === selected_id) {
         return option({
@@ -57799,21 +57831,23 @@ module.exports = React.createClass({
       className: "bb-select"
     }, label({}, (tr("~NODE-RELATION-EDIT.BY")) + " "), select({
       className: "",
-      onChange: this.updateAmount
+      ref: "scalar",
+      onChange: this.updateRelation
     }, options));
   },
   render: function() {
-    var classname;
-    classname = RelationFactory.inconName(this.state.increaseOrDecrease, this.state.amount);
+    var classname, ref1, scalar, vector;
+    ref1 = RelationFactory.selectionsFromRelation(this.props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
+    classname = RelationFactory.iconName(vector, scalar);
     return div({
       className: 'link-relation-view'
     }, span({}, "As " + this.props.link.sourceNode.title + " increases … "), div({
       className: 'inspector-content group'
     }, div({
       className: 'full'
-    }, this.renderIncreaseOrDecreaseSelect()), div({
+    }, this.renderVector(vector)), div({
       className: 'full'
-    }, this.renderAmountSelect()), i({
+    }, this.renderScalar(scalar)), i({
       className: "full chart center " + classname
     })));
   }
@@ -58345,11 +58379,6 @@ module.exports = React.createClass({
     min: React.PropTypes.number,
     onChange: React.PropTypes.func
   },
-  getInitialState: function() {
-    return {
-      value: 50
-    };
-  },
   getDefaultProps: function() {
     return {
       max: 100,
@@ -58363,8 +58392,21 @@ module.exports = React.createClass({
     var value;
     if (value = evt.target.value) {
       value = this.trim(parseInt(value));
-      return this.setState({
-        value: value
+      return this.props.linkManager.changeNode({
+        initialValue: value
+      });
+    }
+  },
+  updateChecked: function(evt) {
+    var value;
+    value = evt.target.value;
+    if (value === "on") {
+      return this.props.linkManager.changeNode({
+        isAccumulator: true
+      });
+    } else {
+      return this.props.LinkManager.changeNode({
+        isAccumulator: false
       });
     }
   },
@@ -58372,6 +58414,8 @@ module.exports = React.createClass({
     return evt.target.select();
   },
   render: function() {
+    var node;
+    node = this.props.node;
     return div({
       className: 'value-inspector'
     }, div({
@@ -58385,7 +58429,7 @@ module.exports = React.createClass({
       type: "number",
       min: "" + this.props.min,
       max: "" + this.props.max,
-      value: "" + this.state.value,
+      value: "" + node.initialValue,
       onClick: this.selectText,
       onChange: this.updateValue
     })), div({
@@ -58395,7 +58439,7 @@ module.exports = React.createClass({
       type: "range",
       min: "" + this.props.min,
       max: "" + this.props.max,
-      value: "" + this.state.value,
+      value: "" + node.initialValue,
       onChange: this.updateValue
     }), label({
       className: "left half small"
@@ -58404,7 +58448,9 @@ module.exports = React.createClass({
     }, this.props.max)), span({
       className: "checkbox group full"
     }, span({}, input({
-      type: "checkbox"
+      type: "checkbox",
+      checked: node.isAccumulator,
+      onChange: this.updateChecked
     }), label({}, tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR"))), i({
       className: "fa fa-question-circle"
     }))), div({
@@ -58997,14 +59043,15 @@ module.exports = React.createClass({
   renderTabforLink: function(link) {
     var relationView;
     relationView = LinkRelationView({
-      link: link
+      link: link,
+      linkManager: this.props.linkManager
     });
     return Tabber.Tab({
       label: link.sourceNode.title,
       component: relationView
     });
   },
-  render: function() {
+  renderNodeRelationInspector: function() {
     var tabs;
     tabs = _.map(this.props.node.inLinks(), (function(_this) {
       return function(link) {
@@ -59018,6 +59065,22 @@ module.exports = React.createClass({
     }), div({
       className: "bottom-pane"
     }, p({}, tr("~NODE-RELATION-EDIT.DEFINING_WITH_WORDS"))));
+  },
+  renderLinkRelationInspector: function() {
+    return div({
+      className: 'relation-inspector'
+    }, div({
+      className: 'link-relation-inspector'
+    }, "TBD: No link relation panel"), div({
+      className: "bottom-pane"
+    }, p({}, tr("~NODE-RELATION-EDIT.DEFINING_WITH_WORDS"))));
+  },
+  render: function() {
+    if (this.props.node) {
+      return this.renderNodeRelationInspector();
+    } else {
+      return this.renderLinkRelationInspector();
+    }
   }
 });
 
