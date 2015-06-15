@@ -7,9 +7,6 @@ module.exports = React.createClass
 
   displayName: 'LinkRelationView'
 
-  componentDidMount: ->
-    @props.linkManager.addLinkListener @
-
   getDefaultProps: ->
     link:
       targetNode:

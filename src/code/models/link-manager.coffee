@@ -245,6 +245,10 @@ module.exports   = class LinkManager
         link[key] = changes[key]
     @_maybeChangeSelectedItem link
 
+    for listener in @linkListeners
+      log.info "link changed: #{link.terminalKey()}"
+      listener.changeLink? link
+
   _nameForNode: (node) ->
     @nodeKeys[node]
 
