@@ -114,9 +114,6 @@ module.exports =
   onNodeDelete: ->
     @props.linkManager.deleteSelected()
 
-  onLinkChanged: (link, title, color, deleted) ->
-    @props.linkManager.changeLink link, title,color, deleted
-
   runSimulation: ->
     simulator = new Simulation
       nodes: @props.linkManager.getNodes()

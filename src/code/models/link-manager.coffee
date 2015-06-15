@@ -220,25 +220,29 @@ module.exports   = class LinkManager
   selectLink: (link) ->
     @selectionManager.selectLink(link)
 
-  changeLink: (link, title, color, deleted) ->
-    if deleted
+  changeLink: (link, changes={}) ->
+    if changes.deleted
       @removeSelectedLink()
     else if link
-      originalTitle = link.title
-      originalColor = link.color
+      originalData =
+        title: link.title
+        color: link.color
+        relation: link.relation
       @undoRedoManager.createAndExecuteCommand 'changeLink',
-        execute: => @_changeLink link, title, color
-        undo: => @_changeLink link, originalTitle, originalColor
+        execute: => @_changeLink link,  changes
+        undo: => @_changeLink link, originalData
 
   _maybeChangeSelectedItem: (item) ->
     # TODO: This is kind of hacky:
     if @selectionManager.isSelected(item)
       @selectionManager._notifySelectionChange()
 
-  _changeLink: (link, title, color) ->
+  _changeLink: (link, changes) ->
     log.info "Change  for #{link.title}"
-    link.title = title
-    link.color = color
+    for key in ['title','color', 'relation']
+      if changes[key]
+        log.info "Change #{key} for #{link.title}"
+        link[key] = changes[key]
     @_maybeChangeSelectedItem link
 
   _nameForNode: (node) ->
