@@ -33,7 +33,7 @@ module.exports = React.createClass
     relationView = (LinkRelationView {link: link})
     (Tabber.Tab {label: (link.sourceNode.title), component: relationView})
 
-  render: ->
+  renderNodeRelationInspector: ->
     tabs = _.map @props.node.inLinks(), (link) => @renderTabforLink(link)
     (div {className:'relation-inspector'},
       (TabbedPanel {tabs: tabs})
@@ -41,3 +41,16 @@ module.exports = React.createClass
         (p {}, tr "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS")
       )
     )
+
+  renderLinkRelationInspector: ->
+    (div {className:'relation-inspector'},
+      (div {className: 'link-relation-inspector'}, "TBD: No link relation panel")
+      (div {className: "bottom-pane"},
+        (p {}, tr "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS")
+      )
+    )
+  render: ->
+    if @props.node
+      @renderNodeRelationInspector()
+    else
+      @renderLinkRelationInspector()

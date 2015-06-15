@@ -44,7 +44,7 @@ module.exports = class RelationFactory
     postfixIco: "less-and-less"
     formulaFrag: "sqrt(in)"
 
-  @inconName: (incdec,amount)->
+  @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
   @vectors: [@increase, @decrease]

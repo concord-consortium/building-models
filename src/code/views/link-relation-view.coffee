@@ -58,7 +58,7 @@ module.exports = React.createClass
     )
 
   render: ->
-    classname = RelationFactory.inconName(@state.increaseOrDecrease, @state.amount)
+    classname = RelationFactory.iconName(@state.increaseOrDecrease, @state.amount)
     (div {className: 'link-relation-view'},
       (span {}, "As #{@props.link.sourceNode.title} increases … ")
       (div {className: 'inspector-content group'},
