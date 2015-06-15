@@ -54747,7 +54747,7 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype._changeLink = function(link, changes) {
-    var i, key, len, ref;
+    var i, j, key, len, len1, listener, ref, ref1, results;
     log.info("Change  for " + link.title);
     ref = ['title', 'color', 'relation'];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -54757,7 +54757,15 @@ module.exports = LinkManager = (function() {
         link[key] = changes[key];
       }
     }
-    return this._maybeChangeSelectedItem(link);
+    this._maybeChangeSelectedItem(link);
+    ref1 = this.linkListeners;
+    results = [];
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      listener = ref1[j];
+      log.info("notifying of new link: " + (link.terminalKey()));
+      results.push(typeof listener.changeLink === "function" ? listener.changeLink(link) : void 0);
+    }
+    return results;
   };
 
   LinkManager.prototype._nameForNode = function(node) {
@@ -57754,9 +57762,6 @@ tr = require("../utils/translate");
 
 module.exports = React.createClass({
   displayName: 'LinkRelationView',
-  componentDidMount: function() {
-    return this.props.linkManager.addLinkListener(this);
-  },
   getDefaultProps: function() {
     return {
       link: {
@@ -59017,28 +59022,11 @@ ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span,
 
 module.exports = React.createClass({
   displayName: 'RelationInspectorView',
-  getDefaultProps: function() {
-    var node;
-    node = {
-      title: "population"
-    };
-    node.inLinks = function() {
-      var link1, link2;
-      link1 = {
-        targetNode: node,
-        sourceNode: {
-          title: "source node one"
-        }
-      };
-      link2 = {
-        targetNode: node,
-        sourceNode: {
-          title: "second node two"
-        }
-      };
-      return [link1, link2];
-    };
-    return node;
+  componentDidMount: function() {
+    return this.props.linkManager.addLinkListener(this);
+  },
+  changeLink: function() {
+    return this.forceUpdate();
   },
   renderTabforLink: function(link) {
     var relationView;
