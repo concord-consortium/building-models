@@ -59,7 +59,7 @@ module.exports = class RelationFactory
   @fromSelections: (vector,scalar) ->
     name = "#{vector.text} #{scalar.text}"
     formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
-    new Relationship({name: name, formula: formula})
+    new Relationship({text: name, formula: formula})
 
   @selectionsFromRelation: (relation) ->
     vector = _.find @vectors, (v) ->

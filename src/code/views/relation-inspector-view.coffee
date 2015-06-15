@@ -30,7 +30,7 @@ module.exports = React.createClass
 
 
   renderTabforLink: (link) ->
-    relationView = (LinkRelationView {link: link})
+    relationView = (LinkRelationView {link: link, linkManager: @props.linkManager})
     (Tabber.Tab {label: (link.sourceNode.title), component: relationView})
 
   renderNodeRelationInspector: ->

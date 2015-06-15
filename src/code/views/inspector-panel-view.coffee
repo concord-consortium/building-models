@@ -91,7 +91,7 @@ module.exports = React.createClass
 
   renderRelationInspector: ->
     if @props.node
-      (NodeRelationInspectorView {node:@props.node})
+      (NodeRelationInspectorView {node:@props.node, linkManager: @props.linkManager})
     else if @props.link
       (LinkRelationInspectorView {link:@props.link, linkManager: @props.linkManager})
 

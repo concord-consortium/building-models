@@ -7,9 +7,8 @@ module.exports = React.createClass
 
   displayName: 'LinkRelationView'
 
-  getInitialState: ->
-    increaseOrDecrease: RelationFactory.increase
-    amount: RelationFactory.aboutTheSame
+  componentDidMount: ->
+    @props.linkManager.addLinkListener @
 
   getDefaultProps: ->
     link:
@@ -18,20 +17,24 @@ module.exports = React.createClass
       sourceNode:
         title: "default source node"
 
-  updateIncreaseOrDecrease: (evt)->
-    id = parseInt evt.target.value
-    selected = RelationFactory.vectors[id]
-    @setState
-      increaseOrDecrease: selected
+  updateRelation: ->
+    vector   = @getVector()
+    scalar   = @getScalar()
 
-  updateAmount: (evt)->
-    id = parseInt evt.target.value
-    selected = RelationFactory.scalars[id]
-    @setState
-      amount: selected
+    relation = RelationFactory.fromSelections(vector, scalar)
+    link = @props.link
+    @props.linkManager.changeLink(link, {relation: relation})
 
-  renderIncreaseOrDecreaseSelect: ->
-    selected_id = @state.increaseOrDecrease.id
+  getVector: ->
+    id = parseInt React.findDOMNode(@refs.vector).value
+    RelationFactory.vectors[id]
+
+  getScalar: ->
+    id = parseInt React.findDOMNode(@refs.scalar).value
+    RelationFactory.scalars[id]
+
+  renderVector: (increaseOrDecrease)->
+    selected_id = increaseOrDecrease.id
     options = _.map RelationFactory.vectors, (opt) ->
       if opt.id is selected_id
         (option {value: opt.id, selected: 'true'}, opt.text)
@@ -39,12 +42,12 @@ module.exports = React.createClass
         (option {value: opt.id}, opt.text)
     (div {className: "bb-select"},
       (label {}, "#{@props.link.targetNode.title} ")
-      (select {className:"", onChange: @updateIncreaseOrDecrease},
+      (select {className:"", ref: "vector", onChange: @updateRelation},
       options)
     )
 
-  renderAmountSelect: ->
-    selected_id = @state.amount.id
+  renderScalar:(amount) ->
+    selected_id = amount.id
     options = _.map RelationFactory.scalars, (opt) ->
       if opt.id is selected_id
         (option {value: opt.id, selected: 'true'}, opt.text)
@@ -52,21 +55,22 @@ module.exports = React.createClass
         (option {value: opt.id}, opt.text)
     (div {className: "bb-select"},
       (label {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-      (select {className:"", onChange: @updateAmount},
+      (select {className:"", ref: "scalar", onChange: @updateRelation},
         options
       )
     )
 
   render: ->
-    classname = RelationFactory.iconName(@state.increaseOrDecrease, @state.amount)
+    {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
+    classname = RelationFactory.iconName(vector, scalar)
     (div {className: 'link-relation-view'},
       (span {}, "As #{@props.link.sourceNode.title} increases … ")
       (div {className: 'inspector-content group'},
         (div {className: 'full'},
-          @renderIncreaseOrDecreaseSelect()
+          @renderVector(vector)
         )
         (div {className: 'full'},
-          @renderAmountSelect()
+          @renderScalar(scalar)
         )
         (i {className: "full chart center #{classname}"})
       )
