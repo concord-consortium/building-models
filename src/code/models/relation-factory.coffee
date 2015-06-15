@@ -6,13 +6,13 @@ module.exports = class RelationFactory
     id: 0
     prefixIco: "inc"
     text: tr "~NODE-RELATION-EDIT.INCREASES"
-    formulaFrag: "out +"
+    formulaFrag: "1 *"
 
   @decrease:
     id: 1
     prefixIco: "dec"
     text: tr "~NODE-RELATION-EDIT.DECREASES"
-    formulaFrag: "out -"
+    formulaFrag: "-1 *"
 
   @aboutTheSame:
     id: 0

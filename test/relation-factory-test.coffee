@@ -32,11 +32,11 @@ describe "RelationFactory", ->
 
       describe "the function", ->
         it "should be `out + in`", ->
-          @underTest.formula.should.equal 'out + in'
+          @underTest.formula.should.equal '1 * in'
 
       describe "evaluating the function for out=1 and in=6", ->
         it "should evaluate to 7", ->
-          @underTest.evaluate(6,1).should.equal 7
+          @underTest.evaluate(6,1).should.equal 6
 
   describe "selectionsFromRelation", ->
     describe "with an instanace of increase aboutTheSame", ->

@@ -13,6 +13,8 @@ IntegrationFunction = (t, timeStep) ->
     inV = sourceNode.previousValue
     outV = @previousValue
     nextValue = link.relation.evaluate(inV, outV) * timeStep
+    if @isAccumulator
+      nextValue = @previousValue + nextValue
     @currentValue = @currentValue + (nextValue / count)
   @currentValue
 

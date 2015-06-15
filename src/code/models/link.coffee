@@ -4,7 +4,7 @@ module.exports = class Link extends GraphPrimitive
 
   @defaultColor = "#777"
   @defaultRelation = new Relation
-    formula: "out + in"
+    formula: "1 * in"
 
   constructor: (@options={}) ->
     @options.color ?= Link.defaultColor

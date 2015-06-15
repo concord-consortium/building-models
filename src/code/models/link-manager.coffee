@@ -196,6 +196,8 @@ module.exports   = class LinkManager
         title: node.title
         image: node.image
         color: node.color
+        initialValue: node.initialValue
+        isAccumulator: node.isAccumulator
 
       @undoRedoManager.createAndExecuteCommand 'changeNode',
         execute: => @_changeNode node, data
@@ -203,7 +205,7 @@ module.exports   = class LinkManager
 
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
-    for key in ['title','image','color']
+    for key in ['title','image','color', 'initialValue', 'isAccumulator']
       if data[key]
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
