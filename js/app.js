@@ -56230,9 +56230,9 @@ module.exports = {
   "~NODE-EDIT.ADD_REMOTE": "Add remote",
   "~NODE-EDIT.DELETE": "✖ Delete Component",
   "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value",
-  "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words. Switch to define with numbers.",
+  "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with numbers. Switch to define with equations.",
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator",
-  "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with numbers.",
+  "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations.",
   "~NODE-RELATION-EDIT.INCREASES": "increases",
   "~NODE-RELATION-EDIT.DECREASES": "decreases",
   "~NODE-RELATION-EDIT.BY": "by",
@@ -57629,29 +57629,51 @@ ToolPanel = React.createFactory(React.createClass({
   buttonData: [
     {
       name: "plus",
-      shows: "add"
+      shows: "add",
+      'enabled': ['nothing', 'node', 'link']
     }, {
       name: "brush",
-      shows: "design"
+      shows: "design",
+      'enabled': ['node', 'link']
     }, {
       name: "ruler",
-      shows: "value"
+      shows: "value",
+      'enabled': ['node']
     }, {
       name: "curve",
-      shows: "relations"
+      shows: "relations",
+      'enabled': ['node']
     }
   ],
+  isDisabled: function(button) {
+    if (_.includes(button.enabled, 'nothing')) {
+      return false;
+    }
+    if (_.includes(button.enabled, 'node') && this.props.node) {
+      return false;
+    }
+    if (_.includes(button.enabled, 'link') && this.props.link) {
+      return false;
+    }
+    return true;
+  },
   buttonProps: function(button) {
-    return {
+    var props;
+    props = {
       name: button.name,
       shows: button.shows,
-      selected: this.props.nowShowing === button.shows,
-      onClick: (function(_this) {
+      selected: false,
+      disabled: this.isDisabled(button)
+    };
+    if (!this.isDisabled(button)) {
+      props.onClick = (function(_this) {
         return function() {
           return _this.select(button.name);
         };
-      })(this)
-    };
+      })(this);
+      props.selected = this.props.nowShowing === button.shows;
+    }
+    return props;
   },
   select: function(name) {
     var button;
@@ -57954,9 +57976,7 @@ module.exports = React.createClass({
   render: function() {
     return div({
       className: 'link-inspector-view'
-    }, div({
-      className: 'inspector-content'
-    }, h2({}, "Link Value")));
+    });
   }
 });
 
@@ -59139,11 +59159,7 @@ module.exports = React.createClass({
   renderLinkRelationInspector: function() {
     return div({
       className: 'relation-inspector'
-    }, div({
-      className: 'link-relation-inspector'
-    }, "TBD: No link relation panel"), div({
-      className: "bottom-pane"
-    }, p({}, tr("~NODE-RELATION-EDIT.DEFINING_WITH_WORDS"))));
+    });
   },
   render: function() {
     if (this.props.node) {
