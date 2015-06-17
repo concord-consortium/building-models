@@ -57820,7 +57820,7 @@ module.exports = React.createClass({
   },
   deleteLink: function() {
     return this.props.linkManager.changeLink(this.props.link, {
-      "delete": true
+      deleted: true
     });
   },
   pickColor: function(e) {
