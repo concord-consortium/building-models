@@ -1,4 +1,4 @@
-{div, span} = React.DOM
+{div, span, i} = React.DOM
 
 module.exports = React.createClass
 
@@ -25,6 +25,7 @@ module.exports = React.createClass
   render: ->
     buttonClass = (enabled) -> "button-link #{if not enabled then 'disabled' else ''}"
     (div {className: 'document-actions'},
+      (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
       (div {className: 'undo-redo'},
         (span {className: (buttonClass @state.canUndo), onClick: @undoClicked, disabled: not @state.canUndo}, 'Undo')
         (span {className: (buttonClass @state.canRedo), onClick: @redoClicked, disabled: not @state.canRedo}, 'Redo')

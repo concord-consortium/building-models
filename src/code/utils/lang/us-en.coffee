@@ -96,3 +96,5 @@ module.exports =
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)"
 
   "~RELATIONSHIP.NO_RELATION": "No relation defined"
+
+  "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."

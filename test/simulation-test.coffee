@@ -218,16 +218,12 @@ describe "Simulation", ->
         it "should exist", ->
           @report.should.exist
 
-        describe "the meta-data", ->
-          beforeEach ->
-            @metaData = @report.simulation
-
-          it "should have some simulation details", ->
-            @metaData.should.exist
-            @metaData.steps.should.equal 10
-            @metaData.duration.should.equal 10
-            @metaData.timeStep.should.equal 1
-            @metaData.nodeCount.should.equal 2
+        it "should have some simulation details", ->
+          @report.should.exist
+          @report.steps.should.equal 10
+          @report.duration.should.equal 10
+          @report.timeStep.should.equal 1
+          @report.nodeNames.length.should.equal 2
 
         describe "the simulation frames", ->
           beforeEach ->
@@ -249,3 +245,27 @@ describe "Simulation", ->
             @lastFrame.nodes.should.have.length 2
             @lastFrame.nodes[0].value.should.equal 10
             @lastFrame.nodes[1].value.should.equal 10
+
+        describe "the codap transformation", ->
+          beforeEach ->
+            @codapData = _.map @report.frames, (frame) ->
+              data       = [frame.time]
+              _.each frame.nodes, (n) -> data.push n.value
+              data
+
+          describe "the number of samples", ->
+            it "should have 10", ->
+              @codapData.length.should.equal 10
+
+          describe "the format of the last sample", ->
+            beforeEach ->
+              @lastFrame = @codapData[0]
+
+            it "should be have 3 elements (time,nodeA, nodeB)", ->
+              @lastFrame.should.have.length 3
+
+            it "should be a numeric property", ->
+              @lastFrame[0].should.be.a('number')
+              @lastFrame[0].should.equal 1
+              @lastFrame[1].should.equal 10
+              @lastFrame[2].should.equal 1
