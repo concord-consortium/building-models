@@ -24,18 +24,31 @@ ToolPanel = React.createFactory React.createClass
   displayName: 'toolPanel'
 
   buttonData: [
-      {name: "plus",  shows: "add"}
-      {name: "brush", shows: "design"}
-      {name: "ruler", shows: "value"}
-      {name: "curve", shows: "relations"}
+      {name: "plus",  shows: "add", 'enabled': ['nothing','node','link'] }
+      {name: "brush", shows: "design",'enabled': ['node','link'] }
+      {name: "ruler", shows: "value", 'enabled': ['node'] }
+      {name: "curve", shows: "relations",'enabled': ['node']}
     ]
 
+  isDisabled: (button) ->
+    return false if _.includes(button.enabled, 'nothing')
+    return false if _.includes(button.enabled, 'node') and @props.node
+    return false if _.includes(button.enabled, 'link') and @props.link
+    return true
+
   buttonProps: (button) ->
-    name: button.name
-    shows: button.shows
-    selected: @props.nowShowing is button.shows
-    onClick: =>
-      @select button.name
+    props =
+      name:     button.name
+      shows:    button.shows
+      selected: false
+      disabled: @isDisabled(button)
+
+    unless @isDisabled(button)
+      props.onClick = =>
+        @select button.name
+      props.selected = @props.nowShowing is button.shows
+
+    props
 
   select: (name) ->
     button = _.find @buttonData, {name: name}

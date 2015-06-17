@@ -33,12 +33,13 @@ module.exports = React.createClass
     )
 
   renderLinkRelationInspector: ->
-    (div {className:'relation-inspector'},
-      (div {className: 'link-relation-inspector'}, "TBD: No link relation panel")
-      (div {className: "bottom-pane"},
-        (p {}, tr "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS")
-      )
-    )
+    (div {className:'relation-inspector'})
+    # TODO: build this later.
+    #   (div {className: 'link-relation-inspector'}, "TBD: No link relation panel")
+    #   (div {className: "bottom-pane"},
+    #     (p {}, tr "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS")
+    #   )
+    # )
   render: ->
     if @props.node
       @renderNodeRelationInspector()
