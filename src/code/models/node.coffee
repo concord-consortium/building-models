@@ -38,6 +38,9 @@ module.exports = class Node extends GraphPrimitive
   inLinks: ->
     _.filter @links, (link) => link.targetNode is @
 
+  inNodes: ->
+    _.map @inLinks(), (link) -> link.sourceNode
+
   infoString: ->
     linkNamer = (link) ->
       " --#{link.title}-->[#{link.targetNode.title}]"

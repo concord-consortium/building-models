@@ -3,6 +3,8 @@ LinkInspectorView = React.createFactory require './link-inspector-view'
 PaletteInspectorView = React.createFactory require './palette-inspector-view'
 LinkValueInspectorView = React.createFactory require './link-value-inspector-view'
 NodeValueInspectorView = React.createFactory require './node-value-inspector-view'
+LinkRelationInspectorView = React.createFactory require './relation-inspector-view'
+NodeRelationInspectorView = React.createFactory require './relation-inspector-view'
 
 {div, i, span} = React.DOM
 
@@ -62,22 +64,6 @@ module.exports = React.createClass
   setShowing: (item) ->
     @setState(nowShowing: item)
 
-  renderNodeInspector: ->
-    (NodeInspectorView {
-      node: @props.node
-      onNodeChanged: @props.onNodeChanged
-      onNodeDelete: @props.onNodeDelete
-      palette: @props.palette
-    })
-
-  renderNodeValueInspector: ->
-    (NodeValueInspectorView {})
-
-  renderLinkValueInspector: ->
-    (LinkValueInspectorView {})
-
-  renderLinkInspector: ->
-    (LinkInspectorView {link: @props.link, onLinkChanged: @props.onLinkChanged})
 
   renderPaletteInspector: ->
     (PaletteInspectorView {
@@ -87,20 +73,35 @@ module.exports = React.createClass
     })
 
   renderDesignInspector: ->
-    if @props.node then @renderNodeInspector()
-    else if @props.link then @renderLinkInspector()
-    else @renderPaletteInspector()
+    if @props.node
+      (NodeInspectorView {
+        node: @props.node
+        onNodeChanged: @props.onNodeChanged
+        onNodeDelete: @props.onNodeDelete
+        palette: @props.palette
+      })
+    else if @props.link
+      (LinkInspectorView {link: @props.link, onLinkChanged: @props.onLinkChanged})
 
   renderValueInspector: ->
-    if @props.node then @renderNodeValueInspector()
-    else if @props.link then @renderLinkValueInspector()
-    else @renderPaletteInspector()
+    if @props.node
+      (NodeValueInspectorView {})
+    else if @props.link
+      (LinkValueInspectorView {})
+
+  renderRelationInspector: ->
+    if @props.node
+      (NodeRelationInspectorView {node:@props.node})
+    else if @props.link
+      (LinkRelationInspectorView {link:@props.link})
+
 
   renderInspectorPanel: ->
     view = switch @state.nowShowing
-      when 'design' then @renderDesignInspector()
-      when 'value' then @renderValueInspector()
-      when 'add' then @renderPaletteInspector()
+      when 'add'       then @renderPaletteInspector()
+      when 'design'    then @renderDesignInspector()
+      when 'value'     then @renderValueInspector()
+      when 'relations' then @renderRelationInspector()
 
     (div {className: "inspector-panel-content"},
       view

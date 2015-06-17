@@ -1,0 +1,42 @@
+.tabbed-panel
+  enable-flex(justify:flex-start, alignContent:stretch, alignItems:stretch)
+  width 100%
+  border-radius 5px
+  .workspace-tabs
+    width 30%
+    width dialog-tab-width
+    padding 20px 0
+    margin 0px
+    background-color: white
+    ul
+      margin 0
+      list-style none
+      padding-left 10px
+      li
+        blenderbox-modal-labels()
+        font-size 15px
+        -webkit-border-radius tab-border-radius
+        -moz-border-radius tab-border-radius
+        border-radius: tab-border-radius
+        margin 10px 26px 10px 30px
+        padding 10px
+        color #000
+        background-color #c8e7de
+        cursor pointer
+        &.tab-selected
+          -webkit-border-top-right-radius 0
+          -webkit-border-bottom-right-radius 0
+          -moz-border-radius-topright 0
+          -moz-border-radius-bottomright 0
+          border-top-right-radius 0
+          border-bottom-right-radius 0
+          color #fff
+          background-color #72bca6
+          margin-right 0
+
+  .workspace-tab-component
+    margin 0px
+    width 70%
+    border-left 5px solid #72bca6
+    padding 10px
+    padding-bottom 50px

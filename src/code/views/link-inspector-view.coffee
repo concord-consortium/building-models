@@ -1,6 +1,5 @@
 {div, h2, button, label, input} = React.DOM
 tr = require "../utils/translate"
-InspectorTabs = React.createFactory require './inspector-tabs-view'
 
 palettes = [
   ['#4D6A6D','#798478', "#A0A083", "#C9ADA1", "#EAE0CC"],

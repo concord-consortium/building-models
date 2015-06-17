@@ -1,6 +1,5 @@
 {div, h2, label, input, select, option, optgroup, button} = React.DOM
 tr = require "../utils/translate"
-InspectorTabs = React.createFactory require './inspector-tabs-view'
 ColorPicker = React.createFactory require './color-picker-view'
 ImagePickerView = React.createFactory require './image-picker-view'
 module.exports = React.createClass
