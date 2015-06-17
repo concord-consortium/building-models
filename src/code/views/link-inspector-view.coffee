@@ -17,7 +17,7 @@ module.exports = React.createClass
     @props.linkManager.changeLink @props.link, {title: e.target.value}
 
   deleteLink: ->
-    @props.linkManager.changeLink @props.link, {delete: true}
+    @props.linkManager.changeLink @props.link, {deleted: true}
 
   pickColor: (e) ->
     @props.linkManager.changeLink @props.link, {color: $(e.target).css('background-color')}
