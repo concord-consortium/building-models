@@ -54256,11 +54256,12 @@ module.exports = CodapConnect = (function() {
       });
     });
     sampleData = _.map(data.frames, function(frame) {
-      data = [frame.time];
+      var sample;
+      sample = [frame.time];
       _.each(frame.nodes, function(n) {
-        return data.push(n.value);
+        return sample.push(n.value);
       });
-      return data;
+      return sample;
     });
     this.codapPhone.call({
       action: 'createCollection',
@@ -54767,7 +54768,7 @@ module.exports = LinkManager = (function() {
     ref = ['title', 'image', 'color', 'initialValue', 'isAccumulator'];
     for (i = 0, len = ref.length; i < len; i++) {
       key = ref[i];
-      if (data[key]) {
+      if (data.hasOwnProperty(key)) {
         log.info("Change " + key + " for " + node.title);
         node[key] = data[key];
       }
@@ -58506,16 +58507,10 @@ module.exports = React.createClass({
   },
   updateChecked: function(evt) {
     var value;
-    value = evt.target.value;
-    if (value === "on") {
-      return this.props.linkManager.changeNode({
-        isAccumulator: true
-      });
-    } else {
-      return this.props.LinkManager.changeNode({
-        isAccumulator: false
-      });
-    }
+    value = evt.target.checked;
+    return this.props.linkManager.changeNode({
+      isAccumulator: value
+    });
   },
   selectText: function(evt) {
     return evt.target.select();
