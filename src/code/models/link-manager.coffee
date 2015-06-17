@@ -206,7 +206,7 @@ module.exports   = class LinkManager
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
     for key in ['title','image','color', 'initialValue', 'isAccumulator']
-      if data[key]
+      if data.hasOwnProperty key
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
     @_notifyNodeChanged(node)
