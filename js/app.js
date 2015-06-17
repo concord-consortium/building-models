@@ -29,12 +29,12 @@ window.initApp = function(wireframes) {
     linkManager: LinkManager.instance('building-models'),
     data: getParameterByName('data')
   };
+  opts.codapConnect = new CodapConnect(opts.linkManager);
   appView = AppView(opts);
   elem = '#app';
-  jsPlumb.bind('ready', function() {
+  return jsPlumb.bind('ready', function() {
     return React.render(appView, $(elem)[0]);
   });
-  return opts.codapConnect = new CodapConnect(opts.linkManager);
 };
 
 
@@ -53968,14 +53968,17 @@ module.exports = {
       nodes: this.props.linkManager.getNodes(),
       duration: 10,
       timeStep: 1,
-      reportFunc: function(report) {
-        var nodeInfo;
-        log.info(report);
-        nodeInfo = (_.map(report.endState, function(n) {
-          return n.title + " " + n.initialValue + " → " + n.value;
-        })).join("\n");
-        return alert("Run for " + report.simulation.steps + " steps\n" + nodeInfo + ":");
-      }
+      reportFunc: (function(_this) {
+        return function(report) {
+          var nodeInfo;
+          log.info(report);
+          nodeInfo = (_.map(report.endState, function(n) {
+            return n.title + " " + n.initialValue + " → " + n.value;
+          })).join("\n");
+          alert("Run for " + report.steps + " steps\n" + nodeInfo + ":");
+          return _this.props.codapConnect.sendSimulationData(report);
+        };
+      })(this)
     });
     simulator.run();
     return simulator.report();
@@ -54191,10 +54194,12 @@ module.exports = {
 
 
 },{"../utils/translate":548}],530:[function(require,module,exports){
-var CodapConnect, IframePhoneRpcEndpoint,
+var CodapConnect, IframePhoneRpcEndpoint, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 IframePhoneRpcEndpoint = (require('iframe-phone')).IframePhoneRpcEndpoint;
+
+tr = require('../utils/translate');
 
 module.exports = CodapConnect = (function() {
   CodapConnect.prototype.name = 'Building Models Tool';
@@ -54218,10 +54223,80 @@ module.exports = CodapConnect = (function() {
           width: 800,
           height: 600
         },
+        collections: [
+          {
+            name: 'Simulation',
+            attrs: [
+              {
+                name: 'steps',
+                type: 'numeric',
+                description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
+                precision: 0
+              }
+            ]
+          }
+        ],
         contextType: 'DG.DataContext'
       }
     }, this.initGameHandler);
   }
+
+  CodapConnect.prototype.sendSimulationData = function(data) {
+    var openCaseCallback, sampleData, sampleDataAttrs;
+    sampleDataAttrs = [
+      {
+        name: "time",
+        type: "numeric"
+      }
+    ];
+    _.each(data.nodeNames, function(name) {
+      return sampleDataAttrs.push({
+        name: name,
+        type: 'numeric'
+      });
+    });
+    sampleData = _.map(data.frames, function(frame) {
+      data = [frame.time];
+      _.each(frame.nodes, function(n) {
+        return data.push(n.value);
+      });
+      return data;
+    });
+    this.codapPhone.call({
+      action: 'createCollection',
+      args: {
+        name: 'Samples',
+        attrs: sampleDataAttrs
+      }
+    });
+    openCaseCallback = (function(_this) {
+      return function(result) {
+        if (result) {
+          if (result.success) {
+            return _this.codapPhone.call({
+              action: 'createCases',
+              args: {
+                collection: 'Samples',
+                parent: result.caseID,
+                values: sampleData
+              }
+            });
+          } else {
+            return log.info("CODAP returned an error on 'createCase'");
+          }
+        } else {
+          return log.info("Unable to call 'createCase' in CODAP (phone timeout?)");
+        }
+      };
+    })(this);
+    return this.codapPhone.call({
+      action: 'openCase',
+      args: {
+        collection: 'Simulation',
+        values: [data.steps]
+      }
+    }, openCaseCallback);
+  };
 
   CodapConnect.prototype.codapRequestHandler = function(cmd, callback) {
     var args, operation;
@@ -54278,7 +54353,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../data/initial-palette":523,"iframe-phone":167}],531:[function(require,module,exports){
+},{"../data/initial-palette":523,"../utils/translate":548,"iframe-phone":167}],531:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -54762,7 +54837,7 @@ module.exports = LinkManager = (function() {
     results = [];
     for (j = 0, len1 = ref1.length; j < len1; j++) {
       listener = ref1[j];
-      log.info("notifying of new link: " + (link.terminalKey()));
+      log.info("link changed: " + (link.terminalKey()));
       results.push(typeof listener.changeLink === "function" ? listener.changeLink(link) : void 0);
     }
     return results;
@@ -55552,35 +55627,35 @@ module.exports = Simulation = (function() {
   };
 
   Simulation.prototype.addReportFrame = function(time) {
-    var newFrame;
-    newFrame = {
+    var nodes;
+    nodes = _.map(this.nodes, function(node) {
+      return {
+        time: time,
+        title: node.title,
+        value: node.currentValue,
+        initialValue: node.initialValue
+      };
+    });
+    return this.reportFrames.push({
       time: time,
-      nodes: _.map(this.nodes, function(node) {
-        return {
-          title: node.title,
-          value: node.currentValue
-        };
-      })
-    };
-    return this.reportFrames.push(newFrame);
+      nodes: nodes
+    });
   };
 
   Simulation.prototype.report = function() {
     var data, steps;
     steps = this.duration / this.timeStep;
     data = {
-      simulation: {
-        steps: steps,
-        duration: this.duration,
-        timeStep: this.timeStep,
-        nodeCount: this.nodes.length
-      },
+      steps: steps,
+      duration: this.duration,
+      timeStep: this.timeStep,
+      nodeNames: _.pluck(this.nodes, 'title'),
       frames: this.reportFrames,
-      endState: _.map(this.nodes, function(node) {
+      endState: _.map(this.nodes, function(n) {
         return {
-          title: node.title,
-          value: node.currentValue,
-          initialValue: node.initialValue
+          title: n.title,
+          initialValue: n.initialValue,
+          value: n.currentValue
         };
       })
     };
@@ -56209,10 +56284,14 @@ module.exports = {
   "~FILE.UPLOADING": "Uploading...",
   "~FILE.CONFIRM_ORIGINAL_REVERT": "Are you sure you want to revert to the original version?",
   "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?",
+  "~DOCUMENT.ACTIONS.RUN_SIMULATION": "Run simulation",
+  "~DOCUMENT.ACTIONS.UNDO": "Undo",
+  "~DOCUMENT.ACTIONS.REDO": "Redo",
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)",
-  "~RELATIONSHIP.NO_RELATION": "No relation defined"
+  "~RELATIONSHIP.NO_RELATION": "No relation defined",
+  "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
 };
 
 
@@ -56574,7 +56653,8 @@ module.exports = React.createClass({
     }, NodeWell({
       palette: this.state.palette
     }), DocumentActions({
-      linkManager: this.props.linkManager
+      linkManager: this.props.linkManager,
+      runSimulation: this.runSimulation
     })), div({
       className: 'canvas'
     }, LinkView({
@@ -56686,9 +56766,11 @@ module.exports = React.createClass({
 
 
 },{"../utils/colors":539,"../utils/translate":548}],552:[function(require,module,exports){
-var div, ref, span;
+var br, div, i, ref, span, tr;
 
-ref = React.DOM, div = ref.div, span = ref.span;
+ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
+
+tr = require('../utils/translate');
 
 module.exports = React.createClass({
   displayName: 'DocumentActions',
@@ -56721,22 +56803,27 @@ module.exports = React.createClass({
     return div({
       className: 'document-actions'
     }, div({
+      className: "misc-actions"
+    }, i({
+      className: "fa fa-play-circle",
+      onClick: this.props.runSimulation
+    }), tr("~DOCUMENT.ACTIONS.RUN_SIMULATION")), div({
       className: 'undo-redo'
     }, span({
       className: buttonClass(this.state.canUndo),
       onClick: this.undoClicked,
       disabled: !this.state.canUndo
-    }, 'Undo'), span({
+    }, tr("~DOCUMENT.ACTIONS.UNDO")), span({
       className: buttonClass(this.state.canRedo),
       onClick: this.redoClicked,
       disabled: !this.state.canRedo
-    }, 'Redo')));
+    }, tr("~DOCUMENT.ACTIONS.REDO"))));
   }
 });
 
 
 
-},{}],553:[function(require,module,exports){
+},{"../utils/translate":548}],553:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -56963,11 +57050,6 @@ module.exports = React.createClass({
     }, 'Unsaved') : void 0), this.state.action ? div({}, i({
       className: "fa fa-cog fa-spin"
     }), this.state.action) : void 0, div({
-      className: 'global-nav-run-simulation'
-    }, i({
-      className: "fa fa-play-circle",
-      onClick: this.props.runSimulation
-    })), div({
       className: 'global-nav-name-and-help'
     }, span({
       className: 'mockup-only'
