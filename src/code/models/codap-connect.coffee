@@ -58,9 +58,9 @@ module.exports = class CodapConnect
 
     # Fill in the sample data values (node values array)
     sampleData = _.map data.frames, (frame) ->
-      data       = [frame.time]
-      _.each frame.nodes, (n) -> data.push n.value
-      data
+      sample     = [frame.time]
+      _.each frame.nodes, (n) -> sample.push n.value
+      sample
 
     # see: https://github.com/concord-consortium/codap/wiki/Data-Interactive-API#createcollection
     @codapPhone.call
