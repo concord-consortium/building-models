@@ -5,23 +5,21 @@ tr = require '../utils/translate'
 
 module.exports = class Node extends GraphPrimitive
 
-  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null}, key) ->
+  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50}, key) ->
     super()
     if key
       @key = key
     @links = []
-    @x = nodeSpec.x
-    @y = nodeSpec.y
-    @title = nodeSpec.title
-    @image = nodeSpec.image
-    @color = nodeSpec.color or Colors[0].value
+    {@x, @y, @title, @image, @initialValue, @color} = nodeSpec
+    @color ?= Colors[0].value
 
   type: 'Node'
   addLink: (link) ->
     if link.sourceNode is @ or link.targetNode is @
       if _.contains @links, link
         throw new Error "Duplicate link for Node:#{@.id}"
-      @links.push link
+      else
+        @links.push link
     else
       throw new Error "Bad link for Node:#{@.id}"
 

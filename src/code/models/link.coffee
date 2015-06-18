@@ -1,13 +1,20 @@
 GraphPrimitive = require './graph-primitive'
-
+Relation = require "./relationship"
 module.exports = class Link extends GraphPrimitive
 
-  @defaultColor: "#777"
+  @defaultColor = "#777"
+  @defaultRelation = new Relation
+    formula: "out + in"
 
   constructor: (@options={}) ->
     @options.color ?= Link.defaultColor
     @options.title ?= ''
-    {@sourceNode, @sourceTerminal ,@targetNode, @targetTerminal, @color, @title} = @options
+    @options.relation ?= Link.defaultRelation
+    {
+      @sourceNode, @sourceTerminal, @targetNode, @targetTerminal,
+      @color, @title, @relation
+    } = @options
+
     super()
 
   type: 'Link'
@@ -31,5 +38,3 @@ module.exports = class Link extends GraphPrimitive
     "sourceTerminal": @sourceTerminal
     "targetNodeKey": @targetNode.key
     "targetTerminal": @targetTerminal
-
-

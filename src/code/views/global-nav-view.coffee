@@ -59,6 +59,9 @@ module.exports = React.createClass
           (i {className: "fa fa-cog fa-spin"})
           @state.action
         )
+      (div {className: 'global-nav-run-simulation'},
+        (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
+      )
       (div {className: 'global-nav-name-and-help'},
         (span {className: 'mockup-only'}, @props.username),
         (span {className: 'mockup-only'},

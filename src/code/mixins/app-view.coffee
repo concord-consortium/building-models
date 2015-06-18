@@ -1,3 +1,5 @@
+Simulation = require "../models/simulation"
+
 module.exports =
 
   getInitialAppViewState: (subState) ->
@@ -56,7 +58,7 @@ module.exports =
       selectedNode = manager.getInspection()[0] or null
       editingNode  = manager.getTitleEditing()[0] or null
       selectedLink = manager.getLinkSelection()[0] or null
-      
+
       @setState
         selectedNode: selectedNode
         editingNode: editingNode
@@ -114,3 +116,19 @@ module.exports =
 
   onLinkChanged: (link, title, color, deleted) ->
     @props.linkManager.changeLink link, title,color, deleted
+
+  runSimulation: ->
+    simulator = new Simulation
+      nodes: @props.linkManager.getNodes()
+      duration: 10
+      timeStep: 1
+      reportFunc: (report) ->
+        log.info report
+        nodeInfo = (
+          _.map report.endState, (n) ->
+            "#{n.title} #{n.initialValue} → #{n.value}"
+        ).join("\n")
+        alert "Run for #{report.simulation.steps} steps\n#{nodeInfo}:"
+
+    simulator.run()
+    simulator.report()
