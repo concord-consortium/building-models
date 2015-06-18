@@ -6,13 +6,13 @@ module.exports = class RelationFactory
     id: 0
     prefixIco: "inc"
     text: tr "~NODE-RELATION-EDIT.INCREASES"
-    formulaFrag: "out +"
+    formulaFrag: "1 *"
 
   @decrease:
     id: 1
     prefixIco: "dec"
     text: tr "~NODE-RELATION-EDIT.DECREASES"
-    formulaFrag: "out -"
+    formulaFrag: "-1 *"
 
   @aboutTheSame:
     id: 0
@@ -59,7 +59,7 @@ module.exports = class RelationFactory
   @fromSelections: (vector,scalar) ->
     name = "#{vector.text} #{scalar.text}"
     formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
-    new Relationship({name: name, formula: formula})
+    new Relationship({text: name, formula: formula})
 
   @selectionsFromRelation: (relation) ->
     vector = _.find @vectors, (v) ->

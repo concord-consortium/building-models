@@ -5,12 +5,14 @@ tr = require '../utils/translate'
 
 module.exports = class Node extends GraphPrimitive
 
-  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50}, key) ->
+  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50, isAccumulator:false}, key) ->
     super()
     if key
       @key = key
     @links = []
-    {@x, @y, @title, @image, @initialValue, @color} = nodeSpec
+    {@x, @y, @title, @image, @initialValue, @isAccumulator, @color} = nodeSpec
+    @initialValue  ?= 50
+    @isAccumulator ?= false
     @color ?= Colors[0].value
 
   type: 'Node'

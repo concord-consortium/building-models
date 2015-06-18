@@ -55,7 +55,6 @@ module.exports = React.createClass
           node: @state.selectedNode
           link: @state.selectedLink
           onNodeChanged: @onNodeChanged
-          onLinkChanged: @onLinkChanged
           onNodeDelete: @onNodeDelete
           palette: @state.palette
           toggleImageBrowser: @toggleImageBrowser

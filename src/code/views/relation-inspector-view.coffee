@@ -12,25 +12,15 @@ module.exports = React.createClass
 
   displayName: 'RelationInspectorView'
 
-  getDefaultProps: ->
-    node =
-      title: "population"
+  componentDidMount: ->
+    @props.linkManager.addLinkListener @
 
-    node.inLinks = ->
-      link1 =
-        targetNode: node
-        sourceNode:
-          title: "source node one"
-      link2 =
-        targetNode: node
-        sourceNode:
-          title: "second node two"
-      [link1, link2]
-    node
-
+  changeLink: ->
+    # Wish there was something nicer to do here:
+    @forceUpdate()
 
   renderTabforLink: (link) ->
-    relationView = (LinkRelationView {link: link})
+    relationView = (LinkRelationView {link: link, linkManager: @props.linkManager})
     (Tabber.Tab {label: (link.sourceNode.title), component: relationView})
 
   renderNodeRelationInspector: ->

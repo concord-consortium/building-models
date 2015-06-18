@@ -11,10 +11,6 @@ module.exports = React.createClass
     min: React.PropTypes.number
     onChange: React.PropTypes.func
 
-
-  getInitialState: ->
-    value: 50
-
   getDefaultProps: ->
     max: 100
     min: 0
@@ -25,12 +21,20 @@ module.exports = React.createClass
   updateValue:  (evt) ->
     if value = evt.target.value
       value = @trim(parseInt(value))
-      @setState(value: value)
+      @props.linkManager.changeNode(initialValue:value)
+
+  updateChecked:  (evt) ->
+    value = evt.target.value
+    if value is "on"
+      @props.linkManager.changeNode(isAccumulator:true)
+    else
+      @props.LinkManager.changeNode(isAccumulator:false)
 
   selectText: (evt) ->
     evt.target.select()
 
   render: ->
+    node = @props.node
     (div {className: 'value-inspector'},
       (div {className: 'inspector-content group'},
         (span {className: 'full'},
@@ -40,7 +44,7 @@ module.exports = React.createClass
             type: "number",
             min: "#{@props.min}",
             max: "#{@props.max}",
-            value: "#{@state.value}",
+            value: "#{node.initialValue}",
             onClick: @selectText,
             onChange: @updateValue}
           )
@@ -51,7 +55,7 @@ module.exports = React.createClass
             type: "range",
             min: "#{@props.min}",
             max: "#{@props.max}",
-            value: "#{@state.value}",
+            value: "#{node.initialValue}",
             onChange: @updateValue}
           )
           (label {className: "left half small"}, @props.min)
@@ -59,7 +63,7 @@ module.exports = React.createClass
         )
         (span {className: "checkbox group full"},
           (span {},
-            (input {type: "checkbox"})
+            (input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked})
             (label {}, tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR")
           )
           (i {className: "fa fa-question-circle"})

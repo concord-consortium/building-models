@@ -12,17 +12,15 @@ module.exports = React.createClass
 
   displayName: 'LinkEditView'
 
-  notifyChange: (title, color, deleted) ->
-    @props.onLinkChanged? @props.link, title, color, !!deleted
 
   changeTitle: (e) ->
-    @notifyChange e.target.value, @props.link.color
+    @props.linkManager.changeLink @props.link, {title: e.target.value}
 
   deleteLink: ->
-    @notifyChange @props.link.title, @props.link.color, true
+    @props.linkManager.changeLink @props.link, {delete: true}
 
   pickColor: (e) ->
-    @notifyChange @props.link.title, $(e.target).css('background-color')
+    @props.linkManager.changeLink @props.link, {color: $(e.target).css('background-color')}
 
   render: ->
     tabs = [tr('design'), tr('define')]

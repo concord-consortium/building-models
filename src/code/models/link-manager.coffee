@@ -196,6 +196,8 @@ module.exports   = class LinkManager
         title: node.title
         image: node.image
         color: node.color
+        initialValue: node.initialValue
+        isAccumulator: node.isAccumulator
 
       @undoRedoManager.createAndExecuteCommand 'changeNode',
         execute: => @_changeNode node, data
@@ -203,7 +205,7 @@ module.exports   = class LinkManager
 
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
-    for key in ['title','image','color']
+    for key in ['title','image','color', 'initialValue', 'isAccumulator']
       if data[key]
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
@@ -218,26 +220,34 @@ module.exports   = class LinkManager
   selectLink: (link) ->
     @selectionManager.selectLink(link)
 
-  changeLink: (link, title, color, deleted) ->
-    if deleted
+  changeLink: (link, changes={}) ->
+    if changes.deleted
       @removeSelectedLink()
     else if link
-      originalTitle = link.title
-      originalColor = link.color
+      originalData =
+        title: link.title
+        color: link.color
+        relation: link.relation
       @undoRedoManager.createAndExecuteCommand 'changeLink',
-        execute: => @_changeLink link, title, color
-        undo: => @_changeLink link, originalTitle, originalColor
+        execute: => @_changeLink link,  changes
+        undo: => @_changeLink link, originalData
 
   _maybeChangeSelectedItem: (item) ->
     # TODO: This is kind of hacky:
     if @selectionManager.isSelected(item)
       @selectionManager._notifySelectionChange()
 
-  _changeLink: (link, title, color) ->
+  _changeLink: (link, changes) ->
     log.info "Change  for #{link.title}"
-    link.title = title
-    link.color = color
+    for key in ['title','color', 'relation']
+      if changes[key]
+        log.info "Change #{key} for #{link.title}"
+        link[key] = changes[key]
     @_maybeChangeSelectedItem link
+
+    for listener in @linkListeners
+      log.info "link changed: #{link.terminalKey()}"
+      listener.changeLink? link
 
   _nameForNode: (node) ->
     @nodeKeys[node]

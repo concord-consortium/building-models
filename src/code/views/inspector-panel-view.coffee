@@ -81,19 +81,19 @@ module.exports = React.createClass
         palette: @props.palette
       })
     else if @props.link
-      (LinkInspectorView {link: @props.link, onLinkChanged: @props.onLinkChanged})
+      (LinkInspectorView {link: @props.link,  linkManager: @props.linkManager})
 
   renderValueInspector: ->
     if @props.node
-      (NodeValueInspectorView {})
+      (NodeValueInspectorView {node: @props.node, linkManager: @props.linkManager})
     else if @props.link
-      (LinkValueInspectorView {})
+      (LinkValueInspectorView {link:@props.link})
 
   renderRelationInspector: ->
     if @props.node
-      (NodeRelationInspectorView {node:@props.node})
+      (NodeRelationInspectorView {node:@props.node, linkManager: @props.linkManager})
     else if @props.link
-      (LinkRelationInspectorView {link:@props.link})
+      (LinkRelationInspectorView {link:@props.link, linkManager: @props.linkManager})
 
 
   renderInspectorPanel: ->
