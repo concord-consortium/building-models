@@ -80,7 +80,6 @@ module.exports = class Simulation
         value: node.currentValue
         initialValue: node.initialValue
     @reportFunc(data)
-    # TODO CLEANUP
 
   run: ->
     time = 0

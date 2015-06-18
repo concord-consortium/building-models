@@ -169,7 +169,7 @@ describe "Simulation", ->
             @nodeA.currentValue.should.equal @nodeA.initialValue
 
         describe "nodeB", ->
-          it "should be get A's previous value", ->
+          it "should get A's previous value", ->
             @nodeB.currentValue.should.equal @nodeA.initialValue
 
         describe "nodeC", ->
@@ -187,7 +187,7 @@ describe "Simulation", ->
             @nodeA.currentValue.should.equal @nodeA.initialValue
 
         describe "nodeB", ->
-          it "should be get A's previous value", ->
+          it "should get A's previous value", ->
             @nodeB.currentValue.should.equal @nodeA.initialValue
 
         describe "nodeC", ->
@@ -195,7 +195,7 @@ describe "Simulation", ->
             @nodeC.currentValue.should.equal @nodeA.initialValue
 
   describe "report", ->
-    describe "for a simple graph A(10) -0.1-> B(0) for 10 itterations", ->
+    describe "for a simple graph A(10) -0.1-> B(0) for 10 iterations", ->
       beforeEach ->
         @nodeA    = new Node({name: "A", initialValue: 10})
         @nodeB    = new Node({name: "B", initialValue: 0 })

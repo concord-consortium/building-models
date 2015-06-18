@@ -10,7 +10,7 @@ module.exports = class Node extends GraphPrimitive
     if key
       @key = key
     @links = []
-    {@x, @y, @title, @image, @initialValue} = nodeSpec
+    {@x, @y, @title, @image, @initialValue, @color} = nodeSpec
     @color ?= Colors[0].value
 
   type: 'Node'
