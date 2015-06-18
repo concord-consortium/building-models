@@ -8,8 +8,9 @@ module.exports = React.createClass
 
 
   render: ->
-    (div {className: 'link-inspector-view'},
-      (div {className: 'inspector-content'},
-        (h2 {}, "Link Value")
-      )
-    )
+    (div {className: 'link-inspector-view'})
+    # TODO: complete this later
+    #   (div {className: 'inspector-content'},
+    #     (h2 {}, "Link Value")
+    #   )
+    # )

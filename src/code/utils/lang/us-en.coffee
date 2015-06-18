@@ -20,11 +20,11 @@ module.exports =
 
   # views/node-value-inspector-view.coffee
   "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value"
-  "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words. Switch to define with numbers."
+  "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with numbers. Switch to define with equations."
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator"
 
   # views/relation-inspector-view.coffee
-  "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with numbers."
+  "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations."
 
   "~NODE-RELATION-EDIT.INCREASES": "increases"
   "~NODE-RELATION-EDIT.DECREASES": "decreases"

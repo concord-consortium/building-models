@@ -24,11 +24,8 @@ module.exports = React.createClass
       @props.linkManager.changeNode(initialValue:value)
 
   updateChecked:  (evt) ->
-    value = evt.target.value
-    if value is "on"
-      @props.linkManager.changeNode(isAccumulator:true)
-    else
-      @props.LinkManager.changeNode(isAccumulator:false)
+    value = evt.target.checked
+    @props.linkManager.changeNode(isAccumulator:value)
 
   selectText: (evt) ->
     evt.target.select()
