@@ -60,27 +60,29 @@ module.exports = class Simulation
 
   # create an object representation of the current timeStep
   addReportFrame: (time) ->
-    newFrame =
+    nodes = _.map @nodes, (node) ->
+      time:  time
+      title: node.title
+      value: node.currentValue
+      initialValue: node.initialValue
+    @reportFrames.push
       time: time
-      nodes: _.map @nodes, (node) ->
-        title: node.title
-        value: node.currentValue
-    @reportFrames.push newFrame
+      nodes: nodes
 
   # create envelope deata for the report
   report: ->
     steps = @duration / @timeStep
     data =
-      simulation:
-        steps: steps
-        duration: @duration
-        timeStep: @timeStep
-        nodeCount: @nodes.length
+      steps: steps
+      duration: @duration
+      timeStep: @timeStep
+      nodeNames: _.pluck @nodes, 'title'
       frames: @reportFrames
-      endState: _.map @nodes, (node) ->
-        title: node.title
-        value: node.currentValue
-        initialValue: node.initialValue
+      endState: _.map @nodes, (n) ->
+        title: n.title
+        initialValue: n.initialValue
+        value: n.currentValue
+
     @reportFunc(data)
 
   run: ->

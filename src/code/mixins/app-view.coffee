@@ -119,13 +119,14 @@ module.exports =
       nodes: @props.linkManager.getNodes()
       duration: 10
       timeStep: 1
-      reportFunc: (report) ->
+      reportFunc: (report) =>
         log.info report
         nodeInfo = (
           _.map report.endState, (n) ->
             "#{n.title} #{n.initialValue} → #{n.value}"
         ).join("\n")
-        alert "Run for #{report.simulation.steps} steps\n#{nodeInfo}:"
+        alert "Run for #{report.steps} steps\n#{nodeInfo}:"
+        @props.codapConnect.sendSimulationData(report)
 
     simulator.run()
     simulator.report()

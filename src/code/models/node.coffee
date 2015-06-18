@@ -10,7 +10,7 @@ module.exports = class Node extends GraphPrimitive
     if key
       @key = key
     @links = []
-    {@x, @y, @title, @image, @initialValue, @isAccumulator, @color} = nodeSpec
+    {@x, @y, @title, @image, @initialValue, @isAccumulator} = nodeSpec
     @initialValue  ?= 50
     @isAccumulator ?= false
     @color ?= Colors[0].value

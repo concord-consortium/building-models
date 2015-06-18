@@ -1,5 +1,5 @@
 IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
-
+tr = require '../utils/translate'
 module.exports = class CodapConnect
 
   name: 'Building Models Tool'
@@ -23,8 +23,75 @@ module.exports = class CodapConnect
         dimensions:
           width: 800
           height: 600
+        collections: [
+          {
+            name: 'Simulation'
+            attrs: [
+              {
+                name: 'steps'
+                type: 'numeric'
+                description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
+                precision: 0
+              }
+            ]
+          }
+        ]
         contextType: 'DG.DataContext'
     }, @initGameHandler)
+
+
+
+  sendSimulationData: (data) ->
+    # First column definition is the time index
+    sampleDataAttrs = [
+      {
+        name: "time"
+        type: "numeric"
+      }
+    ]
+
+    # Append node names to column descriptions.
+    _.each data.nodeNames, (name) ->
+      sampleDataAttrs.push
+        name: name
+        type: 'numeric'
+
+    # Fill in the sample data values (node values array)
+    sampleData = _.map data.frames, (frame) ->
+      sample     = [frame.time]
+      _.each frame.nodes, (n) -> sample.push n.value
+      sample
+
+    # see: https://github.com/concord-consortium/codap/wiki/Data-Interactive-API#createcollection
+    @codapPhone.call
+      action: 'createCollection'
+      args:
+        name: 'Samples'
+        attrs: sampleDataAttrs
+
+    # called by CODAP when 'openCase' is received.
+    openCaseCallback = (result) =>
+      if result
+        if result.success
+          @codapPhone.call
+            action: 'createCases'
+            args: {
+              collection: 'Samples',
+              parent: result.caseID,
+              values: sampleData
+            }
+        else
+          log.info "CODAP returned an error on 'createCase'"
+      else
+        log.info "Unable to call 'createCase' in CODAP (phone timeout?)"
+
+    @codapPhone.call( {
+      action: 'openCase'
+      args: {
+        collection: 'Simulation',
+        values: [data.steps]
+        }
+    }, openCaseCallback)
 
   codapRequestHandler: (cmd, callback) =>
     operation = cmd.operation

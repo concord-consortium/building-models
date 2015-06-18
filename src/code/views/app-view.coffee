@@ -43,7 +43,7 @@ module.exports = React.createClass
           )
         (div {className: 'action-bar'},
           (NodeWell {palette: @state.palette})
-          (DocumentActions {linkManager: @props.linkManager})
+          (DocumentActions {linkManager: @props.linkManager, runSimulation: @runSimulation})
         )
         (div {className: 'canvas'},
           (LinkView {

@@ -90,9 +90,16 @@ module.exports =
   "~FILE.CONFIRM_ORIGINAL_REVERT": "Are you sure you want to revert to the original version?"
   "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?"
 
+
+  "~DOCUMENT.ACTIONS.RUN_SIMULATION": "Run simulation"
+  "~DOCUMENT.ACTIONS.UNDO": "Undo"
+  "~DOCUMENT.ACTIONS.REDO": "Redo"
+
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here"
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)"
 
   "~RELATIONSHIP.NO_RELATION": "No relation defined"
+
+  "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
