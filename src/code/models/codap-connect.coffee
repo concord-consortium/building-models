@@ -120,6 +120,15 @@ module.exports = class CodapConnect
         @linkManager.loadData args.state
         callback
           success: true
+
+      when 'undoAction'
+        log.info 'Received undoAction request from CODAP.'
+        @linkManager.undo()
+
+      when 'redoAction'
+        log.info 'Received redoAction request from CODAP.'
+        @linkManager.redo()
+
       else
         log.info 'Unknown request received from CODAP: ' + operation
 
