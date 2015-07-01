@@ -8,10 +8,16 @@ module.exports = class CodapConnect
 
   initAccomplished: false
 
-  constructor: (linkManager, name) ->
+  @instances: {} # map of context -> instance
+
+  @instance: (context) ->
+    CodapConnect.instances[context] ?= new CodapConnect context
+    CodapConnect.instances[context]
+
+  constructor: (context) ->
     log.info 'CodapConnect: initializing'
-    @linkManager = linkManager
-    name and @name = name
+    LinkManager = require './link-manager'
+    @linkManager = LinkManager.instance context
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'codap-game', window.parent )
@@ -92,6 +98,10 @@ module.exports = class CodapConnect
         values: [data.steps]
         }
     }, openCaseCallback)
+
+  sendUndoableActionPerformed: () ->
+    @codapPhone.call
+      action: 'undoableActionPerformed'
 
   codapRequestHandler: (cmd, callback) =>
     operation = cmd.operation

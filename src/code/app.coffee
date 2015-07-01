@@ -14,7 +14,7 @@ window.initApp = (wireframes=false) ->
     linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
 
-  opts.codapConnect = new CodapConnect opts.linkManager
+  opts.codapConnect = CodapConnect.instance 'building-models'
 
   appView = AppView opts
   elem = '#app'

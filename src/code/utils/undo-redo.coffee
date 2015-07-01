@@ -1,4 +1,5 @@
 # based on https://github.com/jzaefferer/undo/blob/master/undo.js
+CodapConnect = require '../models/codap-connect'
 
 class Manager
   constructor: (options = {}) ->
@@ -10,6 +11,10 @@ class Manager
 
   createAndExecuteCommand: (name, methods) ->
     @execute (new Command name, methods)
+
+    codapConnect = CodapConnect.instance 'building-models'
+    codapConnect.sendUndoableActionPerformed()
+
 
   execute: (command) ->
     @_clearRedo()
