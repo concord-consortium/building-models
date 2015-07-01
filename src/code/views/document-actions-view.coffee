@@ -14,6 +14,7 @@ module.exports = React.createClass
 
   modelChanged: (status) ->
     @setState
+      undoRedoVisible: status.showUndoRedo
       canRedo: status.canRedo
       canUndo: status.canUndo
 
@@ -30,8 +31,9 @@ module.exports = React.createClass
         (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
         tr "~DOCUMENT.ACTIONS.RUN_SIMULATION"
       )
-      (div {className: 'undo-redo'},
-        (span {className: (buttonClass @state.canUndo), onClick: @undoClicked, disabled: not @state.canUndo}, tr "~DOCUMENT.ACTIONS.UNDO")
-        (span {className: (buttonClass @state.canRedo), onClick: @redoClicked, disabled: not @state.canRedo}, tr "~DOCUMENT.ACTIONS.REDO")
-      )
+      if @state.undoRedoVisible
+        (div {className: 'undo-redo'},
+          (span {className: (buttonClass @state.canUndo), onClick: @undoClicked, disabled: not @state.canUndo}, tr "~DOCUMENT.ACTIONS.UNDO")
+          (span {className: (buttonClass @state.canRedo), onClick: @redoClicked, disabled: not @state.canRedo}, tr "~DOCUMENT.ACTIONS.REDO")
+        )
     )
