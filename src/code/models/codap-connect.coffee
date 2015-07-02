@@ -99,7 +99,7 @@ module.exports = class CodapConnect
         }
     }, openCaseCallback)
 
-  sendUndoableActionPerformed: () ->
+  sendUndoableActionPerformed: ->
     @codapPhone.call
       action: 'undoableActionPerformed'
 
@@ -127,18 +127,27 @@ module.exports = class CodapConnect
 
       when 'undoAction'
         log.info 'Received undoAction request from CODAP.'
-        @linkManager.undo()
+        successes = @linkManager.undo()
+        callback {success: @reduceSuccesses successes}
 
       when 'redoAction'
         log.info 'Received redoAction request from CODAP.'
-        @linkManager.redo()
+        successes = @linkManager.redo()
+        callback {success: @reduceSuccesses successes}
 
       else
         log.info 'Unknown request received from CODAP: ' + operation
 
+  # undo/redo events can return an array of successes
+  # this reduces that array to true iff every element is true
+  reduceSuccesses: (successes) ->
+    return successes unless successes.length
+    return false for s in successes when s is false
+    return true
+
   initGameHandler: =>
     @initAccomplished = true
-  
+
   #
   # Requests a CODAP action, if the Building Models tool is configured to reside
   # in CODAP. For actions that may be requested, see

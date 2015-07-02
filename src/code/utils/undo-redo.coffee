@@ -53,7 +53,7 @@ class Manager
     return @stackPosition < @commands.length - 1
 
   hideUndoRedo: (hide) ->
-    @showUndoRedo = !hide
+    @showUndoRedo = not hide
     @_changed()
 
   save: ->
