@@ -11,10 +11,12 @@ class Manager
     @showUndoRedo = true
 
   createAndExecuteCommand: (name, methods) ->
-    @execute (new Command name, methods)
+    result = @execute (new Command name, methods)
 
     codapConnect = CodapConnect.instance 'building-models'
     codapConnect.sendUndoableActionPerformed()
+
+    result
 
 
   execute: (command) ->
