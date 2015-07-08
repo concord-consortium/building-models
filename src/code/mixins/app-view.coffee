@@ -98,9 +98,10 @@ module.exports =
       else
         undo = redo = false
       if undo or redo
-        e.preventDefault()
-        @props.linkManager.redo() if redo
-        @props.linkManager.undo() if undo
+        if (@props.linkManager.undoRedoIsVisible)
+          e.preventDefault()
+          @props.linkManager.redo() if redo
+          @props.linkManager.undo() if undo
 
   componentDidUnmount: ->
     @addDeleteKeyHandler false

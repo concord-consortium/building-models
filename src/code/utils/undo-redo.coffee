@@ -1,4 +1,5 @@
 # based on https://github.com/jzaefferer/undo/blob/master/undo.js
+CodapConnect = require '../models/codap-connect'
 
 class Manager
   constructor: (options = {}) ->
@@ -7,9 +8,16 @@ class Manager
     @stackPosition = -1
     @savePosition = -1
     @changeListeners = []
+    @showUndoRedo = true
 
   createAndExecuteCommand: (name, methods) ->
-    @execute (new Command name, methods)
+    result = @execute (new Command name, methods)
+
+    codapConnect = CodapConnect.instance 'building-models'
+    codapConnect.sendUndoableActionPerformed()
+
+    result
+
 
   execute: (command) ->
     @_clearRedo()
@@ -45,6 +53,10 @@ class Manager
 
   canRedo: ->
     return @stackPosition < @commands.length - 1
+
+  hideUndoRedo: (hide) ->
+    @showUndoRedo = not hide
+    @_changed()
 
   save: ->
     @savePosition = @stackPosition
@@ -89,6 +101,7 @@ class Manager
         canUndo: @canUndo()
         canRedo: @canRedo()
         saved: @saved()
+        showUndoRedo: @showUndoRedo
       for listener in @changeListeners
         listener status
 

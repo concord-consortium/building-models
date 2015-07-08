@@ -1,5 +1,6 @@
 global._ = require 'lodash'
 global.log = require 'loglevel'
+global.window = { location: '' }
 
 chai = require('chai')
 chai.config.includeStack = true
@@ -14,6 +15,7 @@ GraphPrimitive = requireModel 'graph-primitive'
 Link           = requireModel 'link'
 Node           = requireModel 'node'
 LinkManager    = requireModel 'link-manager'
+CodapConnect   = requireModel 'codap-connect'
 
 describe 'GraphPrimitive', ->
   it 'GraphPrimitive should exists', ->
@@ -148,6 +150,13 @@ describe 'Node', ->
 
   describe "LinkManager", ->
     beforeEach ->
+      sandbox = Sinon.sandbox.create()
+      sandbox.stub(CodapConnect, "instance", ->
+        return {
+          sendUndoableActionPerformed: -> return ''
+        }
+      )
+
       @nodeA = new Node({title: "a", x:10, y:10}, 'a')
       @nodeB = new Node({title: "b", x:20, y:20}, 'b')
       @linkManager = new LinkManager()
@@ -169,6 +178,9 @@ describe 'Node', ->
       })
       @otherNewLink.terminalKey = ->
         "otherNewLink"
+
+    afterEach ->
+      CodapConnect.instance.restore()
 
     describe "addLink", ->
       describe "When the link doesn't already exist", ->

@@ -8,10 +8,16 @@ module.exports = class CodapConnect
 
   initAccomplished: false
 
-  constructor: (linkManager, name) ->
+  @instances: {} # map of context -> instance
+
+  @instance: (context) ->
+    CodapConnect.instances[context] ?= new CodapConnect context
+    CodapConnect.instances[context]
+
+  constructor: (context) ->
     log.info 'CodapConnect: initializing'
-    @linkManager = linkManager
-    name and @name = name
+    LinkManager = require './link-manager'
+    @linkManager = LinkManager.instance context
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'codap-game', window.parent )
@@ -93,6 +99,10 @@ module.exports = class CodapConnect
         }
     }, openCaseCallback)
 
+  sendUndoableActionPerformed: ->
+    @codapPhone.call
+      action: 'undoableActionPerformed'
+
   codapRequestHandler: (cmd, callback) =>
     operation = cmd.operation
     args = cmd.args
@@ -110,12 +120,34 @@ module.exports = class CodapConnect
         @linkManager.loadData args.state
         callback
           success: true
+
+      when 'externalUndoAvailable'
+        log.info 'Received externalUndoAvailable request from CODAP.'
+        @linkManager.hideUndoRedo(true)
+
+      when 'undoAction'
+        log.info 'Received undoAction request from CODAP.'
+        successes = @linkManager.undo()
+        callback {success: @reduceSuccesses successes}
+
+      when 'redoAction'
+        log.info 'Received redoAction request from CODAP.'
+        successes = @linkManager.redo()
+        callback {success: @reduceSuccesses successes}
+
       else
         log.info 'Unknown request received from CODAP: ' + operation
 
+  # undo/redo events can return an array of successes
+  # this reduces that array to true iff every element is true
+  reduceSuccesses: (successes) ->
+    return successes unless successes.length
+    return false for s in successes when s is false
+    return true
+
   initGameHandler: =>
     @initAccomplished = true
-  
+
   #
   # Requests a CODAP action, if the Building Models tool is configured to reside
   # in CODAP. For actions that may be requested, see
