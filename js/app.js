@@ -55190,7 +55190,8 @@ module.exports = {
   },
   onPaletteChange: function(status) {
     return this.setState({
-      palette: status.palette
+      palette: status.palette,
+      internalLibrary: status.internalLibrary
     });
   },
   getData: function() {
@@ -55621,7 +55622,7 @@ module.exports = CodapConnect = (function() {
         log.info('Received saveState request from CODAP.');
         return callback({
           success: true,
-          state: this.linkManager.serialize(paletteManager.state.palette)
+          state: this.linkManager.serialize(paletteManager.store.palette)
         });
       case 'restoreState':
         log.info('Received restoreState request from CODAP.');
@@ -56574,18 +56575,19 @@ paletteActions = Reflux.createActions(["addToPalette", "loadData"]);
 
 paletteStore = Reflux.createStore({
   init: function() {
-    var i, internalLibrary, len, linkManager, node, results;
+    var i, len, node, ref, results;
     this.listenTo(paletteActions.addToPalette, this.onAddToPallete);
     this.listenTo(paletteActions.loadData, this.onloadData);
     this.palette = require('../data/initial-palette');
     this._updateChanges();
-    linkManager = LinkManager.instance('building-models');
-    linkManager.addLoadListener(this.onLoadData);
-    internalLibrary = require('../data/internal-library');
+    this.linkManager = LinkManager.instance('building-models');
+    this.linkManager.addLoadListener(this.onLoadData);
+    this.internalLibrary = require('../data/internal-library');
+    ref = this.internalLibrary;
     results = [];
-    for (i = 0, len = internalLibrary.length; i < len; i++) {
-      node = internalLibrary[i];
-      results.push(linkManager.setImageMetadata(node.image, node.metadata));
+    for (i = 0, len = ref.length; i < len; i++) {
+      node = ref[i];
+      results.push(this.linkManager.setImageMetadata(node.image, node.metadata));
     }
     return results;
   },
@@ -56613,7 +56615,7 @@ paletteStore = Reflux.createStore({
           metadata: node.metadata
         });
         if (node.metadata) {
-          return this.props.linkManager.setImageMetadata(node.image, node.metada);
+          return this.linkManager.setImageMetadata(node.image, node.metada);
         }
       }
     }
@@ -58524,7 +58526,7 @@ module.exports = React.createClass({
 
 
 },{"../mixins/google-file-interface":547,"../utils/translate":569,"./dropdown-view":574}],577:[function(require,module,exports){
-var ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, TabbedPanel, tr;
+var ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteManager, TabbedPanel, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
 
@@ -58540,18 +58542,24 @@ MyComputerDialog = React.createFactory(require('./image-my-computer-dialog-view'
 
 LinkDialog = React.createFactory(require('./image-link-dialog-view'));
 
+PaletteManager = require("../models/palette-manager");
+
 tr = require('../utils/translate');
 
 module.exports = React.createClass({
   displayName: 'Image Browser',
   render: function() {
-    var props;
+    var addToPalette, props, store;
+    store = PaletteManager.store;
+    addToPalette = function(node) {
+      return PaletteManager.actions.addToPalette.trigger(node);
+    };
     props = {
-      palette: this.props.palette,
-      internalLibrary: this.props.internalLibrary,
-      addToPalette: this.props.addToPalette,
-      inPalette: this.props.inPalette,
-      inLibrary: this.props.inLibrary,
+      palette: store.palette,
+      internalLibrary: store.internalLibrary,
+      addToPalette: addToPalette,
+      inPalette: store.inPalette,
+      inLibrary: store.inLibrary,
       linkManager: this.props.linkManager
     };
     return ModalTabbedDialogFactory({
@@ -58575,7 +58583,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":569,"./image-link-dialog-view":578,"./image-metadata-view":579,"./image-my-computer-dialog-view":580,"./image-search-dialog-view":582,"./modal-tabbed-dialog-view":589,"./tabbed-panel-view":600}],578:[function(require,module,exports){
+},{"../models/palette-manager":555,"../utils/translate":569,"./image-link-dialog-view":578,"./image-metadata-view":579,"./image-my-computer-dialog-view":580,"./image-search-dialog-view":582,"./modal-tabbed-dialog-view":589,"./tabbed-panel-view":600}],578:[function(require,module,exports){
 var DropZone, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
