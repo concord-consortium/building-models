@@ -48,7 +48,6 @@ paletteStore   = Reflux.createStore
           @props.linkManager.setImageMetadata node.image, node.metada
 
   onAddToPallete: (node) ->
-    @info "Adding to Palette: #{JSON.stringify(node)}"
     @_addToPallete(node)
     @_updateChanges()
 
