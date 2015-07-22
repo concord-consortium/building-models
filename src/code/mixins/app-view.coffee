@@ -7,6 +7,7 @@ module.exports =
     mixinState =
       selectedNode: null
       selectedConnection: null
+      palette: []
       filename: null
     _.extend mixinState, subState
 
@@ -32,9 +33,13 @@ module.exports =
 
     @_loadInitialData()
     @_registerUndoRedoKeys()
+    PaletteManager.store.listen @onPaletteChange
 
   componentDidUnmount: ->
     @addDeleteKeyHandler false
+
+  onPaletteChange: (status) ->
+    @setState palette: status.palette
 
   getData: ->
     @props.linkManager.toJsonString @state.palette
@@ -72,7 +77,11 @@ module.exports =
       selectedNode: selectedNode
       editingNode: editingNode
       selectedLink: selectedLink
-    PaletteManager.actions.addToPalette selectedNode
+
+    # TODO: Why add selected to palette? maybe for drop-events? remove.
+    if selectedNode
+      PaletteManager.actions.addToPalette selectedNode
+
     log.info 'updated selections'
 
   _loadInitialData: ->
