@@ -4,17 +4,9 @@ PaletteManager = require "../models/palette-manager"
 module.exports =
 
   getInitialAppViewState: (subState) ->
-
-    # load the metadata at startup
-    internalLibrary = require '../data/internal-library'
-    for node in internalLibrary
-      @props.linkManager.setImageMetadata node.image, node.metadata
-
     mixinState =
       selectedNode: null
       selectedConnection: null
-      palette: require '../data/initial-palette'
-      internalLibrary: internalLibrary
       filename: null
     _.extend mixinState, subState
 
@@ -31,28 +23,6 @@ module.exports =
     else
       $(window).off 'keydown'
 
-  addToPalette: (node) ->
-    if node?.image.match /^(https?|data):/
-      # make sure this is a new image
-      if not @inPalette node
-        palette = @state.palette.slice 0
-        palette.push
-          title: node.title or ''
-          image: node.image
-          metadata: node.metadata
-        if node.metadata
-          @props.linkManager.setImageMetadata node.image, node.metadata
-        @setState palette: palette
-
-  _nodeInUse: (node, collection) ->
-    !!((_.find collection, {image: node.image}) or (node.metadata and (_.find collection, {metadata: {link: node.metadata.link}})))
-
-  inPalette: (node) ->
-    @_nodeInUse node, @state.palette
-
-  inLibrary: (node) ->
-    @_nodeInUse node, @state.internalLibrary
-
   componentDidMount: ->
     @addDeleteKeyHandler true
     @props.linkManager.selectionManager.addSelectionListener (manager) =>
@@ -65,17 +35,8 @@ module.exports =
         editingNode: editingNode
         selectedLink: selectedLink
 
-      @addToPalette selectedNode
+      PaletteManager.actions.addToPalette selectedNode
       log.info 'updated selections'
-
-    @props.linkManager.addLoadListener (data) =>
-      # reload the palette
-      if data.palette
-        @setState palette: data.palette
-      else
-        @setState palette: (require '../data/initial-palette')
-        for node in data.nodes
-          @addToPalette node
 
     @props.linkManager.addFilenameListener (filename) =>
       @setState filename: filename
