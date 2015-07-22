@@ -1,4 +1,5 @@
-Simulation = require "../models/simulation"
+Simulation     = require "../models/simulation"
+PaletteManager = require "../models/palette-manager"
 
 module.exports =
 

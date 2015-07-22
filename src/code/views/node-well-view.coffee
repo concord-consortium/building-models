@@ -1,4 +1,5 @@
-ProtoNodeView = React.createFactory require './proto-node-view'
+ProtoNodeView  = React.createFactory require './proto-node-view'
+PaletteManager = require "../models/palette-manager"
 
 {div} = React.DOM
 
