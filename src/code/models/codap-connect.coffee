@@ -112,7 +112,7 @@ module.exports = class CodapConnect
         log.info 'Received saveState request from CODAP.'
         callback
           success: true
-          state: @linkManager.serialize paletteManager.state.palette
+          state: @linkManager.serialize paletteManager.store.palette
 
       when 'restoreState'
         log.info 'Received restoreState request from CODAP.'

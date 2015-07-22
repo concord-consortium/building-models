@@ -17,13 +17,14 @@ paletteStore   = Reflux.createStore
 
     @_updateChanges()
 
-    linkManager = LinkManager.instance 'building-models'
-    linkManager.addLoadListener @onLoadData
+    # TODO: this doesn't seem safe
+    @linkManager = LinkManager.instance 'building-models'
+    @linkManager.addLoadListener @onLoadData
 
     # load the metadata at startup
-    internalLibrary = require '../data/internal-library'
-    for node in internalLibrary
-      linkManager.setImageMetadata node.image, node.metadata
+    @internalLibrary = require '../data/internal-library'
+    for node in @internalLibrary
+      @linkManager.setImageMetadata node.image, node.metadata
 
   onLoadData: (data) ->
     @info "onLoadData called"
@@ -45,7 +46,7 @@ paletteStore   = Reflux.createStore
           image: node.image
           metadata: node.metadata
         if node.metadata
-          @props.linkManager.setImageMetadata node.image, node.metada
+          @linkManager.setImageMetadata node.image, node.metada
 
   onAddToPallete: (node) ->
     @_addToPallete(node)

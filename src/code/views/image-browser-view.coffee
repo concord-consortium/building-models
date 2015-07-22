@@ -5,17 +5,22 @@ ImageMetadata = React.createFactory require './image-metadata-view'
 ImageSearchDialog = React.createFactory require './image-search-dialog-view'
 MyComputerDialog = React.createFactory require './image-my-computer-dialog-view'
 LinkDialog = React.createFactory require './image-link-dialog-view'
+PaletteManager = require "../models/palette-manager"
+
 tr = require '../utils/translate'
 
 module.exports = React.createClass
   displayName: 'Image Browser'
   render: ->
+    store   = PaletteManager.store
+    addToPalette = (node) ->
+      PaletteManager.actions.addToPalette.trigger(node)
     props =
-      palette: @props.palette
-      internalLibrary: @props.internalLibrary
-      addToPalette: @props.addToPalette
-      inPalette: @props.inPalette
-      inLibrary: @props.inLibrary
+      palette: store.palette
+      internalLibrary: store.internalLibrary
+      addToPalette: addToPalette
+      inPalette: store.inPalette
+      inLibrary: store.inLibrary
       linkManager: @props.linkManager
 
     (ModalTabbedDialogFactory {title: (tr "~ADD-NEW-IMAGE.TITLE"), close: @props.close, tabs: [

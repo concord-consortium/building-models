@@ -39,7 +39,9 @@ module.exports =
     @addDeleteKeyHandler false
 
   onPaletteChange: (status) ->
-    @setState palette: status.palette
+    @setState
+      palette: status.palette
+      internalLibrary: status.internalLibrary
 
   getData: ->
     @props.linkManager.toJsonString @state.palette
