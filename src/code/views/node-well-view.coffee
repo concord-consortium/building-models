@@ -1,4 +1,5 @@
-ProtoNodeView = React.createFactory require './proto-node-view'
+ProtoNodeView  = React.createFactory require './proto-node-view'
+PaletteManager = require "../models/palette-manager"
 
 {div} = React.DOM
 
@@ -6,9 +7,17 @@ module.exports = React.createClass
 
   displayName: 'NodeWell'
 
+  componentDidMount: ->
+    PaletteManager.store.listen @onPaletteChange
+
+  onPaletteChange: (status) ->
+    @setState palette: status.palette
+
   getInitialState: ->
     nodes: []
+    palette: []
     collapsed: true
+
   collapse: ->
     @setState collapsed: true
   expand: ->
@@ -28,7 +37,7 @@ module.exports = React.createClass
     (div {className: 'top-node-palette-wrapper'},
       (div {className: topNodePaletteClass},
         (div {className: 'node-well'},
-          for node, i in @props.palette
+          for node, i in @state.palette
             (ProtoNodeView {key: i, image: node.image, title: node.title})
         )
       )

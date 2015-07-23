@@ -17,7 +17,8 @@
     "lodash": "^3.3.0",
     "loglevel": "^1.2.0",
     "mathjs": "^1.7.0",
-    "react": "^0.13.1"
+    "react": "^0.13.3",
+    "reflux": "^0.2.7"
   },
   "devDependencies": {
     "browserify": "^9.0.3",

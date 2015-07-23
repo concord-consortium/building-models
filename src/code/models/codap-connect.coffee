@@ -106,13 +106,13 @@ module.exports = class CodapConnect
   codapRequestHandler: (cmd, callback) =>
     operation = cmd.operation
     args = cmd.args
-
+    paletteManager = require '../models/palette-manager'
     switch operation
       when 'saveState'
         log.info 'Received saveState request from CODAP.'
         callback
           success: true
-          state: @linkManager.serialize require '../data/initial-palette'
+          state: @linkManager.serialize paletteManager.store.palette
 
       when 'restoreState'
         log.info 'Received restoreState request from CODAP.'
