@@ -89,7 +89,7 @@ module.exports =
   _loadInitialData: ->
     if @props.data?.length > 0
       @props.linkManager.loadData JSON.parse @props.data
-    else
+    else if @props.url?.length > 0
       @props.linkManager.loadDataFromUrl @props.url
 
   # cross platform undo/redo key-binding ctr-z ctr-y
