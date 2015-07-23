@@ -45,7 +45,11 @@ module.exports = React.createClass
           )
         (div {className: 'action-bar'},
           (NodeWell {palette: @state.palette})
-          (DocumentActions {linkManager: @props.linkManager, runSimulation: @runSimulation})
+          (DocumentActions
+            linkManager: @props.linkManager
+            runSimulation: @runSimulation
+            simplified: @props.simplified
+          )
         )
         (div {className: 'canvas'},
           (LinkView {
@@ -59,6 +63,7 @@ module.exports = React.createClass
           onNodeChanged: @onNodeChanged
           onNodeDelete: @onNodeDelete
           palette: @state.palette
+          simplified: @props.simplified
           toggleImageBrowser: @toggleImageBrowser
           linkManager: @props.linkManager
         )

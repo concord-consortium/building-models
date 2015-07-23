@@ -24,12 +24,18 @@ module.exports = React.createClass
   redoClicked: ->
     @props.linkManager.redo()
 
+  renderRunLink: ->
+    unless @props.simplified
+      (span {},
+        (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
+        tr "~DOCUMENT.ACTIONS.RUN_SIMULATION"
+      )
+
   render: ->
     buttonClass = (enabled) -> "button-link #{if not enabled then 'disabled' else ''}"
     (div {className: 'document-actions'},
       (div {className: "misc-actions"},
-        (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
-        tr "~DOCUMENT.ACTIONS.RUN_SIMULATION"
+        @renderRunLink()
       )
       if @state.undoRedoVisible
         (div {className: 'undo-redo'},

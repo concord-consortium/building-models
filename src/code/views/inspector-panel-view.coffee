@@ -24,10 +24,10 @@ ToolPanel = React.createFactory React.createClass
   displayName: 'toolPanel'
 
   buttonData: [
-      {name: "plus",  shows: "add", 'enabled': ['nothing','node','link'] }
-      {name: "brush", shows: "design",'enabled': ['node','link'] }
-      {name: "ruler", shows: "value", 'enabled': ['node'] }
-      {name: "curve", shows: "relations",'enabled': ['node']}
+      {name: "plus",  simple: true, shows: "add", 'enabled': ['nothing','node','link'] }
+      {name: "brush", simple: true, shows: "design",'enabled': ['node','link'] }
+      {name: "ruler", simple: false, shows: "value", 'enabled': ['node'] }
+      {name: "curve", simple: false, shows: "relations",'enabled': ['node']}
     ]
 
   isDisabled: (button) ->
@@ -59,7 +59,10 @@ ToolPanel = React.createFactory React.createClass
         @props.onNowShowing(null)
 
   render: ->
-    buttonsView = _.map @buttonData, (button) =>
+    buttons = @buttonData.slice 0
+    if @props.simplified
+      buttons = _.filter buttons, (button) -> button.simple
+    buttonsView = _.map buttons, (button) =>
       props = @buttonProps(button)
       (ToolButton props)
 
@@ -126,6 +129,12 @@ module.exports = React.createClass
       className = "#{className} collapsed"
 
     (div {className: className},
-      (ToolPanel {node: @props.node, link: @props.link, nowShowing: @state.nowShowing, onNowShowing: @setShowing})
+      (ToolPanel
+        node: @props.node
+        link: @props.link
+        nowShowing: @state.nowShowing
+        onNowShowing: @setShowing
+        simplified: @props.simplified
+      )
       @renderInspectorPanel()
     )
