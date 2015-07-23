@@ -27,7 +27,8 @@ window.initApp = function(wireframes) {
   opts = {
     url: getParameterByName('url'),
     linkManager: LinkManager.instance('building-models'),
-    data: getParameterByName('data')
+    data: getParameterByName('data'),
+    simplified: getParameterByName('simplified')
   };
   opts.codapConnect = CodapConnect.instance('building-models');
   appView = AppView(opts);
@@ -58084,7 +58085,8 @@ module.exports = React.createClass({
       palette: this.state.palette
     }), DocumentActions({
       linkManager: this.props.linkManager,
-      runSimulation: this.runSimulation
+      runSimulation: this.runSimulation,
+      simplified: this.props.simplified
     })), div({
       className: 'canvas'
     }, LinkView({
@@ -58097,6 +58099,7 @@ module.exports = React.createClass({
       onNodeChanged: this.onNodeChanged,
       onNodeDelete: this.onNodeDelete,
       palette: this.state.palette,
+      simplified: this.props.simplified,
       toggleImageBrowser: this.toggleImageBrowser,
       linkManager: this.props.linkManager
     }), this.state.showImageBrowser ? ImageBrowser({
@@ -58226,6 +58229,14 @@ module.exports = React.createClass({
   redoClicked: function() {
     return this.props.linkManager.redo();
   },
+  renderRunLink: function() {
+    if (!this.props.simplified) {
+      return span({}, i({
+        className: "fa fa-play-circle",
+        onClick: this.props.runSimulation
+      }), tr("~DOCUMENT.ACTIONS.RUN_SIMULATION"));
+    }
+  },
   render: function() {
     var buttonClass;
     buttonClass = function(enabled) {
@@ -58235,10 +58246,7 @@ module.exports = React.createClass({
       className: 'document-actions'
     }, div({
       className: "misc-actions"
-    }, i({
-      className: "fa fa-play-circle",
-      onClick: this.props.runSimulation
-    }), tr("~DOCUMENT.ACTIONS.RUN_SIMULATION")), this.state.undoRedoVisible ? div({
+    }, this.renderRunLink()), this.state.undoRedoVisible ? div({
       className: 'undo-redo'
     }, span({
       className: buttonClass(this.state.canUndo),
@@ -59066,18 +59074,22 @@ ToolPanel = React.createFactory(React.createClass({
   buttonData: [
     {
       name: "plus",
+      simple: true,
       shows: "add",
       'enabled': ['nothing', 'node', 'link']
     }, {
       name: "brush",
+      simple: true,
       shows: "design",
       'enabled': ['node', 'link']
     }, {
       name: "ruler",
+      simple: false,
       shows: "value",
       'enabled': ['node']
     }, {
       name: "curve",
+      simple: false,
       shows: "relations",
       'enabled': ['node']
     }
@@ -59126,8 +59138,14 @@ ToolPanel = React.createFactory(React.createClass({
     }
   },
   render: function() {
-    var buttonsView;
-    buttonsView = _.map(this.buttonData, (function(_this) {
+    var buttons, buttonsView;
+    buttons = this.buttonData.slice(0);
+    if (this.props.simplified) {
+      buttons = _.filter(buttons, function(button) {
+        return button.simple;
+      });
+    }
+    buttonsView = _.map(buttons, (function(_this) {
       return function(button) {
         var props;
         props = _this.buttonProps(button);
@@ -59229,7 +59247,8 @@ module.exports = React.createClass({
       node: this.props.node,
       link: this.props.link,
       nowShowing: this.state.nowShowing,
-      onNowShowing: this.setShowing
+      onNowShowing: this.setShowing,
+      simplified: this.props.simplified
     }), this.renderInspectorPanel());
   }
 });
