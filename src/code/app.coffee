@@ -10,7 +10,10 @@ getParameterByName = (name) ->
 
 window.initApp = (wireframes=false) ->
   opts =
-    url: 'json/serialized.json'
+    # Valid opts are:
+    # url: Where to load json e.g.'json/serialized.json'
+    # linkManager: The instance of the link-manager we are talking with
+    # data: the json to load (compare with url above)
     linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
 

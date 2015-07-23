@@ -13,7 +13,7 @@ paletteStore   = Reflux.createStore
     @listenTo paletteActions.addToPalette, @onAddToPallete
     @listenTo paletteActions.loadData, @onloadData
 
-    @palette = require '../data/initial-palette'
+    @palette = []
 
     @_updateChanges()
 
@@ -31,10 +31,8 @@ paletteStore   = Reflux.createStore
     # reload the palette
     if data.palette
       @palette = data.palette.slice 0
-    else
-      @palette = require '../data/initial-palette'
-      for node in data.nodes
-        @_addToPallete node
+    for node in data.nodes
+      @_addToPallete node
     @_updateChanges()
 
   _addToPallete: (node) ->
