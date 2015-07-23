@@ -98,6 +98,8 @@ module.exports   = class LinkManager
       undo: => @_removeLink link
 
   _addLink: (link) ->
+    if link.sourceNode is link.targetNode
+      return false
     if @hasLink link
       return false
     else
