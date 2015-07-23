@@ -15,7 +15,7 @@ module.exports = React.createClass
 
   getInitialState: ->
     nodes: []
-    palette: []
+    palette: PaletteManager.store.palette
     collapsed: true
 
   collapse: ->

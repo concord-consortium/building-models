@@ -14,6 +14,7 @@ window.initApp = (wireframes=false) ->
     # url: Where to load json e.g.'json/serialized.json'
     # linkManager: The instance of the link-manager we are talking with
     # data: the json to load (compare with url above)
+    url: getParameterByName 'url'
     linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
 

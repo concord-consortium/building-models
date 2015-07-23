@@ -13,7 +13,7 @@ paletteStore   = Reflux.createStore
     @listenTo paletteActions.addToPalette, @onAddToPallete
     @listenTo paletteActions.loadData, @onloadData
 
-    @palette = []
+    @palette = require '../data/initial-palette'
 
     @_updateChanges()
 
@@ -36,15 +36,14 @@ paletteStore   = Reflux.createStore
     @_updateChanges()
 
   _addToPallete: (node) ->
-    if node?.image.match /^(https?|data):/
-      # make sure this is a new image
-      if not @inPalette node
-        @palette.push
-          title: node.title or ''
-          image: node.image
-          metadata: node.metadata
-        if node.metadata
-          @linkManager.setImageMetadata node.image, node.metada
+    # make sure this is a new image
+    if not @inPalette node
+      @palette.push
+        title: node.title or ''
+        image: node.image
+        metadata: node.metadata
+      if node.metadata
+        @linkManager.setImageMetadata node.image, node.metada
 
   onAddToPallete: (node) ->
     @_addToPallete(node)
