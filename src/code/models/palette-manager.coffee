@@ -1,7 +1,9 @@
 LinkManager    = require './link-manager'
 
 # TODO: Maybe loadData goes into some other action-set
-paletteActions = Reflux.createActions(["addToPalette","loadData"])
+paletteActions = Reflux.createActions(
+  ["addToPalette","loadData", "selectPaletteIndex", "itemDropped"]
+)
 
 paletteStore   = Reflux.createStore
   # NOTE: This Reflux shortcut does not work as advertised,
@@ -12,8 +14,11 @@ paletteStore   = Reflux.createStore
     # this.listenToMany(paletteActions)
     @listenTo paletteActions.addToPalette, @onAddToPallete
     @listenTo paletteActions.loadData, @onloadData
+    @listenTo paletteActions.selectPaletteIndex, @onSelectPaletteIndex
+    @listenTo paletteActions.itemDropped, @onItemDropped
 
     @palette = require '../data/initial-palette'
+    @selectPaletteIndex = 0
 
     @_updateChanges()
 
@@ -44,10 +49,27 @@ paletteStore   = Reflux.createStore
         metadata: node.metadata
       if node.metadata
         @linkManager.setImageMetadata node.image, node.metada
+      @_pushToFront(@palette.length-1)
 
   onAddToPallete: (node) ->
     @_addToPallete(node)
     @_updateChanges()
+
+  onSelectPaletteIndex: (index) ->
+    @_pushToFront(index)
+    @_updateChanges()
+
+  onItemDropped: (image) ->
+    found = _.findIndex @palette, (i) ->
+      i.image == image
+    if found
+      @_pushToFront(found)
+    @_updateChanges()
+
+
+  _pushToFront: (index) ->
+    @palette.splice(0, 0, @palette.splice(index, 1)[0])
+    @selectedPaletteItem = @palette[0]
 
   inPalette: (node) ->
     @_nodeInUse node, @palette
@@ -62,6 +84,8 @@ paletteStore   = Reflux.createStore
     data =
       palette: @palette
       internalLibrary: @internalLibrary
+      selectedIndex: 0
+      selectedPaletteItem: @palette[0]
     @info "Sending changes to listeners: #{JSON.stringify(data)}"
     @trigger(data)
 

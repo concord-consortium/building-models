@@ -1,4 +1,5 @@
-node-well-width = 275px
+node-well-width = 400px
+
 node-well-height = palette-and-actions-height * 4
 node-well-collapsed-height= palette-and-actions-height
 node-well-tab-width = 45px
@@ -8,13 +9,11 @@ node-well-tab-height = 30px
   .top-node-palette
     top 0px
 
-.top-node-palette
-  position absolute
-  left 0px
-  top global-nav-height
-  width node-well-width
-  height node-well-height
+.top-node-palette-wrapper
+  background-color hsla(1,1,1,0.5)
+  // height node-well-height
   background-color white
+  max-width node-well-width
   box-sizing padding-box
   overflow hidden
   z-index 1
@@ -38,7 +37,7 @@ node-well-tab-height = 30px
         max-height 25px
   &.collapsed
     height node-well-collapsed-height
-
+    transition 0.2s
 
 .iframed-workspace
   .top-node-palette-tab
@@ -46,23 +45,31 @@ node-well-tab-height = 30px
     &.collapsed
       top: palette-and-actions-height
 
-.top-node-palette-tab
+.wrapperwrapper
   position absolute
-  box-sizing border-box
-  background-color white
-  background-repeat no-repeat
-  background-position center
-  background-image url("../img/bb-chrome/chevron-up.png")
-  width node-well-tab-width
-  height node-well-tab-height
-  left: node-well-width - node-well-tab-width
-  top: node-well-height + global-nav-height
-  box-shadow 0px 2px 2px hsla(0,0,50,0.4)
-  border-radius 0px 0px 4px 4px
-  padding 1em
-  z-index 3
+  left 0px
+  top global-nav-height
+  max-width node-well-width
+  z-index 1
   transition 0.2s
-  &.collapsed
-    background-image url("../img/bb-chrome/chevron-down.png")
-    top: palette-and-actions-height + global-nav-height
-
+  .tab-wrapper
+    width 100%
+    background-color hsla(1,1,1,0.0)
+    .top-node-palette-tab
+      float right
+      box-sizing border-box
+      background-color white
+      background-repeat no-repeat
+      background-position center
+      background-image url("../img/bb-chrome/chevron-up.png")
+      height node-well-tab-height
+      left node-well-width - node-well-tab-width
+      top node-well-height + global-nav-height
+      box-shadow 0px 2px 2px hsla(0,0,50,0.4)
+      border-radius 0px 0px 4px 4px
+      padding 1em 2em
+      z-index 3
+      transition 0.2s
+      &.collapsed
+        background-image url("../img/bb-chrome/chevron-down.png")
+        // top: palette-and-actions-height + global-nav-height + 30px

@@ -44,7 +44,11 @@ module.exports = React.createClass
             runSimulation: @runSimulation
           )
         (div {className: 'action-bar'},
-          (NodeWell {palette: @state.palette})
+          (NodeWell {
+            palette: @state.palette
+            toggleImageBrowser: @toggleImageBrowser
+            linkManager: @props.linkManager
+          })
           (DocumentActions
             linkManager: @props.linkManager
             runSimulation: @runSimulation

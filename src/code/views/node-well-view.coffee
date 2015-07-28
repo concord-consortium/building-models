@@ -1,5 +1,5 @@
-ProtoNodeView  = React.createFactory require './proto-node-view'
-PaletteManager = require "../models/palette-manager"
+ProtoNodeView         = React.createFactory require './proto-node-view'
+PaletteInspectorView  = React.createFactory require './palette-inspector-view'
 
 {div} = React.DOM
 
@@ -7,39 +7,38 @@ module.exports = React.createClass
 
   displayName: 'NodeWell'
 
-  componentDidMount: ->
-    PaletteManager.store.listen @onPaletteChange
-
-  onPaletteChange: (status) ->
-    @setState palette: status.palette
+  mixins: [ require '../mixins/palette-listening']
 
   getInitialState: ->
     nodes: []
-    palette: PaletteManager.store.palette
     collapsed: true
 
   collapse: ->
     @setState collapsed: true
+
   expand: ->
     @setState collapsed: false
+
   toggle: ->
     if @state.collapsed
       @expand()
     else
       @collapse()
-  render: ->
 
-    topNodePaletteClass    = 'top-node-palette'
+  render: ->
+    topNodePaletteClass    = 'top-node-palette-wrapper'
     topNodeTabPaletteClass = 'top-node-palette-tab'
     if @state.collapsed
-      topNodePaletteClass    = 'top-node-palette collapsed'
+      topNodePaletteClass    = 'top-node-palette-wrapper collapsed'
       topNodeTabPaletteClass = 'top-node-palette-tab collapsed'
-    (div {className: 'top-node-palette-wrapper'},
+    (div {className: 'wrapperwrapper'},
       (div {className: topNodePaletteClass},
-        (div {className: 'node-well'},
-          for node, i in @state.palette
-            (ProtoNodeView {key: i, image: node.image, title: node.title})
-        )
+        (PaletteInspectorView {
+          toggleImageBrowser: @props.toggleImageBrowser,
+          linkManager: @props.linkManager
+        })
       )
-      (div {className: topNodeTabPaletteClass, onClick: @toggle})
+      (div {className: 'tab-wrapper'},
+        (div {className: topNodeTabPaletteClass, onClick: @toggle})
+      )
     )
