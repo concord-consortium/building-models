@@ -11,7 +11,6 @@ PaletteAddImage = React.createFactory React.createClass
   render: ->
     (div {className: 'palette-image'},
       (div {className: 'palette-add-image', onClick: @props.onClick},
-        (i {className: "fa fa-plus-circle"})
         tr '~PALETTE-INSPECTOR.ADD_IMAGE'
       )
     )
@@ -21,14 +20,16 @@ PaletteImage = React.createFactory React.createClass
   clicked: ->
     @props.onSelect @props.index
   render: ->
-    (div {className: 'palette-image'},
+    className = "palette-image"
+    className = "palette-image selected" if @props.selected
+    (div {className: className},
       (ProtoNodeView {
         key: @props.index,
         image: @props.node.image,
         title: @props.node.title,
         onNodeClicked: @clicked
+        selected: @props.selected
         })
-      (div {className: 'palette-image-selected'}, if @props.selected then (i {className: "fa fa-check-circle"}) else '')
     )
 
 module.exports = React.createClass

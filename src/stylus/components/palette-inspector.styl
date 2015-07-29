@@ -1,6 +1,17 @@
-pallete-size()
-  max-height 45px
-  max-width 45px
+$protoNodeDimension = 40px
+$paletteItemPadding = 4px
+$paletteItemDimension = $protoNodeDimension + (2 * $paletteItemPadding)
+$paletteRowHeight = 80px
+$paletteHieght = $paletteRowHeight * 3
+
+pal-image-size()
+  max-height $protoNodeDimension
+  max-width $protoNodeDimension
+  padding 0px
+  margin 0px
+  vertical-align middle
+  text-align center
+  box-sizing border-box
 
 .palette-inspector
   background-color white
@@ -10,30 +21,34 @@ pallete-size()
     margin 0px
     padding-top 0px
     margin-top 0px
-    max-height 80px * 3
+    max-height $paletteHieght
     overflow auto
     .palette-image
-      height 60px
+      height $paletteItemDimension
+      width $paletteItemDimension
+      padding 0
       float left
       margin 5px
-      margin-top 2px
       margin-bottom 15px
+      box-sizing border-box
+      enable-flex(direction:row, wp:nowrap, justify:center, alignContent:center, alignItems:center)
+      border 2px solid none
       .proto-node
-        pallete-size()
+        pal-image-size()
         .img-background
-          pallete-size()
-          border none
-          padding 0
+          pal-image-size()
           img
-            pallete-size()
-      .palette-image-selected
-        text-align center
-        color #00889f
-        min-height 5px
+            pal-image-size()
+      &.selected
+        border 2px solid #72BDCB
+        border-radius 5px
+
     .palette-add-image
-      height 50px
-      width 50px
-      margin 5px
+      width $paletteItemDimension
+      height $paletteItemDimension
+      box-sizing border-box
+      line-height $paletteItemDimension
+      vertical-align middle
       font-size 10px
       text-align center
       cursor pointer
