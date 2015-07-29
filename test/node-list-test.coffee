@@ -1,5 +1,7 @@
 global._ = require 'lodash'
 global.log = require 'loglevel'
+global.Reflux = require 'reflux'
+
 global.window = { location: '' }
 
 chai = require('chai')

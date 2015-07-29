@@ -1,46 +1,44 @@
 xlat = require '../utils/translate'
 licenses = require '../data/licenses'
+PaletteManager = require '../models/palette-manager'
 
 {div, table, tr, td, a, input, select, radio, p} = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'ImageMetadata'
+  mixins: [require '../mixins/palette-listening']
 
   getInitialState: ->
     hostname: null
 
-  findHostname: (props) ->
+  hostname: ->
     # instead of using a regexp to extract the hostname use the dom
     link = document.createElement 'a'
-    link.setAttribute 'href', props.metadata.link
-    @setState hostname: link.hostname
+    link.setAttribute 'href', @state.imageMetadata?.link
+    link.hostname
 
-  componentWillMount: ->
-    @findHostname @props
-
-  componentWillReceiveProps: (nextProps) ->
-    @findHostname nextProps if nextProps.metadata.link isnt @props.metadata.link
 
   changed: ->
     newMetaData =
       title: @refs.title.getDOMNode().value
       link: @refs.link.getDOMNode().value
       license: @refs.license.getDOMNode().value
-    metadata = _.extend @props.metadata, newMetaData
-    @props.setImageMetadata @props.image, metadata
+      source: 'external'
+
+    PaletteManager.actions.setImageMetadata @state.selectedPaletteImage, newMetaData
 
   render: ->
-    license = licenses.getLicense (@props.metadata.license or 'public domain')
+    license = licenses.getLicense (@state.imageMetadata.license or 'public domain')
 
     (div {className: 'image-metadata'},
-      if @props.metadata.source is 'external'
+      if @state.imageMetadata.source is 'external'
         (div {key: 'external'},
           (table {},
-            (tr {}, (td {}, xlat '~METADATA.TITLE'), (td {}, (input {ref: 'title', value: @props.metadata.title, onChange: @changed})))
-            (tr {}, (td {}, xlat '~METADATA.LINK'), (td {}, (input {ref: 'link', value: @props.metadata.link, onChange: @changed})))
-            (tr {}, (td {}, xlat '~METADATA.CREDIT'), (td {}, (select {ref: 'license', value: @props.metadata.license, onChange: @changed},
-              licenses.getRenderOptions @props.metadata.license
+            (tr {}, (td {}, xlat '~METADATA.TITLE'), (td {}, (input {ref: 'title', value: @state.imageMetadata.title, onChange: @changed})))
+            (tr {}, (td {}, xlat '~METADATA.LINK'), (td {}, (input {ref: 'link', value: @state.imageMetadata.link, onChange: @changed})))
+            (tr {}, (td {}, xlat '~METADATA.CREDIT'), (td {}, (select {ref: 'license', value: @state.imageMetadata.license, onChange: @changed},
+              licenses.getRenderOptions @state.imageMetadata.license
             )))
           )
           (p {className: 'learn-more'}, (a {href: license.link, target: '_blank'}, "Learn more about #{license.fullLabel}"))
@@ -48,8 +46,8 @@ module.exports = React.createClass
       else
         (div {key: 'internal'},
           (p {},
-            (div {}, "\"#{@props.metadata.title}\"")
-            (div {}, (a {href: @props.metadata.link, target: '_blank'}, "See it on #{@state.hostname}"))
+            (div {}, "\"#{@state.imageMetadata.title}\"")
+            (div {}, (a {href: @state.imageMetadata.link, target: '_blank'}, "See it on #{@hostname()}"))
           )
           (p {},
             (div {}, 'License')

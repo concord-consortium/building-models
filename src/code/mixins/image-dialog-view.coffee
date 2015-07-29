@@ -1,5 +1,6 @@
 PreviewImage = React.createFactory require '../views/preview-image-dialog-view'
 hasValidImageExtension = require '../utils/has-valid-image-extension'
+PaletteManager = require '../models/palette-manager'
 
 resizeImage = require '../utils/resize-image'
 
@@ -11,6 +12,7 @@ module.exports =
     _.extend mixinState, subState
 
   imageSelected: (imageInfo) ->
+    PaletteManager.actions.setImageMetadata imageInfo.image, imageInfo.metadata
     @setState selectedImage: imageInfo
 
   imageDropped: (imageInfo) ->

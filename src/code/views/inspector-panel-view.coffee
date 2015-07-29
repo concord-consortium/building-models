@@ -24,7 +24,7 @@ ToolPanel = React.createFactory React.createClass
   displayName: 'toolPanel'
 
   buttonData: [
-      {name: "plus",  simple: true, shows: "add", 'enabled': ['nothing','node','link'] }
+      # {name: "plus",  simple: true, shows: "add", 'enabled': ['nothing','node','link'] }
       {name: "brush", simple: true, shows: "design",'enabled': ['node','link'] }
       {name: "ruler", simple: false, shows: "value", 'enabled': ['node'] }
       {name: "curve", simple: false, shows: "relations",'enabled': ['node']}

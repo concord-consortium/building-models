@@ -32,6 +32,6 @@ module.exports = React.createClass
       )
       if @props.imageInfo.metadata
         (div {className: 'preview-metadata'},
-          (ImageMetadata {className: 'image-browser-preview-metadata', metadata: @props.imageInfo.metadata, setImageMetadata: @setImageMetadata})
+          (ImageMetadata {className: 'image-browser-preview-metadata'})
         )
     )

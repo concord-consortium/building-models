@@ -36,46 +36,8 @@ module.exports = React.createClass
   displayName: 'PaletteInspector'
   mixins: [ require '../mixins/palette-listening']
 
-  getInitialState: ->
-    selectedIndex = _.findIndex @props.palette, (node) -> node.image.length > 0
-    selectedImage = @props.palette[selectedIndex]?.image
-
-    initialState =
-      selectedIndex: selectedIndex
-      selectedImage: selectedImage
-      metadata: @getMetadata selectedImage
-
   imageSelected: (index) ->
-    # @setState
-    #   selectedIndex: index
-    #   selectedImage: selectedImage
-    #   metadata: @getMetadata selectedImage
-
-  getMetadata: (image) ->
-    metadata = @props.linkManager.getImageMetadata image
-    if not metadata
-      # if no metadata is found then this is a dropped image
-      metadata =
-        source: 'external'
-        title: ''
-        link: ''
-    metadata
-
-  scrollToBottom: ->
-    palette = @refs.palette?.getDOMNode()
-    if palette
-      palette.scrollTop = palette.scrollHeight;
-
-  componentDidMount: ->
-    @scrollToBottom()
-
-  componentDidUpdate: (prevProps) ->
-    if JSON.stringify(prevProps.palette) isnt JSON.stringify(@props.palette)
-      @scrollToBottom()
-
-  setImageMetadata: (image, metadata) ->
-    @props.linkManager.setImageMetadata image, metadata
-    @setState metadata: metadata
+    PaletteManager.actions.selectPaletteIndex(index)
 
   render: ->
     (div {className: 'palette-inspector'},
@@ -88,7 +50,7 @@ module.exports = React.createClass
                 key: node.id
                 node: node
                 index: index
-                selected: index is @state.selectedIndex
+                selected: index is @state.selectedPaletteIndex
                 onSelect: @imageSelected
               })
         )
@@ -97,11 +59,11 @@ module.exports = React.createClass
         (div {className: 'palette-about-image-title'},
           (i {className: "fa fa-info-circle"})
           (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
-          (img {src: @state.selectedImage})
+          (img {src: @state.selectedPaletteItem?.image})
         )
-        if @state.selectedImage
+        if @state.selectedPaletteItem?.image
           (div {className: 'palette-about-image-info'},
-            (ImageMetadata {metadata: @state.metadata, image: @state.selectedImage, setImageMetadata: @setImageMetadata})
+            (ImageMetadata {})
           )
       )
     )
