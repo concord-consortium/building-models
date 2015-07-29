@@ -56602,14 +56602,19 @@ paletteStore = Reflux.createStore({
     return this.metadataCache[image];
   },
   onLoadData: function(data) {
-    var j, len, node, ref;
+    var j, k, len, len1, node, p_item, ref, ref1;
     this.info("onLoadData called");
+    this.palette = [];
     if (data.palette) {
-      this.palette = data.palette.slice(0);
+      ref = data.palette;
+      for (j = 0, len = ref.length; j < len; j++) {
+        p_item = ref[j];
+        this._addToPallete(p_item);
+      }
     }
-    ref = data.nodes;
-    for (j = 0, len = ref.length; j < len; j++) {
-      node = ref[j];
+    ref1 = data.nodes;
+    for (k = 0, len1 = ref1.length; k < len1; k++) {
+      node = ref1[k];
       this._addToPallete(node);
     }
     return this._updateChanges();
