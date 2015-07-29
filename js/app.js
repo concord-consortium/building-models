@@ -57743,7 +57743,7 @@ module.exports = {
   "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB": "Image Search",
   "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
   "~ADD-NEW-IMAGE.LINK-TAB": "Link",
-  "~PALETTE-INSPECTOR.ADD_IMAGE": "Add new image",
+  "~PALETTE-INSPECTOR.ADD_IMAGE": "New",
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
   "~METADATA.TITLE": "Title",
   "~METADATA.LINK": "Link",
@@ -60372,9 +60372,7 @@ PaletteAddImage = React.createFactory(React.createClass({
     }, div({
       className: 'palette-add-image',
       onClick: this.props.onClick
-    }, i({
-      className: "fa fa-plus-circle"
-    }), tr('~PALETTE-INSPECTOR.ADD_IMAGE')));
+    }, tr('~PALETTE-INSPECTOR.ADD_IMAGE')));
   }
 }));
 
@@ -60384,18 +60382,20 @@ PaletteImage = React.createFactory(React.createClass({
     return this.props.onSelect(this.props.index);
   },
   render: function() {
+    var className;
+    className = "palette-image";
+    if (this.props.selected) {
+      className = "palette-image selected";
+    }
     return div({
-      className: 'palette-image'
+      className: className
     }, ProtoNodeView({
       key: this.props.index,
       image: this.props.node.image,
       title: this.props.node.title,
-      onNodeClicked: this.clicked
-    }), div({
-      className: 'palette-image-selected'
-    }, this.props.selected ? i({
-      className: "fa fa-check-circle"
-    }) : ''));
+      onNodeClicked: this.clicked,
+      selected: this.props.selected
+    }));
   }
 }));
 
