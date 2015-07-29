@@ -50,10 +50,14 @@ paletteStore   = Reflux.createStore
   onLoadData: (data) ->
     @info "onLoadData called"
     # reload the palette
+    @palette = []
     if data.palette
-      @palette = data.palette.slice 0
+      for p_item in data.palette
+        @_addToPallete p_item
     for node in data.nodes
       @_addToPallete node
+
+
     @_updateChanges()
 
   _addToPallete: (node) ->
