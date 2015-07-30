@@ -60,11 +60,11 @@ module.exports = React.createClass
         (div {className: 'palette-about-image-title'},
           (i {className: "fa fa-info-circle"})
           (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
-          (img {src: @state.selectedPaletteItem?.image})
+          (img {src: @state.selectedPaletteImage})
         )
-        if @state.selectedPaletteItem?.image
+        if @state.selectedPaletteImage
           (div {className: 'palette-about-image-info'},
-            (ImageMetadata {})
+            (ImageMetadata {image: @state.selectedPaletteImage})
           )
       )
     )

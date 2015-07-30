@@ -14,9 +14,6 @@ module.exports = React.createClass
   addImage: ->
     @props.addImage @props.imageInfo
 
-  setImageMetadata: (image, metadata) ->
-    @props.linkManager.setImageMetadata image, metadata
-
   render: ->
     (div {},
       (div {className: 'header'}, tr '~IMAGE-BROWSER.PREVIEW')
@@ -32,6 +29,6 @@ module.exports = React.createClass
       )
       if @props.imageInfo.metadata
         (div {className: 'preview-metadata'},
-          (ImageMetadata {className: 'image-browser-preview-metadata'})
+          (ImageMetadata {image: @props.imageInfo.image, className: 'image-browser-preview-metadata'})
         )
     )

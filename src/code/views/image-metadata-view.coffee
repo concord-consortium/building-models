@@ -26,7 +26,7 @@ module.exports = React.createClass
       license: @refs.license.getDOMNode().value
       source: 'external'
 
-    PaletteManager.actions.setImageMetadata @state.selectedPaletteImage, newMetaData
+    PaletteManager.actions.setImageMetadata @props.image, newMetaData
 
   render: ->
     license = licenses.getLicense (@state.imageMetadata.license or 'public domain')
