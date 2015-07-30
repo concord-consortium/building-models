@@ -21,7 +21,6 @@ module.exports   = class LinkManager
     @loadListeners      = []
     @filename           = null
     @filenameListeners  = []
-    @imageMetadataCache = {}
 
     @undoRedoManager    = new UndoRedo.Manager debug: true
     @selectionManager   = new SelectionManager()
@@ -308,10 +307,6 @@ module.exports   = class LinkManager
     importer.importData(data)
     @setFilename data.filename or 'New Model'
 
-    if data.imageMetadata
-      _.forEach data.imageMetadata, (metadata, image) =>
-        @setImageMetadata image, metadata
-
     for listener in @loadListeners
       listener data
     @undoRedoManager.clearHistory()
@@ -333,9 +328,12 @@ module.exports   = class LinkManager
     linkExports = for key,link of @linkKeys
       link.toExport()
     imageMetadata = {}
-    _.forEach palette, (node) =>
-      if @imageMetadataCache[node.image]
-        imageMetadata[node.image] = @imageMetadataCache[node.image]
+    # The pallete manager is curently in charge of trackign image meta-data
+    PaletteManager   = require "../models/palette-manager"
+    _.forEach palette, (node) ->
+      meta = PaletteManager.store.getMetaData(node.image)
+      if meta
+        imageMetadata[node.image] = meta
     return {
       version: 0.1
       filename: @filename
@@ -347,9 +345,3 @@ module.exports   = class LinkManager
 
   toJsonString: (palette) ->
     JSON.stringify @serialize palette
-
-  setImageMetadata: (image, metadata) ->
-    @imageMetadataCache[image] = metadata
-
-  getImageMetadata: (image) ->
-    @imageMetadataCache[image]

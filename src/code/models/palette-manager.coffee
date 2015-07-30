@@ -1,7 +1,12 @@
 LinkManager    = require './link-manager'
 
 # TODO: Maybe loadData goes into some other action-set
-paletteActions = Reflux.createActions(["addToPalette","loadData"])
+paletteActions = Reflux.createActions(
+  [
+    "addToPalette", "loadData", "selectPaletteIndex",
+    "setImageMetadata", "itemDropped"
+  ]
+)
 
 paletteStore   = Reflux.createStore
   # NOTE: This Reflux shortcut does not work as advertised,
@@ -12,8 +17,18 @@ paletteStore   = Reflux.createStore
     # this.listenToMany(paletteActions)
     @listenTo paletteActions.addToPalette, @onAddToPallete
     @listenTo paletteActions.loadData, @onloadData
+    @listenTo paletteActions.selectPaletteIndex, @onSelectPaletteIndex
+    @listenTo paletteActions.itemDropped, @onItemDropped
+    @listenTo paletteActions.setImageMetadata, @onSetImageMetadata
 
     @palette = require '../data/initial-palette'
+    @selectPaletteIndex = 0
+    @blankMetadata =
+      source: 'external'
+      title: ''
+      link: ''
+    @imageMetadata = @blankMetadata
+    @metadataCache = {}
 
     @_updateChanges()
 
@@ -24,15 +39,25 @@ paletteStore   = Reflux.createStore
     # load the metadata at startup
     @internalLibrary = require '../data/internal-library'
     for node in @internalLibrary
-      @linkManager.setImageMetadata node.image, node.metadata
+      @_addMetadata node.image, node.metadata
+
+  _addMetadata: (image,metadata) ->
+    @metadataCache[image] = metadata or @blankMetadata
+
+  getMetaData: (image) ->
+    @metadataCache[image]
 
   onLoadData: (data) ->
     @info "onLoadData called"
     # reload the palette
+    @palette = []
     if data.palette
-      @palette = data.palette.slice 0
+      for p_item in data.palette
+        @_addToPallete p_item
     for node in data.nodes
       @_addToPallete node
+
+
     @_updateChanges()
 
   _addToPallete: (node) ->
@@ -42,12 +67,37 @@ paletteStore   = Reflux.createStore
         title: node.title or ''
         image: node.image
         metadata: node.metadata
-      if node.metadata
-        @linkManager.setImageMetadata node.image, node.metada
+      @_addMetadata(node.image, node.metadata)
+      @_pushToFront(@palette.length-1)
 
   onAddToPallete: (node) ->
     @_addToPallete(node)
     @_updateChanges()
+
+  onSelectPaletteIndex: (index) ->
+    # @_pushToFront(index) if we want to add the selected item to front
+    @selectedPaletteIndex = index
+    @selectedPaletteItem  = @palette[index]
+    @selectedPaletteImage = @selectedPaletteItem.image
+    @imageMetadata = @getMetaData(@selectedPaletteImage)
+    @imageMetadata ||= @blankMetadata
+    @_updateChanges()
+
+  onSetImageMetadata: (image, metadata) ->
+    @_addMetadata(image, metadata)
+    @imageMetadata = metadata
+    @_updateChanges()
+
+  # TODO: Maybe later we want to reorganize palette in last used order
+  onItemDropped: (image) ->
+    found = _.findIndex @palette, (i) ->
+      i.image == image
+    if found
+      @_pushToFront(found)
+    @_updateChanges()
+
+  _pushToFront: (index) ->
+    @palette.splice(0, 0, @palette.splice(index, 1)[0])
 
   inPalette: (node) ->
     @_nodeInUse node, @palette
@@ -58,16 +108,26 @@ paletteStore   = Reflux.createStore
   info: (msg) ->
     log.info("PaletteManager: #{msg}")
 
+
   _updateChanges: ->
     data =
       palette: @palette
       internalLibrary: @internalLibrary
+      selectedPaletteIndex: @selectedPaletteIndex
+      selectedPaletteItem: @selectedPaletteItem
+      selectedPaletteImage: @selectedPaletteImage
+      imageMetadata: @imageMetadata
+
     @info "Sending changes to listeners: #{JSON.stringify(data)}"
     @trigger(data)
 
   _nodeInUse: (node, collection) ->
     !!((_.find collection, {image: node.image}) or (node.metadata and (_.find collection, {metadata: {link: node.metadata.link}})))
 
+  _loadInitialiMetadata: (data) ->
+    if data.imageMetadata
+      _.forEach data.imageMetadata, (metadata, image) =>
+        @_addMetadata image, metadata
 
 module.exports =
   actions: paletteActions

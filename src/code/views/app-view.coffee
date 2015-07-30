@@ -44,7 +44,11 @@ module.exports = React.createClass
             runSimulation: @runSimulation
           )
         (div {className: 'action-bar'},
-          (NodeWell {palette: @state.palette})
+          (NodeWell {
+            palette: @state.palette
+            toggleImageBrowser: @toggleImageBrowser
+            linkManager: @props.linkManager
+          })
           (DocumentActions
             linkManager: @props.linkManager
             runSimulation: @runSimulation
@@ -69,11 +73,6 @@ module.exports = React.createClass
         )
         if @state.showImageBrowser
           (ImageBrowser
-            internalLibrary: @state.internalLibrary
-            palette: @state.palette
-            addToPalette: @addToPalette
-            inPalette: @inPalette
-            inLibrary: @inLibrary
             linkManager: @props.linkManager
             close: @toggleImageBrowser
           )
