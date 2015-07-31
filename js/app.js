@@ -55433,7 +55433,7 @@ module.exports = {
 
 
 
-},{"../models/palette-manager":556,"../utils/has-valid-image-extension":564,"../utils/resize-image":569,"../views/preview-image-dialog-view":598}],549:[function(require,module,exports){
+},{"../models/palette-manager":556,"../utils/has-valid-image-extension":564,"../utils/resize-image":569,"../views/preview-image-dialog-view":599}],549:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -56596,7 +56596,9 @@ paletteStore = Reflux.createStore({
     return results;
   },
   _addMetadata: function(image, metadata) {
-    return this.metadataCache[image] = metadata || this.blankMetadata;
+    var base;
+    (base = this.metadataCache)[image] || (base[image] = _.clone(this.blankMetadata, true));
+    return _.merge(this.metadataCache[image], metadata);
   },
   getMetaData: function(image) {
     return this.metadataCache[image];
@@ -56604,6 +56606,7 @@ paletteStore = Reflux.createStore({
   onLoadData: function(data) {
     var j, k, len, len1, node, p_item, ref, ref1;
     this.info("onLoadData called");
+    this.metadataCache = _.clone(data.imageMetadata || {});
     this.palette = [];
     if (data.palette) {
       ref = data.palette;
@@ -56620,13 +56623,16 @@ paletteStore = Reflux.createStore({
     return this._updateChanges();
   },
   _addToPallete: function(node) {
+    var metadata;
     if (!this.inPalette(node)) {
+      metadata = _.clone(node.metadata);
+      _.merge(metadata, this.getMetaData(node.image));
       this.palette.push({
         title: node.title || '',
         image: node.image,
-        metadata: node.metadata
+        metadata: metadata
       });
-      this._addMetadata(node.image, node.metadata);
+      this._addMetadata(node.image, metadata);
       return this._pushToFront(this.palette.length - 1);
     }
   },
@@ -56706,6 +56712,8 @@ module.exports = {
   actions: paletteActions,
   store: paletteStore
 };
+
+window.PaletteManager = module.exports;
 
 
 
@@ -58192,7 +58200,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":546,"./document-actions-view":574,"./global-nav-view":577,"./image-browser-view":578,"./inspector-panel-view":584,"./link-view":588,"./node-well-view":595,"./placeholder-view":597,"reflux":523}],573:[function(require,module,exports){
+},{"../mixins/app-view":546,"./document-actions-view":574,"./global-nav-view":577,"./image-browser-view":578,"./inspector-panel-view":584,"./link-view":588,"./node-well-view":595,"./placeholder-view":598,"reflux":523}],573:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -58719,7 +58727,7 @@ module.exports = React.createClass({
       license: this.refs.license.getDOMNode().value,
       source: 'external'
     };
-    return PaletteManager.actions.setImageMetadata(this.state.selectedPaletteImage, newMetaData);
+    return PaletteManager.actions.setImageMetadata(this.props.image, newMetaData);
   },
   render: function() {
     var license;
@@ -59503,7 +59511,7 @@ module.exports = React.createClass({
 
 
 },{"../utils/translate":570}],588:[function(require,module,exports){
-var DiagramToolkit, Importer, Node, NodeList, div, dropImageHandler, tr;
+var DiagramToolkit, Importer, Node, NodeList, PaletteManager, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
 
@@ -59516,6 +59524,8 @@ DiagramToolkit = require('../utils/js-plumb-diagram-toolkit');
 dropImageHandler = require('../utils/drop-image-handler');
 
 tr = require('../utils/translate');
+
+PaletteManager = require('../models/palette-manager');
 
 div = React.DOM.div;
 
@@ -59549,7 +59559,7 @@ module.exports = React.createClass({
       };
     })(this));
     return $container.droppable({
-      accept: '.proto-node',
+      accept: '.palette-image',
       hoverClass: "ui-state-highlight",
       drop: (function(_this) {
         return function(e, ui) {
@@ -59569,8 +59579,9 @@ module.exports = React.createClass({
     });
   },
   addNode: function(e, ui) {
-    var image, node, offset, ref, title;
-    ref = ui.draggable.data(), title = ref.title, image = ref.image;
+    var index, node, offset, paletteItem, ref, title;
+    ref = ui.draggable.data(), title = ref.title, index = ref.index;
+    paletteItem = PaletteManager.store.palette[index];
     title = tr("~NODE.UNTITLED");
     offset = $(this.refs.linkView.getDOMNode()).offset();
     node = this.props.linkManager.importNode({
@@ -59578,7 +59589,7 @@ module.exports = React.createClass({
         x: ui.offset.left - offset.left,
         y: ui.offset.top - offset.top,
         title: title,
-        image: image
+        image: paletteItem.image
       }
     });
     return this.props.linkManager.editNode(node.key);
@@ -59819,7 +59830,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/link-manager":553,"../utils/drop-image-handler":562,"../utils/importer":565,"../utils/js-plumb-diagram-toolkit":566,"../utils/translate":570,"./node-view":594}],589:[function(require,module,exports){
+},{"../models/link-manager":553,"../models/palette-manager":556,"../utils/drop-image-handler":562,"../utils/importer":565,"../utils/js-plumb-diagram-toolkit":566,"../utils/translate":570,"./node-view":594}],589:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -60292,9 +60303,7 @@ module.exports = React.createClass({
 
 
 },{"../mixins/node-title":549,"../utils/translate":570}],595:[function(require,module,exports){
-var PaletteInspectorView, ProtoNodeView, div;
-
-ProtoNodeView = React.createFactory(require('./proto-node-view'));
+var PaletteInspectorView, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
 
@@ -60352,10 +60361,10 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/palette-listening":550,"./palette-inspector-view":596,"./proto-node-view":599}],596:[function(require,module,exports){
-var ImageMetadata, PaletteAddImage, PaletteImage, PaletteManager, ProtoNodeView, div, i, img, ref, span, tr;
+},{"../mixins/palette-listening":550,"./palette-inspector-view":596}],596:[function(require,module,exports){
+var ImageMetadata, PaletteAddImage, PaletteItemView, PaletteManager, div, i, img, ref, span, tr;
 
-ProtoNodeView = React.createFactory(require('./proto-node-view'));
+PaletteItemView = React.createFactory(require('./palette-item-view'));
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
 
@@ -60376,29 +60385,6 @@ PaletteAddImage = React.createFactory(React.createClass({
   }
 }));
 
-PaletteImage = React.createFactory(React.createClass({
-  displayName: 'PaletteImage',
-  clicked: function() {
-    return this.props.onSelect(this.props.index);
-  },
-  render: function() {
-    var className;
-    className = "palette-image";
-    if (this.props.selected) {
-      className = "palette-image selected";
-    }
-    return div({
-      className: className
-    }, ProtoNodeView({
-      key: this.props.index,
-      image: this.props.node.image,
-      title: this.props.node.title,
-      onNodeClicked: this.clicked,
-      selected: this.props.selected
-    }));
-  }
-}));
-
 module.exports = React.createClass({
   displayName: 'PaletteInspector',
   mixins: [require('../mixins/palette-listening')],
@@ -60406,7 +60392,8 @@ module.exports = React.createClass({
     return PaletteManager.actions.selectPaletteIndex(index);
   },
   render: function() {
-    var index, node, ref1, ref2;
+    var index;
+    index = 0;
     return div({
       className: 'palette-inspector'
     }, div({
@@ -60414,107 +60401,36 @@ module.exports = React.createClass({
       ref: 'palette'
     }, div({}, PaletteAddImage({
       onClick: this.props.toggleImageBrowser
-    }), (function() {
-      var j, len, ref1, results;
-      ref1 = this.state.palette;
-      results = [];
-      for (index = j = 0, len = ref1.length; j < len; index = ++j) {
-        node = ref1[index];
-        if (node.image) {
-          results.push(PaletteImage({
-            key: node.id,
-            node: node,
-            index: index,
-            selected: index === this.state.selectedPaletteIndex,
-            onSelect: this.imageSelected
-          }));
-        } else {
-          results.push(void 0);
-        }
-      }
-      return results;
-    }).call(this))), div({
+    }), _.map(this.state.palette, (function(_this) {
+      return function(node, index) {
+        return PaletteItemView({
+          key: index,
+          index: index,
+          node: node,
+          image: node.image,
+          selected: index === _this.state.selectedPaletteIndex,
+          onSelect: _this.imageSelected
+        });
+      };
+    })(this)))), div({
       className: 'palette-about-image'
     }, div({
       className: 'palette-about-image-title'
     }, i({
       className: "fa fa-info-circle"
     }), span({}, tr('~PALETTE-INSPECTOR.ABOUT_IMAGE')), img({
-      src: (ref1 = this.state.selectedPaletteItem) != null ? ref1.image : void 0
-    })), ((ref2 = this.state.selectedPaletteItem) != null ? ref2.image : void 0) ? div({
+      src: this.state.selectedPaletteImage
+    })), this.state.selectedPaletteImage ? div({
       className: 'palette-about-image-info'
-    }, ImageMetadata({})) : void 0));
-  }
-});
-
-
-
-},{"../mixins/palette-listening":550,"../models/palette-manager":556,"../utils/translate":570,"./image-metadata-view":580,"./proto-node-view":599}],597:[function(require,module,exports){
-var div;
-
-div = React.DOM.div;
-
-module.exports = React.createClass({
-  displayName: 'Placeholder',
-  render: function() {
-    return div({
-      className: "placeholder " + this.props.className
-    }, div({
-      className: 'placeholder-content'
-    }, this.props.label));
-  }
-});
-
-
-
-},{}],598:[function(require,module,exports){
-var ImageMetadata, a, button, div, i, img, ref, tr;
-
-ImageMetadata = React.createFactory(require('./image-metadata-view'));
-
-tr = require('../utils/translate');
-
-ref = React.DOM, div = ref.div, button = ref.button, img = ref.img, i = ref.i, a = ref.a;
-
-module.exports = React.createClass({
-  displayName: 'ImageSearchResult',
-  cancel: function(e) {
-    e.preventDefault();
-    return this.props.addImage(null);
-  },
-  addImage: function() {
-    return this.props.addImage(this.props.imageInfo);
-  },
-  setImageMetadata: function(image, metadata) {
-    return this.props.linkManager.setImageMetadata(image, metadata);
-  },
-  render: function() {
-    return div({}, div({
-      className: 'header'
-    }, tr('~IMAGE-BROWSER.PREVIEW')), div({
-      className: 'preview-image'
-    }, img({
-      src: this.props.imageInfo.image
-    }), a({
-      href: '#',
-      onClick: this.cancel
-    }, i({
-      className: "fa fa-close"
-    }), 'cancel')), div({
-      className: 'preview-add-image'
-    }, button({
-      onClick: this.addImage
-    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? div({
-      className: 'preview-metadata'
     }, ImageMetadata({
-      className: 'image-browser-preview-metadata'
-    })) : void 0);
+      image: this.state.selectedPaletteImage
+    })) : void 0));
   }
 });
 
 
 
-},{"../utils/translate":570,"./image-metadata-view":580}],599:[function(require,module,exports){
+},{"../mixins/palette-listening":550,"../models/palette-manager":556,"../utils/translate":570,"./image-metadata-view":580,"./palette-item-view":597}],597:[function(require,module,exports){
 var div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -60548,31 +60464,98 @@ module.exports = React.createClass({
     return void 0;
   },
   onClick: function() {
-    var base;
-    return typeof (base = this.props).onNodeClicked === "function" ? base.onNodeClicked(this.props.image) : void 0;
+    return this.props.onSelect(this.props.index);
   },
   render: function() {
-    var defaultImage, imageUrl, ref1;
+    var className, defaultImage, imageUrl, ref1;
+    className = "palette-image";
+    if (this.props.selected) {
+      className = className + " selected";
+    }
     defaultImage = "img/nodes/blank.png";
     imageUrl = ((ref1 = this.props.image) != null ? ref1.length : void 0) > 0 ? this.props.image : defaultImage;
     return div({
-      className: 'proto-node',
+      'data-index': this.props.index,
+      'data-title': this.props.node.title,
+      className: className,
       ref: 'node',
-      onClick: this.onClick,
-      'data-node-key': this.props.key,
-      'data-image': this.props.image,
-      'data-title': this.props.title
+      onClick: this.onClick
+    }, div({
+      className: 'proto-node'
     }, div({
       className: 'img-background'
     }, img({
       src: imageUrl
-    })));
+    }))));
   }
 });
 
 
 
-},{}],600:[function(require,module,exports){
+},{}],598:[function(require,module,exports){
+var div;
+
+div = React.DOM.div;
+
+module.exports = React.createClass({
+  displayName: 'Placeholder',
+  render: function() {
+    return div({
+      className: "placeholder " + this.props.className
+    }, div({
+      className: 'placeholder-content'
+    }, this.props.label));
+  }
+});
+
+
+
+},{}],599:[function(require,module,exports){
+var ImageMetadata, a, button, div, i, img, ref, tr;
+
+ImageMetadata = React.createFactory(require('./image-metadata-view'));
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, button = ref.button, img = ref.img, i = ref.i, a = ref.a;
+
+module.exports = React.createClass({
+  displayName: 'ImageSearchResult',
+  cancel: function(e) {
+    e.preventDefault();
+    return this.props.addImage(null);
+  },
+  addImage: function() {
+    return this.props.addImage(this.props.imageInfo);
+  },
+  render: function() {
+    return div({}, div({
+      className: 'header'
+    }, tr('~IMAGE-BROWSER.PREVIEW')), div({
+      className: 'preview-image'
+    }, img({
+      src: this.props.imageInfo.image
+    }), a({
+      href: '#',
+      onClick: this.cancel
+    }, i({
+      className: "fa fa-close"
+    }), 'cancel')), div({
+      className: 'preview-add-image'
+    }, button({
+      onClick: this.addImage
+    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? div({
+      className: 'preview-metadata'
+    }, ImageMetadata({
+      image: this.props.imageInfo.image,
+      className: 'image-browser-preview-metadata'
+    })) : void 0);
+  }
+});
+
+
+
+},{"../utils/translate":570,"./image-metadata-view":580}],600:[function(require,module,exports){
 var LinkRelationView, TabbedPanel, Tabber, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
