@@ -1,4 +1,3 @@
-ProtoNodeView         = React.createFactory require './proto-node-view'
 PaletteInspectorView  = React.createFactory require './palette-inspector-view'
 
 {div} = React.DOM

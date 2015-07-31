@@ -98,7 +98,7 @@ paletteStore   = Reflux.createStore
   # TODO: Maybe later we want to reorganize palette in last used order
   onItemDropped: (image) ->
     found = _.findIndex @palette, (i) ->
-      i.image == image
+      i.image is image
     if found
       @_pushToFront(found)
     @_updateChanges()
