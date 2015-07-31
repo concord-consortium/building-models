@@ -1,6 +1,7 @@
 PaletteItemView  = React.createFactory require './palette-item-view'
 ImageMetadata  = React.createFactory require './image-metadata-view'
 
+Draggable      = require '../mixins/draggable'
 PaletteManager = require "../models/palette-manager"
 tr             = require "../utils/translate"
 
@@ -8,10 +9,15 @@ tr             = require "../utils/translate"
 {div, img, i, span} = React.DOM
 
 PaletteAddImage = React.createFactory React.createClass
+  mixins: [Draggable]
   render: ->
-    (div {className: 'palette-image'},
+    (div {className: 'palette-image', 'data-droptype': 'new'},
       (div {className: 'palette-add-image', onClick: @props.onClick},
-        tr '~PALETTE-INSPECTOR.ADD_IMAGE'
+        (div { className: 'proto-node'},
+          (div {className: 'img-background'},
+            tr '~PALETTE-INSPECTOR.ADD_IMAGE'
+          )
+        )
       )
     )
 
