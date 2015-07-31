@@ -58,8 +58,19 @@ module.exports = React.createClass
           @addNode e, ui
 
   addNode: (e, ui) ->
-    {title, index} = ui.draggable.data()
-    paletteItem = PaletteManager.store.palette[index]
+    data = ui.draggable.data()
+    if data.droptype is 'new'
+      paletteItem = @addNewPaletteNode(e,ui)
+
+    else if data.droptype is 'paletteItem'
+      paletteItem = PaletteManager.store.palette[data.index]
+      @addPaletteNode(ui,paletteItem)
+      
+  addNewPaletteNode: (e,ui) ->
+    undefined
+
+
+  addPaletteNode: (ui, paletteItem) ->
     # requirement change: new nodes are untitled
     title = tr "~NODE.UNTITLED"
     offset = $(@refs.linkView.getDOMNode()).offset()

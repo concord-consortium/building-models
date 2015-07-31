@@ -21,6 +21,7 @@ module.exports = React.createClass
     (div {
       'data-index': @props.index
       'data-title': @props.node.title
+      'data-droptype': 'paletteItem'
       className: className
       ref: 'node'
       onClick: @onClick
