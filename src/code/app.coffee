@@ -20,7 +20,7 @@ window.initApp = (wireframes=false) ->
     simplified: getParameterByName 'simplified'
 
   opts.codapConnect = CodapConnect.instance 'building-models'
-
+  opts.tree = (require './models/image-manager').tree
   appView = AppView opts
   elem = '#app'
 
