@@ -57891,7 +57891,7 @@ module.exports = {
   "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB": "Image Search",
   "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
   "~ADD-NEW-IMAGE.LINK-TAB": "Link",
-  "~PALETTE-INSPECTOR.ADD_IMAGE": "New",
+  "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image",
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
   "~METADATA.TITLE": "Title",
   "~METADATA.LINK": "Link",
