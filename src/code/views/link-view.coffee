@@ -4,6 +4,7 @@ NodeList         = require '../models/link-manager'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
+PaletteManager   = require '../models/palette-manager'
 
 {div} = React.DOM
 
@@ -37,7 +38,7 @@ module.exports = React.createClass
         @_updateToolkit()
 
     $container.droppable
-      accept: '.proto-node'
+      accept: '.palette-image'
       hoverClass: "ui-state-highlight"
       drop: (e, ui) =>
         # this seems crazy but we can't get the real drop target from the event so we have to calculate it
@@ -57,7 +58,8 @@ module.exports = React.createClass
           @addNode e, ui
 
   addNode: (e, ui) ->
-    {title, image} = ui.draggable.data()
+    {title, index} = ui.draggable.data()
+    paletteItem = PaletteManager.store.palette[index]
     # requirement change: new nodes are untitled
     title = tr "~NODE.UNTITLED"
     offset = $(@refs.linkView.getDOMNode()).offset()
@@ -66,7 +68,7 @@ module.exports = React.createClass
         x: ui.offset.left - offset.left
         y: ui.offset.top - offset.top
         title: title
-        image: image
+        image: paletteItem.image
     @props.linkManager.editNode(node.key)
 
 

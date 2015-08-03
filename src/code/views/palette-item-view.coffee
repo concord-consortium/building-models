@@ -5,6 +5,8 @@ module.exports = React.createClass
   displayName: 'ProtoNode'
 
   componentDidMount: ->
+    # converts from a paletteItem to a element
+    # in the diagram. (adding and removing css classes as required)
     reactSafeClone = (e) ->
       clone = $(@).clone(false)
       clone.removeClass "proto-node"
@@ -25,13 +27,24 @@ module.exports = React.createClass
   doMove: -> undefined
 
   onClick: ->
-    @props.onNodeClicked? @props.image
+    @props.onSelect @props.index
 
   render: ->
+    className = "palette-image"
+    className = "#{className} selected" if @props.selected
     defaultImage = "img/nodes/blank.png"
     imageUrl = if @props.image?.length > 0 then @props.image else defaultImage
-    (div {className: 'proto-node', ref: 'node', onClick: @onClick, 'data-node-key': @props.key, 'data-image': @props.image, 'data-title': @props.title},
-      (div {className: 'img-background'},
-        (img {src: imageUrl})
+
+    (div {
+      'data-index': @props.index
+      'data-title': @props.node.title
+      className: className
+      ref: 'node'
+      onClick: @onClick
+      },
+      (div { className: 'proto-node'},
+        (div {className: 'img-background'},
+          (img {src: imageUrl})
+        )
       )
     )

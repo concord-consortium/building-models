@@ -1,4 +1,4 @@
-ProtoNodeView  = React.createFactory require './proto-node-view'
+PaletteItemView  = React.createFactory require './palette-item-view'
 ImageMetadata  = React.createFactory require './image-metadata-view'
 
 PaletteManager = require "../models/palette-manager"
@@ -15,23 +15,6 @@ PaletteAddImage = React.createFactory React.createClass
       )
     )
 
-PaletteImage = React.createFactory React.createClass
-  displayName: 'PaletteImage'
-  clicked: ->
-    @props.onSelect @props.index
-  render: ->
-    className = "palette-image"
-    className = "palette-image selected" if @props.selected
-    (div {className: className},
-      (ProtoNodeView {
-        key: @props.index,
-        image: @props.node.image,
-        title: @props.node.title,
-        onNodeClicked: @clicked
-        selected: @props.selected
-        })
-    )
-
 module.exports = React.createClass
 
   displayName: 'PaletteInspector'
@@ -41,19 +24,21 @@ module.exports = React.createClass
     PaletteManager.actions.selectPaletteIndex(index)
 
   render: ->
+    index = 0
     (div {className: 'palette-inspector'},
       (div {className: 'palette', ref: 'palette'},
         (div {},
           (PaletteAddImage {onClick: @props.toggleImageBrowser})
-          for node, index in @state.palette
-            if node.image
-              (PaletteImage {
-                key: node.id
-                node: node
-                index: index
-                selected: index is @state.selectedPaletteIndex
-                onSelect: @imageSelected
-              })
+          # _.forEach @state.palette, (node,index) =>
+          _.map @state.palette, (node, index) =>
+            (PaletteItemView {
+              key: index
+              index: index
+              node: node
+              image: node.image
+              selected: index is @state.selectedPaletteIndex
+              onSelect: @imageSelected
+            })
         )
       )
       (div {className: 'palette-about-image'},
