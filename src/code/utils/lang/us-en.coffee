@@ -45,7 +45,7 @@ module.exports =
   "~ADD-NEW-IMAGE.LINK-TAB": "Link"
 
   # views/palette-inspector-view.coffee
-  "~PALETTE-INSPECTOR.ADD_IMAGE": "New"
+  "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image"
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image"
 
   # views/image-metadata-view.coffee
