@@ -42,32 +42,39 @@ paletteStore   = Reflux.createStore
       @_addMetadata node.image, node.metadata
 
   _addMetadata: (image,metadata) ->
-    @metadataCache[image] = metadata or @blankMetadata
+    @metadataCache[image] ||= _.clone @blankMetadata, true
+    _.merge(@metadataCache[image],metadata)
 
   getMetaData: (image) ->
     @metadataCache[image]
 
   onLoadData: (data) ->
     @info "onLoadData called"
+    # reload the imageCache
+    @metadataCache = _.clone (data.imageMetadata or {})
+
     # reload the palette
     @palette = []
     if data.palette
       for p_item in data.palette
         @_addToPallete p_item
+
+    # add nodes incase they aren't in the palette (? good idea?)
     for node in data.nodes
       @_addToPallete node
-
 
     @_updateChanges()
 
   _addToPallete: (node) ->
     # make sure this is a new image
     if not @inPalette node
+      metadata = _.clone node.metadata
+      _.merge metadata, @getMetaData(node.image)
       @palette.push
         title: node.title or ''
         image: node.image
-        metadata: node.metadata
-      @_addMetadata(node.image, node.metadata)
+        metadata: metadata
+      @_addMetadata(node.image, metadata)
       @_pushToFront(@palette.length-1)
 
   onAddToPallete: (node) ->
@@ -132,3 +139,5 @@ paletteStore   = Reflux.createStore
 module.exports =
   actions: paletteActions
   store: paletteStore
+
+window.PaletteManager = module.exports
