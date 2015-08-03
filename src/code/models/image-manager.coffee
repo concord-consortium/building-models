@@ -24,6 +24,7 @@ store = Reflux.createStore
   onOpen: (callback=false)->
     @keepShowing = true
     @lastImage = null
+    @callback = null
     if callback
       @callback = callback
       @keepShowing = false
