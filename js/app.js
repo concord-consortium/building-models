@@ -55804,6 +55804,7 @@ store = Reflux.createStore({
     }
     this.keepShowing = true;
     this.lastImage = null;
+    this.callback = null;
     if (callback) {
       this.callback = callback;
       this.keepShowing = false;
