@@ -13,7 +13,7 @@ PaletteAddImage = React.createFactory React.createClass
   mixins: [Draggable]
   render: ->
     (div {className: 'palette-image', 'data-droptype': 'new'},
-      (div {className: 'palette-add-image', onClick: ImageManager.actions.open },
+      (div {className: 'palette-add-image', onClick: -> ImageManager.actions.open(false) },
         (div { className: 'proto-node'},
           (div {className: 'img-background'},
             tr '~PALETTE-INSPECTOR.ADD_IMAGE'

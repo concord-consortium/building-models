@@ -1,5 +1,5 @@
 actions = Reflux.createActions([
-    "open", "close", "addImage"
+    "open", "close", "addImage", "cancel"
   ])
 
 
@@ -9,7 +9,7 @@ store = Reflux.createStore
     @initValues()
 
   initValues: ->
-    @showing        = true
+    @showing        = false
     @keepShowing    = false
     @lastImage      = null
     @callback       = -> undefined
@@ -19,10 +19,11 @@ store = Reflux.createStore
     @listenTo actions.open, @onOpen
     @listenTo actions.close, @onClose
     @listenTo actions.addImage, @onAddImage
+    @listenTo actions.cancel, @onCancel
 
   onOpen: (callback=false)->
     @keepShowing = true
-    @callback = false
+    @lastImage = null
     if callback
       @callback = callback
       @keepShowing = false
@@ -30,13 +31,23 @@ store = Reflux.createStore
     @_updateChanges()
 
   onClose: ->
-    @callback?()
     @showing = false
     @_updateChanges()
 
-  onImageAdd: (img) ->
+  onAddImage: (img) ->
     @lastImage = img
+    @finish()
+
+  onCancel: ->
+    @lastImage = null
+    @finish()
+
+  finish: ->
     @_updateChanges()
+    @callback?(@lastImage)
+    unless @keepShowing
+      actions.close.trigger()
+
 
   _updateChanges: ->
     data =
@@ -48,7 +59,7 @@ store = Reflux.createStore
     @trigger(data)
 
 
-mixin =
+listenerMixin =
   actions: actions
 
   getInitialState: ->
@@ -68,4 +79,4 @@ mixin =
 module.exports =
   store: store
   actions: actions
-  mixin: mixin
+  mixin: listenerMixin

@@ -5,6 +5,7 @@ DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
 PaletteManager   = require '../models/palette-manager'
+ImageManager     = require '../models/image-manager'
 
 {div} = React.DOM
 
@@ -65,13 +66,15 @@ module.exports = React.createClass
     else if data.droptype is 'paletteItem'
       paletteItem = PaletteManager.store.palette[data.index]
       @addPaletteNode(ui,paletteItem)
-      
+
   addNewPaletteNode: (e,ui) ->
-    undefined
+    ImageManager.actions.open (savedPaletteItem) =>
+      if savedPaletteItem
+        @addPaletteNode(ui, savedPaletteItem)
 
 
   addPaletteNode: (ui, paletteItem) ->
-    # requirement change: new nodes are untitled
+    # Default new nodes are untitled
     title = tr "~NODE.UNTITLED"
     offset = $(@refs.linkView.getDOMNode()).offset()
     node = @props.linkManager.importNode
