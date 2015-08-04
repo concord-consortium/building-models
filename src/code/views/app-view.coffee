@@ -71,10 +71,8 @@ module.exports = React.createClass
           toggleImageBrowser: @toggleImageBrowser
           linkManager: @props.linkManager
         )
-        if @state.showImageBrowser
-          (ImageBrowser
-            linkManager: @props.linkManager
-            close: @toggleImageBrowser
-          )
+        (ImageBrowser
+          linkManager: @props.linkManager
+        )
       )
     )

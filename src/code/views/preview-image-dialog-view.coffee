@@ -1,4 +1,5 @@
 ImageMetadata = React.createFactory require './image-metadata-view'
+ImageManger   = require "../models/image-manager"
 
 tr = require '../utils/translate'
 
@@ -9,9 +10,11 @@ module.exports = React.createClass
 
   cancel: (e) ->
     e.preventDefault()
+    ImageManger.actions.cancel()
     @props.addImage null
 
   addImage: ->
+    ImageManger.actions.addImage @props.imageInfo
     @props.addImage @props.imageInfo
 
   render: ->

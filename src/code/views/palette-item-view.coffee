@@ -1,33 +1,16 @@
 {div, img} = React.DOM
+Draggable = require '../mixins/draggable'
 
 module.exports = React.createClass
 
   displayName: 'ProtoNode'
 
-  componentDidMount: ->
-    # converts from a paletteItem to a element
-    # in the diagram. (adding and removing css classes as required)
-    reactSafeClone = (e) ->
-      clone = $(@).clone(false)
-      clone.removeClass "proto-node"
-      clone.addClass "elm"
-      clone.attr('data-reactid', null)
-      clone.find("*").each (i,v) ->
-        $(v).attr('data-reactid', null)
-      clone
-    $(@refs.node.getDOMNode()).draggable
-      drag: @doMove
-      revert: true
-      helper: reactSafeClone
-      revertDuration: 0
-      opacity: 0.35
-      appendTo: 'body'
-      zIndex: 1000
-
-  doMove: -> undefined
+  mixins: [Draggable]
 
   onClick: ->
     @props.onSelect @props.index
+
+  removeClasses: ["palette-image"]
 
   render: ->
     className = "palette-image"
@@ -38,6 +21,7 @@ module.exports = React.createClass
     (div {
       'data-index': @props.index
       'data-title': @props.node.title
+      'data-droptype': 'paletteItem'
       className: className
       ref: 'node'
       onClick: @onClick
