@@ -4,7 +4,7 @@ LinkManager    = require './link-manager'
 paletteActions = Reflux.createActions(
   [
     "addToPalette", "loadData", "selectPaletteIndex",
-    "setImageMetadata", "itemDropped"
+    "deselect", "restoreSelection", "setImageMetadata", "itemDropped"
   ]
 )
 
@@ -20,6 +20,8 @@ paletteStore   = Reflux.createStore
     @listenTo paletteActions.selectPaletteIndex, @onSelectPaletteIndex
     @listenTo paletteActions.itemDropped, @onItemDropped
     @listenTo paletteActions.setImageMetadata, @onSetImageMetadata
+    @listenTo paletteActions.deselect, @onDeselect
+    @listenTo paletteActions.restoreSelection, @onRestoreSelection
 
     @palette = require '../data/initial-palette'
     @selectPaletteIndex = 0
@@ -83,11 +85,25 @@ paletteStore   = Reflux.createStore
 
   onSelectPaletteIndex: (index) ->
     # @_pushToFront(index) if we want to add the selected item to front
-    @selectedPaletteIndex = index
+    @_selectPaletteIndex(index)
+    @_updateChanges()
+
+  _selectPaletteIndex: (index) ->
+    @lastSelection = @selectedPaletteIndex = index
     @selectedPaletteItem  = @palette[index]
     @selectedPaletteImage = @selectedPaletteItem.image
     @imageMetadata = @getMetaData(@selectedPaletteImage)
     @imageMetadata ||= @blankMetadata
+
+  onDeselect: ->
+    @lastSelection = @selectedPaletteIndex
+    @selectedPaletteIndex = -1
+    @selectedPaletteItem  = null
+
+  onRestoreSelection: ->
+    if @lastSelection > -1
+      @_selectPaletteIndex @lastSelection
+    else @_selectPaletteIndex 0
     @_updateChanges()
 
   onSetImageMetadata: (image, metadata) ->
