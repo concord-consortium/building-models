@@ -55774,7 +55774,9 @@ module.exports = GraphPrimitive = (function() {
 
 
 },{}],554:[function(require,module,exports){
-var actions, listenerMixin, store;
+var PaletteManager, actions, listenerMixin, store;
+
+PaletteManager = require('./palette-manager');
 
 actions = Reflux.createActions(["open", "close", "addImage", "cancel"]);
 
@@ -55802,6 +55804,7 @@ store = Reflux.createStore({
     if (callback == null) {
       callback = false;
     }
+    PaletteManager.actions.deselect();
     this.keepShowing = true;
     this.lastImage = null;
     this.callback = null;
@@ -55814,6 +55817,11 @@ store = Reflux.createStore({
   },
   onClose: function() {
     this.showing = false;
+    if (this.lastImage) {
+      PaletteManager.actions.selectPaletteIndex(0);
+    } else {
+      PaletteManager.actions.restoreSelection();
+    }
     return this._updateChanges();
   },
   onAddImage: function(img) {
@@ -55874,7 +55882,7 @@ module.exports = {
 
 
 
-},{}],555:[function(require,module,exports){
+},{"./palette-manager":558}],555:[function(require,module,exports){
 var DiagramNode, Importer, Link, LinkManager, SelectionManager, UndoRedo, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -56705,7 +56713,7 @@ var LinkManager, paletteActions, paletteStore;
 
 LinkManager = require('./link-manager');
 
-paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "setImageMetadata", "itemDropped"]);
+paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "deselect", "restoreSelection", "setImageMetadata", "itemDropped"]);
 
 paletteStore = Reflux.createStore({
   init: function() {
@@ -56715,6 +56723,8 @@ paletteStore = Reflux.createStore({
     this.listenTo(paletteActions.selectPaletteIndex, this.onSelectPaletteIndex);
     this.listenTo(paletteActions.itemDropped, this.onItemDropped);
     this.listenTo(paletteActions.setImageMetadata, this.onSetImageMetadata);
+    this.listenTo(paletteActions.deselect, this.onDeselect);
+    this.listenTo(paletteActions.restoreSelection, this.onRestoreSelection);
     this.palette = require('../data/initial-palette');
     this.selectPaletteIndex = 0;
     this.blankMetadata = {
@@ -56782,11 +56792,27 @@ paletteStore = Reflux.createStore({
     return this._updateChanges();
   },
   onSelectPaletteIndex: function(index) {
-    this.selectedPaletteIndex = index;
+    this._selectPaletteIndex(index);
+    return this._updateChanges();
+  },
+  _selectPaletteIndex: function(index) {
+    this.lastSelection = this.selectedPaletteIndex = index;
     this.selectedPaletteItem = this.palette[index];
     this.selectedPaletteImage = this.selectedPaletteItem.image;
     this.imageMetadata = this.getMetaData(this.selectedPaletteImage);
-    this.imageMetadata || (this.imageMetadata = this.blankMetadata);
+    return this.imageMetadata || (this.imageMetadata = this.blankMetadata);
+  },
+  onDeselect: function() {
+    this.lastSelection = this.selectedPaletteIndex;
+    this.selectedPaletteIndex = -1;
+    return this.selectedPaletteItem = null;
+  },
+  onRestoreSelection: function() {
+    if (this.lastSelection > -1) {
+      this._selectPaletteIndex(this.lastSelection);
+    } else {
+      this._selectPaletteIndex(0);
+    }
     return this._updateChanges();
   },
   onSetImageMetadata: function(image, metadata) {
@@ -60605,9 +60631,9 @@ module.exports = React.createClass({
       src: this.state.selectedPaletteImage
     })), this.state.selectedPaletteImage ? div({
       className: 'palette-about-image-info'
-    }, ImageMetadata({
+    }, this.state.selectedPaletteItem ? ImageMetadata({
       image: this.state.selectedPaletteImage
-    })) : void 0));
+    }) : void 0) : void 0));
   }
 });
 
