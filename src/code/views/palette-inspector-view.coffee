@@ -56,7 +56,8 @@ module.exports = React.createClass
         )
         if @state.selectedPaletteImage
           (div {className: 'palette-about-image-info'},
-            (ImageMetadata {image: @state.selectedPaletteImage})
+            if @state.selectedPaletteItem
+              (ImageMetadata {image: @state.selectedPaletteImage})
           )
       )
     )

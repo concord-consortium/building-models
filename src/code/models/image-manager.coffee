@@ -1,3 +1,5 @@
+PaletteManager = require './palette-manager'
+
 actions = Reflux.createActions([
     "open", "close", "addImage", "cancel"
   ])
@@ -22,6 +24,7 @@ store = Reflux.createStore
     @listenTo actions.cancel, @onCancel
 
   onOpen: (callback=false)->
+    PaletteManager.actions.deselect()
     @keepShowing = true
     @lastImage = null
     @callback = null
@@ -33,6 +36,12 @@ store = Reflux.createStore
 
   onClose: ->
     @showing = false
+    # When the window closes, select the newest added item
+    # or whatever was selected when we started
+    if @lastImage
+      PaletteManager.actions.selectPaletteIndex 0
+    else
+      PaletteManager.actions.restoreSelection()
     @_updateChanges()
 
   onAddImage: (img) ->
