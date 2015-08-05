@@ -1,13 +1,13 @@
-xlat = require '../utils/translate'
-licenses = require '../data/licenses'
-PaletteManager = require '../models/palette-manager'
+xlat       = require '../utils/translate'
+licenses   = require '../data/licenses'
+ImageDialogStore = require '../stores/image-dialog-store'
 
 {div, table, tr, td, a, input, select, radio, p} = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'ImageMetadata'
-  mixins: [require '../mixins/palette-listening']
+
 
   getInitialState: ->
     hostname: null
@@ -15,9 +15,8 @@ module.exports = React.createClass
   hostname: ->
     # instead of using a regexp to extract the hostname use the dom
     link = document.createElement 'a'
-    link.setAttribute 'href', @state.imageMetadata?.link
+    link.setAttribute 'href', @props.metadata?.link
     link.hostname
-
 
   changed: ->
     newMetaData =
@@ -26,32 +25,47 @@ module.exports = React.createClass
       license: @refs.license.getDOMNode().value
       source: 'external'
 
-    PaletteManager.actions.setImageMetadata @props.image, newMetaData
+    ImageDialogStore.actions.update {metadata: newMetaData}
 
   render: ->
-    license = licenses.getLicense (@state.imageMetadata.license or 'public domain')
-
     (div {className: 'image-metadata'},
-      if @state.imageMetadata.source is 'external'
-        (div {key: 'external'},
-          (table {},
-            (tr {}, (td {}, xlat '~METADATA.TITLE'), (td {}, (input {ref: 'title', value: @state.imageMetadata.title, onChange: @changed})))
-            (tr {}, (td {}, xlat '~METADATA.LINK'), (td {}, (input {ref: 'link', value: @state.imageMetadata.link, onChange: @changed})))
-            (tr {}, (td {}, xlat '~METADATA.CREDIT'), (td {}, (select {ref: 'license', value: @state.imageMetadata.license, onChange: @changed},
-              licenses.getRenderOptions @state.imageMetadata.license
-            )))
-          )
-          (p {className: 'learn-more'}, (a {href: license.link, target: '_blank'}, "Learn more about #{license.fullLabel}"))
-        )
-      else
-        (div {key: 'internal'},
-          (p {},
-            (div {}, "\"#{@state.imageMetadata.title}\"")
-            (div {}, (a {href: @state.imageMetadata.link, target: '_blank'}, "See it on #{@hostname()}"))
-          )
-          (p {},
-            (div {}, 'License')
-            (div {}, (a {href: license.link, target: '_blank'}, license.label))
-          )
-        )
+      if @props.metadata
+        @renderMetadata()
     )
+
+  renderMetadata: ->
+    licenseName = @props.metadata.license or 'public domain'
+    licenseData = licenses.getLicense licenseName
+    title   = @props.metadata.title
+    link    = @props.metadata.link
+
+    if @props.metadata.source is 'external'
+      (div {key: 'external'},
+        (table {},
+          (tr {}, (td {}, xlat '~METADATA.TITLE'),
+            (td {},
+              (input {ref: 'title', value: title, onChange: @changed})))
+
+          (tr {}, (td {}, xlat '~METADATA.LINK'),
+            (td {},
+              (input {ref: 'link', value: link, onChange: @changed})))
+          (tr {}, (td {}, xlat '~METADATA.CREDIT'),
+            (td {},
+              (select {ref: 'license', value: licenseName, onChange: @changed},
+                licenses.getRenderOptions licenseName
+          )))
+        )
+        (p {className: 'learn-more'}, (a {href: licenseData.link, target: '_blank'}, "Learn more about #{licenseData.fullLabel}"))
+      )
+    else
+      (div {key: 'internal'},
+        (p {})
+        (div {}, "\"#{title}\"")
+        if link
+          (div {key: 'hostname'}, (a {href: link, target: '_blank'}, "See it on #{@hostname()}"))
+        (p {})
+        (div {}, 'License')
+        (div {key: 'license'},
+          (a {href: licenseData.link, target: '_blank'}, licenseData.label)
+        )
+      )

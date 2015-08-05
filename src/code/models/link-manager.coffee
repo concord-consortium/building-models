@@ -3,6 +3,7 @@ Link             = require './link'
 DiagramNode      = require './node'
 UndoRedo         = require '../utils/undo-redo'
 SelectionManager = require './selection-manager'
+PaletteStore   = require "../stores/palette-store"
 tr               = require "../utils/translate"
 
 # LinkManager is the logical manager of Nodes and Links.
@@ -57,10 +58,6 @@ module.exports   = class LinkManager
   addNodeListener: (listener) ->
     log.info("adding node listener")
     @nodeListeners.push listener
-
-  addLoadListener: (listener) ->
-    log.info("adding load listener #{listener}")
-    @loadListeners.push listener
 
   addFilenameListener: (listener) ->
     log.info("adding filename listener #{listener}")
@@ -306,9 +303,7 @@ module.exports   = class LinkManager
     importer = new Importer(@)
     importer.importData(data)
     @setFilename data.filename or 'New Model'
-
-    for listener in @loadListeners
-      listener data
+    PaletteStore.actions.loadData(data)
     @undoRedoManager.clearHistory()
 
   loadDataFromUrl: (url) =>
@@ -328,12 +323,10 @@ module.exports   = class LinkManager
     linkExports = for key,link of @linkKeys
       link.toExport()
     imageMetadata = {}
-    # The pallete manager is curently in charge of trackign image meta-data
-    PaletteManager   = require "../models/palette-manager"
+
     _.forEach palette, (node) ->
-      meta = PaletteManager.store.getMetaData(node.image)
-      if meta
-        imageMetadata[node.image] = meta
+      if node.metadata
+        imageMetadata[node.image] = node.metadata
     return {
       version: 0.1
       filename: @filename

@@ -1,4 +1,5 @@
 DropZone = React.createFactory require './dropzone-view'
+ImageDialogStore = require '../stores/image-dialog-store'
 
 tr = require '../utils/translate'
 
@@ -7,10 +8,7 @@ tr = require '../utils/translate'
 module.exports = React.createClass
   displayName: 'MyComputer'
 
-  mixins: [require '../mixins/image-dialog-view']
-
-  getInitialState: ->
-    @getInitialImageDialogViewState()
+  mixins: [ ImageDialogStore.mixin, require '../mixins/image-dialog-view']
 
   previewImage: (e) ->
     e.preventDefault()

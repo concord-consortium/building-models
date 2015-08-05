@@ -1,4 +1,4 @@
-
+ImageDialogStore = require "../stores/image-dialog-store"
 
 OpenClipart = require '../utils/open-clipart'
 tr = require '../utils/translate'
@@ -18,7 +18,7 @@ ImageSearchResult = React.createFactory React.createClass
       @setState loaded: true
 
   clicked: ->
-    @props.clicked @props.imageInfo
+    ImageDialogStore.actions.update @props.imageInfo
 
   render: ->
     src = if @state.loaded then @props.imageInfo.image else 'img/bb-chrome/spin.svg'
@@ -30,13 +30,12 @@ ImageSearchResult = React.createFactory React.createClass
 module.exports = React.createClass
   displayName: 'ImageSearch'
 
-  mixins: [require '../mixins/image-dialog-view']
+  mixins: [require '../mixins/image-dialog-view', ImageDialogStore.mixin]
 
   getInitialState: ->
     @getInitialImageDialogViewState
       searching: false
       searched: false
-      internalLibrary: @props.internalLibrary
       internalResults: []
       externalResults: []
 
@@ -81,11 +80,16 @@ module.exports = React.createClass
   isDisabledInExternalSearch: (node) ->
     (@props.inPalette node) or (@props.inLibrary node)
 
+  internalListSource: ->
+    if @state.internalResults.length is 0
+      _.map @props.internalLibrary
+    else @state.internalResults
+
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and (@state.internalResults.length + @state.externalResults.length) is 0
 
     (div {className: 'image-search-dialog'},
-      if @state.selectedImage
+      if @props.selectedImage?.image
         @renderPreviewImage()
       else
         (div {},
@@ -108,7 +112,7 @@ module.exports = React.createClass
             if @state.internalResults.length is 0 and (@state.searching or @state.externalResults.length > 0)
               tr '~IMAGE-BROWSER.NO_INTERNAL_FOUND', query: @state.query
             else
-              for node, index in (if @state.internalResults.length is 0 then @state.internalLibrary else @state.internalResults)
+              for node, index in @internalListSource()
                 if node.image
                   (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
           )

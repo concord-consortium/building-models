@@ -4,8 +4,8 @@ NodeList         = require '../models/link-manager'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
-PaletteManager   = require '../models/palette-manager'
-ImageManager     = require '../models/image-manager'
+PaletteStore   = require '../stores/palette-store'
+ImageDialogStore     = require '../stores/image-dialog-store'
 
 {div} = React.DOM
 
@@ -64,11 +64,11 @@ module.exports = React.createClass
       paletteItem = @addNewPaletteNode(e,ui)
 
     else if data.droptype is 'paletteItem'
-      paletteItem = PaletteManager.store.palette[data.index]
+      paletteItem = PaletteStore.store.palette[data.index]
       @addPaletteNode(ui,paletteItem)
 
   addNewPaletteNode: (e,ui) ->
-    ImageManager.actions.open (savedPaletteItem) =>
+    ImageDialogStore.actions.open (savedPaletteItem) =>
       if savedPaletteItem
         @addPaletteNode(ui, savedPaletteItem)
 

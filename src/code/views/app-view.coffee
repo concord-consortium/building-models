@@ -7,6 +7,7 @@ NodeWell        = React.createFactory require './node-well-view'
 InspectorPanel  = React.createFactory require './inspector-panel-view'
 ImageBrowser    = React.createFactory require './image-browser-view'
 DocumentActions = React.createFactory require './document-actions-view'
+ImageDialogStore    = require '../stores/image-dialog-store'
 
 {div, a} = React.DOM
 
@@ -14,7 +15,7 @@ module.exports = React.createClass
 
   displayName: 'WirefameApp'
 
-  mixins: [require '../mixins/app-view']
+  mixins: [ImageDialogStore.mixin, require '../mixins/app-view']
 
   getInitialState: ->
 
@@ -71,8 +72,9 @@ module.exports = React.createClass
           toggleImageBrowser: @toggleImageBrowser
           linkManager: @props.linkManager
         )
-        (ImageBrowser
-          linkManager: @props.linkManager
-        )
+        if @state.showingDialog
+          (ImageBrowser
+            linkManager: @props.linkManager
+          )
       )
     )
