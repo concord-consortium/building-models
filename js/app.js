@@ -31,7 +31,7 @@ window.initApp = function(wireframes) {
     simplified: getParameterByName('simplified')
   };
   opts.codapConnect = CodapConnect.instance('building-models');
-  opts.tree = (require('./models/image-manager')).tree;
+  opts.tree = (require('./stores/image-dialog-store')).tree;
   appView = AppView(opts);
   elem = '#app';
   return jsPlumb.bind('ready', function() {
@@ -41,7 +41,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/codap-connect":552,"./models/image-manager":554,"./models/link-manager":555,"./views/app-view":574}],2:[function(require,module,exports){
+},{"./models/codap-connect":551,"./models/link-manager":553,"./stores/image-dialog-store":560,"./views/app-view":573}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -54945,7 +54945,13 @@ module.exports = [
   {
     "id": "1",
     "title": "",
-    "image": "img/nodes/blank.png"
+    "image": "img/nodes/blank.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Blank",
+      "link": null,
+      "license": "public domain"
+    }
   }
 ];
 
@@ -55109,11 +55115,11 @@ module.exports = {
 
 
 },{}],546:[function(require,module,exports){
-var PaletteManager, Simulation;
+var PaletteStore, Simulation;
 
 Simulation = require("../models/simulation");
 
-PaletteManager = require("../models/palette-manager");
+PaletteStore = require("../stores/palette-store");
 
 module.exports = {
   getInitialAppViewState: function(subState) {
@@ -55155,7 +55161,7 @@ module.exports = {
     })(this));
     this._loadInitialData();
     this._registerUndoRedoKeys();
-    return PaletteManager.store.listen(this.onPaletteChange);
+    return PaletteStore.store.listen(this.onPaletteChange);
   },
   componentDidUnmount: function() {
     return this.addDeleteKeyHandler(false);
@@ -55201,15 +55207,11 @@ module.exports = {
     selectedNode = manager.getInspection()[0] || null;
     editingNode = manager.getTitleEditing()[0] || null;
     selectedLink = manager.getLinkSelection()[0] || null;
-    this.setState({
+    return this.setState({
       selectedNode: selectedNode,
       editingNode: editingNode,
       selectedLink: selectedLink
     });
-    if (selectedNode) {
-      PaletteManager.actions.addToPalette(selectedNode);
-    }
-    return log.info('updated selections');
   },
   _loadInitialData: function() {
     var ref, ref1;
@@ -55255,7 +55257,7 @@ module.exports = {
 
 
 
-},{"../models/palette-manager":558,"../models/simulation":562}],547:[function(require,module,exports){
+},{"../models/simulation":559,"../stores/palette-store":561}],547:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -55418,53 +55420,36 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":565,"../utils/translate":572}],549:[function(require,module,exports){
-var PaletteManager, PreviewImage, hasValidImageExtension, resizeImage;
+},{"../utils/google-drive-io":564,"../utils/translate":571}],549:[function(require,module,exports){
+var ImageDialogStore, PreviewImage, hasValidImageExtension;
 
 PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
 
 hasValidImageExtension = require('../utils/has-valid-image-extension');
 
-PaletteManager = require('../models/palette-manager');
-
-resizeImage = require('../utils/resize-image');
+ImageDialogStore = require('../stores/image-dialog-store');
 
 module.exports = {
   getInitialImageDialogViewState: function(subState) {
-    var mixinState;
-    mixinState = {
-      selectedImage: null
-    };
-    return _.extend(mixinState, subState);
+    return subState;
   },
   imageSelected: function(imageInfo) {
-    PaletteManager.actions.setImageMetadata(imageInfo.image, imageInfo.metadata);
-    return this.setState({
-      selectedImage: imageInfo
-    });
+    return ImageDialogStore.actions.update(imageInfo);
   },
   imageDropped: function(imageInfo) {
     return this.imageSelected(imageInfo);
   },
   addImage: function(imageInfo) {
-    if (imageInfo && !this.props.inPalette(imageInfo)) {
-      resizeImage(imageInfo.image, (function(_this) {
-        return function(dataUrl) {
-          imageInfo.image = dataUrl;
-          return _this.props.addToPalette(imageInfo);
-        };
-      })(this));
+    if (imageInfo) {
+      return ImageDialogStore.actions.addToPalette(imageInfo);
     }
-    return this.setState({
-      selectedImage: null
-    });
   },
   hasValidImageExtension: function(imageName) {
     return hasValidImageExtension(imageName);
   },
   renderPreviewImage: function() {
     return PreviewImage({
-      imageInfo: this.state.selectedImage,
+      imageInfo: this.props.selectedImage,
       addImage: this.addImage,
       linkManager: this.props.linkManager
     });
@@ -55473,7 +55458,7 @@ module.exports = {
 
 
 
-},{"../models/palette-manager":558,"../utils/has-valid-image-extension":566,"../utils/resize-image":571,"../views/preview-image-dialog-view":601}],550:[function(require,module,exports){
+},{"../stores/image-dialog-store":560,"../utils/has-valid-image-extension":565,"../views/preview-image-dialog-view":600}],550:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -55503,38 +55488,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":572}],551:[function(require,module,exports){
-var PaletteManager;
-
-PaletteManager = require("../models/palette-manager");
-
-module.exports = {
-  getInitialState: function() {
-    return {
-      palette: PaletteManager.store.palette,
-      selectedPaletteItem: PaletteManager.store.selectedPaletteItem,
-      selectedPaletteIndex: PaletteManager.store.selectedPaletteIndex,
-      selectedPaletteImage: PaletteManager.store.selectedPaletteImage,
-      imageMetadata: PaletteManager.store.imageMetadata
-    };
-  },
-  componentDidMount: function() {
-    return PaletteManager.store.listen(this.onPaletteChange);
-  },
-  onPaletteChange: function(status) {
-    return this.setState({
-      palette: status.palette,
-      selectedPaletteItem: status.selectedPaletteItem,
-      selectedPaletteIndex: status.selectedPaletteIndex,
-      selectedPaletteImage: status.selectedPaletteImage,
-      imageMetadata: status.imageMetadata
-    });
-  }
-};
-
-
-
-},{"../models/palette-manager":558}],552:[function(require,module,exports){
+},{"../utils/translate":571}],551:[function(require,module,exports){
 var CodapConnect, IframePhoneRpcEndpoint, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -55661,7 +55615,7 @@ module.exports = CodapConnect = (function() {
     var args, operation, paletteManager, successes;
     operation = cmd.operation;
     args = cmd.args;
-    paletteManager = require('../models/palette-manager');
+    paletteManager = require('../stores/palette-store');
     switch (operation) {
       case 'saveState':
         log.info('Received saveState request from CODAP.');
@@ -55742,7 +55696,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../models/palette-manager":558,"../utils/translate":572,"./link-manager":555,"iframe-phone":167}],553:[function(require,module,exports){
+},{"../stores/palette-store":561,"../utils/translate":571,"./link-manager":553,"iframe-phone":167}],552:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -55773,117 +55727,8 @@ module.exports = GraphPrimitive = (function() {
 
 
 
-},{}],554:[function(require,module,exports){
-var PaletteManager, actions, listenerMixin, store;
-
-PaletteManager = require('./palette-manager');
-
-actions = Reflux.createActions(["open", "close", "addImage", "cancel"]);
-
-store = Reflux.createStore({
-  init: function() {
-    this.enableListening();
-    return this.initValues();
-  },
-  initValues: function() {
-    this.showing = false;
-    this.keepShowing = false;
-    this.lastImage = null;
-    this.callback = function() {
-      return void 0;
-    };
-    return this._updateChanges();
-  },
-  enableListening: function() {
-    this.listenTo(actions.open, this.onOpen);
-    this.listenTo(actions.close, this.onClose);
-    this.listenTo(actions.addImage, this.onAddImage);
-    return this.listenTo(actions.cancel, this.onCancel);
-  },
-  onOpen: function(callback) {
-    if (callback == null) {
-      callback = false;
-    }
-    PaletteManager.actions.deselect();
-    this.keepShowing = true;
-    this.lastImage = null;
-    this.callback = null;
-    if (callback) {
-      this.callback = callback;
-      this.keepShowing = false;
-    }
-    this.showing = true;
-    return this._updateChanges();
-  },
-  onClose: function() {
-    this.showing = false;
-    if (this.lastImage) {
-      PaletteManager.actions.selectPaletteIndex(0);
-    } else {
-      PaletteManager.actions.restoreSelection();
-    }
-    return this._updateChanges();
-  },
-  onAddImage: function(img) {
-    this.lastImage = img;
-    return this.finish();
-  },
-  onCancel: function() {
-    this.lastImage = null;
-    return this.finish();
-  },
-  finish: function() {
-    this._updateChanges();
-    if (typeof this.callback === "function") {
-      this.callback(this.lastImage);
-    }
-    if (!this.keepShowing) {
-      return actions.close.trigger();
-    }
-  },
-  _updateChanges: function() {
-    var data;
-    data = {
-      showing: this.showing,
-      keepShowing: this.keepShowing,
-      lastImage: this.lastImage
-    };
-    log.info("Sending changes to listeners: " + (JSON.stringify(data)));
-    return this.trigger(data);
-  }
-});
-
-listenerMixin = {
-  actions: actions,
-  getInitialState: function() {
-    return {
-      showing: store.showing,
-      keepShowing: store.keepShowing,
-      lastImage: store.lastImage
-    };
-  },
-  componentDidMount: function() {
-    return store.listen(this.onChange);
-  },
-  onChange: function(status) {
-    return this.setState({
-      showing: status.showing,
-      keepShowing: status.keepShowing,
-      lastImage: status.lastImage
-    });
-  }
-};
-
-module.exports = {
-  store: store,
-  actions: actions,
-  mixin: listenerMixin
-};
-
-
-
-},{"./palette-manager":558}],555:[function(require,module,exports){
-var DiagramNode, Importer, Link, LinkManager, SelectionManager, UndoRedo, tr,
+},{}],553:[function(require,module,exports){
+var DiagramNode, Importer, Link, LinkManager, PaletteStore, SelectionManager, UndoRedo, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Importer = require('../utils/importer');
@@ -55895,6 +55740,8 @@ DiagramNode = require('./node');
 UndoRedo = require('../utils/undo-redo');
 
 SelectionManager = require('./selection-manager');
+
+PaletteStore = require("../stores/palette-store");
 
 tr = require("../utils/translate");
 
@@ -55965,11 +55812,6 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype.addNodeListener = function(listener) {
     log.info("adding node listener");
     return this.nodeListeners.push(listener);
-  };
-
-  LinkManager.prototype.addLoadListener = function(listener) {
-    log.info("adding load listener " + listener);
-    return this.loadListeners.push(listener);
   };
 
   LinkManager.prototype.addFilenameListener = function(listener) {
@@ -56418,16 +56260,12 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.loadData = function(data) {
-    var i, importer, len, listener, ref;
+    var importer;
     log.info("json success");
     importer = new Importer(this);
     importer.importData(data);
     this.setFilename(data.filename || 'New Model');
-    ref = this.loadListeners;
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      listener(data);
-    }
+    PaletteStore.actions.loadData(data);
     return this.undoRedoManager.clearHistory();
   };
 
@@ -56449,7 +56287,7 @@ module.exports = LinkManager = (function() {
   };
 
   LinkManager.prototype.serialize = function(palette) {
-    var PaletteManager, imageMetadata, key, link, linkExports, node, nodeExports;
+    var imageMetadata, key, link, linkExports, node, nodeExports;
     nodeExports = (function() {
       var ref, results;
       ref = this.nodeKeys;
@@ -56471,12 +56309,9 @@ module.exports = LinkManager = (function() {
       return results;
     }).call(this);
     imageMetadata = {};
-    PaletteManager = require("../models/palette-manager");
     _.forEach(palette, function(node) {
-      var meta;
-      meta = PaletteManager.store.getMetaData(node.image);
-      if (meta) {
-        return imageMetadata[node.image] = meta;
+      if (node.metadata) {
+        return imageMetadata[node.image] = node.metadata;
       }
     });
     return {
@@ -56499,7 +56334,7 @@ module.exports = LinkManager = (function() {
 
 
 
-},{"../models/palette-manager":558,"../utils/importer":567,"../utils/translate":572,"../utils/undo-redo":573,"./link":556,"./node":557,"./selection-manager":561}],556:[function(require,module,exports){
+},{"../stores/palette-store":561,"../utils/importer":566,"../utils/translate":571,"../utils/undo-redo":572,"./link":554,"./node":555,"./selection-manager":558}],554:[function(require,module,exports){
 var GraphPrimitive, Link, Relation,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -56568,7 +56403,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":553,"./relationship":560}],557:[function(require,module,exports){
+},{"./graph-primitive":552,"./relationship":557}],555:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -56708,183 +56543,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":563,"../utils/translate":572,"./graph-primitive":553}],558:[function(require,module,exports){
-var LinkManager, paletteActions, paletteStore;
-
-LinkManager = require('./link-manager');
-
-paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "deselect", "restoreSelection", "setImageMetadata", "itemDropped"]);
-
-paletteStore = Reflux.createStore({
-  init: function() {
-    var j, len, node, ref, results;
-    this.listenTo(paletteActions.addToPalette, this.onAddToPallete);
-    this.listenTo(paletteActions.loadData, this.onloadData);
-    this.listenTo(paletteActions.selectPaletteIndex, this.onSelectPaletteIndex);
-    this.listenTo(paletteActions.itemDropped, this.onItemDropped);
-    this.listenTo(paletteActions.setImageMetadata, this.onSetImageMetadata);
-    this.listenTo(paletteActions.deselect, this.onDeselect);
-    this.listenTo(paletteActions.restoreSelection, this.onRestoreSelection);
-    this.palette = require('../data/initial-palette');
-    this.selectPaletteIndex = 0;
-    this.blankMetadata = {
-      source: 'external',
-      title: '',
-      link: ''
-    };
-    this.imageMetadata = this.blankMetadata;
-    this.metadataCache = {};
-    this._updateChanges();
-    this.linkManager = LinkManager.instance('building-models');
-    this.linkManager.addLoadListener(this.onLoadData);
-    this.internalLibrary = require('../data/internal-library');
-    ref = this.internalLibrary;
-    results = [];
-    for (j = 0, len = ref.length; j < len; j++) {
-      node = ref[j];
-      results.push(this._addMetadata(node.image, node.metadata));
-    }
-    return results;
-  },
-  _addMetadata: function(image, metadata) {
-    var base;
-    (base = this.metadataCache)[image] || (base[image] = _.clone(this.blankMetadata, true));
-    return _.merge(this.metadataCache[image], metadata);
-  },
-  getMetaData: function(image) {
-    return this.metadataCache[image];
-  },
-  onLoadData: function(data) {
-    var j, k, len, len1, node, p_item, ref, ref1;
-    this.info("onLoadData called");
-    this.metadataCache = _.clone(data.imageMetadata || {});
-    this.palette = [];
-    if (data.palette) {
-      ref = data.palette;
-      for (j = 0, len = ref.length; j < len; j++) {
-        p_item = ref[j];
-        this._addToPallete(p_item);
-      }
-    }
-    ref1 = data.nodes;
-    for (k = 0, len1 = ref1.length; k < len1; k++) {
-      node = ref1[k];
-      this._addToPallete(node);
-    }
-    return this._updateChanges();
-  },
-  _addToPallete: function(node) {
-    var metadata;
-    if (!this.inPalette(node)) {
-      metadata = _.clone(node.metadata);
-      _.merge(metadata, this.getMetaData(node.image));
-      this.palette.push({
-        title: node.title || '',
-        image: node.image,
-        metadata: metadata
-      });
-      this._addMetadata(node.image, metadata);
-      return this._pushToFront(this.palette.length - 1);
-    }
-  },
-  onAddToPallete: function(node) {
-    this._addToPallete(node);
-    return this._updateChanges();
-  },
-  onSelectPaletteIndex: function(index) {
-    this._selectPaletteIndex(index);
-    return this._updateChanges();
-  },
-  _selectPaletteIndex: function(index) {
-    this.lastSelection = this.selectedPaletteIndex = index;
-    this.selectedPaletteItem = this.palette[index];
-    this.selectedPaletteImage = this.selectedPaletteItem.image;
-    this.imageMetadata = this.getMetaData(this.selectedPaletteImage);
-    return this.imageMetadata || (this.imageMetadata = this.blankMetadata);
-  },
-  onDeselect: function() {
-    this.lastSelection = this.selectedPaletteIndex;
-    this.selectedPaletteIndex = -1;
-    return this.selectedPaletteItem = null;
-  },
-  onRestoreSelection: function() {
-    if (this.lastSelection > -1) {
-      this._selectPaletteIndex(this.lastSelection);
-    } else {
-      this._selectPaletteIndex(0);
-    }
-    return this._updateChanges();
-  },
-  onSetImageMetadata: function(image, metadata) {
-    this._addMetadata(image, metadata);
-    this.imageMetadata = metadata;
-    return this._updateChanges();
-  },
-  onItemDropped: function(image) {
-    var found;
-    found = _.findIndex(this.palette, function(i) {
-      return i.image === image;
-    });
-    if (found) {
-      this._pushToFront(found);
-    }
-    return this._updateChanges();
-  },
-  _pushToFront: function(index) {
-    return this.palette.splice(0, 0, this.palette.splice(index, 1)[0]);
-  },
-  inPalette: function(node) {
-    return this._nodeInUse(node, this.palette);
-  },
-  inLibrary: function(node) {
-    return this._nodeInUse(node, this.internalLibrary);
-  },
-  info: function(msg) {
-    return log.info("PaletteManager: " + msg);
-  },
-  _updateChanges: function() {
-    var data;
-    data = {
-      palette: this.palette,
-      internalLibrary: this.internalLibrary,
-      selectedPaletteIndex: this.selectedPaletteIndex,
-      selectedPaletteItem: this.selectedPaletteItem,
-      selectedPaletteImage: this.selectedPaletteImage,
-      imageMetadata: this.imageMetadata
-    };
-    this.info("Sending changes to listeners: " + (JSON.stringify(data)));
-    return this.trigger(data);
-  },
-  _nodeInUse: function(node, collection) {
-    return !!((_.find(collection, {
-      image: node.image
-    })) || (node.metadata && (_.find(collection, {
-      metadata: {
-        link: node.metadata.link
-      }
-    }))));
-  },
-  _loadInitialiMetadata: function(data) {
-    if (data.imageMetadata) {
-      return _.forEach(data.imageMetadata, (function(_this) {
-        return function(metadata, image) {
-          return _this._addMetadata(image, metadata);
-        };
-      })(this));
-    }
-  }
-});
-
-module.exports = {
-  actions: paletteActions,
-  store: paletteStore
-};
-
-window.PaletteManager = module.exports;
-
-
-
-},{"../data/initial-palette":543,"../data/internal-library":544,"./link-manager":555}],559:[function(require,module,exports){
+},{"../utils/colors":562,"../utils/translate":571,"./graph-primitive":552}],556:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -56981,7 +56640,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":572,"./relationship":560}],560:[function(require,module,exports){
+},{"../utils/translate":571,"./relationship":557}],557:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -57046,7 +56705,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":572,"mathjs":168}],561:[function(require,module,exports){
+},{"../utils/translate":571,"mathjs":168}],558:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, UndoRedo, tr;
 
 Importer = require('../utils/importer');
@@ -57224,7 +56883,7 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":567,"../utils/translate":572,"../utils/undo-redo":573,"./link":556,"./node":557}],562:[function(require,module,exports){
+},{"../utils/importer":566,"../utils/translate":571,"../utils/undo-redo":572,"./link":554,"./node":555}],559:[function(require,module,exports){
 var IntegrationFunction, Simulation;
 
 IntegrationFunction = function(t, timeStep) {
@@ -57365,7 +57024,308 @@ module.exports = Simulation = (function() {
 
 
 
-},{}],563:[function(require,module,exports){
+},{}],560:[function(require,module,exports){
+var PaletteStore, imageDialogActions, listenerMixin, store;
+
+PaletteStore = require('./palette-store');
+
+imageDialogActions = Reflux.createActions(["open", "close", "update", "cancel", "addToPalette"]);
+
+store = Reflux.createStore({
+  listenables: [imageDialogActions],
+  init: function() {
+    this.enableListening();
+    return this.initValues();
+  },
+  initValues: function() {
+    this.showingDialog = false;
+    this.keepShowing = false;
+    this.callback = function() {
+      return void 0;
+    };
+    this.resetPaletteItem();
+    return this._updateChanges();
+  },
+  resetPaletteItem: function() {
+    return this.paletteItem = null;
+  },
+  enableListening: function() {
+    return PaletteStore.store.listen(this.onPaletteSelect);
+  },
+  onOpen: function(callback) {
+    if (callback == null) {
+      callback = false;
+    }
+    PaletteStore.actions.deselect();
+    this.keepShowing = true;
+    this.resetPaletteItem();
+    this.showingDialog = true;
+    this.callback = null;
+    if (callback) {
+      this.callback = callback;
+      this.keepShowing = false;
+    }
+    return this._updateChanges();
+  },
+  onPaletteSelect: function(status) {
+    this.paletteItem = status.selectedPaletteItem;
+    return this.finish();
+  },
+  onClose: function() {
+    this.showingDialog = false;
+    this.resetPaletteItem();
+    return this._updateChanges();
+  },
+  onUpdate: function(data) {
+    if (this.paletteItem) {
+      this.paletteItem = _.merge(this.paletteItem, data);
+    } else {
+
+    }
+    this.paletteItem || (this.paletteItem = data);
+    return this._updateChanges();
+  },
+  onCancel: function() {
+    this.resetPaletteItem();
+    return this.finish();
+  },
+  finish: function() {
+    this._updateChanges();
+    if (typeof this.callback === "function") {
+      this.callback(this.paletteItem);
+    }
+    this.resetPaletteItem();
+    this._updateChanges();
+    if (!this.keepShowing) {
+      return imageDialogActions.close.trigger();
+    }
+  },
+  _updateChanges: function() {
+    var data;
+    data = {
+      showingDialog: this.showingDialog,
+      keepShowing: this.keepShowing,
+      paletteItem: this.paletteItem
+    };
+    return this.trigger(data);
+  }
+});
+
+listenerMixin = {
+  actions: imageDialogActions,
+  getInitialState: function() {
+    return {
+      showingDialog: store.showingDialog,
+      keepShowing: store.keepShowing,
+      paletteItem: store.paletteItem,
+      selectedImage: store.paletteItem
+    };
+  },
+  componentDidMount: function() {
+    return store.listen(this.onChange);
+  },
+  onChange: function(status) {
+    return this.setState({
+      showingDialog: status.showingDialog,
+      keepShowing: status.keepShowing,
+      paletteItem: status.paletteItem,
+      selectedImage: status.paletteItem
+    });
+  }
+};
+
+module.exports = {
+  store: store,
+  actions: imageDialogActions,
+  mixin: listenerMixin
+};
+
+
+
+},{"./palette-store":561}],561:[function(require,module,exports){
+var initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage;
+
+resizeImage = require('../utils/resize-image');
+
+initialPalette = require('../data/initial-palette');
+
+initialLibrary = require('../data/internal-library');
+
+paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "deselect", "restoreSelection", "itemDropped"]);
+
+paletteStore = Reflux.createStore({
+  listenables: [paletteActions],
+  init: function() {
+    this.initializeLibrary();
+    this.initializePalette();
+    this.blankMetadata = {
+      source: 'external',
+      title: 'blank',
+      link: '',
+      license: ''
+    };
+    return this.imageMetadata = _.clone(this.blankMetadata, true);
+  },
+  initializeLibrary: function() {
+    var i, len, node, results;
+    this.library = {};
+    results = [];
+    for (i = 0, len = initialLibrary.length; i < len; i++) {
+      node = initialLibrary[i];
+      results.push(this.addToLibrary(node));
+    }
+    return results;
+  },
+  initializePalette: function() {
+    var i, len, node;
+    this.palette = [];
+    for (i = 0, len = initialPalette.length; i < len; i++) {
+      node = initialPalette[i];
+      this.addToPalette(node);
+    }
+    this.selectPaletteIndex(0);
+    return this.updateChanges();
+  },
+  standardizeNode: function(node) {
+    node.image || (node.image = "");
+    node.key || (node.key = node.image.substr(0, 400));
+    return node.metadata || (node.metadata = _.clone(this.blankMetadata, true));
+  },
+  addToLibrary: function(node) {
+    if (!this.inLibrary(node)) {
+      this.standardizeNode(node);
+      this.library[node.key] = node;
+      resizeImage(node.image, function(dataUrl) {
+        return node.image = dataUrl;
+      });
+      return log.info("library: " + this.library);
+    }
+  },
+  onLoadData: function(data) {
+    var i, len, p_item, ref;
+    this.palette = [];
+    if (data.palette) {
+      ref = data.palette;
+      for (i = 0, len = ref.length; i < len; i++) {
+        p_item = ref[i];
+        this.addToPalette(p_item);
+      }
+    }
+    return this.updateChanges();
+  },
+  addToPalette: function(node) {
+    this.addToLibrary(node);
+    if (!this.inPalette(node)) {
+      this.palette.push(node);
+      this.moveToFront(this.palette.length - 1);
+      return this.selectPaletteIndex(0);
+    }
+  },
+  onAddToPalette: function(node) {
+    this.addToPalette(node);
+    return this.updateChanges();
+  },
+  onSelectPaletteIndex: function(index) {
+    this.selectPaletteIndex(index);
+    return this.updateChanges();
+  },
+  selectPaletteIndex: function(index) {
+    this.lastSelection = this.selectedIndex = index;
+    this.selectedPaletteItem = this.palette[index];
+    return this.selectedPaletteImage = this.selectedPaletteItem.image;
+  },
+  deselect: function() {
+    this.lastSelection = this.selectedIndex;
+    this.selectedPaletteIndex = -1;
+    return this.selectedPaletteItem = null;
+  },
+  onDeselect: function() {
+    return this.deselect();
+  },
+  onRestoreSelection: function() {
+    if (this.lastSelection > -1) {
+      this.selectPaletteIndex(this.lastSelection);
+    } else {
+      this.selectPaletteIndex(0);
+    }
+    return this.updateChanges();
+  },
+  onSetImageMetadata: function(image, metadata) {
+    var libraryItem;
+    log.info("Set Image metadata called");
+    this.addToLibrary(image);
+    libraryItem = this.inLibrary(image);
+    if (libraryItem) {
+      libraryItem.metadata = metadata;
+      this.imageMetadata = libraryItem.metadata;
+      return this.updateChanges();
+    } else {
+      return alert("cant find library item");
+    }
+  },
+  moveToFront: function(index) {
+    return this.palette.splice(0, 0, this.palette.splice(index, 1)[0]);
+  },
+  inPalette: function(node) {
+    return _.find(this.palette, {
+      key: node.key
+    });
+  },
+  inLibrary: function(node) {
+    return this.library[node.key];
+  },
+  updateChanges: function() {
+    var data;
+    data = {
+      palette: this.palette,
+      library: this.library,
+      selectedPaletteIndex: this.selectedIndex,
+      selectedPaletteItem: this.selectedPaletteItem,
+      selectedPaletteImage: this.selectedPaletteImage,
+      imageMetadata: this.imageMetadata
+    };
+    log.info("Sending changes to listeners: " + (JSON.stringify(data)));
+    return this.trigger(data);
+  }
+});
+
+mixin = {
+  getInitialState: function() {
+    return {
+      palette: paletteStore.palette,
+      library: paletteStore.library,
+      selectedPaletteItem: paletteStore.selectedPaletteItem,
+      selectedPaletteIndex: paletteStore.selectedPaletteIndex,
+      selectedPaletteImage: paletteStore.selectedPaletteImage,
+      imageMetadata: paletteStore.imageMetadata
+    };
+  },
+  componentDidMount: function() {
+    return paletteStore.listen(this.onPaletteChange);
+  },
+  onPaletteChange: function(status) {
+    return this.setState({
+      palette: status.palette,
+      library: status.library,
+      selectedPaletteIndex: status.selectedPaletteIndex,
+      selectedPaletteItem: status.selectedPaletteItem,
+      selectedPaletteImage: status.selectedPaletteImage,
+      imageMetadata: status.imageMetadata
+    });
+  }
+};
+
+module.exports = {
+  actions: paletteActions,
+  store: paletteStore,
+  mixin: mixin
+};
+
+window.PaletteStore = module.exports;
+
+
+
+},{"../data/initial-palette":543,"../data/internal-library":544,"../utils/resize-image":570}],562:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -57385,7 +57345,7 @@ module.exports = [
 
 
 
-},{"./translate":572}],564:[function(require,module,exports){
+},{"./translate":571}],563:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -57437,7 +57397,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":566,"./resize-image":571}],565:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":565,"./resize-image":570}],564:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -57604,7 +57564,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],566:[function(require,module,exports){
+},{}],565:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -57623,7 +57583,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":572}],567:[function(require,module,exports){
+},{"./translate":571}],566:[function(require,module,exports){
 var MySystemImporter;
 
 module.exports = MySystemImporter = (function() {
@@ -57673,7 +57633,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{}],568:[function(require,module,exports){
+},{}],567:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -57881,7 +57841,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],569:[function(require,module,exports){
+},{}],568:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -57966,7 +57926,7 @@ module.exports = {
 
 
 
-},{}],570:[function(require,module,exports){
+},{}],569:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -58003,42 +57963,49 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],571:[function(require,module,exports){
+},{}],570:[function(require,module,exports){
 module.exports = function(src, callback) {
-  var img, maxHeight, maxWidth;
-  maxWidth = 100;
-  maxHeight = 100;
-  img = document.createElement('img');
-  img.setAttribute('crossOrigin', 'anonymous');
-  img.src = src;
-  img.onload = function() {
-    var canvas, height, width;
-    canvas = document.createElement('canvas');
-    width = img.width, height = img.height;
-    if (width > height) {
-      if (width > maxWidth) {
-        height *= maxWidth / width;
-        width = maxWidth;
-      }
-    } else {
-      if (height > maxHeight) {
-        width *= maxHeight / height;
-        height = maxHeight;
-      }
-    }
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-    return callback(canvas.toDataURL('image/png'));
-  };
-  return img.onerror = function(e) {
+  var fail, img, maxHeight, maxWidth;
+  fail = function() {
     return callback(src);
   };
+  if (typeof document !== "undefined" && document !== null) {
+    maxWidth = 100;
+    maxHeight = 100;
+    img = document.createElement('img');
+    img.setAttribute('crossOrigin', 'anonymous');
+    img.src = src;
+    img.onload = function() {
+      var canvas, height, width;
+      canvas = document.createElement('canvas');
+      width = img.width, height = img.height;
+      if (width > height) {
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      return callback(canvas.toDataURL('image/png'));
+    };
+    return img.onerror = function(e) {
+      return fail();
+    };
+  } else {
+    return fail();
+  }
 };
 
 
 
-},{}],572:[function(require,module,exports){
+},{}],571:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -58071,7 +58038,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":569}],573:[function(require,module,exports){
+},{"./lang/us-en":568}],572:[function(require,module,exports){
 var CodapConnect, Command, Manager;
 
 CodapConnect = require('../models/codap-connect');
@@ -58280,8 +58247,8 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":552}],574:[function(require,module,exports){
-var DocumentActions, GlobalNav, ImageBrowser, InspectorPanel, LinkView, NodeWell, Placeholder, Reflux, a, div, ref;
+},{"../models/codap-connect":551}],573:[function(require,module,exports){
+var DocumentActions, GlobalNav, ImageBrowser, ImageDialogStore, InspectorPanel, LinkView, NodeWell, Placeholder, Reflux, a, div, ref;
 
 Reflux = require('reflux');
 
@@ -58299,11 +58266,13 @@ ImageBrowser = React.createFactory(require('./image-browser-view'));
 
 DocumentActions = React.createFactory(require('./document-actions-view'));
 
+ImageDialogStore = require('../stores/image-dialog-store');
+
 ref = React.DOM, div = ref.div, a = ref.a;
 
 module.exports = React.createClass({
   displayName: 'WirefameApp',
-  mixins: [require('../mixins/app-view')],
+  mixins: [ImageDialogStore.mixin, require('../mixins/app-view')],
   getInitialState: function() {
     var iframed;
     try {
@@ -58358,15 +58327,15 @@ module.exports = React.createClass({
       simplified: this.props.simplified,
       toggleImageBrowser: this.toggleImageBrowser,
       linkManager: this.props.linkManager
-    }), ImageBrowser({
+    }), this.state.showingDialog ? ImageBrowser({
       linkManager: this.props.linkManager
-    })));
+    }) : void 0));
   }
 });
 
 
 
-},{"../mixins/app-view":546,"./document-actions-view":576,"./global-nav-view":579,"./image-browser-view":580,"./inspector-panel-view":586,"./link-view":590,"./node-well-view":597,"./placeholder-view":600,"reflux":523}],575:[function(require,module,exports){
+},{"../mixins/app-view":546,"../stores/image-dialog-store":560,"./document-actions-view":575,"./global-nav-view":578,"./image-browser-view":579,"./inspector-panel-view":585,"./link-view":589,"./node-well-view":596,"./placeholder-view":599,"reflux":523}],574:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -58448,7 +58417,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":563,"../utils/translate":572}],576:[function(require,module,exports){
+},{"../utils/colors":562,"../utils/translate":571}],575:[function(require,module,exports){
 var br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
@@ -58512,7 +58481,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":572}],577:[function(require,module,exports){
+},{"../utils/translate":571}],576:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -58617,7 +58586,7 @@ module.exports = React.createClass({
 
 
 
-},{}],578:[function(require,module,exports){
+},{}],577:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -58672,7 +58641,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":564,"../utils/translate":572}],579:[function(require,module,exports){
+},{"../utils/drop-image-handler":563,"../utils/translate":571}],578:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -58752,8 +58721,8 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":548,"../utils/translate":572,"./dropdown-view":577}],580:[function(require,module,exports){
-var ImageManager, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteManager, TabbedPanel, div, i, img, ref, span, tr;
+},{"../mixins/google-file-interface":548,"../utils/translate":571,"./dropdown-view":576}],579:[function(require,module,exports){
+var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
 
@@ -58769,9 +58738,9 @@ MyComputerDialog = React.createFactory(require('./image-my-computer-dialog-view'
 
 LinkDialog = React.createFactory(require('./image-link-dialog-view'));
 
-PaletteManager = require("../models/palette-manager");
+PaletteStore = require("../stores/palette-store");
 
-ImageManager = require("../models/image-manager");
+ImageDialogStore = require("../stores/image-dialog-store");
 
 tr = require('../utils/translate');
 
@@ -58779,26 +58748,16 @@ ref = React.DOM, div = ref.div, img = ref.img, i = ref.i, span = ref.span;
 
 module.exports = React.createClass({
   displayName: 'Image Browser',
-  mixins: [ImageManager.mixin],
+  mixins: [ImageDialogStore.mixin, PaletteStore.mixin],
   render: function() {
-    if (this.state.showing) {
-      return this.renderDialog();
-    } else {
-      return this.renderNothing();
-    }
-  },
-  renderDialog: function() {
-    var addToPalette, props, store;
-    store = PaletteManager.store;
-    addToPalette = function(node) {
-      return PaletteManager.actions.addToPalette.trigger(node);
-    };
+    var props, store;
+    store = PaletteStore.store;
     props = {
-      palette: store.palette,
-      internalLibrary: store.internalLibrary,
-      addToPalette: addToPalette,
+      palette: this.state.palette,
+      internalLibrary: this.state.library,
       inPalette: store.inPalette,
-      inLibrary: store.inLibrary
+      inLibrary: store.inLibrary,
+      selectedImage: this.state.paletteItem
     };
     return ModalTabbedDialogFactory({
       title: tr("~ADD-NEW-IMAGE.TITLE"),
@@ -58816,18 +58775,17 @@ module.exports = React.createClass({
         })
       ]
     });
-  },
-  renderNothing: function() {
-    return div({});
   }
 });
 
 
 
-},{"../models/image-manager":554,"../models/palette-manager":558,"../utils/translate":572,"./image-link-dialog-view":581,"./image-metadata-view":582,"./image-my-computer-dialog-view":583,"./image-search-dialog-view":585,"./modal-tabbed-dialog-view":592,"./tabbed-panel-view":603}],581:[function(require,module,exports){
-var DropZone, div, input, p, ref, tr;
+},{"../stores/image-dialog-store":560,"../stores/palette-store":561,"../utils/translate":571,"./image-link-dialog-view":580,"./image-metadata-view":581,"./image-my-computer-dialog-view":582,"./image-search-dialog-view":584,"./modal-tabbed-dialog-view":591,"./tabbed-panel-view":602}],580:[function(require,module,exports){
+var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
+
+ImageDialogStore = require('../stores/image-dialog-store');
 
 tr = require('../utils/translate');
 
@@ -58835,10 +58793,7 @@ ref = React.DOM, div = ref.div, p = ref.p, input = ref.input;
 
 module.exports = React.createClass({
   displayName: 'Link',
-  mixins: [require('../mixins/image-dialog-view')],
-  getInitialState: function() {
-    return this.getInitialImageDialogViewState();
-  },
+  mixins: [ImageDialogStore.mixin, require('../mixins/image-dialog-view')],
   previewImage: function(e) {
     var url;
     e.preventDefault();
@@ -58874,20 +58829,19 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":549,"../utils/translate":572,"./dropzone-view":578}],582:[function(require,module,exports){
-var PaletteManager, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
+},{"../mixins/image-dialog-view":549,"../stores/image-dialog-store":560,"../utils/translate":571,"./dropzone-view":577}],581:[function(require,module,exports){
+var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
 
 licenses = require('../data/licenses');
 
-PaletteManager = require('../models/palette-manager');
+ImageDialogStore = require('../stores/image-dialog-store');
 
 ref = React.DOM, div = ref.div, table = ref.table, tr = ref.tr, td = ref.td, a = ref.a, input = ref.input, select = ref.select, radio = ref.radio, p = ref.p;
 
 module.exports = React.createClass({
   displayName: 'ImageMetadata',
-  mixins: [require('../mixins/palette-listening')],
   getInitialState: function() {
     return {
       hostname: null
@@ -58896,7 +58850,7 @@ module.exports = React.createClass({
   hostname: function() {
     var link, ref1;
     link = document.createElement('a');
-    link.setAttribute('href', (ref1 = this.state.imageMetadata) != null ? ref1.link : void 0);
+    link.setAttribute('href', (ref1 = this.props.metadata) != null ? ref1.link : void 0);
     return link.hostname;
   },
   changed: function() {
@@ -58907,50 +58861,68 @@ module.exports = React.createClass({
       license: this.refs.license.getDOMNode().value,
       source: 'external'
     };
-    return PaletteManager.actions.setImageMetadata(this.props.image, newMetaData);
+    return ImageDialogStore.actions.update({
+      metadata: newMetaData
+    });
   },
   render: function() {
-    var license;
-    license = licenses.getLicense(this.state.imageMetadata.license || 'public domain');
     return div({
       className: 'image-metadata'
-    }, this.state.imageMetadata.source === 'external' ? div({
-      key: 'external'
-    }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, input({
-      ref: 'title',
-      value: this.state.imageMetadata.title,
-      onChange: this.changed
-    }))), tr({}, td({}, xlat('~METADATA.LINK')), td({}, input({
-      ref: 'link',
-      value: this.state.imageMetadata.link,
-      onChange: this.changed
-    }))), tr({}, td({}, xlat('~METADATA.CREDIT')), td({}, select({
-      ref: 'license',
-      value: this.state.imageMetadata.license,
-      onChange: this.changed
-    }, licenses.getRenderOptions(this.state.imageMetadata.license))))), p({
-      className: 'learn-more'
-    }, a({
-      href: license.link,
-      target: '_blank'
-    }, "Learn more about " + license.fullLabel))) : div({
-      key: 'internal'
-    }, p({}, div({}, "\"" + this.state.imageMetadata.title + "\""), div({}, a({
-      href: this.state.imageMetadata.link,
-      target: '_blank'
-    }, "See it on " + (this.hostname())))), p({}, div({}, 'License'), div({}, a({
-      href: license.link,
-      target: '_blank'
-    }, license.label)))));
+    }, this.props.metadata ? this.renderMetadata() : void 0);
+  },
+  renderMetadata: function() {
+    var licenseData, licenseName, link, title;
+    licenseName = this.props.metadata.license || 'public domain';
+    licenseData = licenses.getLicense(licenseName);
+    title = this.props.metadata.title;
+    link = this.props.metadata.link;
+    if (this.props.metadata.source === 'external') {
+      return div({
+        key: 'external'
+      }, table({}, tr({}, td({}, xlat('~METADATA.TITLE')), td({}, input({
+        ref: 'title',
+        value: title,
+        onChange: this.changed
+      }))), tr({}, td({}, xlat('~METADATA.LINK')), td({}, input({
+        ref: 'link',
+        value: link,
+        onChange: this.changed
+      }))), tr({}, td({}, xlat('~METADATA.CREDIT')), td({}, select({
+        ref: 'license',
+        value: licenseName,
+        onChange: this.changed
+      }, licenses.getRenderOptions(licenseName))))), p({
+        className: 'learn-more'
+      }, a({
+        href: licenseData.link,
+        target: '_blank'
+      }, "Learn more about " + licenseData.fullLabel)));
+    } else {
+      return div({
+        key: 'internal'
+      }, p({}), div({}, "\"" + title + "\""), link ? div({
+        key: 'hostname'
+      }, a({
+        href: link,
+        target: '_blank'
+      }, "See it on " + (this.hostname()))) : void 0, p({}), div({}, 'License'), div({
+        key: 'license'
+      }, a({
+        href: licenseData.link,
+        target: '_blank'
+      }, licenseData.label)));
+    }
   }
 });
 
 
 
-},{"../data/licenses":545,"../mixins/palette-listening":551,"../models/palette-manager":558,"../utils/translate":572}],583:[function(require,module,exports){
-var DropZone, div, input, p, ref, tr;
+},{"../data/licenses":545,"../stores/image-dialog-store":560,"../utils/translate":571}],582:[function(require,module,exports){
+var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
+
+ImageDialogStore = require('../stores/image-dialog-store');
 
 tr = require('../utils/translate');
 
@@ -58958,10 +58930,7 @@ ref = React.DOM, div = ref.div, p = ref.p, input = ref.input;
 
 module.exports = React.createClass({
   displayName: 'MyComputer',
-  mixins: [require('../mixins/image-dialog-view')],
-  getInitialState: function() {
-    return this.getInitialImageDialogViewState();
-  },
+  mixins: [ImageDialogStore.mixin, require('../mixins/image-dialog-view')],
   previewImage: function(e) {
     var files, reader;
     e.preventDefault();
@@ -58999,7 +58968,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":549,"../utils/translate":572,"./dropzone-view":578}],584:[function(require,module,exports){
+},{"../mixins/image-dialog-view":549,"../stores/image-dialog-store":560,"../utils/translate":571,"./dropzone-view":577}],583:[function(require,module,exports){
 var ImgChoice, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -59077,8 +59046,10 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":572}],585:[function(require,module,exports){
-var ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
+},{"../utils/translate":571}],584:[function(require,module,exports){
+var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
+
+ImageDialogStore = require("../stores/image-dialog-store");
 
 OpenClipart = require('../utils/open-clipart');
 
@@ -59106,7 +59077,7 @@ ImageSearchResult = React.createFactory(React.createClass({
     })(this);
   },
   clicked: function() {
-    return this.props.clicked(this.props.imageInfo);
+    return ImageDialogStore.actions.update(this.props.imageInfo);
   },
   render: function() {
     var src;
@@ -59129,12 +59100,11 @@ ImageSearchResult = React.createFactory(React.createClass({
 
 module.exports = React.createClass({
   displayName: 'ImageSearch',
-  mixins: [require('../mixins/image-dialog-view')],
+  mixins: [require('../mixins/image-dialog-view', ImageDialogStore.mixin)],
   getInitialState: function() {
     return this.getInitialImageDialogViewState({
       searching: false,
       searched: false,
-      internalLibrary: this.props.internalLibrary,
       internalResults: [],
       externalResults: []
     });
@@ -59188,12 +59158,19 @@ module.exports = React.createClass({
   isDisabledInExternalSearch: function(node) {
     return (this.props.inPalette(node)) || (this.props.inLibrary(node));
   },
+  internalListSource: function() {
+    if (this.state.internalResults.length === 0) {
+      return _.map(this.props.internalLibrary);
+    } else {
+      return this.state.internalResults;
+    }
+  },
   render: function() {
-    var index, node, showNoResultsAlert;
+    var index, node, ref1, showNoResultsAlert;
     showNoResultsAlert = this.state.searchable && this.state.searched && (this.state.internalResults.length + this.state.externalResults.length) === 0;
     return div({
       className: 'image-search-dialog'
-    }, this.state.selectedImage ? this.renderPreviewImage() : div({}, div({
+    }, ((ref1 = this.props.selectedImage) != null ? ref1.image : void 0) ? this.renderPreviewImage() : div({}, div({
       className: 'image-search-dialog-form'
     }, form({}, input({
       type: 'text',
@@ -59210,16 +59187,16 @@ module.exports = React.createClass({
     }, tr('~IMAGE-BROWSER.LIBRARY_HEADER')), div({
       className: 'image-search-dialog-results'
     }, (function() {
-      var j, len, ref1, results1;
+      var j, len, ref2, results1;
       if (this.state.internalResults.length === 0 && (this.state.searching || this.state.externalResults.length > 0)) {
         return tr('~IMAGE-BROWSER.NO_INTERNAL_FOUND', {
           query: this.state.query
         });
       } else {
-        ref1 = (this.state.internalResults.length === 0 ? this.state.internalLibrary : this.state.internalResults);
+        ref2 = this.internalListSource();
         results1 = [];
-        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
-          node = ref1[index];
+        for (index = j = 0, len = ref2.length; j < len; index = ++j) {
+          node = ref2[index];
           if (node.image) {
             if (node.image) {
               results1.push(ImageSearchResult({
@@ -59242,7 +59219,7 @@ module.exports = React.createClass({
     }, tr('Openclipart.org Images')), div({
       className: "image-search-dialog-results " + (this.state.externalResults.length === this.state.numExternalMatches ? 'show-all' : '')
     }, (function() {
-      var j, len, ref1, results1;
+      var j, len, ref2, results1;
       if (this.state.searching) {
         return div({}, i({
           className: "fa fa-cog fa-spin"
@@ -59255,10 +59232,10 @@ module.exports = React.createClass({
           query: this.state.query
         });
       } else {
-        ref1 = this.state.externalResults;
+        ref2 = this.state.externalResults;
         results1 = [];
-        for (index = j = 0, len = ref1.length; j < len; index = ++j) {
-          node = ref1[index];
+        for (index = j = 0, len = ref2.length; j < len; index = ++j) {
+          node = ref2[index];
           results1.push(ImageSearchResult({
             key: index,
             imageInfo: node,
@@ -59281,7 +59258,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":549,"../utils/open-clipart":570,"../utils/translate":572}],586:[function(require,module,exports){
+},{"../mixins/image-dialog-view":549,"../stores/image-dialog-store":560,"../utils/open-clipart":569,"../utils/translate":571}],585:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, PaletteInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -59507,7 +59484,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":587,"./link-value-inspector-view":589,"./node-inspector-view":594,"./node-value-inspector-view":595,"./palette-inspector-view":598,"./relation-inspector-view":602}],587:[function(require,module,exports){
+},{"./link-inspector-view":586,"./link-value-inspector-view":588,"./node-inspector-view":593,"./node-value-inspector-view":594,"./palette-inspector-view":597,"./relation-inspector-view":601}],586:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -59563,7 +59540,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":572}],588:[function(require,module,exports){
+},{"../utils/translate":571}],587:[function(require,module,exports){
 var RelationFactory, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
@@ -59672,7 +59649,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/relation-factory":559,"../utils/translate":572}],589:[function(require,module,exports){
+},{"../models/relation-factory":556,"../utils/translate":571}],588:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -59690,8 +59667,8 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":572}],590:[function(require,module,exports){
-var DiagramToolkit, ImageManager, Importer, Node, NodeList, PaletteManager, div, dropImageHandler, tr;
+},{"../utils/translate":571}],589:[function(require,module,exports){
+var DiagramToolkit, ImageDialogStore, Importer, Node, NodeList, PaletteStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
 
@@ -59705,9 +59682,9 @@ dropImageHandler = require('../utils/drop-image-handler');
 
 tr = require('../utils/translate');
 
-PaletteManager = require('../models/palette-manager');
+PaletteStore = require('../stores/palette-store');
 
-ImageManager = require('../models/image-manager');
+ImageDialogStore = require('../stores/image-dialog-store');
 
 div = React.DOM.div;
 
@@ -59766,12 +59743,12 @@ module.exports = React.createClass({
     if (data.droptype === 'new') {
       return paletteItem = this.addNewPaletteNode(e, ui);
     } else if (data.droptype === 'paletteItem') {
-      paletteItem = PaletteManager.store.palette[data.index];
+      paletteItem = PaletteStore.store.palette[data.index];
       return this.addPaletteNode(ui, paletteItem);
     }
   },
   addNewPaletteNode: function(e, ui) {
-    return ImageManager.actions.open((function(_this) {
+    return ImageDialogStore.actions.open((function(_this) {
       return function(savedPaletteItem) {
         if (savedPaletteItem) {
           return _this.addPaletteNode(ui, savedPaletteItem);
@@ -60029,7 +60006,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/image-manager":554,"../models/link-manager":555,"../models/palette-manager":558,"../utils/drop-image-handler":564,"../utils/importer":567,"../utils/js-plumb-diagram-toolkit":568,"../utils/translate":572,"./node-view":596}],591:[function(require,module,exports){
+},{"../models/link-manager":553,"../stores/image-dialog-store":560,"../stores/palette-store":561,"../utils/drop-image-handler":563,"../utils/importer":566,"../utils/js-plumb-diagram-toolkit":567,"../utils/translate":571,"./node-view":595}],590:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -60054,7 +60031,7 @@ module.exports = React.createClass({
     }, i({
       className: "modal-dialog-title-close fa fa-close",
       onClick: this.close
-    }), this.props.title || 'Untitled Dialog'), div({
+    }, "(close)"), this.props.title || 'Untitled Dialog'), div({
       className: 'modal-dialog-workspace'
     }, this.props.children))));
   }
@@ -60062,7 +60039,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":593}],592:[function(require,module,exports){
+},{"./modal-view":592}],591:[function(require,module,exports){
 var ModalDialog, TabbedPanel, a, div, li, ref, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -60085,7 +60062,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":591,"./tabbed-panel-view":603}],593:[function(require,module,exports){
+},{"./modal-dialog-view":590,"./tabbed-panel-view":602}],592:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -60117,7 +60094,7 @@ module.exports = React.createClass({
 
 
 
-},{}],594:[function(require,module,exports){
+},{}],593:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -60202,7 +60179,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":550,"../utils/translate":572,"./color-picker-view":575,"./image-picker-view":584}],595:[function(require,module,exports){
+},{"../mixins/node-title":550,"../utils/translate":571,"./color-picker-view":574,"./image-picker-view":583}],594:[function(require,module,exports){
 var div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -60292,7 +60269,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":572}],596:[function(require,module,exports){
+},{"../utils/translate":571}],595:[function(require,module,exports){
 var NodeTitle, div, i, img, input, ref, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img;
@@ -60501,16 +60478,18 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":550,"../utils/translate":572}],597:[function(require,module,exports){
-var PaletteInspectorView, div;
+},{"../mixins/node-title":550,"../utils/translate":571}],596:[function(require,module,exports){
+var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
+
+PaletteStore = require('../stores/palette-store');
 
 div = React.DOM.div;
 
 module.exports = React.createClass({
   displayName: 'NodeWell',
-  mixins: [require('../mixins/palette-listening')],
+  mixins: [PaletteStore.mixin],
   getInitialState: function() {
     return {
       nodes: [],
@@ -60560,8 +60539,8 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/palette-listening":551,"./palette-inspector-view":598}],598:[function(require,module,exports){
-var Draggable, ImageManager, ImageMetadata, PaletteAddImage, PaletteItemView, PaletteManager, div, i, img, ref, span, tr;
+},{"../stores/palette-store":561,"./palette-inspector-view":597}],597:[function(require,module,exports){
+var Draggable, ImageDialogStore, ImageMetadata, PaletteAddImage, PaletteItemView, PaletteStore, div, i, img, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
 
@@ -60569,9 +60548,9 @@ ImageMetadata = React.createFactory(require('./image-metadata-view'));
 
 Draggable = require('../mixins/draggable');
 
-PaletteManager = require("../models/palette-manager");
+PaletteStore = require("../stores/palette-store");
 
-ImageManager = require("../models/image-manager");
+ImageDialogStore = require("../stores/image-dialog-store");
 
 tr = require("../utils/translate");
 
@@ -60586,7 +60565,7 @@ PaletteAddImage = React.createFactory(React.createClass({
     }, div({
       className: 'palette-add-image',
       onClick: function() {
-        return ImageManager.actions.open(false);
+        return ImageDialogStore.actions.open.trigger(false);
       }
     }, div({
       className: 'proto-node'
@@ -60598,9 +60577,9 @@ PaletteAddImage = React.createFactory(React.createClass({
 
 module.exports = React.createClass({
   displayName: 'PaletteInspector',
-  mixins: [require('../mixins/palette-listening')],
+  mixins: [PaletteStore.mixin],
   imageSelected: function(index) {
-    return PaletteManager.actions.selectPaletteIndex(index);
+    return PaletteStore.actions.selectPaletteIndex(index);
   },
   render: function() {
     var index;
@@ -60629,17 +60608,17 @@ module.exports = React.createClass({
       className: "fa fa-info-circle"
     }), span({}, tr('~PALETTE-INSPECTOR.ABOUT_IMAGE')), img({
       src: this.state.selectedPaletteImage
-    })), this.state.selectedPaletteImage ? div({
+    })), this.state.selectedPaletteItem ? div({
       className: 'palette-about-image-info'
-    }, this.state.selectedPaletteItem ? ImageMetadata({
-      image: this.state.selectedPaletteImage
+    }, this.state.selectedPaletteItem.metadata ? ImageMetadata({
+      metadata: this.state.selectedPaletteItem.metadata
     }) : void 0) : void 0));
   }
 });
 
 
 
-},{"../mixins/draggable":547,"../mixins/palette-listening":551,"../models/image-manager":554,"../models/palette-manager":558,"../utils/translate":572,"./image-metadata-view":582,"./palette-item-view":599}],599:[function(require,module,exports){
+},{"../mixins/draggable":547,"../stores/image-dialog-store":560,"../stores/palette-store":561,"../utils/translate":571,"./image-metadata-view":581,"./palette-item-view":598}],598:[function(require,module,exports){
 var Draggable, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -60680,7 +60659,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":547}],600:[function(require,module,exports){
+},{"../mixins/draggable":547}],599:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -60698,12 +60677,14 @@ module.exports = React.createClass({
 
 
 
-},{}],601:[function(require,module,exports){
-var ImageManger, ImageMetadata, a, button, div, i, img, ref, tr;
+},{}],600:[function(require,module,exports){
+var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
 
-ImageManger = require("../models/image-manager");
+ImageManger = require("../stores/image-dialog-store");
+
+PaletteStore = require("../stores/palette-store");
 
 tr = require('../utils/translate');
 
@@ -60713,20 +60694,19 @@ module.exports = React.createClass({
   displayName: 'ImageSearchResult',
   cancel: function(e) {
     e.preventDefault();
-    ImageManger.actions.cancel();
-    return this.props.addImage(null);
+    return ImageManger.actions.cancel();
   },
   addImage: function() {
-    ImageManger.actions.addImage(this.props.imageInfo);
-    return this.props.addImage(this.props.imageInfo);
+    return PaletteStore.actions.addToPalette(this.props.imageInfo);
   },
   render: function() {
+    var ref1, ref2;
     return div({}, div({
       className: 'header'
     }, tr('~IMAGE-BROWSER.PREVIEW')), div({
       className: 'preview-image'
     }, img({
-      src: this.props.imageInfo.image
+      src: (ref1 = this.props.imageInfo) != null ? ref1.image : void 0
     }), a({
       href: '#',
       onClick: this.cancel
@@ -60736,10 +60716,10 @@ module.exports = React.createClass({
       className: 'preview-add-image'
     }, button({
       onClick: this.addImage
-    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), this.props.imageInfo.metadata ? div({
+    }, tr('~IMAGE-BROWSER.ADD_IMAGE'))), ((ref2 = this.props.imageInfo) != null ? ref2.metadata : void 0) ? div({
       className: 'preview-metadata'
     }, ImageMetadata({
-      image: this.props.imageInfo.image,
+      metadata: this.props.imageInfo.metadata,
       className: 'image-browser-preview-metadata'
     })) : void 0);
   }
@@ -60747,7 +60727,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/image-manager":554,"../utils/translate":572,"./image-metadata-view":582}],602:[function(require,module,exports){
+},{"../stores/image-dialog-store":560,"../stores/palette-store":561,"../utils/translate":571,"./image-metadata-view":581}],601:[function(require,module,exports){
 var LinkRelationView, TabbedPanel, Tabber, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -60810,7 +60790,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":572,"./link-relation-view":588,"./tabbed-panel-view":603}],603:[function(require,module,exports){
+},{"../utils/translate":571,"./link-relation-view":587,"./tabbed-panel-view":602}],602:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
