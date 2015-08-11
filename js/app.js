@@ -55439,19 +55439,12 @@ module.exports = {
   imageDropped: function(imageInfo) {
     return this.imageSelected(imageInfo);
   },
-  addImage: function(imageInfo) {
-    if (imageInfo) {
-      return ImageDialogStore.actions.addToPalette(imageInfo);
-    }
-  },
   hasValidImageExtension: function(imageName) {
     return hasValidImageExtension(imageName);
   },
   renderPreviewImage: function() {
     return PreviewImage({
-      imageInfo: this.props.selectedImage,
-      addImage: this.addImage,
-      linkManager: this.props.linkManager
+      imageInfo: this.props.selectedImage
     });
   }
 };
@@ -57029,7 +57022,7 @@ var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
 
-imageDialogActions = Reflux.createActions(["open", "close", "update", "cancel", "addToPalette"]);
+imageDialogActions = Reflux.createActions(["open", "close", "update", "cancel"]);
 
 store = Reflux.createStore({
   listenables: [imageDialogActions],
@@ -57071,9 +57064,12 @@ store = Reflux.createStore({
     this.paletteItem = status.selectedPaletteItem;
     return this.finish();
   },
-  onClose: function() {
+  close: function() {
     this.showingDialog = false;
-    this.resetPaletteItem();
+    return this.resetPaletteItem();
+  },
+  onClose: function() {
+    this.close();
     return this._updateChanges();
   },
   onUpdate: function(data) {
@@ -60635,9 +60631,6 @@ module.exports = React.createClass({
   render: function() {
     var className, defaultImage, imageUrl, ref1;
     className = "palette-image";
-    if (this.props.selected) {
-      className = className + " selected";
-    }
     defaultImage = "img/nodes/blank.png";
     imageUrl = ((ref1 = this.props.image) != null ? ref1.length : void 0) > 0 ? this.props.image : defaultImage;
     return div({
