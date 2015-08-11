@@ -63,9 +63,14 @@ store = Reflux.createStore
     @resetPaletteItem()
     @finish()
 
+  invoke_callback: ->
+    @callback?(@paletteItem)
+    @callback = null # once only
+    
   finish: ->
     @_updateChanges()
-    @callback?(@paletteItem)
+    @invoke_callback()
+    @callback = null
     @resetPaletteItem()
     @_updateChanges()
     unless @keepShowing

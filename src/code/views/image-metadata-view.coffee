@@ -25,7 +25,7 @@ module.exports = React.createClass
       license: @refs.license.getDOMNode().value
       source: 'external'
 
-    ImageDialogStore.actions.update {metadata: newMetaData}
+    @props.update {metadata: newMetaData}
 
   render: ->
     (div {className: 'image-metadata'},
