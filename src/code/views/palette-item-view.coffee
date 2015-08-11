@@ -14,7 +14,6 @@ module.exports = React.createClass
 
   render: ->
     className = "palette-image"
-    className = "#{className} selected" if @props.selected
     defaultImage = "img/nodes/blank.png"
     imageUrl = if @props.image?.length > 0 then @props.image else defaultImage
 
