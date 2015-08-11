@@ -57085,11 +57085,16 @@ store = Reflux.createStore({
     this.resetPaletteItem();
     return this.finish();
   },
-  finish: function() {
-    this._updateChanges();
+  invoke_callback: function() {
     if (typeof this.callback === "function") {
       this.callback(this.paletteItem);
     }
+    return this.callback = null;
+  },
+  finish: function() {
+    this._updateChanges();
+    this.invoke_callback();
+    this.callback = null;
     this.resetPaletteItem();
     this._updateChanges();
     if (!this.keepShowing) {
@@ -57147,7 +57152,7 @@ initialPalette = require('../data/initial-palette');
 
 initialLibrary = require('../data/internal-library');
 
-paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "deselect", "restoreSelection", "itemDropped"]);
+paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "deselect", "restoreSelection", "itemDropped", "update"]);
 
 paletteStore = Reflux.createStore({
   listenables: [paletteActions],
@@ -57206,6 +57211,14 @@ paletteStore = Reflux.createStore({
         p_item = ref[i];
         this.addToPalette(p_item);
       }
+    }
+    return this.updateChanges();
+  },
+  onUpdate: function(data) {
+    if (this.selectedPaletteItem) {
+      this.selectedPaletteItem = _.merge(this.selectedPaletteItem, data);
+    } else {
+      this.selectedPaletteItem = data;
     }
     return this.updateChanges();
   },
@@ -58857,7 +58870,7 @@ module.exports = React.createClass({
       license: this.refs.license.getDOMNode().value,
       source: 'external'
     };
-    return ImageDialogStore.actions.update({
+    return this.props.update({
       metadata: newMetaData
     });
   },
@@ -60607,7 +60620,8 @@ module.exports = React.createClass({
     })), this.state.selectedPaletteItem ? div({
       className: 'palette-about-image-info'
     }, this.state.selectedPaletteItem.metadata ? ImageMetadata({
-      metadata: this.state.selectedPaletteItem.metadata
+      metadata: this.state.selectedPaletteItem.metadata,
+      update: PaletteStore.actions.update
     }) : void 0) : void 0));
   }
 });
@@ -60713,6 +60727,7 @@ module.exports = React.createClass({
       className: 'preview-metadata'
     }, ImageMetadata({
       metadata: this.props.imageInfo.metadata,
+      update: ImageManger.actions.update,
       className: 'image-browser-preview-metadata'
     })) : void 0);
   }
