@@ -13,7 +13,7 @@ module.exports = React.createClass
       (div {className: 'modal-dialog'},
         (div {className: 'modal-dialog-wrapper'},
           (div {className: 'modal-dialog-title'},
-            (i {className: "modal-dialog-title-close fa fa-close", onClick: @close})
+            (i {className: "modal-dialog-title-close fa fa-close", onClick: @close}, "(close)")
             @props.title or 'Untitled Dialog'
           )
           (div {className: 'modal-dialog-workspace'}, @props.children)

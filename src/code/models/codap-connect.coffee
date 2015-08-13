@@ -106,7 +106,7 @@ module.exports = class CodapConnect
   codapRequestHandler: (cmd, callback) =>
     operation = cmd.operation
     args = cmd.args
-    paletteManager = require '../models/palette-manager'
+    paletteManager = require '../stores/palette-store'
     switch operation
       when 'saveState'
         log.info 'Received saveState request from CODAP.'

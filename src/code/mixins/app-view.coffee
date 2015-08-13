@@ -1,5 +1,5 @@
-Simulation     = require "../models/simulation"
-PaletteManager = require "../models/palette-manager"
+Simulation   = require "../models/simulation"
+PaletteStore = require "../stores/palette-store"
 
 module.exports =
 
@@ -33,7 +33,7 @@ module.exports =
 
     @_loadInitialData()
     @_registerUndoRedoKeys()
-    PaletteManager.store.listen @onPaletteChange
+    PaletteStore.store.listen @onPaletteChange
 
   componentDidUnmount: ->
     @addDeleteKeyHandler false
@@ -79,12 +79,6 @@ module.exports =
       selectedNode: selectedNode
       editingNode: editingNode
       selectedLink: selectedLink
-
-    # TODO: Why add selected to palette? maybe for drop-events? remove.
-    if selectedNode
-      PaletteManager.actions.addToPalette selectedNode
-
-    log.info 'updated selections'
 
   _loadInitialData: ->
     if @props.data?.length > 0

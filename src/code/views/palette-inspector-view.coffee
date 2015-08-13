@@ -1,9 +1,9 @@
 PaletteItemView  = React.createFactory require './palette-item-view'
-ImageMetadata  = React.createFactory require './image-metadata-view'
+ImageMetadata    = React.createFactory require './image-metadata-view'
 
 Draggable      = require '../mixins/draggable'
-PaletteManager = require "../models/palette-manager"
-ImageManager   = require "../models/image-manager"
+PaletteStore   = require "../stores/palette-store"
+ImageDialogStore     = require "../stores/image-dialog-store"
 tr             = require "../utils/translate"
 
 
@@ -13,7 +13,7 @@ PaletteAddImage = React.createFactory React.createClass
   mixins: [Draggable]
   render: ->
     (div {className: 'palette-image', 'data-droptype': 'new'},
-      (div {className: 'palette-add-image', onClick: -> ImageManager.actions.open(false) },
+      (div {className: 'palette-add-image', onClick: -> ImageDialogStore.actions.open.trigger(false) },
         (div { className: 'proto-node'},
           (div {className: 'img-background'},
             tr '~PALETTE-INSPECTOR.ADD_IMAGE'
@@ -25,10 +25,10 @@ PaletteAddImage = React.createFactory React.createClass
 module.exports = React.createClass
 
   displayName: 'PaletteInspector'
-  mixins: [ require '../mixins/palette-listening']
+  mixins: [ PaletteStore.mixin ]
 
   imageSelected: (index) ->
-    PaletteManager.actions.selectPaletteIndex(index)
+    PaletteStore.actions.selectPaletteIndex(index)
 
   render: ->
     index = 0
@@ -54,10 +54,10 @@ module.exports = React.createClass
           (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
           (img {src: @state.selectedPaletteImage})
         )
-        if @state.selectedPaletteImage
+        if @state.selectedPaletteItem
           (div {className: 'palette-about-image-info'},
-            if @state.selectedPaletteItem
-              (ImageMetadata {image: @state.selectedPaletteImage})
+            if @state.selectedPaletteItem.metadata
+              (ImageMetadata {metadata: @state.selectedPaletteItem.metadata})
           )
       )
     )

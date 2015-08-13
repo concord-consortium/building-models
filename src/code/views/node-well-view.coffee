@@ -1,12 +1,12 @@
 PaletteInspectorView  = React.createFactory require './palette-inspector-view'
-
+PaletteStore = require '../stores/palette-store'
 {div} = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'NodeWell'
 
-  mixins: [ require '../mixins/palette-listening']
+  mixins: [ PaletteStore.mixin ]
 
   getInitialState: ->
     nodes: []
