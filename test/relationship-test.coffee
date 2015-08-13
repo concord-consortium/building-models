@@ -22,8 +22,8 @@ describe "relationship", ->
     describe "using the defaults", ->
       it "should make a working relationship", ->
         undertest = new Relationship(@arguments)
-        undertest.text.should.equal "No relation defined"
-        undertest.formula.should.equal "out + 0 * in"
+        undertest.text.should.equal "increases"
+        undertest.formula.should.equal "1 * in"
 
   describe "evaluate", ->
     describe "a simple formula", ->
