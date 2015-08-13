@@ -1,24 +1,19 @@
+Migrations = require '../data/migrations/migrations'
+
 module.exports = class MySystemImporter
 
   constructor: (@system) ->
     undefined
 
   importData: (data) ->
+    Migrations.update(data)
     @importNodes data.nodes
     @importLinks data.links
 
   importNodes: (importNodes) ->
-    for data in importNodes
-      @system.importNode
-        key: data.key
-        data: data
+    for node in importNodes
+      @system.importNode node
 
   importLinks: (links) ->
-    for data in links
-      @system.importLink
-        sourceNode: data.sourceNodeKey
-        targetNode: data.targetNodeKey
-        sourceTerminal: data.sourceTerminal
-        targetTerminal: data.targetTerminal
-        title: data.title
-        color: data.color
+    for link in links
+      @system.importLink link
