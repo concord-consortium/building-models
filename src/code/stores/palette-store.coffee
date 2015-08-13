@@ -6,7 +6,8 @@ initialLibrary = require '../data/internal-library'
 paletteActions = Reflux.createActions(
   [
     "addToPalette", "loadData", "selectPaletteIndex",
-    "deselect", "restoreSelection", "itemDropped"
+    "deselect", "restoreSelection", "itemDropped",
+    "update"
   ]
 )
 
@@ -56,6 +57,14 @@ paletteStore   = Reflux.createStore
       for p_item in data.palette
         @addToPalette p_item
     @updateChanges()
+
+  onUpdate: (data) ->
+    if @selectedPaletteItem
+      @selectedPaletteItem = _.merge @selectedPaletteItem, data
+    else
+      @selectedPaletteItem = data
+    @updateChanges()
+
 
   addToPalette: (node) ->
     # ensure its in our library first

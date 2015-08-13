@@ -19,6 +19,8 @@ Node           = requireModel 'node'
 LinkManager    = requireModel 'link-manager'
 CodapConnect   = requireModel 'codap-connect'
 
+SerializedTestData = require "./serialized-test-data/v-0.1"
+
 describe 'GraphPrimitive', ->
   it 'GraphPrimitive should exists', ->
     GraphPrimitive.should.exist
@@ -201,17 +203,19 @@ describe 'Node', ->
 
     describe "Serialization", ->
       beforeEach ->
-        @serializedForm = """{"version":0.1,"filename":null,"nodes":[{"title":"a","x":10,"y":10,"key":"a"},{"title":"b","x":20,"y":20,"key":"b"}],"links":[{"title":"","color":"#777","sourceNodeKey":"a","sourceTerminal":"b","targetNodeKey":"b","targetTerminal":"a"}],"imageMetadata":{}}"""
+        @serializedForm = JSON.stringify SerializedTestData
+        @fakePalette = {a: 1, b:2}
 
       describe "toJsonString", ->
         it "should include nodes and links", ->
-          expectedValue = "{}"
           @nodeA.key.should.equal("a")
           @linkManager.addLink(@newLink)
           @linkManager.nodeKeys["a"].should.equal(@nodeA)
           @linkManager.toJsonString().should.match(/"nodes":/)
           @linkManager.toJsonString().should.match(/"links":/)
-          @linkManager.toJsonString().should.equal(@serializedForm)
+          @linkManager.toJsonString().should.not.match(/"description":/)
+          @linkManager.toJsonString().should.not.match(/"metadata":/)
+          @linkManager.toJsonString(@fakePalette).should.match(/"palette":/)
 
       describe "loadData", ->
         beforeEach ->

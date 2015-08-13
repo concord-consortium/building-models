@@ -34,7 +34,7 @@ module.exports = class Link extends GraphPrimitive
   toExport: ->
     "title": @title
     "color": @color
-    "sourceNodeKey": @sourceNode.key
+    "sourceNode": @sourceNode.key
     "sourceTerminal": @sourceTerminal
-    "targetNodeKey": @targetNode.key
+    "targetNode": @targetNode.key
     "targetTerminal": @targetTerminal

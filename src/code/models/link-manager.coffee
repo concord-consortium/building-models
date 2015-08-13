@@ -5,6 +5,7 @@ UndoRedo         = require '../utils/undo-redo'
 SelectionManager = require './selection-manager'
 PaletteStore   = require "../stores/palette-store"
 tr               = require "../utils/translate"
+Migrations       = require "../data/migrations/migrations"
 
 # LinkManager is the logical manager of Nodes and Links.
 module.exports   = class LinkManager
@@ -327,14 +328,13 @@ module.exports   = class LinkManager
     _.forEach palette, (node) ->
       if node.metadata
         imageMetadata[node.image] = node.metadata
-    return {
-      version: 0.1
+    data =
+      version: Migrations.latestVersion()
       filename: @filename
       palette: palette
       nodes: nodeExports
       links: linkExports
-      imageMetadata: imageMetadata
-    }
+    return data
 
   toJsonString: (palette) ->
     JSON.stringify @serialize palette
