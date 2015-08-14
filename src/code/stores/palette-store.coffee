@@ -7,7 +7,7 @@ paletteActions = Reflux.createActions(
   [
     "addToPalette", "loadData", "selectPaletteIndex",
     "deselect", "restoreSelection", "itemDropped",
-    "update"
+    "update", "deleteSelected"
   ]
 )
 
@@ -65,6 +65,16 @@ paletteStore   = Reflux.createStore
       @selectedPaletteItem = data
     @updateChanges()
 
+  onDeleteSelected: ->
+    if @deleteSelected()
+      @updateChanges()
+
+  deleteSelected: ->
+    if @selectedPaletteItem
+      @palette = _.without @palette, @selectedPaletteItem
+      @deselect()
+      return true
+    return false
 
   addToPalette: (node) ->
     # ensure its in our library first

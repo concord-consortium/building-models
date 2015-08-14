@@ -47,6 +47,14 @@ module.exports =
   # views/palette-inspector-view.coffee
   "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image"
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image"
+  "~PALETTE-INSPECTOR.DELETE": "Delete Image"
+
+  # views/palette-delete-view.coffee
+  "~PALETTE-DIALOG.TITLE":  "Delete image \"%{oldName}\"?"
+  "~PALETTE-DIALOG.DELETE": "Delete"
+  "~PALETTE-DIALOG.REPLACE": "and replace with"
+  "~PALETTE-DIALOG.OK": "ok"
+  "~PALETTE-DIALOG.CANCEL": "✖ cancel"
 
   # views/image-metadata-view.coffee
   "~METADATA.TITLE": "Title"

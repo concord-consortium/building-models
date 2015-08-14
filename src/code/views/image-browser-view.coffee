@@ -12,7 +12,7 @@ tr = require '../utils/translate'
 {div, img, i, span} = React.DOM
 
 module.exports = React.createClass
-  displayName: 'Image Browser'
+  displayName: 'ImageBrowser'
   mixins: [ImageDialogStore.mixin, PaletteStore.mixin]
 
   render:  ->
