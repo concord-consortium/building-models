@@ -1,5 +1,3 @@
-# TODO:  This should be split up into and ImageDialogStore and a DialogStore…
-
 PaletteStore = require './palette-store'
 
 paletteDialogActions = Reflux.createActions([
