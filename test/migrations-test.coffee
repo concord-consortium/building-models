@@ -6,9 +6,9 @@ describe "Migrations",  ->
     beforeEach ->
       @result = Migrations.update(originalData)
 
-    describe "the final version number as of 2015-08-12", ->
-      it "should be 1.0", ->
-        @result.version.should.equal 1.0
+    describe "the final version number as of 2015-08-13", ->
+      it "should be 1.1", ->
+        @result.version.should.equal 1.1
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -19,6 +19,13 @@ describe "Migrations",  ->
           for node in @result.nodes
             node.key.should.exist
             node.data.should.exist
+
+        describe "v-1.1 node changes", ->
+          it "should have initial node values", ->
+            for node in @result.nodes
+              node.data.initialValue.should.exist
+              node.data.isAccumulator.should.exist
+              node.data.isAccumulator.should.equal false
 
     describe "the palette", ->
       it "should exist", ->
@@ -31,3 +38,10 @@ describe "Migrations",  ->
     describe "the links", ->
       it "should have one link", ->
         @result.links.length.should.equal 1
+
+      describe "v-1.1 link changes", ->
+        it "should have valid relationship values", ->
+          for link in @result.links
+            link.relation.should.exist
+            link.relation.text.should.exist
+            link.relation.formula.should.exist

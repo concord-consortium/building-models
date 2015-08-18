@@ -323,11 +323,7 @@ module.exports   = class LinkManager
       node.toExport()
     linkExports = for key,link of @linkKeys
       link.toExport()
-    imageMetadata = {}
 
-    _.forEach palette, (node) ->
-      if node.metadata
-        imageMetadata[node.image] = node.metadata
     data =
       version: Migrations.latestVersion()
       filename: @filename

@@ -66,4 +66,6 @@ module.exports = class Node extends GraphPrimitive
       x: @x
       y: @y
       image: @image
+      initialValue: @initialValue
+      isAccumulator: @isAccumulator
     key: @key

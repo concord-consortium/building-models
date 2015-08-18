@@ -3,8 +3,8 @@ tr   = require "../utils/translate"
 
 module.exports = class Relationship
 
-  @defaultText:       tr "~RELATIONSHIP.NO_RELATION"
-  @defaultFormula:    "out + 0 * in"
+  @defaultText:       tr "~NODE-RELATION-EDIT.INCREASES"
+  @defaultFormula:    "1 * in"
   @defaultGraphThumb: "TBD"
   @errValue:          -1
 
@@ -40,3 +40,7 @@ module.exports = class Relationship
       @hasError = true
       @errHandler(error, @formula, inV, outV)
     result
+
+  toExport: ->
+    text        : @text
+    formula     : @formula

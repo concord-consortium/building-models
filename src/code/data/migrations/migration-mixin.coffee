@@ -7,13 +7,13 @@ module.exports =
     (data.version or 0) < @version
 
   name: ->
-    "#{@version} – #{@date} : #{@discription?}"
+    "#{@version} – #{@date} : #{@description}"
 
   update: (data) ->
     if @needsUpdate(data)
       @doUpdate(data)
-      log.info "✔ upgradded #{@name}"
+      log.info "✔ upgradded #{@name()}"
       data.version = @version
     else
-      log.info "  skipped : #{@name}"
+      log.info "  skipped : #{@name()}"
     data
