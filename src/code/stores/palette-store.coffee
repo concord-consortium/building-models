@@ -54,7 +54,7 @@ paletteStore   = Reflux.createStore
     # reload the palette
     @palette = []
     if data.palette
-      for p_item in data.palette
+      for p_item in data.palette by -1
         @addToPalette p_item
     @updateChanges()
 
