@@ -18,7 +18,7 @@ module.exports = React.createClass
 
         (ModalDialog {title: title, close: PaletteDialogStore.actions.close },
           (PaletteDeleteView {
-            palette: _.without @state.palette, @state.paletteItem
+            options: @state.options
             paletteItem: @state.paletteItem,
             replacement: @state.replacement,
             cancel: PaletteDialogStore.actions.close

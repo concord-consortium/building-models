@@ -69,3 +69,6 @@ module.exports = class Node extends GraphPrimitive
       initialValue: @initialValue
       isAccumulator: @isAccumulator
     key: @key
+
+  paletteItemIs: (paletteItem) ->
+    paletteItem.image is @image

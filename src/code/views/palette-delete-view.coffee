@@ -35,8 +35,8 @@ module.exports = React.createClass
         (div {className: "vertical-content"},
           (div {}, tr "~PALETTE-DIALOG.REPLACE")
           (ImagePickerView {
-            nodes: @props.palette or []
-            selected: @props.replacement or @props.palette?[0]
+            nodes: @props.options or []
+            selected: @props.replacement
             onChange: @changePalette
           })
         )

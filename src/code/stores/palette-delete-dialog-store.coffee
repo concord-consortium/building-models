@@ -17,14 +17,16 @@ store = Reflux.createStore
     @paletteItem  = null
     @palette      = PaletteStore.store.palette
     @replacement  = null
-
+    @deleted      = false
     @_updateChanges()
 
   enableListening: ->
     PaletteStore.store.listen @onPaletteSelect
 
   onOpen: ->
-    @showing = true
+    @showing      = true
+    @deleted      = false
+    @replacement  = PaletteStore.store.palette[0]
     @_updateChanges()
 
   onClose: ->
@@ -38,6 +40,7 @@ store = Reflux.createStore
     @close()
 
   onDelete: (item) ->
+    @deleted = true
     PaletteStore.actions.deleteSelected()
     @close()
 
@@ -56,7 +59,9 @@ store = Reflux.createStore
       showing     : @showing
       paletteItem : @paletteItem
       palette     : @palette
+      options     : _.without @palette, @paletteItem
       replacement : @replacement
+      deleted     : @deleted
     @trigger(data)
 
 
@@ -67,7 +72,9 @@ listenerMixin =
     showing     : store.showing
     paletteItem : store.paletteItem
     palette     : store.palette
+    options     : store.options
     replacement : store.replacement
+    deleted     : store.deleted
 
   componentDidMount: ->
     store.listen @onChange
@@ -77,7 +84,9 @@ listenerMixin =
       showing     : status.showing
       paletteItem : status.paletteItem
       palette     : status.palette
+      options     : status.options
       replacement : status.replacement
+      deleted     : status.deleted
 
 module.exports =
   store: store
