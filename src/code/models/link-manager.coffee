@@ -33,7 +33,7 @@ module.exports   = class LinkManager
 
   paletteDelete: (status) ->
     {deleted,paletteItem,replacement} = status
-    if deleted and paletteItem
+    if deleted and paletteItem and replacement
       for node in @getNodes()
         if node.paletteItemIs paletteItem
           @changeNode({image: replacement.image},node)
