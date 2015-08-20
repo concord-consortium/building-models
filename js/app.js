@@ -55936,7 +55936,7 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype.paletteDelete = function(status) {
     var deleted, i, len, node, paletteItem, ref, replacement, results;
     deleted = status.deleted, paletteItem = status.paletteItem, replacement = status.replacement;
-    if (deleted && paletteItem) {
+    if (deleted && paletteItem && replacement) {
       ref = this.getNodes();
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
@@ -57369,23 +57369,22 @@ store = Reflux.createStore({
     this.palette = PaletteStore.store.palette;
     this.replacement = null;
     this.deleted = false;
-    return this._updateChanges();
+    return this._notifyChanges();
   },
   enableListening: function() {
     return PaletteStore.store.listen(this.onPaletteSelect);
   },
   onOpen: function() {
     this.showing = true;
-    this.deleted = false;
-    this.replacement = PaletteStore.store.palette[0];
-    return this._updateChanges();
+    this._reset();
+    return this._notifyChanges();
   },
   onClose: function() {
     return this.close();
   },
   onSelect: function(replacement) {
     this.replacement = replacement;
-    return this._updateChanges();
+    return this._notifyChanges();
   },
   onCancel: function() {
     return this.close();
@@ -57398,19 +57397,26 @@ store = Reflux.createStore({
   onPaletteSelect: function(status) {
     this.paletteItem = status.selectedPaletteItem;
     this.palette = status.palette;
-    return this._updateChanges();
+    this.replacement = status.replacement;
+    this._reset();
+    return this._notifyChanges();
   },
   close: function() {
     this.showing = false;
-    return this._updateChanges();
+    return this._notifyChanges();
   },
-  _updateChanges: function() {
+  _reset: function() {
+    this.deleted = false;
+    this.options = _.without(this.palette, this.paletteItem);
+    return this.replacement = this.options[0];
+  },
+  _notifyChanges: function() {
     var data;
     data = {
       showing: this.showing,
       paletteItem: this.paletteItem,
       palette: this.palette,
-      options: _.without(this.palette, this.paletteItem),
+      options: this.options,
       replacement: this.replacement,
       deleted: this.deleted
     };
