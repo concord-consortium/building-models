@@ -57365,7 +57365,7 @@ store = Reflux.createStore({
   },
   initValues: function() {
     this.showing = false;
-    this.paletteItem = null;
+    this.paletteItem = PaletteStore.store.selectedPaletteItem;
     this.palette = PaletteStore.store.palette;
     this.replacement = null;
     this.deleted = false;
@@ -57398,9 +57398,7 @@ store = Reflux.createStore({
   onPaletteSelect: function(status) {
     this.paletteItem = status.selectedPaletteItem;
     this.palette = status.palette;
-    if (this.showing) {
-      return this._updateChanges();
-    }
+    return this._updateChanges();
   },
   close: function() {
     this.showing = false;
@@ -57515,11 +57513,11 @@ paletteStore = Reflux.createStore({
     }
   },
   onLoadData: function(data) {
-    var i, len, p_item, ref;
+    var i, p_item, ref;
     this.palette = [];
     if (data.palette) {
       ref = data.palette;
-      for (i = 0, len = ref.length; i < len; i++) {
+      for (i = ref.length - 1; i >= 0; i += -1) {
         p_item = ref[i];
         this.addToPalette(p_item);
       }
@@ -57702,7 +57700,8 @@ module.exports = function(e, callback) {
               title: (file.name.split('.'))[0],
               image: dataUrl,
               metadata: {
-                source: 'external'
+                source: 'external',
+                title: (file.name.split('.'))[0]
               }
             });
           });
@@ -59267,18 +59266,21 @@ module.exports = React.createClass({
   displayName: 'MyComputer',
   mixins: [ImageDialogStore.mixin, require('../mixins/image-dialog-view')],
   previewImage: function(e) {
-    var files, reader;
+    var files, reader, title;
     e.preventDefault();
     files = this.refs.file.getDOMNode().files;
     if (files.length === 0) {
       return alert(tr("~IMAGE-BROWSER.PLEASE_DROP_FILE"));
     } else if (this.hasValidImageExtension(files[0].name)) {
+      title = (files[0].name.split('.'))[0];
       reader = new FileReader();
       reader.onload = (function(_this) {
         return function(e) {
           return _this.imageSelected({
             image: e.target.result,
+            title: title,
             metadata: {
+              title: title,
               source: 'external'
             }
           });
@@ -60947,7 +60949,7 @@ module.exports = React.createClass({
       className: "vertical-content"
     }, div({}, tr("~PALETTE-DIALOG.DELETE")), oldImage ? img({
       src: oldImage
-    }) : void 0), div({
+    }) : void 0), this.props.options.length > 0 ? (div({
       className: "vertical-content"
     }, i({
       className: 'arrow-div fa fa-arrow-right'
@@ -60957,7 +60959,7 @@ module.exports = React.createClass({
       nodes: this.props.options || [],
       selected: this.props.replacement,
       onChange: this.changePalette
-    })), div({
+    }))) : void 0, div({
       className: "vertical-content buttons"
     }, div({}, button({
       className: 'button ok',
