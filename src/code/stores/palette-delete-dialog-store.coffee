@@ -14,7 +14,7 @@ store = Reflux.createStore
 
   initValues: ->
     @showing      = false
-    @paletteItem  = null
+    @paletteItem  = PaletteStore.store.selectedPaletteItem
     @palette      = PaletteStore.store.palette
     @replacement  = null
     @deleted      = false
@@ -47,8 +47,7 @@ store = Reflux.createStore
   onPaletteSelect: (status) ->
     @paletteItem = status.selectedPaletteItem
     @palette     = status.palette
-    if @showing
-      @_updateChanges()
+    @_updateChanges()
 
   close: ->
     @showing = false

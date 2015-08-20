@@ -29,17 +29,18 @@ module.exports = React.createClass
           if oldImage
             (img {src: oldImage})
         )
-        (div {className: "vertical-content"},
-          (i {className: 'arrow-div fa fa-arrow-right'})
-        )
-        (div {className: "vertical-content"},
-          (div {}, tr "~PALETTE-DIALOG.REPLACE")
-          (ImagePickerView {
-            nodes: @props.options or []
-            selected: @props.replacement
-            onChange: @changePalette
-          })
-        )
+        if @props.options.length > 0
+          (div {className: "vertical-content"},
+            (i {className: 'arrow-div fa fa-arrow-right'})
+          )
+          (div {className: "vertical-content"},
+            (div {}, tr "~PALETTE-DIALOG.REPLACE")
+            (ImagePickerView {
+              nodes: @props.options or []
+              selected: @props.replacement
+              onChange: @changePalette
+            })
+          )
         (div {className: "vertical-content buttons"},
           (div {},
             (button {className: 'button ok', onClick: @ok},
