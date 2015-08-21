@@ -60507,7 +60507,7 @@ module.exports = React.createClass({
 
 
 },{"./modal-view":599}],597:[function(require,module,exports){
-var ModalDialog, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
+var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
 
@@ -60515,13 +60515,15 @@ PaletteDeleteView = React.createFactory(require('./palette-delete-view'));
 
 PaletteDialogStore = require('../stores/palette-delete-dialog-store');
 
+NodesStore = require('../stores/nodes-store');
+
 tr = require('../utils/translate');
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
 
 module.exports = React.createClass({
   displayName: 'ModalPaletteDelete',
-  mixins: [PaletteDialogStore.mixin],
+  mixins: [PaletteDialogStore.mixin, NodesStore.mixin],
   render: function() {
     var ref1, title;
     return div({
@@ -60535,6 +60537,7 @@ module.exports = React.createClass({
       options: this.state.options,
       paletteItem: this.state.paletteItem,
       replacement: this.state.replacement,
+      paletteItemHasNodes: this.state.paletteItemHasNodes,
       cancel: PaletteDialogStore.actions.close,
       ok: PaletteDialogStore.actions["delete"]
     }))) : void 0);
@@ -60543,7 +60546,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":566,"../utils/translate":577,"./modal-dialog-view":596,"./palette-delete-view":604}],598:[function(require,module,exports){
+},{"../stores/nodes-store":565,"../stores/palette-delete-dialog-store":566,"../utils/translate":577,"./modal-dialog-view":596,"./palette-delete-view":604}],598:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61079,7 +61082,7 @@ module.exports = React.createClass({
       className: "vertical-content"
     }, div({}, tr("~PALETTE-DIALOG.DELETE")), oldImage ? img({
       src: oldImage
-    }) : void 0), this.props.options.length > 0 ? (div({
+    }) : void 0), this.props.options.length > 0 && this.props.paletteItemHasNodes ? (div({
       className: "vertical-content"
     }, i({
       className: 'arrow-div fa fa-arrow-right'
