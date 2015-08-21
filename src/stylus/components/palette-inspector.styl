@@ -59,6 +59,16 @@ pal-image-size()
         margin 5px
         font-size 12px
 
+  .palette-delete
+    margin-top: 10px
+    color light-blue
+    cursor pointer
+    i
+      margin-right 0.5em
+    &:hover
+      color dark-blue
+      transition 0.1s
+
   .palette-about-image
     margin-top 10px
     padding 15px 20px
@@ -70,9 +80,11 @@ pal-image-size()
         label-font(weight: bold)
         margin 0 5px
       img
-        max-width 20px
-        max-height 20px
-        vertical-align text-bottom
+        max-width 80px
+        max-height 80px
+        margin-right 1em
+        vertical-align text-top
+        float right
     .palette-about-image-info
       margin-top 20px
       line-height 1.75em

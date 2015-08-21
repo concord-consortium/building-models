@@ -3,9 +3,11 @@ Link             = require './link'
 DiagramNode      = require './node'
 UndoRedo         = require '../utils/undo-redo'
 SelectionManager = require './selection-manager'
-PaletteStore   = require "../stores/palette-store"
+PaletteStore     = require "../stores/palette-store"
 tr               = require "../utils/translate"
 Migrations       = require "../data/migrations/migrations"
+
+PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
 
 # LinkManager is the logical manager of Nodes and Links.
 module.exports   = class LinkManager
@@ -26,6 +28,15 @@ module.exports   = class LinkManager
 
     @undoRedoManager    = new UndoRedo.Manager debug: true
     @selectionManager   = new SelectionManager()
+    PaletteDeleteStore.store.listen @paletteDelete.bind(@)
+
+
+  paletteDelete: (status) ->
+    {deleted,paletteItem,replacement} = status
+    if deleted and paletteItem
+      for node in @getNodes()
+        if node.paletteItemIs paletteItem
+          @changeNode({image: replacement.image},node)
 
   undo: ->
     @undoRedoManager.undo()

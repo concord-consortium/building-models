@@ -1,13 +1,16 @@
 Reflux = require 'reflux'
 
-Placeholder     = React.createFactory require './placeholder-view'
-GlobalNav       = React.createFactory require './global-nav-view'
-LinkView        = React.createFactory require './link-view'
-NodeWell        = React.createFactory require './node-well-view'
-InspectorPanel  = React.createFactory require './inspector-panel-view'
-ImageBrowser    = React.createFactory require './image-browser-view'
-DocumentActions = React.createFactory require './document-actions-view'
+Placeholder        = React.createFactory require './placeholder-view'
+GlobalNav          = React.createFactory require './global-nav-view'
+LinkView           = React.createFactory require './link-view'
+NodeWell           = React.createFactory require './node-well-view'
+InspectorPanel     = React.createFactory require './inspector-panel-view'
+ImageBrowser       = React.createFactory require './image-browser-view'
+DocumentActions    = React.createFactory require './document-actions-view'
+ModalPaletteDelete = React.createFactory require './modal-palette-delete-view'
+
 ImageDialogStore    = require '../stores/image-dialog-store'
+
 
 {div, a} = React.DOM
 
@@ -76,5 +79,6 @@ module.exports = React.createClass
           (ImageBrowser
             linkManager: @props.linkManager
           )
+        (ModalPaletteDelete {})
       )
     )

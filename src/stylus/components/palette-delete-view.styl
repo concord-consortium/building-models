@@ -1,0 +1,100 @@
+.palette-delete-view
+  background-color white
+  margin 2em
+  padding 1em
+  font-family Montserrat, sans-serif
+  font-size 18px
+  color  rgb(11, 78, 93)
+
+  .horizontal-content
+    enable-flex(justify:flex-start, alignContent:flex-start, alignItems:flex-start)
+    div
+      margin-bottom 10px
+  button
+    modal-button()
+    cursor pointer
+    transition 0.2s
+    &:hover
+      color dark-blue
+
+  i
+    font-size 1.2em
+    margin-right 0.5em
+
+  img
+    vertical-align middle
+    max-height 50px
+    // border 2px solid
+    border-radius 5px
+    padding 4px
+
+  .vertical-content
+    text-align center
+    enable-flex(direction:column, justify:flex-start, alignContent:center, alignItems:center)
+    height 120px
+    min-width 80px
+    &.buttons
+      enable-flex(direction:column, justify:flex-end, alignContent:flex-end, alignItems:flex-end)
+      margin-left 30px
+
+  .arrow-div
+    margin: auto
+    font-size: 50
+
+  .delete-prompt
+    font-weight bold
+
+  .cancel
+    margin-top 0px
+    color light-blue
+    cursor pointer
+    float right
+    transition 0.2s
+    &:hover
+      color dark-blue
+
+  // We have to override some .image-picker styles see image-picker.styl
+  .image-picker
+    vertical-align middle
+    // margin-top 0px
+    margin 0px
+    padding 0em
+    cursor pointer
+    no-select()
+    box-shadow none
+
+    .selected-image
+      margin 0px
+      padding 0px
+      padding-right 20px
+      margin-right 0px
+      vertical-align middle
+      width inherit
+      height inherit
+
+    img
+      vertical-align middle
+      max-height 50px
+      // border 2px solid
+      border-radius 5px
+
+    .image-choices
+      position absolute
+      box-sizing border-box
+      overflow visible
+      cursor pointer
+      left 0px
+      width 250px
+      enable-flex(wp:wrap,justify:flex-start)
+      box-shadow 3px 3px 10px hsla(0,0,30,0.4)
+      &.closed
+        height 0px
+        padding 0px
+        border none
+        overflow hidden
+      .image-choice
+        max-height 3em
+        max-width  3em
+        vertical-align middle
+        img
+          border none

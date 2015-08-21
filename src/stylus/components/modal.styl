@@ -1,6 +1,5 @@
-
 dialog-width = 690px
-dialog-min-height = 375px
+dialog-min-height = 310px
 dialog-tab-width = 247px
 tab-border-radius = 5px
 
@@ -11,6 +10,7 @@ tab-border-radius = 5px
     absolute(0, 0, 0, 0)
     background-color #777
     opacity 0.5
+    z-index 2
 
   .modal-content
     absolute(0, 0, 0, 0)
@@ -20,9 +20,10 @@ tab-border-radius = 5px
       enable-flex(column, justify: center, alignItems: center)
 
       .modal-dialog-wrapper
-        width dialog-width
+        max-width dialog-width
         min-height dialog-min-height
         background-color #fff
+        z-index 3
 
         .modal-dialog-title
           label-font()
