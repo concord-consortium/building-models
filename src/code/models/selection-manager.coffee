@@ -1,7 +1,6 @@
 Importer    = require '../utils/importer'
 Link        = require './link'
 DiagramNode = require './node'
-UndoRedo    = require '../utils/undo-redo'
 tr          = require "../utils/translate"
 
 

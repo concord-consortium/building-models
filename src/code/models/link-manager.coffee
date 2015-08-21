@@ -26,7 +26,7 @@ module.exports   = class LinkManager
     @filename           = null
     @filenameListeners  = []
 
-    @undoRedoManager    = new UndoRedo.Manager debug: true
+    @undoRedoManager    = new UndoRedo.instance debug:true
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 
