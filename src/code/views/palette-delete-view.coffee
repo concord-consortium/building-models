@@ -29,7 +29,7 @@ module.exports = React.createClass
           if oldImage
             (img {src: oldImage})
         )
-        if @props.options.length > 0
+        if @props.options.length > 0 and @props.paletteItemHasNodes
           (div {className: "vertical-content"},
             (i {className: 'arrow-div fa fa-arrow-right'})
           )
