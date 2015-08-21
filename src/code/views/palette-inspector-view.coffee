@@ -6,6 +6,7 @@ Draggable          = require '../mixins/draggable'
 PaletteStore       = require "../stores/palette-store"
 ImageDialogStore   = require "../stores/image-dialog-store"
 PaletteDialogStore = require "../stores/palette-delete-dialog-store"
+NodesStore         = require "../stores/nodes-store"
 
 tr             = require "../utils/translate"
 
@@ -28,7 +29,7 @@ PaletteAddImage = React.createFactory React.createClass
 module.exports = React.createClass
 
   displayName: 'PaletteInspector'
-  mixins: [ PaletteStore.mixin ]
+  mixins: [ PaletteStore.mixin, NodesStore.mixin ]
 
   imageSelected: (index) ->
     PaletteStore.actions.selectPaletteIndex(index)
@@ -61,12 +62,19 @@ module.exports = React.createClass
             (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
             (img {src: @state.selectedPaletteImage})
           )
-          (div {className: 'palette-delete', onClick: @delete},
-            (span {},
-              (i {className: "fa fa-trash"})
-              (label {}, tr '~PALETTE-INSPECTOR.DELETE')
+          unless @state.palette.length is 1 and @state.paletteItemHasNodes
+            (div {className: 'palette-delete', onClick: @delete},
+              if @state.paletteItemHasNodes
+                (span {},
+                  (i {className: "fa fa-recycle"})
+                  (label {}, tr '~PALETTE-INSPECTOR.REPLACE')
+                )
+              else
+                (span {},
+                  (i {className: "fa fa-trash"})
+                  (label {}, tr '~PALETTE-INSPECTOR.DELETE')
+                )
             )
-          )
           (div {className: 'palette-about-image-info'},
             if @state.selectedPaletteItem.metadata
               (ImageMetadata {

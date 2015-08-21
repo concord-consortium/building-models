@@ -7,6 +7,7 @@ PaletteStore     = require "../stores/palette-store"
 tr               = require "../utils/translate"
 Migrations       = require "../data/migrations/migrations"
 
+NodesStore           = require "../stores/nodes-store"
 PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
 
 # LinkManager is the logical manager of Nodes and Links.
@@ -26,7 +27,7 @@ module.exports   = class LinkManager
     @filename           = null
     @filenameListeners  = []
 
-    @undoRedoManager    = new UndoRedo.instance debug:true
+    @undoRedoManager    = UndoRedo.instance debug:true
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 
@@ -162,11 +163,13 @@ module.exports   = class LinkManager
       for listener in @nodeListeners
         log.info("notifying of new Node")
         listener.handleNodeAdd(node)
+        NodesStore.actions.nodesChanged(@getNodes())
       return true
     return false
 
   _removeNode: (node) ->
     delete @nodeKeys[node.key]
+    NodesStore.actions.nodesChanged()
     for listener in @nodeListeners
       log.info("notifying of deleted Node")
       listener.handleNodeRm(node)

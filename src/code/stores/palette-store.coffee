@@ -1,6 +1,8 @@
 resizeImage    = require '../utils/resize-image'
 initialPalette = require '../data/initial-palette'
 initialLibrary = require '../data/internal-library'
+UndoRedo       = require '../utils/undo-redo'
+
 
 # TODO: Maybe loadData goes into some other action-set
 paletteActions = Reflux.createActions(
@@ -24,6 +26,7 @@ paletteStore   = Reflux.createStore
       link: ''
       license: ''
     @imageMetadata = _.clone @blankMetadata, true
+    @undoManger = UndoRedo.instance debug:true
 
   initializeLibrary: ->
     @library = {}
@@ -65,16 +68,19 @@ paletteStore   = Reflux.createStore
       @selectedPaletteItem = data
     @updateChanges()
 
-  onDeleteSelected: ->
-    if @deleteSelected()
-      @updateChanges()
 
-  deleteSelected: ->
-    if @selectedPaletteItem
-      @palette = _.without @palette, @selectedPaletteItem
-      @deselect()
-      return true
-    return false
+  onDeleteSelected: ->
+    paletteItem = @selectedPaletteItem
+    if paletteItem
+
+      @undoManger.createAndExecuteCommand 'deletePaletteItem',
+        execute: =>
+          @palette = _.without @palette, paletteItem
+          @deselect()
+          @updateChanges()
+        undo: =>
+          @addToPalette(paletteItem)
+          @updateChanges()
 
   addToPalette: (node) ->
     # ensure its in our library first
@@ -85,8 +91,15 @@ paletteStore   = Reflux.createStore
       @selectPaletteIndex(0)
 
   onAddToPalette: (node) ->
-    @addToPalette(node)
-    @updateChanges()
+    @undoManger.createAndExecuteCommand 'addPaletteItem',
+      execute: =>
+        @addToPalette(node)
+        @updateChanges()
+      undo:  =>
+        @palette = _.without @palette, node
+        @deselect()
+        @updateChanges()
+
 
   onSelectPaletteIndex: (index) ->
     # @moveToFront(index) if we want to add the selected item to front
@@ -96,7 +109,10 @@ paletteStore   = Reflux.createStore
   selectPaletteIndex: (index) ->
     @lastSelection = @selectedIndex = index
     @selectedPaletteItem  = @palette[index]
-    @selectedPaletteImage = @selectedPaletteItem.image
+    if @selectedPaletteItem
+      @selectedPaletteImage = @selectedPaletteItem.image
+    else
+      @deselect() # if we tried to select something non-existent, deselect.
 
   deselect: ->
     @lastSelection = @selectedIndex
