@@ -58321,7 +58321,7 @@ module.exports = {
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
   "~PALETTE-INSPECTOR.DELETE": "Delete Image",
   "~PALETTE-INSPECTOR.REPLACE": "Replace Image",
-  "~PALETTE-DIALOG.TITLE": "Delete image \"%{oldName}\"?",
+  "~PALETTE-DIALOG.TITLE": "Delete image?",
   "~PALETTE-DIALOG.DELETE": "Delete",
   "~PALETTE-DIALOG.REPLACE": "and replace with",
   "~PALETTE-DIALOG.OK": "ok",
@@ -60525,12 +60525,10 @@ module.exports = React.createClass({
   displayName: 'ModalPaletteDelete',
   mixins: [PaletteDialogStore.mixin, NodesStore.mixin],
   render: function() {
-    var ref1, title;
+    var title;
     return div({
       key: 'ModalPaletteDelete'
-    }, this.state.showing ? (title = tr("~PALETTE-DIALOG.TITLE", {
-      oldName: ((ref1 = this.state.paletteItem) != null ? ref1.title : void 0) || ""
-    }), ModalDialog({
+    }, this.state.showing ? (title = tr("~PALETTE-DIALOG.TITLE"), ModalDialog({
       title: title,
       close: PaletteDialogStore.actions.close
     }, PaletteDeleteView({
