@@ -56196,7 +56196,7 @@ module.exports = LinkManager = (function() {
   LinkManager.prototype._removeNode = function(node) {
     var i, len, listener, ref, results;
     delete this.nodeKeys[node.key];
-    NodesStore.actions.nodesChanged();
+    NodesStore.actions.nodesChanged(this.getNodes());
     ref = this.nodeListeners;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -56263,6 +56263,7 @@ module.exports = LinkManager = (function() {
 
   LinkManager.prototype._notifyNodeChanged = function(node) {
     var i, len, listener, ref;
+    NodesStore.actions.nodesChanged(this.getNodes());
     ref = this.nodeListeners;
     for (i = 0, len = ref.length; i < len; i++) {
       listener = ref[i];
