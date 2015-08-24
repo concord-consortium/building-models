@@ -1,6 +1,8 @@
 # based on https://github.com/jzaefferer/undo/blob/master/undo.js
 CodapConnect = require '../models/codap-connect'
 
+DEFAULT_CONTEXT_NAME = 'building-models'
+
 class Manager
   constructor: (options = {}) ->
     {@debug} = options
@@ -13,7 +15,7 @@ class Manager
   createAndExecuteCommand: (name, methods) ->
     result = @execute (new Command name, methods)
 
-    codapConnect = CodapConnect.instance 'building-models'
+    codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
     codapConnect.sendUndoableActionPerformed()
 
     result
@@ -120,7 +122,14 @@ class Command
   undo: (debug) -> @_call 'undo', debug
   redo: (debug) -> @_call 'execute', debug, 'redo'
 
-module.exports =
-  Manager: Manager
-  Command: Command
+instances = {}
+instance  = (opts={}) ->
+  {contextName, debug} = opts
+  contextName ||= DEFAULT_CONTEXT_NAME
+  instances[contextName] ||= new Manager(opts)
+  instances[contextName]
 
+module.exports =
+  instance: instance
+  constructor: Manager
+  command: Command

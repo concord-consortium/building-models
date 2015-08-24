@@ -1,6 +1,7 @@
 ModalDialog         = React.createFactory require './modal-dialog-view'
 PaletteDeleteView   = React.createFactory require './palette-delete-view'
 PaletteDialogStore  = require '../stores/palette-delete-dialog-store'
+NodesStore          = require '../stores/nodes-store'
 tr                  = require '../utils/translate'
 
 {div, ul, li, a} = React.DOM
@@ -8,19 +9,18 @@ tr                  = require '../utils/translate'
 module.exports = React.createClass
 
   displayName: 'ModalPaletteDelete'
-  mixins: [PaletteDialogStore.mixin]
+  mixins: [PaletteDialogStore.mixin, NodesStore.mixin]
 
   render: ->
     (div {key:'ModalPaletteDelete'},
       if @state.showing
-        title = tr "~PALETTE-DIALOG.TITLE",
-        oldName: @state.paletteItem?.title or ""
-
+        title = tr "~PALETTE-DIALOG.TITLE"
         (ModalDialog {title: title, close: PaletteDialogStore.actions.close },
           (PaletteDeleteView {
             options: @state.options
             paletteItem: @state.paletteItem,
             replacement: @state.replacement,
+            paletteItemHasNodes: @state.paletteItemHasNodes
             cancel: PaletteDialogStore.actions.close
             ok: PaletteDialogStore.actions.delete
           })

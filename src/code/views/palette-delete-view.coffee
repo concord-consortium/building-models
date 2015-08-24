@@ -16,38 +16,51 @@ module.exports = React.createClass
   ok: ->
     @props.ok?()
 
-  render: ->
-    oldName    = @props.paletteItem?.title or "blank"
-    newName    = @props.replacement?.title or "blank"
-    oldImage   = @props.paletteItem?.image
-    newImage   = @props.newPaletteItem?.image
+  showReplacement: ->
+    @props.options.length > 0 and @props.paletteItemHasNodes
 
+  renderArrow: ->
+    if @showReplacement()
+      (div {className: "vertical-content"},
+        (i {className: 'arrow-div fa fa-arrow-right'})
+      )
+
+  renderReplacement: ->
+    if @showReplacement()
+      (div {className: "vertical-content"},
+        (div {}, tr "~PALETTE-DIALOG.REPLACE")
+        (ImagePickerView {
+          nodes: @props.options or []
+          selected: @props.replacement
+          onChange: @changePalette
+        })
+      )
+
+  renderPaletteItem: ->
+    oldImage   = @props.paletteItem?.image
+    (div {className: "vertical-content"},
+      (div {}, tr "~PALETTE-DIALOG.DELETE")
+      if oldImage
+        (img {src: oldImage})
+    )
+
+  renderButtons: ->
+    (div {className: "vertical-content buttons"},
+      (div {},
+        (button {className: 'button ok', onClick: @ok},
+          (i {className: "fa fa-trash"}),
+           tr "~PALETTE-DIALOG.OK"
+        )
+      )
+    )
+
+  render: ->
     (div {className: 'palette-delete-view'},
       (div {className: 'horizontal-content'},
-        (div {className: "vertical-content"},
-          (div {}, tr "~PALETTE-DIALOG.DELETE")
-          if oldImage
-            (img {src: oldImage})
-        )
-        (div {className: "vertical-content"},
-          (i {className: 'arrow-div fa fa-arrow-right'})
-        )
-        (div {className: "vertical-content"},
-          (div {}, tr "~PALETTE-DIALOG.REPLACE")
-          (ImagePickerView {
-            nodes: @props.options or []
-            selected: @props.replacement
-            onChange: @changePalette
-          })
-        )
-        (div {className: "vertical-content buttons"},
-          (div {},
-            (button {className: 'button ok', onClick: @ok},
-              (i {className: "fa fa-trash"}),
-               tr "~PALETTE-DIALOG.OK"
-            )
-          )
-        )
+        @renderPaletteItem()
+        @renderArrow()
+        @renderReplacement()
+        @renderButtons()
       )
       (div {className: "cancel"},
         (a {onClick: @cancel}, tr "~PALETTE-DIALOG.CANCEL")

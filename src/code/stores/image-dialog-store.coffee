@@ -29,7 +29,6 @@ store = Reflux.createStore
     PaletteStore.store.listen @onPaletteSelect
 
   onOpen: (callback=false)->
-    PaletteStore.actions.deselect()
     @keepShowing = true
     @resetPaletteItem()
     @showingDialog = true
@@ -66,7 +65,7 @@ store = Reflux.createStore
   invoke_callback: ->
     @callback?(@paletteItem)
     @callback = null # once only
-    
+
   finish: ->
     @_updateChanges()
     @invoke_callback()
