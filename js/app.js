@@ -61068,38 +61068,54 @@ module.exports = React.createClass({
     var base;
     return typeof (base = this.props).ok === "function" ? base.ok() : void 0;
   },
-  render: function() {
-    var newImage, newName, oldImage, oldName, ref1, ref2, ref3, ref4;
-    oldName = ((ref1 = this.props.paletteItem) != null ? ref1.title : void 0) || "blank";
-    newName = ((ref2 = this.props.replacement) != null ? ref2.title : void 0) || "blank";
-    oldImage = (ref3 = this.props.paletteItem) != null ? ref3.image : void 0;
-    newImage = (ref4 = this.props.newPaletteItem) != null ? ref4.image : void 0;
+  showReplacement: function() {
+    return this.props.options.length > 0 && this.props.paletteItemHasNodes;
+  },
+  renderArrow: function() {
+    if (this.showReplacement()) {
+      return div({
+        className: "vertical-content"
+      }, i({
+        className: 'arrow-div fa fa-arrow-right'
+      }));
+    }
+  },
+  renderReplacement: function() {
+    if (this.showReplacement()) {
+      return div({
+        className: "vertical-content"
+      }, div({}, tr("~PALETTE-DIALOG.REPLACE")), ImagePickerView({
+        nodes: this.props.options || [],
+        selected: this.props.replacement,
+        onChange: this.changePalette
+      }));
+    }
+  },
+  renderPaletteItem: function() {
+    var oldImage, ref1;
+    oldImage = (ref1 = this.props.paletteItem) != null ? ref1.image : void 0;
     return div({
-      className: 'palette-delete-view'
-    }, div({
-      className: 'horizontal-content'
-    }, div({
       className: "vertical-content"
     }, div({}, tr("~PALETTE-DIALOG.DELETE")), oldImage ? img({
       src: oldImage
-    }) : void 0), this.props.options.length > 0 && this.props.paletteItemHasNodes ? (div({
-      className: "vertical-content"
-    }, i({
-      className: 'arrow-div fa fa-arrow-right'
-    })), div({
-      className: "vertical-content"
-    }, div({}, tr("~PALETTE-DIALOG.REPLACE")), ImagePickerView({
-      nodes: this.props.options || [],
-      selected: this.props.replacement,
-      onChange: this.changePalette
-    }))) : void 0, div({
+    }) : void 0);
+  },
+  renderButtons: function() {
+    return div({
       className: "vertical-content buttons"
     }, div({}, button({
       className: 'button ok',
       onClick: this.ok
     }, i({
       className: "fa fa-trash"
-    }), tr("~PALETTE-DIALOG.OK"))))), div({
+    }), tr("~PALETTE-DIALOG.OK"))));
+  },
+  render: function() {
+    return div({
+      className: 'palette-delete-view'
+    }, div({
+      className: 'horizontal-content'
+    }, this.renderPaletteItem(), this.renderArrow(), this.renderReplacement(), this.renderButtons()), div({
       className: "cancel"
     }, a({
       onClick: this.cancel
