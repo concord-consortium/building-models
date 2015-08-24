@@ -14,9 +14,7 @@ module.exports = React.createClass
   render: ->
     (div {key:'ModalPaletteDelete'},
       if @state.showing
-        title = tr "~PALETTE-DIALOG.TITLE",
-        oldName: @state.paletteItem?.title or ""
-
+        title = tr "~PALETTE-DIALOG.TITLE"
         (ModalDialog {title: title, close: PaletteDialogStore.actions.close },
           (PaletteDeleteView {
             options: @state.options

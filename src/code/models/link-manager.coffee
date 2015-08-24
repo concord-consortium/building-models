@@ -169,7 +169,7 @@ module.exports   = class LinkManager
 
   _removeNode: (node) ->
     delete @nodeKeys[node.key]
-    NodesStore.actions.nodesChanged()
+    NodesStore.actions.nodesChanged(@getNodes())
     for listener in @nodeListeners
       log.info("notifying of deleted Node")
       listener.handleNodeRm(node)
@@ -204,6 +204,7 @@ module.exports   = class LinkManager
 
 
   _notifyNodeChanged: (node) ->
+    NodesStore.actions.nodesChanged(@getNodes())
     for listener in @nodeListeners
       listener.handleNodeChange(node)
     @_maybeChangeSelectedItem node

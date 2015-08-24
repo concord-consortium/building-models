@@ -51,7 +51,7 @@ module.exports =
   "~PALETTE-INSPECTOR.REPLACE": "Replace Image"
 
   # views/palette-delete-view.coffee
-  "~PALETTE-DIALOG.TITLE":  "Delete image \"%{oldName}\"?"
+  "~PALETTE-DIALOG.TITLE":  "Delete image?"
   "~PALETTE-DIALOG.DELETE": "Delete"
   "~PALETTE-DIALOG.REPLACE": "and replace with"
   "~PALETTE-DIALOG.OK": "ok"
