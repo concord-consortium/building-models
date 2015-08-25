@@ -51,5 +51,3 @@ module.exports =
   actions: nodeActions
   store: nodeStore
   mixin: mixin
-
-window.PaletteStore = module.exports
