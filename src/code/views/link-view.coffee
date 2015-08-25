@@ -21,9 +21,6 @@ module.exports = React.createClass
       handleConnect: @handleConnect
       handleClick:   @handleClick
 
-    @props.linkManager.addLinkListener @
-    @props.linkManager.addNodeListener @
-
     @props.selectionManager.addSelectionListener (manager) =>
       lastLinkSelection = @state.selectedLink
       selectedNode      = manager.getInspection()[0] or null
@@ -110,39 +107,31 @@ module.exports = React.createClass
 
   onNodeMoved: (node_event) ->
     @handleEvent =>
-      @props.linkManager.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+      @linkManager.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
 
   onNodeMoveComplete: (node_event) ->
     @handleEvent =>
       {left, top} = node_event.extra.position
-      @props.linkManager.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+      @linkManager.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
 
   onNodeDeleted: (node_event) ->
     @handleEvent =>
-      @props.linkManager.removeNode node_event.nodeKey
+      @linkManager.removeNode node_event.nodeKey
 
   handleConnect: (info, evnt) ->
     @handleEvent =>
-      @props.linkManager.newLinkFromEvent info, evnt
+      @linkManager.newLinkFromEvent info, evnt
 
   handleClick: (connection, evnt) ->
     @handleEvent =>
-      @props.linkManager.selectLink connection.linkModel
-
-  handleLinkAdd: (info, evnt) ->
-    @setState links: @props.linkManager.getLinks()
-    true
-
-  handleLinkRm: ->
-    @setState links: @props.linkManager.getLinks()
-    false
+      @linkManager.selectLink connection.linkModel
 
   handleNodeChange: (nodeData) ->
-    @setState nodes: @props.linkManager.getNodes()
+    @setState nodes: @linkManager.getNodes()
     true
 
   handleNodeAdd: (nodeData) ->
-    @setState nodes: @props.linkManager.getNodes()
+    @setState nodes: @linkManager.getNodes()
     true
 
   handleNodeMove: (nodeData) ->

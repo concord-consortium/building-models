@@ -1,345 +1,364 @@
-Importer         = require '../utils/importer'
-Link             = require './link'
-DiagramNode      = require './node'
-UndoRedo         = require '../utils/undo-redo'
-SelectionManager = require './selection-manager'
-PaletteStore     = require "../stores/palette-store"
-tr               = require "../utils/translate"
-Migrations       = require "../data/migrations/migrations"
+Importer            = require '../utils/importer'
+Link                = require './link'
+DiagramNode         = require './node'
+UndoRedo            = require '../utils/undo-redo'
+SelectionManager    = require './selection-manager'
+PaletteStore        = require "../stores/palette-store"
+tr                  = require "../utils/translate"
+Migrations          = require "../data/migrations/migrations"
 
-NodesStore           = require "../stores/nodes-store"
+NodesStore          = require "../stores/nodes-store"
 PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
 
-# LinkManager is the logical manager of Nodes and Links.
-module.exports   = class LinkManager
-  @instances: {} # map of context -> instance
+LinkManager  = (context) ->
+  Reflux.createStore
 
-  @instance: (context) ->
-    LinkManager.instances[context] ?= new LinkManager context
-    LinkManager.instances[context]
+    init: (context) ->
+      @linkKeys           = {}
+      @nodeKeys           = {}
+      @linkListeners      = []
+      @nodeListeners      = []
+      @loadListeners      = []
+      @filename           = null
+      @filenameListeners  = []
 
-  constructor: (context) ->
-    @linkKeys           = {}
-    @nodeKeys           = {}
-    @linkListeners      = []
-    @nodeListeners      = []
-    @loadListeners      = []
-    @filename           = null
-    @filenameListeners  = []
-
-    @undoRedoManager    = UndoRedo.instance debug:true
-    @selectionManager   = new SelectionManager()
-    PaletteDeleteStore.store.listen @paletteDelete.bind(@)
+      @undoRedoManager    = UndoRedo.instance debug:true, context:context
+      @selectionManager   = new SelectionManager()
+      PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 
 
-  paletteDelete: (status) ->
-    {deleted,paletteItem,replacement} = status
-    if deleted and paletteItem and replacement
-      for node in @getNodes()
-        if node.paletteItemIs paletteItem
-          @changeNode({image: replacement.image},node)
+    paletteDelete: (status) ->
+      {deleted,paletteItem,replacement} = status
+      if deleted and paletteItem and replacement
+        for node in @getNodes()
+          if node.paletteItemIs paletteItem
+            @changeNode({image: replacement.image},node)
 
-  undo: ->
-    @undoRedoManager.undo()
+    undo: ->
+      @undoRedoManager.undo()
 
-  redo: ->
-    @undoRedoManager.redo()
+    redo: ->
+      @undoRedoManager.redo()
 
-  setSaved: ->
-    @undoRedoManager.save()
+    setSaved: ->
+      @undoRedoManager.save()
 
-  revertToOriginal: ->
-    @undoRedoManager.revertToOriginal()
+    revertToOriginal: ->
+      @undoRedoManager.revertToOriginal()
 
-  revertToLastSave: ->
-    @undoRedoManager.revertToLastSave()
+    revertToLastSave: ->
+      @undoRedoManager.revertToLastSave()
+
+    hideUndoRedo: (hide) ->
+      @undoRedoManager.hideUndoRedo(hide)
 
   addChangeListener: (listener) ->
     log.info("adding change listener")
     @undoRedoManager.addChangeListener listener
 
-  addLinkListener: (listener) ->
-    log.info("adding link listener")
-    @linkListeners.push listener
+    addNodeListener: (listener) ->
+      log.info("adding node listener")
+      @nodeListeners.push listener
 
-  addNodeListener: (listener) ->
-    log.info("adding node listener")
-    @nodeListeners.push listener
+    addFilenameListener: (listener) ->
+      log.info("adding filename listener #{listener}")
+      @filenameListeners.push listener
 
-  addFilenameListener: (listener) ->
-    log.info("adding filename listener #{listener}")
-    @filenameListeners.push listener
+    setFilename: (filename) ->
+      @filename = filename
+      for listener in @filenameListeners
+        listener filename
 
-  setFilename: (filename) ->
-    @filename = filename
-    for listener in @filenameListeners
-      listener filename
+    getLinks: ->
+      (value for key, value of @linkKeys)
 
-  getLinks: ->
-    (value for key, value of @linkKeys)
+    getNodes: ->
+      (value for key, value of @nodeKeys)
 
-  getNodes: ->
-    (value for key, value of @nodeKeys)
+    hasLink: (link) ->
+      @linkKeys[link.terminalKey()]?
 
-  hasLink: (link) ->
-    @linkKeys[link.terminalKey()]?
+    hasNode: (node) ->
+      @nodeKeys[node.key]?
 
-  hasNode: (node) ->
-    @nodeKeys[node.key]?
+    importLink: (linkSpec) ->
+      sourceNode = @nodeKeys[linkSpec.sourceNode]
+      targetNode = @nodeKeys[linkSpec.targetNode]
+      linkSpec.sourceNode = sourceNode
+      linkSpec.targetNode = targetNode
+      link = new Link(linkSpec)
+      @addLink(link)
 
-  importLink: (linkSpec) ->
-    sourceNode = @nodeKeys[linkSpec.sourceNode]
-    targetNode = @nodeKeys[linkSpec.targetNode]
-    linkSpec.sourceNode = sourceNode
-    linkSpec.targetNode = targetNode
-    link = new Link(linkSpec)
-    @addLink(link)
+    addLink: (link) ->
+      @undoRedoManager.createAndExecuteCommand 'addLink',
+        execute: => @_addLink link
+        undo: => @_removeLink link
 
-  addLink: (link) ->
-    @undoRedoManager.createAndExecuteCommand 'addLink',
-      execute: => @_addLink link
-      undo: => @_removeLink link
+    _addLink: (link) ->
+      if link.sourceNode is link.targetNode
+        return false
+      if @hasLink link
+        return false
+      else
+        @linkKeys[link.terminalKey()] = link
+        @nodeKeys[link.sourceNode.key].addLink(link)
+        @nodeKeys[link.targetNode.key].addLink(link)
+        for listener in @linkListeners
+          log.info "notifying of new link: #{link.terminalKey()}"
+          listener.handleLinkAdd(link)
+        return true
 
-  _addLink: (link) ->
-    if link.sourceNode is link.targetNode
-      return false
-    if @hasLink link
-      return false
-    else
-      @linkKeys[link.terminalKey()] = link
-      @nodeKeys[link.sourceNode.key].addLink(link)
-      @nodeKeys[link.targetNode.key].addLink(link)
+    removeLink: (link) ->
+      @undoRedoManager.createAndExecuteCommand 'removeLink',
+        execute: => @_removeLink link
+        undo: => @_addLink link
+
+    _removeLink: (link) ->
+      delete @linkKeys[link.terminalKey()]
+      @nodeKeys[link.sourceNode.key]?.removeLink(link)
+      @nodeKeys[link.targetNode.key]?.removeLink(link)
       for listener in @linkListeners
-        log.info "notifying of new link: #{link.terminalKey()}"
-        listener.handleLinkAdd(link)
-      return true
+        log.info("notifying of deleted Link")
+        listener.handleLinkRm(link)
 
-  removeLink: (link) ->
-    @undoRedoManager.createAndExecuteCommand 'removeLink',
-      execute: => @_removeLink link
-      undo: => @_addLink link
+    importNode: (nodeSpec) ->
+      node = new DiagramNode(nodeSpec.data, nodeSpec.key)
+      @addNode(node)
+      node
 
-  _removeLink: (link) ->
-    delete @linkKeys[link.terminalKey()]
-    @nodeKeys[link.sourceNode.key]?.removeLink(link)
-    @nodeKeys[link.targetNode.key]?.removeLink(link)
-    for listener in @linkListeners
-      log.info("notifying of deleted Link")
-      listener.handleLinkRm(link)
+    addNode: (node) ->
+      @undoRedoManager.createAndExecuteCommand 'addNode',
+        execute: => @_addNode node
+        undo: => @_removeNode node
 
-  importNode: (nodeSpec) ->
-    node = new DiagramNode(nodeSpec.data, nodeSpec.key)
-    @addNode(node)
-    node
+    removeNode: (nodeKey) ->
+      node = @nodeKeys[nodeKey]
 
-  addNode: (node) ->
-    @undoRedoManager.createAndExecuteCommand 'addNode',
-      execute: => @_addNode node
-      undo: => @_removeNode node
+      # create a copy of the list of links
+      links = node.links.slice()
 
-  removeNode: (nodeKey) ->
-    node = @nodeKeys[nodeKey]
+      @undoRedoManager.createAndExecuteCommand 'removeNode',
+        execute: =>
+          @_removeLink(link) for link in links
+          @_removeNode node
+        undo: =>
+          @_addNode node
+          @_addLink(link) for link in links
 
-    # create a copy of the list of links
-    links = node.links.slice()
+    _addNode: (node) ->
+      unless @hasNode node
+        @nodeKeys[node.key] = node
+        for listener in @nodeListeners
+          log.info("notifying of new Node")
+          listener.handleNodeAdd(node)
+          NodesStore.actions.nodesChanged(@getNodes())
+        return true
+      return false
 
-    @undoRedoManager.createAndExecuteCommand 'removeNode',
-      execute: =>
-        @_removeLink(link) for link in links
-        @_removeNode node
-      undo: =>
-        @_addNode node
-        @_addLink(link) for link in links
-
-  _addNode: (node) ->
-    unless @hasNode node
-      @nodeKeys[node.key] = node
+    _removeNode: (node) ->
+      delete @nodeKeys[node.key]
+      NodesStore.actions.nodesChanged(@getNodes())
       for listener in @nodeListeners
-        log.info("notifying of new Node")
-        listener.handleNodeAdd(node)
-        NodesStore.actions.nodesChanged(@getNodes())
-      return true
-    return false
+        log.info("notifying of deleted Node")
+        listener.handleNodeRm(node)
 
-  _removeNode: (node) ->
-    delete @nodeKeys[node.key]
-    NodesStore.actions.nodesChanged(@getNodes())
-    for listener in @nodeListeners
-      log.info("notifying of deleted Node")
-      listener.handleNodeRm(node)
+    moveNodeCompleted: (nodeKey, pos, originalPos) ->
+      node = @nodeKeys[nodeKey]
+      return unless node
+      @undoRedoManager.createAndExecuteCommand 'moveNode',
+        execute: => @moveNode node.key, pos, originalPos
+        undo: => @moveNode node.key, originalPos, pos
 
-  moveNodeCompleted: (nodeKey, pos, originalPos) ->
-    node = @nodeKeys[nodeKey]
-    return unless node
-    @undoRedoManager.createAndExecuteCommand 'moveNode',
-      execute: => @moveNode node.key, pos, originalPos
-      undo: => @moveNode node.key, originalPos, pos
+    moveNode: (nodeKey, pos, originalPos) ->
+      node = @nodeKeys[nodeKey]
+      return unless node
+      node.x = pos.left
+      node.y = pos.top
+      for listener in @nodeListeners
+        log.info("notifying of NodeMove")
+        listener.handleNodeMove(node)
 
-  moveNode: (nodeKey, pos, originalPos) ->
-    node = @nodeKeys[nodeKey]
-    return unless node
-    node.x = pos.left
-    node.y = pos.top
-    for listener in @nodeListeners
-      log.info("notifying of NodeMove")
-      listener.handleNodeMove(node)
+    selectedNode: ->
+      @selectionManager.selection(SelectionManager.NodeInpsection)[0] or null
 
-  selectedNode: ->
-    @selectionManager.selection(SelectionManager.NodeInpsection)[0] or null
+    editingNode: ->
+      @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
 
-  editingNode: ->
-    @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
+    editNode: (nodeKey) ->
+      @selectionManager.selectForTitleEditing(@nodeKeys[nodeKey])
 
-  editNode: (nodeKey) ->
-    @selectionManager.selectForTitleEditing(@nodeKeys[nodeKey])
-
-  selectNode: (nodeKey) ->
-    @selectionManager.selectForInspection(@nodeKeys[nodeKey])
+    selectNode: (nodeKey) ->
+      @selectionManager.selectForInspection(@nodeKeys[nodeKey])
 
 
-  _notifyNodeChanged: (node) ->
-    NodesStore.actions.nodesChanged(@getNodes())
-    for listener in @nodeListeners
-      listener.handleNodeChange(node)
-    @_maybeChangeSelectedItem node
+    _notifyNodeChanged: (node) ->
+      NodesStore.actions.nodesChanged(@getNodes())
+      for listener in @nodeListeners
+        listener.handleNodeChange(node)
+      @_maybeChangeSelectedItem node
 
-  changeNode: (data, node) ->
-    node = node or @selectedNode()
-    if node
-      originalData =
-        title: node.title
-        image: node.image
-        color: node.color
-        initialValue: node.initialValue
-        isAccumulator: node.isAccumulator
+    changeNode: (data, node) ->
+      node = node or @selectedNode()
+      if node
+        originalData =
+          title: node.title
+          image: node.image
+          color: node.color
+          initialValue: node.initialValue
+          isAccumulator: node.isAccumulator
 
-      @undoRedoManager.createAndExecuteCommand 'changeNode',
-        execute: => @_changeNode node, data
-        undo: => @_changeNode node, originalData
+        @undoRedoManager.createAndExecuteCommand 'changeNode',
+          execute: => @_changeNode node, data
+          undo: => @_changeNode node, originalData
 
-  _changeNode: (node, data) ->
-    log.info "Change for #{node.title}"
-    for key in ['title','image','color', 'initialValue', 'isAccumulator']
-      if data.hasOwnProperty key
-        log.info "Change #{key} for #{node.title}"
-        node[key] = data[key]
-    @_notifyNodeChanged(node)
+    _changeNode: (node, data) ->
+      log.info "Change for #{node.title}"
+      for key in ['title','image','color', 'initialValue', 'isAccumulator']
+        if data.hasOwnProperty key
+          log.info "Change #{key} for #{node.title}"
+          node[key] = data[key]
+      @_notifyNodeChanged(node)
 
 
-  changeNodeWithKey: (key, data) ->
-    node = @nodeKeys[ key ]
-    if node
-      @changeNode(data,node)
+    changeNodeWithKey: (key, data) ->
+      node = @nodeKeys[ key ]
+      if node
+        @changeNode(data,node)
 
-  selectLink: (link) ->
-    @selectionManager.selectLink(link)
+    selectLink: (link) ->
+      @selectionManager.selectLink(link)
 
-  changeLink: (link, changes={}) ->
-    if changes.deleted
+    changeLink: (link, changes={}) ->
+      if changes.deleted
+        @removeSelectedLink()
+      else if link
+        originalData =
+          title: link.title
+          color: link.color
+          relation: link.relation
+        @undoRedoManager.createAndExecuteCommand 'changeLink',
+          execute: => @_changeLink link,  changes
+          undo: => @_changeLink link, originalData
+
+    _maybeChangeSelectedItem: (item) ->
+      # TODO: This is kind of hacky:
+      if @selectionManager.isSelected(item)
+        @selectionManager._notifySelectionChange()
+
+    _changeLink: (link, changes) ->
+      log.info "Change  for #{link.title}"
+      for key in ['title','color', 'relation']
+        if changes[key]
+          log.info "Change #{key} for #{link.title}"
+          link[key] = changes[key]
+      @_maybeChangeSelectedItem link
+      @updateListeners()
+
+    _nameForNode: (node) ->
+      @nodeKeys[node]
+
+    newLinkFromEvent: (info) ->
+      newLink = {}
+      startKey = $(info.source).data('node-key') or 'undefined'
+      endKey   = $(info.target).data('node-key') or 'undefined'
+      startTerminal = if info.connection.endpoints[0].anchor.type is "Top" then "a" else "b"
+      endTerminal   = if info.connection.endpoints[1].anchor.type is "Top" then "a" else "b"
+      @importLink
+        sourceNode:startKey,
+        targetNode:endKey,
+        sourceTerminal: startTerminal,
+        targetTerminal: endTerminal,
+        color: info.color,
+        title: info.title
+      true
+
+    deleteAll: ->
+      for node of @nodeKeys
+        @removeNode node
+      @setFilename 'New Model'
+      @undoRedoManager.clearHistory()
+
+    deleteSelected: ->
+      log.info "Deleting selected items"
       @removeSelectedLink()
-    else if link
-      originalData =
-        title: link.title
-        color: link.color
-        relation: link.relation
-      @undoRedoManager.createAndExecuteCommand 'changeLink',
-        execute: => @_changeLink link,  changes
-        undo: => @_changeLink link, originalData
+      @removeSelectedNode()
 
-  _maybeChangeSelectedItem: (item) ->
-    # TODO: This is kind of hacky:
-    if @selectionManager.isSelected(item)
-      @selectionManager._notifySelectionChange()
+    removeSelectedNode: ->
+      nodeKey = @selectedNode()?.key
+      if nodeKey
+        @removeNode nodeKey
+        @selectionManager.clearSelection()
 
-  _changeLink: (link, changes) ->
-    log.info "Change  for #{link.title}"
-    for key in ['title','color', 'relation']
-      if changes[key]
-        log.info "Change #{key} for #{link.title}"
-        link[key] = changes[key]
-    @_maybeChangeSelectedItem link
+    removeSelectedLink: ->
+      selectedLink = @selectionManager.getLinkSelection()[0] or null
+      if selectedLink
+        @removeLink(selectedLink)
+        @selectionManager.clearLinkSelection()
 
-    for listener in @linkListeners
-      log.info "link changed: #{link.terminalKey()}"
-      listener.changeLink? link
+    removeLinksForNode: (node) ->
+      @removeLink(link) for link in node.links
 
-  _nameForNode: (node) ->
-    @nodeKeys[node]
+    loadData: (data) ->
+      log.info "json success"
+      importer = new Importer(@)
+      importer.importData(data)
+      @setFilename data.filename or 'New Model'
+      PaletteStore.actions.loadData(data)
+      @undoRedoManager.clearHistory()
 
-  newLinkFromEvent: (info) ->
-    newLink = {}
-    startKey = $(info.source).data('node-key') or 'undefined'
-    endKey   = $(info.target).data('node-key') or 'undefined'
-    startTerminal = if info.connection.endpoints[0].anchor.type is "Top" then "a" else "b"
-    endTerminal   = if info.connection.endpoints[1].anchor.type is "Top" then "a" else "b"
-    @importLink
-      sourceNode:startKey,
-      targetNode:endKey,
-      sourceTerminal: startTerminal,
-      targetTerminal: endTerminal,
-      color: info.color,
-      title: info.title
-    true
+    loadDataFromUrl: (url) =>
+      log.info("loading local data")
+      log.info("url " + url)
+      $.ajax
+        url: url,
+        dataType: 'json',
+        success: (data) =>
+          @loadData data
+        error: (xhr, status, err) ->
+          log.error(url, status, err.toString())
 
-  deleteAll: ->
-    for node of @nodeKeys
-      @removeNode node
-    @setFilename 'New Model'
-    @undoRedoManager.clearHistory()
+    serialize: (palette) ->
+      nodeExports = for key,node of @nodeKeys
+        node.toExport()
+      linkExports = for key,link of @linkKeys
+        link.toExport()
 
-  deleteSelected: ->
-    log.info "Deleting selected items"
-    @removeSelectedLink()
-    @removeSelectedNode()
+      data =
+        version: Migrations.latestVersion()
+        filename: @filename
+        palette: palette
+        nodes: nodeExports
+        links: linkExports
+      return data
 
-  removeSelectedNode: ->
-    nodeKey = @selectedNode()?.key
-    if nodeKey
-      @removeNode nodeKey
-      @selectionManager.clearSelection()
+    toJsonString: (palette) ->
+      JSON.stringify @serialize palette
 
-  removeSelectedLink: ->
-    selectedLink = @selectionManager.getLinkSelection()[0] or null
-    if selectedLink
-      @removeLink(selectedLink)
-      @selectionManager.clearLinkSelection()
+    updateListeners: ->
+      data =
+        nodes: @nodes
+        links: @links
+      @trigger(data)
 
+defaultContextName = 'building-models'
+instances = []
+instance = (contextName=defaultContextName) ->
+  instances[contextName] = new LinkManager(contextName)
 
-  removeLinksForNode: (node) ->
-    @removeLink(link) for link in node.links
+mixin =
+  getInitialState: ->
+    nodes: @linkManager.nodes
+    links: @linkManager.links
 
-  loadData: (data) ->
-    log.info "json success"
-    importer = new Importer(@)
-    importer.importData(data)
-    @setFilename data.filename or 'New Model'
-    PaletteStore.actions.loadData(data)
-    @undoRedoManager.clearHistory()
+  componentDidMount: ->
+    @linkManager ||= instance()
+    @linkManager.listen @onNodesChange
 
-  loadDataFromUrl: (url) =>
-    log.info("loading local data")
-    log.info("url " + url)
-    $.ajax
-      url: url,
-      dataType: 'json',
-      success: (data) =>
-        @loadData data
-      error: (xhr, status, err) ->
-        log.error(url, status, err.toString())
+  onNodesChange: (status) ->
+    @setState
+      nodes: status.nodes
+      links: status.links
 
-  serialize: (palette) ->
-    nodeExports = for key,node of @nodeKeys
-      node.toExport()
-    linkExports = for key,link of @linkKeys
-      link.toExport()
-
-    data =
-      version: Migrations.latestVersion()
-      filename: @filename
-      palette: palette
-      nodes: nodeExports
-      links: linkExports
-    return data
-
-  toJsonString: (palette) ->
-    JSON.stringify @serialize palette
+module.exports =
+  instance: instance
+  mixin: mixin
