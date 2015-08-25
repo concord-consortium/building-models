@@ -58298,7 +58298,7 @@ module.exports = {
   "~NODE-EDIT.DROPPED": "Dropped",
   "~NODE-EDIT.REMOTE": "Remote",
   "~NODE-EDIT.ADD_REMOTE": "Add remote",
-  "~NODE-EDIT.DELETE": "✖ Delete Component",
+  "~NODE-EDIT.DELETE": "Delete",
   "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value",
   "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with numbers. Switch to define with equations.",
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator",
@@ -60599,9 +60599,9 @@ module.exports = React.createClass({
 
 
 },{}],600:[function(require,module,exports){
-var ColorPicker, ImagePickerView, button, div, h2, input, label, optgroup, option, ref, select, tr;
+var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
-ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
+ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
 
 tr = require("../utils/translate");
 
@@ -60677,7 +60677,9 @@ module.exports = React.createClass({
     }, label({
       className: 'node-delete',
       onClick: this["delete"]
-    }, tr("~NODE-EDIT.DELETE")))));
+    }, i({
+      className: "fa fa-trash"
+    }), tr("~NODE-EDIT.DELETE")))));
   }
 });
 
