@@ -1,7 +1,11 @@
 {div, span, i, br} = React.DOM
 
-tr = require '../utils/translate'
+CodapStore = require "../stores/codap-store"
+tr         = require '../utils/translate'
+
 module.exports = React.createClass
+
+  mixins: [ CodapStore.mixin ]
 
   displayName: 'DocumentActions'
 
@@ -25,7 +29,7 @@ module.exports = React.createClass
     @props.linkManager.redo()
 
   renderRunLink: ->
-    unless @props.simplified
+    if @state.codapHasLoaded and not @props.simplified
       (span {},
         (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
         tr "~DOCUMENT.ACTIONS.RUN_SIMULATION"
