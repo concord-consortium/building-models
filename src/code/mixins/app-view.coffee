@@ -63,7 +63,7 @@ module.exports =
           _.map report.endState, (n) ->
             "#{n.title} #{n.initialValue} → #{n.value}"
         ).join("\n")
-        alert "Run for #{report.steps} steps\n#{nodeInfo}:"
+        log.info "Run for #{report.steps} steps\n#{nodeInfo}:"
         @props.codapConnect.sendSimulationData(report)
 
     simulator.run()
