@@ -10,7 +10,6 @@ class Manager
     @stackPosition = -1
     @savePosition = -1
     @changeListeners = []
-    @showUndoRedo = true
 
   createAndExecuteCommand: (name, methods) ->
     result = @execute (new Command name, methods)
@@ -56,10 +55,6 @@ class Manager
   canRedo: ->
     return @stackPosition < @commands.length - 1
 
-  hideUndoRedo: (hide) ->
-    @showUndoRedo = not hide
-    @_changed()
-
   save: ->
     @savePosition = @stackPosition
     @_changed()
@@ -103,7 +98,6 @@ class Manager
         canUndo: @canUndo()
         canRedo: @canRedo()
         saved: @saved()
-        showUndoRedo: @showUndoRedo
       for listener in @changeListeners
         listener status
 

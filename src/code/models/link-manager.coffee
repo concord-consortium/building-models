@@ -54,12 +54,6 @@ module.exports   = class LinkManager
   revertToLastSave: ->
     @undoRedoManager.revertToLastSave()
 
-  hideUndoRedo: (hide) ->
-    @undoRedoManager.hideUndoRedo(hide)
-
-  undoRedoIsVisible: ->
-    @undoRedoManager.showUndoRedo
-
   addChangeListener: (listener) ->
     log.info("adding change listener")
     @undoRedoManager.addChangeListener listener

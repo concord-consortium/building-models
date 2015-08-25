@@ -1,5 +1,6 @@
 Simulation   = require "../models/simulation"
 PaletteStore = require "../stores/palette-store"
+CodapStore   = require "../stores/codap-store"
 
 module.exports =
 
@@ -9,6 +10,7 @@ module.exports =
       selectedConnection: null
       palette: []
       filename: null
+      undoRedoShowing: true
     _.extend mixinState, subState
 
   componentDidUpdate: ->
@@ -34,6 +36,7 @@ module.exports =
     @_loadInitialData()
     @_registerUndoRedoKeys()
     PaletteStore.store.listen @onPaletteChange
+    CodapStore.store.listen @onCodapStateChange
 
   componentDidUnmount: ->
     @addDeleteKeyHandler false
@@ -42,6 +45,10 @@ module.exports =
     @setState
       palette: status.palette
       internalLibrary: status.internalLibrary
+
+  onCodapStateChange: (status) ->
+    @setState
+      undoRedoShowing: not status.hideUndoRedo
 
   getData: ->
     @props.linkManager.toJsonString @state.palette
@@ -63,7 +70,7 @@ module.exports =
           _.map report.endState, (n) ->
             "#{n.title} #{n.initialValue} → #{n.value}"
         ).join("\n")
-        alert "Run for #{report.steps} steps\n#{nodeInfo}:"
+        log.info "Run for #{report.steps} steps\n#{nodeInfo}:"
         @props.codapConnect.sendSimulationData(report)
 
     simulator.run()
@@ -101,7 +108,7 @@ module.exports =
       else
         undo = redo = false
       if undo or redo
-        if (@props.linkManager.undoRedoIsVisible)
+        if (@state.undoRedoShowing)
           e.preventDefault()
           @props.linkManager.redo() if redo
           @props.linkManager.undo() if undo

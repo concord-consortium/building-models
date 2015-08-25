@@ -1,7 +1,11 @@
 {div, span, i, br} = React.DOM
 
-tr = require '../utils/translate'
+CodapStore = require "../stores/codap-store"
+tr         = require '../utils/translate'
+
 module.exports = React.createClass
+
+  mixins: [ CodapStore.mixin ]
 
   displayName: 'DocumentActions'
 
@@ -14,7 +18,6 @@ module.exports = React.createClass
 
   modelChanged: (status) ->
     @setState
-      undoRedoVisible: status.showUndoRedo
       canRedo: status.canRedo
       canUndo: status.canUndo
 
@@ -25,7 +28,7 @@ module.exports = React.createClass
     @props.linkManager.redo()
 
   renderRunLink: ->
-    unless @props.simplified
+    if @state.codapHasLoaded and not @props.simplified
       (span {},
         (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
         tr "~DOCUMENT.ACTIONS.RUN_SIMULATION"
@@ -37,7 +40,7 @@ module.exports = React.createClass
       (div {className: "misc-actions"},
         @renderRunLink()
       )
-      if @state.undoRedoVisible
+      unless @state.hideUndoRedo
         (div {className: 'undo-redo'},
           (span {className: (buttonClass @state.canUndo), onClick: @undoClicked, disabled: not @state.canUndo}, tr "~DOCUMENT.ACTIONS.UNDO")
           (span {className: (buttonClass @state.canRedo), onClick: @redoClicked, disabled: not @state.canRedo}, tr "~DOCUMENT.ACTIONS.REDO")
