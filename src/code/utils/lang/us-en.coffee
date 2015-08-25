@@ -16,7 +16,7 @@ module.exports =
   "~NODE-EDIT.DROPPED": "Dropped"
   "~NODE-EDIT.REMOTE": "Remote"
   "~NODE-EDIT.ADD_REMOTE": "Add remote"
-  "~NODE-EDIT.DELETE": "✖ Delete Component"
+  "~NODE-EDIT.DELETE": "Delete"
 
   # views/node-value-inspector-view.coffee
   "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value"

@@ -1,4 +1,4 @@
-{div, h2, label, input, select, option, optgroup, button} = React.DOM
+{div, h2, label, input, select, option, optgroup, button, i} = React.DOM
 tr = require "../utils/translate"
 ColorPicker = React.createFactory require './color-picker-view'
 ImagePickerView = React.createFactory require './image-picker-view'
@@ -44,7 +44,10 @@ module.exports = React.createClass
           (ImagePickerView {nodes:@props.palette, selected: @props.node, onChange: @changeImage})
         )
         (div {className: 'edit-row'},
-          (label {className: 'node-delete', onClick: @delete}, tr("~NODE-EDIT.DELETE"))
+          (label {className: 'node-delete', onClick: @delete},
+            (i {className: "fa fa-trash"})
+            tr("~NODE-EDIT.DELETE")
+          )
         )
       )
     )
