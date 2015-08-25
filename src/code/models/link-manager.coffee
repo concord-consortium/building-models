@@ -52,9 +52,9 @@ LinkManager  = (context) ->
     hideUndoRedo: (hide) ->
       @undoRedoManager.hideUndoRedo(hide)
 
-  addChangeListener: (listener) ->
-    log.info("adding change listener")
-    @undoRedoManager.addChangeListener listener
+    addChangeListener: (listener) ->
+      log.info("adding change listener")
+      @undoRedoManager.addChangeListener listener
 
     addNodeListener: (listener) ->
       log.info("adding node listener")
