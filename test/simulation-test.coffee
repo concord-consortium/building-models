@@ -45,11 +45,11 @@ describe "Simulation", ->
       @simulation.nodes.should.equal @arguments.nodes
 
   describe "run", ->
-    describe "for a simple graph A(10) -0.1-> B(0) for 10 itterations", ->
+    describe "for a simple graph A(10) -0.1-> B(0) for 10 iterations", ->
       beforeEach ->
         @nodeA    = new Node({initialValue: 10})
         @nodeB    = new Node({initialValue: 0 })
-        @formula  = "out + 0.1 * in"
+        @formula  = "0.1 * in"
         @arguments =
           nodes: [@nodeA, @nodeB]
           timeStep: 1
@@ -64,11 +64,60 @@ describe "Simulation", ->
       describe "the result", ->
         it "should give B 10 at the end", ->
           @simulation.run()
-          @nodeB.currentValue.should.equal 10
+          @nodeB.currentValue.should.equal 1
 
     describe "for other two-node scenarios", ->
       beforeEach ->
         @scenarios = [
+          # basic accumulator
+          {
+            startA:   10
+            startB:   0
+            bIsAccumulator: true
+            formula:  "1 * in"
+            duration: 10
+            timeStep: 1
+            result:   100
+          }
+          # basic accumulator implicitly defined using 'out'
+          {
+            startA:   10
+            startB:   0
+            formula:  "out + 1 * in"
+            duration: 10
+            timeStep: 1
+            result:   100
+          }
+          # basic accumulator with an initial value
+          {
+            startA:   10
+            startB:   50
+            bIsAccumulator: true
+            formula:  "1 * in"
+            duration: 10
+            timeStep: 1
+            result:   150
+          }
+          # accumulator with a negative relationship
+          {
+            startA:   10
+            startB:   0
+            bIsAccumulator: true
+            formula:  "-0.1 * in"
+            duration: 10
+            timeStep: 1
+            result:   -10
+          }
+          # basic non-accumulator with a negative relationship
+          {
+            startA:   10
+            startB:   0
+            formula:  "in * -0.1"
+            duration: 10
+            timeStep: 1
+            result:   -1
+          }
+          # odder examples...
           {
             startA:   10
             startB:   0
@@ -106,7 +155,7 @@ describe "Simulation", ->
         it "should compute correctly", ->
           _.each @scenarios, (scenario) ->
             nodeA = new Node({initialValue: scenario.startA})
-            nodeB = new Node({initialValue: scenario.startB})
+            nodeB = new Node({initialValue: scenario.startB, isAccumulator: scenario.bIsAccumulator})
             LinkNodes(nodeA, nodeB, scenario.formula)
             simulation = new Simulation
               nodes: [nodeA, nodeB]
@@ -142,6 +191,61 @@ describe "Simulation", ->
       describe "nodeC", ->
         it "should average its imputs", ->
           @nodeC.currentValue.should.equal 15
+
+    describe "for other three-node scenarios, A->C and B->C", ->
+      beforeEach ->
+        @scenarios = [
+          # basic non-accumulator
+          {
+            startA:   10
+            startB:   5
+            startC:   0
+            formulaA:  "1 * in"
+            formulaB:  "1 * in"
+            duration: 10
+            timeStep: 1
+            result:   7.5
+          }
+          # basic accumulator
+          {
+            startA:   10
+            startB:   1
+            startC:   0
+            cIsAccumulator: true
+            formulaA:  "1 * in"
+            formulaB:  "1 * in"
+            duration: 10
+            timeStep: 1
+            result:   110
+          }
+          # basic accumulator with one negative relationship
+          {
+            startA:   10
+            startB:   1
+            startC:   0
+            cIsAccumulator: true
+            formulaA:  "1 * in"
+            formulaB:  "-1 * in"
+            duration: 10
+            timeStep: 1
+            result:   90
+          }
+        ]
+      describe "each scenario", ->
+        it "should compute correctly", ->
+          _.each @scenarios, (scenario) ->
+            nodeA = new Node({initialValue: scenario.startA})
+            nodeB = new Node({initialValue: scenario.startB})
+            nodeC = new Node({initialValue: scenario.startC, isAccumulator: scenario.cIsAccumulator})
+            LinkNodes(nodeA, nodeC, scenario.formulaA)
+            LinkNodes(nodeB, nodeC, scenario.formulaB)
+            simulation = new Simulation
+              nodes: [nodeA, nodeB, nodeC]
+              timeStep: scenario.timeStep
+              duration: scenario.duration
+            simulation.run()
+            nodeC.currentValue.should.equal scenario.result
+
 
 
     describe "for a three node cascade", ->

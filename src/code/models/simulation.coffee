@@ -7,15 +7,19 @@ IntegrationFunction = (t, timeStep) ->
   if count < 1
     return @currentValue
 
-  @currentValue = 0
+  if not @isAccumulator
+    @currentValue = 0
+
   _.each links, (link) =>
     sourceNode = link.sourceNode
     inV = sourceNode.previousValue
     outV = @previousValue
     nextValue = link.relation.evaluate(inV, outV) * timeStep
     if @isAccumulator
-      nextValue = @previousValue + nextValue
-    @currentValue = @currentValue + (nextValue / count)
+      @currentValue = @currentValue + nextValue
+    else
+      @currentValue = @currentValue + (nextValue / count)
+
   @currentValue
 
 module.exports = class Simulation
