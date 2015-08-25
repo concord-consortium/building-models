@@ -124,7 +124,7 @@ module.exports = class CodapConnect
 
       when 'externalUndoAvailable'
         log.info 'Received externalUndoAvailable request from CODAP.'
-        @linkManager.hideUndoRedo(true)
+        CodapStore.actions.hideUndoRedo()
 
       when 'undoAction'
         log.info 'Received undoAction request from CODAP.'

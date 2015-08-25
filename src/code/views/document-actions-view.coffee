@@ -18,7 +18,6 @@ module.exports = React.createClass
 
   modelChanged: (status) ->
     @setState
-      undoRedoVisible: status.showUndoRedo
       canRedo: status.canRedo
       canUndo: status.canUndo
 
@@ -41,7 +40,7 @@ module.exports = React.createClass
       (div {className: "misc-actions"},
         @renderRunLink()
       )
-      if @state.undoRedoVisible
+      unless @state.hideUndoRedo
         (div {className: 'undo-redo'},
           (span {className: (buttonClass @state.canUndo), onClick: @undoClicked, disabled: not @state.canUndo}, tr "~DOCUMENT.ACTIONS.UNDO")
           (span {className: (buttonClass @state.canRedo), onClick: @redoClicked, disabled: not @state.canRedo}, tr "~DOCUMENT.ACTIONS.REDO")
