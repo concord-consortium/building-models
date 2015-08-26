@@ -20,7 +20,7 @@ module.exports = React.createClass
 
     relation = RelationFactory.fromSelections(vector, scalar)
     link = @props.link
-    @props.linkManager.changeLink(link, {relation: relation})
+    @props.graphStore.changeLink(link, {relation: relation})
 
   getVector: ->
     id = parseInt React.findDOMNode(@refs.vector).value

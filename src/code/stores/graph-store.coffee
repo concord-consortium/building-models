@@ -1,36 +1,24 @@
-Importer         = require '../utils/importer'
-Link             = require './link'
-DiagramNode      = require './node'
-UndoRedo         = require '../utils/undo-redo'
-SelectionManager = require './selection-manager'
-PaletteStore     = require "../stores/palette-store"
-tr               = require "../utils/translate"
-Migrations       = require "../data/migrations/migrations"
-
-NodesStore           = require "../stores/nodes-store"
+Importer            = require '../utils/importer'
+Link                = require '../models/link'
+DiagramNode         = require '../models/node'
+UndoRedo            = require '../utils/undo-redo'
+SelectionManager    = require '../models/selection-manager'
+PaletteStore        = require "../stores/palette-store"
+tr                  = require "../utils/translate"
+Migrations          = require "../data/migrations/migrations"
 PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
 
-# LinkManager is the logical manager of Nodes and Links.
-module.exports   = class LinkManager
-  @instances: {} # map of context -> instance
-
-  @instance: (context) ->
-    LinkManager.instances[context] ?= new LinkManager context
-    LinkManager.instances[context]
-
-  constructor: (context) ->
+GraphStore  = Reflux.createStore
+  init: (context) ->
     @linkKeys           = {}
     @nodeKeys           = {}
-    @linkListeners      = []
-    @nodeListeners      = []
     @loadListeners      = []
     @filename           = null
     @filenameListeners  = []
 
-    @undoRedoManager    = UndoRedo.instance debug:true
+    @undoRedoManager    = UndoRedo.instance debug:true, context:context
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
-
 
   paletteDelete: (status) ->
     {deleted,paletteItem,replacement} = status
@@ -54,17 +42,12 @@ module.exports   = class LinkManager
   revertToLastSave: ->
     @undoRedoManager.revertToLastSave()
 
+  hideUndoRedo: (hide) ->
+    @undoRedoManager.hideUndoRedo(hide)
+
   addChangeListener: (listener) ->
     log.info("adding change listener")
     @undoRedoManager.addChangeListener listener
-
-  addLinkListener: (listener) ->
-    log.info("adding link listener")
-    @linkListeners.push listener
-
-  addNodeListener: (listener) ->
-    log.info("adding node listener")
-    @nodeListeners.push listener
 
   addFilenameListener: (listener) ->
     log.info("adding filename listener #{listener}")
@@ -101,18 +84,12 @@ module.exports   = class LinkManager
       undo: => @_removeLink link
 
   _addLink: (link) ->
-    if link.sourceNode is link.targetNode
-      return false
-    if @hasLink link
-      return false
-    else
+    unless link.sourceNode is link.targetNode or @hasLink link
       @linkKeys[link.terminalKey()] = link
       @nodeKeys[link.sourceNode.key].addLink(link)
       @nodeKeys[link.targetNode.key].addLink(link)
-      for listener in @linkListeners
-        log.info "notifying of new link: #{link.terminalKey()}"
-        listener.handleLinkAdd(link)
-      return true
+    @updateListeners()
+
 
   removeLink: (link) ->
     @undoRedoManager.createAndExecuteCommand 'removeLink',
@@ -123,9 +100,7 @@ module.exports   = class LinkManager
     delete @linkKeys[link.terminalKey()]
     @nodeKeys[link.sourceNode.key]?.removeLink(link)
     @nodeKeys[link.targetNode.key]?.removeLink(link)
-    for listener in @linkListeners
-      log.info("notifying of deleted Link")
-      listener.handleLinkRm(link)
+    @updateListeners()
 
   importNode: (nodeSpec) ->
     node = new DiagramNode(nodeSpec.data, nodeSpec.key)
@@ -154,19 +129,11 @@ module.exports   = class LinkManager
   _addNode: (node) ->
     unless @hasNode node
       @nodeKeys[node.key] = node
-      for listener in @nodeListeners
-        log.info("notifying of new Node")
-        listener.handleNodeAdd(node)
-        NodesStore.actions.nodesChanged(@getNodes())
-      return true
-    return false
+      @updateListeners()
 
   _removeNode: (node) ->
     delete @nodeKeys[node.key]
-    NodesStore.actions.nodesChanged(@getNodes())
-    for listener in @nodeListeners
-      log.info("notifying of deleted Node")
-      listener.handleNodeRm(node)
+    @updateListeners()
 
   moveNodeCompleted: (nodeKey, pos, originalPos) ->
     node = @nodeKeys[nodeKey]
@@ -180,9 +147,7 @@ module.exports   = class LinkManager
     return unless node
     node.x = pos.left
     node.y = pos.top
-    for listener in @nodeListeners
-      log.info("notifying of NodeMove")
-      listener.handleNodeMove(node)
+    @updateListeners()
 
   selectedNode: ->
     @selectionManager.selection(SelectionManager.NodeInpsection)[0] or null
@@ -198,10 +163,8 @@ module.exports   = class LinkManager
 
 
   _notifyNodeChanged: (node) ->
-    NodesStore.actions.nodesChanged(@getNodes())
-    for listener in @nodeListeners
-      listener.handleNodeChange(node)
     @_maybeChangeSelectedItem node
+    @updateListeners()
 
   changeNode: (data, node) ->
     node = node or @selectedNode()
@@ -258,10 +221,7 @@ module.exports   = class LinkManager
         log.info "Change #{key} for #{link.title}"
         link[key] = changes[key]
     @_maybeChangeSelectedItem link
-
-    for listener in @linkListeners
-      log.info "link changed: #{link.terminalKey()}"
-      listener.changeLink? link
+    @updateListeners()
 
   _nameForNode: (node) ->
     @nodeKeys[node]
@@ -304,7 +264,6 @@ module.exports   = class LinkManager
       @removeLink(selectedLink)
       @selectionManager.clearLinkSelection()
 
-
   removeLinksForNode: (node) ->
     @removeLink(link) for link in node.links
 
@@ -343,3 +302,31 @@ module.exports   = class LinkManager
 
   toJsonString: (palette) ->
     JSON.stringify @serialize palette
+
+  updateListeners: ->
+    data =
+      nodes: @getNodes()
+      links: @getLinks()
+    @trigger(data)
+
+
+mixin =
+  getInitialState: ->
+    nodes: GraphStore.nodes
+    links: GraphStore.links
+
+  componentDidMount: ->
+    GraphStore.listen @onLinksChange
+
+  onLinksChange: (status) ->
+    @setState
+      nodes: status.nodes
+      links: status.links
+    # TODO: not this:
+    @diagramToolkit?.repaint()
+
+
+module.exports =
+  # actions: GraphActions
+  store: GraphStore
+  mixin: mixin

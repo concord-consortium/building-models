@@ -1,5 +1,5 @@
 AppView     = React.createFactory require './views/app-view'
-LinkManager = require './models/link-manager'
+GraphStore = require './stores/graph-store'
 CodapConnect = require './models/codap-connect'
 
 getParameterByName = (name) ->
@@ -11,11 +11,11 @@ getParameterByName = (name) ->
 window.initApp = (wireframes=false) ->
   opts =
     # Valid opts are:
+    # graphStore: store for the node-link graph
     # url: Where to load json e.g.'json/serialized.json'
-    # linkManager: The instance of the link-manager we are talking with
     # data: the json to load (compare with url above)
+    graphStore: GraphStore.store
     url: getParameterByName 'url'
-    linkManager: LinkManager.instance 'building-models'
     data: getParameterByName 'data'
     simplified: getParameterByName 'simplified'
 

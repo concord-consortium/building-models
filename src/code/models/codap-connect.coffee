@@ -17,8 +17,8 @@ module.exports = class CodapConnect
 
   constructor: (context) ->
     log.info 'CodapConnect: initializing'
-    LinkManager = require './link-manager'
-    @linkManager = LinkManager.instance context
+    GraphStore = require '../stores/graph-store'
+    @graphStore = GraphStore.store
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'codap-game', window.parent )
@@ -113,12 +113,12 @@ module.exports = class CodapConnect
         log.info 'Received saveState request from CODAP.'
         callback
           success: true
-          state: @linkManager.serialize paletteManager.store.palette
+          state: @graphStore.serialize paletteManager.store.palette
 
       when 'restoreState'
         log.info 'Received restoreState request from CODAP.'
-        @linkManager.deleteAll()
-        @linkManager.loadData args.state
+        @graphStore.deleteAll()
+        @graphStore.loadData args.state
         callback
           success: true
 
@@ -128,12 +128,12 @@ module.exports = class CodapConnect
 
       when 'undoAction'
         log.info 'Received undoAction request from CODAP.'
-        successes = @linkManager.undo()
+        successes = @graphStore.undo()
         callback {success: @reduceSuccesses successes}
 
       when 'redoAction'
         log.info 'Received redoAction request from CODAP.'
-        successes = @linkManager.redo()
+        successes = @graphStore.redo()
         callback {success: @reduceSuccesses successes}
 
       else

@@ -14,7 +14,7 @@ module.exports = React.createClass
     canUndo: false
 
   componentDidMount: ->
-    @props.linkManager.addChangeListener @modelChanged
+    @props.graphStore.addChangeListener @modelChanged
 
   modelChanged: (status) ->
     @setState
@@ -22,10 +22,10 @@ module.exports = React.createClass
       canUndo: status.canUndo
 
   undoClicked: ->
-    @props.linkManager.undo()
+    @props.graphStore.undo()
 
   redoClicked: ->
-    @props.linkManager.redo()
+    @props.graphStore.redo()
 
   renderRunLink: ->
     if @state.codapHasLoaded and not @props.simplified

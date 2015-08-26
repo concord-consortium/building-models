@@ -14,13 +14,13 @@ module.exports = React.createClass
 
 
   changeTitle: (e) ->
-    @props.linkManager.changeLink @props.link, {title: e.target.value}
+    @props.graphStore.changeLink @props.link, {title: e.target.value}
 
   deleteLink: ->
-    @props.linkManager.changeLink @props.link, {deleted: true}
+    @props.graphStore.changeLink @props.link, {deleted: true}
 
   pickColor: (e) ->
-    @props.linkManager.changeLink @props.link, {color: $(e.target).css('background-color')}
+    @props.graphStore.changeLink @props.link, {color: $(e.target).css('background-color')}
 
   render: ->
     tabs = [tr('design'), tr('define')]

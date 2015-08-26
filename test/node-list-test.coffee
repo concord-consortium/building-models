@@ -16,7 +16,7 @@ requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 GraphPrimitive = requireModel 'graph-primitive'
 Link           = requireModel 'link'
 Node           = requireModel 'node'
-LinkManager    = requireModel 'link-manager'
+GraphStore    = require "#{__dirname}/../src/code/stores/graph-store"
 CodapConnect   = requireModel 'codap-connect'
 
 SerializedTestData = require "./serialized-test-data/v-0.1"
@@ -152,7 +152,7 @@ describe 'Node', ->
             expected = "Node a  --link a-->[Node b], --link b-->[Node c]"
             @node_a.infoString().should.equal(expected)
 
-  describe "LinkManager", ->
+  describe "GraphStore", ->
     beforeEach ->
       sandbox = Sinon.sandbox.create()
       sandbox.stub(CodapConnect, "instance", ->
@@ -163,9 +163,10 @@ describe 'Node', ->
 
       @nodeA = new Node({title: "a", x:10, y:10}, 'a')
       @nodeB = new Node({title: "b", x:20, y:20}, 'b')
-      @linkManager = new LinkManager()
-      @linkManager.addNode @nodeA
-      @linkManager.addNode @nodeB
+      @graphStore = GraphStore.store
+      @graphStore.init()
+      @graphStore.addNode @nodeA
+      @graphStore.addNode @nodeB
 
       @newLink = new Link({
         sourceNode: @nodeA
@@ -189,17 +190,19 @@ describe 'Node', ->
     describe "addLink", ->
       describe "When the link doesn't already exist", ->
         it "should add a new link", ->
-          should.not.exist @linkManager.linkKeys['newLink']
-          @linkManager.addLink(@newLink).should.equal(true)
-          @linkManager.addLink(@otherNewLink).should.equal(true)
-          @linkManager.linkKeys['newLink'].should.equal(@newLink)
-          @linkManager.linkKeys['otherNewLink'].should.equal(@otherNewLink)
+          should.not.exist @graphStore.linkKeys['newLink']
+          @graphStore.addLink(@newLink)
+          @graphStore.linkKeys['newLink'].should.equal(@newLink)
+          should.not.exist @graphStore.linkKeys['otherNewLink']
+          @graphStore.addLink(@otherNewLink)
+          @graphStore.linkKeys['otherNewLink'].should.equal(@otherNewLink)
+
       describe "When the link does already exist", ->
         beforeEach ->
-          @linkManager.linkKeys['newLink'] = 'oldValue'
+          @graphStore.linkKeys['newLink'] = 'oldValue'
         it "should not add the new link", ->
-          @linkManager.addLink(@newLink).should.equal(false)
-          @linkManager.linkKeys['newLink'].should.equal('oldValue')
+          @graphStore.addLink(@newLink)
+          @graphStore.linkKeys['newLink'].should.equal('oldValue')
 
     describe "Serialization", ->
       beforeEach ->
@@ -209,19 +212,20 @@ describe 'Node', ->
       describe "toJsonString", ->
         it "should include nodes and links", ->
           @nodeA.key.should.equal("a")
-          @linkManager.addLink(@newLink)
-          @linkManager.nodeKeys["a"].should.equal(@nodeA)
-          @linkManager.toJsonString().should.match(/"nodes":/)
-          @linkManager.toJsonString().should.match(/"links":/)
-          @linkManager.toJsonString().should.not.match(/"description":/)
-          @linkManager.toJsonString().should.not.match(/"metadata":/)
-          @linkManager.toJsonString(@fakePalette).should.match(/"palette":/)
+          @graphStore.addLink(@newLink)
+          @graphStore.nodeKeys["a"].should.equal(@nodeA)
+          @graphStore.toJsonString().should.match(/"nodes":/)
+          @graphStore.toJsonString().should.match(/"links":/)
+          @graphStore.toJsonString().should.not.match(/"description":/)
+          @graphStore.toJsonString().should.not.match(/"metadata":/)
+          @graphStore.toJsonString(@fakePalette).should.match(/"palette":/)
 
       describe "loadData", ->
         beforeEach ->
-          @linkManager = new LinkManager()
+          @graphStore = GraphStore.store
+          @graphStore.init()
         it "should read the serialized data without error", ->
           data = JSON.parse(@serializedForm)
-          @linkManager.loadData(data)
-          @linkManager.nodeKeys.should.have.any.keys("a")
-          @linkManager.nodeKeys.should.have.any.keys("b")
+          @graphStore.loadData(data)
+          @graphStore.nodeKeys.should.have.any.keys("a")
+          @graphStore.nodeKeys.should.have.any.keys("b")

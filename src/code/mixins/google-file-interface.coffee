@@ -25,7 +25,7 @@ module.exports =
 
   newFile: ->
     if confirm tr "~FILE.CONFIRM"
-      @props.linkManager.deleteAll()
+      @props.graphStore.deleteAll()
       @setState
         fileId: null
 
@@ -43,13 +43,13 @@ module.exports =
             @setState
               fileId: fileSpec.id
               action: null
-            @props.linkManager.deleteAll()
-            @props.linkManager.loadData data
+            @props.graphStore.deleteAll()
+            @props.graphStore.loadData data
 
   rename: ->
     filename = $.trim ((prompt (tr "~FILE.FILENAME"), @props.filename) or '')
     if filename.length > 0
-      @props.linkManager.setFilename filename
+      @props.graphStore.setFilename filename
     return filename
 
   saveFile: ->
@@ -67,12 +67,12 @@ module.exports =
           @setState
             fileId: fileSpec.id
             action: null
-          @props.linkManager.setSaved()
+          @props.graphStore.setSaved()
 
   revertToOriginal: ->
     if confirm tr "~FILE.CONFIRM_ORIGINAL_REVERT"
-      @props.linkManager.revertToOriginal()
+      @props.graphStore.revertToOriginal()
 
   revertToLastSave: ->
     if confirm tr "~FILE.CONFIRM_LAST_SAVE_REVERT"
-      @props.linkManager.revertToLastSave()
+      @props.graphStore.revertToLastSave()

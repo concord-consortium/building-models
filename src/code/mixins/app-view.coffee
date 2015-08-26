@@ -18,7 +18,7 @@ module.exports =
 
   addDeleteKeyHandler: (add) ->
     if add
-      deleteFunction = @props.linkManager.deleteSelected.bind @props.linkManager
+      deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
       $(window).on 'keydown', (e) ->
         if e.which is 8 and not $(e.target).is('input, textarea')
           e.preventDefault()
@@ -28,9 +28,9 @@ module.exports =
 
   componentDidMount: ->
     @addDeleteKeyHandler true
-    @props.linkManager.selectionManager.addSelectionListener @_updateSelection
+    @props.graphStore.selectionManager.addSelectionListener @_updateSelection
 
-    @props.linkManager.addFilenameListener (filename) =>
+    @props.graphStore.addFilenameListener (filename) =>
       @setState filename: filename
 
     @_loadInitialData()
@@ -51,17 +51,17 @@ module.exports =
       undoRedoShowing: not status.hideUndoRedo
 
   getData: ->
-    @props.linkManager.toJsonString @state.palette
+    @props.graphStore.toJsonString @state.palette
 
   onNodeChanged: (node, data) ->
-    @props.linkManager.changeNode data
+    @props.graphStore.changeNode data
 
   onNodeDelete: ->
-    @props.linkManager.deleteSelected()
+    @props.graphStore.deleteSelected()
 
   runSimulation: ->
     simulator = new Simulation
-      nodes: @props.linkManager.getNodes()
+      nodes: @props.graphStore.getNodes()
       duration: 10
       timeStep: 1
       reportFunc: (report) =>
@@ -89,9 +89,9 @@ module.exports =
 
   _loadInitialData: ->
     if @props.data?.length > 0
-      @props.linkManager.loadData JSON.parse @props.data
+      @props.graphStore.loadData JSON.parse @props.data
     else if @props.url?.length > 0
-      @props.linkManager.loadDataFromUrl @props.url
+      @props.graphStore.loadDataFromUrl @props.url
 
   # cross platform undo/redo key-binding ctr-z ctr-y
   _registerUndoRedoKeys: ->
@@ -110,5 +110,5 @@ module.exports =
       if undo or redo
         if (@state.undoRedoShowing)
           e.preventDefault()
-          @props.linkManager.redo() if redo
-          @props.linkManager.undo() if undo
+          @props.graphStore.redo() if redo
+          @props.graphStore.undo() if undo

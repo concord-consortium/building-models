@@ -1,4 +1,5 @@
 PaletteStore = require './palette-store'
+GraphStore   = require './graph-store'
 
 nodeActions = Reflux.createActions(
   [
@@ -12,19 +13,28 @@ nodeStore   = Reflux.createStore
   init: ->
     @nodes               = []
     @paletteItemHasNodes = false
-    
-    PaletteStore.store.listen => @internalUpdate()
+    @selectedPaletteItem = null
+
+    PaletteStore.store.listen @paletteChanged
+    GraphStore.store.listen  @graphChanged
 
   onNodesChanged: (nodes) ->
     @nodes = nodes
     @internalUpdate()
 
+  graphChanged: (status) ->
+    @nodes = status.nodes
+    @internalUpdate()
+
+  paletteChanged: ->
+    @selectedPaletteItem = PaletteStore.store.selectedPaletteItem
+    @internalUpdate()
+
   internalUpdate: ->
-    selectedPaletteItem = PaletteStore.store.selectedPaletteItem
     @paletteItemHasNodes = false
-    return unless selectedPaletteItem
+    return unless @selectedPaletteItem
     _.each @nodes, (node) =>
-      if node.paletteItemIs selectedPaletteItem
+      if node.paletteItemIs @selectedPaletteItem
         @paletteItemHasNodes = true
     @notifyChange()
 

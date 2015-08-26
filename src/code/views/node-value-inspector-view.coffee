@@ -21,11 +21,11 @@ module.exports = React.createClass
   updateValue:  (evt) ->
     if value = evt.target.value
       value = @trim(parseInt(value))
-      @props.linkManager.changeNode(initialValue:value)
+      @props.graphStore.changeNode(initialValue:value)
 
   updateChecked:  (evt) ->
     value = evt.target.checked
-    @props.linkManager.changeNode(isAccumulator:value)
+    @props.graphStore.changeNode(isAccumulator:value)
 
   selectText: (evt) ->
     evt.target.select()

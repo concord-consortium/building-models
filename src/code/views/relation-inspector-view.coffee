@@ -3,24 +3,18 @@ TabbedPanel = React.createFactory require './tabbed-panel-view'
 Tabber = require './tabbed-panel-view'
 tr = require "../utils/translate"
 
+graphStore        = require '../stores/graph-store'
+
 {div, h2, label, span, input, p, i, select, option} = React.DOM
-
-
-
 
 module.exports = React.createClass
 
   displayName: 'RelationInspectorView'
 
-  componentDidMount: ->
-    @props.linkManager.addLinkListener @
-
-  changeLink: ->
-    # Wish there was something nicer to do here:
-    @forceUpdate()
+  mixins: [ graphStore.mixin ]
 
   renderTabforLink: (link) ->
-    relationView = (LinkRelationView {link: link, linkManager: @props.linkManager})
+    relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
     (Tabber.Tab {label: (link.sourceNode.title), component: relationView})
 
   renderNodeRelationInspector: ->

@@ -34,7 +34,7 @@ module.exports = React.createClass
       (div {className: topNodePaletteClass},
         (PaletteInspectorView {
           toggleImageBrowser: @props.toggleImageBrowser,
-          linkManager: @props.linkManager
+          graphStore: @props.graphStore
         })
       )
       (div {className: 'tab-wrapper'},
