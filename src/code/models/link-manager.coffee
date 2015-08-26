@@ -16,7 +16,6 @@ LinkManager  = (context) ->
     init: (context) ->
       @linkKeys           = {}
       @nodeKeys           = {}
-      @nodeListeners      = []
       @loadListeners      = []
       @filename           = null
       @filenameListeners  = []
@@ -54,10 +53,6 @@ LinkManager  = (context) ->
     addChangeListener: (listener) ->
       log.info("adding change listener")
       @undoRedoManager.addChangeListener listener
-
-    addNodeListener: (listener) ->
-      log.info("adding node listener")
-      @nodeListeners.push listener
 
     addFilenameListener: (listener) ->
       log.info("adding filename listener #{listener}")
@@ -143,10 +138,7 @@ LinkManager  = (context) ->
     _addNode: (node) ->
       unless @hasNode node
         @nodeKeys[node.key] = node
-        for listener in @nodeListeners
-          log.info("notifying of new Node")
-          listener.handleNodeAdd(node)
-          NodesStore.actions.nodesChanged(@getNodes())
+        NodesStore.actions.nodesChanged(@getNodes())
         @updateListeners()
         return true
       return false
@@ -154,9 +146,6 @@ LinkManager  = (context) ->
     _removeNode: (node) ->
       delete @nodeKeys[node.key]
       NodesStore.actions.nodesChanged(@getNodes())
-      for listener in @nodeListeners
-        log.info("notifying of deleted Node")
-        listener.handleNodeRm(node)
       @updateListeners()
 
     moveNodeCompleted: (nodeKey, pos, originalPos) ->
@@ -171,9 +160,6 @@ LinkManager  = (context) ->
       return unless node
       node.x = pos.left
       node.y = pos.top
-      for listener in @nodeListeners
-        log.info("notifying of NodeMove")
-        listener.handleNodeMove(node)
       @updateListeners()
 
     selectedNode: ->
@@ -191,8 +177,6 @@ LinkManager  = (context) ->
 
     _notifyNodeChanged: (node) ->
       NodesStore.actions.nodesChanged(@getNodes())
-      for listener in @nodeListeners
-        listener.handleNodeChange(node)
       @_maybeChangeSelectedItem node
       @updateListeners()
 
