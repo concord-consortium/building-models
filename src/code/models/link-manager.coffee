@@ -90,15 +90,14 @@ LinkManager  = (context) ->
 
     _addLink: (link) ->
       if link.sourceNode is link.targetNode
-        return false
+        return
       if @hasLink link
-        return false
+        return
       else
         @linkKeys[link.terminalKey()] = link
         @nodeKeys[link.sourceNode.key].addLink(link)
         @nodeKeys[link.targetNode.key].addLink(link)
         @updateListeners()
-        return true
 
     removeLink: (link) ->
       @undoRedoManager.createAndExecuteCommand 'removeLink',
@@ -140,8 +139,6 @@ LinkManager  = (context) ->
         @nodeKeys[node.key] = node
         NodesStore.actions.nodesChanged(@getNodes())
         @updateListeners()
-        return true
-      return false
 
     _removeNode: (node) ->
       delete @nodeKeys[node.key]
