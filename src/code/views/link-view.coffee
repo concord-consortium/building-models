@@ -1,18 +1,18 @@
 Node             = React.createFactory require './node-view'
 Importer         = require '../utils/importer'
-NodeList         = require '../models/link-manager'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
-PaletteStore   = require '../stores/palette-store'
-ImageDialogStore     = require '../stores/image-dialog-store'
+PaletteStore     = require '../stores/palette-store'
+LinkStore        = require '../models/link-manager'
+ImageDialogStore = require '../stores/image-dialog-store'
 
 {div} = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'LinkView'
-
+  mixins: [ LinkStore.mixin ]
   componentDidMount: ->
     $container = $(@refs.container.getDOMNode())
 
@@ -69,7 +69,6 @@ module.exports = React.createClass
       if savedPaletteItem
         @addPaletteNode(ui, savedPaletteItem)
 
-
   addPaletteNode: (ui, paletteItem) ->
     # Default new nodes are untitled
     title = tr "~NODE.UNTITLED"
@@ -81,8 +80,6 @@ module.exports = React.createClass
         title: title
         image: paletteItem.image
     @props.linkManager.editNode(node.key)
-
-
 
   getInitialState: ->
     nodes: []
@@ -126,25 +123,6 @@ module.exports = React.createClass
     @handleEvent =>
       @linkManager.selectLink connection.linkModel
 
-  handleNodeChange: (nodeData) ->
-    @setState nodes: @linkManager.getNodes()
-    true
-
-  handleNodeAdd: (nodeData) ->
-    @setState nodes: @linkManager.getNodes()
-    true
-
-  handleNodeMove: (nodeData) ->
-    # TODO: PERF: we could look up the dom elem
-    # for that node, and then just tell the
-    # toolkit to repaint the links for that one elem...
-    @setState nodes: @props.linkManager.getNodes()
-    @diagramToolkit.repaint()
-    true
-
-  handleNodeRm: ->
-    @setState nodes: @props.linkManager.getNodes()
-    false
 
   # TODO, can we get rid of this?
   _nodeForName: (name) ->

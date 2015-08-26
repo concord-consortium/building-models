@@ -106,6 +106,7 @@ LinkManager  = (context) ->
         for listener in @linkListeners
           log.info "notifying of new link: #{link.terminalKey()}"
           listener.handleLinkAdd(link)
+        @updateListeners()
         return true
 
     removeLink: (link) ->
@@ -120,6 +121,7 @@ LinkManager  = (context) ->
       for listener in @linkListeners
         log.info("notifying of deleted Link")
         listener.handleLinkRm(link)
+      @updateListeners()
 
     importNode: (nodeSpec) ->
       node = new DiagramNode(nodeSpec.data, nodeSpec.key)
@@ -152,6 +154,7 @@ LinkManager  = (context) ->
           log.info("notifying of new Node")
           listener.handleNodeAdd(node)
           NodesStore.actions.nodesChanged(@getNodes())
+        @updateListeners()
         return true
       return false
 
@@ -161,6 +164,7 @@ LinkManager  = (context) ->
       for listener in @nodeListeners
         log.info("notifying of deleted Node")
         listener.handleNodeRm(node)
+      @updateListeners()
 
     moveNodeCompleted: (nodeKey, pos, originalPos) ->
       node = @nodeKeys[nodeKey]
@@ -177,6 +181,7 @@ LinkManager  = (context) ->
       for listener in @nodeListeners
         log.info("notifying of NodeMove")
         listener.handleNodeMove(node)
+      @updateListeners()
 
     selectedNode: ->
       @selectionManager.selection(SelectionManager.NodeInpsection)[0] or null
@@ -196,6 +201,7 @@ LinkManager  = (context) ->
       for listener in @nodeListeners
         listener.handleNodeChange(node)
       @_maybeChangeSelectedItem node
+      @updateListeners()
 
     changeNode: (data, node) ->
       node = node or @selectedNode()
@@ -336,28 +342,31 @@ LinkManager  = (context) ->
 
     updateListeners: ->
       data =
-        nodes: @nodes
-        links: @links
+        nodes: @getNodes()
+        links: @getLinks()
       @trigger(data)
 
 defaultContextName = 'building-models'
 instances = []
 instance = (contextName=defaultContextName) ->
-  instances[contextName] = new LinkManager(contextName)
+  instances[contextName] ||= new LinkManager(contextName)
 
 mixin =
   getInitialState: ->
+    @linkManager ||= instance()
     nodes: @linkManager.nodes
     links: @linkManager.links
 
   componentDidMount: ->
     @linkManager ||= instance()
-    @linkManager.listen @onNodesChange
+    @linkManager.listen @onLinksChange
 
-  onNodesChange: (status) ->
+  onLinksChange: (status) ->
     @setState
       nodes: status.nodes
       links: status.links
+    # TODO: not this:
+    @diagramToolkit?.repaint()
 
 module.exports =
   instance: instance
