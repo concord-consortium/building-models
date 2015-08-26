@@ -43,7 +43,7 @@ module.exports = React.createClass
           (GlobalNav
             filename: @state.filename
             username: @state.username
-            linkManager: @props.linkManager
+            graphStore: @props.graphStore
             getData: @getData,
             runSimulation: @runSimulation
           )
@@ -51,18 +51,18 @@ module.exports = React.createClass
           (NodeWell {
             palette: @state.palette
             toggleImageBrowser: @toggleImageBrowser
-            linkManager: @props.linkManager
+            graphStore: @props.graphStore
           })
           (DocumentActions
-            linkManager: @props.linkManager
+            graphStore: @props.graphStore
             runSimulation: @runSimulation
             simplified: @props.simplified
           )
         )
         (div {className: 'canvas'},
           (LinkView {
-            linkManager: @props.linkManager,
-            selectionManager: @props.linkManager.selectionManager,
+            graphStore: @props.graphStore,
+            selectionManager: @props.graphStore.selectionManager,
             selectedLink: @state.selectedLink})
         )
         (InspectorPanel
@@ -73,11 +73,11 @@ module.exports = React.createClass
           palette: @state.palette
           simplified: @props.simplified
           toggleImageBrowser: @toggleImageBrowser
-          linkManager: @props.linkManager
+          graphStore: @props.graphStore
         )
         if @state.showingDialog
           (ImageBrowser
-            linkManager: @props.linkManager
+            graphStore: @props.graphStore
           )
         (ModalPaletteDelete {})
       )

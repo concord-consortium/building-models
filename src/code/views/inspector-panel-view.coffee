@@ -85,7 +85,7 @@ module.exports = React.createClass
     (PaletteInspectorView {
       palette: @props.palette,
       toggleImageBrowser: @props.toggleImageBrowser,
-      linkManager: @props.linkManager
+      graphStore: @props.graphStore
     })
 
   renderDesignInspector: ->
@@ -97,19 +97,19 @@ module.exports = React.createClass
         palette: @props.palette
       })
     else if @props.link
-      (LinkInspectorView {link: @props.link,  linkManager: @props.linkManager})
+      (LinkInspectorView {link: @props.link,  graphStore: @props.graphStore})
 
   renderValueInspector: ->
     if @props.node
-      (NodeValueInspectorView {node: @props.node, linkManager: @props.linkManager})
+      (NodeValueInspectorView {node: @props.node, graphStore: @props.graphStore})
     else if @props.link
       (LinkValueInspectorView {link:@props.link})
 
   renderRelationInspector: ->
     if @props.node
-      (NodeRelationInspectorView {node:@props.node, linkManager: @props.linkManager})
+      (NodeRelationInspectorView {node:@props.node, graphStore: @props.graphStore})
     else if @props.link
-      (LinkRelationInspectorView {link:@props.link, linkManager: @props.linkManager})
+      (LinkRelationInspectorView {link:@props.link, graphStore: @props.graphStore})
 
 
   renderInspectorPanel: ->

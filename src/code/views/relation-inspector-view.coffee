@@ -3,7 +3,7 @@ TabbedPanel = React.createFactory require './tabbed-panel-view'
 Tabber = require './tabbed-panel-view'
 tr = require "../utils/translate"
 
-LinkStore        = require '../models/link-manager'
+graphStore        = require '../stores/graph-store'
 
 {div, h2, label, span, input, p, i, select, option} = React.DOM
 
@@ -11,10 +11,10 @@ module.exports = React.createClass
 
   displayName: 'RelationInspectorView'
 
-  mixins: [ LinkStore.mixin ]
+  mixins: [ graphStore.mixin ]
 
   renderTabforLink: (link) ->
-    relationView = (LinkRelationView {link: link, linkManager: @props.linkManager})
+    relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
     (Tabber.Tab {label: (link.sourceNode.title), component: relationView})
 
   renderNodeRelationInspector: ->

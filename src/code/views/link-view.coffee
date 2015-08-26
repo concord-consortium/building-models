@@ -4,7 +4,7 @@ DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
 PaletteStore     = require '../stores/palette-store'
-LinkStore        = require '../models/link-manager'
+LinkStore        = require '../stores/graph-store'
 ImageDialogStore = require '../stores/image-dialog-store'
 
 {div} = React.DOM
@@ -73,13 +73,13 @@ module.exports = React.createClass
     # Default new nodes are untitled
     title = tr "~NODE.UNTITLED"
     offset = $(@refs.linkView.getDOMNode()).offset()
-    node = @props.linkManager.importNode
+    node = @props.graphStore.importNode
       data:
         x: ui.offset.left - offset.left
         y: ui.offset.top - offset.top
         title: title
         image: paletteItem.image
-    @props.linkManager.editNode(node.key)
+    @props.graphStore.editNode(node.key)
 
   getInitialState: ->
     nodes: []
@@ -103,26 +103,25 @@ module.exports = React.createClass
       true
 
   onNodeMoved: (node_event) ->
-    @handleEvent =>
-      @linkManager.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+    @handleEvent ->
+      LinkStore.store.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
 
   onNodeMoveComplete: (node_event) ->
-    @handleEvent =>
+    @handleEvent ->
       {left, top} = node_event.extra.position
-      @linkManager.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+      LinkStore.store.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
 
   onNodeDeleted: (node_event) ->
-    @handleEvent =>
-      @linkManager.removeNode node_event.nodeKey
+    @handleEvent ->
+      LinkStore.store.removeNode node_event.nodeKey
 
   handleConnect: (info, evnt) ->
-    @handleEvent =>
-      @linkManager.newLinkFromEvent info, evnt
+    @handleEvent ->
+      LinkStore.store.newLinkFromEvent info, evnt
 
   handleClick: (connection, evnt) ->
-    @handleEvent =>
-      @linkManager.selectLink connection.linkModel
-
+    @handleEvent ->
+      LinkStore.store.selectLink connection.linkModel
 
   # TODO, can we get rid of this?
   _nodeForName: (name) ->
@@ -179,14 +178,14 @@ module.exports = React.createClass
 
     # get the files
     dropImageHandler e, (file) =>
-      @props.linkManager.setImageMetadata file.image, file.metadata
-      node = @props.linkManager.importNode
+      @props.graphStore.setImageMetadata file.image, file.metadata
+      node = @props.graphStore.importNode
         data:
           x: dropPos.x
           y: dropPos.y
           title: tr "~NODE.UNTITLED"
           image: file.image
-      @props.linkManager.editNode(node.key)
+      @props.graphStore.editNode(node.key)
 
   onContainerClicked: (e) ->
     if e.target is @refs.container.getDOMNode()
@@ -207,7 +206,7 @@ module.exports = React.createClass
             onMove: @onNodeMoved
             onMoveComplete: @onNodeMoveComplete
             onDelete: @onNodeDeleted
-            linkManager: @props.linkManager
+            graphStore: @props.graphStore
             selectionManager: @props.selectionManager
           })
       )

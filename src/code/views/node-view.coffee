@@ -118,7 +118,7 @@ module.exports = React.createClass
 
   changeTitle: (newTitle) ->
     log.info "Title is changing to #{newTitle}"
-    @props.linkManager.changeNodeWithKey(@props.nodeKey, {title:newTitle})
+    @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
 
   startEditing: ->
     @props.selectionManager.selectForTitleEditing(@props.data)

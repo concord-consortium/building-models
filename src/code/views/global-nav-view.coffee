@@ -16,7 +16,7 @@ module.exports = React.createClass
 
   componentDidMount: ->
     @createGoogleDrive()
-    @props.linkManager.addChangeListener @modelChanged
+    @props.graphStore.addChangeListener @modelChanged
 
   modelChanged: (status) ->
     @setState
