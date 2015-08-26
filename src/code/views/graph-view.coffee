@@ -193,7 +193,7 @@ module.exports = React.createClass
       @props.selectionManager.clearSelection()
 
   render: ->
-    (div {className: "link-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
+    (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container', onClick: @onContainerClicked},
         for node in @state.nodes
           (Node {

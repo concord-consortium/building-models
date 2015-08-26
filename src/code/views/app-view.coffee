@@ -2,7 +2,7 @@ Reflux = require 'reflux'
 
 Placeholder        = React.createFactory require './placeholder-view'
 GlobalNav          = React.createFactory require './global-nav-view'
-LinkView           = React.createFactory require './link-view'
+GraphView          = React.createFactory require './graph-view'
 NodeWell           = React.createFactory require './node-well-view'
 InspectorPanel     = React.createFactory require './inspector-panel-view'
 ImageBrowser       = React.createFactory require './image-browser-view'
@@ -60,7 +60,7 @@ module.exports = React.createClass
           )
         )
         (div {className: 'canvas'},
-          (LinkView {
+          (GraphView {
             graphStore: @props.graphStore,
             selectionManager: @props.graphStore.selectionManager,
             selectedLink: @state.selectedLink})
