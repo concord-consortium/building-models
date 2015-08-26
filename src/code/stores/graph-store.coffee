@@ -194,6 +194,12 @@ GraphStore  = Reflux.createStore
     if node
       @changeNode(data,node)
 
+  startNodeEdit: ->
+    @undoRedoManager.startCommandBatch()
+
+  endNodeEdit: ->
+    @undoRedoManager.endCommandBatch()
+
   selectLink: (link) ->
     @selectionManager.selectLink(link)
 
