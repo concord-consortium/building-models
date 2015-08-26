@@ -16,7 +16,6 @@ LinkManager  = (context) ->
     init: (context) ->
       @linkKeys           = {}
       @nodeKeys           = {}
-      @linkListeners      = []
       @nodeListeners      = []
       @loadListeners      = []
       @filename           = null
@@ -103,9 +102,6 @@ LinkManager  = (context) ->
         @linkKeys[link.terminalKey()] = link
         @nodeKeys[link.sourceNode.key].addLink(link)
         @nodeKeys[link.targetNode.key].addLink(link)
-        for listener in @linkListeners
-          log.info "notifying of new link: #{link.terminalKey()}"
-          listener.handleLinkAdd(link)
         @updateListeners()
         return true
 
@@ -118,9 +114,6 @@ LinkManager  = (context) ->
       delete @linkKeys[link.terminalKey()]
       @nodeKeys[link.sourceNode.key]?.removeLink(link)
       @nodeKeys[link.targetNode.key]?.removeLink(link)
-      for listener in @linkListeners
-        log.info("notifying of deleted Link")
-        listener.handleLinkRm(link)
       @updateListeners()
 
     importNode: (nodeSpec) ->
