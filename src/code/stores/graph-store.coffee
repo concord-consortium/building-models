@@ -6,8 +6,6 @@ SelectionManager    = require '../models/selection-manager'
 PaletteStore        = require "../stores/palette-store"
 tr                  = require "../utils/translate"
 Migrations          = require "../data/migrations/migrations"
-
-NodesStore          = require "../stores/nodes-store"
 PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
 
 GraphStore  = Reflux.createStore
@@ -131,12 +129,10 @@ GraphStore  = Reflux.createStore
   _addNode: (node) ->
     unless @hasNode node
       @nodeKeys[node.key] = node
-      NodesStore.actions.nodesChanged(@getNodes())
       @updateListeners()
 
   _removeNode: (node) ->
     delete @nodeKeys[node.key]
-    NodesStore.actions.nodesChanged(@getNodes())
     @updateListeners()
 
   moveNodeCompleted: (nodeKey, pos, originalPos) ->
@@ -167,7 +163,6 @@ GraphStore  = Reflux.createStore
 
 
   _notifyNodeChanged: (node) ->
-    NodesStore.actions.nodesChanged(@getNodes())
     @_maybeChangeSelectedItem node
     @updateListeners()
 
