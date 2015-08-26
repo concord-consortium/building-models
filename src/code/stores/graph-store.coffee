@@ -86,15 +86,12 @@ GraphStore  = Reflux.createStore
       undo: => @_removeLink link
 
   _addLink: (link) ->
-    if link.sourceNode is link.targetNode
-      return
-    if @hasLink link
-      return
-    else
+    unless link.sourceNode is link.targetNode or @hasLink link
       @linkKeys[link.terminalKey()] = link
       @nodeKeys[link.sourceNode.key].addLink(link)
       @nodeKeys[link.targetNode.key].addLink(link)
-      @updateListeners()
+    @updateListeners()
+
 
   removeLink: (link) ->
     @undoRedoManager.createAndExecuteCommand 'removeLink',
