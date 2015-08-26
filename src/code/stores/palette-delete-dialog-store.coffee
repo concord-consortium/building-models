@@ -1,4 +1,5 @@
 PaletteStore = require './palette-store'
+UndoRedo       = require '../utils/undo-redo'
 
 paletteDialogActions = Reflux.createActions([
     "open", "close", "delete", "cancel", "select"
@@ -11,6 +12,7 @@ store = Reflux.createStore
   init: ->
     @enableListening()
     @initValues()
+    @undoManger = UndoRedo.instance debug:true
 
   initValues: ->
     @showing      = false
@@ -40,8 +42,10 @@ store = Reflux.createStore
 
   onDelete: (item) ->
     @deleted = true
+    @undoManger.startCommandBatch()
     PaletteStore.actions.deleteSelected()
     @close()
+    @undoManger.endCommandBatch()
 
   onPaletteSelect: (status) ->
     @paletteItem = status.selectedPaletteItem
