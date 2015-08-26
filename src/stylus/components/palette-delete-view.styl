@@ -53,48 +53,11 @@
     &:hover
       color dark-blue
 
-  // We have to override some .image-picker styles see image-picker.styl
+
   .image-picker
-    vertical-align middle
-    // margin-top 0px
-    margin 0px
-    padding 0em
-    cursor pointer
-    no-select()
     box-shadow none
 
     .selected-image
       margin 0px
       padding 0px
       padding-right 20px
-      margin-right 0px
-      vertical-align middle
-      width inherit
-      height inherit
-
-    img
-      vertical-align middle
-      max-height 50px
-      // border 2px solid
-      border-radius 5px
-
-    .image-choices
-      position absolute
-      box-sizing border-box
-      overflow visible
-      cursor pointer
-      left 0px
-      width 250px
-      enable-flex(wp:wrap,justify:flex-start)
-      box-shadow 3px 3px 10px hsla(0,0,30,0.4)
-      &.closed
-        height 0px
-        padding 0px
-        border none
-        overflow hidden
-      .image-choice
-        max-height 3em
-        max-width  3em
-        vertical-align middle
-        img
-          border none

@@ -1,58 +1,64 @@
+
 .image-picker
   position relative
   display inline-block
   box-sizing border-box
-  vertical-align top
-  margin-top 12px
+  vertical-align middle
+  margin 0px
+  padding 0em
   background-color white
   border-radius 3px
   box-shadow -1px 0px 2px hsla(0,0,50,0.4)
   no-select()
+  cursor pointer
+
   .selected-image
     margin 0px
-    padding 10px
-    padding-right 15px
+    padding 1em
+    padding-right 20px
     margin-right 5px
     background-image url("../img/bb-chrome/arrow-expand.svg")
     background-position right center
     background-repeat no-repeat
     background-size 10px 10px
-    width 45px
-    height 45px
+    vertical-align middle
+
     img
-      padding 4px
-      max-width 42px
-      max-height 42px
+      max-width 50px
+      max-height 50px
+      vertical-align middle
+
   .image-choices
     position absolute
     box-sizing border-box
-    padding 4px
+    padding 0.5em
     background-color white
     border-radius 0px 0px 2px 2px
     display inline-block
     vertical-align top
-    overflow hidden
+    overflow visible
     cursor pointer
     z-index 5
-    width 200px
-    right 0px
-    enable-flex(wp:wrap)
+    width 350px
+    left -100px
     no-select()
     transition 0.1s
     box-shadow 0px 1px 1px hsla(0,0,30,0.4)
+    enable-flex(wp:wrap,justify:flex-start)
     &.closed
       height 0px
       padding 0px
-   img.image-choice
-     padding 0px
-     max-width 24px
-     max-height 24px
+      border none
+      overflow hidden
+
    .image-choice
-      padding 4px
-      padding-bottom 12px
-      &.selected
-        background-color inherit
-        box-shadow none
-        background-image url('../img/bb-chrome/icon-checkmark.svg')
-        background-position bottom
-        background-repeat no-repeat
+     box-sizing border-box
+     vertical-align middle
+     padding 8px
+     overflow hidden
+     img
+       border none
+       padding 0px
+       margin 0px
+       max-height 48px
+       max-width 48px
