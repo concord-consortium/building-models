@@ -3,6 +3,8 @@ CodapConnect = require '../models/codap-connect'
 
 DEFAULT_CONTEXT_NAME = 'building-models'
 
+internalEndCommandBatchAction = Reflux.createAction()
+
 class Manager
   constructor: (options = {}) ->
     {@debug} = options
@@ -11,20 +13,21 @@ class Manager
     @savePosition = -1
     @changeListeners = []
     @currentBatch = null
+    internalEndCommandBatchAction.listen @_finalizeEndComandBatch, @
 
   startCommandBatch: ->
     @currentBatch = new CommandBatch() unless @currentBatch
 
   endCommandBatch: ->
-    # The setTimeout here is ugly, but allows us to call this directly after a call
-    # to a store's action, which happens via an async callback, and ensure that
-    # endCommandBatch will be pushed to the back of the execution stack
-    setTimeout =>
-      if @currentBatch
-        @commands.push @currentBatch
-        @stackPosition++
-        @currentBatch = null
-    , 1
+    # calling this via an action pushes it to the end of the
+    # command stack, allowing any other commands to execute first
+    internalEndCommandBatchAction()
+
+  _finalizeEndComandBatch: ->
+    if @currentBatch
+      @commands.push @currentBatch
+      @stackPosition++
+      @currentBatch = null
 
   createAndExecuteCommand: (name, methods) ->
     result = @execute (new Command name, methods)
