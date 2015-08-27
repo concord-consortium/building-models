@@ -1,30 +1,15 @@
 PaletteItemView    = React.createFactory require './palette-item-view'
-
+PaletteAddView     = React.createFactory require './palette-add-view'
 ImageMetadata      = React.createFactory require './image-metadata-view'
 
-Draggable          = require '../mixins/draggable'
 PaletteStore       = require "../stores/palette-store"
-ImageDialogStore   = require "../stores/image-dialog-store"
 PaletteDialogStore = require "../stores/palette-delete-dialog-store"
 NodesStore         = require "../stores/nodes-store"
 
-tr             = require "../utils/translate"
-
+tr                 = require "../utils/translate"
 
 {label, div, img, i, span} = React.DOM
 
-PaletteAddImage = React.createFactory React.createClass
-  mixins: [Draggable]
-  render: ->
-    (div {className: 'palette-image', 'data-droptype': 'new'},
-      (div {className: 'palette-add-image', onClick: -> ImageDialogStore.actions.open.trigger(false) },
-        (div { className: 'proto-node'},
-          (div {className: 'img-background'},
-            tr '~PALETTE-INSPECTOR.ADD_IMAGE'
-          )
-        )
-      )
-    )
 
 module.exports = React.createClass
 
@@ -42,7 +27,7 @@ module.exports = React.createClass
     (div {className: 'palette-inspector'},
       (div {className: 'palette', ref: 'palette'},
         (div {},
-          (PaletteAddImage {})
+          (PaletteAddView {})
           # _.forEach @state.palette, (node,index) =>
           _.map @state.palette, (node, index) =>
             (PaletteItemView {

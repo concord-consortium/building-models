@@ -1,5 +1,6 @@
 {div, img} = React.DOM
 tr = require '../utils/translate'
+PaletteAddView     = React.createFactory require './palette-add-view'
 
 ImgChoice = React.createFactory React.createClass
   displayName: 'ImgChoice'
@@ -38,6 +39,7 @@ module.exports = React.createClass
         (img {src: @props.selected.image})
       )
       (div {className: @className()},
+        (PaletteAddView {callback:  @props.onChange })
         for node in @props.nodes
           (ImgChoice {key: node.id, node: node, selected: @props.selected, onChange: @props.onChange})
       )

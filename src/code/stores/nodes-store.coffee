@@ -1,5 +1,5 @@
-PaletteStore = require './palette-store'
-GraphStore   = require './graph-store'
+PaletteStore       = require './palette-store'
+GraphStore         = require './graph-store'
 
 nodeActions = Reflux.createActions(
   [

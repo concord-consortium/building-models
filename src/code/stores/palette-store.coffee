@@ -9,7 +9,7 @@ paletteActions = Reflux.createActions(
   [
     "addToPalette", "loadData",
     "selectPaletteIndex", "selectPaletteItem", "deselect", "restoreSelection",
-    "itemDropped","update", "deleteSelected"
+    "itemDropped","update", "delete"
   ]
 )
 
@@ -69,10 +69,8 @@ paletteStore   = Reflux.createStore
     @updateChanges()
 
 
-  onDeleteSelected: ->
-    paletteItem = @selectedPaletteItem
+  onDelete: (paletteItem)->
     if paletteItem
-
       @undoManger.createAndExecuteCommand 'deletePaletteItem',
         execute: =>
           @palette = _.without @palette, paletteItem

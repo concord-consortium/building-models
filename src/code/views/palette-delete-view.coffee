@@ -16,17 +16,15 @@ module.exports = React.createClass
   ok: ->
     @props.ok?()
 
-  showReplacement: ->
-    @props.options.length > 0 and @props.paletteItemHasNodes
 
   renderArrow: ->
-    if @showReplacement()
+    if @props.showReplacement
       (div {className: "vertical-content"},
         (i {className: 'arrow-div fa fa-arrow-right'})
       )
 
   renderReplacement: ->
-    if @showReplacement()
+    if @props.showReplacement
       (div {className: "vertical-content"},
         (div {}, tr "~PALETTE-DIALOG.REPLACE")
         (ImagePickerView {
