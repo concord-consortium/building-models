@@ -55623,7 +55623,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":565,"../utils/has-valid-image-extension":572,"../views/preview-image-dialog-view":610}],554:[function(require,module,exports){
+},{"../stores/image-dialog-store":565,"../utils/has-valid-image-extension":572,"../views/preview-image-dialog-view":609}],554:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -57415,6 +57415,7 @@ paletteDialogActions = Reflux.createActions(["open", "close", "delete", "cancel"
 store = Reflux.createStore({
   listenables: [paletteDialogActions],
   init: function() {
+    this.enableListening();
     this.initValues();
     return this.undoManger = UndoRedo.instance({
       debug: true
@@ -57422,25 +57423,18 @@ store = Reflux.createStore({
   },
   initValues: function() {
     this.showing = false;
+    this.paletteItem = PaletteStore.store.selectedPaletteItem;
+    this.palette = PaletteStore.store.palette;
+    this.replacement = null;
     this.deleted = false;
-    this.paletteItemHasNodes = false;
     return this._notifyChanges();
+  },
+  enableListening: function() {
+    return PaletteStore.store.listen(this.onPaletteSelect);
   },
   onOpen: function() {
     this.showing = true;
-    this.paletteItem = PaletteStore.store.selectedPaletteItem;
-    this.options = _.without(PaletteStore.store.palette, this.paletteItem);
-    this.paletteItemHasNodes = false;
-    this.replacement = this.options[0];
-    this.deleted = false;
-    this.paletteItemHasNodes = false;
-    _.each((require('./nodes-store')).store.nodes, (function(_this) {
-      return function(node) {
-        if (node.paletteItemIs(_this.paletteItem)) {
-          return _this.paletteItemHasNodes = true;
-        }
-      };
-    })(this));
+    this._reset();
     return this._notifyChanges();
   },
   onClose: function() {
@@ -57456,24 +57450,36 @@ store = Reflux.createStore({
   onDelete: function(item) {
     this.deleted = true;
     this.undoManger.startCommandBatch();
-    PaletteStore.actions["delete"](item);
+    PaletteStore.actions.deleteSelected();
     this.close();
     return this.undoManger.endCommandBatch();
+  },
+  onPaletteSelect: function(status) {
+    this.paletteItem = status.selectedPaletteItem;
+    this.palette = status.palette;
+    this.replacement = status.replacement;
+    this._reset();
+    return this._notifyChanges();
   },
   close: function() {
     this.showing = false;
     PaletteStore.actions.restoreSelection();
     return this._notifyChanges();
   },
+  _reset: function() {
+    this.deleted = false;
+    this.options = _.without(this.palette, this.paletteItem);
+    return this.replacement = this.options[0];
+  },
   _notifyChanges: function() {
     var data;
     data = {
       showing: this.showing,
       paletteItem: this.paletteItem,
+      palette: this.palette,
       options: this.options,
       replacement: this.replacement,
-      deleted: this.deleted,
-      paletteItemHasNodes: this.paletteItemHasNodes
+      deleted: this.deleted
     };
     return this.trigger(data);
   }
@@ -57485,10 +57491,10 @@ listenerMixin = {
     return {
       showing: store.showing,
       paletteItem: store.paletteItem,
+      palette: store.palette,
       options: store.options,
       replacement: store.replacement,
-      deleted: store.deleted,
-      paletteItemHasNodes: store.paletteItemHasNodes
+      deleted: store.deleted
     };
   },
   componentDidMount: function() {
@@ -57498,10 +57504,10 @@ listenerMixin = {
     return this.setState({
       showing: status.showing,
       paletteItem: status.paletteItem,
+      palette: status.palette,
       options: status.options,
       replacement: status.replacement,
-      deleted: status.deleted,
-      paletteItemHasNodes: status.paletteItemHasNodes
+      deleted: status.deleted
     });
   }
 };
@@ -57514,7 +57520,7 @@ module.exports = {
 
 
 
-},{"../utils/undo-redo":579,"./nodes-store":566,"./palette-store":568}],568:[function(require,module,exports){
+},{"../utils/undo-redo":579,"./palette-store":568}],568:[function(require,module,exports){
 var UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage;
 
 resizeImage = require('../utils/resize-image');
@@ -57525,7 +57531,7 @@ initialLibrary = require('../data/internal-library');
 
 UndoRedo = require('../utils/undo-redo');
 
-paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "deselect", "restoreSelection", "itemDropped", "update", "delete"]);
+paletteActions = Reflux.createActions(["addToPalette", "loadData", "selectPaletteIndex", "deselect", "restoreSelection", "itemDropped", "update", "deleteSelected"]);
 
 paletteStore = Reflux.createStore({
   listenables: [paletteActions],
@@ -57598,7 +57604,9 @@ paletteStore = Reflux.createStore({
     }
     return this.updateChanges();
   },
-  onDelete: function(paletteItem) {
+  onDeleteSelected: function() {
+    var paletteItem;
+    paletteItem = this.selectedPaletteItem;
     if (paletteItem) {
       return this.undoManger.createAndExecuteCommand('deletePaletteItem', {
         execute: (function(_this) {
@@ -58829,7 +58837,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":550,"../stores/image-dialog-store":565,"./document-actions-view":582,"./global-nav-view":585,"./graph-view":586,"./image-browser-view":587,"./inspector-panel-view":593,"./modal-palette-delete-view":598,"./node-well-view":604,"./placeholder-view":609,"reflux":523}],581:[function(require,module,exports){
+},{"../mixins/app-view":550,"../stores/image-dialog-store":565,"./document-actions-view":582,"./global-nav-view":585,"./graph-view":586,"./image-browser-view":587,"./inspector-panel-view":593,"./modal-palette-delete-view":598,"./node-well-view":604,"./placeholder-view":608,"reflux":523}],581:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -59567,7 +59575,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":565,"../stores/palette-store":568,"../utils/translate":578,"./image-link-dialog-view":588,"./image-metadata-view":589,"./image-my-computer-dialog-view":590,"./image-search-dialog-view":592,"./modal-tabbed-dialog-view":599,"./tabbed-panel-view":612}],588:[function(require,module,exports){
+},{"../stores/image-dialog-store":565,"../stores/palette-store":568,"../utils/translate":578,"./image-link-dialog-view":588,"./image-metadata-view":589,"./image-my-computer-dialog-view":590,"./image-search-dialog-view":592,"./modal-tabbed-dialog-view":599,"./tabbed-panel-view":611}],588:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -59759,13 +59767,11 @@ module.exports = React.createClass({
 
 
 },{"../mixins/image-dialog-view":553,"../stores/image-dialog-store":565,"../utils/translate":578,"./dropzone-view":584}],591:[function(require,module,exports){
-var ImgChoice, PaletteAddView, div, img, ref, tr;
+var ImgChoice, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
 
 tr = require('../utils/translate');
-
-PaletteAddView = React.createFactory(require('./palette-add-view'));
 
 ImgChoice = React.createFactory(React.createClass({
   displayName: 'ImgChoice',
@@ -59818,9 +59824,7 @@ module.exports = React.createClass({
       src: this.props.selected.image
     })), div({
       className: this.className()
-    }, PaletteAddView({
-      callback: this.props.onChange
-    }), (function() {
+    }, (function() {
       var i, len, ref1, results;
       ref1 = this.props.nodes;
       results = [];
@@ -59840,7 +59844,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":578,"./palette-add-view":605}],592:[function(require,module,exports){
+},{"../utils/translate":578}],592:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -60278,7 +60282,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":594,"./link-value-inspector-view":596,"./node-inspector-view":601,"./node-value-inspector-view":602,"./palette-inspector-view":607,"./relation-inspector-view":611}],594:[function(require,module,exports){
+},{"./link-inspector-view":594,"./link-value-inspector-view":596,"./node-inspector-view":601,"./node-value-inspector-view":602,"./palette-inspector-view":606,"./relation-inspector-view":610}],594:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -60511,7 +60515,7 @@ ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
 
 module.exports = React.createClass({
   displayName: 'ModalPaletteDelete',
-  mixins: [PaletteDialogStore.mixin],
+  mixins: [PaletteDialogStore.mixin, NodesStore.mixin],
   render: function() {
     var title;
     return div({
@@ -60523,20 +60527,16 @@ module.exports = React.createClass({
       options: this.state.options,
       paletteItem: this.state.paletteItem,
       replacement: this.state.replacement,
-      showReplacement: this.state.paletteItemHasNodes,
+      paletteItemHasNodes: this.state.paletteItemHasNodes,
       cancel: PaletteDialogStore.actions.close,
-      ok: (function(_this) {
-        return function() {
-          return PaletteDialogStore.actions["delete"](_this.state.paletteItem);
-        };
-      })(this)
+      ok: PaletteDialogStore.actions["delete"]
     }))) : void 0);
   }
 });
 
 
 
-},{"../stores/nodes-store":566,"../stores/palette-delete-dialog-store":567,"../utils/translate":578,"./modal-dialog-view":597,"./palette-delete-view":606}],599:[function(require,module,exports){
+},{"../stores/nodes-store":566,"../stores/palette-delete-dialog-store":567,"../utils/translate":578,"./modal-dialog-view":597,"./palette-delete-view":605}],599:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -60557,7 +60557,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":597,"./tabbed-panel-view":612}],600:[function(require,module,exports){
+},{"./modal-dialog-view":597,"./tabbed-panel-view":611}],600:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -61038,45 +61038,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":568,"./palette-inspector-view":607}],605:[function(require,module,exports){
-var Draggable, ImageDialogStore, div, tr;
-
-ImageDialogStore = require("../stores/image-dialog-store");
-
-Draggable = require('../mixins/draggable');
-
-tr = require("../utils/translate");
-
-div = React.DOM.div;
-
-module.exports = React.createClass({
-  displayName: 'PaletteAddView',
-  mixins: [Draggable],
-  defaultProps: {
-    callback: false
-  },
-  render: function() {
-    return div({
-      className: 'palette-image',
-      'data-droptype': 'new'
-    }, div({
-      className: 'palette-add-image',
-      onClick: (function(_this) {
-        return function() {
-          return ImageDialogStore.actions.open.trigger(_this.props.callback);
-        };
-      })(this)
-    }, div({
-      className: 'proto-node'
-    }, div({
-      className: 'img-background'
-    }, tr('~PALETTE-INSPECTOR.ADD_IMAGE')))));
-  }
-});
-
-
-
-},{"../mixins/draggable":551,"../stores/image-dialog-store":565,"../utils/translate":578}],606:[function(require,module,exports){
+},{"../stores/palette-store":568,"./palette-inspector-view":606}],605:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -61100,8 +61062,11 @@ module.exports = React.createClass({
     var base;
     return typeof (base = this.props).ok === "function" ? base.ok() : void 0;
   },
+  showReplacement: function() {
+    return this.props.options.length > 0 && this.props.paletteItemHasNodes;
+  },
   renderArrow: function() {
-    if (this.props.showReplacement) {
+    if (this.showReplacement()) {
       return div({
         className: "vertical-content"
       }, i({
@@ -61110,7 +61075,7 @@ module.exports = React.createClass({
     }
   },
   renderReplacement: function() {
-    if (this.props.showReplacement) {
+    if (this.showReplacement()) {
       return div({
         className: "vertical-content"
       }, div({}, tr("~PALETTE-DIALOG.REPLACE")), ImagePickerView({
@@ -61154,16 +61119,18 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":567,"../utils/translate":578,"./image-picker-view":591}],607:[function(require,module,exports){
-var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
+},{"../stores/palette-delete-dialog-store":567,"../utils/translate":578,"./image-picker-view":591}],606:[function(require,module,exports){
+var Draggable, ImageDialogStore, ImageMetadata, NodesStore, PaletteAddImage, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
 
-PaletteAddView = React.createFactory(require('./palette-add-view'));
-
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
 
+Draggable = require('../mixins/draggable');
+
 PaletteStore = require("../stores/palette-store");
+
+ImageDialogStore = require("../stores/image-dialog-store");
 
 PaletteDialogStore = require("../stores/palette-delete-dialog-store");
 
@@ -61172,6 +61139,25 @@ NodesStore = require("../stores/nodes-store");
 tr = require("../utils/translate");
 
 ref = React.DOM, label = ref.label, div = ref.div, img = ref.img, i = ref.i, span = ref.span;
+
+PaletteAddImage = React.createFactory(React.createClass({
+  mixins: [Draggable],
+  render: function() {
+    return div({
+      className: 'palette-image',
+      'data-droptype': 'new'
+    }, div({
+      className: 'palette-add-image',
+      onClick: function() {
+        return ImageDialogStore.actions.open.trigger(false);
+      }
+    }, div({
+      className: 'proto-node'
+    }, div({
+      className: 'img-background'
+    }, tr('~PALETTE-INSPECTOR.ADD_IMAGE')))));
+  }
+}));
 
 module.exports = React.createClass({
   displayName: 'PaletteInspector',
@@ -61190,7 +61176,7 @@ module.exports = React.createClass({
     }, div({
       className: 'palette',
       ref: 'palette'
-    }, div({}, PaletteAddView({}), _.map(this.state.palette, (function(_this) {
+    }, div({}, PaletteAddImage({}), _.map(this.state.palette, (function(_this) {
       return function(node, index) {
         return PaletteItemView({
           key: index,
@@ -61227,7 +61213,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":566,"../stores/palette-delete-dialog-store":567,"../stores/palette-store":568,"../utils/translate":578,"./image-metadata-view":589,"./palette-add-view":605,"./palette-item-view":608}],608:[function(require,module,exports){
+},{"../mixins/draggable":551,"../stores/image-dialog-store":565,"../stores/nodes-store":566,"../stores/palette-delete-dialog-store":567,"../stores/palette-store":568,"../utils/translate":578,"./image-metadata-view":589,"./palette-item-view":607}],607:[function(require,module,exports){
 var Draggable, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -61265,7 +61251,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":551}],609:[function(require,module,exports){
+},{"../mixins/draggable":551}],608:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -61283,7 +61269,7 @@ module.exports = React.createClass({
 
 
 
-},{}],610:[function(require,module,exports){
+},{}],609:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -61334,7 +61320,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":565,"../stores/palette-store":568,"../utils/translate":578,"./image-metadata-view":589}],611:[function(require,module,exports){
+},{"../stores/image-dialog-store":565,"../stores/palette-store":568,"../utils/translate":578,"./image-metadata-view":589}],610:[function(require,module,exports){
 var LinkRelationView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -61394,7 +61380,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/graph-store":564,"../utils/translate":578,"./link-relation-view":595,"./tabbed-panel-view":612}],612:[function(require,module,exports){
+},{"../stores/graph-store":564,"../utils/translate":578,"./link-relation-view":595,"./tabbed-panel-view":611}],611:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
