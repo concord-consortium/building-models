@@ -1,9 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var AppView, CodapConnect, LinkManager, getParameterByName;
+var AppView, CodapConnect, GraphStore, getParameterByName;
 
 AppView = React.createFactory(require('./views/app-view'));
 
-LinkManager = require('./models/link-manager');
+GraphStore = require('./stores/graph-store');
 
 CodapConnect = require('./models/codap-connect');
 
@@ -25,13 +25,12 @@ window.initApp = function(wireframes) {
     wireframes = false;
   }
   opts = {
+    graphStore: GraphStore.store,
     url: getParameterByName('url'),
-    linkManager: LinkManager.instance('building-models'),
     data: getParameterByName('data'),
     simplified: getParameterByName('simplified')
   };
   opts.codapConnect = CodapConnect.instance('building-models');
-  opts.tree = (require('./stores/image-dialog-store')).tree;
   appView = AppView(opts);
   elem = '#app';
   return jsPlumb.bind('ready', function() {
@@ -41,7 +40,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/codap-connect":555,"./models/link-manager":557,"./stores/image-dialog-store":564,"./views/app-view":579}],2:[function(require,module,exports){
+},{"./models/codap-connect":555,"./stores/graph-store":564,"./views/app-view":580}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -55227,7 +55226,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":561,"./migration-mixin":548}],548:[function(require,module,exports){
+},{"../../models/relationship":560,"./migration-mixin":548}],548:[function(require,module,exports){
 module.exports = {
   needsUpdate: function(data) {
     return (data.version || 0) < this.version;
@@ -55279,11 +55278,13 @@ module.exports = {
 
 
 },{"./01_base":546,"./02_add_relations":547}],550:[function(require,module,exports){
-var PaletteStore, Simulation;
+var CodapStore, PaletteStore, Simulation;
 
 Simulation = require("../models/simulation");
 
 PaletteStore = require("../stores/palette-store");
+
+CodapStore = require("../stores/codap-store");
 
 module.exports = {
   getInitialAppViewState: function(subState) {
@@ -55292,7 +55293,8 @@ module.exports = {
       selectedNode: null,
       selectedConnection: null,
       palette: [],
-      filename: null
+      filename: null,
+      undoRedoShowing: true
     };
     return _.extend(mixinState, subState);
   },
@@ -55302,7 +55304,7 @@ module.exports = {
   addDeleteKeyHandler: function(add) {
     var deleteFunction;
     if (add) {
-      deleteFunction = this.props.linkManager.deleteSelected.bind(this.props.linkManager);
+      deleteFunction = this.props.graphStore.deleteSelected.bind(this.props.graphStore);
       return $(window).on('keydown', function(e) {
         if (e.which === 8 && !$(e.target).is('input, textarea')) {
           e.preventDefault();
@@ -55315,8 +55317,8 @@ module.exports = {
   },
   componentDidMount: function() {
     this.addDeleteKeyHandler(true);
-    this.props.linkManager.selectionManager.addSelectionListener(this._updateSelection);
-    this.props.linkManager.addFilenameListener((function(_this) {
+    this.props.graphStore.selectionManager.addSelectionListener(this._updateSelection);
+    this.props.graphStore.addFilenameListener((function(_this) {
       return function(filename) {
         return _this.setState({
           filename: filename
@@ -55325,7 +55327,8 @@ module.exports = {
     })(this));
     this._loadInitialData();
     this._registerUndoRedoKeys();
-    return PaletteStore.store.listen(this.onPaletteChange);
+    PaletteStore.store.listen(this.onPaletteChange);
+    return CodapStore.store.listen(this.onCodapStateChange);
   },
   componentDidUnmount: function() {
     return this.addDeleteKeyHandler(false);
@@ -55336,19 +55339,24 @@ module.exports = {
       internalLibrary: status.internalLibrary
     });
   },
+  onCodapStateChange: function(status) {
+    return this.setState({
+      undoRedoShowing: !status.hideUndoRedo
+    });
+  },
   getData: function() {
-    return this.props.linkManager.toJsonString(this.state.palette);
+    return this.props.graphStore.toJsonString(this.state.palette);
   },
   onNodeChanged: function(node, data) {
-    return this.props.linkManager.changeNode(data);
+    return this.props.graphStore.changeNode(data);
   },
   onNodeDelete: function() {
-    return this.props.linkManager.deleteSelected();
+    return this.props.graphStore.deleteSelected();
   },
   runSimulation: function() {
     var simulator;
     simulator = new Simulation({
-      nodes: this.props.linkManager.getNodes(),
+      nodes: this.props.graphStore.getNodes(),
       duration: 10,
       timeStep: 1,
       reportFunc: (function(_this) {
@@ -55358,7 +55366,7 @@ module.exports = {
           nodeInfo = (_.map(report.endState, function(n) {
             return n.title + " " + n.initialValue + " → " + n.value;
           })).join("\n");
-          alert("Run for " + report.steps + " steps\n" + nodeInfo + ":");
+          log.info("Run for " + report.steps + " steps\n" + nodeInfo + ":");
           return _this.props.codapConnect.sendSimulationData(report);
         };
       })(this)
@@ -55380,9 +55388,9 @@ module.exports = {
   _loadInitialData: function() {
     var ref, ref1;
     if (((ref = this.props.data) != null ? ref.length : void 0) > 0) {
-      return this.props.linkManager.loadData(JSON.parse(this.props.data));
+      return this.props.graphStore.loadData(JSON.parse(this.props.data));
     } else if (((ref1 = this.props.url) != null ? ref1.length : void 0) > 0) {
-      return this.props.linkManager.loadDataFromUrl(this.props.url);
+      return this.props.graphStore.loadDataFromUrl(this.props.url);
     }
   },
   _registerUndoRedoKeys: function() {
@@ -55404,13 +55412,13 @@ module.exports = {
           undo = redo = false;
         }
         if (undo || redo) {
-          if (_this.props.linkManager.undoRedoIsVisible) {
+          if (_this.state.undoRedoShowing) {
             e.preventDefault();
             if (redo) {
-              _this.props.linkManager.redo();
+              _this.props.graphStore.redo();
             }
             if (undo) {
-              return _this.props.linkManager.undo();
+              return _this.props.graphStore.undo();
             }
           }
         }
@@ -55421,7 +55429,7 @@ module.exports = {
 
 
 
-},{"../models/simulation":563,"../stores/palette-store":567}],551:[function(require,module,exports){
+},{"../models/simulation":562,"../stores/codap-store":563,"../stores/palette-store":568}],551:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -55499,7 +55507,7 @@ module.exports = {
   },
   newFile: function() {
     if (confirm(tr("~FILE.CONFIRM"))) {
-      this.props.linkManager.deleteAll();
+      this.props.graphStore.deleteAll();
       return this.setState({
         fileId: null
       });
@@ -55525,8 +55533,8 @@ module.exports = {
                 fileId: fileSpec.id,
                 action: null
               });
-              _this.props.linkManager.deleteAll();
-              return _this.props.linkManager.loadData(data);
+              _this.props.graphStore.deleteAll();
+              return _this.props.graphStore.loadData(data);
             }
           });
         }
@@ -55537,7 +55545,7 @@ module.exports = {
     var filename;
     filename = $.trim((prompt(tr("~FILE.FILENAME"), this.props.filename)) || '');
     if (filename.length > 0) {
-      this.props.linkManager.setFilename(filename);
+      this.props.graphStore.setFilename(filename);
     }
     return filename;
   },
@@ -55564,7 +55572,7 @@ module.exports = {
               fileId: fileSpec.id,
               action: null
             });
-            return _this.props.linkManager.setSaved();
+            return _this.props.graphStore.setSaved();
           }
         };
       })(this));
@@ -55572,19 +55580,19 @@ module.exports = {
   },
   revertToOriginal: function() {
     if (confirm(tr("~FILE.CONFIRM_ORIGINAL_REVERT"))) {
-      return this.props.linkManager.revertToOriginal();
+      return this.props.graphStore.revertToOriginal();
     }
   },
   revertToLastSave: function() {
     if (confirm(tr("~FILE.CONFIRM_LAST_SAVE_REVERT"))) {
-      return this.props.linkManager.revertToLastSave();
+      return this.props.graphStore.revertToLastSave();
     }
   }
 };
 
 
 
-},{"../utils/google-drive-io":570,"../utils/translate":577}],553:[function(require,module,exports){
+},{"../utils/google-drive-io":571,"../utils/translate":578}],553:[function(require,module,exports){
 var ImageDialogStore, PreviewImage, hasValidImageExtension;
 
 PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
@@ -55615,7 +55623,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":564,"../utils/has-valid-image-extension":571,"../views/preview-image-dialog-view":608}],554:[function(require,module,exports){
+},{"../stores/image-dialog-store":565,"../utils/has-valid-image-extension":572,"../views/preview-image-dialog-view":609}],554:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -55645,11 +55653,13 @@ module.exports = {
 
 
 
-},{"../utils/translate":577}],555:[function(require,module,exports){
-var CodapConnect, IframePhoneRpcEndpoint, tr,
+},{"../utils/translate":578}],555:[function(require,module,exports){
+var CodapConnect, CodapStore, IframePhoneRpcEndpoint, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 IframePhoneRpcEndpoint = (require('iframe-phone')).IframePhoneRpcEndpoint;
+
+CodapStore = require("../stores/codap-store");
 
 tr = require('../utils/translate');
 
@@ -55673,10 +55683,10 @@ module.exports = CodapConnect = (function() {
   function CodapConnect(context) {
     this.initGameHandler = bind(this.initGameHandler, this);
     this.codapRequestHandler = bind(this.codapRequestHandler, this);
-    var LinkManager;
+    var GraphStore;
     log.info('CodapConnect: initializing');
-    LinkManager = require('./link-manager');
-    this.linkManager = LinkManager.instance(context);
+    GraphStore = require('../stores/graph-store');
+    this.graphStore = GraphStore.store;
     this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'codap-game', window.parent);
     this.codapPhone.call({
       action: 'initGame',
@@ -55778,27 +55788,27 @@ module.exports = CodapConnect = (function() {
         log.info('Received saveState request from CODAP.');
         return callback({
           success: true,
-          state: this.linkManager.serialize(paletteManager.store.palette)
+          state: this.graphStore.serialize(paletteManager.store.palette)
         });
       case 'restoreState':
         log.info('Received restoreState request from CODAP.');
-        this.linkManager.deleteAll();
-        this.linkManager.loadData(args.state);
+        this.graphStore.deleteAll();
+        this.graphStore.loadData(args.state);
         return callback({
           success: true
         });
       case 'externalUndoAvailable':
         log.info('Received externalUndoAvailable request from CODAP.');
-        return this.linkManager.hideUndoRedo(true);
+        return CodapStore.actions.hideUndoRedo();
       case 'undoAction':
         log.info('Received undoAction request from CODAP.');
-        successes = this.linkManager.undo();
+        successes = this.graphStore.undo();
         return callback({
           success: this.reduceSuccesses(successes)
         });
       case 'redoAction':
         log.info('Received redoAction request from CODAP.');
-        successes = this.linkManager.redo();
+        successes = this.graphStore.redo();
         return callback({
           success: this.reduceSuccesses(successes)
         });
@@ -55821,8 +55831,11 @@ module.exports = CodapConnect = (function() {
     return true;
   };
 
-  CodapConnect.prototype.initGameHandler = function() {
-    return this.initAccomplished = true;
+  CodapConnect.prototype.initGameHandler = function(result) {
+    if (result && result.success) {
+      this.initAccomplished = true;
+      return CodapStore.actions.codapLoaded();
+    }
   };
 
   CodapConnect.prototype.request = function(action, args, callback) {
@@ -55853,7 +55866,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../stores/palette-store":567,"../utils/translate":577,"./link-manager":557,"iframe-phone":167}],556:[function(require,module,exports){
+},{"../stores/codap-store":563,"../stores/graph-store":564,"../stores/palette-store":568,"../utils/translate":578,"iframe-phone":167}],556:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -55885,637 +55898,6 @@ module.exports = GraphPrimitive = (function() {
 
 
 },{}],557:[function(require,module,exports){
-var DiagramNode, Importer, Link, LinkManager, Migrations, NodesStore, PaletteDeleteStore, PaletteStore, SelectionManager, UndoRedo, tr,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-Importer = require('../utils/importer');
-
-Link = require('./link');
-
-DiagramNode = require('./node');
-
-UndoRedo = require('../utils/undo-redo');
-
-SelectionManager = require('./selection-manager');
-
-PaletteStore = require("../stores/palette-store");
-
-tr = require("../utils/translate");
-
-Migrations = require("../data/migrations/migrations");
-
-NodesStore = require("../stores/nodes-store");
-
-PaletteDeleteStore = require("../stores/palette-delete-dialog-store");
-
-module.exports = LinkManager = (function() {
-  LinkManager.instances = {};
-
-  LinkManager.instance = function(context) {
-    var base;
-    if ((base = LinkManager.instances)[context] == null) {
-      base[context] = new LinkManager(context);
-    }
-    return LinkManager.instances[context];
-  };
-
-  function LinkManager(context) {
-    this.loadDataFromUrl = bind(this.loadDataFromUrl, this);
-    this.linkKeys = {};
-    this.nodeKeys = {};
-    this.linkListeners = [];
-    this.nodeListeners = [];
-    this.loadListeners = [];
-    this.filename = null;
-    this.filenameListeners = [];
-    this.undoRedoManager = UndoRedo.instance({
-      debug: true
-    });
-    this.selectionManager = new SelectionManager();
-    PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
-  }
-
-  LinkManager.prototype.paletteDelete = function(status) {
-    var deleted, i, len, node, paletteItem, ref, replacement, results;
-    deleted = status.deleted, paletteItem = status.paletteItem, replacement = status.replacement;
-    if (deleted && paletteItem && replacement) {
-      ref = this.getNodes();
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        node = ref[i];
-        if (node.paletteItemIs(paletteItem)) {
-          results.push(this.changeNode({
-            image: replacement.image
-          }, node));
-        } else {
-          results.push(void 0);
-        }
-      }
-      return results;
-    }
-  };
-
-  LinkManager.prototype.undo = function() {
-    return this.undoRedoManager.undo();
-  };
-
-  LinkManager.prototype.redo = function() {
-    return this.undoRedoManager.redo();
-  };
-
-  LinkManager.prototype.setSaved = function() {
-    return this.undoRedoManager.save();
-  };
-
-  LinkManager.prototype.revertToOriginal = function() {
-    return this.undoRedoManager.revertToOriginal();
-  };
-
-  LinkManager.prototype.revertToLastSave = function() {
-    return this.undoRedoManager.revertToLastSave();
-  };
-
-  LinkManager.prototype.hideUndoRedo = function(hide) {
-    return this.undoRedoManager.hideUndoRedo(hide);
-  };
-
-  LinkManager.prototype.undoRedoIsVisible = function() {
-    return this.undoRedoManager.showUndoRedo;
-  };
-
-  LinkManager.prototype.addChangeListener = function(listener) {
-    log.info("adding change listener");
-    return this.undoRedoManager.addChangeListener(listener);
-  };
-
-  LinkManager.prototype.addLinkListener = function(listener) {
-    log.info("adding link listener");
-    return this.linkListeners.push(listener);
-  };
-
-  LinkManager.prototype.addNodeListener = function(listener) {
-    log.info("adding node listener");
-    return this.nodeListeners.push(listener);
-  };
-
-  LinkManager.prototype.addFilenameListener = function(listener) {
-    log.info("adding filename listener " + listener);
-    return this.filenameListeners.push(listener);
-  };
-
-  LinkManager.prototype.setFilename = function(filename) {
-    var i, len, listener, ref, results;
-    this.filename = filename;
-    ref = this.filenameListeners;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      results.push(listener(filename));
-    }
-    return results;
-  };
-
-  LinkManager.prototype.getLinks = function() {
-    var key, ref, results, value;
-    ref = this.linkKeys;
-    results = [];
-    for (key in ref) {
-      value = ref[key];
-      results.push(value);
-    }
-    return results;
-  };
-
-  LinkManager.prototype.getNodes = function() {
-    var key, ref, results, value;
-    ref = this.nodeKeys;
-    results = [];
-    for (key in ref) {
-      value = ref[key];
-      results.push(value);
-    }
-    return results;
-  };
-
-  LinkManager.prototype.hasLink = function(link) {
-    return this.linkKeys[link.terminalKey()] != null;
-  };
-
-  LinkManager.prototype.hasNode = function(node) {
-    return this.nodeKeys[node.key] != null;
-  };
-
-  LinkManager.prototype.importLink = function(linkSpec) {
-    var link, sourceNode, targetNode;
-    sourceNode = this.nodeKeys[linkSpec.sourceNode];
-    targetNode = this.nodeKeys[linkSpec.targetNode];
-    linkSpec.sourceNode = sourceNode;
-    linkSpec.targetNode = targetNode;
-    link = new Link(linkSpec);
-    return this.addLink(link);
-  };
-
-  LinkManager.prototype.addLink = function(link) {
-    return this.undoRedoManager.createAndExecuteCommand('addLink', {
-      execute: (function(_this) {
-        return function() {
-          return _this._addLink(link);
-        };
-      })(this),
-      undo: (function(_this) {
-        return function() {
-          return _this._removeLink(link);
-        };
-      })(this)
-    });
-  };
-
-  LinkManager.prototype._addLink = function(link) {
-    var i, len, listener, ref;
-    if (link.sourceNode === link.targetNode) {
-      return false;
-    }
-    if (this.hasLink(link)) {
-      return false;
-    } else {
-      this.linkKeys[link.terminalKey()] = link;
-      this.nodeKeys[link.sourceNode.key].addLink(link);
-      this.nodeKeys[link.targetNode.key].addLink(link);
-      ref = this.linkListeners;
-      for (i = 0, len = ref.length; i < len; i++) {
-        listener = ref[i];
-        log.info("notifying of new link: " + (link.terminalKey()));
-        listener.handleLinkAdd(link);
-      }
-      return true;
-    }
-  };
-
-  LinkManager.prototype.removeLink = function(link) {
-    return this.undoRedoManager.createAndExecuteCommand('removeLink', {
-      execute: (function(_this) {
-        return function() {
-          return _this._removeLink(link);
-        };
-      })(this),
-      undo: (function(_this) {
-        return function() {
-          return _this._addLink(link);
-        };
-      })(this)
-    });
-  };
-
-  LinkManager.prototype._removeLink = function(link) {
-    var i, len, listener, ref, ref1, ref2, results;
-    delete this.linkKeys[link.terminalKey()];
-    if ((ref = this.nodeKeys[link.sourceNode.key]) != null) {
-      ref.removeLink(link);
-    }
-    if ((ref1 = this.nodeKeys[link.targetNode.key]) != null) {
-      ref1.removeLink(link);
-    }
-    ref2 = this.linkListeners;
-    results = [];
-    for (i = 0, len = ref2.length; i < len; i++) {
-      listener = ref2[i];
-      log.info("notifying of deleted Link");
-      results.push(listener.handleLinkRm(link));
-    }
-    return results;
-  };
-
-  LinkManager.prototype.importNode = function(nodeSpec) {
-    var node;
-    node = new DiagramNode(nodeSpec.data, nodeSpec.key);
-    this.addNode(node);
-    return node;
-  };
-
-  LinkManager.prototype.addNode = function(node) {
-    return this.undoRedoManager.createAndExecuteCommand('addNode', {
-      execute: (function(_this) {
-        return function() {
-          return _this._addNode(node);
-        };
-      })(this),
-      undo: (function(_this) {
-        return function() {
-          return _this._removeNode(node);
-        };
-      })(this)
-    });
-  };
-
-  LinkManager.prototype.removeNode = function(nodeKey) {
-    var links, node;
-    node = this.nodeKeys[nodeKey];
-    links = node.links.slice();
-    return this.undoRedoManager.createAndExecuteCommand('removeNode', {
-      execute: (function(_this) {
-        return function() {
-          var i, len, link;
-          for (i = 0, len = links.length; i < len; i++) {
-            link = links[i];
-            _this._removeLink(link);
-          }
-          return _this._removeNode(node);
-        };
-      })(this),
-      undo: (function(_this) {
-        return function() {
-          var i, len, link, results;
-          _this._addNode(node);
-          results = [];
-          for (i = 0, len = links.length; i < len; i++) {
-            link = links[i];
-            results.push(_this._addLink(link));
-          }
-          return results;
-        };
-      })(this)
-    });
-  };
-
-  LinkManager.prototype._addNode = function(node) {
-    var i, len, listener, ref;
-    if (!this.hasNode(node)) {
-      this.nodeKeys[node.key] = node;
-      ref = this.nodeListeners;
-      for (i = 0, len = ref.length; i < len; i++) {
-        listener = ref[i];
-        log.info("notifying of new Node");
-        listener.handleNodeAdd(node);
-        NodesStore.actions.nodesChanged(this.getNodes());
-      }
-      return true;
-    }
-    return false;
-  };
-
-  LinkManager.prototype._removeNode = function(node) {
-    var i, len, listener, ref, results;
-    delete this.nodeKeys[node.key];
-    NodesStore.actions.nodesChanged(this.getNodes());
-    ref = this.nodeListeners;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      log.info("notifying of deleted Node");
-      results.push(listener.handleNodeRm(node));
-    }
-    return results;
-  };
-
-  LinkManager.prototype.moveNodeCompleted = function(nodeKey, pos, originalPos) {
-    var node;
-    node = this.nodeKeys[nodeKey];
-    if (!node) {
-      return;
-    }
-    return this.undoRedoManager.createAndExecuteCommand('moveNode', {
-      execute: (function(_this) {
-        return function() {
-          return _this.moveNode(node.key, pos, originalPos);
-        };
-      })(this),
-      undo: (function(_this) {
-        return function() {
-          return _this.moveNode(node.key, originalPos, pos);
-        };
-      })(this)
-    });
-  };
-
-  LinkManager.prototype.moveNode = function(nodeKey, pos, originalPos) {
-    var i, len, listener, node, ref, results;
-    node = this.nodeKeys[nodeKey];
-    if (!node) {
-      return;
-    }
-    node.x = pos.left;
-    node.y = pos.top;
-    ref = this.nodeListeners;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      log.info("notifying of NodeMove");
-      results.push(listener.handleNodeMove(node));
-    }
-    return results;
-  };
-
-  LinkManager.prototype.selectedNode = function() {
-    return this.selectionManager.selection(SelectionManager.NodeInpsection)[0] || null;
-  };
-
-  LinkManager.prototype.editingNode = function() {
-    return this.selectionManager.selection(SelectionManager.NodeTitleEditing)[0] || null;
-  };
-
-  LinkManager.prototype.editNode = function(nodeKey) {
-    return this.selectionManager.selectForTitleEditing(this.nodeKeys[nodeKey]);
-  };
-
-  LinkManager.prototype.selectNode = function(nodeKey) {
-    return this.selectionManager.selectForInspection(this.nodeKeys[nodeKey]);
-  };
-
-  LinkManager.prototype._notifyNodeChanged = function(node) {
-    var i, len, listener, ref;
-    NodesStore.actions.nodesChanged(this.getNodes());
-    ref = this.nodeListeners;
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
-      listener.handleNodeChange(node);
-    }
-    return this._maybeChangeSelectedItem(node);
-  };
-
-  LinkManager.prototype.changeNode = function(data, node) {
-    var originalData;
-    node = node || this.selectedNode();
-    if (node) {
-      originalData = {
-        title: node.title,
-        image: node.image,
-        color: node.color,
-        initialValue: node.initialValue,
-        isAccumulator: node.isAccumulator
-      };
-      return this.undoRedoManager.createAndExecuteCommand('changeNode', {
-        execute: (function(_this) {
-          return function() {
-            return _this._changeNode(node, data);
-          };
-        })(this),
-        undo: (function(_this) {
-          return function() {
-            return _this._changeNode(node, originalData);
-          };
-        })(this)
-      });
-    }
-  };
-
-  LinkManager.prototype._changeNode = function(node, data) {
-    var i, key, len, ref;
-    log.info("Change for " + node.title);
-    ref = ['title', 'image', 'color', 'initialValue', 'isAccumulator'];
-    for (i = 0, len = ref.length; i < len; i++) {
-      key = ref[i];
-      if (data.hasOwnProperty(key)) {
-        log.info("Change " + key + " for " + node.title);
-        node[key] = data[key];
-      }
-    }
-    return this._notifyNodeChanged(node);
-  };
-
-  LinkManager.prototype.changeNodeWithKey = function(key, data) {
-    var node;
-    node = this.nodeKeys[key];
-    if (node) {
-      return this.changeNode(data, node);
-    }
-  };
-
-  LinkManager.prototype.selectLink = function(link) {
-    return this.selectionManager.selectLink(link);
-  };
-
-  LinkManager.prototype.changeLink = function(link, changes) {
-    var originalData;
-    if (changes == null) {
-      changes = {};
-    }
-    if (changes.deleted) {
-      return this.removeSelectedLink();
-    } else if (link) {
-      originalData = {
-        title: link.title,
-        color: link.color,
-        relation: link.relation
-      };
-      return this.undoRedoManager.createAndExecuteCommand('changeLink', {
-        execute: (function(_this) {
-          return function() {
-            return _this._changeLink(link, changes);
-          };
-        })(this),
-        undo: (function(_this) {
-          return function() {
-            return _this._changeLink(link, originalData);
-          };
-        })(this)
-      });
-    }
-  };
-
-  LinkManager.prototype._maybeChangeSelectedItem = function(item) {
-    if (this.selectionManager.isSelected(item)) {
-      return this.selectionManager._notifySelectionChange();
-    }
-  };
-
-  LinkManager.prototype._changeLink = function(link, changes) {
-    var i, j, key, len, len1, listener, ref, ref1, results;
-    log.info("Change  for " + link.title);
-    ref = ['title', 'color', 'relation'];
-    for (i = 0, len = ref.length; i < len; i++) {
-      key = ref[i];
-      if (changes[key]) {
-        log.info("Change " + key + " for " + link.title);
-        link[key] = changes[key];
-      }
-    }
-    this._maybeChangeSelectedItem(link);
-    ref1 = this.linkListeners;
-    results = [];
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      listener = ref1[j];
-      log.info("link changed: " + (link.terminalKey()));
-      results.push(typeof listener.changeLink === "function" ? listener.changeLink(link) : void 0);
-    }
-    return results;
-  };
-
-  LinkManager.prototype._nameForNode = function(node) {
-    return this.nodeKeys[node];
-  };
-
-  LinkManager.prototype.newLinkFromEvent = function(info) {
-    var endKey, endTerminal, newLink, startKey, startTerminal;
-    newLink = {};
-    startKey = $(info.source).data('node-key') || 'undefined';
-    endKey = $(info.target).data('node-key') || 'undefined';
-    startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
-    endTerminal = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
-    this.importLink({
-      sourceNode: startKey,
-      targetNode: endKey,
-      sourceTerminal: startTerminal,
-      targetTerminal: endTerminal,
-      color: info.color,
-      title: info.title
-    });
-    return true;
-  };
-
-  LinkManager.prototype.deleteAll = function() {
-    var node;
-    for (node in this.nodeKeys) {
-      this.removeNode(node);
-    }
-    this.setFilename('New Model');
-    return this.undoRedoManager.clearHistory();
-  };
-
-  LinkManager.prototype.deleteSelected = function() {
-    log.info("Deleting selected items");
-    this.removeSelectedLink();
-    return this.removeSelectedNode();
-  };
-
-  LinkManager.prototype.removeSelectedNode = function() {
-    var nodeKey, ref;
-    nodeKey = (ref = this.selectedNode()) != null ? ref.key : void 0;
-    if (nodeKey) {
-      this.removeNode(nodeKey);
-      return this.selectionManager.clearSelection();
-    }
-  };
-
-  LinkManager.prototype.removeSelectedLink = function() {
-    var selectedLink;
-    selectedLink = this.selectionManager.getLinkSelection()[0] || null;
-    if (selectedLink) {
-      this.removeLink(selectedLink);
-      return this.selectionManager.clearLinkSelection();
-    }
-  };
-
-  LinkManager.prototype.removeLinksForNode = function(node) {
-    var i, len, link, ref, results;
-    ref = node.links;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      link = ref[i];
-      results.push(this.removeLink(link));
-    }
-    return results;
-  };
-
-  LinkManager.prototype.loadData = function(data) {
-    var importer;
-    log.info("json success");
-    importer = new Importer(this);
-    importer.importData(data);
-    this.setFilename(data.filename || 'New Model');
-    PaletteStore.actions.loadData(data);
-    return this.undoRedoManager.clearHistory();
-  };
-
-  LinkManager.prototype.loadDataFromUrl = function(url) {
-    log.info("loading local data");
-    log.info("url " + url);
-    return $.ajax({
-      url: url,
-      dataType: 'json',
-      success: (function(_this) {
-        return function(data) {
-          return _this.loadData(data);
-        };
-      })(this),
-      error: function(xhr, status, err) {
-        return log.error(url, status, err.toString());
-      }
-    });
-  };
-
-  LinkManager.prototype.serialize = function(palette) {
-    var data, key, link, linkExports, node, nodeExports;
-    nodeExports = (function() {
-      var ref, results;
-      ref = this.nodeKeys;
-      results = [];
-      for (key in ref) {
-        node = ref[key];
-        results.push(node.toExport());
-      }
-      return results;
-    }).call(this);
-    linkExports = (function() {
-      var ref, results;
-      ref = this.linkKeys;
-      results = [];
-      for (key in ref) {
-        link = ref[key];
-        results.push(link.toExport());
-      }
-      return results;
-    }).call(this);
-    data = {
-      version: Migrations.latestVersion(),
-      filename: this.filename,
-      palette: palette,
-      nodes: nodeExports,
-      links: linkExports
-    };
-    return data;
-  };
-
-  LinkManager.prototype.toJsonString = function(palette) {
-    return JSON.stringify(this.serialize(palette));
-  };
-
-  return LinkManager;
-
-})();
-
-
-
-},{"../data/migrations/migrations":549,"../stores/nodes-store":565,"../stores/palette-delete-dialog-store":566,"../stores/palette-store":567,"../utils/importer":572,"../utils/translate":577,"../utils/undo-redo":578,"./link":558,"./node":559,"./selection-manager":562}],558:[function(require,module,exports){
 var GraphPrimitive, Link, Relation,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -56593,7 +55975,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":556,"./relationship":561}],559:[function(require,module,exports){
+},{"./graph-primitive":556,"./relationship":560}],558:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -56741,7 +56123,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":568,"../utils/translate":577,"./graph-primitive":556}],560:[function(require,module,exports){
+},{"../utils/colors":569,"../utils/translate":578,"./graph-primitive":556}],559:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -56838,7 +56220,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":577,"./relationship":561}],561:[function(require,module,exports){
+},{"../utils/translate":578,"./relationship":560}],560:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -56910,7 +56292,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":577,"mathjs":168}],562:[function(require,module,exports){
+},{"../utils/translate":578,"mathjs":168}],561:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, tr;
 
 Importer = require('../utils/importer');
@@ -57086,7 +56468,7 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":572,"../utils/translate":577,"./link":558,"./node":559}],563:[function(require,module,exports){
+},{"../utils/importer":573,"../utils/translate":578,"./link":557,"./node":558}],562:[function(require,module,exports){
 var IntegrationFunction, Simulation;
 
 IntegrationFunction = function(t, timeStep) {
@@ -57097,7 +56479,9 @@ IntegrationFunction = function(t, timeStep) {
   if (count < 1) {
     return this.currentValue;
   }
-  this.currentValue = 0;
+  if (!this.isAccumulator) {
+    this.currentValue = 0;
+  }
   _.each(links, (function(_this) {
     return function(link) {
       var inV, outV, sourceNode;
@@ -57106,9 +56490,10 @@ IntegrationFunction = function(t, timeStep) {
       outV = _this.previousValue;
       nextValue = link.relation.evaluate(inV, outV) * timeStep;
       if (_this.isAccumulator) {
-        nextValue = _this.previousValue + nextValue;
+        return _this.currentValue = _this.currentValue + nextValue;
+      } else {
+        return _this.currentValue = _this.currentValue + (nextValue / count);
       }
-      return _this.currentValue = _this.currentValue + (nextValue / count);
     };
   })(this));
   return this.currentValue;
@@ -57227,7 +56612,594 @@ module.exports = Simulation = (function() {
 
 
 
+},{}],563:[function(require,module,exports){
+var codapActions, codapStore, mixin;
+
+codapActions = Reflux.createActions(["codapLoaded", "hideUndoRedo"]);
+
+codapStore = Reflux.createStore({
+  listenables: [codapActions],
+  init: function() {
+    this.codapHasLoaded = false;
+    return this.hideUndoRedo = false;
+  },
+  onCodapLoaded: function() {
+    this.codapHasLoaded = true;
+    return this.notifyChange();
+  },
+  onHideUndoRedo: function() {
+    this.hideUndoRedo = true;
+    return this.notifyChange();
+  },
+  notifyChange: function() {
+    var data;
+    data = {
+      codapHasLoaded: this.codapHasLoaded,
+      hideUndoRedo: this.hideUndoRedo
+    };
+    return this.trigger(data);
+  }
+});
+
+mixin = {
+  getInitialState: function() {
+    return {
+      codapHasLoaded: codapStore.codapHasLoaded,
+      hideUndoRedo: codapStore.hideUndoRedo
+    };
+  },
+  componentDidMount: function() {
+    return codapStore.listen(this.onCodapStateChange);
+  },
+  onCodapStateChange: function(status) {
+    return this.setState({
+      codapHasLoaded: status.codapHasLoaded,
+      hideUndoRedo: status.hideUndoRedo
+    });
+  }
+};
+
+module.exports = {
+  actions: codapActions,
+  store: codapStore,
+  mixin: mixin
+};
+
+
+
 },{}],564:[function(require,module,exports){
+var DiagramNode, GraphStore, Importer, Link, Migrations, PaletteDeleteStore, PaletteStore, SelectionManager, UndoRedo, mixin, tr;
+
+Importer = require('../utils/importer');
+
+Link = require('../models/link');
+
+DiagramNode = require('../models/node');
+
+UndoRedo = require('../utils/undo-redo');
+
+SelectionManager = require('../models/selection-manager');
+
+PaletteStore = require("../stores/palette-store");
+
+tr = require("../utils/translate");
+
+Migrations = require("../data/migrations/migrations");
+
+PaletteDeleteStore = require("../stores/palette-delete-dialog-store");
+
+GraphStore = Reflux.createStore({
+  init: function(context) {
+    this.linkKeys = {};
+    this.nodeKeys = {};
+    this.loadListeners = [];
+    this.filename = null;
+    this.filenameListeners = [];
+    this.undoRedoManager = UndoRedo.instance({
+      debug: true,
+      context: context
+    });
+    this.selectionManager = new SelectionManager();
+    return PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
+  },
+  paletteDelete: function(status) {
+    var deleted, i, len, node, paletteItem, ref, replacement, results;
+    deleted = status.deleted, paletteItem = status.paletteItem, replacement = status.replacement;
+    if (deleted && paletteItem && replacement) {
+      ref = this.getNodes();
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        node = ref[i];
+        if (node.paletteItemIs(paletteItem)) {
+          results.push(this.changeNode({
+            image: replacement.image
+          }, node));
+        } else {
+          results.push(void 0);
+        }
+      }
+      return results;
+    }
+  },
+  undo: function() {
+    return this.undoRedoManager.undo();
+  },
+  redo: function() {
+    return this.undoRedoManager.redo();
+  },
+  setSaved: function() {
+    return this.undoRedoManager.save();
+  },
+  revertToOriginal: function() {
+    return this.undoRedoManager.revertToOriginal();
+  },
+  revertToLastSave: function() {
+    return this.undoRedoManager.revertToLastSave();
+  },
+  hideUndoRedo: function(hide) {
+    return this.undoRedoManager.hideUndoRedo(hide);
+  },
+  addChangeListener: function(listener) {
+    log.info("adding change listener");
+    return this.undoRedoManager.addChangeListener(listener);
+  },
+  addFilenameListener: function(listener) {
+    log.info("adding filename listener " + listener);
+    return this.filenameListeners.push(listener);
+  },
+  setFilename: function(filename) {
+    var i, len, listener, ref, results;
+    this.filename = filename;
+    ref = this.filenameListeners;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      listener = ref[i];
+      results.push(listener(filename));
+    }
+    return results;
+  },
+  getLinks: function() {
+    var key, ref, results, value;
+    ref = this.linkKeys;
+    results = [];
+    for (key in ref) {
+      value = ref[key];
+      results.push(value);
+    }
+    return results;
+  },
+  getNodes: function() {
+    var key, ref, results, value;
+    ref = this.nodeKeys;
+    results = [];
+    for (key in ref) {
+      value = ref[key];
+      results.push(value);
+    }
+    return results;
+  },
+  hasLink: function(link) {
+    return this.linkKeys[link.terminalKey()] != null;
+  },
+  hasNode: function(node) {
+    return this.nodeKeys[node.key] != null;
+  },
+  importLink: function(linkSpec) {
+    var link, sourceNode, targetNode;
+    sourceNode = this.nodeKeys[linkSpec.sourceNode];
+    targetNode = this.nodeKeys[linkSpec.targetNode];
+    linkSpec.sourceNode = sourceNode;
+    linkSpec.targetNode = targetNode;
+    link = new Link(linkSpec);
+    return this.addLink(link);
+  },
+  addLink: function(link) {
+    return this.undoRedoManager.createAndExecuteCommand('addLink', {
+      execute: (function(_this) {
+        return function() {
+          return _this._addLink(link);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this._removeLink(link);
+        };
+      })(this)
+    });
+  },
+  _addLink: function(link) {
+    if (!(link.sourceNode === link.targetNode || this.hasLink(link))) {
+      this.linkKeys[link.terminalKey()] = link;
+      this.nodeKeys[link.sourceNode.key].addLink(link);
+      this.nodeKeys[link.targetNode.key].addLink(link);
+    }
+    return this.updateListeners();
+  },
+  removeLink: function(link) {
+    return this.undoRedoManager.createAndExecuteCommand('removeLink', {
+      execute: (function(_this) {
+        return function() {
+          return _this._removeLink(link);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this._addLink(link);
+        };
+      })(this)
+    });
+  },
+  _removeLink: function(link) {
+    var ref, ref1;
+    delete this.linkKeys[link.terminalKey()];
+    if ((ref = this.nodeKeys[link.sourceNode.key]) != null) {
+      ref.removeLink(link);
+    }
+    if ((ref1 = this.nodeKeys[link.targetNode.key]) != null) {
+      ref1.removeLink(link);
+    }
+    return this.updateListeners();
+  },
+  importNode: function(nodeSpec) {
+    var node;
+    node = new DiagramNode(nodeSpec.data, nodeSpec.key);
+    this.addNode(node);
+    return node;
+  },
+  addNode: function(node) {
+    return this.undoRedoManager.createAndExecuteCommand('addNode', {
+      execute: (function(_this) {
+        return function() {
+          return _this._addNode(node);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this._removeNode(node);
+        };
+      })(this)
+    });
+  },
+  removeNode: function(nodeKey) {
+    var links, node;
+    node = this.nodeKeys[nodeKey];
+    links = node.links.slice();
+    return this.undoRedoManager.createAndExecuteCommand('removeNode', {
+      execute: (function(_this) {
+        return function() {
+          var i, len, link;
+          for (i = 0, len = links.length; i < len; i++) {
+            link = links[i];
+            _this._removeLink(link);
+          }
+          return _this._removeNode(node);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          var i, len, link, results;
+          _this._addNode(node);
+          results = [];
+          for (i = 0, len = links.length; i < len; i++) {
+            link = links[i];
+            results.push(_this._addLink(link));
+          }
+          return results;
+        };
+      })(this)
+    });
+  },
+  _addNode: function(node) {
+    if (!this.hasNode(node)) {
+      this.nodeKeys[node.key] = node;
+      return this.updateListeners();
+    }
+  },
+  _removeNode: function(node) {
+    delete this.nodeKeys[node.key];
+    return this.updateListeners();
+  },
+  moveNodeCompleted: function(nodeKey, pos, originalPos) {
+    var node;
+    node = this.nodeKeys[nodeKey];
+    if (!node) {
+      return;
+    }
+    return this.undoRedoManager.createAndExecuteCommand('moveNode', {
+      execute: (function(_this) {
+        return function() {
+          return _this.moveNode(node.key, pos, originalPos);
+        };
+      })(this),
+      undo: (function(_this) {
+        return function() {
+          return _this.moveNode(node.key, originalPos, pos);
+        };
+      })(this)
+    });
+  },
+  moveNode: function(nodeKey, pos, originalPos) {
+    var node;
+    node = this.nodeKeys[nodeKey];
+    if (!node) {
+      return;
+    }
+    node.x = pos.left;
+    node.y = pos.top;
+    return this.updateListeners();
+  },
+  selectedNode: function() {
+    return this.selectionManager.selection(SelectionManager.NodeInpsection)[0] || null;
+  },
+  editingNode: function() {
+    return this.selectionManager.selection(SelectionManager.NodeTitleEditing)[0] || null;
+  },
+  editNode: function(nodeKey) {
+    return this.selectionManager.selectForTitleEditing(this.nodeKeys[nodeKey]);
+  },
+  selectNode: function(nodeKey) {
+    return this.selectionManager.selectForInspection(this.nodeKeys[nodeKey]);
+  },
+  _notifyNodeChanged: function(node) {
+    this._maybeChangeSelectedItem(node);
+    return this.updateListeners();
+  },
+  changeNode: function(data, node) {
+    var originalData;
+    node = node || this.selectedNode();
+    if (node) {
+      originalData = {
+        title: node.title,
+        image: node.image,
+        color: node.color,
+        initialValue: node.initialValue,
+        isAccumulator: node.isAccumulator
+      };
+      return this.undoRedoManager.createAndExecuteCommand('changeNode', {
+        execute: (function(_this) {
+          return function() {
+            return _this._changeNode(node, data);
+          };
+        })(this),
+        undo: (function(_this) {
+          return function() {
+            return _this._changeNode(node, originalData);
+          };
+        })(this)
+      });
+    }
+  },
+  _changeNode: function(node, data) {
+    var i, key, len, ref;
+    log.info("Change for " + node.title);
+    ref = ['title', 'image', 'color', 'initialValue', 'isAccumulator'];
+    for (i = 0, len = ref.length; i < len; i++) {
+      key = ref[i];
+      if (data.hasOwnProperty(key)) {
+        log.info("Change " + key + " for " + node.title);
+        node[key] = data[key];
+      }
+    }
+    return this._notifyNodeChanged(node);
+  },
+  changeNodeWithKey: function(key, data) {
+    var node;
+    node = this.nodeKeys[key];
+    if (node) {
+      return this.changeNode(data, node);
+    }
+  },
+  startNodeEdit: function() {
+    return this.undoRedoManager.startCommandBatch();
+  },
+  endNodeEdit: function() {
+    return this.undoRedoManager.endCommandBatch();
+  },
+  selectLink: function(link) {
+    return this.selectionManager.selectLink(link);
+  },
+  changeLink: function(link, changes) {
+    var originalData;
+    if (changes == null) {
+      changes = {};
+    }
+    if (changes.deleted) {
+      return this.removeSelectedLink();
+    } else if (link) {
+      originalData = {
+        title: link.title,
+        color: link.color,
+        relation: link.relation
+      };
+      return this.undoRedoManager.createAndExecuteCommand('changeLink', {
+        execute: (function(_this) {
+          return function() {
+            return _this._changeLink(link, changes);
+          };
+        })(this),
+        undo: (function(_this) {
+          return function() {
+            return _this._changeLink(link, originalData);
+          };
+        })(this)
+      });
+    }
+  },
+  _maybeChangeSelectedItem: function(item) {
+    if (this.selectionManager.isSelected(item)) {
+      return this.selectionManager._notifySelectionChange();
+    }
+  },
+  _changeLink: function(link, changes) {
+    var i, key, len, ref;
+    log.info("Change  for " + link.title);
+    ref = ['title', 'color', 'relation'];
+    for (i = 0, len = ref.length; i < len; i++) {
+      key = ref[i];
+      if (changes[key]) {
+        log.info("Change " + key + " for " + link.title);
+        link[key] = changes[key];
+      }
+    }
+    this._maybeChangeSelectedItem(link);
+    return this.updateListeners();
+  },
+  _nameForNode: function(node) {
+    return this.nodeKeys[node];
+  },
+  newLinkFromEvent: function(info) {
+    var endKey, endTerminal, newLink, startKey, startTerminal;
+    newLink = {};
+    startKey = $(info.source).data('node-key') || 'undefined';
+    endKey = $(info.target).data('node-key') || 'undefined';
+    startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
+    endTerminal = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
+    this.importLink({
+      sourceNode: startKey,
+      targetNode: endKey,
+      sourceTerminal: startTerminal,
+      targetTerminal: endTerminal,
+      color: info.color,
+      title: info.title
+    });
+    return true;
+  },
+  deleteAll: function() {
+    var node;
+    for (node in this.nodeKeys) {
+      this.removeNode(node);
+    }
+    this.setFilename('New Model');
+    return this.undoRedoManager.clearHistory();
+  },
+  deleteSelected: function() {
+    log.info("Deleting selected items");
+    this.removeSelectedLink();
+    return this.removeSelectedNode();
+  },
+  removeSelectedNode: function() {
+    var nodeKey, ref;
+    nodeKey = (ref = this.selectedNode()) != null ? ref.key : void 0;
+    if (nodeKey) {
+      this.removeNode(nodeKey);
+      return this.selectionManager.clearSelection();
+    }
+  },
+  removeSelectedLink: function() {
+    var selectedLink;
+    selectedLink = this.selectionManager.getLinkSelection()[0] || null;
+    if (selectedLink) {
+      this.removeLink(selectedLink);
+      return this.selectionManager.clearLinkSelection();
+    }
+  },
+  removeLinksForNode: function(node) {
+    var i, len, link, ref, results;
+    ref = node.links;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      link = ref[i];
+      results.push(this.removeLink(link));
+    }
+    return results;
+  },
+  loadData: function(data) {
+    var importer;
+    log.info("json success");
+    importer = new Importer(this);
+    importer.importData(data);
+    this.setFilename(data.filename || 'New Model');
+    PaletteStore.actions.loadData(data);
+    return this.undoRedoManager.clearHistory();
+  },
+  loadDataFromUrl: (function(_this) {
+    return function(url) {
+      log.info("loading local data");
+      log.info("url " + url);
+      return $.ajax({
+        url: url,
+        dataType: 'json',
+        success: function(data) {
+          return _this.loadData(data);
+        },
+        error: function(xhr, status, err) {
+          return log.error(url, status, err.toString());
+        }
+      });
+    };
+  })(this),
+  serialize: function(palette) {
+    var data, key, link, linkExports, node, nodeExports;
+    nodeExports = (function() {
+      var ref, results;
+      ref = this.nodeKeys;
+      results = [];
+      for (key in ref) {
+        node = ref[key];
+        results.push(node.toExport());
+      }
+      return results;
+    }).call(this);
+    linkExports = (function() {
+      var ref, results;
+      ref = this.linkKeys;
+      results = [];
+      for (key in ref) {
+        link = ref[key];
+        results.push(link.toExport());
+      }
+      return results;
+    }).call(this);
+    data = {
+      version: Migrations.latestVersion(),
+      filename: this.filename,
+      palette: palette,
+      nodes: nodeExports,
+      links: linkExports
+    };
+    return data;
+  },
+  toJsonString: function(palette) {
+    return JSON.stringify(this.serialize(palette));
+  },
+  updateListeners: function() {
+    var data;
+    data = {
+      nodes: this.getNodes(),
+      links: this.getLinks()
+    };
+    return this.trigger(data);
+  }
+});
+
+mixin = {
+  getInitialState: function() {
+    return {
+      nodes: GraphStore.nodes,
+      links: GraphStore.links
+    };
+  },
+  componentDidMount: function() {
+    return GraphStore.listen(this.onLinksChange);
+  },
+  onLinksChange: function(status) {
+    var ref;
+    this.setState({
+      nodes: status.nodes,
+      links: status.links
+    });
+    return (ref = this.diagramToolkit) != null ? ref.repaint() : void 0;
+  }
+};
+
+module.exports = {
+  store: GraphStore,
+  mixin: mixin
+};
+
+
+
+},{"../data/migrations/migrations":549,"../models/link":557,"../models/node":558,"../models/selection-manager":561,"../stores/palette-delete-dialog-store":567,"../stores/palette-store":568,"../utils/importer":573,"../utils/translate":578,"../utils/undo-redo":579}],565:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -57352,10 +57324,12 @@ module.exports = {
 
 
 
-},{"./palette-store":567}],565:[function(require,module,exports){
-var PaletteStore, mixin, nodeActions, nodeStore;
+},{"./palette-store":568}],566:[function(require,module,exports){
+var GraphStore, PaletteStore, mixin, nodeActions, nodeStore;
 
 PaletteStore = require('./palette-store');
+
+GraphStore = require('./graph-store');
 
 nodeActions = Reflux.createActions(["nodesChanged"]);
 
@@ -57364,26 +57338,30 @@ nodeStore = Reflux.createStore({
   init: function() {
     this.nodes = [];
     this.paletteItemHasNodes = false;
-    return PaletteStore.store.listen((function(_this) {
-      return function() {
-        return _this.internalUpdate();
-      };
-    })(this));
+    this.selectedPaletteItem = null;
+    PaletteStore.store.listen(this.paletteChanged);
+    return GraphStore.store.listen(this.graphChanged);
   },
   onNodesChanged: function(nodes) {
     this.nodes = nodes;
     return this.internalUpdate();
   },
+  graphChanged: function(status) {
+    this.nodes = status.nodes;
+    return this.internalUpdate();
+  },
+  paletteChanged: function() {
+    this.selectedPaletteItem = PaletteStore.store.selectedPaletteItem;
+    return this.internalUpdate();
+  },
   internalUpdate: function() {
-    var selectedPaletteItem;
-    selectedPaletteItem = PaletteStore.store.selectedPaletteItem;
     this.paletteItemHasNodes = false;
-    if (!selectedPaletteItem) {
+    if (!this.selectedPaletteItem) {
       return;
     }
     _.each(this.nodes, (function(_this) {
       return function(node) {
-        if (node.paletteItemIs(selectedPaletteItem)) {
+        if (node.paletteItemIs(_this.selectedPaletteItem)) {
           return _this.paletteItemHasNodes = true;
         }
       };
@@ -57423,14 +57401,14 @@ module.exports = {
   mixin: mixin
 };
 
-window.PaletteStore = module.exports;
 
 
-
-},{"./palette-store":567}],566:[function(require,module,exports){
-var PaletteStore, listenerMixin, paletteDialogActions, store;
+},{"./graph-store":564,"./palette-store":568}],567:[function(require,module,exports){
+var PaletteStore, UndoRedo, listenerMixin, paletteDialogActions, store;
 
 PaletteStore = require('./palette-store');
+
+UndoRedo = require('../utils/undo-redo');
 
 paletteDialogActions = Reflux.createActions(["open", "close", "delete", "cancel", "select"]);
 
@@ -57438,7 +57416,10 @@ store = Reflux.createStore({
   listenables: [paletteDialogActions],
   init: function() {
     this.enableListening();
-    return this.initValues();
+    this.initValues();
+    return this.undoManger = UndoRedo.instance({
+      debug: true
+    });
   },
   initValues: function() {
     this.showing = false;
@@ -57468,8 +57449,10 @@ store = Reflux.createStore({
   },
   onDelete: function(item) {
     this.deleted = true;
+    this.undoManger.startCommandBatch();
     PaletteStore.actions.deleteSelected();
-    return this.close();
+    this.close();
+    return this.undoManger.endCommandBatch();
   },
   onPaletteSelect: function(status) {
     this.paletteItem = status.selectedPaletteItem;
@@ -57537,7 +57520,7 @@ module.exports = {
 
 
 
-},{"./palette-store":567}],567:[function(require,module,exports){
+},{"../utils/undo-redo":579,"./palette-store":568}],568:[function(require,module,exports){
 var UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage;
 
 resizeImage = require('../utils/resize-image');
@@ -57771,7 +57754,7 @@ window.PaletteStore = module.exports;
 
 
 
-},{"../data/initial-palette":543,"../data/internal-library":544,"../utils/resize-image":576,"../utils/undo-redo":578}],568:[function(require,module,exports){
+},{"../data/initial-palette":543,"../data/internal-library":544,"../utils/resize-image":577,"../utils/undo-redo":579}],569:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -57791,7 +57774,7 @@ module.exports = [
 
 
 
-},{"./translate":577}],569:[function(require,module,exports){
+},{"./translate":578}],570:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -57844,7 +57827,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":571,"./resize-image":576}],570:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":572,"./resize-image":577}],571:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -58011,7 +57994,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],571:[function(require,module,exports){
+},{}],572:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -58030,7 +58013,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":577}],572:[function(require,module,exports){
+},{"./translate":578}],573:[function(require,module,exports){
 var Migrations, MySystemImporter;
 
 Migrations = require('../data/migrations/migrations');
@@ -58073,7 +58056,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{"../data/migrations/migrations":549}],573:[function(require,module,exports){
+},{"../data/migrations/migrations":549}],574:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -58281,7 +58264,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],574:[function(require,module,exports){
+},{}],575:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -58300,7 +58283,7 @@ module.exports = {
   "~NODE-EDIT.ADD_REMOTE": "Add remote",
   "~NODE-EDIT.DELETE": "Delete",
   "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value",
-  "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with numbers. Switch to define with equations.",
+  "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with numbers. Switch to define with words.",
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator",
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations.",
   "~NODE-RELATION-EDIT.INCREASES": "increases",
@@ -58373,7 +58356,7 @@ module.exports = {
 
 
 
-},{}],575:[function(require,module,exports){
+},{}],576:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -58410,7 +58393,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],576:[function(require,module,exports){
+},{}],577:[function(require,module,exports){
 module.exports = function(src, callback) {
   var fail, img, maxHeight, maxWidth;
   fail = function() {
@@ -58452,7 +58435,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],577:[function(require,module,exports){
+},{}],578:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -58485,12 +58468,14 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":574}],578:[function(require,module,exports){
-var CodapConnect, Command, DEFAULT_CONTEXT_NAME, Manager, instance, instances;
+},{"./lang/us-en":575}],579:[function(require,module,exports){
+var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances, internalEndCommandBatchAction;
 
 CodapConnect = require('../models/codap-connect');
 
 DEFAULT_CONTEXT_NAME = 'building-models';
+
+internalEndCommandBatchAction = Reflux.createAction();
 
 Manager = (function() {
   function Manager(options) {
@@ -58502,8 +58487,27 @@ Manager = (function() {
     this.stackPosition = -1;
     this.savePosition = -1;
     this.changeListeners = [];
-    this.showUndoRedo = true;
+    this.currentBatch = null;
+    internalEndCommandBatchAction.listen(this._finalizeEndComandBatch, this);
   }
+
+  Manager.prototype.startCommandBatch = function() {
+    if (!this.currentBatch) {
+      return this.currentBatch = new CommandBatch();
+    }
+  };
+
+  Manager.prototype.endCommandBatch = function() {
+    return internalEndCommandBatchAction();
+  };
+
+  Manager.prototype._finalizeEndComandBatch = function() {
+    if (this.currentBatch) {
+      this.commands.push(this.currentBatch);
+      this.stackPosition++;
+      return this.currentBatch = null;
+    }
+  };
 
   Manager.prototype.createAndExecuteCommand = function(name, methods) {
     var codapConnect, result;
@@ -58517,8 +58521,12 @@ Manager = (function() {
     var result;
     this._clearRedo();
     result = command.execute(this.debug);
-    this.commands.push(command);
-    this.stackPosition++;
+    if (this.currentBatch) {
+      this.currentBatch.push(command);
+    } else {
+      this.commands.push(command);
+      this.stackPosition++;
+    }
     this._changed();
     if (this.debug) {
       this.log();
@@ -58562,11 +58570,6 @@ Manager = (function() {
 
   Manager.prototype.canRedo = function() {
     return this.stackPosition < this.commands.length - 1;
-  };
-
-  Manager.prototype.hideUndoRedo = function(hide) {
-    this.showUndoRedo = !hide;
-    return this._changed();
   };
 
   Manager.prototype.save = function() {
@@ -58638,8 +58641,7 @@ Manager = (function() {
         dirty: this.dirty(),
         canUndo: this.canUndo(),
         canRedo: this.canRedo(),
-        saved: this.saved(),
-        showUndoRedo: this.showUndoRedo
+        saved: this.saved()
       };
       ref = this.changeListeners;
       results = [];
@@ -58689,6 +58691,41 @@ Command = (function() {
 
 })();
 
+CommandBatch = (function() {
+  function CommandBatch() {
+    this.commands = [];
+  }
+
+  CommandBatch.prototype.push = function(command) {
+    return this.commands.push(command);
+  };
+
+  CommandBatch.prototype.undo = function(debug) {
+    var command, i, ref, results;
+    ref = this.commands;
+    results = [];
+    for (i = ref.length - 1; i >= 0; i += -1) {
+      command = ref[i];
+      results.push(command.undo(debug));
+    }
+    return results;
+  };
+
+  CommandBatch.prototype.redo = function(debug) {
+    var command, i, len, ref, results;
+    ref = this.commands;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      command = ref[i];
+      results.push(command.redo(debug));
+    }
+    return results;
+  };
+
+  return CommandBatch;
+
+})();
+
 instances = {};
 
 instance = function(opts) {
@@ -58710,8 +58747,8 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":555}],579:[function(require,module,exports){
-var DocumentActions, GlobalNav, ImageBrowser, ImageDialogStore, InspectorPanel, LinkView, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref;
+},{"../models/codap-connect":555}],580:[function(require,module,exports){
+var DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref;
 
 Reflux = require('reflux');
 
@@ -58719,7 +58756,7 @@ Placeholder = React.createFactory(require('./placeholder-view'));
 
 GlobalNav = React.createFactory(require('./global-nav-view'));
 
-LinkView = React.createFactory(require('./link-view'));
+GraphView = React.createFactory(require('./graph-view'));
 
 NodeWell = React.createFactory(require('./node-well-view'));
 
@@ -58764,7 +58801,7 @@ module.exports = React.createClass({
     }, !this.state.iframed ? GlobalNav({
       filename: this.state.filename,
       username: this.state.username,
-      linkManager: this.props.linkManager,
+      graphStore: this.props.graphStore,
       getData: this.getData,
       runSimulation: this.runSimulation
     }) : void 0, div({
@@ -58772,16 +58809,16 @@ module.exports = React.createClass({
     }, NodeWell({
       palette: this.state.palette,
       toggleImageBrowser: this.toggleImageBrowser,
-      linkManager: this.props.linkManager
+      graphStore: this.props.graphStore
     }), DocumentActions({
-      linkManager: this.props.linkManager,
+      graphStore: this.props.graphStore,
       runSimulation: this.runSimulation,
       simplified: this.props.simplified
     })), div({
       className: 'canvas'
-    }, LinkView({
-      linkManager: this.props.linkManager,
-      selectionManager: this.props.linkManager.selectionManager,
+    }, GraphView({
+      graphStore: this.props.graphStore,
+      selectionManager: this.props.graphStore.selectionManager,
       selectedLink: this.state.selectedLink
     })), InspectorPanel({
       node: this.state.selectedNode,
@@ -58791,16 +58828,16 @@ module.exports = React.createClass({
       palette: this.state.palette,
       simplified: this.props.simplified,
       toggleImageBrowser: this.toggleImageBrowser,
-      linkManager: this.props.linkManager
+      graphStore: this.props.graphStore
     }), this.state.showingDialog ? ImageBrowser({
-      linkManager: this.props.linkManager
+      graphStore: this.props.graphStore
     }) : void 0, ModalPaletteDelete({})));
   }
 });
 
 
 
-},{"../mixins/app-view":550,"../stores/image-dialog-store":564,"./document-actions-view":581,"./global-nav-view":584,"./image-browser-view":585,"./inspector-panel-view":591,"./link-view":595,"./modal-palette-delete-view":597,"./node-well-view":603,"./placeholder-view":607,"reflux":523}],580:[function(require,module,exports){
+},{"../mixins/app-view":550,"../stores/image-dialog-store":565,"./document-actions-view":582,"./global-nav-view":585,"./graph-view":586,"./image-browser-view":587,"./inspector-panel-view":593,"./modal-palette-delete-view":598,"./node-well-view":604,"./placeholder-view":608,"reflux":523}],581:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -58882,14 +58919,17 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":568,"../utils/translate":577}],581:[function(require,module,exports){
-var br, div, i, ref, span, tr;
+},{"../utils/colors":569,"../utils/translate":578}],582:[function(require,module,exports){
+var CodapStore, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
+
+CodapStore = require("../stores/codap-store");
 
 tr = require('../utils/translate');
 
 module.exports = React.createClass({
+  mixins: [CodapStore.mixin],
   displayName: 'DocumentActions',
   getInitialState: function() {
     return {
@@ -58898,23 +58938,22 @@ module.exports = React.createClass({
     };
   },
   componentDidMount: function() {
-    return this.props.linkManager.addChangeListener(this.modelChanged);
+    return this.props.graphStore.addChangeListener(this.modelChanged);
   },
   modelChanged: function(status) {
     return this.setState({
-      undoRedoVisible: status.showUndoRedo,
       canRedo: status.canRedo,
       canUndo: status.canUndo
     });
   },
   undoClicked: function() {
-    return this.props.linkManager.undo();
+    return this.props.graphStore.undo();
   },
   redoClicked: function() {
-    return this.props.linkManager.redo();
+    return this.props.graphStore.redo();
   },
   renderRunLink: function() {
-    if (!this.props.simplified) {
+    if (this.state.codapHasLoaded && !this.props.simplified) {
       return span({}, i({
         className: "fa fa-play-circle",
         onClick: this.props.runSimulation
@@ -58930,7 +58969,7 @@ module.exports = React.createClass({
       className: 'document-actions'
     }, div({
       className: "misc-actions"
-    }, this.renderRunLink()), this.state.undoRedoVisible ? div({
+    }, this.renderRunLink()), !this.state.hideUndoRedo ? div({
       className: 'undo-redo'
     }, span({
       className: buttonClass(this.state.canUndo),
@@ -58946,7 +58985,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":577}],582:[function(require,module,exports){
+},{"../stores/codap-store":563,"../utils/translate":578}],583:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -59051,7 +59090,7 @@ module.exports = React.createClass({
 
 
 
-},{}],583:[function(require,module,exports){
+},{}],584:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -59106,7 +59145,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":569,"../utils/translate":577}],584:[function(require,module,exports){
+},{"../utils/drop-image-handler":570,"../utils/translate":578}],585:[function(require,module,exports){
 var Dropdown, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -59127,7 +59166,7 @@ module.exports = React.createClass({
   },
   componentDidMount: function() {
     this.createGoogleDrive();
-    return this.props.linkManager.addChangeListener(this.modelChanged);
+    return this.props.graphStore.addChangeListener(this.modelChanged);
   },
   modelChanged: function(status) {
     return this.setState({
@@ -59186,7 +59225,298 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":552,"../utils/translate":577,"./dropdown-view":582}],585:[function(require,module,exports){
+},{"../mixins/google-file-interface":552,"../utils/translate":578,"./dropdown-view":583}],586:[function(require,module,exports){
+var DiagramToolkit, ImageDialogStore, Importer, LinkStore, Node, PaletteStore, div, dropImageHandler, tr;
+
+Node = React.createFactory(require('./node-view'));
+
+Importer = require('../utils/importer');
+
+DiagramToolkit = require('../utils/js-plumb-diagram-toolkit');
+
+dropImageHandler = require('../utils/drop-image-handler');
+
+tr = require('../utils/translate');
+
+PaletteStore = require('../stores/palette-store');
+
+LinkStore = require('../stores/graph-store');
+
+ImageDialogStore = require('../stores/image-dialog-store');
+
+div = React.DOM.div;
+
+module.exports = React.createClass({
+  displayName: 'LinkView',
+  mixins: [LinkStore.mixin],
+  componentDidMount: function() {
+    var $container;
+    $container = $(this.refs.container.getDOMNode());
+    this.diagramToolkit = new DiagramToolkit($container, {
+      Container: $container[0],
+      handleConnect: this.handleConnect,
+      handleClick: this.handleClick
+    });
+    this.props.selectionManager.addSelectionListener((function(_this) {
+      return function(manager) {
+        var editingNode, lastLinkSelection, selectedLink, selectedNode;
+        lastLinkSelection = _this.state.selectedLink;
+        selectedNode = manager.getInspection()[0] || null;
+        editingNode = manager.getTitleEditing()[0] || null;
+        selectedLink = manager.getLinkSelection()[0] || null;
+        _this.setState({
+          selectedNode: selectedNode,
+          editingNode: editingNode,
+          selectedLink: selectedLink
+        });
+        if (lastLinkSelection === !_this.state.selectedLink) {
+          return _this._updateToolkit();
+        }
+      };
+    })(this));
+    return $container.droppable({
+      accept: '.palette-image',
+      hoverClass: "ui-state-highlight",
+      drop: (function(_this) {
+        return function(e, ui) {
+          var $panel, inPanel, panel;
+          $panel = $('.inspector-panel-content');
+          panel = {
+            width: $panel.width(),
+            height: $panel.height(),
+            offset: $panel.offset()
+          };
+          inPanel = ui.offset.left >= panel.offset.left && ui.offset.top >= panel.offset.top && ui.offset.left <= panel.offset.left + panel.width && ui.offset.top <= panel.offset.top + panel.height;
+          if (!inPanel) {
+            return _this.addNode(e, ui);
+          }
+        };
+      })(this)
+    });
+  },
+  addNode: function(e, ui) {
+    var data, paletteItem;
+    data = ui.draggable.data();
+    if (data.droptype === 'new') {
+      return paletteItem = this.addNewPaletteNode(e, ui);
+    } else if (data.droptype === 'paletteItem') {
+      paletteItem = PaletteStore.store.palette[data.index];
+      return this.addPaletteNode(ui, paletteItem);
+    }
+  },
+  addNewPaletteNode: function(e, ui) {
+    return ImageDialogStore.actions.open((function(_this) {
+      return function(savedPaletteItem) {
+        if (savedPaletteItem) {
+          return _this.addPaletteNode(ui, savedPaletteItem);
+        }
+      };
+    })(this));
+  },
+  addPaletteNode: function(ui, paletteItem) {
+    var node, offset, title;
+    title = tr("~NODE.UNTITLED");
+    offset = $(this.refs.linkView.getDOMNode()).offset();
+    node = this.props.graphStore.importNode({
+      data: {
+        x: ui.offset.left - offset.left,
+        y: ui.offset.top - offset.top,
+        title: title,
+        image: paletteItem.image
+      }
+    });
+    return this.props.graphStore.editNode(node.key);
+  },
+  getInitialState: function() {
+    return {
+      nodes: [],
+      links: [],
+      selectedNode: null,
+      editingNode: null,
+      selectedLink: null,
+      canDrop: false
+    };
+  },
+  componentWillUpdate: function() {
+    var ref;
+    return (ref = this.diagramToolkit) != null ? typeof ref.clear === "function" ? ref.clear() : void 0 : void 0;
+  },
+  componentDidUpdate: function() {
+    return this._updateToolkit();
+  },
+  handleEvent: function(handler) {
+    if (this.ignoringEvents) {
+      return false;
+    } else {
+      handler();
+      return true;
+    }
+  },
+  onNodeMoved: function(node_event) {
+    return this.handleEvent(function() {
+      return LinkStore.store.moveNode(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
+    });
+  },
+  onNodeMoveComplete: function(node_event) {
+    return this.handleEvent(function() {
+      var left, ref, top;
+      ref = node_event.extra.position, left = ref.left, top = ref.top;
+      return LinkStore.store.moveNodeCompleted(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
+    });
+  },
+  onNodeDeleted: function(node_event) {
+    return this.handleEvent(function() {
+      return LinkStore.store.removeNode(node_event.nodeKey);
+    });
+  },
+  handleConnect: function(info, evnt) {
+    return this.handleEvent(function() {
+      return LinkStore.store.newLinkFromEvent(info, evnt);
+    });
+  },
+  handleClick: function(connection, evnt) {
+    return this.handleEvent(function() {
+      return LinkStore.store.selectLink(connection.linkModel);
+    });
+  },
+  _nodeForName: function(name) {
+    var ref;
+    return ((ref = this.refs[name]) != null ? ref.getDOMNode() : void 0) || false;
+  },
+  _updateNodeValue: function(name, key, value) {
+    var changed, i, len, node, ref;
+    changed = 0;
+    ref = this.state.nodes;
+    for (i = 0, len = ref.length; i < len; i++) {
+      node = ref[i];
+      if (node.key === name) {
+        node[key] = value;
+        changed++;
+      }
+    }
+    if (changed > 0) {
+      return this.setState({
+        nodes: this.state.nodes
+      });
+    }
+  },
+  _updateToolkit: function() {
+    if (this.diagramToolkit) {
+      this.ignoringEvents = true;
+      this.diagramToolkit.supspendDrawing();
+      this._redrawLinks();
+      this._redrawTargets();
+      this.diagramToolkit.resumeDrawing();
+      return this.ignoringEvents = false;
+    }
+  },
+  _redrawTargets: function() {
+    this.diagramToolkit.makeSource($(this.refs.linkView.getDOMNode()).find('.connection-source'));
+    return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find('.elm'));
+  },
+  _redrawLinks: function() {
+    var i, isSelected, len, link, ref, results, source, target;
+    ref = this.state.links;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      link = ref[i];
+      source = this._nodeForName(link.sourceNode.key);
+      target = this._nodeForName(link.targetNode.key);
+      isSelected = this.props.selectionManager.isSelected(link);
+      if (source && target) {
+        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, isSelected, link));
+      } else {
+        results.push(void 0);
+      }
+    }
+    return results;
+  },
+  onDragOver: function(e) {
+    if (!this.state.canDrop) {
+      this.setState({
+        canDrop: true
+      });
+    }
+    return e.preventDefault();
+  },
+  onDragLeave: function(e) {
+    this.setState({
+      canDrop: false
+    });
+    return e.preventDefault();
+  },
+  onDrop: function(e) {
+    var dropPos, offset;
+    this.setState({
+      canDrop: false
+    });
+    e.preventDefault();
+    offset = $(this.refs.linkView.getDOMNode()).offset();
+    dropPos = {
+      x: e.clientX - offset.left,
+      y: e.clientY - offset.top
+    };
+    return dropImageHandler(e, (function(_this) {
+      return function(file) {
+        var node;
+        _this.props.graphStore.setImageMetadata(file.image, file.metadata);
+        node = _this.props.graphStore.importNode({
+          data: {
+            x: dropPos.x,
+            y: dropPos.y,
+            title: tr("~NODE.UNTITLED"),
+            image: file.image
+          }
+        });
+        return _this.props.graphStore.editNode(node.key);
+      };
+    })(this));
+  },
+  onContainerClicked: function(e) {
+    if (e.target === this.refs.container.getDOMNode()) {
+      return this.props.selectionManager.clearSelection();
+    }
+  },
+  render: function() {
+    var node;
+    return div({
+      className: "graph-view " + (this.state.canDrop ? 'can-drop' : ''),
+      ref: 'linkView',
+      onDragOver: this.onDragOver,
+      onDrop: this.onDrop,
+      onDragLeave: this.onDragLeave
+    }, div({
+      className: 'container',
+      ref: 'container',
+      onClick: this.onContainerClicked
+    }, (function() {
+      var i, len, ref, results;
+      ref = this.state.nodes;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        node = ref[i];
+        results.push(Node({
+          key: node.key,
+          data: node,
+          selected: this.state.selectedNode === node,
+          editTitle: this.state.editingNode === node,
+          nodeKey: node.key,
+          ref: node.key,
+          onMove: this.onNodeMoved,
+          onMoveComplete: this.onNodeMoveComplete,
+          onDelete: this.onNodeDeleted,
+          graphStore: this.props.graphStore,
+          selectionManager: this.props.selectionManager
+        }));
+      }
+      return results;
+    }).call(this)));
+  }
+});
+
+
+
+},{"../stores/graph-store":564,"../stores/image-dialog-store":565,"../stores/palette-store":568,"../utils/drop-image-handler":570,"../utils/importer":573,"../utils/js-plumb-diagram-toolkit":574,"../utils/translate":578,"./node-view":603}],587:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -59245,7 +59575,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":564,"../stores/palette-store":567,"../utils/translate":577,"./image-link-dialog-view":586,"./image-metadata-view":587,"./image-my-computer-dialog-view":588,"./image-search-dialog-view":590,"./modal-tabbed-dialog-view":598,"./tabbed-panel-view":610}],586:[function(require,module,exports){
+},{"../stores/image-dialog-store":565,"../stores/palette-store":568,"../utils/translate":578,"./image-link-dialog-view":588,"./image-metadata-view":589,"./image-my-computer-dialog-view":590,"./image-search-dialog-view":592,"./modal-tabbed-dialog-view":599,"./tabbed-panel-view":611}],588:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -59294,7 +59624,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":553,"../stores/image-dialog-store":564,"../utils/translate":577,"./dropzone-view":583}],587:[function(require,module,exports){
+},{"../mixins/image-dialog-view":553,"../stores/image-dialog-store":565,"../utils/translate":578,"./dropzone-view":584}],589:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -59382,7 +59712,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":545,"../stores/image-dialog-store":564,"../utils/translate":577}],588:[function(require,module,exports){
+},{"../data/licenses":545,"../stores/image-dialog-store":565,"../utils/translate":578}],590:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -59436,7 +59766,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":553,"../stores/image-dialog-store":564,"../utils/translate":577,"./dropzone-view":583}],589:[function(require,module,exports){
+},{"../mixins/image-dialog-view":553,"../stores/image-dialog-store":565,"../utils/translate":578,"./dropzone-view":584}],591:[function(require,module,exports){
 var ImgChoice, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -59514,7 +59844,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":577}],590:[function(require,module,exports){
+},{"../utils/translate":578}],592:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -59726,7 +60056,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":553,"../stores/image-dialog-store":564,"../utils/open-clipart":575,"../utils/translate":577}],591:[function(require,module,exports){
+},{"../mixins/image-dialog-view":553,"../stores/image-dialog-store":565,"../utils/open-clipart":576,"../utils/translate":578}],593:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, PaletteInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -59871,7 +60201,7 @@ module.exports = React.createClass({
     return PaletteInspectorView({
       palette: this.props.palette,
       toggleImageBrowser: this.props.toggleImageBrowser,
-      linkManager: this.props.linkManager
+      graphStore: this.props.graphStore
     });
   },
   renderDesignInspector: function() {
@@ -59885,7 +60215,7 @@ module.exports = React.createClass({
     } else if (this.props.link) {
       return LinkInspectorView({
         link: this.props.link,
-        linkManager: this.props.linkManager
+        graphStore: this.props.graphStore
       });
     }
   },
@@ -59893,7 +60223,7 @@ module.exports = React.createClass({
     if (this.props.node) {
       return NodeValueInspectorView({
         node: this.props.node,
-        linkManager: this.props.linkManager
+        graphStore: this.props.graphStore
       });
     } else if (this.props.link) {
       return LinkValueInspectorView({
@@ -59905,12 +60235,12 @@ module.exports = React.createClass({
     if (this.props.node) {
       return NodeRelationInspectorView({
         node: this.props.node,
-        linkManager: this.props.linkManager
+        graphStore: this.props.graphStore
       });
     } else if (this.props.link) {
       return LinkRelationInspectorView({
         link: this.props.link,
-        linkManager: this.props.linkManager
+        graphStore: this.props.graphStore
       });
     }
   },
@@ -59952,7 +60282,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":592,"./link-value-inspector-view":594,"./node-inspector-view":600,"./node-value-inspector-view":601,"./palette-inspector-view":605,"./relation-inspector-view":609}],592:[function(require,module,exports){
+},{"./link-inspector-view":594,"./link-value-inspector-view":596,"./node-inspector-view":601,"./node-value-inspector-view":602,"./palette-inspector-view":606,"./relation-inspector-view":610}],594:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -59966,17 +60296,17 @@ palette = palettes[2];
 module.exports = React.createClass({
   displayName: 'LinkEditView',
   changeTitle: function(e) {
-    return this.props.linkManager.changeLink(this.props.link, {
+    return this.props.graphStore.changeLink(this.props.link, {
       title: e.target.value
     });
   },
   deleteLink: function() {
-    return this.props.linkManager.changeLink(this.props.link, {
+    return this.props.graphStore.changeLink(this.props.link, {
       deleted: true
     });
   },
   pickColor: function(e) {
-    return this.props.linkManager.changeLink(this.props.link, {
+    return this.props.graphStore.changeLink(this.props.link, {
       color: $(e.target).css('background-color')
     });
   },
@@ -60008,7 +60338,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":577}],593:[function(require,module,exports){
+},{"../utils/translate":578}],595:[function(require,module,exports){
 var RelationFactory, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
@@ -60037,7 +60367,7 @@ module.exports = React.createClass({
     scalar = this.getScalar();
     relation = RelationFactory.fromSelections(vector, scalar);
     link = this.props.link;
-    return this.props.linkManager.changeLink(link, {
+    return this.props.graphStore.changeLink(link, {
       relation: relation
     });
   },
@@ -60117,7 +60447,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/relation-factory":560,"../utils/translate":577}],594:[function(require,module,exports){
+},{"../models/relation-factory":559,"../utils/translate":578}],596:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -60135,346 +60465,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":577}],595:[function(require,module,exports){
-var DiagramToolkit, ImageDialogStore, Importer, Node, NodeList, PaletteStore, div, dropImageHandler, tr;
-
-Node = React.createFactory(require('./node-view'));
-
-Importer = require('../utils/importer');
-
-NodeList = require('../models/link-manager');
-
-DiagramToolkit = require('../utils/js-plumb-diagram-toolkit');
-
-dropImageHandler = require('../utils/drop-image-handler');
-
-tr = require('../utils/translate');
-
-PaletteStore = require('../stores/palette-store');
-
-ImageDialogStore = require('../stores/image-dialog-store');
-
-div = React.DOM.div;
-
-module.exports = React.createClass({
-  displayName: 'LinkView',
-  componentDidMount: function() {
-    var $container;
-    $container = $(this.refs.container.getDOMNode());
-    this.diagramToolkit = new DiagramToolkit($container, {
-      Container: $container[0],
-      handleConnect: this.handleConnect,
-      handleClick: this.handleClick
-    });
-    this.props.linkManager.addLinkListener(this);
-    this.props.linkManager.addNodeListener(this);
-    this.props.selectionManager.addSelectionListener((function(_this) {
-      return function(manager) {
-        var editingNode, lastLinkSelection, selectedLink, selectedNode;
-        lastLinkSelection = _this.state.selectedLink;
-        selectedNode = manager.getInspection()[0] || null;
-        editingNode = manager.getTitleEditing()[0] || null;
-        selectedLink = manager.getLinkSelection()[0] || null;
-        _this.setState({
-          selectedNode: selectedNode,
-          editingNode: editingNode,
-          selectedLink: selectedLink
-        });
-        if (lastLinkSelection === !_this.state.selectedLink) {
-          return _this._updateToolkit();
-        }
-      };
-    })(this));
-    return $container.droppable({
-      accept: '.palette-image',
-      hoverClass: "ui-state-highlight",
-      drop: (function(_this) {
-        return function(e, ui) {
-          var $panel, inPanel, panel;
-          $panel = $('.inspector-panel-content');
-          panel = {
-            width: $panel.width(),
-            height: $panel.height(),
-            offset: $panel.offset()
-          };
-          inPanel = ui.offset.left >= panel.offset.left && ui.offset.top >= panel.offset.top && ui.offset.left <= panel.offset.left + panel.width && ui.offset.top <= panel.offset.top + panel.height;
-          if (!inPanel) {
-            return _this.addNode(e, ui);
-          }
-        };
-      })(this)
-    });
-  },
-  addNode: function(e, ui) {
-    var data, paletteItem;
-    data = ui.draggable.data();
-    if (data.droptype === 'new') {
-      return paletteItem = this.addNewPaletteNode(e, ui);
-    } else if (data.droptype === 'paletteItem') {
-      paletteItem = PaletteStore.store.palette[data.index];
-      return this.addPaletteNode(ui, paletteItem);
-    }
-  },
-  addNewPaletteNode: function(e, ui) {
-    return ImageDialogStore.actions.open((function(_this) {
-      return function(savedPaletteItem) {
-        if (savedPaletteItem) {
-          return _this.addPaletteNode(ui, savedPaletteItem);
-        }
-      };
-    })(this));
-  },
-  addPaletteNode: function(ui, paletteItem) {
-    var node, offset, title;
-    title = tr("~NODE.UNTITLED");
-    offset = $(this.refs.linkView.getDOMNode()).offset();
-    node = this.props.linkManager.importNode({
-      data: {
-        x: ui.offset.left - offset.left,
-        y: ui.offset.top - offset.top,
-        title: title,
-        image: paletteItem.image
-      }
-    });
-    return this.props.linkManager.editNode(node.key);
-  },
-  getInitialState: function() {
-    return {
-      nodes: [],
-      links: [],
-      selectedNode: null,
-      editingNode: null,
-      selectedLink: null,
-      canDrop: false
-    };
-  },
-  componentWillUpdate: function() {
-    var ref;
-    return (ref = this.diagramToolkit) != null ? typeof ref.clear === "function" ? ref.clear() : void 0 : void 0;
-  },
-  componentDidUpdate: function() {
-    return this._updateToolkit();
-  },
-  handleEvent: function(handler) {
-    if (this.ignoringEvents) {
-      return false;
-    } else {
-      handler();
-      return true;
-    }
-  },
-  onNodeMoved: function(node_event) {
-    return this.handleEvent((function(_this) {
-      return function() {
-        return _this.props.linkManager.moveNode(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
-      };
-    })(this));
-  },
-  onNodeMoveComplete: function(node_event) {
-    return this.handleEvent((function(_this) {
-      return function() {
-        var left, ref, top;
-        ref = node_event.extra.position, left = ref.left, top = ref.top;
-        return _this.props.linkManager.moveNodeCompleted(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
-      };
-    })(this));
-  },
-  onNodeDeleted: function(node_event) {
-    return this.handleEvent((function(_this) {
-      return function() {
-        return _this.props.linkManager.removeNode(node_event.nodeKey);
-      };
-    })(this));
-  },
-  handleConnect: function(info, evnt) {
-    return this.handleEvent((function(_this) {
-      return function() {
-        return _this.props.linkManager.newLinkFromEvent(info, evnt);
-      };
-    })(this));
-  },
-  handleClick: function(connection, evnt) {
-    return this.handleEvent((function(_this) {
-      return function() {
-        return _this.props.linkManager.selectLink(connection.linkModel);
-      };
-    })(this));
-  },
-  handleLinkAdd: function(info, evnt) {
-    this.setState({
-      links: this.props.linkManager.getLinks()
-    });
-    return true;
-  },
-  handleLinkRm: function() {
-    this.setState({
-      links: this.props.linkManager.getLinks()
-    });
-    return false;
-  },
-  handleNodeChange: function(nodeData) {
-    this.setState({
-      nodes: this.props.linkManager.getNodes()
-    });
-    return true;
-  },
-  handleNodeAdd: function(nodeData) {
-    this.setState({
-      nodes: this.props.linkManager.getNodes()
-    });
-    return true;
-  },
-  handleNodeMove: function(nodeData) {
-    this.setState({
-      nodes: this.props.linkManager.getNodes()
-    });
-    this.diagramToolkit.repaint();
-    return true;
-  },
-  handleNodeRm: function() {
-    this.setState({
-      nodes: this.props.linkManager.getNodes()
-    });
-    return false;
-  },
-  _nodeForName: function(name) {
-    var ref;
-    return ((ref = this.refs[name]) != null ? ref.getDOMNode() : void 0) || false;
-  },
-  _updateNodeValue: function(name, key, value) {
-    var changed, i, len, node, ref;
-    changed = 0;
-    ref = this.state.nodes;
-    for (i = 0, len = ref.length; i < len; i++) {
-      node = ref[i];
-      if (node.key === name) {
-        node[key] = value;
-        changed++;
-      }
-    }
-    if (changed > 0) {
-      return this.setState({
-        nodes: this.state.nodes
-      });
-    }
-  },
-  _updateToolkit: function() {
-    if (this.diagramToolkit) {
-      this.ignoringEvents = true;
-      this.diagramToolkit.supspendDrawing();
-      this._redrawLinks();
-      this._redrawTargets();
-      this.diagramToolkit.resumeDrawing();
-      return this.ignoringEvents = false;
-    }
-  },
-  _redrawTargets: function() {
-    this.diagramToolkit.makeSource($(this.refs.linkView.getDOMNode()).find('.connection-source'));
-    return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find('.elm'));
-  },
-  _redrawLinks: function() {
-    var i, isSelected, len, link, ref, results, source, target;
-    ref = this.state.links;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      link = ref[i];
-      source = this._nodeForName(link.sourceNode.key);
-      target = this._nodeForName(link.targetNode.key);
-      isSelected = this.props.selectionManager.isSelected(link);
-      if (source && target) {
-        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, isSelected, link));
-      } else {
-        results.push(void 0);
-      }
-    }
-    return results;
-  },
-  onDragOver: function(e) {
-    if (!this.state.canDrop) {
-      this.setState({
-        canDrop: true
-      });
-    }
-    return e.preventDefault();
-  },
-  onDragLeave: function(e) {
-    this.setState({
-      canDrop: false
-    });
-    return e.preventDefault();
-  },
-  onDrop: function(e) {
-    var dropPos, offset;
-    this.setState({
-      canDrop: false
-    });
-    e.preventDefault();
-    offset = $(this.refs.linkView.getDOMNode()).offset();
-    dropPos = {
-      x: e.clientX - offset.left,
-      y: e.clientY - offset.top
-    };
-    return dropImageHandler(e, (function(_this) {
-      return function(file) {
-        var node;
-        _this.props.linkManager.setImageMetadata(file.image, file.metadata);
-        node = _this.props.linkManager.importNode({
-          data: {
-            x: dropPos.x,
-            y: dropPos.y,
-            title: tr("~NODE.UNTITLED"),
-            image: file.image
-          }
-        });
-        return _this.props.linkManager.editNode(node.key);
-      };
-    })(this));
-  },
-  onContainerClicked: function(e) {
-    if (e.target === this.refs.container.getDOMNode()) {
-      return this.props.selectionManager.clearSelection();
-    }
-  },
-  render: function() {
-    var node;
-    return div({
-      className: "link-view " + (this.state.canDrop ? 'can-drop' : ''),
-      ref: 'linkView',
-      onDragOver: this.onDragOver,
-      onDrop: this.onDrop,
-      onDragLeave: this.onDragLeave
-    }, div({
-      className: 'container',
-      ref: 'container',
-      onClick: this.onContainerClicked
-    }, (function() {
-      var i, len, ref, results;
-      ref = this.state.nodes;
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        node = ref[i];
-        results.push(Node({
-          key: node.key,
-          data: node,
-          selected: this.state.selectedNode === node,
-          editTitle: this.state.editingNode === node,
-          nodeKey: node.key,
-          ref: node.key,
-          onMove: this.onNodeMoved,
-          onMoveComplete: this.onNodeMoveComplete,
-          onDelete: this.onNodeDeleted,
-          linkManager: this.props.linkManager,
-          selectionManager: this.props.selectionManager
-        }));
-      }
-      return results;
-    }).call(this)));
-  }
-});
-
-
-
-},{"../models/link-manager":557,"../stores/image-dialog-store":564,"../stores/palette-store":567,"../utils/drop-image-handler":569,"../utils/importer":572,"../utils/js-plumb-diagram-toolkit":573,"../utils/translate":577,"./node-view":602}],596:[function(require,module,exports){
+},{"../utils/translate":578}],597:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -60507,7 +60498,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":599}],597:[function(require,module,exports){
+},{"./modal-view":600}],598:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -60545,7 +60536,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":565,"../stores/palette-delete-dialog-store":566,"../utils/translate":577,"./modal-dialog-view":596,"./palette-delete-view":604}],598:[function(require,module,exports){
+},{"../stores/nodes-store":566,"../stores/palette-delete-dialog-store":567,"../utils/translate":578,"./modal-dialog-view":597,"./palette-delete-view":605}],599:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -60566,7 +60557,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":596,"./tabbed-panel-view":610}],599:[function(require,module,exports){
+},{"./modal-dialog-view":597,"./tabbed-panel-view":611}],600:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -60598,7 +60589,7 @@ module.exports = React.createClass({
 
 
 
-},{}],600:[function(require,module,exports){
+},{}],601:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -60685,7 +60676,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":554,"../utils/translate":577,"./color-picker-view":580,"./image-picker-view":589}],601:[function(require,module,exports){
+},{"../mixins/node-title":554,"../utils/translate":578,"./color-picker-view":581,"./image-picker-view":591}],602:[function(require,module,exports){
 var div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -60712,7 +60703,7 @@ module.exports = React.createClass({
     var value;
     if (value = evt.target.value) {
       value = this.trim(parseInt(value));
-      return this.props.linkManager.changeNode({
+      return this.props.graphStore.changeNode({
         initialValue: value
       });
     }
@@ -60720,7 +60711,7 @@ module.exports = React.createClass({
   updateChecked: function(evt) {
     var value;
     value = evt.target.checked;
-    return this.props.linkManager.changeNode({
+    return this.props.graphStore.changeNode({
       isAccumulator: value
     });
   },
@@ -60775,7 +60766,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":577}],602:[function(require,module,exports){
+},{"../utils/translate":578}],603:[function(require,module,exports){
 var NodeTitle, div, i, img, input, ref, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img;
@@ -60925,8 +60916,9 @@ module.exports = React.createClass({
     });
   },
   changeTitle: function(newTitle) {
+    this.props.graphStore.startNodeEdit();
     log.info("Title is changing to " + newTitle);
-    return this.props.linkManager.changeNodeWithKey(this.props.nodeKey, {
+    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {
       title: newTitle
     });
   },
@@ -60934,6 +60926,7 @@ module.exports = React.createClass({
     return this.props.selectionManager.selectForTitleEditing(this.props.data);
   },
   stopEditing: function() {
+    this.props.graphStore.endNodeEdit();
     return this.props.selectionManager.clearTitleEditing();
   },
   isEditing: function() {
@@ -60984,7 +60977,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":554,"../utils/translate":577}],603:[function(require,module,exports){
+},{"../mixins/node-title":554,"../utils/translate":578}],604:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -61033,7 +61026,7 @@ module.exports = React.createClass({
       className: topNodePaletteClass
     }, PaletteInspectorView({
       toggleImageBrowser: this.props.toggleImageBrowser,
-      linkManager: this.props.linkManager
+      graphStore: this.props.graphStore
     })), div({
       className: 'tab-wrapper'
     }, div({
@@ -61045,7 +61038,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":567,"./palette-inspector-view":605}],604:[function(require,module,exports){
+},{"../stores/palette-store":568,"./palette-inspector-view":606}],605:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -61126,7 +61119,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":566,"../utils/translate":577,"./image-picker-view":589}],605:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":567,"../utils/translate":578,"./image-picker-view":591}],606:[function(require,module,exports){
 var Draggable, ImageDialogStore, ImageMetadata, NodesStore, PaletteAddImage, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -61220,7 +61213,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":551,"../stores/image-dialog-store":564,"../stores/nodes-store":565,"../stores/palette-delete-dialog-store":566,"../stores/palette-store":567,"../utils/translate":577,"./image-metadata-view":587,"./palette-item-view":606}],606:[function(require,module,exports){
+},{"../mixins/draggable":551,"../stores/image-dialog-store":565,"../stores/nodes-store":566,"../stores/palette-delete-dialog-store":567,"../stores/palette-store":568,"../utils/translate":578,"./image-metadata-view":589,"./palette-item-view":607}],607:[function(require,module,exports){
 var Draggable, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -61258,7 +61251,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":551}],607:[function(require,module,exports){
+},{"../mixins/draggable":551}],608:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -61276,7 +61269,7 @@ module.exports = React.createClass({
 
 
 
-},{}],608:[function(require,module,exports){
+},{}],609:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -61327,8 +61320,8 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":564,"../stores/palette-store":567,"../utils/translate":577,"./image-metadata-view":587}],609:[function(require,module,exports){
-var LinkRelationView, TabbedPanel, Tabber, div, h2, i, input, label, option, p, ref, select, span, tr;
+},{"../stores/image-dialog-store":565,"../stores/palette-store":568,"../utils/translate":578,"./image-metadata-view":589}],610:[function(require,module,exports){
+var LinkRelationView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
 
@@ -61338,21 +61331,18 @@ Tabber = require('./tabbed-panel-view');
 
 tr = require("../utils/translate");
 
+graphStore = require('../stores/graph-store');
+
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
 
 module.exports = React.createClass({
   displayName: 'RelationInspectorView',
-  componentDidMount: function() {
-    return this.props.linkManager.addLinkListener(this);
-  },
-  changeLink: function() {
-    return this.forceUpdate();
-  },
+  mixins: [graphStore.mixin],
   renderTabforLink: function(link) {
     var relationView;
     relationView = LinkRelationView({
       link: link,
-      linkManager: this.props.linkManager
+      graphStore: this.props.graphStore
     });
     return Tabber.Tab({
       label: link.sourceNode.title,
@@ -61390,7 +61380,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":577,"./link-relation-view":593,"./tabbed-panel-view":610}],610:[function(require,module,exports){
+},{"../stores/graph-store":564,"../utils/translate":578,"./link-relation-view":595,"./tabbed-panel-view":611}],611:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
