@@ -56,7 +56,10 @@ store = Reflux.createStore
 
   close: ->
     @showing = false
-    PaletteStore.actions.restoreSelection()
+    if @replacement and @deleted
+      PaletteStore.actions.selectPaletteItem @replacement
+    else
+      PaletteStore.actions.restoreSelection()
     @_notifyChanges()
 
   _reset: ->

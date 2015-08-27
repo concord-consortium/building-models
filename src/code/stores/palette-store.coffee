@@ -7,9 +7,9 @@ UndoRedo       = require '../utils/undo-redo'
 # TODO: Maybe loadData goes into some other action-set
 paletteActions = Reflux.createActions(
   [
-    "addToPalette", "loadData", "selectPaletteIndex",
-    "deselect", "restoreSelection", "itemDropped",
-    "update", "deleteSelected"
+    "addToPalette", "loadData",
+    "selectPaletteIndex", "selectPaletteItem", "deselect", "restoreSelection",
+    "itemDropped","update", "deleteSelected"
   ]
 )
 
@@ -106,6 +106,11 @@ paletteStore   = Reflux.createStore
     @selectPaletteIndex(index)
     @updateChanges()
 
+  onSelectPaletteItem: (item) ->
+    index = _.indexOf @palette, item
+    @selectPaletteIndex(index)
+    @updateChanges()
+
   selectPaletteIndex: (index) ->
     @lastSelection = @selectedIndex = index
     @selectedPaletteItem  = @palette[index]
@@ -125,7 +130,8 @@ paletteStore   = Reflux.createStore
 
   onRestoreSelection: ->
     if @lastSelection > -1
-      @selectPaletteIndex @lastSelection
+      maxIndex = @palette.length - 1
+      @selectPaletteIndex Math.min(maxIndex,@lastSelection)
     else @selectPaletteIndex 0
     @updateChanges()
 
