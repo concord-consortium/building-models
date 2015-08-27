@@ -117,6 +117,7 @@ module.exports = React.createClass
       syntheticEvent: evt
 
   changeTitle: (newTitle) ->
+    @props.graphStore.startNodeEdit()
     log.info "Title is changing to #{newTitle}"
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
 
@@ -124,6 +125,7 @@ module.exports = React.createClass
     @props.selectionManager.selectForTitleEditing(@props.data)
 
   stopEditing: ->
+    @props.graphStore.endNodeEdit()
     @props.selectionManager.clearTitleEditing()
 
   isEditing: ->

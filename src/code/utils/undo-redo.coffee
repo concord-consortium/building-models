@@ -10,6 +10,21 @@ class Manager
     @stackPosition = -1
     @savePosition = -1
     @changeListeners = []
+    @currentBatch = null
+
+  startCommandBatch: ->
+    @currentBatch = new CommandBatch() unless @currentBatch
+
+  endCommandBatch: ->
+    # The setTimeout here is ugly, but allows us to call this directly after a call
+    # to a store's action, which happens via an async callback, and ensure that
+    # endCommandBatch will be pushed to the back of the execution stack
+    setTimeout =>
+      if @currentBatch
+        @commands.push @currentBatch
+        @stackPosition++
+        @currentBatch = null
+    , 1
 
   createAndExecuteCommand: (name, methods) ->
     result = @execute (new Command name, methods)
@@ -19,12 +34,14 @@ class Manager
 
     result
 
-
   execute: (command) ->
     @_clearRedo()
     result = command.execute @debug
-    @commands.push command
-    @stackPosition++
+    if @currentBatch
+      @currentBatch.push command
+    else
+      @commands.push command
+      @stackPosition++
     @_changed()
     @log() if @debug
     result
@@ -115,6 +132,18 @@ class Command
   execute: (debug) -> @_call 'execute', debug
   undo: (debug) -> @_call 'undo', debug
   redo: (debug) -> @_call 'execute', debug, 'redo'
+
+class CommandBatch
+  constructor: ->
+    @commands = []
+
+  push: (command) ->
+    @commands.push command
+
+  undo: (debug) ->
+    command.undo(debug) for command in @commands by -1
+  redo: (debug) ->
+    command.redo(debug) for command in @commands
 
 instances = {}
 instance  = (opts={}) ->
