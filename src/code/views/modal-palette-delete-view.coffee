@@ -20,7 +20,7 @@ module.exports = React.createClass
             options: @state.options
             paletteItem: @state.paletteItem,
             replacement: @state.replacement,
-            showReplacement: @state.paletteItemHasNodes
+            showReplacement: @state.showReplacement
             cancel: PaletteDialogStore.actions.close
             ok: => PaletteDialogStore.actions.delete @state.paletteItem
           })

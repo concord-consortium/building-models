@@ -8,7 +8,7 @@ UndoRedo       = require '../utils/undo-redo'
 paletteActions = Reflux.createActions(
   [
     "addToPalette", "loadData",
-    "selectPaletteIndex", "selectPaletteItem", "deselect", "restoreSelection",
+    "selectPaletteIndex", "selectPaletteItem", "restoreSelection",
     "itemDropped","update", "delete"
   ]
 )
@@ -68,20 +68,18 @@ paletteStore   = Reflux.createStore
       @selectedPaletteItem = data
     @updateChanges()
 
-
   onDelete: (paletteItem)->
     if paletteItem
       @undoManger.createAndExecuteCommand 'deletePaletteItem',
         execute: =>
-          @palette = _.without @palette, paletteItem
-          @deselect()
+          @removePaletteItem(paletteItem)
           @updateChanges()
         undo: =>
           @addToPalette(paletteItem)
           @updateChanges()
 
   addToPalette: (node) ->
-    # ensure its in our library first
+    # PaletteItems always get added to library first
     @addToLibrary(node)
     if not @inPalette node
       @palette.push node
@@ -94,8 +92,7 @@ paletteStore   = Reflux.createStore
         @addToPalette(node)
         @updateChanges()
       undo:  =>
-        @palette = _.without @palette, node
-        @deselect()
+        @removePaletteItem(node)
         @updateChanges()
 
 
@@ -110,26 +107,15 @@ paletteStore   = Reflux.createStore
     @updateChanges()
 
   selectPaletteIndex: (index) ->
-    @lastSelection = @selectedIndex = index
-    @selectedPaletteItem  = @palette[index]
-    if @selectedPaletteItem
-      @selectedPaletteImage = @selectedPaletteItem.image
-    else
-      @deselect() # if we tried to select something non-existent, deselect.
-
-  deselect: ->
-    @lastSelection = @selectedIndex
-    @selectedPaletteIndex = -1
-    @selectedPaletteItem  = null
-
-  onDeselect: ->
-    @deselect()
-    # @updateChanges()
+    maxIndex = @palette.length - 1
+    effectiveIndex = Math.min(maxIndex, index)
+    @lastSelection = @selectedIndex = effectiveIndex
+    @selectedPaletteItem  = @palette[effectiveIndex]
+    @selectedPaletteImage = @selectedPaletteItem?.image
 
   onRestoreSelection: ->
     if @lastSelection > -1
-      maxIndex = @palette.length - 1
-      @selectPaletteIndex Math.min(maxIndex,@lastSelection)
+      @selectPaletteIndex maxIndex
     else @selectPaletteIndex 0
     @updateChanges()
 
@@ -143,6 +129,12 @@ paletteStore   = Reflux.createStore
       @updateChanges()
     else
       alert "cant find library item"
+
+  removePaletteItem: (item) ->
+    # Try to select the same index as the deleted item
+    i = _.indexOf @palette, item
+    @palette = _.without @palette, item
+    @selectPaletteIndex(i)
 
   moveToFront: (index) ->
     @palette.splice(0, 0, @palette.splice(index, 1)[0])

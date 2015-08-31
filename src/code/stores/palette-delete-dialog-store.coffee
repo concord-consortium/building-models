@@ -14,23 +14,26 @@ store = Reflux.createStore
     @undoManger = UndoRedo.instance debug:true
 
   initValues: ->
-    @showing             = false
-    @deleted             = false
-    @paletteItemHasNodes = false
+    @showing         = false
+    @deleted         = false
+    @showReplacement = false
+    @replacement     = null
     @_notifyChanges()
 
   onOpen: ->
-    @showing             = true
-    @paletteItem         = PaletteStore.store.selectedPaletteItem
-    @options             = _.without PaletteStore.store.palette, @paletteItem
-    @paletteItemHasNodes = false
-    @replacement         = @options[0]
-    @deleted             = false
-    @paletteItemHasNodes = false
+    @showing         = true
+    @paletteItem     = PaletteStore.store.selectedPaletteItem
+    @options         = _.without PaletteStore.store.palette, @paletteItem
+    @showReplacement = false
+    @deleted         = false
+    @replacement     = null
 
     _.each (require './nodes-store').store.nodes, (node) =>
       if node.paletteItemIs @paletteItem
-        @paletteItemHasNodes = true
+        @showReplacement = true
+
+    if @showReplacement
+      @replacement = @options[0]
 
     @_notifyChanges()
 
@@ -55,18 +58,18 @@ store = Reflux.createStore
     @showing = false
     if @replacement and @deleted
       PaletteStore.actions.selectPaletteItem @replacement
-    else
+    else if not @deleted
       PaletteStore.actions.restoreSelection()
     @_notifyChanges()
 
   _notifyChanges: ->
     data =
-      showing:             @showing
-      paletteItem:         @paletteItem
-      options:             @options
-      replacement:         @replacement
-      deleted:             @deleted
-      paletteItemHasNodes: @paletteItemHasNodes
+      showing:         @showing
+      paletteItem:     @paletteItem
+      options:         @options
+      replacement:     @replacement
+      deleted:         @deleted
+      showReplacement: @showReplacement
     @trigger(data)
 
 
@@ -74,24 +77,24 @@ listenerMixin =
   actions: paletteDialogActions
 
   getInitialState: ->
-    showing:             store.showing
-    paletteItem:         store.paletteItem
-    options:             store.options
-    replacement:         store.replacement
-    deleted:             store.deleted
-    paletteItemHasNodes: store.paletteItemHasNodes
+    showing:         store.showing
+    paletteItem:     store.paletteItem
+    options:         store.options
+    replacement:     store.replacement
+    deleted:         store.deleted
+    showReplacement: store.showReplacement
 
   componentDidMount: ->
     store.listen @onChange
 
   onChange: (status) ->
     @setState
-      showing:             status.showing
-      paletteItem:         status.paletteItem
-      options:             status.options
-      replacement:         status.replacement
-      deleted:             status.deleted
-      paletteItemHasNodes: status.paletteItemHasNodes
+      showing:         status.showing
+      paletteItem:     status.paletteItem
+      options:         status.options
+      replacement:     status.replacement
+      deleted:         status.deleted
+      showReplacement: status.showReplacement
 
 module.exports =
   store: store
