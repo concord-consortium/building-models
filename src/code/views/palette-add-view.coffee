@@ -13,11 +13,13 @@ module.exports = React.createClass
     label: tr '~PALETTE-INSPECTOR.ADD_IMAGE'
 
   render: ->
-    (div {
-      className: 'palette-add-image',
-      'data-droptype': 'new',
-      onClick: =>
-        ImageDialogStore.actions.open.trigger(@props.callback)
-      },
-      (div {}, @props.label )
+    (div {className: 'palette-image', 'data-droptype': 'new'},
+      (div {
+        className: 'palette-add-image',
+        onClick: => ImageDialogStore.actions.open.trigger(@props.callback)
+        },
+        (div { className: 'proto-node'},
+          (div {}, @props.label )
+        )
+      )
     )

@@ -115,7 +115,7 @@ paletteStore   = Reflux.createStore
 
   onRestoreSelection: ->
     if @lastSelection > -1
-      @selectPaletteIndex maxIndex
+      @selectPaletteIndex @lastSelection
     else @selectPaletteIndex 0
     @updateChanges()
 

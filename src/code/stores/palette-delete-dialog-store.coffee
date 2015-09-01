@@ -34,33 +34,36 @@ store = Reflux.createStore
 
     if @showReplacement
       @replacement = @options[0]
-
+    @undoManger.startCommandBatch()
     @_notifyChanges()
 
   onClose: ->
     @close()
 
   onSelect: (replacement) ->
-    @replacement = replacement
-    @_notifyChanges()
+    if replacement
+      @replacement = replacement
+      @_notifyChanges()
 
   onCancel: ->
     @close()
 
   onDelete: (item) ->
     @deleted = true
-    @undoManger.startCommandBatch()
     PaletteStore.actions.delete(item)
     @close()
-    @undoManger.endCommandBatch()
 
   close: ->
     @showing = false
+    @_notifyChanges()
+    @undoManger.endCommandBatch()
     if @replacement and @deleted
       PaletteStore.actions.selectPaletteItem @replacement
     else if not @deleted
+      @undoManger.undo()
       PaletteStore.actions.restoreSelection()
-    @_notifyChanges()
+
+
 
   _notifyChanges: ->
     data =
