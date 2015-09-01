@@ -62,6 +62,7 @@ module.exports = React.createClass
 
     else if data.droptype is 'paletteItem'
       paletteItem = PaletteStore.store.palette[data.index]
+      PaletteStore.actions.selectPaletteIndex(data.index)
       @addPaletteNode(ui,paletteItem)
 
   addNewPaletteNode: (e,ui) ->
@@ -80,6 +81,7 @@ module.exports = React.createClass
         title: title
         image: paletteItem.image
     @props.graphStore.editNode(node.key)
+    @props.selectionManager.selectForInspection node
 
   getInitialState: ->
     nodes: []
