@@ -58302,6 +58302,7 @@ module.exports = {
   "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
   "~ADD-NEW-IMAGE.LINK-TAB": "Link",
   "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image",
+  "~PALETTE-INSPECTOR.ADD_IMAGE_SHORT": "New",
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
   "~PALETTE-INSPECTOR.DELETE": "Delete Image",
   "~PALETTE-INSPECTOR.REPLACE": "Replace Image",
@@ -59826,9 +59827,12 @@ module.exports = React.createClass({
       src: this.props.selected.image
     })), div({
       className: this.className()
+    }, div({
+      className: "image-choice"
     }, PaletteAddView({
-      callback: this.props.onChange
-    }), (function() {
+      callback: this.props.onChange,
+      label: tr('~PALETTE-INSPECTOR.ADD_IMAGE_SHORT')
+    })), (function() {
       var i, len, ref1, results;
       ref1 = this.props.nodes;
       results = [];
@@ -61060,25 +61064,22 @@ div = React.DOM.div;
 module.exports = React.createClass({
   displayName: 'PaletteAddView',
   mixins: [Draggable],
-  defaultProps: {
-    callback: false
+  getDefaultProps: function() {
+    return {
+      callback: false,
+      label: tr('~PALETTE-INSPECTOR.ADD_IMAGE')
+    };
   },
   render: function() {
     return div({
-      className: 'palette-image',
-      'data-droptype': 'new'
-    }, div({
       className: 'palette-add-image',
+      'data-droptype': 'new',
       onClick: (function(_this) {
         return function() {
           return ImageDialogStore.actions.open.trigger(_this.props.callback);
         };
       })(this)
-    }, div({
-      className: 'proto-node'
-    }, div({
-      className: 'img-background'
-    }, tr('~PALETTE-INSPECTOR.ADD_IMAGE')))));
+    }, div({}, this.props.label));
   }
 });
 
@@ -61121,7 +61122,9 @@ module.exports = React.createClass({
     if (this.props.showReplacement) {
       return div({
         className: "vertical-content"
-      }, div({}, tr("~PALETTE-DIALOG.REPLACE")), ImagePickerView({
+      }, div({
+        className: "label"
+      }, tr("~PALETTE-DIALOG.REPLACE")), ImagePickerView({
         nodes: this.props.options || [],
         selected: this.props.replacement,
         onChange: this.changePalette
@@ -61133,7 +61136,9 @@ module.exports = React.createClass({
     oldImage = (ref1 = this.props.paletteItem) != null ? ref1.image : void 0;
     return div({
       className: "vertical-content"
-    }, div({}, tr("~PALETTE-DIALOG.DELETE")), oldImage ? img({
+    }, div({
+      className: "label"
+    }, tr("~PALETTE-DIALOG.DELETE")), oldImage ? img({
       src: oldImage
     }) : void 0);
   },
@@ -61196,7 +61201,9 @@ module.exports = React.createClass({
     }, div({
       className: 'palette',
       ref: 'palette'
-    }, div({}, PaletteAddView({}), _.map(this.state.palette, (function(_this) {
+    }, div({}, div({
+      className: "palette-image"
+    }, PaletteAddView({})), _.map(this.state.palette, (function(_this) {
       return function(node, index) {
         return PaletteItemView({
           key: index,
