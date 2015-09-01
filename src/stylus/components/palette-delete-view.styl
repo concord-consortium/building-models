@@ -8,8 +8,7 @@
 
   .horizontal-content
     enable-flex(justify:flex-start, alignContent:flex-start, alignItems:flex-start)
-    div
-      margin-bottom 10px
+
   button
     modal-button()
     cursor pointer
@@ -33,6 +32,10 @@
     enable-flex(direction:column, justify:flex-start, alignContent:flex-start, alignItems:center)
     height 80px
     min-width 80px
+
+    .padded
+      margin-bottom 10px
+
     &.buttons
       enable-flex(direction:column, justify:flex-start, alignContent:flex-start, alignItems:flex-end)
       margin-left 30px

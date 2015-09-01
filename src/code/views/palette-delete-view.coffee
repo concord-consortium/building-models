@@ -26,7 +26,7 @@ module.exports = React.createClass
   renderReplacement: ->
     if @props.showReplacement
       (div {className: "vertical-content"},
-        (div {}, tr "~PALETTE-DIALOG.REPLACE")
+        (div {className: "label"}, tr "~PALETTE-DIALOG.REPLACE")
         (ImagePickerView {
           nodes: @props.options or []
           selected: @props.replacement
@@ -37,7 +37,7 @@ module.exports = React.createClass
   renderPaletteItem: ->
     oldImage   = @props.paletteItem?.image
     (div {className: "vertical-content"},
-      (div {}, tr "~PALETTE-DIALOG.DELETE")
+      (div {className: "label"}, tr "~PALETTE-DIALOG.DELETE")
       if oldImage
         (img {src: oldImage})
     )

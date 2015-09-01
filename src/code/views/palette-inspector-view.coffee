@@ -27,7 +27,9 @@ module.exports = React.createClass
     (div {className: 'palette-inspector'},
       (div {className: 'palette', ref: 'palette'},
         (div {},
-          (PaletteAddView {})
+          (div {className: "palette-image"},
+            (PaletteAddView {})
+          )
           # _.forEach @state.palette, (node,index) =>
           _.map @state.palette, (node, index) =>
             (PaletteItemView {

@@ -39,7 +39,12 @@ module.exports = React.createClass
         (img {src: @props.selected.image})
       )
       (div {className: @className()},
-        (PaletteAddView {callback:  @props.onChange })
+        (div {className: "image-choice"},
+          (PaletteAddView {
+            callback:  @props.onChange,
+            label: tr '~PALETTE-INSPECTOR.ADD_IMAGE_SHORT'
+          })
+        )
         for node in @props.nodes
           (ImgChoice {key: node.id, node: node, selected: @props.selected, onChange: @props.onChange})
       )

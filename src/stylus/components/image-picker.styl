@@ -28,37 +28,47 @@
       max-height 50px
       vertical-align middle
 
-  .image-choices
+  div.image-choices
+    margin 0px
     position absolute
     box-sizing border-box
     padding 0.5em
     background-color white
-    border-radius 0px 0px 2px 2px
+    border-radius 2px 2px 2px 2px
     display inline-block
     vertical-align top
-    overflow visible
+    overflow hidden
     cursor pointer
     z-index 5
     width 350px
     left -100px
     no-select()
     transition 0.1s
-    box-shadow 0px 1px 1px hsla(0,0,30,0.4)
+    box-shadow 4px 4px 4px 4px hsla(0,0,30,0.4)
     enable-flex(wp:wrap,justify:flex-start)
     &.closed
       height 0px
       padding 0px
       border none
+      box-shadow none
       overflow hidden
 
-   .image-choice
-     box-sizing border-box
-     vertical-align middle
-     padding 8px
+   div.image-choice
      overflow hidden
+     vertical-align top
+     max-height 48px
+     margin 5px
+     margin-bottom 0px
+     padding 10px
+     border-radius 4px 4px 4px 4px
+     &:hover
+      background-color hsla(0,0,80,0.3)
      img
        border none
+       max-height 40px
+       max-width 40px
        padding 0px
        margin 0px
-       max-height 48px
-       max-width 48px
+    .palette-add-image
+      height: 40px
+      width: 40px

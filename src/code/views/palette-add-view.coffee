@@ -8,16 +8,16 @@ module.exports = React.createClass
 
   displayName: 'PaletteAddView'
   mixins: [Draggable]
-  defaultProps:
+  getDefaultProps: ->
     callback: false
+    label: tr '~PALETTE-INSPECTOR.ADD_IMAGE'
 
   render: ->
-    (div {className: 'palette-image', 'data-droptype': 'new'},
-      (div {className: 'palette-add-image', onClick: => ImageDialogStore.actions.open.trigger(@props.callback) },
-        (div { className: 'proto-node'},
-          (div {className: 'img-background'},
-            tr '~PALETTE-INSPECTOR.ADD_IMAGE'
-          )
-        )
-      )
+    (div {
+      className: 'palette-add-image',
+      'data-droptype': 'new',
+      onClick: =>
+        ImageDialogStore.actions.open.trigger(@props.callback)
+      },
+      (div {}, @props.label )
     )
