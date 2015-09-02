@@ -51,9 +51,10 @@ describe "Serialization and Loading", ->
       @graphStore.addNode @nodeB
       @graphStore.addLink @link
 
-    describe "The serialize function", ->
+    describe "The toJsonString function", ->
       it "should serialize all the properties of the model", ->
-        model = @graphStore.serialize()
+        jsonString = @graphStore.toJsonString()
+        model = JSON.parse jsonString
 
         model.version.should.exist
         model.nodes.should.exist
@@ -64,7 +65,8 @@ describe "Serialization and Loading", ->
         model.links.length.should.equal 1
 
       it "should correctly serialize a node", ->
-        node = @graphStore.serialize().nodes[0]
+        jsonString = @graphStore.toJsonString()
+        node = JSON.parse(jsonString).nodes[0]
         node.key.should.equal "a"
         node.data.title.should.equal "a"
         node.data.x.should.equal 10
@@ -74,7 +76,8 @@ describe "Serialization and Loading", ->
         node.data.valueDefinedSemiQuantitatively.should.equal false
 
       it "should correctly serialize a link", ->
-        link = @graphStore.serialize().links[0]
+        jsonString = @graphStore.toJsonString()
+        link = JSON.parse(jsonString).links[0]
         link.title.should.equal ""
         link.color.should.equal "#777"
         link.sourceNode.should.equal "a"
@@ -84,14 +87,18 @@ describe "Serialization and Loading", ->
         link.relation.text.should.equal "increases"
         link.relation.formula.should.equal "1 * in"
 
-    describe "the toJsonString function", ->
-      it "should create a string nodes and links", ->
+      it "should not serialize certain properties", ->
         jsonString = @graphStore.toJsonString()
-        jsonString.should.match(/"nodes":/)
-        jsonString.should.match(/"links":/)
         jsonString.should.not.match(/"description":/)
         jsonString.should.not.match(/"metadata":/)
-        @graphStore.toJsonString(@fakePalette).should.match(/"palette":/)
+
+      it "should be able to serialize the palette", ->
+        console.log @graphStore.toJsonString(@fakePalette)
+        jsonString = @graphStore.toJsonString(@fakePalette)
+        palette = JSON.parse(jsonString).palette
+        palette.a.should.equal 1
+        palette.b.should.equal 2
+
 
   describe "loadData", ->
     beforeEach ->
