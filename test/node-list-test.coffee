@@ -19,8 +19,6 @@ Node           = requireModel 'node'
 GraphStore    = require "#{__dirname}/../src/code/stores/graph-store"
 CodapConnect   = requireModel 'codap-connect'
 
-SerializedTestData = require "./serialized-test-data/v-0.1"
-
 describe 'GraphPrimitive', ->
   it 'GraphPrimitive should exists', ->
     GraphPrimitive.should.exist
@@ -203,29 +201,3 @@ describe 'Node', ->
         it "should not add the new link", ->
           @graphStore.addLink(@newLink)
           @graphStore.linkKeys['newLink'].should.equal('oldValue')
-
-    describe "Serialization", ->
-      beforeEach ->
-        @serializedForm = JSON.stringify SerializedTestData
-        @fakePalette = {a: 1, b:2}
-
-      describe "toJsonString", ->
-        it "should include nodes and links", ->
-          @nodeA.key.should.equal("a")
-          @graphStore.addLink(@newLink)
-          @graphStore.nodeKeys["a"].should.equal(@nodeA)
-          @graphStore.toJsonString().should.match(/"nodes":/)
-          @graphStore.toJsonString().should.match(/"links":/)
-          @graphStore.toJsonString().should.not.match(/"description":/)
-          @graphStore.toJsonString().should.not.match(/"metadata":/)
-          @graphStore.toJsonString(@fakePalette).should.match(/"palette":/)
-
-      describe "loadData", ->
-        beforeEach ->
-          @graphStore = GraphStore.store
-          @graphStore.init()
-        it "should read the serialized data without error", ->
-          data = JSON.parse(@serializedForm)
-          @graphStore.loadData(data)
-          @graphStore.nodeKeys.should.have.any.keys("a")
-          @graphStore.nodeKeys.should.have.any.keys("b")
