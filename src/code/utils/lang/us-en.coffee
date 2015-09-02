@@ -51,6 +51,7 @@ module.exports =
 
   # views/palette-inspector-view.coffee
   "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image"
+  "~PALETTE-INSPECTOR.ADD_IMAGE_SHORT": "New"
   "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image"
   "~PALETTE-INSPECTOR.DELETE": "Delete Image"
   "~PALETTE-INSPECTOR.REPLACE": "Replace Image"

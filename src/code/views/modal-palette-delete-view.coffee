@@ -9,7 +9,7 @@ tr                  = require '../utils/translate'
 module.exports = React.createClass
 
   displayName: 'ModalPaletteDelete'
-  mixins: [PaletteDialogStore.mixin, NodesStore.mixin]
+  mixins: [PaletteDialogStore.mixin]
 
   render: ->
     (div {key:'ModalPaletteDelete'},
@@ -20,9 +20,9 @@ module.exports = React.createClass
             options: @state.options
             paletteItem: @state.paletteItem,
             replacement: @state.replacement,
-            paletteItemHasNodes: @state.paletteItemHasNodes
+            showReplacement: @state.showReplacement
             cancel: PaletteDialogStore.actions.close
-            ok: PaletteDialogStore.actions.delete
+            ok: => PaletteDialogStore.actions.delete @state.paletteItem
           })
         )
     )

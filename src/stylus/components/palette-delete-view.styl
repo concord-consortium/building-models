@@ -1,25 +1,25 @@
 .palette-delete-view
   background-color white
-  margin 2em
+  margin 1.5em
   padding 1em
   font-family Montserrat, sans-serif
   font-size 18px
   color  rgb(11, 78, 93)
 
+  .label
+    font-size 17px
+    margin-bottom 0.1em
+
   .horizontal-content
     enable-flex(justify:flex-start, alignContent:flex-start, alignItems:flex-start)
-    div
-      margin-bottom 10px
+
   button
     modal-button()
     cursor pointer
     transition 0.2s
+    margin-bottom 0.2em
     &:hover
       color dark-blue
-
-  i
-    font-size 1.2em
-    margin-right 0.5em
 
   img
     vertical-align middle
@@ -30,28 +30,35 @@
 
   .vertical-content
     text-align center
-    enable-flex(direction:column, justify:flex-start, alignContent:center, alignItems:center)
-    height 120px
+    enable-flex(direction:column, justify:flex-start, alignContent:flex-start, alignItems:center)
+    height 80px
     min-width 80px
+
+    .padded
+      margin-bottom 10px
+
     &.buttons
-      enable-flex(direction:column, justify:center, alignContent:flex-end, alignItems:flex-end)
+      enable-flex(direction:column, justify:flex-start, alignContent:flex-start, alignItems:flex-end)
       margin-left 30px
+      margin-top: 50px
+
+      .cancel
+        margin-top 5px
+        color light-blue
+        cursor pointer
+        label-font()
+        transition 0.2s
+        &:hover
+          color dark-blue
 
   .arrow-div
     margin: auto
     font-size: 50
+    padding-top 0.9em
 
   .delete-prompt
     font-weight bold
 
-  .cancel
-    margin-top 0px
-    color light-blue
-    cursor pointer
-    float right
-    transition 0.2s
-    &:hover
-      color dark-blue
 
 
   .image-picker
