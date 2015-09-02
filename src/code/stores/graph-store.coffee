@@ -175,6 +175,7 @@ GraphStore  = Reflux.createStore
         color: node.color
         initialValue: node.initialValue
         isAccumulator: node.isAccumulator
+        valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
 
       @undoRedoManager.createAndExecuteCommand 'changeNode',
         execute: => @_changeNode node, data
@@ -182,7 +183,7 @@ GraphStore  = Reflux.createStore
 
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
-    for key in ['title','image','color', 'initialValue', 'isAccumulator']
+    for key in ['title','image','color', 'initialValue', 'isAccumulator', 'valueDefinedSemiQuantitatively']
       if data.hasOwnProperty key
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]

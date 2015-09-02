@@ -14,6 +14,7 @@ module.exports = class Node extends GraphPrimitive
     @initialValue  ?= 50
     @isAccumulator ?= false
     @color ?= Colors[0].value
+    @valueDefinedSemiQuantitatively = false
 
   type: 'Node'
   addLink: (link) ->
