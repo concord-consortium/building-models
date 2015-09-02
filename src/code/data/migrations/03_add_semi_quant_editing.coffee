@@ -13,6 +13,6 @@ migration =
   updateNodes: (data) ->
     for node in data.nodes
       node.data ||= {} # should never happen
-      node.data.valueDefinedSemiQuantitatively = false
+      node.data.valueDefinedSemiQuantitatively = true
 
 module.exports = _.mixin migration, require './migration-mixin'

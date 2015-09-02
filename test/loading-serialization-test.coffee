@@ -73,7 +73,7 @@ describe "Serialization and Loading", ->
         node.data.y.should.equal 15
         node.data.initialValue.should.equal 50
         node.data.isAccumulator.should.equal false
-        node.data.valueDefinedSemiQuantitatively.should.equal false
+        node.data.valueDefinedSemiQuantitatively.should.equal true
 
       it "should correctly serialize a link", ->
         jsonString = @graphStore.toJsonString()

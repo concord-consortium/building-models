@@ -31,7 +31,7 @@ describe "Migrations",  ->
           it "should have initial node values", ->
             for node in @result.nodes
               node.data.valueDefinedSemiQuantitatively.should.exist
-              node.data.valueDefinedSemiQuantitatively.should.equal false
+              node.data.valueDefinedSemiQuantitatively.should.equal true
 
     describe "the palette", ->
       it "should exist", ->
