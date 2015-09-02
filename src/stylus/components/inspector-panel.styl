@@ -58,7 +58,7 @@ inspector-panel-inner-height = 500px
       padding-right 50px
       // overflow hidden
 
-      .inspector-content
+      .inspector-content, .bottom-pane
         padding 1em
         text-align left
         background-color bbgray
@@ -76,10 +76,8 @@ inspector-panel-inner-height = 500px
           white-space nowrap
         label
           display inline-block
-          width 45px
           label-font()
-          margin 1em
-          &.node-delete, &.link-delete
+          &.node-delete, &.link-delete, &.node-switch-edit-mode
             color light-blue
             cursor pointer
             &:hover
@@ -92,6 +90,14 @@ inspector-panel-inner-height = 500px
           border-radius 3px
         i
           margin-right: 1em
+
+      .inspector-content
+        label
+          width 45px
+          margin 1em
+      .bottom-pane
+        label
+          margin-top: -0.8em
 
 
   &.collapsed

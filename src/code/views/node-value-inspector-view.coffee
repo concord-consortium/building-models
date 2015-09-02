@@ -27,6 +27,9 @@ module.exports = React.createClass
     value = evt.target.checked
     @props.graphStore.changeNode(isAccumulator:value)
 
+  updateDefiningType: ->
+    @props.graphStore.changeNode(valueDefinedSemiQuantitatively:!@props.node.valueDefinedSemiQuantitatively)
+
   selectText: (evt) ->
     evt.target.select()
 
@@ -34,18 +37,19 @@ module.exports = React.createClass
     node = @props.node
     (div {className: 'value-inspector'},
       (div {className: 'inspector-content group'},
-        (span {className: 'full'},
-          (label {className: 'right'}, tr "~NODE-VALUE-EDIT.INITIAL-VALUE")
-          (input {
-            className: 'left'
-            type: "number",
-            min: "#{@props.min}",
-            max: "#{@props.max}",
-            value: "#{node.initialValue}",
-            onClick: @selectText,
-            onChange: @updateValue}
+        unless node.valueDefinedSemiQuantitatively
+          (span {className: 'full'},
+            (label {className: 'right'}, tr "~NODE-VALUE-EDIT.INITIAL-VALUE")
+            (input {
+              className: 'left'
+              type: "number",
+              min: "#{@props.min}",
+              max: "#{@props.max}",
+              value: "#{node.initialValue}",
+              onClick: @selectText,
+              onChange: @updateValue}
+            )
           )
-        )
         (div {className: "slider group full"},
           (input {
             className: "full"
@@ -55,8 +59,8 @@ module.exports = React.createClass
             value: "#{node.initialValue}",
             onChange: @updateValue}
           )
-          (label {className: "left half small"}, @props.min)
-          (label {className: "right half small"}, @props.max)
+          (label {className: "left half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.LOW" else @props.min)
+          (label {className: "right half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.HIGH" else @props.max)
         )
         (span {className: "checkbox group full"},
           (span {},
@@ -66,7 +70,16 @@ module.exports = React.createClass
           (i {className: "fa fa-question-circle"})
         )
       )
+
       (div {className: "bottom-pane"},
-        (p {}, tr "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS")
+        (p {},
+          if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS"
+          else  tr "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")
+        (p {},
+          (label {className: 'node-switch-edit-mode', onClick: @updateDefiningType},
+            if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS"
+            else tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS"
+          )
+        )
       )
     )

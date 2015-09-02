@@ -6,9 +6,9 @@ describe "Migrations",  ->
     beforeEach ->
       @result = Migrations.update(originalData)
 
-    describe "the final version number as of 2015-08-13", ->
-      it "should be 1.1", ->
-        @result.version.should.equal 1.1
+    describe "the final version number", ->
+      it "should be 1.2", ->
+        @result.version.should.equal 1.2
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -26,6 +26,12 @@ describe "Migrations",  ->
               node.data.initialValue.should.exist
               node.data.isAccumulator.should.exist
               node.data.isAccumulator.should.equal false
+
+        describe "v-1.2 node changes", ->
+          it "should have initial node values", ->
+            for node in @result.nodes
+              node.data.valueDefinedSemiQuantitatively.should.exist
+              node.data.valueDefinedSemiQuantitatively.should.equal false
 
     describe "the palette", ->
       it "should exist", ->
