@@ -6,6 +6,10 @@
   font-size 18px
   color  rgb(11, 78, 93)
 
+  .label
+    font-size 17px
+    margin-bottom 0.1em
+
   .horizontal-content
     enable-flex(justify:flex-start, alignContent:flex-start, alignItems:flex-start)
 
@@ -13,12 +17,9 @@
     modal-button()
     cursor pointer
     transition 0.2s
+    margin-bottom 0.2em
     &:hover
       color dark-blue
-
-  i
-    font-size 1.2em
-    margin-right 0.5em
 
   img
     vertical-align middle
@@ -39,7 +40,7 @@
     &.buttons
       enable-flex(direction:column, justify:flex-start, alignContent:flex-start, alignItems:flex-end)
       margin-left 30px
-      margin-top: 35px
+      margin-top: 50px
 
       .cancel
         margin-top 5px
@@ -53,6 +54,7 @@
   .arrow-div
     margin: auto
     font-size: 50
+    padding-top 0.9em
 
   .delete-prompt
     font-weight bold
