@@ -59371,8 +59371,7 @@ module.exports = React.createClass({
         image: paletteItem.image
       }
     });
-    this.props.graphStore.editNode(node.key);
-    return this.props.selectionManager.selectForInspection(node);
+    return this.props.graphStore.editNode(node.key);
   },
   getInitialState: function() {
     return {
