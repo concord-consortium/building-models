@@ -5,16 +5,16 @@ tr = require '../utils/translate'
 
 module.exports = class Node extends GraphPrimitive
 
-  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50, isAccumulator:false}, key) ->
+  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50, isAccumulator:false, valueDefinedSemiQuantitatively:false}, key) ->
     super()
     if key
       @key = key
     @links = []
-    {@x, @y, @title, @image, @initialValue, @isAccumulator} = nodeSpec
+    {@x, @y, @title, @image, @initialValue, @isAccumulator, @valueDefinedSemiQuantitatively} = nodeSpec
     @initialValue  ?= 50
     @isAccumulator ?= false
     @color ?= Colors[0].value
-    @valueDefinedSemiQuantitatively = false
+    @valueDefinedSemiQuantitatively ?= false
 
   type: 'Node'
   addLink: (link) ->
@@ -69,6 +69,7 @@ module.exports = class Node extends GraphPrimitive
       image: @image
       initialValue: @initialValue
       isAccumulator: @isAccumulator
+      valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
     key: @key
 
   paletteItemIs: (paletteItem) ->
