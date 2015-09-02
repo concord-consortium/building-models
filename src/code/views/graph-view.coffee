@@ -81,7 +81,6 @@ module.exports = React.createClass
         title: title
         image: paletteItem.image
     @props.graphStore.editNode(node.key)
-    @props.selectionManager.selectForInspection node
 
   getInitialState: ->
     nodes: []
