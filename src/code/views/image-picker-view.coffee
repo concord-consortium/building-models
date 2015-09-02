@@ -1,6 +1,7 @@
 {div, img} = React.DOM
 tr = require '../utils/translate'
 PaletteAddView     = React.createFactory require './palette-add-view'
+PaletteStore = require '../stores/palette-store'
 
 ImgChoice = React.createFactory React.createClass
   displayName: 'ImgChoice'
@@ -22,7 +23,7 @@ module.exports = React.createClass
 
   getInitialState: ->
     opened: false
-
+  mixins: [PaletteStore.mixin]
   toggleOpen: ->
     @setState
       opened: (not @state.opened)
@@ -45,7 +46,7 @@ module.exports = React.createClass
             label: tr '~PALETTE-INSPECTOR.ADD_IMAGE_SHORT'
           })
         )
-        for node in @props.nodes
+        for node in @state.palette
           (ImgChoice {key: node.id, node: node, selected: @props.selected, onChange: @props.onChange})
       )
     )
