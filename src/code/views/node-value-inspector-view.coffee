@@ -11,6 +11,10 @@ module.exports = React.createClass
     min: React.PropTypes.number
     onChange: React.PropTypes.func
 
+  getInitialState: ->
+    'editing-min': false
+    'editing-max': false
+
   trim: (inputValue) ->
     return Math.max(@props.node.min, Math.min(@props.node.max, inputValue))
 
@@ -28,6 +32,41 @@ module.exports = React.createClass
 
   selectText: (evt) ->
     evt.target.select()
+
+  renderEditableProperty: (property, classNames) ->
+    swapState = =>
+      @setState "editing-#{property}": not @state["editing-#{property}"], ->
+        focusable = React.findDOMNode(this.refs.focusable)
+        focusable.focus() unless not focusable
+
+    updateProperty = (evt) =>
+      value = parseInt(evt.target.value)
+      if value
+        @props.graphStore.changeNodeProperty property, value
+
+    if not @state["editing-#{property}"]
+      (div {className: "half small editable-prop #{classNames}", onClick: swapState}, @props.node[property])
+    else
+      (input {
+        className: "half small editable-prop #{classNames}"
+        type: 'number'
+        value: @props.node[property]
+        onChange: updateProperty
+        onBlur: swapState
+        ref: 'focusable'}
+      )
+
+  renderMinAndMax: (node) ->
+    if node.valueDefinedSemiQuantitatively
+      (div {className: "group full"},
+        (label {className: "left half small"}, tr "~NODE-VALUE-EDIT.LOW")
+        (label {className: "right half small"}, tr "~NODE-VALUE-EDIT.HIGH")
+      )
+    else
+      (div {className: "group full"},
+        @renderEditableProperty("min", "left")
+        @renderEditableProperty("max", "right")
+      )
 
   render: ->
     node = @props.node
@@ -55,8 +94,7 @@ module.exports = React.createClass
             value: "#{node.initialValue}",
             onChange: @updateValue}
           )
-          (label {className: "left half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.LOW" else node.min)
-          (label {className: "right half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.HIGH" else node.max)
+          @renderMinAndMax(node)
         )
         (span {className: "checkbox group full"},
           (span {},

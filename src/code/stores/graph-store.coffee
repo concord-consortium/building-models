@@ -191,6 +191,10 @@ GraphStore  = Reflux.createStore
         node[key] = data[key]
     @_notifyNodeChanged(node)
 
+  changeNodeProperty: (property, value, node) ->
+    data = {}
+    data[property] = value
+    @changeNode(data, node)
 
   changeNodeWithKey: (key, data) ->
     node = @nodeKeys[ key ]
