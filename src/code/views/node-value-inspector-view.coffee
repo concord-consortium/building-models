@@ -28,7 +28,7 @@ module.exports = React.createClass
     @props.graphStore.changeNode(isAccumulator:value)
 
   updateDefiningType: ->
-    @props.graphStore.changeNode(valueDefinedSemiQuantitatively:!@props.node.valueDefinedSemiQuantitatively)
+    @props.graphStore.changeNode(valueDefinedSemiQuantitatively: not @props.node.valueDefinedSemiQuantitatively)
 
   selectText: (evt) ->
     evt.target.select()
