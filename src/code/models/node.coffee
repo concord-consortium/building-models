@@ -63,6 +63,10 @@ module.exports = class Node extends GraphPrimitive
     visit @
     _.without visitedNodes, @ # remove ourself from the results.
 
+  normalizeValues: ->
+    @max = Math.max @max, @min
+    @initialValue = Math.max @min, Math.min @max, @initialValue
+
   toExport: ->
     data:
       title: @title
