@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.2", ->
-        @result.version.should.equal 1.2
+      it "should be 1.3", ->
+        @result.version.should.equal 1.3
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -32,6 +32,12 @@ describe "Migrations",  ->
             for node in @result.nodes
               node.data.valueDefinedSemiQuantitatively.should.exist
               node.data.valueDefinedSemiQuantitatively.should.equal true
+
+        describe "v-1.3 node changes", ->
+          it "should have initial node values", ->
+            for node in @result.nodes
+              node.data.min.should.equal 0
+              node.data.max.should.equal 100
 
     describe "the palette", ->
       it "should exist", ->

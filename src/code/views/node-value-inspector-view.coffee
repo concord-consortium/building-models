@@ -11,12 +11,8 @@ module.exports = React.createClass
     min: React.PropTypes.number
     onChange: React.PropTypes.func
 
-  getDefaultProps: ->
-    max: 100
-    min: 0
-
   trim: (inputValue) ->
-    return Math.max(@props.min, Math.min(@props.max, inputValue))
+    return Math.max(@props.node.min, Math.min(@props.node.max, inputValue))
 
   updateValue:  (evt) ->
     if value = evt.target.value
@@ -43,8 +39,8 @@ module.exports = React.createClass
             (input {
               className: 'left'
               type: "number",
-              min: "#{@props.min}",
-              max: "#{@props.max}",
+              min: "#{node.min}",
+              max: "#{node.max}",
               value: "#{node.initialValue}",
               onClick: @selectText,
               onChange: @updateValue}
@@ -54,13 +50,13 @@ module.exports = React.createClass
           (input {
             className: "full"
             type: "range",
-            min: "#{@props.min}",
-            max: "#{@props.max}",
+            min: "#{node.min}",
+            max: "#{node.max}",
             value: "#{node.initialValue}",
             onChange: @updateValue}
           )
-          (label {className: "left half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.LOW" else @props.min)
-          (label {className: "right half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.HIGH" else @props.max)
+          (label {className: "left half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.LOW" else node.min)
+          (label {className: "right half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.HIGH" else node.max)
         )
         (span {className: "checkbox group full"},
           (span {},
