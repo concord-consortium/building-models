@@ -174,6 +174,8 @@ GraphStore  = Reflux.createStore
         image: node.image
         color: node.color
         initialValue: node.initialValue
+        min: node.min
+        max: node.max
         isAccumulator: node.isAccumulator
         valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
 
@@ -183,12 +185,17 @@ GraphStore  = Reflux.createStore
 
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
-    for key in ['title','image','color', 'initialValue', 'isAccumulator', 'valueDefinedSemiQuantitatively']
+    for key in ['title','image','color','initialValue','min','max','isAccumulator','valueDefinedSemiQuantitatively']
       if data.hasOwnProperty key
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
+    node.normalizeValues()
     @_notifyNodeChanged(node)
 
+  changeNodeProperty: (property, value, node) ->
+    data = {}
+    data[property] = value
+    @changeNode(data, node)
 
   changeNodeWithKey: (key, data) ->
     node = @nodeKeys[ key ]

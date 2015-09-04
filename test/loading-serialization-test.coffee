@@ -60,7 +60,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal 1.2
+        model.version.should.equal 1.3
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -72,6 +72,8 @@ describe "Serialization and Loading", ->
         node.data.x.should.equal 10
         node.data.y.should.equal 15
         node.data.initialValue.should.equal 50
+        node.data.min.should.equal 0
+        node.data.max.should.equal 100
         node.data.isAccumulator.should.equal false
         node.data.valueDefinedSemiQuantitatively.should.equal true
 

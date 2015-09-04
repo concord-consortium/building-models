@@ -11,12 +11,12 @@ module.exports = React.createClass
     min: React.PropTypes.number
     onChange: React.PropTypes.func
 
-  getDefaultProps: ->
-    max: 100
-    min: 0
+  getInitialState: ->
+    'editing-min': false
+    'editing-max': false
 
   trim: (inputValue) ->
-    return Math.max(@props.min, Math.min(@props.max, inputValue))
+    return Math.max(@props.node.min, Math.min(@props.node.max, inputValue))
 
   updateValue:  (evt) ->
     if value = evt.target.value
@@ -33,6 +33,46 @@ module.exports = React.createClass
   selectText: (evt) ->
     evt.target.select()
 
+  renderEditableProperty: (property, classNames) ->
+    swapState = =>
+      @setState "editing-#{property}": not @state["editing-#{property}"], ->
+        focusable = React.findDOMNode(this.refs.focusable)
+        focusable.focus() unless not focusable
+
+    updateProperty = (evt) =>
+      value = parseInt(evt.target.value)
+      if value
+        @props.graphStore.changeNodeProperty property, value
+
+    keyDown = (evt) ->
+      if evt.key is 'Enter'
+        swapState()
+
+    if not @state["editing-#{property}"]
+      (div {className: "half small editable-prop #{classNames}", onClick: swapState}, @props.node[property])
+    else
+      (input {
+        className: "half small editable-prop #{classNames}"
+        type: 'number'
+        value: @props.node[property]
+        onChange: updateProperty
+        onBlur: swapState
+        onKeyDown: keyDown
+        ref: 'focusable'}
+      )
+
+  renderMinAndMax: (node) ->
+    if node.valueDefinedSemiQuantitatively
+      (div {className: "group full"},
+        (label {className: "left half small"}, tr "~NODE-VALUE-EDIT.LOW")
+        (label {className: "right half small"}, tr "~NODE-VALUE-EDIT.HIGH")
+      )
+    else
+      (div {className: "group full"},
+        @renderEditableProperty("min", "left")
+        @renderEditableProperty("max", "right")
+      )
+
   render: ->
     node = @props.node
     (div {className: 'value-inspector'},
@@ -43,8 +83,8 @@ module.exports = React.createClass
             (input {
               className: 'left'
               type: "number",
-              min: "#{@props.min}",
-              max: "#{@props.max}",
+              min: "#{node.min}",
+              max: "#{node.max}",
               value: "#{node.initialValue}",
               onClick: @selectText,
               onChange: @updateValue}
@@ -54,13 +94,12 @@ module.exports = React.createClass
           (input {
             className: "full"
             type: "range",
-            min: "#{@props.min}",
-            max: "#{@props.max}",
+            min: "#{node.min}",
+            max: "#{node.max}",
             value: "#{node.initialValue}",
             onChange: @updateValue}
           )
-          (label {className: "left half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.LOW" else @props.min)
-          (label {className: "right half small"}, if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.HIGH" else @props.max)
+          @renderMinAndMax(node)
         )
         (span {className: "checkbox group full"},
           (span {},
