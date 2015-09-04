@@ -44,6 +44,10 @@ module.exports = React.createClass
       if value
         @props.graphStore.changeNodeProperty property, value
 
+    keyDown = (evt) ->
+      if evt.key is 'Enter'
+        swapState()
+
     if not @state["editing-#{property}"]
       (div {className: "half small editable-prop #{classNames}", onClick: swapState}, @props.node[property])
     else
@@ -53,6 +57,7 @@ module.exports = React.createClass
         value: @props.node[property]
         onChange: updateProperty
         onBlur: swapState
+        onKeyDown: keyDown
         ref: 'focusable'}
       )
 
