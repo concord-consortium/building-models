@@ -8,6 +8,8 @@ module.exports =
 
   "~MENU.SETTINGS": "Advanced Settings …"
 
+  "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
+
   "~NODE.UNTITLED": "Untitled"
   "~NODE-EDIT.TITLE": "Name"
   "~NODE-EDIT.COLOR": "Color"
