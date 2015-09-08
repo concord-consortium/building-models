@@ -1,7 +1,9 @@
 {div, i, span} = React.DOM
 tr = require '../utils/translate'
 
-Dropdown = React.createFactory require './dropdown-view'
+Dropdown    = React.createFactory require './dropdown-view'
+OpenInCodap = React.createFactory require './open-in-codap-view'
+
 module.exports = React.createClass
 
   displayName: 'GlobalNav'
@@ -60,6 +62,7 @@ module.exports = React.createClass
           @state.action
         )
       (div {className: 'global-nav-name-and-help'},
+        (OpenInCodap {})
         (span {className: 'mockup-only'}, @props.username),
         (span {className: 'mockup-only'},
           (i {className: 'fa fa-2x fa-question-circle'})
