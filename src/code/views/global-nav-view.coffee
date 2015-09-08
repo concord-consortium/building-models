@@ -1,23 +1,24 @@
 {div, i, span} = React.DOM
 tr = require '../utils/translate'
 
-Dropdown    = React.createFactory require './dropdown-view'
-OpenInCodap = React.createFactory require './open-in-codap-view'
+Dropdown        = React.createFactory require './dropdown-view'
+OpenInCodap     = React.createFactory require './open-in-codap-view'
+PublicLink      = React.createFactory require './public-link-view'
+ModalGoogleSave = React.createFactory require './modal-google-save-view'
+GoogleFileStore = require '../stores/google-file-store'
 
 module.exports = React.createClass
 
   displayName: 'GlobalNav'
 
-  mixins: [require '../mixins/google-file-interface']
+  mixins: [ GoogleFileStore.mixin ]
 
   getInitialState: ->
-    @getInitialAppViewState
-      dirty: false
-      canUndo: false
-      saved: false
+    dirty: false
+    canUndo: false
+    saved: false
 
   componentDidMount: ->
-    @createGoogleDrive()
     @props.graphStore.addChangeListener @modelChanged
 
   modelChanged: (status) ->
@@ -29,22 +30,22 @@ module.exports = React.createClass
   render: ->
     options = [
       name: tr "~MENU.NEW"
-      action: @newFile
+      action: GoogleFileStore.actions.newFile
     ,
       name: tr "~MENU.OPEN"
-      action: @openFile
+      action: GoogleFileStore.actions.openFile
     ,
       name: tr "~MENU.SAVE"
-      action: @saveFile
+      action: GoogleFileStore.actions.showSaveDialog
     ,
       name: tr "~MENU.SAVE_AS"
       action: false
     ,
       name: tr "~MENU.REVERT_TO_ORIGINAL"
-      action: if @state.canUndo then @revertToOriginal else false
+      action: if @state.canUndo then GoogleFileStore.actions.revertToOriginal else false
     ,
       name: tr "~MENU.REVERT_TO_LAST_SAVE"
-      action: if @state.saved and @state.dirty then @revertToLastSave else false
+      action: if @state.saved and @state.dirty then GoogleFileStore.actions.revertToLastSave else false
     ,
       name: tr '~MENU.SETTINGS'
       action: false
@@ -61,8 +62,20 @@ module.exports = React.createClass
           (i {className: "fa fa-cog fa-spin"})
           @state.action
         )
+      (ModalGoogleSave {
+        showing: @state.showingSaveDialog
+        onSave: GoogleFileStore.actions.saveFile
+        filename: @props.filename
+        isPublic: @state.isPublic
+        onRename: (newName) ->
+          GoogleFileStore.actions.rename(newName)
+        onClose: ->
+          GoogleFileStore.actions.close
+        setIsPublic: GoogleFileStore.actions.setIsPublic
+      })
       (div {className: 'global-nav-name-and-help'},
         (OpenInCodap {})
+        (PublicLink  {})
         (span {className: 'mockup-only'}, @props.username),
         (span {className: 'mockup-only'},
           (i {className: 'fa fa-2x fa-question-circle'})

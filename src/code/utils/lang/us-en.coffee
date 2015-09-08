@@ -5,8 +5,9 @@ module.exports =
   "~MENU.SAVE_AS": "Save as …"
   "~MENU.REVERT_TO_ORIGINAL": "Revert To Original"
   "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save"
-
   "~MENU.SETTINGS": "Advanced Settings …"
+
+  "~GOOGLE_SAVE.TITLE": "Save Document"
 
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
 

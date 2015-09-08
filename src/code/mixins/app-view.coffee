@@ -1,6 +1,7 @@
 Simulation   = require "../models/simulation"
 PaletteStore = require "../stores/palette-store"
 CodapStore   = require "../stores/codap-store"
+GoogleFileStore = require "../stores/google-file-store"
 
 module.exports =
 
@@ -50,9 +51,6 @@ module.exports =
     @setState
       undoRedoShowing: not status.hideUndoRedo
 
-  getData: ->
-    @props.graphStore.toJsonString @state.palette
-
   onNodeChanged: (node, data) ->
     @props.graphStore.changeNode data
 
@@ -91,7 +89,7 @@ module.exports =
     if @props.data?.length > 0
       @props.graphStore.loadData JSON.parse @props.data
     else if @props.url?.length > 0
-      @props.graphStore.loadDataFromUrl @props.url
+      GoogleFileStore.actions.loadAfterAuth(@props.url)
 
   # cross platform undo/redo key-binding ctr-z ctr-y
   _registerUndoRedoKeys: ->

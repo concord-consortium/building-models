@@ -1,7 +1,9 @@
-modal-button()
-  padding 15px
-  label-font(weight:bold, size:15px)
+modal-button($thickness=15px)
+  padding $thickness
+  label-font(weight:bold, size:$thickness)
   color #fff
   background-color #72bfca
   border-radius(10px)
   border 0
+  &:hover
+    background-color darken(#72bfca, 30%)
