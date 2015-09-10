@@ -23,6 +23,7 @@ GoogleFileStore = Reflux.createStore
   init: ->
     @gapiLoaded        = false
     @fileId            = null
+    @lastFilename      = null
     @action            = tr "~FILE.CHECKING_AUTH"
     @isPublic          = false
     @docLink           = null
@@ -85,10 +86,11 @@ GoogleFileStore = Reflux.createStore
       @action = tr "~FILE.UPLOADING"
 
       # if this is a save of an existing file with the same name use the fileid
-      fileId = if filename is GraphStore.store.filename then @fileId else null
+      @fileId = if @lastFilename is filename then @fileId else null
+      @lastFilename = filename
       data = GraphStore.store.toJsonString PaletteStore.store.palette
 
-      GoogleDrive.upload {fileName: filename, fileId: fileId}, data, (err, fileSpec) =>
+      GoogleDrive.upload {fileName: filename, fileId: @fileId}, data, (err, fileSpec) =>
         if err
           alert err
           @action = null
@@ -98,7 +100,7 @@ GoogleFileStore = Reflux.createStore
           @docLink = null
           if @isPublic
             GoogleDrive.makePublic fileSpec.id
-          @docLink = fileSpec.downloadUrl
+          @docLink = fileSpec.webContentLink
           GraphStore.store.setSaved()
         @showingSaveDialog = false
         @notifyChange()
@@ -121,8 +123,12 @@ GoogleFileStore = Reflux.createStore
     @action     = null
     @notifyChange()
     if @pendingLoad
-      GoogleDrive.downloadFromUrl @pendingLoad, (unkown,json) ->
+      authorized = false
+      callback = (ignored,json) ->
         GraphStore.store.loadData json
+
+      # non-authorized request
+      GoogleDrive.downloadFromUrl @pendingLoad, callback, authorized
 
 GoogleDrive = new GoogleDriveIO()
 

@@ -92,18 +92,22 @@ module.exports = class GoogleDriveIO
             fileId: fileSpec.id
           request.execute (file) =>
             if file?.downloadUrl
-              @_downloadFromUrl file.downloadUrl
+              @_downloadFromUrl file.downloadUrl, token, callback
             else
               callback "Unable to get download url"
 
-  downloadFromUrl: (url, callack) ->
-    @authorize @authorized, (err, token) =>
-      @_downloadFromUrl url, token, callack
+  downloadFromUrl: (url, callback, authorize=true) ->
+    if authorize
+      @authorize @authorized, (err, token) =>
+        @_downloadFromUrl url, token, callack
+    else
+      @_downloadFromUrl(url, null, callback)
 
   _downloadFromUrl: (url, token, callback) ->
     xhr = new XMLHttpRequest()
     xhr.open 'GET', url
-    xhr.setRequestHeader 'Authorization', "Bearer #{token.access_token}"
+    if token
+      xhr.setRequestHeader 'Authorization', "Bearer #{token.access_token}"
     xhr.onload = ->
       try
         json = JSON.parse xhr.responseText
@@ -112,7 +116,7 @@ module.exports = class GoogleDriveIO
         return
       callback null, json
     xhr.onerror = ->
-      callback "Unable to download #{file.downloadUrl}"
+      callback "Unable to download #{url}"
     xhr.send()
 
   filePicker: (callback) ->

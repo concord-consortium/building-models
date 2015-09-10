@@ -10,6 +10,7 @@ module.exports =
   "~GOOGLE_SAVE.TITLE": "Save Document"
 
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
+  "~PUBLIC_LINK.OPEN": "Open public link"
 
   "~NODE.UNTITLED": "Untitled"
   "~NODE-EDIT.TITLE": "Name"

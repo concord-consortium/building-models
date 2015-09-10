@@ -9,20 +9,18 @@ module.exports = React.createClass
   mixins: [ GoogleFileStore.mixin ]
 
   getDefaultProps: ->
-    linkTitle: tr 'Open public link'
+    linkTitle: tr '~PUBLIC_LINK.OPEN'
 
   makeDocLink: ->
     oldHash = window.location.hash
-    encodedLink = encodeURIComponent(@state.docLink)
-    if oldHash.length > 0
-      "#{oldHash}&url=#{encodedLink}"
-    else
-      "#url=#{encodedLink}"
+    # Use CORS proxy service… (TBD: This service could dissapear)
+    encodedLink = encodeURIComponent("http://cors.io/?u=#{@state.docLink}")
+    "#url=#{encodedLink}"
 
   render: ->
-    (span {className: 'OpenInCodap'},
+    (span {className: 'link'},
       if @state.isPublic and @state.docLink
         window.location.hash=@makeDocLink()
         link = window.location.toString()
-        (a {href:link}, @props.linkTitle)
+        (a {href:link, target:'_blank'}, @props.linkTitle)
     )
