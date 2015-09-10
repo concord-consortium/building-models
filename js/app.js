@@ -40,7 +40,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/codap-connect":556,"./stores/graph-store":565,"./views/app-view":581}],2:[function(require,module,exports){
+},{"./models/codap-connect":556,"./stores/graph-store":566,"./views/app-view":582}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -55180,7 +55180,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":549}],547:[function(require,module,exports){
+},{"./migration-mixin":550}],547:[function(require,module,exports){
 var Relationship, migration;
 
 Relationship = require('../../models/relationship');
@@ -55226,7 +55226,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":561,"./migration-mixin":549}],548:[function(require,module,exports){
+},{"../../models/relationship":561,"./migration-mixin":550}],548:[function(require,module,exports){
 var Relationship, migration;
 
 Relationship = require('../../models/relationship');
@@ -55246,7 +55246,7 @@ migration = {
     for (i = 0, len = ref.length; i < len; i++) {
       node = ref[i];
       node.data || (node.data = {});
-      results.push(node.data.valueDefinedSemiQuantitatively = false);
+      results.push(node.data.valueDefinedSemiQuantitatively = true);
     }
     return results;
   }
@@ -55256,7 +55256,38 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":561,"./migration-mixin":549}],549:[function(require,module,exports){
+},{"../../models/relationship":561,"./migration-mixin":550}],549:[function(require,module,exports){
+var Relationship, migration;
+
+Relationship = require('../../models/relationship');
+
+migration = {
+  version: 1.3,
+  description: "Adds min and max values for nodes.",
+  date: "2015-09-03",
+  doUpdate: function(data) {
+    this.updateNodes(data);
+    return data;
+  },
+  updateNodes: function(data) {
+    var i, len, node, ref, results;
+    ref = data.nodes;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      node = ref[i];
+      node.data || (node.data = {});
+      node.data.min = 0;
+      results.push(node.data.max = 100);
+    }
+    return results;
+  }
+};
+
+module.exports = _.mixin(migration, require('./migration-mixin'));
+
+
+
+},{"../../models/relationship":561,"./migration-mixin":550}],550:[function(require,module,exports){
 module.exports = {
   needsUpdate: function(data) {
     return (data.version || 0) < this.version;
@@ -55278,10 +55309,10 @@ module.exports = {
 
 
 
-},{}],550:[function(require,module,exports){
+},{}],551:[function(require,module,exports){
 var migrations;
 
-migrations = [require("./01_base"), require("./02_add_relations"), require("./03_add_semi_quant_editing")];
+migrations = [require("./01_base"), require("./02_add_relations"), require("./03_add_semi_quant_editing"), require("./04_add_min_max")];
 
 module.exports = {
   migrations: migrations,
@@ -55307,14 +55338,16 @@ module.exports = {
 
 
 
-},{"./01_base":546,"./02_add_relations":547,"./03_add_semi_quant_editing":548}],551:[function(require,module,exports){
-var CodapStore, PaletteStore, Simulation;
+},{"./01_base":546,"./02_add_relations":547,"./03_add_semi_quant_editing":548,"./04_add_min_max":549}],552:[function(require,module,exports){
+var CodapStore, GoogleFileStore, PaletteStore, Simulation;
 
 Simulation = require("../models/simulation");
 
 PaletteStore = require("../stores/palette-store");
 
 CodapStore = require("../stores/codap-store");
+
+GoogleFileStore = require("../stores/google-file-store");
 
 module.exports = {
   getInitialAppViewState: function(subState) {
@@ -55374,9 +55407,6 @@ module.exports = {
       undoRedoShowing: !status.hideUndoRedo
     });
   },
-  getData: function() {
-    return this.props.graphStore.toJsonString(this.state.palette);
-  },
   onNodeChanged: function(node, data) {
     return this.props.graphStore.changeNode(data);
   },
@@ -55420,7 +55450,7 @@ module.exports = {
     if (((ref = this.props.data) != null ? ref.length : void 0) > 0) {
       return this.props.graphStore.loadData(JSON.parse(this.props.data));
     } else if (((ref1 = this.props.url) != null ? ref1.length : void 0) > 0) {
-      return this.props.graphStore.loadDataFromUrl(this.props.url);
+      return GoogleFileStore.actions.loadAfterAuth(this.props.url);
     }
   },
   _registerUndoRedoKeys: function() {
@@ -55459,7 +55489,7 @@ module.exports = {
 
 
 
-},{"../models/simulation":563,"../stores/codap-store":564,"../stores/palette-store":569}],552:[function(require,module,exports){
+},{"../models/simulation":563,"../stores/codap-store":564,"../stores/google-file-store":565,"../stores/palette-store":570}],553:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -55498,131 +55528,7 @@ module.exports = {
 
 
 
-},{}],553:[function(require,module,exports){
-var GoogleDriveIO, tr;
-
-GoogleDriveIO = require('../utils/google-drive-io');
-
-tr = require('../utils/translate');
-
-module.exports = {
-  getInitialAppViewState: function(subState) {
-    var mixinState;
-    mixinState = {
-      gapiLoaded: false,
-      fileId: null,
-      action: tr("~FILE.CHECKING_AUTH")
-    };
-    return _.extend(mixinState, subState);
-  },
-  createGoogleDrive: function() {
-    var waitForAuthCheck;
-    this.googleDrive = new GoogleDriveIO();
-    waitForAuthCheck = (function(_this) {
-      return function() {
-        var ref;
-        if (typeof gapi !== "undefined" && gapi !== null ? (ref = gapi.auth) != null ? ref.authorize : void 0 : void 0) {
-          return _this.googleDrive.authorize(true, function() {
-            return _this.setState({
-              gapiLoaded: true,
-              action: null
-            });
-          });
-        } else {
-          return setTimeout(waitForAuthCheck, 10);
-        }
-      };
-    })(this);
-    return waitForAuthCheck();
-  },
-  newFile: function() {
-    if (confirm(tr("~FILE.CONFIRM"))) {
-      this.props.graphStore.deleteAll();
-      return this.setState({
-        fileId: null
-      });
-    }
-  },
-  openFile: function() {
-    return this.googleDrive.filePicker((function(_this) {
-      return function(err, fileSpec) {
-        if (err) {
-          return alert(err);
-        } else if (fileSpec) {
-          _this.setState({
-            action: tr("~FILE.DOWNLOADING")
-          });
-          return _this.googleDrive.download(fileSpec, function(err, data) {
-            if (err) {
-              alert(err);
-              return _this.setState({
-                action: null
-              });
-            } else {
-              _this.setState({
-                fileId: fileSpec.id,
-                action: null
-              });
-              _this.props.graphStore.deleteAll();
-              return _this.props.graphStore.loadData(data);
-            }
-          });
-        }
-      };
-    })(this));
-  },
-  rename: function() {
-    var filename;
-    filename = $.trim((prompt(tr("~FILE.FILENAME"), this.props.filename)) || '');
-    if (filename.length > 0) {
-      this.props.graphStore.setFilename(filename);
-    }
-    return filename;
-  },
-  saveFile: function() {
-    var fileId, filename;
-    filename = this.rename();
-    if (filename.length > 0) {
-      this.setState({
-        action: tr("~FILE.UPLOADING")
-      });
-      fileId = filename === this.props.filename ? this.state.fileId : null;
-      return this.googleDrive.upload({
-        fileName: filename,
-        fileId: fileId
-      }, this.props.getData(), (function(_this) {
-        return function(err, fileSpec) {
-          if (err) {
-            alert(err);
-            return _this.setState({
-              action: null
-            });
-          } else {
-            _this.setState({
-              fileId: fileSpec.id,
-              action: null
-            });
-            return _this.props.graphStore.setSaved();
-          }
-        };
-      })(this));
-    }
-  },
-  revertToOriginal: function() {
-    if (confirm(tr("~FILE.CONFIRM_ORIGINAL_REVERT"))) {
-      return this.props.graphStore.revertToOriginal();
-    }
-  },
-  revertToLastSave: function() {
-    if (confirm(tr("~FILE.CONFIRM_LAST_SAVE_REVERT"))) {
-      return this.props.graphStore.revertToLastSave();
-    }
-  }
-};
-
-
-
-},{"../utils/google-drive-io":572,"../utils/translate":579}],554:[function(require,module,exports){
+},{}],554:[function(require,module,exports){
 var ImageDialogStore, PreviewImage, hasValidImageExtension;
 
 PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
@@ -55653,7 +55559,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":566,"../utils/has-valid-image-extension":573,"../views/preview-image-dialog-view":611}],555:[function(require,module,exports){
+},{"../stores/image-dialog-store":567,"../utils/has-valid-image-extension":574,"../views/preview-image-dialog-view":614}],555:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -55683,7 +55589,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":579}],556:[function(require,module,exports){
+},{"../utils/translate":580}],556:[function(require,module,exports){
 var CodapConnect, CodapStore, IframePhoneRpcEndpoint, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -55896,7 +55802,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../stores/codap-store":564,"../stores/graph-store":565,"../stores/palette-store":569,"../utils/translate":579,"iframe-phone":167}],557:[function(require,module,exports){
+},{"../stores/codap-store":564,"../stores/graph-store":566,"../stores/palette-store":570,"../utils/translate":580,"iframe-phone":167}],557:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -56027,6 +55933,8 @@ module.exports = Node = (function(superClass) {
         title: "untitled",
         image: null,
         initialValue: 50,
+        min: 0,
+        max: 100,
         isAccumulator: false,
         valueDefinedSemiQuantitatively: false
       };
@@ -56040,6 +55948,12 @@ module.exports = Node = (function(superClass) {
     if (this.initialValue == null) {
       this.initialValue = 50;
     }
+    if (this.min == null) {
+      this.min = 0;
+    }
+    if (this.max == null) {
+      this.max = 100;
+    }
     if (this.isAccumulator == null) {
       this.isAccumulator = false;
     }
@@ -56047,7 +55961,7 @@ module.exports = Node = (function(superClass) {
       this.color = Colors[0].value;
     }
     if (this.valueDefinedSemiQuantitatively == null) {
-      this.valueDefinedSemiQuantitatively = false;
+      this.valueDefinedSemiQuantitatively = true;
     }
   }
 
@@ -56133,6 +56047,11 @@ module.exports = Node = (function(superClass) {
     return _.without(visitedNodes, this);
   };
 
+  Node.prototype.normalizeValues = function() {
+    this.max = Math.max(this.max, this.min);
+    return this.initialValue = Math.max(this.min, Math.min(this.max, this.initialValue));
+  };
+
   Node.prototype.toExport = function() {
     return {
       data: {
@@ -56141,6 +56060,8 @@ module.exports = Node = (function(superClass) {
         y: this.y,
         image: this.image,
         initialValue: this.initialValue,
+        min: this.min,
+        max: this.max,
         isAccumulator: this.isAccumulator,
         valueDefinedSemiQuantitatively: this.valueDefinedSemiQuantitatively
       },
@@ -56158,7 +56079,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":570,"../utils/translate":579,"./graph-primitive":557}],560:[function(require,module,exports){
+},{"../utils/colors":571,"../utils/translate":580,"./graph-primitive":557}],560:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -56255,7 +56176,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":579,"./relationship":561}],561:[function(require,module,exports){
+},{"../utils/translate":580,"./relationship":561}],561:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -56327,7 +56248,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":579,"mathjs":168}],562:[function(require,module,exports){
+},{"../utils/translate":580,"mathjs":168}],562:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, tr;
 
 Importer = require('../utils/importer');
@@ -56503,7 +56424,7 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":574,"../utils/translate":579,"./link":558,"./node":559}],563:[function(require,module,exports){
+},{"../utils/importer":575,"../utils/translate":580,"./link":558,"./node":559}],563:[function(require,module,exports){
 var IntegrationFunction, Simulation;
 
 IntegrationFunction = function(t, timeStep) {
@@ -56703,6 +56624,195 @@ module.exports = {
 
 
 },{}],565:[function(require,module,exports){
+var GoogleDrive, GoogleDriveIO, GoogleFileActions, GoogleFileStore, GraphStore, PaletteStore, mixin, stateFields, tr, waitForAuthCheck;
+
+GoogleDriveIO = require('../utils/google-drive-io');
+
+GraphStore = require('./graph-store');
+
+PaletteStore = require('./palette-store');
+
+tr = require('../utils/translate');
+
+GoogleFileActions = Reflux.createActions(["showSaveDialog", "newFile", "openFile", "rename", "setIsPublic", "saveFile", "close", "revertToOriginal", "revertToLastSave", "connectToApi", "loadAfterAuth"]);
+
+stateFields = ['gapiLoaded', 'fileId', 'action', 'isPublic', 'docLink', 'showingSaveDialog'];
+
+GoogleFileStore = Reflux.createStore({
+  listenables: [GoogleFileActions],
+  init: function() {
+    this.gapiLoaded = false;
+    this.fileId = null;
+    this.lastFilename = null;
+    this.action = tr("~FILE.CHECKING_AUTH");
+    this.isPublic = false;
+    this.docLink = null;
+    return this.showingSaveDialog = false;
+  },
+  notifyChange: function() {
+    return this.trigger({
+      gapiLoaded: this.gapiLoaded,
+      fileId: this.fileId,
+      action: this.action,
+      isPublic: this.isPublic,
+      docLink: this.docLink,
+      showingSaveDialog: this.showingSaveDialog
+    });
+  },
+  onShowSaveDialog: function() {
+    this.showingSaveDialog = true;
+    return this.notifyChange();
+  },
+  onNewFile: function() {
+    if (confirm(tr("~FILE.CONFIRM"))) {
+      GraphStore.store.deleteAll();
+      this.fileId = null;
+      return this.notifyChange();
+    }
+  },
+  onClose: function() {
+    this.showingSaveDialog = false;
+    return this.notifyChange();
+  },
+  onOpenFile: function() {
+    return GoogleDrive.filePicker((function(_this) {
+      return function(err, fileSpec) {
+        if (err) {
+          return alert(err);
+        } else if (fileSpec) {
+          _this.action = tr("~FILE.DOWNLOADING");
+          return GoogleDrive.download(fileSpec, function(err, data) {
+            if (err) {
+              alert(err);
+              return _this.action = null;
+            } else {
+              _this.fileId = fileSpec.id;
+              _this.action = null;
+              _this.notifyChange();
+              GraphStore.store.deleteAll();
+              return GraphStore.store.loadData(data);
+            }
+          });
+        }
+      };
+    })(this));
+  },
+  onRename: function(filename) {
+    if (filename.length > 0) {
+      GraphStore.store.setFilename(filename);
+      this.notifyChange();
+    }
+    return filename;
+  },
+  onSetIsPublic: function(isIt) {
+    this.isPublic = isIt;
+    return this.notifyChange();
+  },
+  onSaveFile: function() {
+    var data, filename;
+    filename = GraphStore.store.filename;
+    if (filename.length > 0) {
+      this.action = tr("~FILE.UPLOADING");
+      this.fileId = this.lastFilename === filename ? this.fileId : null;
+      this.lastFilename = filename;
+      data = GraphStore.store.toJsonString(PaletteStore.store.palette);
+      return GoogleDrive.upload({
+        fileName: filename,
+        fileId: this.fileId
+      }, data, (function(_this) {
+        return function(err, fileSpec) {
+          if (err) {
+            alert(err);
+            _this.action = null;
+          } else {
+            _this.fileId = fileSpec.id;
+            _this.action = null;
+            _this.docLink = null;
+            if (_this.isPublic) {
+              GoogleDrive.makePublic(fileSpec.id);
+            }
+            _this.docLink = fileSpec.webContentLink;
+            GraphStore.store.setSaved();
+          }
+          _this.showingSaveDialog = false;
+          return _this.notifyChange();
+        };
+      })(this));
+    }
+  },
+  onRevertToOriginal: function() {
+    if (confirm(tr("~FILE.CONFIRM_ORIGINAL_REVERT"))) {
+      GraphStore.store.revertToOriginal();
+      return this.notifyChange();
+    }
+  },
+  onRevertToLastSave: function() {
+    if (confirm(tr("~FILE.CONFIRM_LAST_SAVE_REVERT"))) {
+      GraphStore.store.revertToLastSave();
+      return this.notifyChange();
+    }
+  },
+  onLoadAfterAuth: function(url) {
+    return this.pendingLoad = url;
+  },
+  onConnectToApi: function() {
+    var authorized, callback;
+    this.gapiLoaded = true;
+    this.action = null;
+    this.notifyChange();
+    if (this.pendingLoad) {
+      authorized = false;
+      callback = function(ignored, json) {
+        return GraphStore.store.loadData(json);
+      };
+      return GoogleDrive.downloadFromUrl(this.pendingLoad, callback, authorized);
+    }
+  }
+});
+
+GoogleDrive = new GoogleDriveIO();
+
+waitForAuthCheck = function() {
+  var ref;
+  if (typeof gapi !== "undefined" && gapi !== null ? (ref = gapi.auth) != null ? ref.authorize : void 0 : void 0) {
+    return GoogleDrive.authorize(true, function() {
+      return GoogleFileActions.connectToApi();
+    });
+  } else {
+    return setTimeout(waitForAuthCheck, 10);
+  }
+};
+
+waitForAuthCheck();
+
+mixin = {
+  getInitialState: function() {
+    return {
+      gapiLoaded: false,
+      fileId: null,
+      action: tr("~FILE.CHECKING_AUTH"),
+      isPublic: false,
+      docLink: null,
+      showingSaveDialog: false
+    };
+  },
+  componentDidMount: function() {
+    return GoogleFileStore.listen(this.onGoogleChange);
+  },
+  onGoogleChange: function(newData) {
+    return this.setState(_.clone(newData));
+  }
+};
+
+module.exports = {
+  actions: GoogleFileActions,
+  store: GoogleFileStore,
+  mixin: mixin
+};
+
+
+
+},{"../utils/google-drive-io":573,"../utils/translate":580,"./graph-store":566,"./palette-store":570}],566:[function(require,module,exports){
 var DiagramNode, GraphStore, Importer, Link, Migrations, PaletteDeleteStore, PaletteStore, SelectionManager, UndoRedo, mixin, tr;
 
 Importer = require('../utils/importer');
@@ -56988,6 +57098,8 @@ GraphStore = Reflux.createStore({
         image: node.image,
         color: node.color,
         initialValue: node.initialValue,
+        min: node.min,
+        max: node.max,
         isAccumulator: node.isAccumulator,
         valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
       };
@@ -57008,7 +57120,7 @@ GraphStore = Reflux.createStore({
   _changeNode: function(node, data) {
     var i, key, len, ref;
     log.info("Change for " + node.title);
-    ref = ['title', 'image', 'color', 'initialValue', 'isAccumulator', 'valueDefinedSemiQuantitatively'];
+    ref = ['title', 'image', 'color', 'initialValue', 'min', 'max', 'isAccumulator', 'valueDefinedSemiQuantitatively'];
     for (i = 0, len = ref.length; i < len; i++) {
       key = ref[i];
       if (data.hasOwnProperty(key)) {
@@ -57016,7 +57128,14 @@ GraphStore = Reflux.createStore({
         node[key] = data[key];
       }
     }
+    node.normalizeValues();
     return this._notifyNodeChanged(node);
+  },
+  changeNodeProperty: function(property, value, node) {
+    var data;
+    data = {};
+    data[property] = value;
+    return this.changeNode(data, node);
   },
   changeNodeWithKey: function(key, data) {
     var node;
@@ -57235,7 +57354,7 @@ module.exports = {
 
 
 
-},{"../data/migrations/migrations":550,"../models/link":558,"../models/node":559,"../models/selection-manager":562,"../stores/palette-delete-dialog-store":568,"../stores/palette-store":569,"../utils/importer":574,"../utils/translate":579,"../utils/undo-redo":580}],566:[function(require,module,exports){
+},{"../data/migrations/migrations":551,"../models/link":558,"../models/node":559,"../models/selection-manager":562,"../stores/palette-delete-dialog-store":569,"../stores/palette-store":570,"../utils/importer":575,"../utils/translate":580,"../utils/undo-redo":581}],567:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -57360,7 +57479,7 @@ module.exports = {
 
 
 
-},{"./palette-store":569}],567:[function(require,module,exports){
+},{"./palette-store":570}],568:[function(require,module,exports){
 var GraphStore, PaletteStore, mixin, nodeActions, nodeStore;
 
 PaletteStore = require('./palette-store');
@@ -57439,7 +57558,7 @@ module.exports = {
 
 
 
-},{"./graph-store":565,"./palette-store":569}],568:[function(require,module,exports){
+},{"./graph-store":566,"./palette-store":570}],569:[function(require,module,exports){
 var PaletteStore, UndoRedo, listenerMixin, paletteDialogActions, store;
 
 PaletteStore = require('./palette-store');
@@ -57560,7 +57679,7 @@ module.exports = {
 
 
 
-},{"../utils/undo-redo":580,"./nodes-store":567,"./palette-store":569}],569:[function(require,module,exports){
+},{"../utils/undo-redo":581,"./nodes-store":568,"./palette-store":570}],570:[function(require,module,exports){
 var UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage;
 
 resizeImage = require('../utils/resize-image');
@@ -57793,7 +57912,7 @@ window.PaletteStore = module.exports;
 
 
 
-},{"../data/initial-palette":543,"../data/internal-library":544,"../utils/resize-image":578,"../utils/undo-redo":580}],570:[function(require,module,exports){
+},{"../data/initial-palette":543,"../data/internal-library":544,"../utils/resize-image":579,"../utils/undo-redo":581}],571:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -57813,7 +57932,7 @@ module.exports = [
 
 
 
-},{"./translate":579}],571:[function(require,module,exports){
+},{"./translate":580}],572:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -57849,7 +57968,7 @@ module.exports = function(e, callback) {
     }
     return results;
   } else {
-    url = e.dataTransfer.getData('URL');
+    url = e.dataTransfer.GraphStore('URL');
     if (hasValidImageExtension(url)) {
       return callback({
         name: '',
@@ -57866,7 +57985,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":573,"./resize-image":578}],572:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":574,"./resize-image":579}],573:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -57968,44 +58087,85 @@ module.exports = GoogleDriveIO = (function() {
     })(this));
   };
 
-  GoogleDriveIO.prototype.download = function(fileSpec, callback) {
-    return this.authorize(this.authorized, function(err, token) {
-      if (err) {
-        return callback(err);
-      } else {
-        return gapi.client.load('drive', 'v2', function() {
-          var request;
-          request = gapi.client.drive.files.get({
-            fileId: fileSpec.id
-          });
-          return request.execute(function(file) {
-            var xhr;
-            if (file != null ? file.downloadUrl : void 0) {
-              xhr = new XMLHttpRequest();
-              xhr.open('GET', file.downloadUrl);
-              xhr.setRequestHeader('Authorization', "Bearer " + token.access_token);
-              xhr.onload = function() {
-                var e, json;
-                try {
-                  json = JSON.parse(xhr.responseText);
-                } catch (_error) {
-                  e = _error;
-                  callback(e);
-                  return;
-                }
-                return callback(null, json);
-              };
-              xhr.onerror = function() {
-                return callback("Unable to download " + file.downloadUrl);
-              };
-              return xhr.send();
-            } else {
-              return callback("Unable to get download url");
-            }
-          });
-        });
+  GoogleDriveIO.prototype.makePublic = function(fileId) {
+    var perms, request;
+    perms = {
+      'value': '',
+      'type': 'anyone',
+      'role': 'reader'
+    };
+    request = gapi.client.drive.permissions.insert({
+      'fileId': fileId,
+      'resource': perms
+    });
+    return request.execute(function(resp) {
+      if (resp.code && resp.code !== 200) {
+        return alert("there was a problem sharing your document.");
       }
     });
+  };
+
+  GoogleDriveIO.prototype.download = function(fileSpec, callback) {
+    return this.authorize(this.authorized, (function(_this) {
+      return function(err, token) {
+        if (err) {
+          return callback(err);
+        } else {
+          return gapi.client.load('drive', 'v2', function() {
+            var request;
+            request = gapi.client.drive.files.get({
+              fileId: fileSpec.id
+            });
+            return request.execute(function(file) {
+              if (file != null ? file.downloadUrl : void 0) {
+                return _this._downloadFromUrl(file.downloadUrl, token, callback);
+              } else {
+                return callback("Unable to get download url");
+              }
+            });
+          });
+        }
+      };
+    })(this));
+  };
+
+  GoogleDriveIO.prototype.downloadFromUrl = function(url, callback, authorize) {
+    if (authorize == null) {
+      authorize = true;
+    }
+    if (authorize) {
+      return this.authorize(this.authorized, (function(_this) {
+        return function(err, token) {
+          return _this._downloadFromUrl(url, token, callack);
+        };
+      })(this));
+    } else {
+      return this._downloadFromUrl(url, null, callback);
+    }
+  };
+
+  GoogleDriveIO.prototype._downloadFromUrl = function(url, token, callback) {
+    var xhr;
+    xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    if (token) {
+      xhr.setRequestHeader('Authorization', "Bearer " + token.access_token);
+    }
+    xhr.onload = function() {
+      var e, json;
+      try {
+        json = JSON.parse(xhr.responseText);
+      } catch (_error) {
+        e = _error;
+        callback(e);
+        return;
+      }
+      return callback(null, json);
+    };
+    xhr.onerror = function() {
+      return callback("Unable to download " + url);
+    };
+    return xhr.send();
   };
 
   GoogleDriveIO.prototype.filePicker = function(callback) {
@@ -58033,7 +58193,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],573:[function(require,module,exports){
+},{}],574:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -58052,7 +58212,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":579}],574:[function(require,module,exports){
+},{"./translate":580}],575:[function(require,module,exports){
 var Migrations, MySystemImporter;
 
 Migrations = require('../data/migrations/migrations');
@@ -58095,7 +58255,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{"../data/migrations/migrations":550}],575:[function(require,module,exports){
+},{"../data/migrations/migrations":551}],576:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -58303,7 +58463,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],576:[function(require,module,exports){
+},{}],577:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -58312,6 +58472,10 @@ module.exports = {
   "~MENU.REVERT_TO_ORIGINAL": "Revert To Original",
   "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save",
   "~MENU.SETTINGS": "Advanced Settings …",
+  "~GOOGLE_SAVE.TITLE": "Save Document",
+  "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)",
+  "~OPEN_IN_CODAP.TITLE": "Open in CODAP",
+  "~PUBLIC_LINK.OPEN": "Open public link",
   "~NODE.UNTITLED": "Untitled",
   "~NODE-EDIT.TITLE": "Name",
   "~NODE-EDIT.COLOR": "Color",
@@ -58401,7 +58565,7 @@ module.exports = {
 
 
 
-},{}],577:[function(require,module,exports){
+},{}],578:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -58438,7 +58602,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],578:[function(require,module,exports){
+},{}],579:[function(require,module,exports){
 module.exports = function(src, callback) {
   var fail, img, maxHeight, maxWidth;
   fail = function() {
@@ -58480,7 +58644,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],579:[function(require,module,exports){
+},{}],580:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -58513,7 +58677,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":576}],580:[function(require,module,exports){
+},{"./lang/us-en":577}],581:[function(require,module,exports){
 var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances, internalEndCommandBatchAction;
 
 CodapConnect = require('../models/codap-connect');
@@ -58792,7 +58956,7 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":556}],581:[function(require,module,exports){
+},{"../models/codap-connect":556}],582:[function(require,module,exports){
 var DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref;
 
 Reflux = require('reflux');
@@ -58847,7 +59011,7 @@ module.exports = React.createClass({
       filename: this.state.filename,
       username: this.state.username,
       graphStore: this.props.graphStore,
-      getData: this.getData,
+      GraphStore: this.GraphStore,
       runSimulation: this.runSimulation
     }) : void 0, div({
       className: 'action-bar'
@@ -58882,7 +59046,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":551,"../stores/image-dialog-store":566,"./document-actions-view":583,"./global-nav-view":586,"./graph-view":587,"./image-browser-view":588,"./inspector-panel-view":594,"./modal-palette-delete-view":599,"./node-well-view":605,"./placeholder-view":610,"reflux":523}],582:[function(require,module,exports){
+},{"../mixins/app-view":552,"../stores/image-dialog-store":567,"./document-actions-view":584,"./global-nav-view":587,"./graph-view":588,"./image-browser-view":589,"./inspector-panel-view":595,"./modal-palette-delete-view":601,"./node-well-view":607,"./placeholder-view":613,"reflux":523}],583:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -58964,7 +59128,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":570,"../utils/translate":579}],583:[function(require,module,exports){
+},{"../utils/colors":571,"../utils/translate":580}],584:[function(require,module,exports){
 var CodapStore, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
@@ -59030,7 +59194,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/codap-store":564,"../utils/translate":579}],584:[function(require,module,exports){
+},{"../stores/codap-store":564,"../utils/translate":580}],585:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -59135,7 +59299,7 @@ module.exports = React.createClass({
 
 
 
-},{}],585:[function(require,module,exports){
+},{}],586:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -59190,8 +59354,8 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":571,"../utils/translate":579}],586:[function(require,module,exports){
-var Dropdown, div, i, ref, span, tr;
+},{"../utils/drop-image-handler":572,"../utils/translate":580}],587:[function(require,module,exports){
+var Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, PublicLink, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
 
@@ -59199,18 +59363,25 @@ tr = require('../utils/translate');
 
 Dropdown = React.createFactory(require('./dropdown-view'));
 
+OpenInCodap = React.createFactory(require('./open-in-codap-view'));
+
+PublicLink = React.createFactory(require('./public-link-view'));
+
+ModalGoogleSave = React.createFactory(require('./modal-google-save-view'));
+
+GoogleFileStore = require('../stores/google-file-store');
+
 module.exports = React.createClass({
   displayName: 'GlobalNav',
-  mixins: [require('../mixins/google-file-interface')],
+  mixins: [GoogleFileStore.mixin],
   getInitialState: function() {
-    return this.getInitialAppViewState({
+    return {
       dirty: false,
       canUndo: false,
       saved: false
-    });
+    };
   },
   componentDidMount: function() {
-    this.createGoogleDrive();
     return this.props.graphStore.addChangeListener(this.modelChanged);
   },
   modelChanged: function(status) {
@@ -59225,22 +59396,22 @@ module.exports = React.createClass({
     options = [
       {
         name: tr("~MENU.NEW"),
-        action: this.newFile
+        action: GoogleFileStore.actions.newFile
       }, {
         name: tr("~MENU.OPEN"),
-        action: this.openFile
+        action: GoogleFileStore.actions.openFile
       }, {
         name: tr("~MENU.SAVE"),
-        action: this.saveFile
+        action: GoogleFileStore.actions.showSaveDialog
       }, {
         name: tr("~MENU.SAVE_AS"),
         action: false
       }, {
         name: tr("~MENU.REVERT_TO_ORIGINAL"),
-        action: this.state.canUndo ? this.revertToOriginal : false
+        action: this.state.canUndo ? GoogleFileStore.actions.revertToOriginal : false
       }, {
         name: tr("~MENU.REVERT_TO_LAST_SAVE"),
-        action: this.state.saved && this.state.dirty ? this.revertToLastSave : false
+        action: this.state.saved && this.state.dirty ? GoogleFileStore.actions.revertToLastSave : false
       }, {
         name: tr('~MENU.SETTINGS'),
         action: false
@@ -59256,9 +59427,21 @@ module.exports = React.createClass({
       className: 'global-nav-file-status'
     }, 'Unsaved') : void 0), this.state.action ? div({}, i({
       className: "fa fa-cog fa-spin"
-    }), this.state.action) : void 0, div({
+    }), this.state.action) : void 0, ModalGoogleSave({
+      showing: this.state.showingSaveDialog,
+      onSave: GoogleFileStore.actions.saveFile,
+      filename: this.props.filename,
+      isPublic: this.state.isPublic,
+      onRename: function(newName) {
+        return GoogleFileStore.actions.rename(newName);
+      },
+      onClose: function() {
+        return GoogleFileStore.actions.close;
+      },
+      setIsPublic: GoogleFileStore.actions.setIsPublic
+    }), div({
       className: 'global-nav-name-and-help'
-    }, span({
+    }, OpenInCodap({}), PublicLink({}), span({
       className: 'mockup-only'
     }, this.props.username), span({
       className: 'mockup-only'
@@ -59270,7 +59453,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/google-file-interface":553,"../utils/translate":579,"./dropdown-view":584}],587:[function(require,module,exports){
+},{"../stores/google-file-store":565,"../utils/translate":580,"./dropdown-view":585,"./modal-google-save-view":600,"./open-in-codap-view":608,"./public-link-view":615}],588:[function(require,module,exports){
 var DiagramToolkit, ImageDialogStore, Importer, LinkStore, Node, PaletteStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -59562,7 +59745,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/graph-store":565,"../stores/image-dialog-store":566,"../stores/palette-store":569,"../utils/drop-image-handler":571,"../utils/importer":574,"../utils/js-plumb-diagram-toolkit":575,"../utils/translate":579,"./node-view":604}],588:[function(require,module,exports){
+},{"../stores/graph-store":566,"../stores/image-dialog-store":567,"../stores/palette-store":570,"../utils/drop-image-handler":572,"../utils/importer":575,"../utils/js-plumb-diagram-toolkit":576,"../utils/translate":580,"./node-view":606}],589:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -59621,7 +59804,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":566,"../stores/palette-store":569,"../utils/translate":579,"./image-link-dialog-view":589,"./image-metadata-view":590,"./image-my-computer-dialog-view":591,"./image-search-dialog-view":593,"./modal-tabbed-dialog-view":600,"./tabbed-panel-view":613}],589:[function(require,module,exports){
+},{"../stores/image-dialog-store":567,"../stores/palette-store":570,"../utils/translate":580,"./image-link-dialog-view":590,"./image-metadata-view":591,"./image-my-computer-dialog-view":592,"./image-search-dialog-view":594,"./modal-tabbed-dialog-view":602,"./tabbed-panel-view":617}],590:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -59670,7 +59853,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":566,"../utils/translate":579,"./dropzone-view":585}],590:[function(require,module,exports){
+},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":567,"../utils/translate":580,"./dropzone-view":586}],591:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -59758,7 +59941,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":545,"../stores/image-dialog-store":566,"../utils/translate":579}],591:[function(require,module,exports){
+},{"../data/licenses":545,"../stores/image-dialog-store":567,"../utils/translate":580}],592:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -59812,7 +59995,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":566,"../utils/translate":579,"./dropzone-view":585}],592:[function(require,module,exports){
+},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":567,"../utils/translate":580,"./dropzone-view":586}],593:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -59900,7 +60083,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":569,"../utils/translate":579,"./palette-add-view":606}],593:[function(require,module,exports){
+},{"../stores/palette-store":570,"../utils/translate":580,"./palette-add-view":609}],594:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -60112,7 +60295,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":566,"../utils/open-clipart":577,"../utils/translate":579}],594:[function(require,module,exports){
+},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":567,"../utils/open-clipart":578,"../utils/translate":580}],595:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, PaletteInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -60338,7 +60521,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":595,"./link-value-inspector-view":597,"./node-inspector-view":602,"./node-value-inspector-view":603,"./palette-inspector-view":608,"./relation-inspector-view":612}],595:[function(require,module,exports){
+},{"./link-inspector-view":596,"./link-value-inspector-view":598,"./node-inspector-view":604,"./node-value-inspector-view":605,"./palette-inspector-view":611,"./relation-inspector-view":616}],596:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -60394,7 +60577,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":579}],596:[function(require,module,exports){
+},{"../utils/translate":580}],597:[function(require,module,exports){
 var RelationFactory, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
@@ -60503,7 +60686,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/relation-factory":560,"../utils/translate":579}],597:[function(require,module,exports){
+},{"../models/relation-factory":560,"../utils/translate":580}],598:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -60521,7 +60704,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":579}],598:[function(require,module,exports){
+},{"../utils/translate":580}],599:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -60554,7 +60737,86 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":601}],599:[function(require,module,exports){
+},{"./modal-view":603}],600:[function(require,module,exports){
+var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
+
+ModalDialog = React.createFactory(require('./modal-dialog-view'));
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a, input = ref.input, label = ref.label, span = ref.span, button = ref.button;
+
+module.exports = React.createClass({
+  displayName: 'ModalGoogleSave',
+  onSave: function() {
+    var base, base1;
+    if (typeof (base = this.props).onRename === "function") {
+      base.onRename(this.state.filename);
+    }
+    if (typeof (base1 = this.props).setIsPublic === "function") {
+      base1.setIsPublic(this.state.isPublic);
+    }
+    this.props.onSave();
+    return this.props.onClose();
+  },
+  getInitialState: function() {
+    return {
+      filename: this.props.filename,
+      isPublic: this.props.isPublic
+    };
+  },
+  handleFilenameChange: function(e) {
+    return this.setState({
+      filename: e.target.value
+    });
+  },
+  handlePublicChange: function(e) {
+    return this.setState({
+      isPublic: e.target.checked
+    });
+  },
+  render: function() {
+    var title;
+    return div({
+      className: 'modal-google-save'
+    }, this.props.showing ? (title = tr("~GOOGLE_SAVE.TITLE"), ModalDialog({
+      title: title,
+      close: this.props.onClose
+    }, div({
+      className: "google-save-panel"
+    }, div({
+      className: 'filename'
+    }, label({}, 'Name'), input({
+      name: "fileName",
+      ref: "fileName",
+      value: this.state.filename,
+      type: 'text',
+      placeholder: tr('~GOOGLE_SAVE.MAKE_PUBLIC'),
+      onChange: this.handleFilenameChange
+    })), div({
+      className: 'make-public'
+    }, input({
+      type: 'checkbox',
+      value: 'public',
+      checked: this.state.isPublic,
+      onChange: this.handlePublicChange
+    }), label({}, tr('~GOOGLE_SAVE.MAKE_PUBLIC'))), div({
+      className: 'buttons'
+    }, button({
+      name: 'cancel',
+      value: 'Cancel',
+      onClick: this.props.onClose
+    }, 'Cancel'), button({
+      name: 'save',
+      value: 'Save',
+      onClick: this.onSave
+    }, 'Save'))))) : void 0);
+  }
+});
+
+
+
+},{"../utils/translate":580,"./modal-dialog-view":599}],601:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -60596,7 +60858,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":567,"../stores/palette-delete-dialog-store":568,"../utils/translate":579,"./modal-dialog-view":598,"./palette-delete-view":607}],600:[function(require,module,exports){
+},{"../stores/nodes-store":568,"../stores/palette-delete-dialog-store":569,"../utils/translate":580,"./modal-dialog-view":599,"./palette-delete-view":610}],602:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -60617,7 +60879,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":598,"./tabbed-panel-view":613}],601:[function(require,module,exports){
+},{"./modal-dialog-view":599,"./tabbed-panel-view":617}],603:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -60649,7 +60911,7 @@ module.exports = React.createClass({
 
 
 
-},{}],602:[function(require,module,exports){
+},{}],604:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -60735,7 +60997,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":555,"../utils/translate":579,"./color-picker-view":582,"./image-picker-view":592}],603:[function(require,module,exports){
+},{"../mixins/node-title":555,"../utils/translate":580,"./color-picker-view":583,"./image-picker-view":593}],605:[function(require,module,exports){
 var div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -60749,14 +61011,14 @@ module.exports = React.createClass({
     min: React.PropTypes.number,
     onChange: React.PropTypes.func
   },
-  getDefaultProps: function() {
+  getInitialState: function() {
     return {
-      max: 100,
-      min: 0
+      'editing-min': false,
+      'editing-max': false
     };
   },
   trim: function(inputValue) {
-    return Math.max(this.props.min, Math.min(this.props.max, inputValue));
+    return Math.max(this.props.node.min, Math.min(this.props.node.max, inputValue));
   },
   updateValue: function(evt) {
     var value;
@@ -60782,6 +61044,70 @@ module.exports = React.createClass({
   selectText: function(evt) {
     return evt.target.select();
   },
+  renderEditableProperty: function(property, classNames) {
+    var keyDown, swapState, updateProperty;
+    swapState = (function(_this) {
+      return function() {
+        var obj;
+        return _this.setState((
+          obj = {},
+          obj["editing-" + property] = !_this.state["editing-" + property],
+          obj
+        ), function() {
+          var focusable;
+          focusable = React.findDOMNode(this.refs.focusable);
+          if (!!focusable) {
+            return focusable.focus();
+          }
+        });
+      };
+    })(this);
+    updateProperty = (function(_this) {
+      return function(evt) {
+        var value;
+        value = parseInt(evt.target.value);
+        if (value) {
+          return _this.props.graphStore.changeNodeProperty(property, value);
+        }
+      };
+    })(this);
+    keyDown = function(evt) {
+      if (evt.key === 'Enter') {
+        return swapState();
+      }
+    };
+    if (!this.state["editing-" + property]) {
+      return div({
+        className: "half small editable-prop " + classNames,
+        onClick: swapState
+      }, this.props.node[property]);
+    } else {
+      return input({
+        className: "half small editable-prop " + classNames,
+        type: 'number',
+        value: this.props.node[property],
+        onChange: updateProperty,
+        onBlur: swapState,
+        onKeyDown: keyDown,
+        ref: 'focusable'
+      });
+    }
+  },
+  renderMinAndMax: function(node) {
+    if (node.valueDefinedSemiQuantitatively) {
+      return div({
+        className: "group full"
+      }, label({
+        className: "left half small"
+      }, tr("~NODE-VALUE-EDIT.LOW")), label({
+        className: "right half small"
+      }, tr("~NODE-VALUE-EDIT.HIGH")));
+    } else {
+      return div({
+        className: "group full"
+      }, this.renderEditableProperty("min", "left"), this.renderEditableProperty("max", "right"));
+    }
+  },
   render: function() {
     var node;
     node = this.props.node;
@@ -60796,8 +61122,8 @@ module.exports = React.createClass({
     }, tr("~NODE-VALUE-EDIT.INITIAL-VALUE")), input({
       className: 'left',
       type: "number",
-      min: "" + this.props.min,
-      max: "" + this.props.max,
+      min: "" + node.min,
+      max: "" + node.max,
       value: "" + node.initialValue,
       onClick: this.selectText,
       onChange: this.updateValue
@@ -60806,15 +61132,11 @@ module.exports = React.createClass({
     }, input({
       className: "full",
       type: "range",
-      min: "" + this.props.min,
-      max: "" + this.props.max,
+      min: "" + node.min,
+      max: "" + node.max,
       value: "" + node.initialValue,
       onChange: this.updateValue
-    }), label({
-      className: "left half small"
-    }, node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.LOW") : this.props.min), label({
-      className: "right half small"
-    }, node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.HIGH") : this.props.max)), span({
+    }), this.renderMinAndMax(node)), span({
       className: "checkbox group full"
     }, span({}, input({
       type: "checkbox",
@@ -60833,7 +61155,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":579}],604:[function(require,module,exports){
+},{"../utils/translate":580}],606:[function(require,module,exports){
 var NodeTitle, div, i, img, input, ref, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img;
@@ -61044,7 +61366,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":555,"../utils/translate":579}],605:[function(require,module,exports){
+},{"../mixins/node-title":555,"../utils/translate":580}],607:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -61105,7 +61427,47 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":569,"./palette-inspector-view":608}],606:[function(require,module,exports){
+},{"../stores/palette-store":570,"./palette-inspector-view":611}],608:[function(require,module,exports){
+var Dropdown, a, ref, span, tr;
+
+ref = React.DOM, a = ref.a, span = ref.span;
+
+tr = require('../utils/translate');
+
+Dropdown = React.createFactory(require('./dropdown-view'));
+
+module.exports = React.createClass({
+  displayName: 'OpenInCodap',
+  getDefaultProps: function() {
+    return {
+      linkTitle: tr('~OPEN_IN_CODAP.TITLE'),
+      codapUrl: "http://codap.concord.org/releases/latest/static/dg/en/cert/index.html",
+      openInNewWindow: true
+    };
+  },
+  thisEncodedUrl: function() {
+    return encodeURIComponent(window.location.toString());
+  },
+  link: function() {
+    return this.props.codapUrl + "?di=" + (this.thisEncodedUrl());
+  },
+  render: function() {
+    var opts;
+    opts = {
+      href: this.link()
+    };
+    if (this.props.openInNewWindow) {
+      opts.target = "_blank";
+    }
+    return span({
+      className: 'link'
+    }, a(opts, this.props.linkTitle));
+  }
+});
+
+
+
+},{"../utils/translate":580,"./dropdown-view":585}],609:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -61144,7 +61506,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":552,"../stores/image-dialog-store":566,"../utils/translate":579}],607:[function(require,module,exports){
+},{"../mixins/draggable":553,"../stores/image-dialog-store":567,"../utils/translate":580}],610:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -61223,7 +61585,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":568,"../utils/translate":579,"./image-picker-view":592}],608:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":569,"../utils/translate":580,"./image-picker-view":593}],611:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -61298,7 +61660,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":567,"../stores/palette-delete-dialog-store":568,"../stores/palette-store":569,"../utils/translate":579,"./image-metadata-view":590,"./palette-add-view":606,"./palette-item-view":609}],609:[function(require,module,exports){
+},{"../stores/nodes-store":568,"../stores/palette-delete-dialog-store":569,"../stores/palette-store":570,"../utils/translate":580,"./image-metadata-view":591,"./palette-add-view":609,"./palette-item-view":612}],612:[function(require,module,exports){
 var Draggable, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -61336,7 +61698,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":552}],610:[function(require,module,exports){
+},{"../mixins/draggable":553}],613:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -61354,7 +61716,7 @@ module.exports = React.createClass({
 
 
 
-},{}],611:[function(require,module,exports){
+},{}],614:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -61405,7 +61767,45 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":566,"../stores/palette-store":569,"../utils/translate":579,"./image-metadata-view":590}],612:[function(require,module,exports){
+},{"../stores/image-dialog-store":567,"../stores/palette-store":570,"../utils/translate":580,"./image-metadata-view":591}],615:[function(require,module,exports){
+var Dropdown, GoogleFileStore, a, ref, span, tr;
+
+ref = React.DOM, a = ref.a, span = ref.span;
+
+tr = require('../utils/translate');
+
+GoogleFileStore = require('../stores/google-file-store');
+
+Dropdown = React.createFactory(require('./dropdown-view'));
+
+module.exports = React.createClass({
+  displayName: 'PublicLink',
+  mixins: [GoogleFileStore.mixin],
+  getDefaultProps: function() {
+    return {
+      linkTitle: tr('~PUBLIC_LINK.OPEN')
+    };
+  },
+  makeDocLink: function() {
+    var encodedLink, oldHash;
+    oldHash = window.location.hash;
+    encodedLink = encodeURIComponent("http://cors.io/?u=" + this.state.docLink);
+    return "#url=" + encodedLink;
+  },
+  render: function() {
+    var link;
+    return span({
+      className: 'link'
+    }, this.state.isPublic && this.state.docLink ? (window.location.hash = this.makeDocLink(), link = window.location.toString(), a({
+      href: link,
+      target: '_blank'
+    }, this.props.linkTitle)) : void 0);
+  }
+});
+
+
+
+},{"../stores/google-file-store":565,"../utils/translate":580,"./dropdown-view":585}],616:[function(require,module,exports){
 var LinkRelationView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -61465,7 +61865,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/graph-store":565,"../utils/translate":579,"./link-relation-view":596,"./tabbed-panel-view":613}],613:[function(require,module,exports){
+},{"../stores/graph-store":566,"../utils/translate":580,"./link-relation-view":597,"./tabbed-panel-view":617}],617:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
