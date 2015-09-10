@@ -97,10 +97,48 @@ module.exports = class Simulation
 
     @reportFunc(data)
 
+  # Tests that the graph contains no loops consisting of dependent variables.
+  # A graph such as A->B<->C is invalid if B and C connect to each other and
+  # neither are accumulators
+  graphIsValid: ->
+    _.each @nodes, (node) -> node._isValid = null
+
+    # Recursive function. We go throw a node's non-independent ancestors, and if
+    # we find ourselves again, or if any of our ancestors find themselves again,
+    # we have a loop.
+    isInALoop = (node) ->
+      linksIn = node.inLinks()
+      # quick exit if we're not a dependent variable, or if we've already been checked
+      return false if node._isValid or node.isAccumulator or linksIn.length is 0
+      for seen in nodesSeenInSegment
+        if seen is node
+          return true
+
+      nodesSeenInSegment.push node
+
+      for link in linksIn
+        return true if isInALoop link.sourceNode
+
+      return false
+
+    for node in @nodes
+      nodesSeenInSegment = []
+      return false if isInALoop node
+      # if node was not in a loop, none of its ancestors were either,
+      # so mark all nodes we've seen as valid for speed
+      for seen in nodesSeenInSegment
+        seen._isValid = true
+
+    return true
+
+
   run: ->
     time = 0
     @reportFrames = []
     _.each @nodes, (node) => @initializeValues node
+    if not @graphIsValid()
+      # We should normally not get here, as callers ought to check graphIsValid themselves first
+      throw new Error("Graph not valid")
     while time < @duration
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
       _.each @nodes, (node) => @evaluateNode node, time

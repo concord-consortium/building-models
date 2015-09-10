@@ -141,6 +141,23 @@ describe "Simulation", ->
             [50, 50, 50, 0, 0]
             [50, 50, 50, 50, 50]
         ]}
+
+        # *** Tests for invalid graphs (should all throw errors) ***
+
+        # two-node graph in a loop with no accumulators (A<->B)
+        {A: null, B: null, AB: "1 * in", BA: "1 * in",
+        results: [false]
+        }
+
+        # three-node graph in a circle with no accumulators (A->B->C->A)
+        {A: null, B: null, C: null, AB: "1 * in", BC: "1 * in", CA: "1 * in",
+        results: [false]
+        }
+
+        # three-node graph with two non-accumulators in a loop ([A]->B<->C)
+        {A: "50+", B: null, C: null, AB: "1 * in", BC: "1 * in", CB: "1 * in",
+        results: [false]
+        }
       ]
 
       _.each scenarios, (scenario, i) ->
@@ -160,9 +177,13 @@ describe "Simulation", ->
               nodes: nodeArray
               timeStep: 1
               duration: j+1
-            simulation.run()
-            for node, k in nodeArray
-              node.currentValue.should.equal result[k]
+
+            if result is false
+              expect(simulation.run.bind(simulation)).to.throw "Graph not valid"
+            else
+              simulation.run()
+              for node, k in nodeArray
+                node.currentValue.should.equal result[k]
 
 
   describe "report", ->
