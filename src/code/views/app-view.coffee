@@ -44,7 +44,7 @@ module.exports = React.createClass
             filename: @state.filename
             username: @state.username
             graphStore: @props.graphStore
-            getData: @getData,
+            GraphStore: @GraphStore,
             runSimulation: @runSimulation
           )
         (div {className: 'action-bar'},

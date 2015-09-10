@@ -23,6 +23,6 @@ module.exports = React.createClass
     if @props.openInNewWindow
       opts.target = "_blank"
 
-    (span {className: 'OpenInCodap'},
+    (span {className: 'link'},
       (a opts, @props.linkTitle)
     )

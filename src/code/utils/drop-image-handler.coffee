@@ -17,7 +17,7 @@ module.exports = (e, callback) ->
                 title: (file.name.split '.')[0]
         reader.readAsDataURL file
   else
-    url = e.dataTransfer.getData 'URL'
+    url = e.dataTransfer.GraphStore 'URL'
     if hasValidImageExtension url
       callback
         name: ''

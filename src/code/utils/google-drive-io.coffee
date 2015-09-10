@@ -68,31 +68,56 @@ module.exports = class GoogleDriveIO
       else
         callback "No authorization. Upload failed for file: #{fileSpec.fileName}"
 
+  makePublic: (fileId) ->
+    perms =
+      'value': ''
+      'type': 'anyone'
+      'role': 'reader'
+
+    request = gapi.client.drive.permissions.insert
+      'fileId': fileId
+      'resource': perms
+
+    request.execute (resp) ->
+      if resp.code and resp.code isnt 200
+        alert "there was a problem sharing your document."
+
   download: (fileSpec, callback) ->
-    @authorize @authorized, (err, token) ->
+    @authorize @authorized, (err, token) =>
       if err
         callback err
       else
-        gapi.client.load 'drive', 'v2', ->
+        gapi.client.load 'drive', 'v2', =>
           request = gapi.client.drive.files.get
             fileId: fileSpec.id
-          request.execute (file) ->
+          request.execute (file) =>
             if file?.downloadUrl
-              xhr = new XMLHttpRequest()
-              xhr.open 'GET', file.downloadUrl
-              xhr.setRequestHeader 'Authorization', "Bearer #{token.access_token}"
-              xhr.onload = ->
-                try
-                  json = JSON.parse xhr.responseText
-                catch e
-                  callback e
-                  return
-                callback null, json
-              xhr.onerror = ->
-                callback "Unable to download #{file.downloadUrl}"
-              xhr.send()
+              @_downloadFromUrl file.downloadUrl, token, callback
             else
               callback "Unable to get download url"
+
+  downloadFromUrl: (url, callback, authorize=true) ->
+    if authorize
+      @authorize @authorized, (err, token) =>
+        @_downloadFromUrl url, token, callack
+    else
+      @_downloadFromUrl(url, null, callback)
+
+  _downloadFromUrl: (url, token, callback) ->
+    xhr = new XMLHttpRequest()
+    xhr.open 'GET', url
+    if token
+      xhr.setRequestHeader 'Authorization', "Bearer #{token.access_token}"
+    xhr.onload = ->
+      try
+        json = JSON.parse xhr.responseText
+      catch e
+        callback e
+        return
+      callback null, json
+    xhr.onerror = ->
+      callback "Unable to download #{url}"
+    xhr.send()
 
   filePicker: (callback) ->
     @authorize @authorized, (err, token) ->
@@ -108,4 +133,3 @@ module.exports = class GoogleDriveIO
             .setCallback pickerCallback
             .build()
           picker.setVisible true
-
