@@ -58472,6 +58472,7 @@ module.exports = {
   "~MENU.REVERT_TO_ORIGINAL": "Revert To Original",
   "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save",
   "~MENU.SETTINGS": "Advanced Settings …",
+  "~MENU.UNTITLED_MODEL": "Untitled model",
   "~GOOGLE_SAVE.TITLE": "Save Document",
   "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)",
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP",
@@ -58957,9 +58958,11 @@ module.exports = {
 
 
 },{"../models/codap-connect":556}],582:[function(require,module,exports){
-var DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref;
+var DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
 
 Reflux = require('reflux');
+
+tr = require('../utils/translate');
 
 Placeholder = React.createFactory(require('./placeholder-view'));
 
@@ -58994,7 +58997,7 @@ module.exports = React.createClass({
     return this.getInitialAppViewState({
       iframed: iframed,
       username: 'Jane Doe',
-      filename: 'Untitled Model'
+      filename: tr("~MENU.UNTITLED_MODEL")
     });
   },
   toggleImageBrowser: function() {
@@ -59046,7 +59049,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":552,"../stores/image-dialog-store":567,"./document-actions-view":584,"./global-nav-view":587,"./graph-view":588,"./image-browser-view":589,"./inspector-panel-view":595,"./modal-palette-delete-view":601,"./node-well-view":607,"./placeholder-view":613,"reflux":523}],583:[function(require,module,exports){
+},{"../mixins/app-view":552,"../stores/image-dialog-store":567,"../utils/translate":580,"./document-actions-view":584,"./global-nav-view":587,"./graph-view":588,"./image-browser-view":589,"./inspector-panel-view":595,"./modal-palette-delete-view":601,"./node-well-view":607,"./placeholder-view":613,"reflux":523}],583:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -59436,7 +59439,7 @@ module.exports = React.createClass({
         return GoogleFileStore.actions.rename(newName);
       },
       onClose: function() {
-        return GoogleFileStore.actions.close;
+        return GoogleFileStore.actions.close();
       },
       setIsPublic: GoogleFileStore.actions.setIsPublic
     }), div({
@@ -60791,7 +60794,7 @@ module.exports = React.createClass({
       ref: "fileName",
       value: this.state.filename,
       type: 'text',
-      placeholder: tr('~GOOGLE_SAVE.MAKE_PUBLIC'),
+      placeholder: tr('~MENU.UNTITLED_MODEL'),
       onChange: this.handleFilenameChange
     })), div({
       className: 'make-public'
