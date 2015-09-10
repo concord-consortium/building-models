@@ -1,4 +1,5 @@
 Reflux = require 'reflux'
+tr                  = require '../utils/translate'
 
 Placeholder        = React.createFactory require './placeholder-view'
 GlobalNav          = React.createFactory require './global-nav-view'
@@ -30,7 +31,7 @@ module.exports = React.createClass
     @getInitialAppViewState
       iframed: iframed
       username: 'Jane Doe'
-      filename: 'Untitled Model'
+      filename: tr "~MENU.UNTITLED_MODEL"
 
   toggleImageBrowser: ->
     @setState showImageBrowser: not @state.showImageBrowser

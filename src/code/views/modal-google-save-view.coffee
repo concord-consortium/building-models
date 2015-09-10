@@ -37,7 +37,7 @@ module.exports = React.createClass
                 ref: "fileName"
                 value: @state.filename
                 type: 'text',
-                placeholder: tr '~GOOGLE_SAVE.MAKE_PUBLIC'
+                placeholder: tr '~MENU.UNTITLED_MODEL'
                 onChange: @handleFilenameChange
               })
             )

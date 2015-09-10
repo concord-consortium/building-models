@@ -70,7 +70,7 @@ module.exports = React.createClass
         onRename: (newName) ->
           GoogleFileStore.actions.rename(newName)
         onClose: ->
-          GoogleFileStore.actions.close
+          GoogleFileStore.actions.close()
         setIsPublic: GoogleFileStore.actions.setIsPublic
       })
       (div {className: 'global-nav-name-and-help'},

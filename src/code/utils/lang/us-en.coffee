@@ -6,9 +6,11 @@ module.exports =
   "~MENU.REVERT_TO_ORIGINAL": "Revert To Original"
   "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save"
   "~MENU.SETTINGS": "Advanced Settings …"
-
+  "~MENU.UNTITLED_MODEL": "Untitled model"
+  
   "~GOOGLE_SAVE.TITLE": "Save Document"
   "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)"
+
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
   "~PUBLIC_LINK.OPEN": "Open public link"
 
