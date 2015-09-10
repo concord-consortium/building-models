@@ -37,13 +37,13 @@ module.exports = React.createClass
                 ref: "fileName"
                 value: @state.filename
                 type: 'text',
-                placeholder: tr '~GOOGLE_SAVE.DEFAULT_NAME'
+                placeholder: tr '~GOOGLE_SAVE.MAKE_PUBLIC'
                 onChange: @handleFilenameChange
               })
             )
             (div {className: 'make-public'},
               (input {type: 'checkbox', value: 'public', checked: @state.isPublic, onChange: @handlePublicChange})
-              (label {}, 'make public (read-only)')
+              (label {}, tr '~GOOGLE_SAVE.MAKE_PUBLIC')
             )
             (div {className: 'buttons'},
               (button {name: 'cancel', value: 'Cancel', onClick: @props.onClose}, 'Cancel')

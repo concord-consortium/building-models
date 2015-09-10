@@ -8,7 +8,7 @@ module.exports =
   "~MENU.SETTINGS": "Advanced Settings …"
 
   "~GOOGLE_SAVE.TITLE": "Save Document"
-
+  "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)"
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
   "~PUBLIC_LINK.OPEN": "Open public link"
 
