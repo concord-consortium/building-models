@@ -66,237 +66,125 @@ describe "Simulation", ->
           @simulation.run()
           @nodeB.currentValue.should.equal 1
 
-    describe "for other two-node scenarios", ->
-      beforeEach ->
-        @scenarios = [
-          # basic accumulator
-          {
-            startA:   10
-            startB:   0
-            bIsAccumulator: true
-            formula:  "1 * in"
-            duration: 10
-            timeStep: 1
-            result:   100
-          }
-          # basic accumulator implicitly defined using 'out'
-          {
-            startA:   10
-            startB:   0
-            formula:  "out + 1 * in"
-            duration: 10
-            timeStep: 1
-            result:   100
-          }
-          # basic accumulator with an initial value
-          {
-            startA:   10
-            startB:   50
-            bIsAccumulator: true
-            formula:  "1 * in"
-            duration: 10
-            timeStep: 1
-            result:   150
-          }
-          # accumulator with a negative relationship
-          {
-            startA:   10
-            startB:   0
-            bIsAccumulator: true
-            formula:  "-0.1 * in"
-            duration: 10
-            timeStep: 1
-            result:   -10
-          }
-          # basic non-accumulator with a negative relationship
-          {
-            startA:   10
-            startB:   0
-            formula:  "in * -0.1"
-            duration: 10
-            timeStep: 1
-            result:   -1
-          }
-          # odder examples...
-          {
-            startA:   10
-            startB:   0
-            formula:  "in * 2"
-            duration: 10
-            timeStep: 0.2
-            result:   4
-          }
-          {
-            startA:   10
-            startB:   20
-            formula:  "in * 2"
-            duration: 10
-            timeStep: 0.2
-            result:   4
-          }
-          {
-            startA:   10
-            startB:   1
-            formula:  "out + out"
-            duration: 8
-            timeStep: 1
-            result:   256
-          }
-          {
-            startA:   10
-            startB:   1
-            formula:  "out + out"
-            duration: 4
-            timeStep: 0.5
-            result:   1
-          }
-        ]
-      describe "each scenario", ->
-        it "should compute correctly", ->
-          _.each @scenarios, (scenario) ->
-            nodeA = new Node({initialValue: scenario.startA})
-            nodeB = new Node({initialValue: scenario.startB, isAccumulator: scenario.bIsAccumulator})
-            LinkNodes(nodeA, nodeB, scenario.formula)
+    # We can describe each scenario as an object:
+    # Each single-letter key is a node. Values can be a number (the initial value
+    #   for independent variables), a string "x+" (the initial value for collectors),
+    #   or null (dependent variables).
+    # Each two-letter node is a link, with the formula for the link.
+    # Results is an array of arbitrary length, describing the expected result for each
+    # node on each step.
+    describe "for other scenarios", ->
+      scenarios = [
+        # cascade independent and dependent variables (A->B->C)
+        {A: 50, B: null, C: null, AB: "1 * in", BC: "0.1 * in",
+        results: [
+            [50, 50, 5]
+            [50, 50, 5]
+        ]}
+
+        # cascade independent and dependent variables with negative relationship (A->B->C)
+        {A: 50, B: null, C: null, AB: "0.1 * in", BC: "-1 * in",
+        results: [
+            [50, 5, -5]
+            [50, 5, -5]
+        ]}
+
+        # basic collector (A->[B])
+        {A:5, B:"50+", AB: "1 * in",
+        results: [
+          [5, 50]
+          [5, 55]
+        ]}
+
+        # basic collector with feedback (A<->[B])
+        {A:null, B:"50+", AB: "1 * in", BA: "1 * in",
+        results: [
+          [50, 50]
+          [100, 100]
+          [200, 200]
+        ]}
+
+        # three-node graph (>-) with averaging
+        {A: 10, B: 20, C: null, AC: "1 * in", BC: "1 * in",
+        results: [
+            [10, 20, 15]
+            [10, 20, 15]
+        ]}
+
+        # three-node graph (>-) with non-linear averaging
+        {A: 10, B: 20, C: null, AC: "1 * in", BC: "0.1 * in",
+        results: [
+            [10, 20, 6]
+            [10, 20, 6]
+        ]}
+
+        # three-node graph with collector (>-[C])
+        {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
+        results: [
+            [10, 20, 0]
+            [10, 20, 12]
+        ]}
+
+        # three-node graph with collector (>-[C]) and negative relationship
+        {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
+        results: [
+            [10, 1, 0]
+            [10, 1, 9]
+            [10, 1, 18]
+        ]}
+
+        # Stocks and flow example
+        {A: 50, B: "0+", C: null, D: "0+", E: null
+        AB: "1 * in", BC: "1 * in", CB: "-1 * in", CD: "1 * in", DE: "1 * in", ED: "-1 * in"
+        results: [
+            [50, 0, 0, 0, 0]
+            [50, 50, 50, 0, 0]
+            [50, 50, 50, 50, 50]
+        ]}
+
+        # *** Tests for invalid graphs (should all throw errors) ***
+
+        # two-node graph in a loop with no accumulators (A<->B)
+        {A: null, B: null, AB: "1 * in", BA: "1 * in",
+        results: [false]
+        }
+
+        # three-node graph in a circle with no accumulators (A->B->C->A)
+        {A: null, B: null, C: null, AB: "1 * in", BC: "1 * in", CA: "1 * in",
+        results: [false]
+        }
+
+        # three-node graph with two non-accumulators in a loop ([A]->B<->C)
+        {A: "50+", B: null, C: null, AB: "1 * in", BC: "1 * in", CB: "1 * in",
+        results: [false]
+        }
+      ]
+
+      _.each scenarios, (scenario, i) ->
+        it "should compute scenario #{i} correctly", ->
+          nodes = {}
+          for key, value of scenario
+            if key.length == 1
+              isAccumulator = typeof value is "string" and ~value.indexOf('+')
+              nodes[key] = new Node({initialValue: parseInt(value), isAccumulator})
+            else if key.length == 2
+              node1 = nodes[key[0]]
+              node2 = nodes[key[1]]
+              LinkNodes(node1, node2, value)
+          for result, j in scenario.results
+            nodeArray = (node for key, node of nodes)
             simulation = new Simulation
-              nodes: [nodeA, nodeB]
-              timeStep: scenario.timeStep
-              duration: scenario.duration
-            simulation.run()
-            nodeB.currentValue.should.equal scenario.result
+              nodes: nodeArray
+              timeStep: 1
+              duration: j+1
 
-    describe "for a simple three node graph", ->
-      beforeEach ->
-        @nodeA    = new Node({initialValue: 10})
-        @nodeB    = new Node({initialValue: 20})
-        @nodeC    = new Node({initialValue: 0 })
-        @formula  = "in"
-        @arguments =
-          nodes: [@nodeA, @nodeB, @nodeC]
-          timeStep: 1
-          duration: 10
+            if result is false
+              expect(simulation.run.bind(simulation)).to.throw "Graph not valid"
+            else
+              simulation.run()
+              for node, k in nodeArray
+                node.currentValue.should.equal result[k]
 
-        LinkNodes(@nodeA, @nodeC, @formula)
-        LinkNodes(@nodeB, @nodeC, @formula)
-        @simulation = new Simulation(@arguments)
-        @simulation.run()
-
-      describe "nodeA", ->
-        it "should be unaffected", ->
-          @nodeA.currentValue.should.equal 10
-
-      describe "nodeB", ->
-        it "should be unaffected", ->
-          @nodeB.currentValue.should.equal 20
-
-      describe "nodeC", ->
-        it "should average its imputs", ->
-          @nodeC.currentValue.should.equal 15
-
-    describe "for other three-node scenarios, A->C and B->C", ->
-      beforeEach ->
-        @scenarios = [
-          # basic non-accumulator
-          {
-            startA:   10
-            startB:   5
-            startC:   0
-            formulaA:  "1 * in"
-            formulaB:  "1 * in"
-            duration: 10
-            timeStep: 1
-            result:   7.5
-          }
-          # basic accumulator
-          {
-            startA:   10
-            startB:   1
-            startC:   0
-            cIsAccumulator: true
-            formulaA:  "1 * in"
-            formulaB:  "1 * in"
-            duration: 10
-            timeStep: 1
-            result:   110
-          }
-          # basic accumulator with one negative relationship
-          {
-            startA:   10
-            startB:   1
-            startC:   0
-            cIsAccumulator: true
-            formulaA:  "1 * in"
-            formulaB:  "-1 * in"
-            duration: 10
-            timeStep: 1
-            result:   90
-          }
-        ]
-      describe "each scenario", ->
-        it "should compute correctly", ->
-          _.each @scenarios, (scenario) ->
-            nodeA = new Node({initialValue: scenario.startA})
-            nodeB = new Node({initialValue: scenario.startB})
-            nodeC = new Node({initialValue: scenario.startC, isAccumulator: scenario.cIsAccumulator})
-            LinkNodes(nodeA, nodeC, scenario.formulaA)
-            LinkNodes(nodeB, nodeC, scenario.formulaB)
-            simulation = new Simulation
-              nodes: [nodeA, nodeB, nodeC]
-              timeStep: scenario.timeStep
-              duration: scenario.duration
-            simulation.run()
-            nodeC.currentValue.should.equal scenario.result
-
-
-
-    describe "for a three node cascade", ->
-      beforeEach ->
-        @nodeA    = new Node({initialValue: 10})
-        @nodeB    = new Node({initialValue: 20})
-        @nodeC    = new Node({initialValue: 0 })
-        @formula  = "in"
-        LinkNodes(@nodeA, @nodeB, @formula)
-        LinkNodes(@nodeB, @nodeC, @formula)
-
-        @arguments =
-          nodes: [@nodeA, @nodeB, @nodeC]
-          timeStep: 1
-          duration: 1
-
-      describe "after one step", ->
-        beforeEach ->
-          @arguments.duration = 1
-          @simulation = new Simulation(@arguments)
-          @simulation.run()
-
-        describe "nodeA", ->
-          it "should be unaffected", ->
-            @nodeA.currentValue.should.equal @nodeA.initialValue
-
-        describe "nodeB", ->
-          it "should get A's previous value", ->
-            @nodeB.currentValue.should.equal @nodeA.initialValue
-
-        describe "nodeC", ->
-          it "should get B's previous value", ->
-            @nodeC.currentValue.should.equal @nodeB.initialValue
-
-      describe "after two steps", ->
-        beforeEach ->
-          @arguments.duration = 2
-          @simulation = new Simulation(@arguments)
-          @simulation.run()
-
-        describe "nodeA", ->
-          it "should be unaffected", ->
-            @nodeA.currentValue.should.equal @nodeA.initialValue
-
-        describe "nodeB", ->
-          it "should get A's previous value", ->
-            @nodeB.currentValue.should.equal @nodeA.initialValue
-
-        describe "nodeC", ->
-          it "should get A's original value", ->
-            @nodeC.currentValue.should.equal @nodeA.initialValue
 
   describe "report", ->
     describe "for a simple graph A(10) -0.1-> B(0) for 10 iterations", ->

@@ -75,32 +75,40 @@ module.exports = React.createClass
 
   render: ->
     node = @props.node
+    canEditValue = node.inLinks().length is 0 or node.isAccumulator
     (div {className: 'value-inspector'},
       (div {className: 'inspector-content group'},
-        unless node.valueDefinedSemiQuantitatively
-          (span {className: 'full'},
-            (label {className: 'right'}, tr "~NODE-VALUE-EDIT.INITIAL-VALUE")
-            (input {
-              className: 'left'
-              type: "number",
-              min: "#{node.min}",
-              max: "#{node.max}",
-              value: "#{node.initialValue}",
-              onClick: @selectText,
-              onChange: @updateValue}
+        if canEditValue
+          (div {className: 'full'},
+            unless node.valueDefinedSemiQuantitatively
+              (span {className: 'full'},
+                (label {className: 'right'}, tr "~NODE-VALUE-EDIT.INITIAL-VALUE")
+                (input {
+                  className: 'left'
+                  type: "number",
+                  min: "#{node.min}",
+                  max: "#{node.max}",
+                  value: "#{node.initialValue}",
+                  onClick: @selectText,
+                  onChange: @updateValue}
+                )
+              )
+            (div {className: "slider group full"},
+              (input {
+                className: "full"
+                type: "range",
+                min: "#{node.min}",
+                max: "#{node.max}",
+                value: "#{node.initialValue}",
+                onChange: @updateValue}
+              )
+              @renderMinAndMax(node)
             )
           )
-        (div {className: "slider group full"},
-          (input {
-            className: "full"
-            type: "range",
-            min: "#{node.min}",
-            max: "#{node.max}",
-            value: "#{node.initialValue}",
-            onChange: @updateValue}
+        else
+          (div {className: 'full'},
+            (label {className: 'right'}, tr "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE")
           )
-          @renderMinAndMax(node)
-        )
         (span {className: "checkbox group full"},
           (span {},
             (input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked})
@@ -110,15 +118,16 @@ module.exports = React.createClass
         )
       )
 
-      (div {className: "bottom-pane"},
-        (p {},
-          if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS"
-          else  tr "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")
-        (p {},
-          (label {className: 'node-switch-edit-mode', onClick: @updateDefiningType},
-            if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS"
-            else tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS"
+      if canEditValue
+        (div {className: "bottom-pane"},
+          (p {},
+            if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS"
+            else  tr "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")
+          (p {},
+            (label {className: 'node-switch-edit-mode', onClick: @updateDefiningType},
+              if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS"
+              else tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS"
+            )
           )
         )
-      )
     )

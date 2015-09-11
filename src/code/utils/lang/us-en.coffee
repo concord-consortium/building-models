@@ -33,6 +33,7 @@ module.exports =
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator"
   "~NODE-VALUE-EDIT.LOW": "Low"
   "~NODE-VALUE-EDIT.HIGH": "High"
+  "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable"
 
   # views/relation-inspector-view.coffee
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations."
@@ -115,6 +116,9 @@ module.exports =
   "~DOCUMENT.ACTIONS.RUN_SIMULATION": "Run simulation"
   "~DOCUMENT.ACTIONS.UNDO": "Undo"
   "~DOCUMENT.ACTIONS.REDO": "Redo"
+  "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n
+                                      Either remove a link to break the loop, or make one
+                                      of the variables a collector."
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 

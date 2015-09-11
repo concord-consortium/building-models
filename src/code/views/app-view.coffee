@@ -46,7 +46,6 @@ module.exports = React.createClass
             username: @state.username
             graphStore: @props.graphStore
             GraphStore: @GraphStore,
-            runSimulation: @runSimulation
           )
         (div {className: 'action-bar'},
           (NodeWell {
@@ -56,6 +55,7 @@ module.exports = React.createClass
           })
           (DocumentActions
             graphStore: @props.graphStore
+            graphIsValid: @state.graphIsValid
             runSimulation: @runSimulation
             simplified: @props.simplified
           )
