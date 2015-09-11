@@ -31,6 +31,7 @@ module.exports =
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator"
   "~NODE-VALUE-EDIT.LOW": "Low"
   "~NODE-VALUE-EDIT.HIGH": "High"
+  "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable"
 
   # views/relation-inspector-view.coffee
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations."
