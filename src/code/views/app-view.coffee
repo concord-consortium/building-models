@@ -54,6 +54,7 @@ module.exports = React.createClass
           })
           (DocumentActions
             graphStore: @props.graphStore
+            graphIsValid: @state.graphIsValid
             runSimulation: @runSimulation
             simplified: @props.simplified
           )

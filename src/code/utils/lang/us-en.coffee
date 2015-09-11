@@ -113,6 +113,9 @@ module.exports =
   "~DOCUMENT.ACTIONS.RUN_SIMULATION": "Run simulation"
   "~DOCUMENT.ACTIONS.UNDO": "Undo"
   "~DOCUMENT.ACTIONS.REDO": "Redo"
+  "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n
+                                      Either remove a link to break the loop, or make one
+                                      of the variables a collector."
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 

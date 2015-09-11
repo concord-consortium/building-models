@@ -29,8 +29,10 @@ module.exports = React.createClass
 
   renderRunLink: ->
     if @state.codapHasLoaded and not @props.simplified
+      classNames = "fa fa-play-circle"
+      classNames += " error" unless @props.graphIsValid
       (span {},
-        (i {className: "fa fa-play-circle", onClick: @props.runSimulation})
+        (i {className: classNames, onClick: @props.runSimulation})
         tr "~DOCUMENT.ACTIONS.RUN_SIMULATION"
       )
 

@@ -2,6 +2,7 @@ Simulation   = require "../models/simulation"
 PaletteStore = require "../stores/palette-store"
 CodapStore   = require "../stores/codap-store"
 GoogleFileStore = require "../stores/google-file-store"
+tr = require '../utils/translate'
 
 module.exports =
 
@@ -12,6 +13,7 @@ module.exports =
       palette: []
       filename: null
       undoRedoShowing: true
+      graphIsValid: true
     _.extend mixinState, subState
 
   componentDidUpdate: ->
@@ -30,6 +32,7 @@ module.exports =
   componentDidMount: ->
     @addDeleteKeyHandler true
     @props.graphStore.selectionManager.addSelectionListener @_updateSelection
+    @props.graphStore.addChangeListener @onModelChanged
 
     @props.graphStore.addFilenameListener (filename) =>
       @setState filename: filename
@@ -51,6 +54,12 @@ module.exports =
     @setState
       undoRedoShowing: not status.hideUndoRedo
 
+  onModelChanged: ->
+    simulator = new Simulation
+      nodes: @props.graphStore.getNodes()
+    @setState
+      graphIsValid: simulator.graphIsValid()
+
   onNodeChanged: (node, data) ->
     @props.graphStore.changeNode data
 
@@ -58,21 +67,24 @@ module.exports =
     @props.graphStore.deleteSelected()
 
   runSimulation: ->
-    simulator = new Simulation
-      nodes: @props.graphStore.getNodes()
-      duration: 10
-      timeStep: 1
-      reportFunc: (report) =>
-        log.info report
-        nodeInfo = (
-          _.map report.endState, (n) ->
-            "#{n.title} #{n.initialValue} → #{n.value}"
-        ).join("\n")
-        log.info "Run for #{report.steps} steps\n#{nodeInfo}:"
-        @props.codapConnect.sendSimulationData(report)
+    if @state.graphIsValid
+      simulator = new Simulation
+        nodes: @props.graphStore.getNodes()
+        duration: 10
+        timeStep: 1
+        reportFunc: (report) =>
+          log.info report
+          nodeInfo = (
+            _.map report.endState, (n) ->
+              "#{n.title} #{n.initialValue} → #{n.value}"
+          ).join("\n")
+          log.info "Run for #{report.steps} steps\n#{nodeInfo}:"
+          @props.codapConnect.sendSimulationData(report)
 
-    simulator.run()
-    simulator.report()
+      simulator.run()
+      simulator.report()
+    else
+      alert tr "~DOCUMENT.ACTIONS.GRAPH_INVALID"
 
   # Update Selections. #TODO Move elsewhere
   _updateSelection: (manager) ->
