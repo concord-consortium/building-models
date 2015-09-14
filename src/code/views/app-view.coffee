@@ -10,6 +10,8 @@ ImageBrowser       = React.createFactory require './image-browser-view'
 DocumentActions    = React.createFactory require './document-actions-view'
 ModalPaletteDelete = React.createFactory require './modal-palette-delete-view'
 
+window.HashParameters = require "../utils/hash-parameters"
+
 ImageDialogStore    = require '../stores/image-dialog-store'
 
 
