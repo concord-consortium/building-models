@@ -129,12 +129,12 @@ module.exports = class CodapConnect
       when 'undoAction'
         log.info 'Received undoAction request from CODAP.'
         successes = @graphStore.undo()
-        callback {success: @reduceSuccesses successes}
+        callback {success: @reduceSuccesses(successes) isnt false}
 
       when 'redoAction'
         log.info 'Received redoAction request from CODAP.'
         successes = @graphStore.redo()
-        callback {success: @reduceSuccesses successes}
+        callback {success: @reduceSuccesses(successes) isnt false}
 
       else
         log.info 'Unknown request received from CODAP: ' + operation
