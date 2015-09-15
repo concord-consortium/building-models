@@ -23,6 +23,13 @@ module.exports = React.createClass
     if @props.openInNewWindow
       opts.target = "_blank"
 
+    if @props.disabled
+      opts.className = "disabled"
+      opts.disabled = true
+      opts.onClick = (e) ->
+        e.preventDefault()
+        alert tr "~OPEN_IN_COPDAP.DISABLED"
+
     (span {className: 'link'},
       (a opts, @props.linkTitle)
     )

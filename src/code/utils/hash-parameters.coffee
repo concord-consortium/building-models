@@ -28,7 +28,7 @@ class HashParameters
     strings = _.map keys, (key) =>
       value = @parameters[key]
       [key, @encode(value)].join VALUE_TOKEN
-    @writeHash(strings.join "&")
+    @writeHash strings.join('&')
 
   setParam: (key,value) ->
     @parameters[key] = value
@@ -42,7 +42,11 @@ class HashParameters
     @updateLocationhash()
 
   writeHash: (string) ->
-    window.location.hash = string
+    if string.length < 1
+      window.location.hash = ""
+
+    else
+      window.location.hash = "?#{string}"
 
   readHash: ->
     # remove the leading slash

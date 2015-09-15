@@ -1,8 +1,9 @@
-Simulation   = require "../models/simulation"
-PaletteStore = require "../stores/palette-store"
-CodapStore   = require "../stores/codap-store"
+Simulation      = require "../models/simulation"
+PaletteStore    = require "../stores/palette-store"
+CodapStore      = require "../stores/codap-store"
 GoogleFileStore = require "../stores/google-file-store"
-tr = require '../utils/translate'
+HashParams      = require "../utils/hash-parameters"
+tr              = require '../utils/translate'
 
 module.exports =
 
@@ -99,9 +100,20 @@ module.exports =
 
   _loadInitialData: ->
     if @props.data?.length > 0
-      @props.graphStore.loadData JSON.parse @props.data
-    else if @props.url?.length > 0
-      GoogleFileStore.actions.loadAfterAuth(@props.url)
+      @props.graphStore.addAfterAuthHandler JSON.parse @props.data
+      HashParams.clearParam('data')
+
+    else if @props.publicUrl?.length > 0
+      publicUrl = @props.publicUrl
+      GoogleFileStore.actions.addAfterAuthHandler (context) ->
+        context.loadPublicUrl publicUrl
+      HashParams.clearParam('publicUrl')
+
+    else if @props.googleDoc?.length > 0
+      googleDoc = @props.googleDoc
+      GoogleFileStore.actions.addAfterAuthHandler (context) ->
+        context.loadFile {id: googleDoc}
+
 
   # cross platform undo/redo key-binding ctr-z ctr-y
   _registerUndoRedoKeys: ->

@@ -15,14 +15,15 @@ window.initApp = (wireframes=false) ->
   opts =
     # Valid opts are:
     # graphStore: store for the node-link graph
-    # url: Where to load json e.g.'json/serialized.json'
-    # data: the json to load (compare with url above)
+    # publicUrl: Where to load json e.g.'json/serialized.json'
+    # googleDoc: try to load a googledoc from the url
+    # data: the json to load (compare with publicUrl above)
     graphStore: GraphStore.store
-    url: HashParams.getParam 'url'
+    publicUrl: HashParams.getParam 'publicUrl'
     data: HashParams.getParam 'data'
+    googleDoc: HashParams.getParam 'googleDoc'
     simplified: HashParams.getParam 'simplified'
 
-  debugger
   opts.codapConnect = CodapConnect.instance 'building-models'
   appView = AppView opts
   elem = '#app'

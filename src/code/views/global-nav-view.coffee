@@ -3,7 +3,6 @@ tr = require '../utils/translate'
 
 Dropdown        = React.createFactory require './dropdown-view'
 OpenInCodap     = React.createFactory require './open-in-codap-view'
-PublicLink      = React.createFactory require './public-link-view'
 ModalGoogleSave = React.createFactory require './modal-google-save-view'
 GoogleFileStore = require '../stores/google-file-store'
 
@@ -74,8 +73,7 @@ module.exports = React.createClass
         setIsPublic: GoogleFileStore.actions.setIsPublic
       })
       (div {className: 'global-nav-name-and-help'},
-        (OpenInCodap {})
-        (PublicLink  {})
+        (OpenInCodap { disabled: @state.dirty })
         (span {className: 'mockup-only'}, @props.username),
         (span {className: 'mockup-only'},
           (i {className: 'fa fa-2x fa-question-circle'})
