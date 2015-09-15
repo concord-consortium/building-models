@@ -14,6 +14,16 @@ module.exports = React.createClass
   getInitialState: ->
     'editing-min': false
     'editing-max': false
+    'min-value': @props.node.min
+    'max-value': @props.node.max
+
+  componentWillReceiveProps: ->
+    # min and max are copied to state to disconnect the state and property, so
+    # that we can set the text field and only update the model when the input field
+    # is blured. This way we don't perform min/max validation while user is typing
+    @setState
+      'min-value': @props.node.min
+      'max-value': @props.node.max
 
   trim: (inputValue) ->
     return Math.max(@props.node.min, Math.min(@props.node.max, inputValue))
@@ -35,26 +45,28 @@ module.exports = React.createClass
 
   renderEditableProperty: (property, classNames) ->
     swapState = =>
+      # first copy state value to model if we were editing
+      if @state["editing-#{property}"]
+        @props.graphStore.changeNodeProperty property, @state["#{property}-value"]
       @setState "editing-#{property}": not @state["editing-#{property}"], ->
-        focusable = React.findDOMNode(this.refs.focusable)
-        focusable.focus() unless not focusable
+        React.findDOMNode(this.refs.focusable)?.focus()
 
     updateProperty = (evt) =>
+      # just update internal state while typing
       value = parseInt(evt.target.value)
-      if value
-        @props.graphStore.changeNodeProperty property, value
+      if value? then @setState "#{property}-value": value
 
     keyDown = (evt) ->
       if evt.key is 'Enter'
         swapState()
 
     if not @state["editing-#{property}"]
-      (div {className: "half small editable-prop #{classNames}", onClick: swapState}, @props.node[property])
+      (div {className: "half small editable-prop #{classNames}", onClick: swapState}, @state["#{property}-value"])
     else
       (input {
         className: "half small editable-prop #{classNames}"
         type: 'number'
-        value: @props.node[property]
+        value: @state["#{property}-value"]
         onChange: updateProperty
         onBlur: swapState
         onKeyDown: keyDown

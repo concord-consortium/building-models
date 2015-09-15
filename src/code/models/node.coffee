@@ -63,8 +63,15 @@ module.exports = class Node extends GraphPrimitive
     visit @
     _.without visitedNodes, @ # remove ourself from the results.
 
-  normalizeValues: ->
-    @max = Math.max @max, @min
+  # ensures min, max and initialValue are all consistent.
+  # @keys (optional) currently changed keys, so we can prioritize a user setting min or max
+  normalizeValues: (keys) ->
+    if isNaN(@min) then @min = 0
+    if isNaN(@max) then @max = 0
+    if _.contains keys, "max"
+      @min = Math.min @min, @max
+    else
+      @max = Math.max @max, @min
     @initialValue = Math.max @min, Math.min @max, @initialValue
 
   toExport: ->

@@ -189,7 +189,7 @@ GraphStore  = Reflux.createStore
       if data.hasOwnProperty key
         log.info "Change #{key} for #{node.title}"
         node[key] = data[key]
-    node.normalizeValues()
+    node.normalizeValues(_.keys(data))
     @_notifyNodeChanged(node)
 
   changeNodeProperty: (property, value, node) ->
