@@ -1,4 +1,5 @@
 var argv = require('yargs').argv,
+    environment = process.env.ENVIRONMENT || "development",
     production = !!argv.production,
     buildInfo = argv.buildInfo || 'development build (' + (new Date()) + ')',
     src = './src',
@@ -6,6 +7,7 @@ var argv = require('yargs').argv,
 
 module.exports = {
   production: production,
+  environment: environment,
   buildInfo: buildInfo,
   css: {
     watch: src + '/stylus/**/*.styl',

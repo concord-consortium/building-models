@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DISTDIR="./dist" 
+DISTDIR="./dist"
 GITCONFIG="$DISTDIR/.git/config"
 HERE=`pwd`
 DATE=`date +"%Y-%m-%d"`
@@ -41,10 +41,22 @@ cd $HERE
 
 # 4) Build our project using gulp into the dist folder
 echo "Rebuilding app"
-gulp build-all --production --buildInfo '$SHA built on $DATE' &&\
+ENVIRONMENT=staging gulp build-all --production --buildInfo '$SHA built on $DATE' &&\
 
 # 5) Commit and push
-cd $DISTDIR 
+cd $DISTDIR
 git add * &&\
 git commit -a -m "deployment for $SHA built on $DATE" &&\
 git push origin gh-pages
+
+# 6) Let rollbars know of our new staging deploy
+# https://rollbar.com/knowuh/Ivy deployment tracking
+ACCESS_TOKEN=daa3852e6c4f46008fc4043793a0ff38
+ENVIRONMENT=staging
+LOCAL_USERNAME=`whoami`
+REVISION=`git log -n 1 --pretty=format:"%H"`
+curl https://api.rollbar.com/api/1/deploy/ \
+  -F access_token=$ACCESS_TOKEN \
+  -F environment=$ENVIRONMENT \
+  -F revision=$REVISION \
+  -F local_username=$LOCAL_USERNAME
