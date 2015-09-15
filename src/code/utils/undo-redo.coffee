@@ -32,8 +32,10 @@ class Manager
   createAndExecuteCommand: (name, methods) ->
     result = @execute (new Command name, methods)
 
-    codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
-    codapConnect.sendUndoableActionPerformed()
+    # Only notify CODAP of an undoable action on the first command of a batched command
+    if (not @currentBatch) or (@currentBatch.commands.length is 1)
+      codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
+      codapConnect.sendUndoableActionPerformed()
 
     result
 
