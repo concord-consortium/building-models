@@ -43,7 +43,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/codap-connect":556,"./stores/graph-store":566,"./utils/hash-parameters":575,"./views/app-view":583}],2:[function(require,module,exports){
+},{"./models/codap-connect":556,"./stores/graph-store":567,"./utils/hash-parameters":576,"./views/app-view":584}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -55523,7 +55523,7 @@ module.exports = {
 
 
 
-},{"../models/simulation":563,"../stores/codap-store":564,"../stores/google-file-store":565,"../stores/palette-store":570,"../utils/hash-parameters":575,"../utils/translate":581}],553:[function(require,module,exports){
+},{"../models/simulation":563,"../stores/codap-store":565,"../stores/google-file-store":566,"../stores/palette-store":571,"../utils/hash-parameters":576,"../utils/translate":582}],553:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -55593,7 +55593,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":567,"../utils/has-valid-image-extension":574,"../views/preview-image-dialog-view":615}],555:[function(require,module,exports){
+},{"../stores/image-dialog-store":568,"../utils/has-valid-image-extension":575,"../views/preview-image-dialog-view":617}],555:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -55623,7 +55623,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":581}],556:[function(require,module,exports){
+},{"../utils/translate":582}],556:[function(require,module,exports){
 var CodapConnect, CodapStore, IframePhoneRpcEndpoint, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -55836,7 +55836,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../stores/codap-store":564,"../stores/graph-store":566,"../stores/palette-store":570,"../utils/translate":581,"iframe-phone":167}],557:[function(require,module,exports){
+},{"../stores/codap-store":565,"../stores/graph-store":567,"../stores/palette-store":571,"../utils/translate":582,"iframe-phone":167}],557:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -56123,7 +56123,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":571,"../utils/translate":581,"./graph-primitive":557}],560:[function(require,module,exports){
+},{"../utils/colors":572,"../utils/translate":582,"./graph-primitive":557}],560:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -56220,7 +56220,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":581,"./relationship":561}],561:[function(require,module,exports){
+},{"../utils/translate":582,"./relationship":561}],561:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -56292,7 +56292,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":581,"mathjs":168}],562:[function(require,module,exports){
+},{"../utils/translate":582,"mathjs":168}],562:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, tr;
 
 Importer = require('../utils/importer');
@@ -56468,8 +56468,10 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":576,"../utils/translate":581,"./link":558,"./node":559}],563:[function(require,module,exports){
-var IntegrationFunction, Simulation;
+},{"../utils/importer":577,"../utils/translate":582,"./link":558,"./node":559}],563:[function(require,module,exports){
+var AppSettingsStore, IntegrationFunction, Simulation;
+
+AppSettingsStore = require('../stores/app-settings-store').store;
 
 IntegrationFunction = function(t, timeStep) {
   var count, links, nextValue, value;
@@ -56509,6 +56511,9 @@ IntegrationFunction = function(t, timeStep) {
         return value += nextValue / count;
       };
     })(this));
+  }
+  if (AppSettingsStore.settings.capNodeValues) {
+    value = Math.max(this.min, Math.min(this.max, value));
   }
   return value;
 };
@@ -56666,7 +56671,57 @@ module.exports = Simulation = (function() {
 
 
 
-},{}],564:[function(require,module,exports){
+},{"../stores/app-settings-store":564}],564:[function(require,module,exports){
+var AppSettingsActions, AppSettingsStore, mixin;
+
+AppSettingsActions = Reflux.createActions(["showSettingsDialog", "close", "capNodeValues"]);
+
+AppSettingsStore = Reflux.createStore({
+  listenables: [AppSettingsActions],
+  init: function() {
+    return this.settings = {
+      showingSettingsDialog: false,
+      capNodeValues: false
+    };
+  },
+  onShowSettingsDialog: function() {
+    this.settings.showingSettingsDialog = true;
+    return this.notifyChange();
+  },
+  onClose: function() {
+    this.settings.showingSettingsDialog = false;
+    return this.notifyChange();
+  },
+  onCapNodeValues: function(cap) {
+    this.settings.capNodeValues = cap;
+    return this.notifyChange();
+  },
+  notifyChange: function() {
+    return this.trigger(_.clone(this.settings));
+  }
+});
+
+mixin = {
+  getInitialState: function() {
+    return _.clone(AppSettingsStore.settings);
+  },
+  componentDidMount: function() {
+    return AppSettingsStore.listen(this.onAppSettingsChange);
+  },
+  onAppSettingsChange: function(newData) {
+    return this.setState(_.clone(newData));
+  }
+};
+
+module.exports = {
+  actions: AppSettingsActions,
+  store: AppSettingsStore,
+  mixin: mixin
+};
+
+
+
+},{}],565:[function(require,module,exports){
 var codapActions, codapStore, mixin;
 
 codapActions = Reflux.createActions(["codapLoaded", "hideUndoRedo"]);
@@ -56721,8 +56776,8 @@ module.exports = {
 
 
 
-},{}],565:[function(require,module,exports){
-var GoogleDrive, GoogleDriveIO, GoogleFileActions, GoogleFileStore, GraphStore, HashParams, PaletteStore, mixin, stateFields, tr, waitForAuthCheck;
+},{}],566:[function(require,module,exports){
+var GoogleDrive, GoogleDriveIO, GoogleFileActions, GoogleFileStore, GraphStore, HashParams, PaletteStore, mixin, tr, waitForAuthCheck;
 
 GoogleDriveIO = require('../utils/google-drive-io');
 
@@ -56735,8 +56790,6 @@ HashParams = require("../utils/hash-parameters");
 tr = require('../utils/translate');
 
 GoogleFileActions = Reflux.createActions(["showSaveDialog", "newFile", "openFile", "rename", "setIsPublic", "saveFile", "close", "revertToOriginal", "revertToLastSave", "connectToApi", "addAfterAuthHandler"]);
-
-stateFields = ['gapiLoaded', 'fileId', 'action', 'isPublic', 'docLink', 'showingSaveDialog'];
 
 GoogleFileStore = Reflux.createStore({
   listenables: [GoogleFileActions],
@@ -56942,7 +56995,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":573,"../utils/hash-parameters":575,"../utils/translate":581,"./graph-store":566,"./palette-store":570}],566:[function(require,module,exports){
+},{"../utils/google-drive-io":574,"../utils/hash-parameters":576,"../utils/translate":582,"./graph-store":567,"./palette-store":571}],567:[function(require,module,exports){
 var DiagramNode, GraphStore, Importer, Link, Migrations, PaletteDeleteStore, PaletteStore, SelectionManager, UndoRedo, mixin, tr;
 
 Importer = require('../utils/importer');
@@ -57484,7 +57537,7 @@ module.exports = {
 
 
 
-},{"../data/migrations/migrations":551,"../models/link":558,"../models/node":559,"../models/selection-manager":562,"../stores/palette-delete-dialog-store":569,"../stores/palette-store":570,"../utils/importer":576,"../utils/translate":581,"../utils/undo-redo":582}],567:[function(require,module,exports){
+},{"../data/migrations/migrations":551,"../models/link":558,"../models/node":559,"../models/selection-manager":562,"../stores/palette-delete-dialog-store":570,"../stores/palette-store":571,"../utils/importer":577,"../utils/translate":582,"../utils/undo-redo":583}],568:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -57609,7 +57662,7 @@ module.exports = {
 
 
 
-},{"./palette-store":570}],568:[function(require,module,exports){
+},{"./palette-store":571}],569:[function(require,module,exports){
 var GraphStore, PaletteStore, mixin, nodeActions, nodeStore;
 
 PaletteStore = require('./palette-store');
@@ -57688,7 +57741,7 @@ module.exports = {
 
 
 
-},{"./graph-store":566,"./palette-store":570}],569:[function(require,module,exports){
+},{"./graph-store":567,"./palette-store":571}],570:[function(require,module,exports){
 var PaletteStore, UndoRedo, listenerMixin, paletteDialogActions, store;
 
 PaletteStore = require('./palette-store');
@@ -57809,7 +57862,7 @@ module.exports = {
 
 
 
-},{"../utils/undo-redo":582,"./nodes-store":568,"./palette-store":570}],570:[function(require,module,exports){
+},{"../utils/undo-redo":583,"./nodes-store":569,"./palette-store":571}],571:[function(require,module,exports){
 var UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage;
 
 resizeImage = require('../utils/resize-image');
@@ -58042,7 +58095,7 @@ window.PaletteStore = module.exports;
 
 
 
-},{"../data/initial-palette":543,"../data/internal-library":544,"../utils/resize-image":580,"../utils/undo-redo":582}],571:[function(require,module,exports){
+},{"../data/initial-palette":543,"../data/internal-library":544,"../utils/resize-image":581,"../utils/undo-redo":583}],572:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -58062,7 +58115,7 @@ module.exports = [
 
 
 
-},{"./translate":581}],572:[function(require,module,exports){
+},{"./translate":582}],573:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -58115,7 +58168,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":574,"./resize-image":580}],573:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":575,"./resize-image":581}],574:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -58323,7 +58376,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],574:[function(require,module,exports){
+},{}],575:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -58342,7 +58395,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":581}],575:[function(require,module,exports){
+},{"./translate":582}],576:[function(require,module,exports){
 var HashParameters, PARAM_TOKEN, VALUE_TOKEN;
 
 PARAM_TOKEN = /[?|&]/g;
@@ -58427,7 +58480,7 @@ module.exports = new HashParameters();
 
 
 
-},{}],576:[function(require,module,exports){
+},{}],577:[function(require,module,exports){
 var Migrations, MySystemImporter;
 
 Migrations = require('../data/migrations/migrations');
@@ -58470,7 +58523,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{"../data/migrations/migrations":551}],577:[function(require,module,exports){
+},{"../data/migrations/migrations":551}],578:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -58678,7 +58731,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],578:[function(require,module,exports){
+},{}],579:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -58690,6 +58743,8 @@ module.exports = {
   "~MENU.UNTITLED_MODEL": "Untitled model",
   "~GOOGLE_SAVE.TITLE": "Save Document",
   "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)",
+  "~APP_SETTINGS.TITLE": "Settings",
+  "~APP_SETTINGS.CAP_VALUES": "Limit node value range between min and max",
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP",
   "~OPEN_IN_CODAP.DISABLED": "Please save your diagram before opening in CODAP.",
   "~PUBLIC_LINK.OPEN": "Open public link",
@@ -58784,7 +58839,7 @@ module.exports = {
 
 
 
-},{}],579:[function(require,module,exports){
+},{}],580:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -58821,7 +58876,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],580:[function(require,module,exports){
+},{}],581:[function(require,module,exports){
 module.exports = function(src, callback) {
   var fail, img, maxHeight, maxWidth;
   fail = function() {
@@ -58863,7 +58918,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],581:[function(require,module,exports){
+},{}],582:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -58896,7 +58951,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":578}],582:[function(require,module,exports){
+},{"./lang/us-en":579}],583:[function(require,module,exports){
 var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances, internalEndCommandBatchAction;
 
 CodapConnect = require('../models/codap-connect');
@@ -59177,7 +59232,7 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":556}],583:[function(require,module,exports){
+},{"../models/codap-connect":556}],584:[function(require,module,exports){
 var DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
 
 Reflux = require('reflux');
@@ -59247,7 +59302,8 @@ module.exports = React.createClass({
       graphStore: this.props.graphStore,
       graphIsValid: this.state.graphIsValid,
       runSimulation: this.runSimulation,
-      simplified: this.props.simplified
+      simplified: this.props.simplified,
+      iframed: this.state.iframed
     })), div({
       className: 'canvas'
     }, GraphView({
@@ -59271,7 +59327,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":552,"../stores/image-dialog-store":567,"../utils/hash-parameters":575,"../utils/translate":581,"./document-actions-view":585,"./global-nav-view":588,"./graph-view":589,"./image-browser-view":590,"./inspector-panel-view":596,"./modal-palette-delete-view":602,"./node-well-view":608,"./placeholder-view":614,"reflux":523}],584:[function(require,module,exports){
+},{"../mixins/app-view":552,"../stores/image-dialog-store":568,"../utils/hash-parameters":576,"../utils/translate":582,"./document-actions-view":586,"./global-nav-view":589,"./graph-view":590,"./image-browser-view":591,"./inspector-panel-view":597,"./modal-palette-delete-view":604,"./node-well-view":610,"./placeholder-view":616,"reflux":523}],585:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -59353,17 +59409,21 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":571,"../utils/translate":581}],585:[function(require,module,exports){
-var CodapStore, br, div, i, ref, span, tr;
+},{"../utils/colors":572,"../utils/translate":582}],586:[function(require,module,exports){
+var AppSettingsStore, CodapStore, ModalAppSettings, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
+
+ModalAppSettings = React.createFactory(require('./modal-app-settings-view'));
+
+AppSettingsStore = require('../stores/app-settings-store');
 
 CodapStore = require("../stores/codap-store");
 
 tr = require('../utils/translate');
 
 module.exports = React.createClass({
-  mixins: [CodapStore.mixin],
+  mixins: [CodapStore.mixin, AppSettingsStore.mixin],
   displayName: 'DocumentActions',
   getInitialState: function() {
     return {
@@ -59399,6 +59459,12 @@ module.exports = React.createClass({
       }), tr("~DOCUMENT.ACTIONS.RUN_SIMULATION"));
     }
   },
+  renderSettingsLink: function() {
+    return span({}, i({
+      className: "fa fa-cog",
+      onClick: AppSettingsStore.actions.showSettingsDialog
+    }));
+  },
   render: function() {
     var buttonClass;
     buttonClass = function(enabled) {
@@ -59418,13 +59484,21 @@ module.exports = React.createClass({
       className: buttonClass(this.state.canRedo),
       onClick: this.redoClicked,
       disabled: !this.state.canRedo
-    }, tr("~DOCUMENT.ACTIONS.REDO"))) : void 0);
+    }, tr("~DOCUMENT.ACTIONS.REDO"))) : void 0, this.props.iframed ? div({
+      className: "misc-actions"
+    }, this.renderSettingsLink()) : void 0, ModalAppSettings({
+      showing: this.state.showingSettingsDialog,
+      capNodeValues: this.state.capNodeValues,
+      onClose: function() {
+        return AppSettingsStore.actions.close();
+      }
+    }));
   }
 });
 
 
 
-},{"../stores/codap-store":564,"../utils/translate":581}],586:[function(require,module,exports){
+},{"../stores/app-settings-store":564,"../stores/codap-store":565,"../utils/translate":582,"./modal-app-settings-view":601}],587:[function(require,module,exports){
 var DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -59529,7 +59603,7 @@ module.exports = React.createClass({
 
 
 
-},{}],587:[function(require,module,exports){
+},{}],588:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -59584,8 +59658,8 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":572,"../utils/translate":581}],588:[function(require,module,exports){
-var Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
+},{"../utils/drop-image-handler":573,"../utils/translate":582}],589:[function(require,module,exports){
+var AppSettingsActions, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
 
@@ -59598,6 +59672,8 @@ OpenInCodap = React.createFactory(require('./open-in-codap-view'));
 ModalGoogleSave = React.createFactory(require('./modal-google-save-view'));
 
 GoogleFileStore = require('../stores/google-file-store');
+
+AppSettingsActions = require('../stores/app-settings-store').actions;
 
 module.exports = React.createClass({
   displayName: 'GlobalNav',
@@ -59642,7 +59718,7 @@ module.exports = React.createClass({
         action: this.state.saved && this.state.dirty ? GoogleFileStore.actions.revertToLastSave : false
       }, {
         name: tr('~MENU.SETTINGS'),
-        action: false
+        action: AppSettingsActions.showSettingsDialog
       }
     ];
     return div({
@@ -59683,7 +59759,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/google-file-store":565,"../utils/translate":581,"./dropdown-view":586,"./modal-google-save-view":601,"./open-in-codap-view":609}],589:[function(require,module,exports){
+},{"../stores/app-settings-store":564,"../stores/google-file-store":566,"../utils/translate":582,"./dropdown-view":587,"./modal-google-save-view":603,"./open-in-codap-view":611}],590:[function(require,module,exports){
 var DiagramToolkit, ImageDialogStore, Importer, LinkStore, Node, PaletteStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -59975,7 +60051,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/graph-store":566,"../stores/image-dialog-store":567,"../stores/palette-store":570,"../utils/drop-image-handler":572,"../utils/importer":576,"../utils/js-plumb-diagram-toolkit":577,"../utils/translate":581,"./node-view":607}],590:[function(require,module,exports){
+},{"../stores/graph-store":567,"../stores/image-dialog-store":568,"../stores/palette-store":571,"../utils/drop-image-handler":573,"../utils/importer":577,"../utils/js-plumb-diagram-toolkit":578,"../utils/translate":582,"./node-view":609}],591:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -60034,7 +60110,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":567,"../stores/palette-store":570,"../utils/translate":581,"./image-link-dialog-view":591,"./image-metadata-view":592,"./image-my-computer-dialog-view":593,"./image-search-dialog-view":595,"./modal-tabbed-dialog-view":603,"./tabbed-panel-view":618}],591:[function(require,module,exports){
+},{"../stores/image-dialog-store":568,"../stores/palette-store":571,"../utils/translate":582,"./image-link-dialog-view":592,"./image-metadata-view":593,"./image-my-computer-dialog-view":594,"./image-search-dialog-view":596,"./modal-tabbed-dialog-view":605,"./tabbed-panel-view":620}],592:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -60083,7 +60159,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":567,"../utils/translate":581,"./dropzone-view":587}],592:[function(require,module,exports){
+},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":568,"../utils/translate":582,"./dropzone-view":588}],593:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -60171,7 +60247,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":545,"../stores/image-dialog-store":567,"../utils/translate":581}],593:[function(require,module,exports){
+},{"../data/licenses":545,"../stores/image-dialog-store":568,"../utils/translate":582}],594:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -60225,7 +60301,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":567,"../utils/translate":581,"./dropzone-view":587}],594:[function(require,module,exports){
+},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":568,"../utils/translate":582,"./dropzone-view":588}],595:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -60313,7 +60389,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":570,"../utils/translate":581,"./palette-add-view":610}],595:[function(require,module,exports){
+},{"../stores/palette-store":571,"../utils/translate":582,"./palette-add-view":612}],596:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -60525,7 +60601,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":567,"../utils/open-clipart":579,"../utils/translate":581}],596:[function(require,module,exports){
+},{"../mixins/image-dialog-view":554,"../stores/image-dialog-store":568,"../utils/open-clipart":580,"../utils/translate":582}],597:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, PaletteInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -60751,7 +60827,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":597,"./link-value-inspector-view":599,"./node-inspector-view":605,"./node-value-inspector-view":606,"./palette-inspector-view":612,"./relation-inspector-view":616}],597:[function(require,module,exports){
+},{"./link-inspector-view":598,"./link-value-inspector-view":600,"./node-inspector-view":607,"./node-value-inspector-view":608,"./palette-inspector-view":614,"./relation-inspector-view":618}],598:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -60807,7 +60883,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":581}],598:[function(require,module,exports){
+},{"../utils/translate":582}],599:[function(require,module,exports){
 var RelationFactory, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
@@ -60916,7 +60992,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/relation-factory":560,"../utils/translate":581}],599:[function(require,module,exports){
+},{"../models/relation-factory":560,"../utils/translate":582}],600:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -60934,7 +61010,49 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":581}],600:[function(require,module,exports){
+},{"../utils/translate":582}],601:[function(require,module,exports){
+var AppSettingsActions, ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
+
+ModalDialog = React.createFactory(require('./modal-dialog-view'));
+
+AppSettingsActions = require('../stores/app-settings-store').actions;
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a, input = ref.input, label = ref.label, span = ref.span, button = ref.button;
+
+module.exports = React.createClass({
+  displayName: 'ModalAppSettings',
+  handleCapNodeValuesChange: function(e) {
+    return AppSettingsActions.capNodeValues(e.target.checked);
+  },
+  render: function() {
+    var title;
+    return div({
+      className: 'modal-simple-popup'
+    }, this.props.showing ? (title = tr('~APP_SETTINGS.TITLE'), ModalDialog({
+      title: title,
+      close: this.props.onClose
+    }, div({
+      className: "simple-popup-panel"
+    }, div({}, input({
+      type: 'checkbox',
+      value: 'cap',
+      checked: this.props.capNodeValues,
+      onChange: this.handleCapNodeValuesChange
+    }), label({}, tr('~APP_SETTINGS.CAP_VALUES'))), div({
+      className: 'buttons'
+    }, button({
+      name: 'close',
+      value: 'Close',
+      onClick: this.props.onClose
+    }, 'Close'))))) : void 0);
+  }
+});
+
+
+
+},{"../stores/app-settings-store":564,"../utils/translate":582,"./modal-dialog-view":602}],602:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -60967,7 +61085,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":604}],601:[function(require,module,exports){
+},{"./modal-view":606}],603:[function(require,module,exports){
 var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61008,12 +61126,12 @@ module.exports = React.createClass({
   render: function() {
     var title;
     return div({
-      className: 'modal-google-save'
+      className: 'modal-simple-popup'
     }, this.props.showing ? (title = tr("~GOOGLE_SAVE.TITLE"), ModalDialog({
       title: title,
       close: this.props.onClose
     }, div({
-      className: "google-save-panel"
+      className: "simple-popup-panel label-text"
     }, div({
       className: 'filename'
     }, label({}, 'Name'), input({
@@ -61046,7 +61164,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":581,"./modal-dialog-view":600}],602:[function(require,module,exports){
+},{"../utils/translate":582,"./modal-dialog-view":602}],604:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61088,7 +61206,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":568,"../stores/palette-delete-dialog-store":569,"../utils/translate":581,"./modal-dialog-view":600,"./palette-delete-view":611}],603:[function(require,module,exports){
+},{"../stores/nodes-store":569,"../stores/palette-delete-dialog-store":570,"../utils/translate":582,"./modal-dialog-view":602,"./palette-delete-view":613}],605:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61109,7 +61227,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":600,"./tabbed-panel-view":618}],604:[function(require,module,exports){
+},{"./modal-dialog-view":602,"./tabbed-panel-view":620}],606:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -61141,7 +61259,7 @@ module.exports = React.createClass({
 
 
 
-},{}],605:[function(require,module,exports){
+},{}],607:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -61227,7 +61345,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":555,"../utils/translate":581,"./color-picker-view":584,"./image-picker-view":594}],606:[function(require,module,exports){
+},{"../mixins/node-title":555,"../utils/translate":582,"./color-picker-view":585,"./image-picker-view":595}],608:[function(require,module,exports){
 var div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -61404,7 +61522,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":581}],607:[function(require,module,exports){
+},{"../utils/translate":582}],609:[function(require,module,exports){
 var NodeTitle, SquareImage, div, i, img, input, ref, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img;
@@ -61617,7 +61735,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":555,"../utils/translate":581,"./square-image-view":617}],608:[function(require,module,exports){
+},{"../mixins/node-title":555,"../utils/translate":582,"./square-image-view":619}],610:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -61678,7 +61796,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":570,"./palette-inspector-view":612}],609:[function(require,module,exports){
+},{"../stores/palette-store":571,"./palette-inspector-view":614}],611:[function(require,module,exports){
 var Dropdown, a, ref, span, tr;
 
 ref = React.DOM, a = ref.a, span = ref.span;
@@ -61726,7 +61844,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":581,"./dropdown-view":586}],610:[function(require,module,exports){
+},{"../utils/translate":582,"./dropdown-view":587}],612:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -61763,7 +61881,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":553,"../stores/image-dialog-store":567,"../utils/translate":581}],611:[function(require,module,exports){
+},{"../mixins/draggable":553,"../stores/image-dialog-store":568,"../utils/translate":582}],613:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -61842,7 +61960,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":569,"../utils/translate":581,"./image-picker-view":594}],612:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":570,"../utils/translate":582,"./image-picker-view":595}],614:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -61915,7 +62033,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":568,"../stores/palette-delete-dialog-store":569,"../stores/palette-store":570,"../utils/translate":581,"./image-metadata-view":592,"./palette-add-view":610,"./palette-item-view":613}],613:[function(require,module,exports){
+},{"../stores/nodes-store":569,"../stores/palette-delete-dialog-store":570,"../stores/palette-store":571,"../utils/translate":582,"./image-metadata-view":593,"./palette-add-view":612,"./palette-item-view":615}],615:[function(require,module,exports){
 var Draggable, SquareImage, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -61955,7 +62073,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":553,"./square-image-view":617}],614:[function(require,module,exports){
+},{"../mixins/draggable":553,"./square-image-view":619}],616:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -61973,7 +62091,7 @@ module.exports = React.createClass({
 
 
 
-},{}],615:[function(require,module,exports){
+},{}],617:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -62024,7 +62142,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":567,"../stores/palette-store":570,"../utils/translate":581,"./image-metadata-view":592}],616:[function(require,module,exports){
+},{"../stores/image-dialog-store":568,"../stores/palette-store":571,"../utils/translate":582,"./image-metadata-view":593}],618:[function(require,module,exports){
 var LinkRelationView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -62084,7 +62202,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/graph-store":566,"../utils/translate":581,"./link-relation-view":598,"./tabbed-panel-view":618}],617:[function(require,module,exports){
+},{"../stores/graph-store":567,"../utils/translate":582,"./link-relation-view":599,"./tabbed-panel-view":620}],619:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -62125,7 +62243,7 @@ module.exports = React.createClass({
 
 
 
-},{}],618:[function(require,module,exports){
+},{}],620:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
