@@ -28,7 +28,7 @@ module.exports = React.createClass
       opts.disabled = true
       opts.onClick = (e) ->
         e.preventDefault()
-        alert tr "~OPEN_IN_COPDAP.DISABLED"
+        alert tr "~OPEN_IN_CODAP.DISABLED"
 
     (span {className: 'link'},
       (a opts, @props.linkTitle)

@@ -11,7 +11,6 @@ getParameterByName = (name) ->
   if results is null then "" else decodeURIComponent results[1].replace(/\+/g, ' ')
 
 window.initApp = (wireframes=false) ->
-  HashParams.fromLocationHash()
   opts =
     # Valid opts are:
     # graphStore: store for the node-link graph

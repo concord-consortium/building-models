@@ -14,8 +14,6 @@ class HashParameters
   fromLocationHash: ->
     @parameters = {}
     hash = @readHash()
-    unless hash.match PARAM_TOKEN
-      return
 
     keyPairs = hash.split PARAM_TOKEN
     _.each keyPairs, (pair) =>
@@ -35,6 +33,7 @@ class HashParameters
     @updateLocationhash()
 
   getParam: (key) ->
+    @fromLocationHash()
     return @parameters[key]
 
   clearParam: (key) ->
