@@ -10,7 +10,7 @@ module.exports = class Node extends GraphPrimitive
     if key
       @key = key
     @links = []
-    {@x, @y, @title, @image, @initialValue, @isAccumulator, @valueDefinedSemiQuantitatively} = nodeSpec
+    {@x, @y, @title, @image, @initialValue, @isAccumulator, @valueDefinedSemiQuantitatively, @paletteItem} = nodeSpec
     @initialValue  ?= 50
     @min ?= 0
     @max ?= 100
@@ -79,7 +79,7 @@ module.exports = class Node extends GraphPrimitive
       title: @title
       x: @x
       y: @y
-      image: @image
+      paletteItem: @paletteItem
       initialValue: @initialValue
       min: @min
       max: @max
@@ -88,4 +88,4 @@ module.exports = class Node extends GraphPrimitive
     key: @key
 
   paletteItemIs: (paletteItem) ->
-    paletteItem.image is @image
+    paletteItem.uuid is @paletteItem
