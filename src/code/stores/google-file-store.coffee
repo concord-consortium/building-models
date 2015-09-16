@@ -12,12 +12,6 @@ GoogleFileActions = Reflux.createActions [
   "addAfterAuthHandler"
 ]
 
-stateFields = [
-  'gapiLoaded', 'fileId', 'action', 'isPublic',
-  'docLink', 'showingSaveDialog'
-]
-
-
 GoogleFileStore = Reflux.createStore
   listenables: [GoogleFileActions]
 
