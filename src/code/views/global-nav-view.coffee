@@ -1,18 +1,17 @@
 {div, i, span} = React.DOM
 tr = require '../utils/translate'
 
-Dropdown         = React.createFactory require './dropdown-view'
-OpenInCodap      = React.createFactory require './open-in-codap-view'
-ModalGoogleSave  = React.createFactory require './modal-google-save-view'
-ModalAppSettings = React.createFactory require './modal-app-settings-view'
-GoogleFileStore  = require '../stores/google-file-store'
-AppSettingsStore = require '../stores/app-settings-store'
+Dropdown           = React.createFactory require './dropdown-view'
+OpenInCodap        = React.createFactory require './open-in-codap-view'
+ModalGoogleSave    = React.createFactory require './modal-google-save-view'
+GoogleFileStore    = require '../stores/google-file-store'
+AppSettingsActions = require('../stores/app-settings-store').actions
 
 module.exports = React.createClass
 
   displayName: 'GlobalNav'
 
-  mixins: [ GoogleFileStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ GoogleFileStore.mixin ]
 
   getInitialState: ->
     dirty: false
@@ -49,7 +48,7 @@ module.exports = React.createClass
       action: if @state.saved and @state.dirty then GoogleFileStore.actions.revertToLastSave else false
     ,
       name: tr '~MENU.SETTINGS'
-      action: AppSettingsStore.actions.showSettingsDialog
+      action: AppSettingsActions.showSettingsDialog
     ]
 
     (div {className: 'global-nav'},
@@ -63,12 +62,6 @@ module.exports = React.createClass
           (i {className: "fa fa-cog fa-spin"})
           @state.action
         )
-      (ModalAppSettings {
-        showing: @state.showingSettingsDialog
-        capNodeValues: @state.capNodeValues
-        onClose: ->
-          AppSettingsStore.actions.close()
-      })
       (ModalGoogleSave {
         showing: @state.showingSaveDialog
         onSave: GoogleFileStore.actions.saveFile

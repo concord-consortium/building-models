@@ -60,6 +60,7 @@ module.exports = React.createClass
             graphIsValid: @state.graphIsValid
             runSimulation: @runSimulation
             simplified: @props.simplified
+            iframed: @state.iframed
           )
         )
         (div {className: 'canvas'},
