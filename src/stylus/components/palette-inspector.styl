@@ -5,8 +5,8 @@ $paletteRowHeight = 80px
 $paletteHieght = $paletteRowHeight * 3
 
 pal-image-size()
-  max-height $protoNodeDimension
-  max-width $protoNodeDimension
+  height $protoNodeDimension
+  width $protoNodeDimension
   padding 0px
   margin 0px
   vertical-align middle
@@ -34,10 +34,7 @@ pal-image-size()
       border 2px solid none
       .proto-node
         pal-image-size()
-        .img-background
-          pal-image-size()
-          img
-            pal-image-size()
+
       &.selected
         border 2px solid #72BDCB
         border-radius 5px

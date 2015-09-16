@@ -18,8 +18,5 @@ module.exports = React.createClass
         className: 'palette-add-image',
         onClick: => ImageDialogStore.actions.open.trigger(@props.callback)
         },
-        (div { className: 'proto-node'},
-          (div {}, @props.label )
-        )
-      )
+        @props.label )
     )

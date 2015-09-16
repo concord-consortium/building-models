@@ -1,6 +1,8 @@
 {input, div, i, img} = React.DOM
 tr = require "../utils/translate"
 
+SquareImage = React.createFactory require "./square-image-view"
+
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
   mixins: [require '../mixins/node-title']
@@ -145,7 +147,7 @@ module.exports = React.createClass
         onClick: (=> @handleSelected true)
         onTouchend: (=> @handleSelected true)
         },
-        (if @props.data.image?.length > 0 and @props.data.image isnt "#remote" then (img {src: @props.data.image}) else null)
+        (SquareImage {image: @props.data.image})
         if @props.selected
           (div {className: "connection-source", "data-node-key": @props.nodeKey})
       )
