@@ -1,6 +1,8 @@
 AppView     = React.createFactory require './views/app-view'
-GraphStore = require './stores/graph-store'
+
+GraphStore   = require './stores/graph-store'
 CodapConnect = require './models/codap-connect'
+HashParams   = require './utils/hash-parameters'
 
 getParameterByName = (name) ->
   name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
@@ -12,12 +14,14 @@ window.initApp = (wireframes=false) ->
   opts =
     # Valid opts are:
     # graphStore: store for the node-link graph
-    # url: Where to load json e.g.'json/serialized.json'
-    # data: the json to load (compare with url above)
+    # publicUrl: Where to load json e.g.'json/serialized.json'
+    # googleDoc: try to load a googledoc from the url
+    # data: the json to load (compare with publicUrl above)
     graphStore: GraphStore.store
-    url: getParameterByName 'url'
-    data: getParameterByName 'data'
-    simplified: getParameterByName 'simplified'
+    publicUrl: HashParams.getParam 'publicUrl'
+    data: HashParams.getParam 'data'
+    googleDoc: HashParams.getParam 'googleDoc'
+    simplified: HashParams.getParam 'simplified'
 
   opts.codapConnect = CodapConnect.instance 'building-models'
   appView = AppView opts

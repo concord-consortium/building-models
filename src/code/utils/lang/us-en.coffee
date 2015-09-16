@@ -12,6 +12,7 @@ module.exports =
   "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)"
 
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
+  "~OPEN_IN_CODAP.DISABLED": "Please save your diagram before opening in CODAP."
   "~PUBLIC_LINK.OPEN": "Open public link"
 
   "~NODE.UNTITLED": "Untitled"

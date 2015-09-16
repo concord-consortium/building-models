@@ -1,6 +1,7 @@
 GoogleDriveIO = require '../utils/google-drive-io'
 GraphStore    = require './graph-store'
 PaletteStore  = require './palette-store'
+HashParams    = require "../utils/hash-parameters"
 
 tr = require '../utils/translate'
 
@@ -8,7 +9,7 @@ GoogleFileActions = Reflux.createActions [
   "showSaveDialog", "newFile", "openFile",
   "rename", "setIsPublic", "saveFile", "close"
   "revertToOriginal", "revertToLastSave", "connectToApi"
-  "loadAfterAuth"
+  "addAfterAuthHandler"
 ]
 
 stateFields = [
@@ -34,6 +35,7 @@ GoogleFileStore = Reflux.createStore
     @trigger
       gapiLoaded: @gapiLoaded
       fileId: @fileId
+      filename: @filename
       action: @action
       isPublic: @isPublic
       docLink: @docLink
@@ -46,6 +48,8 @@ GoogleFileStore = Reflux.createStore
   onNewFile: ->
     if confirm tr "~FILE.CONFIRM"
       GraphStore.store.deleteAll()
+      HashParams.clearParam('googleDoc')
+      HashParams.clearParam('publicUrl')
       @fileId = null
       @notifyChange()
 
@@ -59,25 +63,20 @@ GoogleFileStore = Reflux.createStore
         alert err
       else if fileSpec
         @action = tr "~FILE.DOWNLOADING"
-        GoogleDrive.download fileSpec, (err, data) =>
-          if err
-            alert err
-            @action = null
-          else
-            @fileId = fileSpec.id
-            @action = null
-            @notifyChange()
-            GraphStore.store.deleteAll()
-            GraphStore.store.loadData data
+        @loadFile(fileSpec)
 
   onRename: (filename) ->
     if filename.length > 0
       GraphStore.store.setFilename filename
+      HashParams.clearParam('publicUrl')
+      HashParams.clearParam('googleDoc')
       @notifyChange()
     return filename
 
-  onSetIsPublic: (isIt) ->
-    @isPublic = isIt
+  onSetIsPublic: (isPublic) ->
+    @isPublic = isPublic
+    if not isPublic
+      HashParams.clearParam('publicUrl')
     @notifyChange()
 
   onSaveFile: ->
@@ -100,7 +99,11 @@ GoogleFileStore = Reflux.createStore
           @docLink = null
           if @isPublic
             GoogleDrive.makePublic fileSpec.id
-          @docLink = fileSpec.webContentLink
+            # have to specify CORS proxy to make this work for anonymous
+            @docLink = "http://cors.io/?u=#{fileSpec.webContentLink}"
+            HashParams.setParam("publicUrl", @docLink)
+          else
+            HashParams.setParam("googleDoc", @fileId)
           GraphStore.store.setSaved()
         @showingSaveDialog = false
         @notifyChange()
@@ -115,20 +118,42 @@ GoogleFileStore = Reflux.createStore
       GraphStore.store.revertToLastSave()
       @notifyChange()
 
-  onLoadAfterAuth: (url) ->
-    @pendingLoad = url
+  onAddAfterAuthHandler: (callback) ->
+    @afterLoadCallbacks ||= []
+    @afterLoadCallbacks.push callback
 
   onConnectToApi: ->
+    @afterLoadCallbacks ||= []
     @gapiLoaded = true
     @action     = null
     @notifyChange()
-    if @pendingLoad
-      authorized = false
-      callback = (ignored,json) ->
-        GraphStore.store.loadData json
+    _.each @afterLoadCallbacks, (callback) =>
+      callback(@)
+    @afterLoadCallbacks = null
 
-      # non-authorized request
-      GoogleDrive.downloadFromUrl @pendingLoad, callback, authorized
+  # non-authorized request
+  loadPublicUrl: (url) ->
+    authorized = false
+    callback = (ignored,json) ->
+      GraphStore.store.loadData json
+
+    GoogleDrive.downloadFromUrl url, callback, authorized
+
+  loadFile: (fileSpec) ->
+    context = @
+    GoogleDrive.download fileSpec, (err, data) =>
+      if err
+        alert err
+        @action = null
+      else
+        @fileId = fileSpec.id
+        @action = null
+        @lastFilename = data.filename
+        GraphStore.store.deleteAll()
+        GraphStore.store.loadData data
+        GraphStore.store.setFilename data.filename
+        HashParams.setParam('googleDoc', @fileId)
+      @notifyChange()
 
 GoogleDrive = new GoogleDriveIO()
 
@@ -145,6 +170,7 @@ mixin =
   getInitialState: ->
     gapiLoaded:        false
     fileId:            null
+    filename:          @filename
     action:            tr "~FILE.CHECKING_AUTH"
     isPublic:          false
     docLink:          null
