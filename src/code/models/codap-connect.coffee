@@ -129,21 +129,21 @@ module.exports = class CodapConnect
       when 'undoAction'
         log.info 'Received undoAction request from CODAP.'
         successes = @graphStore.undo()
-        callback {success: @reduceSuccesses successes}
+        callback {success: @reduceSuccesses(successes) isnt false}
 
       when 'redoAction'
         log.info 'Received redoAction request from CODAP.'
         successes = @graphStore.redo()
-        callback {success: @reduceSuccesses successes}
+        callback {success: @reduceSuccesses(successes) isnt false}
 
       else
         log.info 'Unknown request received from CODAP: ' + operation
 
   # undo/redo events can return an array of successes
-  # this reduces that array to true iff every element is true
+  # this reduces that array to true iff every element is not explicitly false
   reduceSuccesses: (successes) ->
-    return successes unless successes.length
-    return false for s in successes when s is false
+    return successes unless successes?.length        # return successes unless it's a non-zero length array
+    return false for s in successes when s is false  # return false if we encounter *any* explicit false values in the array
     return true
 
   initGameHandler: (result) =>
