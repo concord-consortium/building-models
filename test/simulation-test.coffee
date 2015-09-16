@@ -1,5 +1,6 @@
-global._   = require 'lodash'
-global.log = require 'loglevel'
+global._      = require 'lodash'
+global.log    = require 'loglevel'
+global.Reflux = require 'reflux'
 
 chai = require('chai')
 chai.config.includeStack = true
@@ -13,7 +14,9 @@ requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 Link           = requireModel 'link'
 Node           = requireModel 'node'
 Simulation     = requireModel 'simulation'
-Relationship       = requireModel 'relationship'
+Relationship   = requireModel 'relationship'
+
+AppSettingsStore = require("#{__dirname}/../src/code/stores/app-settings-store").store
 
 LinkNodes = (sourceNode, targetNode, formula) ->
   link = new Link
@@ -142,6 +145,34 @@ describe "Simulation", ->
             [50, 50, 50, 50, 50]
         ]}
 
+        # *** Tests for graphs with bounded ranges ***
+        # Note all nodes have min:0 and max:100 by default
+
+        # basic collector (A->[B])
+        {A:30, B:"50+", AB: "1 * in",
+        cap: true
+        results: [
+          [30, 50]
+          [30, 80]
+          [30, 100]
+        ]}
+
+        # basic subtracting collector (A- -1 ->[B])
+        {A:30, B:"50+", AB: "-1 * in",
+        cap: true
+        results: [
+          [30, 50]
+          [30, 20]
+          [30, 0]
+        ]}
+
+        # basic independent and dependent nodes (A->B)
+        {A:120, B:null, AB: "1 * in",
+        cap: true
+        results: [
+          [120, 100]
+        ]}
+
         # *** Tests for invalid graphs (should all throw errors) ***
 
         # two-node graph in a loop with no accumulators (A<->B)
@@ -162,6 +193,7 @@ describe "Simulation", ->
 
       _.each scenarios, (scenario, i) ->
         it "should compute scenario #{i} correctly", ->
+          AppSettingsStore.settings.capNodeValues = (scenario.cap is true)
           nodes = {}
           for key, value of scenario
             if key.length == 1
