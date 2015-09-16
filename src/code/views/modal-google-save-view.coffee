@@ -25,11 +25,11 @@ module.exports = React.createClass
     @setState isPublic: e.target.checked
 
   render: ->
-    (div {className:'modal-google-save'},
+    (div {className:'modal-simple-popup'},
       if @props.showing
         title = tr "~GOOGLE_SAVE.TITLE"
         (ModalDialog {title: title, close: @props.onClose},
-          (div {className: "google-save-panel"},
+          (div {className: "simple-popup-panel label-text"},
             (div {className: 'filename'},
               (label {}, 'Name')
               (input {
