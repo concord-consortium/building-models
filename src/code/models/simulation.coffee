@@ -1,3 +1,4 @@
+AppSettingsStore  = require('../stores/app-settings-store').store
 
 IntegrationFunction = (t, timeStep) ->
 
@@ -30,6 +31,10 @@ IntegrationFunction = (t, timeStep) ->
       outV = @previousValue or @initialValue
       nextValue = link.relation.evaluate(inV, outV) * timeStep
       value += (nextValue / count)
+
+  # if we need to cap, do it at end of all calculations
+  if AppSettingsStore.settings.capNodeValues
+    value = Math.max @min, Math.min @max, value
 
   value
 

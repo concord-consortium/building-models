@@ -1,11 +1,13 @@
 {div, span, i, br} = React.DOM
 
-CodapStore = require "../stores/codap-store"
-tr         = require '../utils/translate'
+ModalAppSettings = React.createFactory require './modal-app-settings-view'
+AppSettingsStore = require '../stores/app-settings-store'
+CodapStore       = require "../stores/codap-store"
+tr               = require '../utils/translate'
 
 module.exports = React.createClass
 
-  mixins: [ CodapStore.mixin ]
+  mixins: [ CodapStore.mixin, AppSettingsStore.mixin ]
 
   displayName: 'DocumentActions'
 
@@ -36,6 +38,11 @@ module.exports = React.createClass
         tr "~DOCUMENT.ACTIONS.RUN_SIMULATION"
       )
 
+  renderSettingsLink: ->
+    (span {},
+      (i {className: "fa fa-cog", onClick: AppSettingsStore.actions.showSettingsDialog})
+    )
+
   render: ->
     buttonClass = (enabled) -> "button-link #{if not enabled then 'disabled' else ''}"
     (div {className: 'document-actions'},
@@ -47,4 +54,15 @@ module.exports = React.createClass
           (span {className: (buttonClass @state.canUndo), onClick: @undoClicked, disabled: not @state.canUndo}, tr "~DOCUMENT.ACTIONS.UNDO")
           (span {className: (buttonClass @state.canRedo), onClick: @redoClicked, disabled: not @state.canRedo}, tr "~DOCUMENT.ACTIONS.REDO")
         )
+
+      if @props.iframed
+        (div {className: "misc-actions"},
+          @renderSettingsLink()
+        )
+      (ModalAppSettings {
+        showing: @state.showingSettingsDialog
+        capNodeValues: @state.capNodeValues
+        onClose: ->
+          AppSettingsStore.actions.close()
+      })
     )

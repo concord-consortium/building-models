@@ -1,10 +1,11 @@
 {div, i, span} = React.DOM
 tr = require '../utils/translate'
 
-Dropdown        = React.createFactory require './dropdown-view'
-OpenInCodap     = React.createFactory require './open-in-codap-view'
-ModalGoogleSave = React.createFactory require './modal-google-save-view'
-GoogleFileStore = require '../stores/google-file-store'
+Dropdown           = React.createFactory require './dropdown-view'
+OpenInCodap        = React.createFactory require './open-in-codap-view'
+ModalGoogleSave    = React.createFactory require './modal-google-save-view'
+GoogleFileStore    = require '../stores/google-file-store'
+AppSettingsActions = require('../stores/app-settings-store').actions
 
 module.exports = React.createClass
 
@@ -47,7 +48,7 @@ module.exports = React.createClass
       action: if @state.saved and @state.dirty then GoogleFileStore.actions.revertToLastSave else false
     ,
       name: tr '~MENU.SETTINGS'
-      action: false
+      action: AppSettingsActions.showSettingsDialog
     ]
 
     (div {className: 'global-nav'},
