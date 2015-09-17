@@ -42,7 +42,7 @@ module.exports = React.createClass
     (div {className: 'menu'},
       (span {className: 'menu-anchor', onClick: => @select(null)},
         @props.anchor
-        (i {className: 'fa fa-caret-down'})
+        (i {className: 'ivy-icon-arrow-expand'})
       )
       (div {className: menuClass, onMouseLeave: @blur, onMouseEnter: @unblur},
         (ul {},
