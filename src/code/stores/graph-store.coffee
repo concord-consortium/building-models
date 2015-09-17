@@ -7,6 +7,7 @@ PaletteStore        = require "../stores/palette-store"
 tr                  = require "../utils/translate"
 Migrations          = require "../data/migrations/migrations"
 PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
+AppSettingsStore    = require "../stores/app-settings-store"
 
 GraphStore  = Reflux.createStore
   init: (context) ->
@@ -305,6 +306,7 @@ GraphStore  = Reflux.createStore
       node.toExport()
     linkExports = for key,link of @linkKeys
       link.toExport()
+    settings = AppSettingsStore.store.serialize()
 
     data =
       version: Migrations.latestVersion()
@@ -312,6 +314,7 @@ GraphStore  = Reflux.createStore
       palette: palette
       nodes: nodeExports
       links: linkExports
+      settings: settings
     return data
 
   toJsonString: (palette) ->

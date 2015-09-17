@@ -5,6 +5,7 @@ migrations = [
   require "./02_add_relations"
   require "./03_add_semi_quant_editing"
   require "./04_add_min_max"
+  require "./05_add_settings_and_cap"
 ]
 
 module.exports =

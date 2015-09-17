@@ -9,10 +9,11 @@ Sinon          = require('sinon')
 
 requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 
-Link           = requireModel 'link'
-Node           = requireModel 'node'
-GraphStore    = require "#{__dirname}/../src/code/stores/graph-store"
-CodapConnect   = requireModel 'codap-connect'
+Link             = requireModel 'link'
+Node             = requireModel 'node'
+GraphStore       = require "#{__dirname}/../src/code/stores/graph-store"
+AppSettingsStore = require "#{__dirname}/../src/code/stores/app-settings-store"
+CodapConnect     = requireModel 'codap-connect'
 
 SerializedTestData = require "./serialized-test-data/v-0.1"
 
@@ -60,7 +61,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal 1.3
+        model.version.should.equal 1.4
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -95,11 +96,16 @@ describe "Serialization and Loading", ->
         jsonString.should.not.match(/"metadata":/)
 
       it "should be able to serialize the palette", ->
-        console.log @graphStore.toJsonString(@fakePalette)
         jsonString = @graphStore.toJsonString(@fakePalette)
         palette = JSON.parse(jsonString).palette
         palette.a.should.equal 1
         palette.b.should.equal 2
+
+      it "should be able to serialize the settings", ->
+        AppSettingsStore.store.settings.capNodeValues = true
+        jsonString = @graphStore.toJsonString(@fakePalette)
+        model = JSON.parse jsonString
+        model.settings.capNodeValues.should.equal true
 
 
   describe "loadData", ->
