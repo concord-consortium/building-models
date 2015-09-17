@@ -284,7 +284,7 @@ GraphStore  = Reflux.createStore
 
   loadData: (data) ->
     log.info "json success"
-    importer = new Importer(@)
+    importer = new Importer(@, AppSettingsStore.store)
     importer.importData(data)
     @setFilename data.filename or 'New Model'
     PaletteStore.actions.loadData(data)

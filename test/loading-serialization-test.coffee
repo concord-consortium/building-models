@@ -1,4 +1,7 @@
 global.window = { location: '' }
+global._      = require 'lodash'
+global.log    = require 'loglevel'
+global.Reflux = require 'reflux'
 
 chai = require('chai')
 chai.config.includeStack = true
@@ -112,8 +115,17 @@ describe "Serialization and Loading", ->
     beforeEach ->
       @graphStore = GraphStore.store
       @graphStore.init()
+
     it "should read the serialized data without error", ->
       data = JSON.parse(@serializedForm)
       @graphStore.loadData(data)
       @graphStore.nodeKeys.should.have.any.keys("a")
       @graphStore.nodeKeys.should.have.any.keys("b")
+      AppSettingsStore.store.settings.capNodeValues.should.equal false
+
+    it "should read the settings without error", ->
+      data = JSON.parse(@serializedForm)
+      data.settings = {capNodeValues: true}
+      @graphStore.loadData(data)
+      AppSettingsStore.store.settings.capNodeValues.should.equal true
+
