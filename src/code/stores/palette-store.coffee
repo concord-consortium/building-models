@@ -2,7 +2,7 @@ resizeImage    = require '../utils/resize-image'
 initialPalette = require '../data/initial-palette'
 initialLibrary = require '../data/internal-library'
 UndoRedo       = require '../utils/undo-redo'
-
+uuid           = require 'uuid'
 
 # TODO: Maybe loadData goes into some other action-set
 paletteActions = Reflux.createActions(
@@ -40,9 +40,16 @@ paletteStore   = Reflux.createStore
     @selectPaletteIndex(0)
     @updateChanges()
 
+  makeNodeSignature: (node) ->
+    # 400 chars of a URL *might* be adequately unique,
+    # but data urls are going to be more trouble.
+    node.image.substr(0,400)
+
+
   standardizeNode: (node) ->
     node.image    ||= ""
-    node.key      ||= node.image.substr(0,400)
+    node.key      ||= @makeNodeSignature(node)
+    node.uuid     ||= uuid.v4()
     node.metadata ||= _.clone @blankMetadata, true
 
   addToLibrary: (node) ->
@@ -141,6 +148,9 @@ paletteStore   = Reflux.createStore
 
   inPalette: (node) ->
     _.find @palette, {key: node.key}
+
+  findByUUID: (uuid) ->
+    _.find @palette, {uuid: uuid}
 
   inLibrary: (node) ->
     @library[node.key]

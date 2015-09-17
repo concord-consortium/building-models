@@ -1,6 +1,6 @@
 Importer            = require '../utils/importer'
 Link                = require '../models/link'
-DiagramNode         = require '../models/node'
+
 UndoRedo            = require '../utils/undo-redo'
 SelectionManager    = require '../models/selection-manager'
 PaletteStore        = require "../stores/palette-store"
@@ -103,10 +103,6 @@ GraphStore  = Reflux.createStore
     @nodeKeys[link.targetNode.key]?.removeLink(link)
     @updateListeners()
 
-  importNode: (nodeSpec) ->
-    node = new DiagramNode(nodeSpec.data, nodeSpec.key)
-    @addNode(node)
-    node
 
   addNode: (node) ->
     @undoRedoManager.createAndExecuteCommand 'addNode',
@@ -173,6 +169,7 @@ GraphStore  = Reflux.createStore
       originalData =
         title: node.title
         image: node.image
+        paletteItem: node.paletteItem
         color: node.color
         initialValue: node.initialValue
         min: node.min
@@ -284,10 +281,8 @@ GraphStore  = Reflux.createStore
 
   loadData: (data) ->
     log.info "json success"
-    importer = new Importer(@, AppSettingsStore.store)
+    importer = new Importer(@, AppSettingsStore.store, PaletteStore)
     importer.importData(data)
-    @setFilename data.filename or 'New Model'
-    PaletteStore.actions.loadData(data)
     @undoRedoManager.clearHistory()
 
   loadDataFromUrl: (url) =>

@@ -1,4 +1,5 @@
 Node             = React.createFactory require './node-view'
+NodeModel        = require '../models/node'
 Importer         = require '../utils/importer'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
@@ -74,13 +75,15 @@ module.exports = React.createClass
     # Default new nodes are untitled
     title = tr "~NODE.UNTITLED"
     offset = $(@refs.linkView.getDOMNode()).offset()
-    node = @props.graphStore.importNode
-      data:
-        x: ui.offset.left - offset.left
-        y: ui.offset.top - offset.top
-        title: title
-        image: paletteItem.image
-    @props.graphStore.editNode(node.key)
+    newNode = new NodeModel
+      x: ui.offset.left - offset.left
+      y: ui.offset.top - offset.top
+      title: title
+      paletteItem: paletteItem.uuid
+      image: paletteItem.image
+
+    @props.graphStore.addNode newNode
+    @props.graphStore.editNode newNode.key
 
   getInitialState: ->
     nodes: []

@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.4", ->
-        @result.version.should.equal 1.4
+      it "should be 1.5", ->
+        @result.version.should.equal 1.5
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -43,6 +43,12 @@ describe "Migrations",  ->
           it "should have settings and cap value", ->
             @result.settings.capNodeValues.should.equal false
 
+        describe "v-1.5 changes", ->
+          it "should have settings and cap value", ->
+            for node in @result.nodes
+              node.data.image.should.not.be.null
+              node.data.paletteItem.should.not.be.null
+
     describe "the palette", ->
       it "should exist", ->
         @result.palette.should.exist
@@ -50,6 +56,11 @@ describe "Migrations",  ->
         blank = _.find @result.palette, (pitem) ->
           pitem.key is "img/nodes/blank.png"
         blank.should.exist
+
+      describe "v-1.5 changes", ->
+        it "paletteItems should have a uuid", ->
+          for paletteItem in @result.palette
+            paletteItem.uuid.should.not.be.null
 
     describe "the links", ->
       it "should have one link", ->

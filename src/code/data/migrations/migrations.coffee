@@ -6,6 +6,7 @@ migrations = [
   require "./03_add_semi_quant_editing"
   require "./04_add_min_max"
   require "./05_add_settings_and_cap"
+  require "./06_add_palette_references"
 ]
 
 module.exports =

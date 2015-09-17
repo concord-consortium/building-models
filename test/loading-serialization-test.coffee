@@ -30,7 +30,28 @@ describe "Serialization and Loading", ->
     )
 
     @serializedForm = JSON.stringify SerializedTestData
-    @fakePalette = {a: 1, b:2}
+    @fakePalette = [
+      "title": "Dingo"
+      "image": "data:image/dingo"
+      "metadata":
+        "source": "external"
+        "title": "Dingo"
+        "link": ""
+        "license": "public domain"
+      "key": "data:image/dingo"
+      "uuid": "uuid-dingo"
+    ,
+      "title": "Bee"
+      "image": "data:image/bee"
+      "metadata": {
+        "source": "search",
+        "title": "Honey bee",
+        "description": "A honey bee. Uma abelha.",
+        "link": "https://openclipart.org/detail/62203/Honey%20bee"
+      },
+      "key": "data:image/bee"
+      "uuid": "uuid-bee"
+    ]
 
   afterEach ->
     CodapConnect.instance.restore()
@@ -42,8 +63,8 @@ describe "Serialization and Loading", ->
       @graphStore = GraphStore.store
       @graphStore.init()
 
-      @nodeA = new Node({title: "a", x:10, y:15}, 'a')
-      @nodeB = new Node({title: "b", x:20, y:25}, 'b')
+      @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo"}, 'a')
+      @nodeB = new Node({title: "b", x:20, y:25, paletteItem:"uuid-bee"}, 'b')
       @link = new Link({
         sourceNode: @nodeA
         targetNode: @nodeB
@@ -64,22 +85,26 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal 1.4
+        model.version.should.equal 1.5
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
       it "should correctly serialize a node", ->
         jsonString = @graphStore.toJsonString()
-        node = JSON.parse(jsonString).nodes[0]
-        node.key.should.equal "a"
-        node.data.title.should.equal "a"
-        node.data.x.should.equal 10
-        node.data.y.should.equal 15
-        node.data.initialValue.should.equal 50
-        node.data.min.should.equal 0
-        node.data.max.should.equal 100
-        node.data.isAccumulator.should.equal false
-        node.data.valueDefinedSemiQuantitatively.should.equal true
+        nodeA = JSON.parse(jsonString).nodes[0]
+        nodeB = JSON.parse(jsonString).nodes[1]
+        nodeA.key.should.equal "a"
+        nodeA.data.title.should.equal "a"
+        nodeA.data.x.should.equal 10
+        nodeA.data.y.should.equal 15
+        nodeA.data.initialValue.should.equal 50
+        nodeA.data.min.should.equal 0
+        nodeA.data.max.should.equal 100
+        nodeA.data.isAccumulator.should.equal false
+        nodeA.data.valueDefinedSemiQuantitatively.should.equal true
+        expect(nodeA.data.image).to.not.exist
+        expect(nodeA.data.paletteItem).to.equal "uuid-dingo"
+        expect(nodeB.data.paletteItem).to.equal "uuid-bee"
 
       it "should correctly serialize a link", ->
         jsonString = @graphStore.toJsonString()
@@ -101,8 +126,8 @@ describe "Serialization and Loading", ->
       it "should be able to serialize the palette", ->
         jsonString = @graphStore.toJsonString(@fakePalette)
         palette = JSON.parse(jsonString).palette
-        palette.a.should.equal 1
-        palette.b.should.equal 2
+        palette[0].uuid.should.equal "uuid-dingo"
+        palette[1].uuid.should.equal "uuid-bee"
 
       it "should be able to serialize the settings", ->
         AppSettingsStore.store.settings.capNodeValues = true
@@ -129,3 +154,14 @@ describe "Serialization and Loading", ->
       @graphStore.loadData(data)
       AppSettingsStore.store.settings.capNodeValues.should.equal true
 
+    it "nodes should have paletteItem properties after loading", ->
+      data = JSON.parse(@serializedForm)
+      @graphStore.loadData(data)
+      expect(@graphStore.nodeKeys['a'].paletteItem).to.have.length 36
+      expect(@graphStore.nodeKeys['b'].paletteItem).to.have.length 36
+
+    it "should give the nodes an image after loading", ->
+      data = JSON.parse(@serializedForm)
+      @graphStore.loadData(data)
+      @graphStore.nodeKeys['a'].image.should.equal "img/nodes/chicken.png"
+      @graphStore.nodeKeys['b'].image.should.equal "img/nodes/egg.png"
