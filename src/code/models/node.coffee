@@ -4,7 +4,12 @@ Colors = require '../utils/colors'
 tr = require '../utils/translate'
 
 module.exports = class Node extends GraphPrimitive
-
+  # Properties that can be changed.
+  @fields: [
+    'title', 'image', 'color', 'paletteItem',
+    'initialValue', 'min', 'max', 'isAccumulator',
+    'valueDefinedSemiQuantitatively']
+    
   constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50,min:0,max:100,isAccumulator:false, valueDefinedSemiQuantitatively:false}, key) ->
     super()
     if key

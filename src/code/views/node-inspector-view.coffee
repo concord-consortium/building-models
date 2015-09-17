@@ -11,7 +11,7 @@ module.exports = React.createClass
     @props.onNodeChanged? @props.node, {title: newTitle}
 
   changeImage: (node) ->
-    @props.onNodeChanged? @props.node, {image: node.image}
+    @props.onNodeChanged? @props.node, {image: node.image, paletteItem: node.uuid}
 
   changeColor: (color) ->
     @props.onNodeChanged? @props.node, {color: color}
