@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.3", ->
-        @result.version.should.equal 1.3
+      it "should be 1.4", ->
+        @result.version.should.equal 1.4
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -38,6 +38,10 @@ describe "Migrations",  ->
             for node in @result.nodes
               node.data.min.should.equal 0
               node.data.max.should.equal 100
+
+        describe "v-1.4 changes", ->
+          it "should have settings and cap value", ->
+            @result.settings.capNodeValues.should.equal false
 
     describe "the palette", ->
       it "should exist", ->

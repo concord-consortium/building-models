@@ -29,6 +29,12 @@ AppSettingsStore   = Reflux.createStore
   notifyChange: ->
     @trigger _.clone @settings
 
+  importSettings: (data) ->
+    _.merge @settings, data
+
+  serialize: ->
+    capNodeValues: @settings.capNodeValues
+
 mixin =
   getInitialState: ->
     _.clone AppSettingsStore.settings

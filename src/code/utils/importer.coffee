@@ -2,13 +2,14 @@ Migrations = require '../data/migrations/migrations'
 
 module.exports = class MySystemImporter
 
-  constructor: (@system) ->
+  constructor: (@system, @settings) ->
     undefined
 
   importData: (data) ->
     Migrations.update(data)
     @importNodes data.nodes
     @importLinks data.links
+    @settings.importSettings data.settings
 
   importNodes: (importNodes) ->
     for node in importNodes
