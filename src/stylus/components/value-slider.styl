@@ -1,0 +1,55 @@
+.value-slider
+  position relative
+  .slider-line
+    stroke black
+    fill none
+
+  .slider-shape
+    fill black
+    stroke none
+  .svg-background
+    position absolute
+  .value-slider-handle
+    cursor pointer
+    z-index 2
+    position absolute
+    box-sizing border-box
+    background-color light-blue
+    border 1.8px solid white
+    enable-flex(justify:center, alignContent:center, alignItems:center)
+    padding 1px
+    box-shadow  1px 1px 1px hsla(1, 0%, 0%, 0.2)
+    border-radius 5px
+    &:hover
+      background-color green-blue
+      box-shadow  1px 1px 2px hsla(1, 0%, 0%, 0.4)
+
+    i.ivy-icon-smallSliderLines
+      color:white
+      font-size 1em
+  .number
+    display none
+    position absolute
+    color white
+    font-size 9px
+    background-color dark-blue
+    padding 3px
+    border-radius 3px
+    left 0px
+    &:.visible
+      display block
+  .legend
+    default-font()
+    position absolute
+    color med-blue
+    font-size 9px
+    font-weight bold
+    enable-flex(alignItems:center, alignContent:center, justify:space-between)
+    top 2.5em
+    width 100%
+    .min
+      float left
+      text-align left
+    .max
+      float right
+      text-align right
