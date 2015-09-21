@@ -11,6 +11,9 @@ module.exports = React.createClass
   handleCapNodeValuesChange: (e) ->
     AppSettingsActions.capNodeValues(e.target.checked)
 
+  handleDiagramOnly: (e) ->
+    AppSettingsActions.diagramOnly(e.target.checked)
+
   render: ->
     (div {className:'modal-simple-popup'},
       if @props.showing
@@ -20,6 +23,10 @@ module.exports = React.createClass
             (div {},
               (input {type: 'checkbox', value: 'cap', checked: @props.capNodeValues, onChange: @handleCapNodeValuesChange})
               (label {}, tr '~APP_SETTINGS.CAP_VALUES')
+            )
+            (div {},
+              (input {type: 'checkbox', value: 'cap', checked: @props.diagramOnly, onChange: @handleDiagramOnly})
+              (label {}, tr '~APP_SETTINGS.DIAGRAM_ONLY')
             )
             (div {className: 'buttons'},
               (button {name: 'close', value: 'Close', onClick: @props.onClose}, 'Close')

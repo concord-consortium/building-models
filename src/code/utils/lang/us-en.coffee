@@ -13,6 +13,7 @@ module.exports =
 
   "~APP_SETTINGS.TITLE": "Settings"
   "~APP_SETTINGS.CAP_VALUES": "Limit node value range between min and max"
+  "~APP_SETTINGS.DIAGRAM_ONLY": "Use simplified tools for static diagrams"
 
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
   "~OPEN_IN_CODAP.DISABLED": "Please save your diagram before opening in CODAP."

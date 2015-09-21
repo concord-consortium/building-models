@@ -60,7 +60,7 @@ ToolPanel = React.createFactory React.createClass
 
   render: ->
     buttons = @buttonData.slice 0
-    if @props.simplified
+    if @props.diagramOnly
       buttons = _.filter buttons, (button) -> button.simple
     buttonsView = _.map buttons, (button) =>
       props = @buttonProps(button)
@@ -134,7 +134,7 @@ module.exports = React.createClass
         link: @props.link
         nowShowing: @state.nowShowing
         onNowShowing: @setShowing
-        simplified: @props.simplified
+        diagramOnly: @props.diagramOnly
       )
       @renderInspectorPanel()
     )

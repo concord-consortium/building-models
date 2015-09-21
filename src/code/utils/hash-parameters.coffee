@@ -41,15 +41,18 @@ class HashParameters
     @updateLocationhash()
 
   writeHash: (string) ->
-    if string.length < 1
-      window.location.hash = ""
-
-    else
-      window.location.hash = "?#{string}"
+    if window and window.location
+      if string.length < 1
+        window.location.hash = ""
+      else
+        window.location.hash = "?#{string}"
 
   readHash: ->
-    # remove the leading slash
-    hash = window.location.hash.substring(1)
+    if window and window.location
+      # remove the leading slash
+      hash = window.location.hash.substring(1)
+    else
+      ""
 
 
 module.exports = new HashParameters()
