@@ -1,8 +1,11 @@
+HashParams = require '../utils/hash-parameters'
+
 AppSettingsActions = Reflux.createActions(
   [
     "showSettingsDialog"
     "close"
     "capNodeValues"
+    "diagramOnly"
   ]
 )
 
@@ -13,6 +16,7 @@ AppSettingsStore   = Reflux.createStore
     @settings =
       showingSettingsDialog: false
       capNodeValues: false
+      diagramOnly: HashParams.getParam('simplified')
 
   onShowSettingsDialog: ->
     @settings.showingSettingsDialog = true
@@ -26,14 +30,24 @@ AppSettingsStore   = Reflux.createStore
     @settings.capNodeValues = cap
     @notifyChange()
 
+  onDiagramOnly: (diagramOnly) ->
+    @settings.diagramOnly = diagramOnly
+    @notifyChange()
+
   notifyChange: ->
     @trigger _.clone @settings
+    if @settings.diagramOnly
+      HashParams.setParam('simplified','true')
+    else
+      HashParams.clearParam('simplified')
 
   importSettings: (data) ->
     _.merge @settings, data
+    @notifyChange()
 
   serialize: ->
     capNodeValues: @settings.capNodeValues
+    diagramOnly: @settings.diagramOnly
 
 mixin =
   getInitialState: ->

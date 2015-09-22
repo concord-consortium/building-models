@@ -13,6 +13,7 @@ ModalPaletteDelete = React.createFactory require './modal-palette-delete-view'
 window.HashParameters = require "../utils/hash-parameters"
 
 ImageDialogStore    = require '../stores/image-dialog-store'
+AppSettingsStore    = require '../stores/app-settings-store'
 
 
 {div, a} = React.DOM
@@ -21,7 +22,7 @@ module.exports = React.createClass
 
   displayName: 'WirefameApp'
 
-  mixins: [ImageDialogStore.mixin, require '../mixins/app-view']
+  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require '../mixins/app-view']
 
   getInitialState: ->
 
@@ -59,7 +60,7 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             graphIsValid: @state.graphIsValid
             runSimulation: @runSimulation
-            simplified: @props.simplified
+            diagramOnly: @state.diagramOnly
             iframed: @state.iframed
           )
         )
@@ -75,7 +76,7 @@ module.exports = React.createClass
           onNodeChanged: @onNodeChanged
           onNodeDelete: @onNodeDelete
           palette: @state.palette
-          simplified: @props.simplified
+          diagramOnly: @state.diagramOnly
           toggleImageBrowser: @toggleImageBrowser
           graphStore: @props.graphStore
         )

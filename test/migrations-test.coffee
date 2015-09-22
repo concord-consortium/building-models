@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.5", ->
-        @result.version.should.equal 1.5
+      it "should be 1.6", ->
+        @result.version.should.equal 1.6
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -48,6 +48,10 @@ describe "Migrations",  ->
             for node in @result.nodes
               node.data.image.should.not.be.null
               node.data.paletteItem.should.not.be.null
+
+        describe "v-1.6 changes", ->
+          it "should have diagramOnly setting", ->
+            @result.settings.diagramOnly.should.equal false
 
     describe "the palette", ->
       it "should exist", ->

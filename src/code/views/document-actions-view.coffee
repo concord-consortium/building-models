@@ -30,7 +30,7 @@ module.exports = React.createClass
     @props.graphStore.redo()
 
   renderRunLink: ->
-    if @state.codapHasLoaded and not @props.simplified
+    if @state.codapHasLoaded and not @props.diagramOnly
       classNames = "fa fa-play-circle"
       classNames += " error" unless @props.graphIsValid
       (span {},
@@ -62,6 +62,7 @@ module.exports = React.createClass
       (ModalAppSettings {
         showing: @state.showingSettingsDialog
         capNodeValues: @state.capNodeValues
+        diagramOnly: @state.diagramOnly
         onClose: ->
           AppSettingsStore.actions.close()
       })

@@ -21,7 +21,6 @@ window.initApp = (wireframes=false) ->
     publicUrl: HashParams.getParam 'publicUrl'
     data: HashParams.getParam 'data'
     googleDoc: HashParams.getParam 'googleDoc'
-    simplified: HashParams.getParam 'simplified'
 
   opts.codapConnect = CodapConnect.instance 'building-models'
   appView = AppView opts
