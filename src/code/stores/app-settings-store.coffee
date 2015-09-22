@@ -43,6 +43,7 @@ AppSettingsStore   = Reflux.createStore
 
   importSettings: (data) ->
     _.merge @settings, data
+    @notifyChange()
 
   serialize: ->
     capNodeValues: @settings.capNodeValues
