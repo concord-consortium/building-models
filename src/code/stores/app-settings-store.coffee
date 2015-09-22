@@ -46,6 +46,7 @@ AppSettingsStore   = Reflux.createStore
 
   serialize: ->
     capNodeValues: @settings.capNodeValues
+    diagramOnly: @settings.diagramOnly
 
 mixin =
   getInitialState: ->

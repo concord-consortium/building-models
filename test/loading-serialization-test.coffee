@@ -85,7 +85,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal 1.5
+        model.version.should.equal 1.6
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -131,9 +131,11 @@ describe "Serialization and Loading", ->
 
       it "should be able to serialize the settings", ->
         AppSettingsStore.store.settings.capNodeValues = true
+        AppSettingsStore.store.settings.diagramOnly = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
         model.settings.capNodeValues.should.equal true
+        model.settings.diagramOnly.should.equal true
 
 
   describe "loadData", ->

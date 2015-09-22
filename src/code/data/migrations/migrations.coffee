@@ -7,6 +7,7 @@ migrations = [
   require "./04_add_min_max"
   require "./05_add_settings_and_cap"
   require "./06_add_palette_references"
+  require "./07_add_diagram_only_setting"
 ]
 
 module.exports =
