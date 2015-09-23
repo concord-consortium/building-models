@@ -3,7 +3,7 @@ $deleteColor      = hsl(1,50%,50%)
 $img-size         = 42px
 $icon-width       = 50px
 $small-elm-width  = 58px
-$big-elm-width    = 110px
+$big-elm-width    = 90px
 $node-title-width = 90px
 $big-elm-height   = 164px
 
@@ -21,17 +21,21 @@ $big-elm-height   = 164px
     -ms-user-select text
     user-select text
     position relative
-    width $node-title-width
 
   box-sizing border-box
   position absolute
   margin 0px
   padding 0px
+  padding-top 10px
+  width $small-elm-width
+  enable-flex(direction: column, alignItems: center)
+
   border-radius 5px
   background-color none
   text-align center
-  width $icon-width
-  overflow visible
+  overflow display
+  border-radius 5px
+  text-align center
 
   .img-background
     enable-flex(direction:column, justify:center, alignItems:center)
@@ -69,36 +73,27 @@ $big-elm-height   = 164px
   &.selected
     .connection-source
       display block
-    box-shadow 2px 2px 2px hsla(0,0,0,0.2)
-    border-radius 5px
+    box-shadow 0px 0px 3px hsla(0,0,0,0.3)
     background-color white
-    border 2px solid
-    height $big-elm-height
     width $big-elm-width
-    margin-left (($big-elm-width - $icon-width) / -2.0)
-    margin-top -16px
-    padding-top 14px
-    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.25)
-    .node-title
-      margin-left auto
-      margin-right auto
-    input
-      left 0
+    height $big-elm-height
+    overflow hidden
+    .bottom
+      background-color lightgray
     &:hover
       .img-background
-        box-shadow none
+        box-shadow 0px 0px 0px rgba(0, 0, 0, 0.0)
 
 
   &:hover
     .img-background
-      box-shadow 0px 1px 1px 0px rgba(0, 0, 0, 0.25)
+      box-shadow 0px 1px 1px rgba(0, 0, 0, 0.25)
 
 
   .node-title
     default-font(size:10px)
     color dark
     width $node-title-width
-    margin-left (($node-title-width - $icon-width) / -2)
     text-align center
     cursor pointer
     margin-bottom 0.5em

@@ -137,6 +137,7 @@ ValueSlider = React.createClass
 
   render: ->
     center = @props.height / 2
+    lengendHeight = 9 + 4.5
     style =
       padding: "0px"
       border: "0px"
@@ -152,7 +153,6 @@ ValueSlider = React.createClass
       @renderHandle()
       @renderLegend()
     )
-
 
 module.exports = ValueSlider
 Slider = React.createFactory ValueSlider

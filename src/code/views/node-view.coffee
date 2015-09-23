@@ -1,13 +1,12 @@
-{input, div, i, img} = React.DOM
+{input, div, i, img, span} = React.DOM
 tr = require "../utils/translate"
 
 SquareImage = React.createFactory require "./square-image-view"
+SliderView  = React.createFactory require "./value-slider-view"
 
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
   mixins: [require '../mixins/node-title']
-  getDefaultProps: ->
-
 
   componentWillUnmount: ->
     if @props.isEditing
@@ -63,14 +62,24 @@ NodeTitle = React.createFactory React.createClass
         @renderTitle()
     )
 
-module.exports = React.createClass
+module.exports = NodeView = React.createClass
 
   displayName: "NodeView"
+
+  renableDragging: ->
+
+    $elem.draggable dragOpts
+
+  componentDidUpdate: ->
+    handle = '.img-background'
+    if @props.selected
+      handle = null
+    $elem = $(@refs.node.getDOMNode())
+    $elem.draggable( "option", "handle", handle)
 
   componentDidMount: ->
     $elem = $(@refs.node.getDOMNode())
     $elem.draggable
-      # grid: [ 10, 10 ]
       drag: @doMove
       stop: @doStop
       containment: "parent"
@@ -94,6 +103,13 @@ module.exports = React.createClass
     onStop:   -> log.info "internal move handler"
     onDelete: -> log.info "internal on-delete handler"
     onSelect: -> log.info "internal select handler"
+    selected: false
+    simulating: true
+    data:
+      title: "foo"
+      x: 10
+      y: 10
+      color: "dark-blue"
 
   doMove: (evt, extra) ->
     @props.onMove
@@ -133,6 +149,12 @@ module.exports = React.createClass
   isEditing: ->
     @props.selectionManager.isSelectedForTitleEditing(@props.data)
 
+  renderValue: ->
+    (div {},
+      "Value:"
+      (span {className: "value"}, "10")
+    )
+
   render: ->
     style =
       top: @props.data.y
@@ -141,21 +163,41 @@ module.exports = React.createClass
     className = "elm"
     if @props.selected
       className = "#{className} selected"
+
     (div { className: className, ref: "node", style: style, "data-node-key": @props.nodeKey},
-      (div {
-        className: "img-background"
-        onClick: (=> @handleSelected true)
-        onTouchend: (=> @handleSelected true)
-        },
-        (SquareImage {image: @props.data.image})
-        if @props.selected
-          (div {className: "connection-source", "data-node-key": @props.nodeKey})
+      (div {className: 'top'},
+        (div {
+          className: "img-background"
+          onClick: (=> @handleSelected true)
+          onTouchend: (=> @handleSelected true)
+          },
+          (SquareImage {image: @props.data.image})
+          if @props.selected
+            (div {className: "connection-source", "data-node-key": @props.nodeKey})
+        )
+        (NodeTitle {
+          isEditing: @props.editTitle
+          title: @props.data.title
+          onChange: @changeTitle
+          onStopEditing: @stopEditing
+          onStartEditing: @startEditing
+        })
       )
-      (NodeTitle {
-        isEditing: @props.editTitle
-        title: @props.data.title
-        onChange: @changeTitle
-        onStopEditing: @stopEditing
-        onStartEditing: @startEditing
-      })
+      (div {className: 'middle'},)
+      (div {className: 'bottom'},
+        if @props.simulating
+          @renderValue()
+          (SliderView {width: 70} )
+      )
     )
+
+myView = React.createFactory NodeView
+opts =
+  selected: true
+  simulating: true
+  data:
+    x: 200
+    y: 100
+    title: "Testing"
+
+window.testComponent = (domID) -> React.render myView(opts), domID
