@@ -17,7 +17,8 @@
     Add this to the bottom of your
       <span class='inline-code'>my-component.coffee</span> file to test your component:
     <div class='code'>
-      window.testComponent = (domID) -> React.render MyComponent({}), domID
+      myView = React.createFactory MyComponent
+      window.testComponent = (domID) -> React.render myView({}), domID
     </div>
   </div>
   <script src="https://apis.google.com/js/client.js"></script>
