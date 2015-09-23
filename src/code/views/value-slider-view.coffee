@@ -1,6 +1,6 @@
 {div, i, label, span, input, svg, circle, path, rect} = React.DOM
 
-SVGSlider = React.createFactory React.createClass
+ValueSlider = React.createClass
   displayName: 'SVGSlider'
 
   getDefaultProps: ->
@@ -104,19 +104,7 @@ SVGSlider = React.createFactory React.createClass
       @renderLegend()
     )
 
-ValueSlider = React.createClass
-  getDefaultProps: ->
-    min: 0,
-    max: 100
 
-  displayName: 'ValueSlider'
-
-  render: ->
-    (div {className: 'ValueSlider'},
-      (SVGSlider {})
-      (label {}, "vlaue slider")
-      (input  {type:"range", min:@props.min, max:@props.max} )
-    )
-module.exports = SVGSlider
-
-window.testComponent = (domID) -> React.render SVGSlider({}), domID
+module.exports = ValueSlider
+myView = React.createFactory ValueSlider
+window.testComponent = (domID) -> React.render myView({}), domID
