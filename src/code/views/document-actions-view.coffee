@@ -38,16 +38,16 @@ module.exports = React.createClass
 
   renderSettingsLink: ->
     (span {},
-      (i {className: "fa fa-cog", onClick: AppSettingsStore.actions.showSettingsDialog})
+      (i {className: "ivy-icon-options", onClick: AppSettingsStore.actions.showSettingsDialog})
     )
 
   render: ->
-    buttonClass = (enabled) -> "button-link #{if not enabled then 'disabled' else ''}"
+    buttonClass = (enabled) -> if not enabled then 'disabled' else ''
     (div {className: 'document-actions'},
       unless @state.hideUndoRedo
-        (div {className: 'undo-redo'},
-          (span {className: (buttonClass @state.canUndo), onClick: @undoClicked, disabled: not @state.canUndo}, tr "~DOCUMENT.ACTIONS.UNDO")
-          (span {className: (buttonClass @state.canRedo), onClick: @redoClicked, disabled: not @state.canRedo}, tr "~DOCUMENT.ACTIONS.REDO")
+        (div {className: 'misc-actions'},
+          (i {className: "ivy-icon-arrow-undo #{buttonClass @state.canUndo}", onClick: @undoClicked, disabled: not @state.canUndo})
+          (i {className: "ivy-icon-arrow-redo #{buttonClass @state.canRedo}", onClick: @redoClicked, disabled: not @state.canRedo})
         )
 
       (div {className: "misc-actions"},

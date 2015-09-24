@@ -1,35 +1,20 @@
 .document-actions
   enable-flex(justify:flex-end)
   width 100%
-  .undo-redo
-    width 150px
-    text-align right
-    .button-link
-      no-select()
-      label-font()
-      margin 5px
-      cursor pointer
-      color #fff
-      background-color #00f
-      padding 2px 7px
-      -webkit-border-radius: 5px;
-      -moz-border-radius: 5px;
-      border-radius: 5px;
-
-      &.disabled
-        cursor not-allowed
-        background-color #777
   .misc-actions
     padding-left 22px
-    color #777
+    color #666
     font-size 12px
-    text-align center
     i
       padding-right 0.5em
-      font-size 24px
+      font-size 30px
       cursor pointer
-      &:hover
-        text-shadow 1px 1px 3px hsl(0,0.5, 0.5)
+      no-select()
+      &.disabled
+        color #BBB
+        cursor not-allowed
+      &:hover:not(.disabled)
+        color #444
     i.error
       color #AF0000
       &:hover
