@@ -1,4 +1,4 @@
-{input, div, i, img, span} = React.DOM
+{input, div, i, img, span, label} = React.DOM
 tr = require "../utils/translate"
 
 SquareImage = React.createFactory require "./square-image-view"
@@ -38,7 +38,10 @@ NodeTitle = React.createFactory React.createClass
     @props.onStopEditing()
 
   renderTitle: ->
-    (div {className: "node-title", onClick: @props.onStartEditing }, @props.title)
+    className = "node-title"
+    if @isDefaultTitle()
+      className = "node-title untitled"
+    (div {className: className, onClick: @props.onStartEditing }, @props.title)
 
   renderTitleInput: ->
     displayTitle = @displayTitleForInput(@props.title)
@@ -103,7 +106,7 @@ module.exports = NodeView = React.createClass
     onStop:   -> log.info "internal move handler"
     onDelete: -> log.info "internal on-delete handler"
     onSelect: -> log.info "internal select handler"
-    selected: false
+    selected: falsepreviewImageClassName = "img-background link-target"
     simulating: true
     data:
       title: "foo"
@@ -150,9 +153,9 @@ module.exports = NodeView = React.createClass
     @props.selectionManager.isSelectedForTitleEditing(@props.data)
 
   renderValue: ->
-    (div {},
-      "Value:"
-      (span {className: "value"}, "10")
+    (div {className: "value"},
+      (label {}, tr "~NODE.SIMULATION.VALUE")
+      (input  {type: "text", className: "value", value: @props.value})
     )
 
   render: ->
@@ -165,15 +168,20 @@ module.exports = NodeView = React.createClass
       className = "#{className} selected"
 
     (div { className: className, ref: "node", style: style, "data-node-key": @props.nodeKey},
+      if @props.selected
+        (div {className: "actions"},
+          (div {className: "connection-source action-circle ivy-icon-link", "data-node-key": @props.nodeKey})
+          (div {className: "graph-source action-circle ivy-icon-graph", "data-node-key": @props.nodeKey})
+        )
+
       (div {className: 'top'},
         (div {
           className: "img-background"
+          "data-node-key": @props.nodeKey
           onClick: (=> @handleSelected true)
           onTouchend: (=> @handleSelected true)
           },
-          (SquareImage {image: @props.data.image})
-          if @props.selected
-            (div {className: "connection-source", "data-node-key": @props.nodeKey})
+          (SquareImage {image: @props.data.image, ref: "thumbnail"})
         )
         (NodeTitle {
           isEditing: @props.editTitle
@@ -183,21 +191,48 @@ module.exports = NodeView = React.createClass
           onStartEditing: @startEditing
         })
       )
-      (div {className: 'middle'},)
-      (div {className: 'bottom'},
+      (div {className: 'bottom centered-block'},
         if @props.simulating
-          @renderValue()
-          (SliderView {width: 70} )
+          if @props.selected
+            (div {className: 'centered-block'},
+              @renderValue()
+              (SliderView {width: 70} )
+            )
+          else
+            (SliderView {width: 70} )
       )
     )
 
 myView = React.createFactory NodeView
-opts =
-  selected: true
-  simulating: true
-  data:
-    x: 200
-    y: 100
-    title: "Testing"
 
-window.testComponent = (domID) -> React.render myView(opts), domID
+groupView = React.createFactory React.createClass
+  render: ->
+    selectSimulated =
+      selected: true
+      simulating: true
+      data:
+        x: 50
+        y: 100
+        title: "selectSimulated"
+
+    simulated = _.clone selectSimulated, true
+    simulated.selected = false
+    simulated.data.x = 300
+
+    selected = _.clone selectSimulated, true
+    selected.simulating = false
+    selected.data.x = 500
+    selected.data.title = "selected"
+
+    unselected = _.clone selected, true
+    unselected.selected = false
+    unselected.data.x = 800
+    unselected.data.title = "unselected"
+    (div {className: "group"},
+      (myView selectSimulated)
+      (myView simulated)
+      (myView selected)
+      (myView unselected)
+    )
+
+window.testComponent = (domID) -> React.render groupView(), domID

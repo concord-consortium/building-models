@@ -6,6 +6,9 @@ module.exports =
   titlePlaceholder: ->
     @defaultTitle()
 
+  isDefaultTitle: ->
+    @props.title is @titlePlaceholder()
+    
   displayTitleForInput: (proposedTitle) ->
     # For input fields, use 'placeholder' value @defaultTitle
     # to work, the 'value' attribute of the input should be blank

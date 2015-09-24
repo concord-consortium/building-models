@@ -21,14 +21,24 @@ $big-elm-height   = 164px
     -ms-user-select text
     user-select text
     position relative
+    &[type=text]
+      height 20px
+      width 85px
+      border none
+      &:hover
+        text-decoration none
+      &:focus
+        outline none
+        box-shadow 1px 1px 3px 0px rgba(0,0,0,0.25)
 
   box-sizing border-box
   position absolute
   margin 0px
   padding 0px
   padding-top 10px
-  width $small-elm-width
-  enable-flex(direction: column, alignItems: center)
+  width $big-elm-width
+
+  enable-flex(direction: column, alignContent:center, alignItems:center, justify:flex-start)
 
   border-radius 5px
   background-color none
@@ -44,7 +54,7 @@ $big-elm-height   = 164px
     border-radius 5px
     background-color white
     border 2px solid
-    margin-bottom 9px
+    margin 0px
     margin-left auto
     margin-right auto
     width $icon-width
@@ -54,32 +64,43 @@ $big-elm-height   = 164px
       max-height $img-size
       margin 0px
       padding 0px
+  .centered-block
+    enable-flex(direction: column, alignContent:center, alignItems:center, justify:flex-start)
+  .action-circle
+    position absolute
+    background-color light-blue
+    right -12px
+    border-radius 30px
+    padding 5px
+    color white
+    border 1px solid
+    display none
+    box-shadow 0px 1px 1px rgba(0, 0, 0, 0.25)
+    font-size 14px
+    // z-index 1
 
   .connection-source
-    position absolute
-    background-color white
-    right -10px
-    top 10px
-    border-radius 18px
-    width 18px
-    height 18px
-    background-image url("../img/bb-chrome/btn-nodeLink.svg")
-    background-size 10px
-    background-position center
-    background-repeat no-repeat
-    border 2px solid
-    display none
+    top 5px
 
+  .graph-source
+    top 35px
+    font-size 12px
+  .top
+    height 72px
   &.selected
-    .connection-source
+    .action-circle
       display block
     box-shadow 0px 0px 3px hsla(0,0,0,0.3)
     background-color white
-    width $big-elm-width
-    height $big-elm-height
-    overflow hidden
+    height auto
+    .top
+      height auto
     .bottom
-      background-color lightgray
+      background-color light-gray
+      border-radius 0px 0px 5px 5px
+      box-sizing content-box
+      orverflow hidden
+      width $big-elm-width
     &:hover
       .img-background
         box-shadow 0px 0px 0px rgba(0, 0, 0, 0.0)
@@ -89,6 +110,8 @@ $big-elm-height   = 164px
     .img-background
       box-shadow 0px 1px 1px rgba(0, 0, 0, 0.25)
 
+    .node-title
+      text-decoration underline
 
   .node-title
     default-font(size:10px)
@@ -96,8 +119,33 @@ $big-elm-height   = 164px
     width $node-title-width
     text-align center
     cursor pointer
-    margin-bottom 0.5em
     word-wrap break-word
+    margin-top 10px
+    margin-bottom 8px
+  input[type=text].node-title
+    margin-top 6px
+    margin-bottom 4px
+    padding 0px
+  .untitled
+    italic-font(size:10px)
+
+  .value
+    margin-top 9px
+    margin 10px
+    margin-bottom 5px
+    enable-flex(direction: row, alignContent:center, alignItems:center, justify:center)
+    label
+      default-font(size:10px)
+      color: dark-blue
+      flex 1
+    input[type=text]
+      display block
+      background-color white
+      width 30px
+      margin-right 0px
+
+  .value-slider
+    margin 0px
 
   .delete-box
     margin 2px
@@ -117,8 +165,10 @@ $big-elm-height   = 164px
   opacity 0.0
 
 .node-link-target
-  opacity 0.0
-  z-index -10
+  opacity 0.2
+  z-index -1
+
+
 
 .label
   no-select()

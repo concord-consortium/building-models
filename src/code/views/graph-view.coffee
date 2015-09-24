@@ -14,6 +14,10 @@ module.exports = React.createClass
 
   displayName: 'LinkView'
   mixins: [ LinkStore.mixin ]
+
+  getDefaultProps: ->
+    linkTarget: '.img-background'
+
   componentDidMount: ->
     $container = $(@refs.container.getDOMNode())
 
@@ -150,13 +154,13 @@ module.exports = React.createClass
       @ignoringEvents = false
 
   _redrawTargets: ->
-    @diagramToolkit.makeSource $(@refs.linkView.getDOMNode()).find('.connection-source')
-    @diagramToolkit.makeTarget $(@refs.linkView.getDOMNode()).find '.elm'
+    @diagramToolkit.makeSource $(@refs.linkView.getDOMNode()).find '.connection-source'
+    @diagramToolkit.makeTarget $(@refs.linkView.getDOMNode()).find @props.linkTarget
 
   _redrawLinks: ->
     for link in @state.links
-      source = @_nodeForName link.sourceNode.key
-      target = @_nodeForName link.targetNode.key
+      source = $(@_nodeForName link.sourceNode.key).find(@props.linkTarget)
+      target = $(@_nodeForName link.targetNode.key).find(@props.linkTarget)
       isSelected = @props.selectionManager.isSelected(link)
       if source and target
         @diagramToolkit.addLink source, target, link.title, link.color, isSelected, link

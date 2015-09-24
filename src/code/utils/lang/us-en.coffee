@@ -20,6 +20,7 @@ module.exports =
   "~PUBLIC_LINK.OPEN": "Open public link"
 
   "~NODE.UNTITLED": "Untitled"
+  "~NODE.SIMULATION.VALUE": "Value"
   "~NODE-EDIT.TITLE": "Name"
   "~NODE-EDIT.COLOR": "Color"
   "~NODE-EDIT.IMAGE": "Image"
