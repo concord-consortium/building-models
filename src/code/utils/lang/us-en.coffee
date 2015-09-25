@@ -118,7 +118,11 @@ module.exports =
   "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?"
 
 
-  "~DOCUMENT.ACTIONS.RUN_SIMULATION": "Run simulation"
+  "~DOCUMENT.ACTIONS.SIMULATE": "Simulate"
+  "~DOCUMENT.ACTIONS.RUN": "Run"
+  "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Save to graphs"
+  "~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS": "Show mini-graphs"
+  "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode"
   "~DOCUMENT.ACTIONS.UNDO": "Undo"
   "~DOCUMENT.ACTIONS.REDO": "Redo"
   "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n
