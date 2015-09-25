@@ -1,4 +1,5 @@
 Dropdown        = React.createFactory require './dropdown-view'
+ValueSlider     = React.createFactory require './value-slider-view'
 SimulationStore = require '../stores/simulation-store'
 tr              = require '../utils/translate'
 {div, span, i, input, label}  = React.DOM
@@ -29,20 +30,13 @@ module.exports = React.createClass
           (div {className: "row"},
             (Dropdown {anchor: "Years", items: []})
           )
-          (div {className: "row"},
-            (div {className: "full"},
-              (input {
-                className: "full"
-                type: "range"
-                min: "0"
-                max: "10"
-                value: "0"}
-              )
+          (div {className: "row tall"},
+            (ValueSlider {
+              min: "0"
+              max: "10"
+              value: "0"
+              width: "180"}
             )
-          )
-          (div {className: "row short split"},
-            (span {}, "0")
-            (span {}, "10")
           )
           (div {className: "row"},
             (div {className: "button", onClick: @props.runSimulation},
@@ -77,12 +71,13 @@ module.exports = React.createClass
           )
           (div {className: "row left"},
             "Speed"
-            (input {
-              className: "wide"
-              type: "range"
-              min: "0"
-              max: "10"
-              value: "0"}
+            (div {style: {margin: "-3px 0 3px 7px"}},
+              (ValueSlider {
+                min: "0"
+                max: "10"
+                value: "10"
+                width: "140"}
+              )
             )
           )
           (div {className: "row left"},
