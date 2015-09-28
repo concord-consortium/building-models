@@ -10,15 +10,37 @@ ValueSlider = React.createClass
     max: 100
     value: 50
     handleSize: 16
+    minEditable: false
+    maxEditable: false
     onValueChange: (v) ->
       log.info "new value #{v}"
+    onRangeChange: (r) ->
+      log.info "new range #{r.min}, #{r.max}"
 
   getInitialState: ->
     dragging: false
+    "editing-min": false
+    "editing-max": false
 
   updateValue: (xValue,dragging) ->
     value = @valueFromSliderUI(xValue)
     @props.onValueChange value
+
+  updateRange: (property, value) ->
+    range =
+      min: @props.min
+      max: @props.max
+    range[property] = value
+
+    #normalize
+    if property is "max"
+      range.min = Math.min range.min, range.max
+    else
+      range.max = Math.max range.min, range.max
+    if @props.value < range.min or @props.value > range.max
+      value = Math.max range.min, Math.min range.max, @props.value
+      @props.onValueChange value
+    @props.onRangeChange range
 
   componentDidMount: ->
     handle   = @refs.handle or @
@@ -75,10 +97,42 @@ ValueSlider = React.createClass
       )
     )
 
+  renderEditableProperty: (property) ->
+    isEditable = @props["#{property}Editable"]
+
+    swapState = =>
+      # if not editable, ignore
+      return if not isEditable
+      # first copy state value to model if we were editing
+      if @state["editing-#{property}"]
+        newValue = parseInt React.findDOMNode(this.refs.focusable)?.value
+        if newValue? then @updateRange property, newValue
+      @setState "editing-#{property}": not @state["editing-#{property}"], ->
+        React.findDOMNode(this.refs.focusable)?.focus()
+
+    keyDown = (evt) ->
+      if evt.key is 'Enter'
+        swapState()
+
+    classNames = property
+    if isEditable then classNames += " editable"
+
+    if not @state["editing-#{property}"]
+      (div {className: classNames, onClick: swapState}, @props[property])
+    else
+      (input {
+        className: property
+        type: 'number'
+        defaultValue: @props[property]
+        onBlur: swapState
+        onKeyDown: keyDown
+        ref: 'focusable'}
+      )
+
   renderLegend: ->
     (div {className:"legend"},
-      (div {className: "min"}, @props.min)
-      (div {className: "max"}, @props.max)
+      @renderEditableProperty "min"
+      @renderEditableProperty "max"
     )
 
   render: ->
@@ -105,11 +159,24 @@ Slider = React.createFactory ValueSlider
 Demo = React.createClass
   getInitialState: ->
     value: 50
+    min: 0
+    max: 100
   onValueChange: (v) ->
     @setState({value: v})
+  onRangeChange: (range) ->
+    @setState
+      min: range.min
+      max: range.max
   render: ->
     (div {},
-      Slider {value: @state.value, onValueChange: @onValueChange}
+      Slider
+        value: @state.value
+        min: @state.min
+        max: @state.max
+        minEditable: true
+        maxEditable: true
+        onValueChange: @onValueChange
+        onRangeChange: @onRangeChange
     )
 
 window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
