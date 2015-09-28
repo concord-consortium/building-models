@@ -14,17 +14,10 @@ ValueSlider = React.createClass
       log.info "new value #{v}"
 
   getInitialState: ->
-    value = _.clone @props.value
-    value = if value > @props.max then @props.max else value
-    value = if value < @props.min then @props.min else value
-    value: value
     dragging: false
 
   updateValue: (xValue,dragging) ->
     value = @valueFromSliderUI(xValue)
-    @setState
-      'value': value
-      'dragging': dragging
     @props.onValueChange value
 
   componentDidMount: ->
@@ -33,12 +26,14 @@ ValueSlider = React.createClass
       axis: "x"
       containment: "parent"
       start: (event, ui) =>
+        @setState 'dragging': true
         @updateValue ui.position.left, true
 
       drag: (event, ui) =>
         @updateValue ui.position.left, true
 
       stop: (event, ui) =>
+        @setState 'dragging': false
         @updateValue ui.position.left, false
 
   valueFromSliderUI: (displayX) ->
@@ -48,7 +43,7 @@ ValueSlider = React.createClass
     return newV
 
   sliderLocation: ->
-    (@state.value - @props.min) / (@props.max - @props.min)
+    (@props.value - @props.min) / (@props.max - @props.min)
 
   sliderPercent: ->
     (@sliderLocation() * 100)
@@ -59,7 +54,7 @@ ValueSlider = React.createClass
 
     if @state.dragging
       style.display = "block"
-    (div {className: "number", style: style}, Math.round(@state.value))
+    (div {className: "number", style: style}, Math.round(@props.value))
 
   renderHandle: ->
     width = height = "#{@props.handleSize}px"
@@ -92,7 +87,7 @@ ValueSlider = React.createClass
       padding: "0px"
       border: "0px"
       width: "#{@props.width}px"
-      "min-height":"#{@props.height}px"
+      minHeight:"#{@props.height}px"
     circleRadius = 2
     (div {className: "value-slider", style: style},
       (svg {className: "svg-background", width: "#{@props.width}px", height:"#{@props.height}px", viewBox: "0 0 #{@props.width} #{@props.height}"},
@@ -106,5 +101,15 @@ ValueSlider = React.createClass
 
 
 module.exports = ValueSlider
-myView = React.createFactory ValueSlider
-window.testComponent = (domID) -> React.render myView({}), domID
+Slider = React.createFactory ValueSlider
+Demo = React.createClass
+  getInitialState: ->
+    value: 50
+  onValueChange: (v) ->
+    @setState({value: v})
+  render: ->
+    (div {},
+      Slider {value: @state.value, onValueChange: @onValueChange}
+    )
+
+window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
