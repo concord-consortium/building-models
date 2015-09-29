@@ -23,7 +23,6 @@ window.initApp = (wireframes=false) ->
     data: HashParams.getParam 'data'
     googleDoc: HashParams.getParam 'googleDoc'
 
-  opts.codapConnect = CodapConnect.instance 'building-models'
   appView = AppView opts
   elem = '#app'
 

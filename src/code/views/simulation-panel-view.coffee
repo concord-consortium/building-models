@@ -16,8 +16,13 @@ module.exports = React.createClass
     else
       SimulationStore.actions.expandSimulationPanel()
 
+  stepsRangeChanged: (r) ->
+    SimulationStore.actions.setRunSteps r.max
+
   render: ->
     expanded = if @state.expanded then "expanded" else "collapsed"
+    runButtonClasses = "button"
+    if not @state.graphIsValid then runButtonClasses += " disabled error"
     (div {className: 'simulation-panel-wrapper'},
       (div {className: "top-button #{expanded}", onClick: @toggle},
         (div {},
@@ -32,14 +37,16 @@ module.exports = React.createClass
           )
           (div {className: "row tall"},
             (ValueSlider {
-              min: "0"
-              max: "10"
-              value: "0"
-              width: "180"}
+              min: 0
+              max: @state.runSteps
+              value: 0
+              width: 180
+              maxEditable: true
+              onRangeChange: @stepsRangeChanged}
             )
           )
           (div {className: "row"},
-            (div {className: "button", onClick: @props.runSimulation},
+            (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
               tr "~DOCUMENT.ACTIONS.RUN"
               (i {className: "ivy-icon-play"})
             )
@@ -73,10 +80,10 @@ module.exports = React.createClass
             "Speed"
             (div {style: {margin: "-3px 0 3px 7px"}},
               (ValueSlider {
-                min: "0"
-                max: "10"
-                value: "10"
-                width: "140"}
+                min: 0
+                max: 10
+                value: 10
+                width: 140}
               )
             )
           )
