@@ -16,6 +16,9 @@ module.exports = React.createClass
     else
       SimulationStore.actions.expandSimulationPanel()
 
+  stepsRangeChanged: (r) ->
+    SimulationStore.actions.setRunSteps r.max
+
   render: ->
     expanded = if @state.expanded then "expanded" else "collapsed"
     runButtonClasses = "button"
@@ -34,10 +37,12 @@ module.exports = React.createClass
           )
           (div {className: "row tall"},
             (ValueSlider {
-              min: "0"
-              max: "10"
-              value: "0"
-              width: "180"}
+              min: 0
+              max: @state.runSteps
+              value: 0
+              width: 180
+              maxEditable: true
+              onRangeChange: @stepsRangeChanged}
             )
           )
           (div {className: "row"},
@@ -75,10 +80,10 @@ module.exports = React.createClass
             "Speed"
             (div {style: {margin: "-3px 0 3px 7px"}},
               (ValueSlider {
-                min: "0"
-                max: "10"
-                value: "10"
-                width: "140"}
+                min: 0
+                max: 10
+                value: 10
+                width: 140}
               )
             )
           )

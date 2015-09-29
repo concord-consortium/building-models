@@ -8,6 +8,7 @@ SimulationActions = Reflux.createActions(
     "expandSimulationPanel"
     "collapseSimulationPanel"
     "runSimulation"
+    "setRunSteps"
   ]
 )
 
@@ -18,6 +19,7 @@ SimulationStore   = Reflux.createStore
     @settings =
       expanded: false
       graphIsValid: true
+      runSteps: 10
     @codapConnect = CodapConnect.instance 'building-models'
 
 
@@ -35,11 +37,17 @@ SimulationStore   = Reflux.createStore
     @settings.graphIsValid = simulator.graphIsValid()
     @notifyChange()
 
+  onSetRunSteps: (n) ->
+    @settings.runSteps = n
+    @notifyChange()
+
   onRunSimulation: ->
     if @settings.graphIsValid
+      steps = @settings.runSteps
+      steps = Math.min steps, 5000
       simulator = new Simulation
         nodes: GraphStore.getNodes()
-        duration: 10
+        duration: steps
         timeStep: 1
         reportFunc: (report) =>
           log.info report
