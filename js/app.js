@@ -56236,7 +56236,7 @@ tr = require('../utils/translate');
 module.exports = Node = (function(superClass) {
   extend(Node, superClass);
 
-  Node.fields = ['title', 'image', 'color', 'paletteItem', 'initialValue', 'min', 'max', 'isAccumulator', 'valueDefinedSemiQuantitatively'];
+  Node.fields = ['title', 'image', 'color', 'paletteItem', 'initialValue', 'min', 'max', 'value', 'isAccumulator', 'valueDefinedSemiQuantitatively'];
 
   function Node(nodeSpec, key) {
     if (nodeSpec == null) {
@@ -56390,6 +56390,10 @@ module.exports = Node = (function(superClass) {
       },
       key: this.key
     };
+  };
+
+  Node.prototype.canEditValue = function() {
+    return this.inLinks().length === 0 || this.isAccumulator;
   };
 
   Node.prototype.paletteItemIs = function(paletteItem) {
@@ -57580,6 +57584,7 @@ GraphStore = Reflux.createStore({
         paletteItem: node.paletteItem,
         color: node.color,
         initialValue: node.initialValue,
+        value: node.value || node.initialValue,
         min: node.min,
         max: node.max,
         isAccumulator: node.isAccumulator,
@@ -61926,7 +61931,7 @@ module.exports = React.createClass({
   render: function() {
     var canEditValue, node;
     node = this.props.node;
-    canEditValue = node.inLinks().length === 0 || node.isAccumulator;
+    canEditValue = node.canEditValue();
     return div({
       className: 'value-inspector'
     }, div({
@@ -62118,6 +62123,7 @@ module.exports = NodeView = React.createClass({
       },
       selected: falsepreviewImageClassName = "img-background link-target",
       simulating: false,
+      value: null,
       data: {
         title: "foo",
         x: 10,
@@ -62152,6 +62158,11 @@ module.exports = NodeView = React.createClass({
       syntheticEvent: evt
     });
   },
+  changeValue: function(newValue) {
+    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {
+      initialValue: newValue
+    });
+  },
   changeTitle: function(newTitle) {
     this.props.graphStore.startNodeEdit();
     log.info("Title is changing to " + newTitle);
@@ -62170,13 +62181,30 @@ module.exports = NodeView = React.createClass({
     return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
   },
   renderValue: function() {
+    var value;
+    value = this.props.data.value || this.props.data.initialValue;
+    value = Math.round(value);
     return div({
       className: "value"
     }, label({}, tr("~NODE.SIMULATION.VALUE")), input({
       type: "text",
       className: "value",
-      value: this.props.value
+      value: value
     }));
+  },
+  renderSliderView: function() {
+    if (this.props.data.canEditValue()) {
+      return SliderView({
+        width: 70,
+        onValueChange: this.changeValue,
+        value: this.props.data.initialValue,
+        displaySemiQuant: this.props.data.valueDefinedSemiQuantitatively,
+        max: this.props.data.max,
+        min: this.props.data.min
+      });
+    } else {
+      return null;
+    }
   },
   render: function() {
     var className, style;
@@ -62230,11 +62258,7 @@ module.exports = NodeView = React.createClass({
       className: 'bottom centered-block'
     }, this.props.simulating ? this.props.selected ? div({
       className: 'centered-block'
-    }, this.renderValue(), SliderView({
-      width: 70
-    })) : SliderView({
-      width: 70
-    }) : void 0));
+    }, this.renderValue(), this.renderSliderView()) : this.renderSliderView() : void 0));
   }
 });
 
