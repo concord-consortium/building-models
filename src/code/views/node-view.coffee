@@ -1,13 +1,12 @@
-{input, div, i, img} = React.DOM
+{input, div, i, img, span, label} = React.DOM
 tr = require "../utils/translate"
 
 SquareImage = React.createFactory require "./square-image-view"
+SliderView  = React.createFactory require "./value-slider-view"
 
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
   mixins: [require '../mixins/node-title']
-  getDefaultProps: ->
-
 
   componentWillUnmount: ->
     if @props.isEditing
@@ -39,7 +38,10 @@ NodeTitle = React.createFactory React.createClass
     @props.onStopEditing()
 
   renderTitle: ->
-    (div {className: "node-title", onClick: @props.onStartEditing }, @props.title)
+    className = "node-title"
+    if @isDefaultTitle()
+      className = "node-title untitled"
+    (div {className: className, onClick: @props.onStartEditing }, @props.title)
 
   renderTitleInput: ->
     displayTitle = @displayTitleForInput(@props.title)
@@ -63,14 +65,20 @@ NodeTitle = React.createFactory React.createClass
         @renderTitle()
     )
 
-module.exports = React.createClass
+module.exports = NodeView = React.createClass
 
   displayName: "NodeView"
+
+  componentDidUpdate: ->
+    handle = '.img-background'
+    if @props.selected
+      handle = null
+    $elem = $(@refs.node.getDOMNode())
+    $elem.draggable( "option", "handle", handle)
 
   componentDidMount: ->
     $elem = $(@refs.node.getDOMNode())
     $elem.draggable
-      # grid: [ 10, 10 ]
       drag: @doMove
       stop: @doStop
       containment: "parent"
@@ -94,6 +102,13 @@ module.exports = React.createClass
     onStop:   -> log.info "internal move handler"
     onDelete: -> log.info "internal on-delete handler"
     onSelect: -> log.info "internal select handler"
+    selected: falsepreviewImageClassName = "img-background link-target"
+    simulating: false
+    data:
+      title: "foo"
+      x: 10
+      y: 10
+      color: "dark-blue"
 
   doMove: (evt, extra) ->
     @props.onMove
@@ -133,6 +148,12 @@ module.exports = React.createClass
   isEditing: ->
     @props.selectionManager.isSelectedForTitleEditing(@props.data)
 
+  renderValue: ->
+    (div {className: "value"},
+      (label {}, tr "~NODE.SIMULATION.VALUE")
+      (input  {type: "text", className: "value", value: @props.value})
+    )
+
   render: ->
     style =
       top: @props.data.y
@@ -141,21 +162,73 @@ module.exports = React.createClass
     className = "elm"
     if @props.selected
       className = "#{className} selected"
+
     (div { className: className, ref: "node", style: style, "data-node-key": @props.nodeKey},
-      (div {
-        className: "img-background"
-        onClick: (=> @handleSelected true)
-        onTouchend: (=> @handleSelected true)
-        },
-        (SquareImage {image: @props.data.image})
-        if @props.selected
-          (div {className: "connection-source", "data-node-key": @props.nodeKey})
+      if @props.selected
+        (div {className: "actions"},
+          (div {className: "connection-source action-circle ivy-icon-link", "data-node-key": @props.nodeKey})
+          (div {className: "graph-source action-circle ivy-icon-graph", "data-node-key": @props.nodeKey})
+        )
+
+      (div {className: 'top'},
+        (div {
+          className: "img-background"
+          "data-node-key": @props.nodeKey
+          onClick: (=> @handleSelected true)
+          onTouchend: (=> @handleSelected true)
+          },
+          (SquareImage {image: @props.data.image, ref: "thumbnail"})
+        )
+        (NodeTitle {
+          isEditing: @props.editTitle
+          title: @props.data.title
+          onChange: @changeTitle
+          onStopEditing: @stopEditing
+          onStartEditing: @startEditing
+        })
       )
-      (NodeTitle {
-        isEditing: @props.editTitle
-        title: @props.data.title
-        onChange: @changeTitle
-        onStopEditing: @stopEditing
-        onStartEditing: @startEditing
-      })
+      (div {className: 'bottom centered-block'},
+        if @props.simulating
+          if @props.selected
+            (div {className: 'centered-block'},
+              @renderValue()
+              (SliderView {width: 70} )
+            )
+          else
+            (SliderView {width: 70} )
+      )
     )
+
+myView = React.createFactory NodeView
+
+groupView = React.createFactory React.createClass
+  render: ->
+    selectSimulated =
+      selected: true
+      simulating: true
+      data:
+        x: 50
+        y: 100
+        title: "selectSimulated"
+
+    simulated = _.clone selectSimulated, true
+    simulated.selected = false
+    simulated.data.x = 300
+
+    selected = _.clone selectSimulated, true
+    selected.simulating = false
+    selected.data.x = 500
+    selected.data.title = "selected"
+
+    unselected = _.clone selected, true
+    unselected.selected = false
+    unselected.data.x = 800
+    unselected.data.title = "unselected"
+    (div {className: "group"},
+      (myView selectSimulated)
+      (myView simulated)
+      (myView selected)
+      (myView unselected)
+    )
+
+window.testComponent = (domID) -> React.render groupView(), domID

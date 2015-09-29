@@ -11,7 +11,7 @@ module.exports = React.createClass
   mixins: [ SimulationStore.mixin ]
 
   toggle: ->
-    if @state.expanded
+    if @state.simulationPanelExpanded
       SimulationStore.actions.collapseSimulationPanel()
     else
       SimulationStore.actions.expandSimulationPanel()
@@ -20,7 +20,7 @@ module.exports = React.createClass
     SimulationStore.actions.setRunSteps r.max
 
   render: ->
-    expanded = if @state.expanded then "expanded" else "collapsed"
+    expanded = if @state.simulationPanelExpanded then "expanded" else "collapsed"
     runButtonClasses = "button"
     if not @state.graphIsValid then runButtonClasses += " disabled error"
     (div {className: 'simulation-panel-wrapper'},

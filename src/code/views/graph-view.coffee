@@ -8,12 +8,18 @@ PaletteStore     = require '../stores/palette-store'
 LinkStore        = require '../stores/graph-store'
 ImageDialogStore = require '../stores/image-dialog-store'
 
+SimulationStore  = require "../stores/simulation-store"
+
 {div} = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ LinkStore.mixin ]
+  mixins: [ LinkStore.mixin, SimulationStore.mixin ]
+
+  getDefaultProps: ->
+    linkTarget: '.img-background'
+
   componentDidMount: ->
     $container = $(@refs.container.getDOMNode())
 
@@ -150,13 +156,13 @@ module.exports = React.createClass
       @ignoringEvents = false
 
   _redrawTargets: ->
-    @diagramToolkit.makeSource $(@refs.linkView.getDOMNode()).find('.connection-source')
-    @diagramToolkit.makeTarget $(@refs.linkView.getDOMNode()).find '.elm'
+    @diagramToolkit.makeSource $(@refs.linkView.getDOMNode()).find '.connection-source'
+    @diagramToolkit.makeTarget $(@refs.linkView.getDOMNode()).find @props.linkTarget
 
   _redrawLinks: ->
     for link in @state.links
-      source = @_nodeForName link.sourceNode.key
-      target = @_nodeForName link.targetNode.key
+      source = $(@_nodeForName link.sourceNode.key).find(@props.linkTarget)
+      target = $(@_nodeForName link.targetNode.key).find(@props.linkTarget)
       isSelected = @props.selectionManager.isSelected(link)
       if source and target
         @diagramToolkit.addLink source, target, link.title, link.color, isSelected, link
@@ -204,6 +210,7 @@ module.exports = React.createClass
             key: node.key
             data: node
             selected: @state.selectedNode is node
+            simulating: @state.simulationPanelExpanded
             editTitle: @state.editingNode is node
             nodeKey: node.key
             ref: node.key
