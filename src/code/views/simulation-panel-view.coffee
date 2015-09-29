@@ -39,7 +39,7 @@ module.exports = React.createClass
             )
           )
           (div {className: "row"},
-            (div {className: "button", onClick: @props.runSimulation},
+            (div {className: "button", onClick: SimulationStore.actions.runSimulation},
               tr "~DOCUMENT.ACTIONS.RUN"
               (i {className: "ivy-icon-play"})
             )

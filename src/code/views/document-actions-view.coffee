@@ -32,9 +32,7 @@ module.exports = React.createClass
 
   renderRunLink: ->
     if @state.codapHasLoaded and not @props.diagramOnly
-      (SimulationPanel
-        runSimulation: @props.runSimulation
-      )
+      (SimulationPanel {})
 
   renderSettingsLink: ->
     (span {},

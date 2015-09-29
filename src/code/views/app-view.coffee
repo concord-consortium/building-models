@@ -58,8 +58,6 @@ module.exports = React.createClass
           })
           (DocumentActions
             graphStore: @props.graphStore
-            graphIsValid: @state.graphIsValid
-            runSimulation: @runSimulation
             diagramOnly: @state.diagramOnly
             iframed: @state.iframed
           )
