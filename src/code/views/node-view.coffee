@@ -104,6 +104,7 @@ module.exports = NodeView = React.createClass
     onSelect: -> log.info "internal select handler"
     selected: falsepreviewImageClassName = "img-background link-target"
     simulating: false
+    value: null
     data:
       title: "foo"
       x: 10
@@ -133,6 +134,9 @@ module.exports = NodeView = React.createClass
       domElement: @refs.node.getDOMNode()
       syntheticEvent: evt
 
+  changeValue: (newValue) ->
+    @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
+
   changeTitle: (newTitle) ->
     @props.graphStore.startNodeEdit()
     log.info "Title is changing to #{newTitle}"
@@ -149,10 +153,25 @@ module.exports = NodeView = React.createClass
     @props.selectionManager.isSelectedForTitleEditing(@props.data)
 
   renderValue: ->
+    value = @props.data.value or @props.data.initialValue
+    value = Math.round(value)
     (div {className: "value"},
       (label {}, tr "~NODE.SIMULATION.VALUE")
-      (input  {type: "text", className: "value", value: @props.value})
+      (input  {type: "text", className: "value", value: value})
     )
+
+  renderSliderView: ->
+    if @props.data.canEditValue()
+      (SliderView
+        width: 70
+        onValueChange: @changeValue
+        value: @props.data.initialValue
+        displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
+        max: @props.data.max
+        min: @props.data.min
+      )
+    else
+      null
 
   render: ->
     style =
@@ -192,10 +211,10 @@ module.exports = NodeView = React.createClass
           if @props.selected
             (div {className: 'centered-block'},
               @renderValue()
-              (SliderView {width: 70} )
+              @renderSliderView()
             )
           else
-            (SliderView {width: 70} )
+            @renderSliderView()
       )
     )
 
