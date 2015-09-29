@@ -8,24 +8,20 @@ PaletteStore     = require '../stores/palette-store'
 LinkStore        = require '../stores/graph-store'
 ImageDialogStore = require '../stores/image-dialog-store'
 
-SimulationStore  = (require "../stores/simulation-store").store
+SimulationStore  = require "../stores/simulation-store"
 
 {div} = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ LinkStore.mixin ]
+  mixins: [ LinkStore.mixin, SimulationStore.mixin]
 
   getDefaultProps: ->
     linkTarget: '.img-background'
 
   componentDidMount: ->
     $container = $(@refs.container.getDOMNode())
-    SimulationStore.listen (newState) =>
-      # TODO: there might be other ways of detecting this.
-      @setState
-        simulating: newState.expanded
 
     @diagramToolkit = new DiagramToolkit $container,
       Container:     $container[0]
@@ -102,7 +98,6 @@ module.exports = React.createClass
     editingNode: null
     selectedLink: null
     canDrop: false
-    simulating: SimulationStore.settings.expanded
 
   componentWillUpdate: ->
     @diagramToolkit?.clear?()
