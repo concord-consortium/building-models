@@ -18,6 +18,8 @@ module.exports = React.createClass
 
   render: ->
     expanded = if @state.expanded then "expanded" else "collapsed"
+    runButtonClasses = "button"
+    if not @state.graphIsValid then runButtonClasses += " disabled error"
     (div {className: 'simulation-panel-wrapper'},
       (div {className: "top-button #{expanded}", onClick: @toggle},
         (div {},
@@ -39,7 +41,7 @@ module.exports = React.createClass
             )
           )
           (div {className: "row"},
-            (div {className: "button", onClick: SimulationStore.actions.runSimulation},
+            (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
               tr "~DOCUMENT.ACTIONS.RUN"
               (i {className: "ivy-icon-play"})
             )
