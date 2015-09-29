@@ -69,10 +69,6 @@ module.exports = NodeView = React.createClass
 
   displayName: "NodeView"
 
-  renableDragging: ->
-
-    $elem.draggable dragOpts
-
   componentDidUpdate: ->
     handle = '.img-background'
     if @props.selected
