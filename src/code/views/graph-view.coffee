@@ -8,6 +8,8 @@ PaletteStore     = require '../stores/palette-store'
 LinkStore        = require '../stores/graph-store'
 ImageDialogStore = require '../stores/image-dialog-store'
 
+SimulationStore  = (require "../stores/simulation-store").store
+
 {div} = React.DOM
 
 module.exports = React.createClass
@@ -20,6 +22,10 @@ module.exports = React.createClass
 
   componentDidMount: ->
     $container = $(@refs.container.getDOMNode())
+    SimulationStore.listen (newState) =>
+      # TODO: there might be other ways of detecting this.
+      @setState
+        simulating: newState.expanded
 
     @diagramToolkit = new DiagramToolkit $container,
       Container:     $container[0]
@@ -96,6 +102,7 @@ module.exports = React.createClass
     editingNode: null
     selectedLink: null
     canDrop: false
+    simulating: SimulationStore.settings.expanded
 
   componentWillUpdate: ->
     @diagramToolkit?.clear?()
@@ -208,6 +215,7 @@ module.exports = React.createClass
             key: node.key
             data: node
             selected: @state.selectedNode is node
+            simulating: @state.simulating
             editTitle: @state.editingNode is node
             nodeKey: node.key
             ref: node.key

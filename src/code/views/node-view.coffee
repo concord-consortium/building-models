@@ -107,7 +107,7 @@ module.exports = NodeView = React.createClass
     onDelete: -> log.info "internal on-delete handler"
     onSelect: -> log.info "internal select handler"
     selected: falsepreviewImageClassName = "img-background link-target"
-    simulating: true
+    simulating: false
     data:
       title: "foo"
       x: 10
