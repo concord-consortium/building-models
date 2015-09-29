@@ -15,7 +15,7 @@ SimulationStore  = require "../stores/simulation-store"
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ LinkStore.mixin, SimulationStore.mixin]
+  mixins: [ LinkStore.mixin, SimulationStore.mixin ]
 
   getDefaultProps: ->
     linkTarget: '.img-background'
@@ -210,7 +210,7 @@ module.exports = React.createClass
             key: node.key
             data: node
             selected: @state.selectedNode is node
-            simulating: @state.simulating
+            simulating: @state.simulationPanelExpanded
             editTitle: @state.editingNode is node
             nodeKey: node.key
             ref: node.key

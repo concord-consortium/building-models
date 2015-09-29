@@ -17,21 +17,18 @@ SimulationStore   = Reflux.createStore
 
   init: ->
     @settings =
-      expanded: false
-      simulating: false
+      simulationPanelExpanded: false
       graphIsValid: true
       runSteps: 10
     @codapConnect = CodapConnect.instance 'building-models'
 
 
   onExpandSimulationPanel: ->
-    @settings.expanded = true
-    @settings.simulating = true
+    @settings.simulationPanelExpanded = true
     @notifyChange()
 
   onCollapseSimulationPanel: ->
-    @settings.expanded = false
-    @settings.simulating = false
+    @settings.simulationPanelExpanded = false
     @notifyChange()
 
   onModelChanged: ->
