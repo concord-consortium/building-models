@@ -17,7 +17,10 @@ module.exports = React.createClass
       SimulationStore.actions.expandSimulationPanel()
 
   stepsRangeChanged: (r) ->
-    SimulationStore.actions.setRunSteps r.max
+    SimulationStore.actions.setPeriod r.max
+
+  setStepSize: (e) ->
+    SimulationStore.actions.setStepSize parseInt e.target.value
 
   render: ->
     expanded = if @state.simulationPanelExpanded then "expanded" else "collapsed"
@@ -33,12 +36,17 @@ module.exports = React.createClass
       (div {className: "simulation-panel #{expanded}"},
         (div {className: "run-panel"},
           (div {className: "row"},
-            (Dropdown {anchor: "Years", items: []})
+            (Dropdown {
+              isActionMenu: false
+              onSelect: SimulationStore.actions.setPeriodUnits
+              anchor: @state.periodUnitsName
+              items: @state.timeUnitOptions
+            })
           )
           (div {className: "row tall"},
             (ValueSlider {
               min: 0
-              max: @state.runSteps
+              max: @state.period
               value: 0
               width: 180
               maxEditable: true
@@ -92,11 +100,17 @@ module.exports = React.createClass
             (input {
               className: 'left'
               type: "number"
-              size: "3"
-              value: 1
-              min: "0"}
-            )
-            (Dropdown {anchor: "Year", items: []})
+              style: {width: "#{Math.max 3, (@state.stepSize.toString().length+1)}em"}
+              value: @state.stepSize
+              min: "0"
+              onChange: @setStepSize
+            })
+            (Dropdown {
+              isActionMenu: false
+              onSelect: SimulationStore.actions.setStepUnits
+              anchor: @state.stepUnitsName
+              items: @state.timeUnitOptions
+            })
           )
         )
       )
