@@ -18,6 +18,8 @@ class Manager
 
     # listen to all our actions
     @endCommandBatch.listen @_endComandBatch, @
+    @undo.listen @_undo, @
+    @redo.listen @_redo, @
 
   startCommandBatch: ->
     @currentBatch = new CommandBatch() unless @currentBatch
@@ -52,7 +54,9 @@ class Manager
     @log() if @debug
     result
 
-  undo: ->
+  undo: Reflux.createAction()
+
+  _undo: ->
     if @canUndo()
       result = @commands[@stackPosition].undo @debug
       @stackPosition--
@@ -65,7 +69,9 @@ class Manager
   canUndo: ->
     return @stackPosition >= 0
 
-  redo: ->
+  redo: Reflux.createAction()
+
+  _redo: ->
     if @canRedo()
       @stackPosition++
       result = @commands[@stackPosition].redo @debug
