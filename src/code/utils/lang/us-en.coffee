@@ -138,3 +138,19 @@ module.exports =
   "~RELATIONSHIP.NO_RELATION": "No relation defined"
 
   "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
+
+  "~TIME.SECOND": "Second"
+  "~TIME.MINUTE": "Minute"
+  "~TIME.HOUR":   "Hour"
+  "~TIME.DAY":    "Day"
+  "~TIME.WEEK":   "Week"
+  "~TIME.MONTH":  "Month"
+  "~TIME.YEAR":   "Year"
+
+  "~TIME.SECOND.PLURAL": "Seconds"
+  "~TIME.MINUTE.PLURAL": "Minutes"
+  "~TIME.HOUR.PLURAL":   "Hours"
+  "~TIME.DAY.PLURAL":    "Days"
+  "~TIME.WEEK.PLURAL":   "Weeks"
+  "~TIME.MONTH.PLURAL":  "Months"
+  "~TIME.YEAR.PLURAL":   "Years"
