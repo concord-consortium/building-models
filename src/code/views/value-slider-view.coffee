@@ -144,7 +144,7 @@ ValueSlider = React.createClass
       padding: "0px"
       border: "0px"
       width: "#{@props.width}px"
-      minHeight:"#{@props.height}px"
+      minHeight:"#{@props.height + lengendHeight}px"
     circleRadius = 2
     (div {className: "value-slider", style: style},
       (svg {className: "svg-background", width: "#{@props.width}px", height:"#{@props.height}px", viewBox: "0 0 #{@props.width} #{@props.height}"},
