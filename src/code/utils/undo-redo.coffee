@@ -3,7 +3,9 @@ CodapConnect = require '../models/codap-connect'
 
 DEFAULT_CONTEXT_NAME = 'building-models'
 
-internalEndCommandBatchAction = Reflux.createAction()
+# Note: We use several actions, because they hook into Reflux's dispatching system
+# which puts actions in a stack before calling them. We frequently want to ensure
+# that all other actions have completed before, e.g., we end a commandBatch.
 
 class Manager
   constructor: (options = {}) ->
@@ -13,17 +15,16 @@ class Manager
     @savePosition = -1
     @changeListeners = []
     @currentBatch = null
-    internalEndCommandBatchAction.listen @_finalizeEndComandBatch, @
+
+    # listen to all our actions
+    @endCommandBatch.listen @_endComandBatch, @
 
   startCommandBatch: ->
     @currentBatch = new CommandBatch() unless @currentBatch
 
-  endCommandBatch: ->
-    # calling this via an action pushes it to the end of the
-    # command stack, allowing any other commands to execute first
-    internalEndCommandBatchAction()
+  endCommandBatch: Reflux.createAction()
 
-  _finalizeEndComandBatch: ->
+  _endComandBatch: ->
     if @currentBatch
       @commands.push @currentBatch
       @stackPosition++
