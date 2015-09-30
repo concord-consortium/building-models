@@ -18,7 +18,7 @@ module.exports = React.createClass
   mixins: [ LinkStore.mixin, SimulationStore.mixin ]
 
   getDefaultProps: ->
-    linkTarget: '.img-background'
+    linkTarget: '.link-target'
 
   componentDidMount: ->
     $container = $(@refs.container.getDOMNode())
