@@ -126,7 +126,6 @@ module.exports = React.createClass
             (input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked})
             (label {}, tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR")
           )
-          (i {className: "fa fa-question-circle"})
         )
       )
 

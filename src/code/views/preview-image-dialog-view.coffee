@@ -21,7 +21,7 @@ module.exports = React.createClass
       (div {className: 'preview-image'},
         (img {src: @props.imageInfo?.image})
         (a {href: '#', onClick: @cancel},
-          (i {className: "fa fa-close"})
+          (i {className: "ivy-icon-ex"})
           'cancel'
         )
       )

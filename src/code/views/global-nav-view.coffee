@@ -59,7 +59,7 @@ module.exports = React.createClass
       )
       if @state.action
         (div {},
-          (i {className: "fa fa-cog fa-spin"})
+          (i {className: "ivy-icon-options spin"})
           @state.action
         )
       (ModalGoogleSave {
@@ -77,7 +77,7 @@ module.exports = React.createClass
         (OpenInCodap { disabled: @state.dirty })
         (span {className: 'mockup-only'}, @props.username),
         (span {className: 'mockup-only'},
-          (i {className: 'fa fa-2x fa-question-circle'})
+          (i {style: {fontSize: "13px"}, className: 'ivy-icon-help'})
         )
       )
     )

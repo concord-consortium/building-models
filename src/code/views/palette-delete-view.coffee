@@ -20,7 +20,7 @@ module.exports = React.createClass
   renderArrow: ->
     if @props.showReplacement
       (div {className: "vertical-content"},
-        (i {className: 'arrow-div fa fa-arrow-right'})
+        (i {className: 'arrow-div ivy-icon-inspectorArrow-collapse'})
       )
 
   renderReplacement: ->

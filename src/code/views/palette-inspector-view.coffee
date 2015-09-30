@@ -28,7 +28,7 @@ module.exports = React.createClass
       (div {className: 'palette', ref: 'palette'},
         (div {},
           (PaletteAddView {})
-          
+
           # _.forEach @state.palette, (node,index) =>
           _.map @state.palette, (node, index) =>
             (PaletteItemView {
@@ -44,7 +44,7 @@ module.exports = React.createClass
       if @state.selectedPaletteItem
         (div {className: 'palette-about-image'},
           (div {className: 'palette-about-image-title'},
-            (i {className: "fa fa-info-circle"})
+            (i {className: "ivy-icon-info"})
             (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
             (img {src: @state.selectedPaletteImage})
           )
@@ -52,12 +52,12 @@ module.exports = React.createClass
             (div {className: 'palette-delete', onClick: @delete},
               if @state.paletteItemHasNodes
                 (span {},
-                  (i {className: "fa fa-recycle"})
+                  (i {className: "ivy-icon-swapAxis"})
                   (label {}, tr '~PALETTE-INSPECTOR.REPLACE')
                 )
               else
                 (span {},
-                  (i {className: "fa fa-trash"})
+                  (i {className: "ivy-icon-trash"})
                   (label {}, tr '~PALETTE-INSPECTOR.DELETE')
                 )
             )
