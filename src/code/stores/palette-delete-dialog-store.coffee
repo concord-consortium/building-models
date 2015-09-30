@@ -60,7 +60,7 @@ store = Reflux.createStore
     if @replacement and @deleted
       PaletteStore.actions.selectPaletteItem @replacement
     else if not @deleted
-      @undoManger.undo()
+      @undoManger.undo(true)
       PaletteStore.actions.restoreSelection()
 
 

@@ -56,10 +56,13 @@ class Manager
 
   undo: Reflux.createAction()
 
-  _undo: ->
+  # @param drop: calling undo(true) will clear the redo stack. When called on
+  # the last item, this is equivalent to throwing away the undone action.
+  _undo: (drop) ->
     if @canUndo()
       result = @commands[@stackPosition].undo @debug
       @stackPosition--
+      if drop then @_clearRedo()
       @_changed()
       @log() if @debug
       result
