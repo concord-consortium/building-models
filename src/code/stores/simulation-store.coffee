@@ -77,7 +77,7 @@ SimulationStore   = Reflux.createStore
 
   onRunSimulation: ->
     if @settings.graphIsValid
-      steps = @settings.period
+      steps = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
       steps = Math.min steps, 5000
       simulator = new Simulation
         nodes: GraphStore.getNodes()
