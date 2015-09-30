@@ -1,6 +1,7 @@
 GraphStore   = require('./graph-store').store
 Simulation   = require "../models/simulation"
 CodapConnect = require '../models/codap-connect'
+TimeUnits    = require '../utils/time-units'
 tr           = require '../utils/translate'
 
 SimulationActions = Reflux.createActions(
@@ -8,7 +9,10 @@ SimulationActions = Reflux.createActions(
     "expandSimulationPanel"
     "collapseSimulationPanel"
     "runSimulation"
-    "setRunSteps"
+    "setPeriod"
+    "setPeriodUnits"
+    "setStepSize"
+    "setStepUnits"
   ]
 )
 
@@ -16,10 +20,21 @@ SimulationStore   = Reflux.createStore
   listenables: [SimulationActions]
 
   init: ->
+    defaultUnit = TimeUnits.defaultUnit
+    unitName    = TimeUnits.toString defaultUnit
+    unitNamePl  = TimeUnits.toString defaultUnit, true
+    options = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
+
     @settings =
       simulationPanelExpanded: false
       graphIsValid: true
-      runSteps: 10
+      period: 10
+      periodUnits: defaultUnit
+      periodUnitsName: unitNamePl
+      stepSize: 1
+      stepUnits: defaultUnit
+      stepUnitsName: unitName
+      timeUnitOptions: options
     @codapConnect = CodapConnect.instance 'building-models'
 
 
@@ -37,13 +52,32 @@ SimulationStore   = Reflux.createStore
     @settings.graphIsValid = simulator.graphIsValid()
     @notifyChange()
 
-  onSetRunSteps: (n) ->
-    @settings.runSteps = n
+  onSetPeriod: (n) ->
+    @settings.period = n
     @notifyChange()
+
+  onSetPeriodUnits: (unit) ->
+    @settings.periodUnits = unit.unit
+    @settings.periodUnitsName = TimeUnits.toString unit.unit, true
+    @notifyChange()
+
+  onSetStepSize: (n) ->
+    @settings.stepSize = n
+    @_setStepUnitName()
+    @notifyChange()
+
+  onSetStepUnits: (unit) ->
+    @settings.stepUnits = unit.unit
+    @_setStepUnitName()
+    @notifyChange()
+
+  _setStepUnitName: ->
+    pluralize = @settings.stepSize != 1
+    @settings.stepUnitsName = TimeUnits.toString @settings.stepUnits, pluralize
 
   onRunSimulation: ->
     if @settings.graphIsValid
-      steps = @settings.runSteps
+      steps = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
       steps = Math.min steps, 5000
       simulator = new Simulation
         nodes: GraphStore.getNodes()
