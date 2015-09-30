@@ -9,7 +9,8 @@ DropdownItem = React.createFactory React.createClass
 
   render: ->
     className = "menuItem #{if @props.isActionMenu and not @props.item.action then 'disabled' else ''}"
-    (li {key: @props.name, className: className, onClick: @clicked }, @props.name)
+    name = @props.item.name or @props.item
+    (li {className: className, onClick: @clicked }, name)
 
 module.exports = DropDown = React.createClass
 
@@ -54,7 +55,7 @@ module.exports = DropDown = React.createClass
       )
       (div {className: menuClass, onMouseLeave: @blur, onMouseEnter: @unblur},
         (ul {},
-          (DropdownItem {name: item.name or item, item: item, select: @select, isActionMenu: @props.isActionMenu}) for item in @props.items
+          (DropdownItem {key: item.name or item, item: item, select: @select, isActionMenu: @props.isActionMenu}) for item in @props.items
         )
       )
     )
