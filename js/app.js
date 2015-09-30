@@ -43,7 +43,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/codap-connect":561,"./stores/graph-store":572,"./utils/hash-parameters":582,"./views/app-view":590,"./views/value-slider-view":628}],2:[function(require,module,exports){
+},{"./models/codap-connect":561,"./stores/graph-store":572,"./utils/hash-parameters":582,"./views/app-view":591,"./views/value-slider-view":629}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -55797,7 +55797,7 @@ module.exports = {
 
 
 
-},{"../stores/codap-store":570,"../stores/google-file-store":571,"../stores/palette-store":576,"../utils/hash-parameters":582,"../utils/translate":588}],558:[function(require,module,exports){
+},{"../stores/codap-store":570,"../stores/google-file-store":571,"../stores/palette-store":576,"../utils/hash-parameters":582,"../utils/translate":589}],558:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -55867,7 +55867,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":573,"../utils/has-valid-image-extension":581,"../views/preview-image-dialog-view":623}],560:[function(require,module,exports){
+},{"../stores/image-dialog-store":573,"../utils/has-valid-image-extension":581,"../views/preview-image-dialog-view":624}],560:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -55900,7 +55900,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":588}],561:[function(require,module,exports){
+},{"../utils/translate":589}],561:[function(require,module,exports){
 var CodapConnect, CodapStore, IframePhoneRpcEndpoint, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -56113,7 +56113,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../stores/codap-store":570,"../stores/graph-store":572,"../stores/palette-store":576,"../utils/translate":588,"iframe-phone":167}],562:[function(require,module,exports){
+},{"../stores/codap-store":570,"../stores/graph-store":572,"../stores/palette-store":576,"../utils/translate":589,"iframe-phone":167}],562:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -56406,7 +56406,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":578,"../utils/translate":588,"./graph-primitive":562}],565:[function(require,module,exports){
+},{"../utils/colors":578,"../utils/translate":589,"./graph-primitive":562}],565:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -56503,7 +56503,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":588,"./relationship":566}],566:[function(require,module,exports){
+},{"../utils/translate":589,"./relationship":566}],566:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -56575,7 +56575,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":588,"mathjs":168}],567:[function(require,module,exports){
+},{"../utils/translate":589,"mathjs":168}],567:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, tr;
 
 Importer = require('../utils/importer');
@@ -56751,7 +56751,7 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":583,"../utils/translate":588,"./link":563,"./node":564}],568:[function(require,module,exports){
+},{"../utils/importer":583,"../utils/translate":589,"./link":563,"./node":564}],568:[function(require,module,exports){
 var AppSettingsStore, IntegrationFunction, Simulation;
 
 AppSettingsStore = require('../stores/app-settings-store').store;
@@ -57300,7 +57300,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":580,"../utils/hash-parameters":582,"../utils/translate":588,"./graph-store":572,"./palette-store":576}],572:[function(require,module,exports){
+},{"../utils/google-drive-io":580,"../utils/hash-parameters":582,"../utils/translate":589,"./graph-store":572,"./palette-store":576}],572:[function(require,module,exports){
 var AppSettingsStore, GraphStore, Importer, Link, Migrations, NodeModel, PaletteDeleteStore, PaletteStore, SelectionManager, UndoRedo, mixin, tr;
 
 Importer = require('../utils/importer');
@@ -57841,7 +57841,7 @@ module.exports = {
 
 
 
-},{"../data/migrations/migrations":556,"../models/link":563,"../models/node":564,"../models/selection-manager":567,"../stores/app-settings-store":569,"../stores/palette-delete-dialog-store":575,"../stores/palette-store":576,"../utils/importer":583,"../utils/translate":588,"../utils/undo-redo":589}],573:[function(require,module,exports){
+},{"../data/migrations/migrations":556,"../models/link":563,"../models/node":564,"../models/selection-manager":567,"../stores/app-settings-store":569,"../stores/palette-delete-dialog-store":575,"../stores/palette-store":576,"../utils/importer":583,"../utils/translate":589,"../utils/undo-redo":590}],573:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -58166,7 +58166,7 @@ module.exports = {
 
 
 
-},{"../utils/undo-redo":589,"./nodes-store":574,"./palette-store":576}],576:[function(require,module,exports){
+},{"../utils/undo-redo":590,"./nodes-store":574,"./palette-store":576}],576:[function(require,module,exports){
 var UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage, uuid;
 
 resizeImage = require('../utils/resize-image');
@@ -58410,8 +58410,8 @@ window.PaletteStore = module.exports;
 
 
 
-},{"../data/initial-palette":545,"../data/internal-library":546,"../utils/resize-image":587,"../utils/undo-redo":589,"uuid":544}],577:[function(require,module,exports){
-var CodapConnect, GraphStore, Simulation, SimulationActions, SimulationStore, mixin, tr;
+},{"../data/initial-palette":545,"../data/internal-library":546,"../utils/resize-image":587,"../utils/undo-redo":590,"uuid":544}],577:[function(require,module,exports){
+var CodapConnect, GraphStore, Simulation, SimulationActions, SimulationStore, TimeUnits, mixin, tr;
 
 GraphStore = require('./graph-store').store;
 
@@ -58419,17 +58419,42 @@ Simulation = require("../models/simulation");
 
 CodapConnect = require('../models/codap-connect');
 
+TimeUnits = require('../utils/time-units');
+
 tr = require('../utils/translate');
 
-SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "setRunSteps"]);
+SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "setPeriod", "setPeriodUnits", "setStepSize", "setStepUnits"]);
 
 SimulationStore = Reflux.createStore({
   listenables: [SimulationActions],
   init: function() {
+    var defaultUnit, options, unit, unitName, unitNamePl;
+    defaultUnit = TimeUnits.defaultUnit;
+    unitName = TimeUnits.toString(defaultUnit);
+    unitNamePl = TimeUnits.toString(defaultUnit, true);
+    options = (function() {
+      var i, len, ref, results;
+      ref = TimeUnits.units;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        unit = ref[i];
+        results.push({
+          name: TimeUnits.toString(unit, true),
+          unit: unit
+        });
+      }
+      return results;
+    })();
     this.settings = {
       simulationPanelExpanded: false,
       graphIsValid: true,
-      runSteps: 10
+      period: 10,
+      periodUnits: defaultUnit,
+      periodUnitsName: unitNamePl,
+      stepSize: 1,
+      stepUnits: defaultUnit,
+      stepUnitsName: unitName,
+      timeUnitOptions: options
     };
     return this.codapConnect = CodapConnect.instance('building-models');
   },
@@ -58449,14 +58474,34 @@ SimulationStore = Reflux.createStore({
     this.settings.graphIsValid = simulator.graphIsValid();
     return this.notifyChange();
   },
-  onSetRunSteps: function(n) {
-    this.settings.runSteps = n;
+  onSetPeriod: function(n) {
+    this.settings.period = n;
     return this.notifyChange();
+  },
+  onSetPeriodUnits: function(unit) {
+    this.settings.periodUnits = unit.unit;
+    this.settings.periodUnitsName = TimeUnits.toString(unit.unit, true);
+    return this.notifyChange();
+  },
+  onSetStepSize: function(n) {
+    this.settings.stepSize = n;
+    this._setStepUnitName();
+    return this.notifyChange();
+  },
+  onSetStepUnits: function(unit) {
+    this.settings.stepUnits = unit.unit;
+    this._setStepUnitName();
+    return this.notifyChange();
+  },
+  _setStepUnitName: function() {
+    var pluralize;
+    pluralize = this.settings.stepSize !== 1;
+    return this.settings.stepUnitsName = TimeUnits.toString(this.settings.stepUnits, pluralize);
   },
   onRunSimulation: function() {
     var simulator, steps;
     if (this.settings.graphIsValid) {
-      steps = this.settings.runSteps;
+      steps = TimeUnits.stepsInTime(this.settings.stepSize, this.settings.stepUnits, this.settings.period, this.settings.periodUnits);
       steps = Math.min(steps, 5000);
       simulator = new Simulation({
         nodes: GraphStore.getNodes(),
@@ -58506,7 +58551,7 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":561,"../models/simulation":568,"../utils/translate":588,"./graph-store":572}],578:[function(require,module,exports){
+},{"../models/codap-connect":561,"../models/simulation":568,"../utils/time-units":588,"../utils/translate":589,"./graph-store":572}],578:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -58526,7 +58571,7 @@ module.exports = [
 
 
 
-},{"./translate":588}],579:[function(require,module,exports){
+},{"./translate":589}],579:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -58806,7 +58851,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":588}],582:[function(require,module,exports){
+},{"./translate":589}],582:[function(require,module,exports){
 var HashParameters, PARAM_TOKEN, VALUE_TOKEN;
 
 PARAM_TOKEN = /[?|&]/g;
@@ -59276,7 +59321,21 @@ module.exports = {
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)",
   "~RELATIONSHIP.NO_RELATION": "No relation defined",
-  "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
+  "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation.",
+  "~TIME.SECOND": "Second",
+  "~TIME.MINUTE": "Minute",
+  "~TIME.HOUR": "Hour",
+  "~TIME.DAY": "Day",
+  "~TIME.WEEK": "Week",
+  "~TIME.MONTH": "Month",
+  "~TIME.YEAR": "Year",
+  "~TIME.SECOND.PLURAL": "Seconds",
+  "~TIME.MINUTE.PLURAL": "Minutes",
+  "~TIME.HOUR.PLURAL": "Hours",
+  "~TIME.DAY.PLURAL": "Days",
+  "~TIME.WEEK.PLURAL": "Weeks",
+  "~TIME.MONTH.PLURAL": "Months",
+  "~TIME.YEAR.PLURAL": "Years"
 };
 
 
@@ -59361,6 +59420,49 @@ module.exports = function(src, callback) {
 
 
 },{}],588:[function(require,module,exports){
+var toSeconds, tr, units;
+
+tr = require('./translate');
+
+units = {
+  SECOND: 1
+};
+
+units.MINUTE = 60 * units.SECOND;
+
+units.HOUR = 60 * units.MINUTE;
+
+units.DAY = 24 * units.HOUR;
+
+units.WEEK = 7 * units.DAY;
+
+units.MONTH = 30 * units.DAY;
+
+units.YEAR = 365 * units.DAY;
+
+toSeconds = function(n, unit) {
+  return n * units[unit];
+};
+
+module.exports = {
+  units: _.keys(units),
+  defaultUnit: "YEAR",
+  toString: function(unit, plural) {
+    var number;
+    number = plural ? ".PLURAL" : "";
+    return tr("~TIME." + unit + number);
+  },
+  stepsInTime: function(stepSize, stepUnit, period, periodUnit) {
+    var periodInSeconds, stepSizeInSeconds;
+    stepSizeInSeconds = toSeconds(stepSize, stepUnit);
+    periodInSeconds = toSeconds(period, periodUnit);
+    return Math.floor(periodInSeconds / stepSizeInSeconds);
+  }
+};
+
+
+
+},{"./translate":589}],589:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -59393,7 +59495,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":585}],589:[function(require,module,exports){
+},{"./lang/us-en":585}],590:[function(require,module,exports){
 var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances, internalEndCommandBatchAction;
 
 CodapConnect = require('../models/codap-connect');
@@ -59674,7 +59776,7 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":561}],590:[function(require,module,exports){
+},{"../models/codap-connect":561}],591:[function(require,module,exports){
 var AppSettingsStore, DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
 
 Reflux = require('reflux');
@@ -59769,7 +59871,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":557,"../stores/app-settings-store":569,"../stores/image-dialog-store":573,"../utils/hash-parameters":582,"../utils/translate":588,"./document-actions-view":592,"./global-nav-view":595,"./graph-view":596,"./image-browser-view":597,"./inspector-panel-view":603,"./modal-palette-delete-view":610,"./node-well-view":616,"./placeholder-view":622,"reflux":523}],591:[function(require,module,exports){
+},{"../mixins/app-view":557,"../stores/app-settings-store":569,"../stores/image-dialog-store":573,"../utils/hash-parameters":582,"../utils/translate":589,"./document-actions-view":593,"./global-nav-view":596,"./graph-view":597,"./image-browser-view":598,"./inspector-panel-view":604,"./modal-palette-delete-view":611,"./node-well-view":617,"./placeholder-view":623,"reflux":523}],592:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -59851,7 +59953,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":578,"../utils/translate":588}],592:[function(require,module,exports){
+},{"../utils/colors":578,"../utils/translate":589}],593:[function(require,module,exports){
 var AppSettingsStore, CodapStore, ModalAppSettings, SimulationPanel, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
@@ -59939,8 +60041,8 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":569,"../stores/codap-store":570,"../utils/translate":588,"./modal-app-settings-view":607,"./simulation-panel-view":625}],593:[function(require,module,exports){
-var DropdownItem, div, i, li, ref, span, ul;
+},{"../stores/app-settings-store":569,"../stores/codap-store":570,"../utils/translate":589,"./modal-app-settings-view":608,"./simulation-panel-view":626}],594:[function(require,module,exports){
+var Demo, DemoDropDown, DropDown, DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
 
@@ -59950,18 +60052,26 @@ DropdownItem = React.createFactory(React.createClass({
     return this.props.select(this.props.item);
   },
   render: function() {
-    var className;
-    className = "menuItem " + (!this.props.item.action ? 'disabled' : '');
+    var className, name;
+    className = "menuItem " + (this.props.isActionMenu && !this.props.item.action ? 'disabled' : '');
+    name = this.props.item.name || this.props.item;
     return li({
-      key: this.props.item.name,
       className: className,
       onClick: this.clicked
-    }, this.props.item.name);
+    }, name);
   }
 }));
 
-module.exports = React.createClass({
+module.exports = DropDown = React.createClass({
   displayName: 'Dropdown',
+  getDefaultProps: function() {
+    return {
+      isActionMenu: true,
+      onSelect: function(item) {
+        return log.info("Selected " + item);
+      }
+    };
+  },
   getInitialState: function() {
     return {
       showingMenu: false,
@@ -59996,8 +60106,13 @@ module.exports = React.createClass({
     this.setState({
       showingMenu: nextState
     });
-    if (item && item.action) {
+    if (!item) {
+      return;
+    }
+    if (this.props.isActionMenu && item.action) {
       return item.action();
+    } else {
+      return this.props.onSelect(item);
     }
   },
   render: function() {
@@ -60032,9 +60147,10 @@ module.exports = React.createClass({
       for (j = 0, len = ref1.length; j < len; j++) {
         item = ref1[j];
         results.push(DropdownItem({
-          key: item.name,
+          key: item.name || item,
           item: item,
-          select: this.select
+          select: this.select,
+          isActionMenu: this.props.isActionMenu
         }));
       }
       return results;
@@ -60042,9 +60158,53 @@ module.exports = React.createClass({
   }
 });
 
+DemoDropDown = React.createFactory(DropDown);
+
+Demo = React.createClass({
+  getInitialState: function() {
+    return {
+      nonActionMenuSelection: "Selection menu"
+    };
+  },
+  onNonActionMenuSelect: function(item) {
+    return this.setState({
+      nonActionMenuSelection: item
+    });
+  },
+  render: function() {
+    return div({}, div({}, DemoDropDown({
+      anchor: "Action Menu",
+      items: [
+        {
+          name: "Action 1",
+          action: function() {
+            return alert("Action 1");
+          }
+        }, {
+          name: "Action 2",
+          action: function() {
+            return alert("Action 2");
+          }
+        }, {
+          name: "Disabled action"
+        }
+      ]
+    })), div({}, DemoDropDown({
+      isActionMenu: false,
+      onSelect: this.onNonActionMenuSelect,
+      anchor: this.state.nonActionMenuSelection,
+      items: ["Option 1", "Option 2"]
+    })));
+  }
+});
+
+window.testComponent = function(domID) {
+  return React.render(React.createElement(Demo, {}), domID);
+};
 
 
-},{}],594:[function(require,module,exports){
+
+},{}],595:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -60099,7 +60259,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":579,"../utils/translate":588}],595:[function(require,module,exports){
+},{"../utils/drop-image-handler":579,"../utils/translate":589}],596:[function(require,module,exports){
 var AppSettingsActions, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -60200,7 +60360,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":569,"../stores/google-file-store":571,"../utils/translate":588,"./dropdown-view":593,"./modal-google-save-view":609,"./open-in-codap-view":617}],596:[function(require,module,exports){
+},{"../stores/app-settings-store":569,"../stores/google-file-store":571,"../utils/translate":589,"./dropdown-view":594,"./modal-google-save-view":610,"./open-in-codap-view":618}],597:[function(require,module,exports){
 var DiagramToolkit, ImageDialogStore, Importer, LinkStore, Node, NodeModel, PaletteStore, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -60502,7 +60662,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/node":564,"../stores/graph-store":572,"../stores/image-dialog-store":573,"../stores/palette-store":576,"../stores/simulation-store":577,"../utils/drop-image-handler":579,"../utils/importer":583,"../utils/js-plumb-diagram-toolkit":584,"../utils/translate":588,"./node-view":615}],597:[function(require,module,exports){
+},{"../models/node":564,"../stores/graph-store":572,"../stores/image-dialog-store":573,"../stores/palette-store":576,"../stores/simulation-store":577,"../utils/drop-image-handler":579,"../utils/importer":583,"../utils/js-plumb-diagram-toolkit":584,"../utils/translate":589,"./node-view":616}],598:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -60561,7 +60721,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":573,"../stores/palette-store":576,"../utils/translate":588,"./image-link-dialog-view":598,"./image-metadata-view":599,"./image-my-computer-dialog-view":600,"./image-search-dialog-view":602,"./modal-tabbed-dialog-view":611,"./tabbed-panel-view":627}],598:[function(require,module,exports){
+},{"../stores/image-dialog-store":573,"../stores/palette-store":576,"../utils/translate":589,"./image-link-dialog-view":599,"./image-metadata-view":600,"./image-my-computer-dialog-view":601,"./image-search-dialog-view":603,"./modal-tabbed-dialog-view":612,"./tabbed-panel-view":628}],599:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -60610,7 +60770,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":559,"../stores/image-dialog-store":573,"../utils/translate":588,"./dropzone-view":594}],599:[function(require,module,exports){
+},{"../mixins/image-dialog-view":559,"../stores/image-dialog-store":573,"../utils/translate":589,"./dropzone-view":595}],600:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -60698,7 +60858,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":547,"../stores/image-dialog-store":573,"../utils/translate":588}],600:[function(require,module,exports){
+},{"../data/licenses":547,"../stores/image-dialog-store":573,"../utils/translate":589}],601:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -60752,7 +60912,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":559,"../stores/image-dialog-store":573,"../utils/translate":588,"./dropzone-view":594}],601:[function(require,module,exports){
+},{"../mixins/image-dialog-view":559,"../stores/image-dialog-store":573,"../utils/translate":589,"./dropzone-view":595}],602:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -60840,7 +61000,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":576,"../utils/translate":588,"./palette-add-view":618}],602:[function(require,module,exports){
+},{"../stores/palette-store":576,"../utils/translate":589,"./palette-add-view":619}],603:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -61052,7 +61212,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":559,"../stores/image-dialog-store":573,"../utils/open-clipart":586,"../utils/translate":588}],603:[function(require,module,exports){
+},{"../mixins/image-dialog-view":559,"../stores/image-dialog-store":573,"../utils/open-clipart":586,"../utils/translate":589}],604:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, PaletteInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -61278,7 +61438,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":604,"./link-value-inspector-view":606,"./node-inspector-view":613,"./node-value-inspector-view":614,"./palette-inspector-view":620,"./relation-inspector-view":624}],604:[function(require,module,exports){
+},{"./link-inspector-view":605,"./link-value-inspector-view":607,"./node-inspector-view":614,"./node-value-inspector-view":615,"./palette-inspector-view":621,"./relation-inspector-view":625}],605:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -61334,7 +61494,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":588}],605:[function(require,module,exports){
+},{"../utils/translate":589}],606:[function(require,module,exports){
 var RelationFactory, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
@@ -61443,7 +61603,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/relation-factory":565,"../utils/translate":588}],606:[function(require,module,exports){
+},{"../models/relation-factory":565,"../utils/translate":589}],607:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -61461,7 +61621,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":588}],607:[function(require,module,exports){
+},{"../utils/translate":589}],608:[function(require,module,exports){
 var AppSettingsActions, ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61511,7 +61671,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":569,"../utils/translate":588,"./modal-dialog-view":608}],608:[function(require,module,exports){
+},{"../stores/app-settings-store":569,"../utils/translate":589,"./modal-dialog-view":609}],609:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -61544,7 +61704,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":612}],609:[function(require,module,exports){
+},{"./modal-view":613}],610:[function(require,module,exports){
 var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61623,7 +61783,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":588,"./modal-dialog-view":608}],610:[function(require,module,exports){
+},{"../utils/translate":589,"./modal-dialog-view":609}],611:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61665,7 +61825,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":574,"../stores/palette-delete-dialog-store":575,"../utils/translate":588,"./modal-dialog-view":608,"./palette-delete-view":619}],611:[function(require,module,exports){
+},{"../stores/nodes-store":574,"../stores/palette-delete-dialog-store":575,"../utils/translate":589,"./modal-dialog-view":609,"./palette-delete-view":620}],612:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -61686,7 +61846,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":608,"./tabbed-panel-view":627}],612:[function(require,module,exports){
+},{"./modal-dialog-view":609,"./tabbed-panel-view":628}],613:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -61718,7 +61878,7 @@ module.exports = React.createClass({
 
 
 
-},{}],613:[function(require,module,exports){
+},{}],614:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -61805,7 +61965,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":560,"../utils/translate":588,"./color-picker-view":591,"./image-picker-view":601}],614:[function(require,module,exports){
+},{"../mixins/node-title":560,"../utils/translate":589,"./color-picker-view":592,"./image-picker-view":602}],615:[function(require,module,exports){
 var div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -61982,7 +62142,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":588}],615:[function(require,module,exports){
+},{"../utils/translate":589}],616:[function(require,module,exports){
 var NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
@@ -62293,13 +62453,9 @@ groupView = React.createFactory(React.createClass({
   }
 }));
 
-window.testComponent = function(domID) {
-  return React.render(groupView(), domID);
-};
 
 
-
-},{"../mixins/node-title":560,"../utils/translate":588,"./square-image-view":626,"./value-slider-view":628}],616:[function(require,module,exports){
+},{"../mixins/node-title":560,"../utils/translate":589,"./square-image-view":627,"./value-slider-view":629}],617:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -62360,7 +62516,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":576,"./palette-inspector-view":620}],617:[function(require,module,exports){
+},{"../stores/palette-store":576,"./palette-inspector-view":621}],618:[function(require,module,exports){
 var Dropdown, a, ref, span, tr;
 
 ref = React.DOM, a = ref.a, span = ref.span;
@@ -62408,7 +62564,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":588,"./dropdown-view":593}],618:[function(require,module,exports){
+},{"../utils/translate":589,"./dropdown-view":594}],619:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -62445,7 +62601,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":558,"../stores/image-dialog-store":573,"../utils/translate":588}],619:[function(require,module,exports){
+},{"../mixins/draggable":558,"../stores/image-dialog-store":573,"../utils/translate":589}],620:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -62524,7 +62680,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":575,"../utils/translate":588,"./image-picker-view":601}],620:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":575,"../utils/translate":589,"./image-picker-view":602}],621:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -62597,7 +62753,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":574,"../stores/palette-delete-dialog-store":575,"../stores/palette-store":576,"../utils/translate":588,"./image-metadata-view":599,"./palette-add-view":618,"./palette-item-view":621}],621:[function(require,module,exports){
+},{"../stores/nodes-store":574,"../stores/palette-delete-dialog-store":575,"../stores/palette-store":576,"../utils/translate":589,"./image-metadata-view":600,"./palette-add-view":619,"./palette-item-view":622}],622:[function(require,module,exports){
 var Draggable, SquareImage, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -62637,7 +62793,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":558,"./square-image-view":626}],622:[function(require,module,exports){
+},{"../mixins/draggable":558,"./square-image-view":627}],623:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -62655,7 +62811,7 @@ module.exports = React.createClass({
 
 
 
-},{}],623:[function(require,module,exports){
+},{}],624:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -62706,7 +62862,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":573,"../stores/palette-store":576,"../utils/translate":588,"./image-metadata-view":599}],624:[function(require,module,exports){
+},{"../stores/image-dialog-store":573,"../stores/palette-store":576,"../utils/translate":589,"./image-metadata-view":600}],625:[function(require,module,exports){
 var LinkRelationView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -62766,7 +62922,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/graph-store":572,"../utils/translate":588,"./link-relation-view":605,"./tabbed-panel-view":627}],625:[function(require,module,exports){
+},{"../stores/graph-store":572,"../utils/translate":589,"./link-relation-view":606,"./tabbed-panel-view":628}],626:[function(require,module,exports){
 var Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -62790,7 +62946,10 @@ module.exports = React.createClass({
     }
   },
   stepsRangeChanged: function(r) {
-    return SimulationStore.actions.setRunSteps(r.max);
+    return SimulationStore.actions.setPeriod(r.max);
+  },
+  setStepSize: function(e) {
+    return SimulationStore.actions.setStepSize(parseInt(e.target.value));
   },
   render: function() {
     var expanded, runButtonClasses;
@@ -62813,13 +62972,15 @@ module.exports = React.createClass({
     }, div({
       className: "row"
     }, Dropdown({
-      anchor: "Years",
-      items: []
+      isActionMenu: false,
+      onSelect: SimulationStore.actions.setPeriodUnits,
+      anchor: this.state.periodUnitsName,
+      items: this.state.timeUnitOptions
     })), div({
       className: "row tall"
     }, ValueSlider({
       min: 0,
-      max: this.state.runSteps,
+      max: this.state.period,
       value: 0,
       width: 180,
       maxEditable: true,
@@ -62879,19 +63040,24 @@ module.exports = React.createClass({
     }, "Step", input({
       className: 'left',
       type: "number",
-      size: "3",
-      value: 1,
-      min: "0"
+      style: {
+        width: (Math.max(3, this.state.stepSize.toString().length + 1)) + "em"
+      },
+      value: this.state.stepSize,
+      min: "0",
+      onChange: this.setStepSize
     }), Dropdown({
-      anchor: "Year",
-      items: []
+      isActionMenu: false,
+      onSelect: SimulationStore.actions.setStepUnits,
+      anchor: this.state.stepUnitsName,
+      items: this.state.timeUnitOptions
     })))));
   }
 });
 
 
 
-},{"../stores/simulation-store":577,"../utils/translate":588,"./dropdown-view":593,"./value-slider-view":628}],626:[function(require,module,exports){
+},{"../stores/simulation-store":577,"../utils/translate":589,"./dropdown-view":594,"./value-slider-view":629}],627:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -62932,7 +63098,7 @@ module.exports = React.createClass({
 
 
 
-},{}],627:[function(require,module,exports){
+},{}],628:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -63034,7 +63200,7 @@ module.exports = React.createClass({
 
 
 
-},{}],628:[function(require,module,exports){
+},{}],629:[function(require,module,exports){
 var Demo, Slider, ValueSlider, circle, div, i, input, label, path, rect, ref, span, svg;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect;
@@ -63051,6 +63217,8 @@ ValueSlider = React.createClass({
       handleSize: 16,
       minEditable: false,
       maxEditable: false,
+      stepSize: 1,
+      displayPrecision: 0,
       onValueChange: function(v) {
         return log.info("new value " + v);
       },
@@ -63123,7 +63291,7 @@ ValueSlider = React.createClass({
     newV = (displayX / this.props.width * (this.props.max - this.props.min)) + this.props.min;
     newV = newV > this.props.max ? this.props.max : newV;
     newV = newV < this.props.min ? this.props.min : newV;
-    return newV;
+    return Math.round(newV / this.props.stepSize) * this.props.stepSize;
   },
   sliderLocation: function() {
     return (this.props.value - this.props.min) / (this.props.max - this.props.min);
@@ -63142,7 +63310,7 @@ ValueSlider = React.createClass({
     return div({
       className: "number",
       style: style
-    }, Math.round(this.props.value));
+    }, this.props.value.toFixed(this.props.displayPrecision));
   },
   renderHandle: function() {
     var centerOfDiv, height, style, top, width;
@@ -63292,10 +63460,6 @@ Demo = React.createClass({
     }));
   }
 });
-
-window.testComponent = function(domID) {
-  return React.render(React.createElement(Demo, {}), domID);
-};
 
 
 
