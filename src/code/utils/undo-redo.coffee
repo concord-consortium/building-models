@@ -28,8 +28,9 @@ class Manager
 
   _endComandBatch: ->
     if @currentBatch
-      @commands.push @currentBatch
-      @stackPosition++
+      if @currentBatch.commands.length > 0
+        @commands.push @currentBatch
+        @stackPosition++
       @currentBatch = null
 
   createAndExecuteCommand: (name, methods) ->
