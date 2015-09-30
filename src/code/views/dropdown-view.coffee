@@ -8,12 +8,17 @@ DropdownItem = React.createFactory React.createClass
     @props.select @props.item
 
   render: ->
-    className = "menuItem #{if not @props.item.action then 'disabled' else ''}"
-    (li {key: @props.item.name, className: className, onClick: @clicked }, @props.item.name)
+    className = "menuItem #{if @props.isActionMenu and not @props.item.action then 'disabled' else ''}"
+    (li {key: @props.name, className: className, onClick: @clicked }, @props.name)
 
-module.exports = React.createClass
+module.exports = DropDown = React.createClass
 
   displayName: 'Dropdown'
+
+  getDefaultProps: ->
+    isActionMenu: true              # Whether each item contains its own action
+    onSelect: (item) ->             # If not, @props.onSelect is called
+      log.info "Selected #{item}"
 
   getInitialState: ->
     showingMenu: false
@@ -32,8 +37,11 @@ module.exports = React.createClass
   select: (item) ->
     nextState = (not @state.showingMenu)
     @setState {showingMenu: nextState}
-    if item and item.action
+    return unless item
+    if @props.isActionMenu and item.action
       item.action()
+    else
+      @props.onSelect item
 
   render: ->
     menuClass = if @state.showingMenu then 'menu-showing' else 'menu-hidden'
@@ -46,7 +54,41 @@ module.exports = React.createClass
       )
       (div {className: menuClass, onMouseLeave: @blur, onMouseEnter: @unblur},
         (ul {},
-          (DropdownItem {key: item.name, item: item, select: @select}) for item in @props.items
+          (DropdownItem {name: item.name or item, item: item, select: @select, isActionMenu: @props.isActionMenu}) for item in @props.items
         )
       )
     )
+
+
+DemoDropDown = React.createFactory DropDown
+Demo = React.createClass
+  getInitialState: ->
+    nonActionMenuSelection: "Selection menu"
+  onNonActionMenuSelect: (item) ->
+    @setState({nonActionMenuSelection: item})
+  render: ->
+    (div {},
+      (div {},
+        (DemoDropDown {
+          anchor: "Action Menu",
+          items: [
+            {name: "Action 1", action: -> alert "Action 1"}
+            {name: "Action 2", action: -> alert "Action 2"}
+            {name: "Disabled action"}
+          ]
+        })
+      )
+      (div {},
+        (DemoDropDown {
+          isActionMenu: false
+          onSelect: @onNonActionMenuSelect
+          anchor: @state.nonActionMenuSelection,
+          items: [
+            "Option 1"
+            "Option 2"
+          ]
+        })
+      )
+    )
+
+window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
