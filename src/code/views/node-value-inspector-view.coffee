@@ -87,7 +87,7 @@ module.exports = React.createClass
 
   render: ->
     node = @props.node
-    canEditValue = node.inLinks().length is 0 or node.isAccumulator
+    canEditValue = node.canEditValue()
     (div {className: 'value-inspector'},
       (div {className: 'inspector-content group'},
         if canEditValue

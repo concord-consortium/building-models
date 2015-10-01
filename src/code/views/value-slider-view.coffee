@@ -12,6 +12,8 @@ ValueSlider = React.createClass
     handleSize: 16
     minEditable: false
     maxEditable: false
+    stepSize: 1
+    displayPrecision: 0
     onValueChange: (v) ->
       log.info "new value #{v}"
     onRangeChange: (r) ->
@@ -62,7 +64,7 @@ ValueSlider = React.createClass
     newV = (displayX / @props.width * (@props.max - @props.min)) + @props.min
     newV = if newV > @props.max then @props.max else newV
     newV = if newV < @props.min then @props.min else newV
-    return newV
+    return Math.round(newV / @props.stepSize) * @props.stepSize
 
   sliderLocation: ->
     (@props.value - @props.min) / (@props.max - @props.min)
@@ -76,7 +78,7 @@ ValueSlider = React.createClass
 
     if @state.dragging
       style.display = "block"
-    (div {className: "number", style: style}, Math.round(@props.value))
+    (div {className: "number", style: style}, @props.value.toFixed(@props.displayPrecision))
 
   renderHandle: ->
     width = height = "#{@props.handleSize}px"
@@ -142,7 +144,7 @@ ValueSlider = React.createClass
       padding: "0px"
       border: "0px"
       width: "#{@props.width}px"
-      minHeight:"#{@props.height}px"
+      minHeight:"#{@props.height + lengendHeight}px"
     circleRadius = 2
     (div {className: "value-slider", style: style},
       (svg {className: "svg-background", width: "#{@props.width}px", height:"#{@props.height}px", viewBox: "0 0 #{@props.width} #{@props.height}"},

@@ -7,9 +7,9 @@ module.exports = class Node extends GraphPrimitive
   # Properties that can be changed.
   @fields: [
     'title', 'image', 'color', 'paletteItem',
-    'initialValue', 'min', 'max', 'isAccumulator',
-    'valueDefinedSemiQuantitatively']
-    
+    'initialValue', 'min', 'max', 'value',
+    'isAccumulator', 'valueDefinedSemiQuantitatively']
+
   constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50,min:0,max:100,isAccumulator:false, valueDefinedSemiQuantitatively:false}, key) ->
     super()
     if key
@@ -91,6 +91,9 @@ module.exports = class Node extends GraphPrimitive
       isAccumulator: @isAccumulator
       valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
     key: @key
+
+  canEditValue: ->
+    @inLinks().length is 0 or @isAccumulator
 
   paletteItemIs: (paletteItem) ->
     paletteItem.uuid is @paletteItem

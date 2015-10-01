@@ -102,8 +102,9 @@ module.exports = NodeView = React.createClass
     onStop:   -> log.info "internal move handler"
     onDelete: -> log.info "internal on-delete handler"
     onSelect: -> log.info "internal select handler"
-    selected: falsepreviewImageClassName = "img-background link-target"
+    selected: false
     simulating: false
+    value: null
     data:
       title: "foo"
       x: 10
@@ -133,6 +134,9 @@ module.exports = NodeView = React.createClass
       domElement: @refs.node.getDOMNode()
       syntheticEvent: evt
 
+  changeValue: (newValue) ->
+    @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
+
   changeTitle: (newTitle) ->
     @props.graphStore.startNodeEdit()
     log.info "Title is changing to #{newTitle}"
@@ -149,53 +153,79 @@ module.exports = NodeView = React.createClass
     @props.selectionManager.isSelectedForTitleEditing(@props.data)
 
   renderValue: ->
+    value = @props.data.value or @props.data.initialValue
+    value = Math.round(value)
     (div {className: "value"},
       (label {}, tr "~NODE.SIMULATION.VALUE")
-      (input  {type: "text", className: "value", value: @props.value})
+      (input  {type: "text", className: "value", value: value})
     )
+
+  renderSliderView: ->
+    if @props.data.canEditValue()
+      (SliderView
+        width: 70
+        onValueChange: @changeValue
+        value: @props.data.initialValue
+        displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
+        max: @props.data.max
+        min: @props.data.min
+      )
+    else
+      null
+
+  nodeClasses: ->
+    classes = ['elm']
+    if @props.selected
+      classes.push "selected"
+    classes.join " "
+
+  topClasses: ->
+    classes = ['top']
+    unless @props.selected
+      classes.push "link-target"
+    classes.join " "
+
 
   render: ->
     style =
       top: @props.data.y
       left: @props.data.x
       "color": @props.data.color
-    className = "elm"
-    if @props.selected
-      className = "#{className} selected"
 
-    (div { className: className, ref: "node", style: style, "data-node-key": @props.nodeKey},
-      if @props.selected
-        (div {className: "actions"},
-          (div {className: "connection-source action-circle ivy-icon-link", "data-node-key": @props.nodeKey})
-          (div {className: "graph-source action-circle ivy-icon-graph", "data-node-key": @props.nodeKey})
-        )
+    (div { className: @nodeClasses(), ref: "node", style: style},
+      (div {className: 'link-target'},
+        if @props.selected
+          (div {className: "actions"},
+            (div {className: "connection-source action-circle ivy-icon-link", "data-node-key": @props.nodeKey})
+            (div {className: "graph-source action-circle ivy-icon-graph", "data-node-key": @props.nodeKey})
+          )
 
-      (div {className: 'top'},
-        (div {
-          className: "img-background"
-          "data-node-key": @props.nodeKey
-          onClick: (=> @handleSelected true)
-          onTouchend: (=> @handleSelected true)
-          },
-          (SquareImage {image: @props.data.image, ref: "thumbnail"})
+        (div {className: @topClasses(), "data-node-key": @props.nodeKey},
+          (div {
+            className: "img-background"
+            onClick: (=> @handleSelected true)
+            onTouchend: (=> @handleSelected true)
+            },
+            (SquareImage {image: @props.data.image, ref: "thumbnail"})
+          )
+          (NodeTitle {
+            isEditing: @props.editTitle
+            title: @props.data.title
+            onChange: @changeTitle
+            onStopEditing: @stopEditing
+            onStartEditing: @startEditing
+          })
         )
-        (NodeTitle {
-          isEditing: @props.editTitle
-          title: @props.data.title
-          onChange: @changeTitle
-          onStopEditing: @stopEditing
-          onStartEditing: @startEditing
-        })
-      )
-      (div {className: 'bottom centered-block'},
-        if @props.simulating
-          if @props.selected
-            (div {className: 'centered-block'},
-              @renderValue()
-              (SliderView {width: 70} )
-            )
-          else
-            (SliderView {width: 70} )
+        (div {className: 'bottom centered-block' ,"data-node-key": @props.nodeKey},
+          if @props.simulating
+            if @props.selected
+              (div {className: 'centered-block'},
+                @renderValue()
+                @renderSliderView()
+              )
+            else
+              @renderSliderView()
+        )
       )
     )
 

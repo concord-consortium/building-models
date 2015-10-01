@@ -172,6 +172,7 @@ GraphStore  = Reflux.createStore
         paletteItem: node.paletteItem
         color: node.color
         initialValue: node.initialValue
+        value: node.value or node.initialValue
         min: node.min
         max: node.max
         isAccumulator: node.isAccumulator
