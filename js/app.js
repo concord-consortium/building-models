@@ -57575,7 +57575,7 @@ GraphStore = Reflux.createStore({
     return this.updateListeners();
   },
   changeNode: function(data, node) {
-    var originalData;
+    var key, nodeChanged, originalData;
     node = node || this.selectedNode();
     if (node) {
       originalData = {
@@ -57590,18 +57590,28 @@ GraphStore = Reflux.createStore({
         isAccumulator: node.isAccumulator,
         valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
       };
-      return this.undoRedoManager.createAndExecuteCommand('changeNode', {
-        execute: (function(_this) {
-          return function() {
-            return _this._changeNode(node, data);
-          };
-        })(this),
-        undo: (function(_this) {
-          return function() {
-            return _this._changeNode(node, originalData);
-          };
-        })(this)
-      });
+      nodeChanged = false;
+      for (key in data) {
+        if (data.hasOwnProperty(key)) {
+          if (data[key] !== originalData[key]) {
+            nodeChanged = true;
+          }
+        }
+      }
+      if (nodeChanged) {
+        return this.undoRedoManager.createAndExecuteCommand('changeNode', {
+          execute: (function(_this) {
+            return function() {
+              return _this._changeNode(node, data);
+            };
+          })(this),
+          undo: (function(_this) {
+            return function() {
+              return _this._changeNode(node, originalData);
+            };
+          })(this)
+        });
+      }
     }
   },
   _changeNode: function(node, data) {
@@ -58113,7 +58123,7 @@ store = Reflux.createStore({
     if (this.replacement && this.deleted) {
       return PaletteStore.actions.selectPaletteItem(this.replacement);
     } else if (!this.deleted) {
-      this.undoManger.undo();
+      this.undoManger.undo(true);
       return PaletteStore.actions.restoreSelection();
     }
   },
@@ -59496,13 +59506,11 @@ module.exports = translate;
 
 
 },{"./lang/us-en":585}],590:[function(require,module,exports){
-var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances, internalEndCommandBatchAction;
+var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances;
 
 CodapConnect = require('../models/codap-connect');
 
 DEFAULT_CONTEXT_NAME = 'building-models';
-
-internalEndCommandBatchAction = Reflux.createAction();
 
 Manager = (function() {
   function Manager(options) {
@@ -59515,7 +59523,9 @@ Manager = (function() {
     this.savePosition = -1;
     this.changeListeners = [];
     this.currentBatch = null;
-    internalEndCommandBatchAction.listen(this._finalizeEndComandBatch, this);
+    this.endCommandBatch.listen(this._endComandBatch, this);
+    this.undo.listen(this._undo, this);
+    this.redo.listen(this._redo, this);
   }
 
   Manager.prototype.startCommandBatch = function() {
@@ -59524,14 +59534,14 @@ Manager = (function() {
     }
   };
 
-  Manager.prototype.endCommandBatch = function() {
-    return internalEndCommandBatchAction();
-  };
+  Manager.prototype.endCommandBatch = Reflux.createAction();
 
-  Manager.prototype._finalizeEndComandBatch = function() {
+  Manager.prototype._endComandBatch = function() {
     if (this.currentBatch) {
-      this.commands.push(this.currentBatch);
-      this.stackPosition++;
+      if (this.currentBatch.commands.length > 0) {
+        this.commands.push(this.currentBatch);
+        this.stackPosition++;
+      }
       return this.currentBatch = null;
     }
   };
@@ -59563,11 +59573,16 @@ Manager = (function() {
     return result;
   };
 
-  Manager.prototype.undo = function() {
+  Manager.prototype.undo = Reflux.createAction();
+
+  Manager.prototype._undo = function(drop) {
     var result;
     if (this.canUndo()) {
       result = this.commands[this.stackPosition].undo(this.debug);
       this.stackPosition--;
+      if (drop) {
+        this._clearRedo();
+      }
       this._changed();
       if (this.debug) {
         this.log();
@@ -59582,7 +59597,9 @@ Manager = (function() {
     return this.stackPosition >= 0;
   };
 
-  Manager.prototype.redo = function() {
+  Manager.prototype.redo = Reflux.createAction();
+
+  Manager.prototype._redo = function() {
     var result;
     if (this.canRedo()) {
       this.stackPosition++;
@@ -60331,7 +60348,7 @@ module.exports = React.createClass({
     }), this.state.dirty ? span({
       className: 'global-nav-file-status'
     }, 'Unsaved') : void 0), this.state.action ? div({}, i({
-      className: "fa fa-cog fa-spin"
+      className: "ivy-icon-options spin"
     }), this.state.action) : void 0, ModalGoogleSave({
       showing: this.state.showingSaveDialog,
       onSave: GoogleFileStore.actions.saveFile,
@@ -60353,7 +60370,10 @@ module.exports = React.createClass({
     }, this.props.username), span({
       className: 'mockup-only'
     }, i({
-      className: 'fa fa-2x fa-question-circle'
+      style: {
+        fontSize: "13px"
+      },
+      className: 'ivy-icon-help'
     }))));
   }
 });
@@ -60390,7 +60410,7 @@ module.exports = React.createClass({
   mixins: [LinkStore.mixin, SimulationStore.mixin],
   getDefaultProps: function() {
     return {
-      linkTarget: '.img-background'
+      linkTarget: '.link-target'
     };
   },
   componentDidMount: function() {
@@ -61176,7 +61196,7 @@ module.exports = React.createClass({
       var j, len, ref2, results1;
       if (this.state.searching) {
         return div({}, i({
-          className: "fa fa-cog fa-spin"
+          className: "ivy-icon-options spin"
         }), ' ', tr("~IMAGE-BROWSER.SEARCHING", {
           scope: this.state.searchingAll ? 'all matches for ' : '',
           query: this.state.query
@@ -61694,7 +61714,7 @@ module.exports = React.createClass({
     }, div({
       className: 'modal-dialog-title'
     }, i({
-      className: "modal-dialog-title-close fa fa-close",
+      className: "modal-dialog-title-close ivy-icon-ex",
       onClick: this.close
     }), this.props.title || 'Untitled Dialog'), div({
       className: 'modal-dialog-workspace'
@@ -61958,7 +61978,7 @@ module.exports = React.createClass({
       className: 'node-delete',
       onClick: this["delete"]
     }, i({
-      className: "fa fa-trash"
+      className: "ivy-icon-trash"
     }), tr("~NODE-EDIT.DELETE")))));
   }
 });
@@ -62129,9 +62149,7 @@ module.exports = React.createClass({
       type: "checkbox",
       checked: node.isAccumulator,
       onChange: this.updateChecked
-    }), label({}, tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR"))), i({
-      className: "fa fa-question-circle"
-    }))), canEditValue ? div({
+    }), label({}, tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR"))))), canEditValue ? div({
       className: "bottom-pane"
     }, p({}, node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.DEFINING_WITH_WORDS") : tr("~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")), p({}, label({
       className: 'node-switch-edit-mode',
@@ -62267,7 +62285,6 @@ module.exports = NodeView = React.createClass({
     nodeKey: React.PropTypes.string
   },
   getDefaultProps: function() {
-    var falsepreviewImageClassName;
     return {
       onMove: function() {
         return log.info("internal move handler");
@@ -62281,7 +62298,7 @@ module.exports = NodeView = React.createClass({
       onSelect: function() {
         return log.info("internal select handler");
       },
-      selected: falsepreviewImageClassName = "img-background link-target",
+      selected: false,
       simulating: false,
       value: null,
       data: {
@@ -62366,22 +62383,35 @@ module.exports = NodeView = React.createClass({
       return null;
     }
   },
+  nodeClasses: function() {
+    var classes;
+    classes = ['elm'];
+    if (this.props.selected) {
+      classes.push("selected");
+    }
+    return classes.join(" ");
+  },
+  topClasses: function() {
+    var classes;
+    classes = ['top'];
+    if (!this.props.selected) {
+      classes.push("link-target");
+    }
+    return classes.join(" ");
+  },
   render: function() {
-    var className, style;
+    var style;
     style = {
       top: this.props.data.y,
       left: this.props.data.x,
       "color": this.props.data.color
     };
-    className = "elm";
-    if (this.props.selected) {
-      className = className + " selected";
-    }
     return div({
-      className: className,
+      className: this.nodeClasses(),
       ref: "node",
-      style: style,
-      "data-node-key": this.props.nodeKey
+      style: style
+    }, div({
+      className: 'link-target'
     }, this.props.selected ? div({
       className: "actions"
     }, div({
@@ -62391,10 +62421,10 @@ module.exports = NodeView = React.createClass({
       className: "graph-source action-circle ivy-icon-graph",
       "data-node-key": this.props.nodeKey
     })) : void 0, div({
-      className: 'top'
+      className: this.topClasses(),
+      "data-node-key": this.props.nodeKey
     }, div({
       className: "img-background",
-      "data-node-key": this.props.nodeKey,
       onClick: ((function(_this) {
         return function() {
           return _this.handleSelected(true);
@@ -62415,10 +62445,11 @@ module.exports = NodeView = React.createClass({
       onStopEditing: this.stopEditing,
       onStartEditing: this.startEditing
     })), div({
-      className: 'bottom centered-block'
+      className: 'bottom centered-block',
+      "data-node-key": this.props.nodeKey
     }, this.props.simulating ? this.props.selected ? div({
       className: 'centered-block'
-    }, this.renderValue(), this.renderSliderView()) : this.renderSliderView() : void 0));
+    }, this.renderValue(), this.renderSliderView()) : this.renderSliderView() : void 0)));
   }
 });
 
@@ -62630,7 +62661,7 @@ module.exports = React.createClass({
       return div({
         className: "vertical-content"
       }, i({
-        className: 'arrow-div fa fa-arrow-right'
+        className: 'arrow-div ivy-icon-inspectorArrow-collapse'
       }));
     }
   },
@@ -62732,16 +62763,16 @@ module.exports = React.createClass({
     }, div({
       className: 'palette-about-image-title'
     }, i({
-      className: "fa fa-info-circle"
+      className: "ivy-icon-info"
     }), span({}, tr('~PALETTE-INSPECTOR.ABOUT_IMAGE')), img({
       src: this.state.selectedPaletteImage
     })), !(this.state.palette.length === 1 && this.state.paletteItemHasNodes) ? div({
       className: 'palette-delete',
       onClick: this["delete"]
     }, this.state.paletteItemHasNodes ? span({}, i({
-      className: "fa fa-recycle"
+      className: "ivy-icon-swapAxis"
     }), label({}, tr('~PALETTE-INSPECTOR.REPLACE'))) : span({}, i({
-      className: "fa fa-trash"
+      className: "ivy-icon-trash"
     }), label({}, tr('~PALETTE-INSPECTOR.DELETE')))) : void 0, div({
       className: 'palette-about-image-info'
     }, this.state.selectedPaletteItem.metadata ? ImageMetadata({
@@ -62845,7 +62876,7 @@ module.exports = React.createClass({
       href: '#',
       onClick: this.cancel
     }, i({
-      className: "fa fa-close"
+      className: "ivy-icon-ex"
     }), 'cancel')), div({
       className: 'preview-add-image'
     }, button({
@@ -63397,7 +63428,7 @@ ValueSlider = React.createClass({
       padding: "0px",
       border: "0px",
       width: this.props.width + "px",
-      minHeight: this.props.height + "px"
+      minHeight: (this.props.height + lengendHeight) + "px"
     };
     circleRadius = 2;
     return div({
