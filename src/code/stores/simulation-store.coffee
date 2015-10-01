@@ -72,7 +72,7 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   _setStepUnitName: ->
-    pluralize = @settings.stepSize != 1
+    pluralize = @settings.stepSize isnt 1
     @settings.stepUnitsName = TimeUnits.toString @settings.stepUnits, pluralize
 
   onRunSimulation: ->

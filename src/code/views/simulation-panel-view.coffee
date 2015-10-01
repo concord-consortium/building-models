@@ -35,7 +35,7 @@ module.exports = React.createClass
       )
       (div {className: "simulation-panel #{expanded}"},
         (div {className: "run-panel"},
-          (div {className: "row"},
+          (div {className: "row short"},
             (Dropdown {
               isActionMenu: false
               onSelect: SimulationStore.actions.setPeriodUnits
@@ -43,7 +43,7 @@ module.exports = React.createClass
               items: @state.timeUnitOptions
             })
           )
-          (div {className: "row tall"},
+          (div {className: "row short"},
             (ValueSlider {
               min: 0
               max: @state.period
@@ -84,9 +84,9 @@ module.exports = React.createClass
             (input {type: 'checkbox', value: 'quick-test', checked: @props.quickTest})
             (label {}, tr '~DOCUMENT.ACTIONS.QUICK_TEST')
           )
-          (div {className: "row left"},
-            "Speed"
-            (div {style: {margin: "-3px 0 3px 7px"}},
+          (div {className: "row left", style: {margin: "6px 0 -19px 0"}},
+            (span {style: {marginTop: 2}}, "Speed")
+            (div {style: {margin: "-11px 0 3px 7px"}},
               (ValueSlider {
                 min: 0
                 max: 10
