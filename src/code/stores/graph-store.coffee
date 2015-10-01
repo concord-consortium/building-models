@@ -178,9 +178,16 @@ GraphStore  = Reflux.createStore
         isAccumulator: node.isAccumulator
         valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
 
-      @undoRedoManager.createAndExecuteCommand 'changeNode',
-        execute: => @_changeNode node, data
-        undo: => @_changeNode node, originalData
+
+      nodeChanged = false
+      for key of data
+        if data.hasOwnProperty key
+          if data[key] isnt originalData[key] then nodeChanged = true
+
+      if nodeChanged        # don't do anything unless we've actually changed the node
+        @undoRedoManager.createAndExecuteCommand 'changeNode',
+          execute: => @_changeNode node, data
+          undo: => @_changeNode node, originalData
 
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"

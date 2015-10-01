@@ -3,7 +3,9 @@ CodapConnect = require '../models/codap-connect'
 
 DEFAULT_CONTEXT_NAME = 'building-models'
 
-internalEndCommandBatchAction = Reflux.createAction()
+# Note: We use several actions, because they hook into Reflux's dispatching system
+# which puts actions in a stack before calling them. We frequently want to ensure
+# that all other actions have completed before, e.g., we end a commandBatch.
 
 class Manager
   constructor: (options = {}) ->
@@ -13,20 +15,22 @@ class Manager
     @savePosition = -1
     @changeListeners = []
     @currentBatch = null
-    internalEndCommandBatchAction.listen @_finalizeEndComandBatch, @
+
+    # listen to all our actions
+    @endCommandBatch.listen @_endComandBatch, @
+    @undo.listen @_undo, @
+    @redo.listen @_redo, @
 
   startCommandBatch: ->
     @currentBatch = new CommandBatch() unless @currentBatch
 
-  endCommandBatch: ->
-    # calling this via an action pushes it to the end of the
-    # command stack, allowing any other commands to execute first
-    internalEndCommandBatchAction()
+  endCommandBatch: Reflux.createAction()
 
-  _finalizeEndComandBatch: ->
+  _endComandBatch: ->
     if @currentBatch
-      @commands.push @currentBatch
-      @stackPosition++
+      if @currentBatch.commands.length > 0
+        @commands.push @currentBatch
+        @stackPosition++
       @currentBatch = null
 
   createAndExecuteCommand: (name, methods) ->
@@ -51,10 +55,15 @@ class Manager
     @log() if @debug
     result
 
-  undo: ->
+  undo: Reflux.createAction()
+
+  # @param drop: calling undo(true) will clear the redo stack. When called on
+  # the last item, this is equivalent to throwing away the undone action.
+  _undo: (drop) ->
     if @canUndo()
       result = @commands[@stackPosition].undo @debug
       @stackPosition--
+      if drop then @_clearRedo()
       @_changed()
       @log() if @debug
       result
@@ -64,7 +73,9 @@ class Manager
   canUndo: ->
     return @stackPosition >= 0
 
-  redo: ->
+  redo: Reflux.createAction()
+
+  _redo: ->
     if @canRedo()
       @stackPosition++
       result = @commands[@stackPosition].redo @debug
