@@ -1,8 +1,9 @@
-GraphStore   = require('./graph-store').store
-Simulation   = require "../models/simulation"
-CodapConnect = require '../models/codap-connect'
-TimeUnits    = require '../utils/time-units'
-tr           = require '../utils/translate'
+GraphStore         = require('./graph-store').store
+AppSettingsActions = require('./app-settings-store').actions
+Simulation         = require "../models/simulation"
+CodapConnect       = require '../models/codap-connect'
+TimeUnits          = require '../utils/time-units'
+tr                 = require '../utils/translate'
 
 SimulationActions = Reflux.createActions(
   [
@@ -17,7 +18,7 @@ SimulationActions = Reflux.createActions(
 )
 
 SimulationStore   = Reflux.createStore
-  listenables: [SimulationActions]
+  listenables: [SimulationActions, AppSettingsActions]
 
   init: ->
     defaultUnit = TimeUnits.defaultUnit
@@ -36,6 +37,10 @@ SimulationStore   = Reflux.createStore
       stepUnitsName: unitName
       timeUnitOptions: options
     @codapConnect = CodapConnect.instance 'building-models'
+
+  # From AppSettingsStore actions
+  onDiagramOnly: ->
+    SimulationActions.collapseSimulationPanel()
 
 
   onExpandSimulationPanel: ->
