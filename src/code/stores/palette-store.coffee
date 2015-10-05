@@ -2,19 +2,20 @@ resizeImage    = require '../utils/resize-image'
 initialPalette = require '../data/initial-palette'
 initialLibrary = require '../data/internal-library'
 UndoRedo       = require '../utils/undo-redo'
+ImportActions  = require '../actions/import-actions'
 uuid           = require 'uuid'
+
 
 # TODO: Maybe loadData goes into some other action-set
 paletteActions = Reflux.createActions(
   [
-    "addToPalette", "loadData",
-    "selectPaletteIndex", "selectPaletteItem", "restoreSelection",
-    "itemDropped","update", "delete"
+    "addToPalette", "selectPaletteIndex", "selectPaletteItem",
+    "restoreSelection", "itemDropped","update", "delete"
   ]
 )
 
 paletteStore   = Reflux.createStore
-  listenables: [paletteActions]
+  listenables: [paletteActions, ImportActions]
 
   init: ->
     @initializeLibrary()
@@ -60,7 +61,7 @@ paletteStore   = Reflux.createStore
         node.image = dataUrl
       log.info "library: #{@library}"
 
-  onLoadData: (data) ->
+  onImport: (data) ->
     # reload the palette
     @palette = []
     if data.palette

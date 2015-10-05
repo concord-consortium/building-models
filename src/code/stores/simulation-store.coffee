@@ -1,5 +1,7 @@
 GraphStore         = require('./graph-store').store
 AppSettingsActions = require('./app-settings-store').actions
+ImportActions      = require '../actions/import-actions'
+GraphActions       = require '../actions/graph-actions'
 Simulation         = require "../models/simulation"
 CodapConnect       = require '../models/codap-connect'
 TimeUnits          = require '../utils/time-units'
@@ -18,7 +20,9 @@ SimulationActions = Reflux.createActions(
 )
 
 SimulationStore   = Reflux.createStore
-  listenables: [SimulationActions, AppSettingsActions]
+  listenables: [
+    SimulationActions, AppSettingsActions,
+    ImportActions, GraphActions]
 
   init: ->
     defaultUnit = TimeUnits.defaultUnit
@@ -36,7 +40,6 @@ SimulationStore   = Reflux.createStore
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: options
-    @codapConnect = CodapConnect.instance 'building-models'
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -51,9 +54,9 @@ SimulationStore   = Reflux.createStore
     @settings.simulationPanelExpanded = false
     @notifyChange()
 
-  onModelChanged: ->
+  onGraphChanged: (data)->
     simulator = new Simulation
-      nodes: GraphStore.getNodes()
+      nodes: data.nodes
     @settings.graphIsValid = simulator.graphIsValid()
     @notifyChange()
 
@@ -63,22 +66,29 @@ SimulationStore   = Reflux.createStore
 
   onSetPeriodUnits: (unit) ->
     @settings.periodUnits = unit.unit
-    @settings.periodUnitsName = TimeUnits.toString unit.unit, true
     @notifyChange()
 
   onSetStepSize: (n) ->
     @settings.stepSize = n
-    @_setStepUnitName()
     @notifyChange()
 
   onSetStepUnits: (unit) ->
     @settings.stepUnits = unit.unit
-    @_setStepUnitName()
     @notifyChange()
 
-  _setStepUnitName: ->
+  onImport: (data) ->
+    _.merge @settings, data.settings.simulation
+    @notifyChange()
+
+  _setUnitsNames: ->
     pluralize = @settings.stepSize isnt 1
     @settings.stepUnitsName = TimeUnits.toString @settings.stepUnits, pluralize
+    pluralize = @settings.period isnt 1
+    @settings.periodUnitsName = TimeUnits.toString @settings.periodUnits, pluralize
+
+  _sendSimulationData: (report)->
+    @codapConnect ?= CodapConnect.instance 'building-models'
+    @codapConnect.sendSimulationData(report)
 
   onRunSimulation: ->
     if @settings.graphIsValid
@@ -95,7 +105,8 @@ SimulationStore   = Reflux.createStore
               "#{n.title} #{n.initialValue} → #{n.value}"
           ).join("\n")
           log.info "Run for #{report.steps} steps\n#{nodeInfo}:"
-          @codapConnect.sendSimulationData(report)
+          @_sendSimulationData(report)
+
 
       simulator.run()
       simulator.report()
@@ -103,7 +114,19 @@ SimulationStore   = Reflux.createStore
       alert tr "~DOCUMENT.ACTIONS.GRAPH_INVALID"
 
   notifyChange: ->
+    @_setUnitsNames()
     @trigger _.clone @settings
+
+  importSettings: (data) ->
+    _.merge @settings, data
+    @notifyChange()
+
+  serialize: ->
+    period: @settings.period
+    periodUnits: @settings.periodUnits
+    stepSize: @settings.stepSize
+    stepUnits:@settings.stepUnits
+
 
 mixin =
   getInitialState: ->
@@ -111,7 +134,6 @@ mixin =
 
   componentDidMount: ->
     SimulationStore.listen @onSimulationStoreChange
-    GraphStore.addChangeListener SimulationStore.onModelChanged
 
   onSimulationStoreChange: (newData) ->
     @setState _.clone newData

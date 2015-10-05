@@ -1,4 +1,5 @@
-HashParams = require '../utils/hash-parameters'
+HashParams      = require '../utils/hash-parameters'
+ImportActions   = require '../actions/import-actions'
 
 AppSettingsActions = Reflux.createActions(
   [
@@ -10,7 +11,7 @@ AppSettingsActions = Reflux.createActions(
 )
 
 AppSettingsStore   = Reflux.createStore
-  listenables: [AppSettingsActions]
+  listenables: [AppSettingsActions, ImportActions]
 
   init: ->
     @settings =
@@ -41,8 +42,8 @@ AppSettingsStore   = Reflux.createStore
     else
       HashParams.clearParam('simplified')
 
-  importSettings: (data) ->
-    _.merge @settings, data
+  onImport: (data) ->
+    _.merge @settings, data.settings
     @notifyChange()
 
   serialize: ->

@@ -8,6 +8,8 @@ tr                  = require "../utils/translate"
 Migrations          = require "../data/migrations/migrations"
 PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
 AppSettingsStore    = require "../stores/app-settings-store"
+SimulationStore     = require "../stores/simulation-store"
+GraphActions        = require "../actions/graph-actions"
 
 GraphStore  = Reflux.createStore
   init: (context) ->
@@ -310,6 +312,7 @@ GraphStore  = Reflux.createStore
     linkExports = for key,link of @linkKeys
       link.toExport()
     settings = AppSettingsStore.store.serialize()
+    settings.simulation = SimulationStore.store.serialize()
 
     data =
       version: Migrations.latestVersion()
@@ -327,7 +330,7 @@ GraphStore  = Reflux.createStore
     data =
       nodes: @getNodes()
       links: @getLinks()
-    @trigger(data)
+    GraphActions.graphChanged.trigger(data)
 
 
 mixin =
@@ -336,9 +339,9 @@ mixin =
     links: GraphStore.links
 
   componentDidMount: ->
-    GraphStore.listen @onLinksChange
+    GraphActions.graphChanged.listen @onGraphChanged
 
-  onLinksChange: (status) ->
+  onGraphChanged: (status) ->
     @setState
       nodes: status.nodes
       links: status.links

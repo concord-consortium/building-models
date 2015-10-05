@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.6", ->
-        @result.version.should.equal 1.6
+      it "should be 1.7", ->
+        @result.version.should.equal 1.7
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -52,6 +52,14 @@ describe "Migrations",  ->
         describe "v-1.6 changes", ->
           it "should have diagramOnly setting", ->
             @result.settings.diagramOnly.should.equal false
+
+        describe "v-1.7 changes", ->
+          it "should have settings for the simulation", ->
+            @result.settings.simulation.should.exist
+            @result.settings.simulation.period.should.equal 10
+            @result.settings.simulation.stepSize.should.equal 1
+            @result.settings.simulation.periodUnits.should.equal "YEAR"
+            @result.settings.simulation.stepUnits.should.equal "YEAR"
 
     describe "the palette", ->
       it "should exist", ->
