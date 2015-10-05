@@ -100,7 +100,6 @@ SimulationStore   = Reflux.createStore
       simulator = new Simulation
         nodes: @nodes
         duration: steps
-        timeStep: 1
         reportFunc: (report) =>
           log.info report
           nodeInfo = (

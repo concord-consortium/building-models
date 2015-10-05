@@ -1,6 +1,6 @@
 AppSettingsStore  = require('../stores/app-settings-store').store
 
-IntegrationFunction = (t, timeStep) ->
+IntegrationFunction = (t) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
   if @currentValue
@@ -22,14 +22,14 @@ IntegrationFunction = (t, timeStep) ->
       inV = sourceNode.previousValue
       return unless inV               # we simply ignore nodes with no previous value
       outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV) * timeStep
+      nextValue = link.relation.evaluate(inV, outV)
       value += nextValue
   else
     _.each links, (link) =>
       sourceNode = link.sourceNode
-      inV = sourceNode.getCurrentValue(t, timeStep)     # recursively ask incoming node for current value.
+      inV = sourceNode.getCurrentValue(t)     # recursively ask incoming node for current value.
       outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV) * timeStep
+      nextValue = link.relation.evaluate(inV, outV)
       value += (nextValue / count)
 
   # if we need to cap, do it at end of all calculations
@@ -47,7 +47,6 @@ module.exports = class Simulation
   constructor: (@opts={}) ->
     @nodes       = @opts.nodes      or []
     @duration    = @opts.duration   or 10.0
-    @timeStep    = @opts.timeStep   or 0.1
     @reportFunc  = @opts.reportFunc   or Simulation.defaultReportFunc
     @decorateNodes() # extend nodes with integration methods
 
@@ -73,7 +72,7 @@ module.exports = class Simulation
 
   # for some integrators, timeIndex might matter
   evaluateNode: (node, t) ->
-    node.currentValue = node.getCurrentValue(t, @timeStep)
+    node.currentValue = node.getCurrentValue(t)
 
   # create an object representation of the current timeStep
   addReportFrame: (time) ->
@@ -88,11 +87,9 @@ module.exports = class Simulation
 
   # create envelope deata for the report
   report: ->
-    steps = @duration / @timeStep
     data =
-      steps: steps
+      steps: @duration
       duration: @duration
-      timeStep: @timeStep
       nodeNames: _.pluck @nodes, 'title'
       frames: @reportFrames
       endState: _.map @nodes, (n) ->
@@ -147,5 +144,5 @@ module.exports = class Simulation
     while time < @duration
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
       _.each @nodes, (node) => @evaluateNode node, time
-      time = time + @timeStep
+      time++
       @addReportFrame(time)

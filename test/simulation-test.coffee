@@ -33,7 +33,6 @@ describe "Simulation", ->
     @nodes     = []
     @arguments =
       nodes: @nodes
-      timeStep: 0.5
       duration: 5
   it "the class should exist", ->
     Simulation.should.be.defined
@@ -43,7 +42,6 @@ describe "Simulation", ->
       @simulation = new Simulation(@arguments)
 
     it "makes a configured instance", ->
-      @simulation.timeStep.should.equal @arguments.timeStep
       @simulation.duration.should.equal @arguments.duration
       @simulation.nodes.should.equal @arguments.nodes
 
@@ -55,7 +53,6 @@ describe "Simulation", ->
         @formula  = "0.1 * in"
         @arguments =
           nodes: [@nodeA, @nodeB]
-          timeStep: 1
           duration: 10
 
         LinkNodes(@nodeA, @nodeB, @formula)
@@ -207,7 +204,6 @@ describe "Simulation", ->
             nodeArray = (node for key, node of nodes)
             simulation = new Simulation
               nodes: nodeArray
-              timeStep: 1
               duration: j+1
 
             if result is false
@@ -227,7 +223,6 @@ describe "Simulation", ->
         @report   = null
         @arguments =
           nodes: [@nodeA, @nodeB]
-          timeStep: 1
           duration: 10
           reportFunc: (report) =>
             @report = report
@@ -246,7 +241,6 @@ describe "Simulation", ->
           @report.should.exist
           @report.steps.should.equal 10
           @report.duration.should.equal 10
-          @report.timeStep.should.equal 1
           @report.nodeNames.length.should.equal 2
 
         describe "the simulation frames", ->
