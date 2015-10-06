@@ -40,16 +40,21 @@ IntegrationFunction = (t) ->
 
 module.exports = class Simulation
 
-  @defaultReportFunc = (report) ->
-    log.info report
-
-
   constructor: (@opts={}) ->
     @nodes       = @opts.nodes      or []
     @duration    = @opts.duration   or 10.0
-    @reportFunc  = @opts.reportFunc   or Simulation.defaultReportFunc
     @decorateNodes() # extend nodes with integration methods
 
+    @onStart     = @opts.onStart or (nodeNames) ->
+      log.info "simulation stated: #{nodeNames}"
+
+    @onFrames    = @opts.onFrames or (frames) ->
+      log.info "simulation frames: #{frames}"
+
+    @onEnd       = @opts.onEnd or ->
+      log.info "simulation end"
+
+    @bundleAllFrames = true       # equivalent to speed==max once we have speed
 
   decorateNodes: ->
     _.each @nodes, (node) =>
@@ -74,23 +79,20 @@ module.exports = class Simulation
   evaluateNode: (node, t) ->
     node.currentValue = node.getCurrentValue(t)
 
-  # create an object representation of the current timeStep
-  addReportFrame: (time) ->
+  # create an object representation of the current timeStep and notify
+  # listeners, unless we are running at max speed
+  generateFrame: (time) ->
     nodes = _.map @nodes, (node) ->
       title: node.title
       value: node.currentValue
-    @reportFrames.push
+    frame =
       time: time
       nodes: nodes
 
-  # create envelope deata for the report
-  report: ->
-    data =
-      steps: @duration
-      nodeNames: _.pluck @nodes, 'title'
-      frames: @reportFrames
-
-    @reportFunc(data)
+    unless @bundleAllFrames     # notify every frame (doesn't yet happen)
+      @onFrame([frame])
+    else                        # run at max speed, notify at the end
+      @framesBundle.push frame
 
   # Tests that the graph contains no loops consisting of dependent variables.
   # A graph such as A->B<->C is invalid if B and C connect to each other and
@@ -129,13 +131,22 @@ module.exports = class Simulation
 
   run: ->
     time = 0
-    @reportFrames = []
+    @framesBundle = []
     _.each @nodes, (node) => @initializeValues node
     if not @graphIsValid()
       # We should normally not get here, as callers ought to check graphIsValid themselves first
       throw new Error("Graph not valid")
+
+    nodeNames = _.pluck @nodes, 'title'
+    @onStart(nodeNames)
+
     while time < @duration
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
       _.each @nodes, (node) => @evaluateNode node, time
       time++
-      @addReportFrame(time)
+      @generateFrame(time)
+
+    if @bundleAllFrames
+      @onFrames(@framesBundle)
+
+    @onEnd()

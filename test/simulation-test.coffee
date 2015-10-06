@@ -1,6 +1,7 @@
 global._      = require 'lodash'
 global.log    = require 'loglevel'
 global.Reflux = require 'reflux'
+global.window = { location: '' }
 
 chai = require('chai')
 chai.config.includeStack = true
@@ -16,7 +17,14 @@ Node           = requireModel 'node'
 Simulation     = requireModel 'simulation'
 Relationship   = requireModel 'relationship'
 
-AppSettingsStore = require("#{__dirname}/../src/code/stores/app-settings-store").store
+requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
+
+AppSettingsStore  = requireStore('app-settings-store').store
+GraphStore        = requireStore('graph-store').store
+SimulationActions = requireStore('simulation-store').actions
+
+CodapConnect   = requireModel 'codap-connect'
+
 
 LinkNodes = (sourceNode, targetNode, formula) ->
   link = new Link
@@ -214,75 +222,60 @@ describe "Simulation", ->
                 node.currentValue.should.equal result[k]
 
 
-  describe "report", ->
-    describe "for a simple graph A(10) -0.1-> B(0) for 10 iterations", ->
-      beforeEach ->
-        @nodeA    = new Node({name: "A", initialValue: 10})
-        @nodeB    = new Node({name: "B", initialValue: 0 })
-        @formula  = "out + 0.1 * in"
-        @report   = null
-        @arguments =
-          nodes: [@nodeA, @nodeB]
-          duration: 10
-          reportFunc: (report) =>
-            @report = report
+describe "The SimulationStore, with a network in the GraphStore", ->
+  beforeEach ->
+    sandbox = Sinon.sandbox.create()
+    sandbox.stub(CodapConnect, "instance", ->
+        return {
+          sendUndoableActionPerformed: -> return ''
+        }
+      )
 
-        LinkNodes(@nodeA, @nodeB, @formula)
-        @simulation = new Simulation(@arguments)
-        @simulation.run()
-        @report = @simulation.report()
+    @nodeA    = new Node({title: "A", initialValue: 10})
+    @nodeB    = new Node({title: "B", initialValue: 0 })
+    @formula  = "out + 0.1 * in"
 
-      describe "the report generated", ->
+    GraphStore.init()
 
-        it "should exist", ->
-          @report.should.exist
+    GraphStore.addNode @nodeA
+    GraphStore.addNode @nodeB
 
-        it "should have some simulation details", ->
-          @report.should.exist
-          @report.steps.should.equal 10
-          @report.nodeNames.length.should.equal 2
+    LinkNodes(@nodeA, @nodeB, @formula)
 
-        describe "the simulation frames", ->
-          beforeEach ->
-            @frames = @report.frames
-            @firstFrame = @frames[0]
-            @lastFrame = @frames[9]
+  afterEach ->
+      CodapConnect.instance.restore()
 
-          it "should have frames", ->
-            @frames.should.exist
-            @firstFrame.should.exist
-            @firstFrame.time.should.equal 1
-            @lastFrame.should.exist
-            @lastFrame.time.should.equal 10
+  describe "for a fast simulation for 10 iterations", ->
 
-            @firstFrame.nodes.should.have.length 2
-            @firstFrame.nodes[0].value.should.equal 10
-            @firstFrame.nodes[1].value.should.equal 1
+    it "should call simulationStarted with the node names", (done) ->
+      # calledback is an annoyance to prevent later tests from triggering this
+      # listener again, and raising multiple-done() Mocha error
+      calledback = false
 
-            @lastFrame.nodes.should.have.length 2
-            @lastFrame.nodes[0].value.should.equal 10
-            @lastFrame.nodes[1].value.should.equal 10
+      SimulationActions.simulationStarted.listen (nodeNames) ->
+        if not calledback
+          nodeNames.should.eql ["A", "B"]
+          done()
+        calledback = true
 
-        describe "the codap transformation", ->
-          beforeEach ->
-            @codapData = _.map @report.frames, (frame) ->
-              data       = [frame.time]
-              _.each frame.nodes, (n) -> data.push n.value
-              data
+      SimulationActions.runSimulation()
 
-          describe "the number of samples", ->
-            it "should have 10", ->
-              @codapData.length.should.equal 10
+    it "should call simulationFramesCreated with all the step values", (done) ->
+      calledback = false
+      SimulationActions.simulationFramesCreated.listen (data) ->
+        if not calledback
+          data.length.should.equal 10
 
-          describe "the format of the last sample", ->
-            beforeEach ->
-              @lastFrame = @codapData[0]
+          frame0 = data[0]
+          frame0.time.should.equal 1
+          frame0.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
-            it "should be have 3 elements (time,nodeA, nodeB)", ->
-              @lastFrame.should.have.length 3
+          frame9 = data[9]
+          frame9.time.should.equal 10
+          frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 10 } ]
 
-            it "should be a numeric property", ->
-              @lastFrame[0].should.be.a('number')
-              @lastFrame[0].should.equal 1
-              @lastFrame[1].should.equal 10
-              @lastFrame[2].should.equal 1
+          done()
+
+        calledback = true
+
+      SimulationActions.runSimulation()

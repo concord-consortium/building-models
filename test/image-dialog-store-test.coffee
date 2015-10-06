@@ -20,7 +20,7 @@ describe 'ImageDialogStore', ->
     @mock = Sinon.mock(ImageDialogStore.store)
 
   afterEach ->
-    @clock.restore
+    @clock.restore()
     @mock.restore()
 
   it 'GraphPrimitive should exists', ->

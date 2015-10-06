@@ -2,7 +2,6 @@ AppSettingsActions = require('./app-settings-store').actions
 ImportActions      = require '../actions/import-actions'
 GraphActions       = require '../actions/graph-actions'
 Simulation         = require "../models/simulation"
-CodapConnect       = require '../models/codap-connect'
 TimeUnits          = require '../utils/time-units'
 tr                 = require '../utils/translate'
 
@@ -15,6 +14,9 @@ SimulationActions = Reflux.createActions(
     "setPeriodUnits"
     "setStepSize"
     "setStepUnits"
+    "simulationStarted"
+    "simulationFramesCreated"
+    "simulationEnded"
   ]
 )
 
@@ -88,11 +90,6 @@ SimulationStore   = Reflux.createStore
     pluralize = @settings.period isnt 1
     @settings.periodUnitsName = TimeUnits.toString @settings.periodUnits, pluralize
 
-  _sendSimulationData: (report)->
-    @codapConnect ?= CodapConnect.instance 'building-models'
-    @codapConnect.openNewCase( report.nodeNames )
-    @codapConnect.sendSimulationData(report)
-
   onRunSimulation: ->
     if @settings.graphIsValid
       steps = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
@@ -100,17 +97,17 @@ SimulationStore   = Reflux.createStore
       simulator = new Simulation
         nodes: @nodes
         duration: steps
-        reportFunc: (report) =>
-          log.info report
-          endState = (
-            _.map report.frames[report.steps-1].nodes, (n) ->
-              "#{n.title}: #{n.value}"
-          ).join("\n")
-          log.info "Run for #{report.steps} steps\n#{endState}"
-          @_sendSimulationData(report)
+
+        # Simulation events get triggered as Actions here, and are
+        # available to anyone who listens to this store
+        onStart: (nodeNames) ->
+          SimulationActions.simulationStarted(nodeNames)
+        onFrames: (frames) ->
+          SimulationActions.simulationFramesCreated(frames)
+        onEnd: ->
+          SimulationActions.simulationEnded()
 
       simulator.run()
-      simulator.report()
     else
       alert tr "~DOCUMENT.ACTIONS.GRAPH_INVALID"
 

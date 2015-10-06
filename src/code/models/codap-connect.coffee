@@ -24,6 +24,11 @@ module.exports = class CodapConnect
     GraphStore = require '../stores/graph-store'
     @graphStore = GraphStore.store
 
+    SimulationStore = require '../stores/simulation-store'
+    SimulationStore.actions.simulationStarted.listen       @_openNewCase.bind(@)
+    SimulationStore.actions.simulationFramesCreated.listen @_sendSimulationData.bind(@)
+
+
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'codap-game', window.parent )
 
@@ -50,7 +55,9 @@ module.exports = class CodapConnect
         contextType: 'DG.DataContext'
     }, @initGameHandler)
 
-  openNewCase: (nodeNames) ->
+  _openNewCase: (nodeNames) ->
+    @currentCaseID = null
+
     # First column definition is the time index
     sampleDataAttrs = [
       {
@@ -83,17 +90,16 @@ module.exports = class CodapConnect
         @stepsInCurrentCase = 0
         @_flushQueue()
       else
-        @currentCaseID = null
         log.info "CODAP returned an error on 'openCase'"
 
-  sendSimulationData: (data) ->
+  _sendSimulationData: (data) ->
     if not @currentCaseID
       # openNewCase may not have completed yet, so we queue these up
       @queue.push data
       return
 
     # Create the sample data values (node values array)
-    sampleData = _.map data.frames, (frame) ->
+    sampleData = _.map data, (frame) ->
       sample     = [frame.time]
       _.each frame.nodes, (n) -> sample.push n.value
       sample
@@ -119,7 +125,7 @@ module.exports = class CodapConnect
 
   _flushQueue: ->
     for data in @queue
-      @sendSimulationData data
+      @_sendSimulationData data
     @queue = []
 
   sendUndoableActionPerformed: ->
