@@ -46,7 +46,6 @@ SimulationStore   = Reflux.createStore
   onDiagramOnly: ->
     SimulationActions.collapseSimulationPanel()
 
-
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
     @notifyChange()
@@ -102,13 +101,12 @@ SimulationStore   = Reflux.createStore
         duration: steps
         reportFunc: (report) =>
           log.info report
-          nodeInfo = (
-            _.map report.endState, (n) ->
-              "#{n.title} #{n.initialValue} → #{n.value}"
+          endState = (
+            _.map report.frames[report.steps-1].nodes, (n) ->
+              "#{n.title}: #{n.value}"
           ).join("\n")
-          log.info "Run for #{report.steps} steps\n#{nodeInfo}:"
+          log.info "Run for #{report.steps} steps\n#{endState}"
           @_sendSimulationData(report)
-
 
       simulator.run()
       simulator.report()

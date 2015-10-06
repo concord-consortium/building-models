@@ -240,7 +240,6 @@ describe "Simulation", ->
         it "should have some simulation details", ->
           @report.should.exist
           @report.steps.should.equal 10
-          @report.duration.should.equal 10
           @report.nodeNames.length.should.equal 2
 
         describe "the simulation frames", ->

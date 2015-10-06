@@ -77,10 +77,8 @@ module.exports = class Simulation
   # create an object representation of the current timeStep
   addReportFrame: (time) ->
     nodes = _.map @nodes, (node) ->
-      time:  time
       title: node.title
       value: node.currentValue
-      initialValue: node.initialValue
     @reportFrames.push
       time: time
       nodes: nodes
@@ -89,13 +87,8 @@ module.exports = class Simulation
   report: ->
     data =
       steps: @duration
-      duration: @duration
       nodeNames: _.pluck @nodes, 'title'
       frames: @reportFrames
-      endState: _.map @nodes, (n) ->
-        title: n.title
-        initialValue: n.initialValue
-        value: n.currentValue
 
     @reportFunc(data)
 
