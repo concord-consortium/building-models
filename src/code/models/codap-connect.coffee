@@ -9,6 +9,8 @@ module.exports = class CodapConnect
 
   currentCaseID: null
 
+  stepsInCurrentCase: 0
+
   queue: []
 
   @instances: {} # map of context -> instance
@@ -78,6 +80,7 @@ module.exports = class CodapConnect
     }, (result) =>
       if result?.success
         @currentCaseID = result.caseID
+        @stepsInCurrentCase = 0
         @_flushQueue()
       else
         @currentCaseID = null
@@ -102,6 +105,16 @@ module.exports = class CodapConnect
         collection: 'Samples',
         parent: @currentCaseID,
         values: sampleData
+      }
+
+    # Update the parent case with the current number of steps
+    @stepsInCurrentCase += sampleData.length
+    @codapPhone.call
+      action: 'updateCase'
+      args: {
+        collection: 'Simulation',
+        caseID: @currentCaseID
+        values: [@stepsInCurrentCase]
       }
 
   _flushQueue: ->
