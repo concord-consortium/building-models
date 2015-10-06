@@ -137,6 +137,7 @@ module.exports =
 
   "~RELATIONSHIP.NO_RELATION": "No relation defined"
 
+  "~CODAP.SIMULATION.STEPS": "steps"
   "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
 
   "~TIME.SECOND": "Second"

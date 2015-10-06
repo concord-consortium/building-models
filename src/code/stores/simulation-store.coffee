@@ -90,6 +90,7 @@ SimulationStore   = Reflux.createStore
 
   _sendSimulationData: (report)->
     @codapConnect ?= CodapConnect.instance 'building-models'
+    @codapConnect.openNewCase( report.nodeNames )
     @codapConnect.sendSimulationData(report)
 
   onRunSimulation: ->
