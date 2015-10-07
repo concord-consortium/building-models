@@ -54,7 +54,10 @@ module.exports = class Simulation
     @onEnd       = @opts.onEnd or ->
       log.info "simulation end"
 
-    @bundleAllFrames = true       # equivalent to speed==max once we have speed
+    speed            = if @opts.speed? then @opts.speed else 1
+    @bundleAllFrames = speed is 1       # bundle all frames when at max speed
+    @stepInterval    = Math.pow(470, 1-speed) + 30   # exponential, 500ms at speed=0, 31ms at speed=1
+                                                     # (but note at exactly 1 we switch to bundling)
 
   decorateNodes: ->
     _.each @nodes, (node) =>
@@ -79,8 +82,8 @@ module.exports = class Simulation
   evaluateNode: (node, t) ->
     node.currentValue = node.getCurrentValue(t)
 
-  # create an object representation of the current timeStep and notify
-  # listeners, unless we are running at max speed
+  # create an object representation of the current timeStep and add
+  # it to the current bundle of frames.
   generateFrame: (time) ->
     nodes = _.map @nodes, (node) ->
       title: node.title
@@ -89,10 +92,7 @@ module.exports = class Simulation
       time: time
       nodes: nodes
 
-    unless @bundleAllFrames     # notify every frame (doesn't yet happen)
-      @onFrame([frame])
-    else                        # run at max speed, notify at the end
-      @framesBundle.push frame
+    @framesBundle.push frame
 
   # Tests that the graph contains no loops consisting of dependent variables.
   # A graph such as A->B<->C is invalid if B and C connect to each other and
@@ -140,13 +140,36 @@ module.exports = class Simulation
     nodeNames = _.pluck @nodes, 'title'
     @onStart(nodeNames)
 
-    while time < @duration
+    step = =>
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
       _.each @nodes, (node) => @evaluateNode node, time
       time++
       @generateFrame(time)
 
     if @bundleAllFrames
-      @onFrames(@framesBundle)
+      while time < @duration
+        step()
+      @onFrames(@framesBundle)    # send all at once
+      @onEnd()
+    else
+      # use animationFrame and calculate how much time has passed since the last step, and
+      # generate and send the appropriate number of frames. This is better when we send
+      # intermediate values to CODAP, as this can take > 100ms and would tie up setInterval.
+      startTime = window.performance.now()
+      animationFrameLoop = =>
+        if time < @duration
+          requestAnimationFrame animationFrameLoop
+        else if time is @duration then return
 
-    @onEnd()
+        elapsedTime = window.performance.now() - startTime
+        desiredStepsTilNow = Math.floor elapsedTime / @stepInterval
+        desiredStepsTilNow = Math.min desiredStepsTilNow, @duration
+
+        while time < desiredStepsTilNow
+          step()
+
+        @onFrames(@framesBundle)  # send steps til now
+        @framesBundle = []
+
+        if time is @duration then @onEnd()
+      animationFrameLoop()

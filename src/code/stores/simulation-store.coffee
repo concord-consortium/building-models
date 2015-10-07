@@ -14,6 +14,7 @@ SimulationActions = Reflux.createActions(
     "setPeriodUnits"
     "setStepSize"
     "setStepUnits"
+    "setSpeed"
     "simulationStarted"
     "simulationFramesCreated"
     "simulationEnded"
@@ -43,6 +44,7 @@ SimulationStore   = Reflux.createStore
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: options
+      speed: 1
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -90,6 +92,10 @@ SimulationStore   = Reflux.createStore
     pluralize = @settings.period isnt 1
     @settings.periodUnitsName = TimeUnits.toString @settings.periodUnits, pluralize
 
+  onSetSpeed: (s) ->
+    @settings.speed = s
+    @notifyChange()
+
   onRunSimulation: ->
     if @settings.graphIsValid
       steps = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
@@ -97,6 +103,7 @@ SimulationStore   = Reflux.createStore
       simulator = new Simulation
         nodes: @nodes
         duration: steps
+        speed: @settings.speed
 
         # Simulation events get triggered as Actions here, and are
         # available to anyone who listens to this store

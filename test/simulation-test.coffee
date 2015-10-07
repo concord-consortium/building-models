@@ -2,6 +2,12 @@ global._      = require 'lodash'
 global.log    = require 'loglevel'
 global.Reflux = require 'reflux'
 global.window = { location: '' }
+global.window.performance = {
+  now: ->
+    Date.now()
+}
+global.requestAnimationFrame = (callback) ->
+  setTimeout callback, 1
 
 chai = require('chai')
 chai.config.includeStack = true
@@ -247,6 +253,10 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
   describe "for a fast simulation for 10 iterations", ->
 
+    beforeEach ->
+      SimulationActions.setPeriod 10
+      SimulationActions.setSpeed 1
+
     it "should call simulationStarted with the node names", (done) ->
       # calledback is an annoyance to prevent later tests from triggering this
       # listener again, and raising multiple-done() Mocha error
@@ -279,3 +289,24 @@ describe "The SimulationStore, with a network in the GraphStore", ->
         calledback = true
 
       SimulationActions.runSimulation()
+
+  describe "for a slow simulation for 3 iterations", ->
+
+    beforeEach ->
+      SimulationActions.setPeriod 3
+      SimulationActions.setSpeed 0.95
+
+    it "should call simulationFramesCreated several times, with 3 frames total", (done) ->
+      totalCallbacks = 0
+      totalFrames = 0
+      SimulationActions.simulationFramesCreated.listen (data) ->
+        totalCallbacks++
+        totalFrames += data.length
+
+      SimulationActions.simulationEnded.listen ->
+        expect(totalFrames).to.equal 3
+        expect(totalCallbacks).to.be.above 1
+        done()
+
+      SimulationActions.runSimulation()
+
