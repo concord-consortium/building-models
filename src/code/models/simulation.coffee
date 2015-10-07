@@ -1,6 +1,6 @@
 AppSettingsStore  = require('../stores/app-settings-store').store
 
-IntegrationFunction = (t, timeStep) ->
+IntegrationFunction = (t) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
   if @currentValue
@@ -22,14 +22,14 @@ IntegrationFunction = (t, timeStep) ->
       inV = sourceNode.previousValue
       return unless inV               # we simply ignore nodes with no previous value
       outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV) * timeStep
+      nextValue = link.relation.evaluate(inV, outV)
       value += nextValue
   else
     _.each links, (link) =>
       sourceNode = link.sourceNode
-      inV = sourceNode.getCurrentValue(t, timeStep)     # recursively ask incoming node for current value.
+      inV = sourceNode.getCurrentValue(t)     # recursively ask incoming node for current value.
       outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV) * timeStep
+      nextValue = link.relation.evaluate(inV, outV)
       value += (nextValue / count)
 
   # if we need to cap, do it at end of all calculations
@@ -40,17 +40,24 @@ IntegrationFunction = (t, timeStep) ->
 
 module.exports = class Simulation
 
-  @defaultReportFunc = (report) ->
-    log.info report
-
-
   constructor: (@opts={}) ->
     @nodes       = @opts.nodes      or []
     @duration    = @opts.duration   or 10.0
-    @timeStep    = @opts.timeStep   or 0.1
-    @reportFunc  = @opts.reportFunc   or Simulation.defaultReportFunc
     @decorateNodes() # extend nodes with integration methods
 
+    @onStart     = @opts.onStart or (nodeNames) ->
+      log.info "simulation stated: #{nodeNames}"
+
+    @onFrames    = @opts.onFrames or (frames) ->
+      log.info "simulation frames: #{frames}"
+
+    @onEnd       = @opts.onEnd or ->
+      log.info "simulation end"
+
+    speed            = if @opts.speed? then @opts.speed else 1
+    @bundleAllFrames = speed is 1       # bundle all frames when at max speed
+    @stepInterval    = Math.pow(470, 1-speed) + 30   # exponential, 500ms at speed=0, 31ms at speed=1
+                                                     # (but note at exactly 1 we switch to bundling)
 
   decorateNodes: ->
     _.each @nodes, (node) =>
@@ -73,34 +80,19 @@ module.exports = class Simulation
 
   # for some integrators, timeIndex might matter
   evaluateNode: (node, t) ->
-    node.currentValue = node.getCurrentValue(t, @timeStep)
+    node.currentValue = node.getCurrentValue(t)
 
-  # create an object representation of the current timeStep
-  addReportFrame: (time) ->
+  # create an object representation of the current timeStep and add
+  # it to the current bundle of frames.
+  generateFrame: (time) ->
     nodes = _.map @nodes, (node) ->
-      time:  time
       title: node.title
       value: node.currentValue
-      initialValue: node.initialValue
-    @reportFrames.push
+    frame =
       time: time
       nodes: nodes
 
-  # create envelope deata for the report
-  report: ->
-    steps = @duration / @timeStep
-    data =
-      steps: steps
-      duration: @duration
-      timeStep: @timeStep
-      nodeNames: _.pluck @nodes, 'title'
-      frames: @reportFrames
-      endState: _.map @nodes, (n) ->
-        title: n.title
-        initialValue: n.initialValue
-        value: n.currentValue
-
-    @reportFunc(data)
+    @framesBundle.push frame
 
   # Tests that the graph contains no loops consisting of dependent variables.
   # A graph such as A->B<->C is invalid if B and C connect to each other and
@@ -139,13 +131,45 @@ module.exports = class Simulation
 
   run: ->
     time = 0
-    @reportFrames = []
+    @framesBundle = []
     _.each @nodes, (node) => @initializeValues node
     if not @graphIsValid()
       # We should normally not get here, as callers ought to check graphIsValid themselves first
       throw new Error("Graph not valid")
-    while time < @duration
+
+    nodeNames = _.pluck @nodes, 'title'
+    @onStart(nodeNames)
+
+    step = =>
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
       _.each @nodes, (node) => @evaluateNode node, time
-      time = time + @timeStep
-      @addReportFrame(time)
+      time++
+      @generateFrame(time)
+
+    if @bundleAllFrames
+      while time < @duration
+        step()
+      @onFrames(@framesBundle)    # send all at once
+      @onEnd()
+    else
+      # use animationFrame and calculate how much time has passed since the last step, and
+      # generate and send the appropriate number of frames. This is better when we send
+      # intermediate values to CODAP, as this can take > 100ms and would tie up setInterval.
+      startTime = window.performance.now()
+      animationFrameLoop = =>
+        if time < @duration
+          requestAnimationFrame animationFrameLoop
+        else if time is @duration then return
+
+        elapsedTime = window.performance.now() - startTime
+        desiredStepsTilNow = Math.floor elapsedTime / @stepInterval
+        desiredStepsTilNow = Math.min desiredStepsTilNow, @duration
+
+        while time < desiredStepsTilNow
+          step()
+
+        @onFrames(@framesBundle)  # send steps til now
+        @framesBundle = []
+
+        if time is @duration then @onEnd()
+      animationFrameLoop()

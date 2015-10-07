@@ -7,7 +7,11 @@ module.exports = class CodapConnect
 
   codapPhone: null
 
-  initAccomplished: false
+  currentCaseID: null
+
+  stepsInCurrentCase: 0
+
+  queue: []
 
   @instances: {} # map of context -> instance
 
@@ -19,6 +23,11 @@ module.exports = class CodapConnect
     log.info 'CodapConnect: initializing'
     GraphStore = require '../stores/graph-store'
     @graphStore = GraphStore.store
+
+    SimulationStore = require '../stores/simulation-store'
+    SimulationStore.actions.simulationStarted.listen       @_openNewCase.bind(@)
+    SimulationStore.actions.simulationFramesCreated.listen @_sendSimulationData.bind(@)
+
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'codap-game', window.parent )
@@ -35,7 +44,7 @@ module.exports = class CodapConnect
             name: 'Simulation'
             attrs: [
               {
-                name: 'steps'
+                name: tr '~CODAP.SIMULATION.STEPS'
                 type: 'numeric'
                 description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
                 precision: 0
@@ -46,9 +55,9 @@ module.exports = class CodapConnect
         contextType: 'DG.DataContext'
     }, @initGameHandler)
 
+  _openNewCase: (nodeNames) ->
+    @currentCaseID = null
 
-
-  sendSimulationData: (data) ->
     # First column definition is the time index
     sampleDataAttrs = [
       {
@@ -58,47 +67,66 @@ module.exports = class CodapConnect
     ]
 
     # Append node names to column descriptions.
-    _.each data.nodeNames, (name) ->
+    _.each nodeNames, (name) ->
       sampleDataAttrs.push
         name: name
         type: 'numeric'
 
-    # Fill in the sample data values (node values array)
-    sampleData = _.map data.frames, (frame) ->
-      sample     = [frame.time]
-      _.each frame.nodes, (n) -> sample.push n.value
-      sample
-
-    # see: https://github.com/concord-consortium/codap/wiki/Data-Interactive-API#createcollection
     @codapPhone.call
       action: 'createCollection'
       args:
         name: 'Samples'
         attrs: sampleDataAttrs
 
-    # called by CODAP when 'openCase' is received.
-    openCaseCallback = (result) =>
-      if result
-        if result.success
-          @codapPhone.call
-            action: 'createCases'
-            args: {
-              collection: 'Samples',
-              parent: result.caseID,
-              values: sampleData
-            }
-        else
-          log.info "CODAP returned an error on 'createCase'"
-      else
-        log.info "Unable to call 'createCase' in CODAP (phone timeout?)"
-
-    @codapPhone.call( {
+    @codapPhone.call {
       action: 'openCase'
       args: {
         collection: 'Simulation',
-        values: [data.steps]
-        }
-    }, openCaseCallback)
+        values: [0]
+      }
+    }, (result) =>
+      if result?.success
+        @currentCaseID = result.caseID
+        @stepsInCurrentCase = 0
+        @_flushQueue()
+      else
+        log.info "CODAP returned an error on 'openCase'"
+
+  _sendSimulationData: (data) ->
+    if not @currentCaseID
+      # openNewCase may not have completed yet, so we queue these up
+      @queue.push data
+      return
+
+    # Create the sample data values (node values array)
+    sampleData = _.map data, (frame) ->
+      sample     = [frame.time]
+      _.each frame.nodes, (n) -> sample.push n.value
+      sample
+
+    # Send the data
+    @codapPhone.call
+      action: 'createCases'
+      args: {
+        collection: 'Samples',
+        parent: @currentCaseID,
+        values: sampleData
+      }
+
+    # Update the parent case with the current number of steps
+    @stepsInCurrentCase += sampleData.length
+    @codapPhone.call
+      action: 'updateCase'
+      args: {
+        collection: 'Simulation',
+        caseID: @currentCaseID
+        values: [@stepsInCurrentCase]
+      }
+
+  _flushQueue: ->
+    for data in @queue
+      @_sendSimulationData data
+    @queue = []
 
   sendUndoableActionPerformed: ->
     @codapPhone.call
@@ -146,9 +174,8 @@ module.exports = class CodapConnect
     return false for s in successes when s is false  # return false if we encounter *any* explicit false values in the array
     return true
 
-  initGameHandler: (result) =>
+  initGameHandler: (result) ->
     if result and result.success
-      @initAccomplished = true
       CodapStore.actions.codapLoaded()
 
   #

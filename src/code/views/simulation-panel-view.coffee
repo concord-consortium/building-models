@@ -89,10 +89,15 @@ module.exports = React.createClass
             (div {style: {margin: "-11px 0 3px 7px"}},
               (ValueSlider {
                 min: 0
-                max: 10
-                value: 10
-                width: 140}
-              )
+                max: 1
+                value: @state.speed
+                width: 140
+                stepSize: 0.05
+                minLabel: (i {className: "ivy-icon-speedSlow", style: {fontSize: 10, marginLeft: -5}})
+                maxLabel: (i {className: "ivy-icon-speedFast", style: {fontSize: 15, marginRight: -10}})
+                renderValueTooltip: false
+                onValueChange: SimulationStore.actions.setSpeed
+              })
             )
           )
           (div {className: "row left"},
