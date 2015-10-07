@@ -1,4 +1,3 @@
-GraphStore         = require('./graph-store').store
 AppSettingsActions = require('./app-settings-store').actions
 ImportActions      = require '../actions/import-actions'
 GraphActions       = require '../actions/graph-actions'
@@ -30,6 +29,8 @@ SimulationStore   = Reflux.createStore
     unitNamePl  = TimeUnits.toString defaultUnit, true
     options = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
 
+    @nodes = []
+
     @settings =
       simulationPanelExpanded: false
       graphIsValid: true
@@ -55,8 +56,10 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onGraphChanged: (data)->
+    @nodes = data.nodes
+
     simulator = new Simulation
-      nodes: data.nodes
+      nodes: @nodes
     @settings.graphIsValid = simulator.graphIsValid()
     @notifyChange()
 
@@ -95,7 +98,7 @@ SimulationStore   = Reflux.createStore
       steps = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
       steps = Math.min steps, 5000
       simulator = new Simulation
-        nodes: GraphStore.getNodes()
+        nodes: @nodes
         duration: steps
         timeStep: 1
         reportFunc: (report) =>
