@@ -1,5 +1,6 @@
 Migrations          = require '../data/migrations/migrations'
 DiagramNode         = require '../models/node'
+ImportActions       = require '../actions/import-actions'
 
 module.exports = class MySystemImporter
 
@@ -9,10 +10,9 @@ module.exports = class MySystemImporter
   importData: (data) ->
     Migrations.update(data)
     # Synchronous invocation of actions / w trigger
-    @paletteStore.actions.loadData.trigger(data)
+    ImportActions.import.trigger(data)
     @importNodes data.nodes
     @importLinks data.links
-    @settings.importSettings data.settings
     @graphStore.setFilename data.filename or 'New Model'
 
   importNode: (nodeSpec) ->

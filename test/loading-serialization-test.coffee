@@ -16,18 +16,16 @@ Link             = requireModel 'link'
 Node             = requireModel 'node'
 GraphStore       = require "#{__dirname}/../src/code/stores/graph-store"
 AppSettingsStore = require "#{__dirname}/../src/code/stores/app-settings-store"
+SimulationStore  = require "#{__dirname}/../src/code/stores/simulation-store"
 CodapConnect     = requireModel 'codap-connect'
 
 SerializedTestData = require "./serialized-test-data/v-0.1"
 
 describe "Serialization and Loading", ->
   beforeEach ->
-    sandbox = Sinon.sandbox.create()
-    sandbox.stub(CodapConnect, "instance", ->
-      return {
-        sendUndoableActionPerformed: -> return ''
-      }
-    )
+    @sandbox = Sinon.sandbox.create()
+    @sandbox.stub CodapConnect, "instance", ->
+      sendUndoableActionPerformed: -> return ''
 
     @serializedForm = JSON.stringify SerializedTestData
     @fakePalette = [
@@ -85,7 +83,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal 1.6
+        model.version.should.equal 1.7
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -137,6 +135,17 @@ describe "Serialization and Loading", ->
         model.settings.capNodeValues.should.equal true
         model.settings.diagramOnly.should.equal true
 
+      it "should be able to serialize the simulation settings", ->
+        SimulationStore.store.settings.period = 10
+        SimulationStore.store.settings.periodUnits = "YEAR"
+        SimulationStore.store.settings.stepSize = 1
+        SimulationStore.store.settings.stepUnits = "SECOND"
+        jsonString = @graphStore.toJsonString(@fakePalette)
+        model = JSON.parse jsonString
+        model.settings.simulation.period.should.equal 10
+        model.settings.simulation.periodUnits.should.equal "YEAR"
+        model.settings.simulation.stepSize.should.equal 1
+        model.settings.simulation.stepUnits.should.equal "SECOND"
 
   describe "loadData", ->
     beforeEach ->
