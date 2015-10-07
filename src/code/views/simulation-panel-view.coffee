@@ -93,6 +93,9 @@ module.exports = React.createClass
                 value: @state.speed
                 width: 140
                 stepSize: 0.05
+                minLabel: (i {className: "ivy-icon-speedSlow", style: {fontSize: 10, marginLeft: -5}})
+                maxLabel: (i {className: "ivy-icon-speedFast", style: {fontSize: 15, marginRight: -10}})
+                renderValueTooltip: false
                 onValueChange: SimulationStore.actions.setSpeed
               })
             )

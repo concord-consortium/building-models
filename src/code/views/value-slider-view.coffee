@@ -14,6 +14,9 @@ ValueSlider = React.createClass
     maxEditable: false
     stepSize: 1
     displayPrecision: 0
+    renderValueTooltip: true
+    minLabel: null
+    maxLabel: null
     onValueChange: (v) ->
       log.info "new value #{v}"
     onRangeChange: (r) ->
@@ -76,7 +79,7 @@ ValueSlider = React.createClass
     style =
       bottom: "#{@props.handleSize}px"
 
-    if @state.dragging
+    if @state.dragging and @props.renderValueTooltip
       style.display = "block"
     (div {className: "number", style: style}, @props.value.toFixed(@props.displayPrecision))
 
@@ -133,8 +136,8 @@ ValueSlider = React.createClass
 
   renderLegend: ->
     (div {className:"legend"},
-      @renderEditableProperty "min"
-      @renderEditableProperty "max"
+      @props.minLabel or @renderEditableProperty "min"
+      @props.maxLabel or @renderEditableProperty "max"
     )
 
   render: ->
