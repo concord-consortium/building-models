@@ -1,13 +1,11 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var AppView, CodapConnect, GraphStore, HashParams, ValueSlider, getParameterByName;
+var AppView, GraphStore, HashParams, ValueSlider, getParameterByName;
 
 AppView = React.createFactory(require('./views/app-view'));
 
 ValueSlider = require('./views/value-slider-view');
 
 GraphStore = require('./stores/graph-store');
-
-CodapConnect = require('./models/codap-connect');
 
 HashParams = require('./utils/hash-parameters');
 
@@ -43,7 +41,7 @@ window.initApp = function(wireframes) {
 
 
 
-},{"./models/codap-connect":567,"./stores/graph-store":578,"./utils/hash-parameters":588,"./views/app-view":597,"./views/value-slider-view":635}],2:[function(require,module,exports){
+},{"./stores/graph-store":578,"./utils/hash-parameters":588,"./views/app-view":597,"./views/value-slider-view":635}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -56361,9 +56359,9 @@ var CodapConnect, CodapStore, IframePhoneRpcEndpoint, tr,
 
 IframePhoneRpcEndpoint = (require('iframe-phone')).IframePhoneRpcEndpoint;
 
-CodapStore = require("../stores/codap-store");
-
 tr = require('../utils/translate');
+
+CodapStore = null;
 
 module.exports = CodapConnect = (function() {
   CodapConnect.prototype.name = 'Building Models Tool';
@@ -56567,6 +56565,7 @@ module.exports = CodapConnect = (function() {
 
   CodapConnect.prototype.initGameHandler = function(result) {
     if (result && result.success) {
+      CodapStore = require("../stores/codap-store");
       return CodapStore.actions.codapLoaded();
     }
   };
@@ -57530,13 +57529,17 @@ module.exports = {
 
 
 },{"../actions/import-actions":549,"../utils/hash-parameters":588}],576:[function(require,module,exports){
-var codapActions, codapStore, mixin;
+var CodapConnect, codapActions, codapStore, mixin;
+
+CodapConnect = require('../models/codap-connect');
 
 codapActions = Reflux.createActions(["codapLoaded", "hideUndoRedo"]);
 
 codapStore = Reflux.createStore({
   listenables: [codapActions],
   init: function() {
+    var codapConnect;
+    codapConnect = CodapConnect.instance('building-models');
     this.codapHasLoaded = false;
     return this.hideUndoRedo = false;
   },
@@ -57584,7 +57587,7 @@ module.exports = {
 
 
 
-},{}],577:[function(require,module,exports){
+},{"../models/codap-connect":567}],577:[function(require,module,exports){
 var GoogleDrive, GoogleDriveIO, GoogleFileActions, GoogleFileStore, GraphStore, HashParams, PaletteStore, mixin, tr, waitForAuthCheck;
 
 GoogleDriveIO = require('../utils/google-drive-io');
