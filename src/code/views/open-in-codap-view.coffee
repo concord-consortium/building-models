@@ -9,13 +9,14 @@ module.exports = React.createClass
   getDefaultProps: ->
     linkTitle: tr '~OPEN_IN_CODAP.TITLE'
     codapUrl: "http://codap.concord.org/releases/latest/static/dg/en/cert/index.html"
+    documentServer: "http://document-store.herokuapp.com/"
     openInNewWindow: true
 
   thisEncodedUrl: ->
     encodeURIComponent(window.location.toString())
 
   link: ->
-    "#{@props.codapUrl}?di=#{@thisEncodedUrl()}"
+    "#{@props.codapUrl}?documentServer=#{@props.documentServer}&di=#{@thisEncodedUrl()}"
 
   render: ->
     opts = { href: @link() }
