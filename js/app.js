@@ -58485,11 +58485,11 @@ module.exports = {
 
 
 },{"./palette-store":582}],580:[function(require,module,exports){
-var GraphStore, PaletteStore, mixin, nodeActions, nodeStore;
+var GraphActions, PaletteStore, mixin, nodeActions, nodeStore;
 
 PaletteStore = require('./palette-store');
 
-GraphStore = require('./graph-store');
+GraphActions = require('../actions/graph-actions');
 
 nodeActions = Reflux.createActions(["nodesChanged"]);
 
@@ -58500,7 +58500,7 @@ nodeStore = Reflux.createStore({
     this.paletteItemHasNodes = false;
     this.selectedPaletteItem = null;
     PaletteStore.store.listen(this.paletteChanged);
-    return GraphStore.store.listen(this.graphChanged);
+    return GraphActions.graphChanged.listen(this.graphChanged);
   },
   onNodesChanged: function(nodes) {
     this.nodes = nodes;
@@ -58563,7 +58563,7 @@ module.exports = {
 
 
 
-},{"./graph-store":578,"./palette-store":582}],581:[function(require,module,exports){
+},{"../actions/graph-actions":548,"./palette-store":582}],581:[function(require,module,exports){
 var PaletteStore, UndoRedo, listenerMixin, paletteDialogActions, store;
 
 PaletteStore = require('./palette-store');
@@ -58968,9 +58968,10 @@ SimulationStore = Reflux.createStore({
       return results;
     })();
     this.nodes = [];
+    this.graphIsValid = true;
     return this.settings = {
       simulationPanelExpanded: false,
-      graphIsValid: true,
+      modelIsRunnable: true,
       period: 10,
       periodUnits: defaultUnit,
       periodUnitsName: unitNamePl,
@@ -58978,6 +58979,7 @@ SimulationStore = Reflux.createStore({
       stepUnits: defaultUnit,
       stepUnitsName: unitName,
       timeUnitOptions: options,
+      duration: 10,
       speed: 1
     };
   },
@@ -58998,7 +59000,7 @@ SimulationStore = Reflux.createStore({
     simulator = new Simulation({
       nodes: this.nodes
     });
-    this.settings.graphIsValid = simulator.graphIsValid();
+    this.graphIsValid = simulator.graphIsValid();
     return this.notifyChange();
   },
   onSetPeriod: function(n) {
@@ -59028,18 +59030,21 @@ SimulationStore = Reflux.createStore({
     pluralize = this.settings.period !== 1;
     return this.settings.periodUnitsName = TimeUnits.toString(this.settings.periodUnits, pluralize);
   },
+  _setDuration: function() {
+    var duration;
+    duration = TimeUnits.stepsInTime(this.settings.stepSize, this.settings.stepUnits, this.settings.period, this.settings.periodUnits);
+    return this.settings.duration = Math.min(duration, 5000);
+  },
   onSetSpeed: function(s) {
     this.settings.speed = s;
     return this.notifyChange();
   },
   onRunSimulation: function() {
-    var simulator, steps;
-    if (this.settings.graphIsValid) {
-      steps = TimeUnits.stepsInTime(this.settings.stepSize, this.settings.stepUnits, this.settings.period, this.settings.periodUnits);
-      steps = Math.min(steps, 5000);
+    var error, simulator;
+    if (this.settings.modelIsRunnable) {
       simulator = new Simulation({
         nodes: this.nodes,
-        duration: steps,
+        duration: this.settings.duration,
         speed: this.settings.speed,
         onStart: function(nodeNames) {
           return SimulationActions.simulationStarted(nodeNames);
@@ -59053,11 +59058,30 @@ SimulationStore = Reflux.createStore({
       });
       return simulator.run();
     } else {
-      return alert(tr("~DOCUMENT.ACTIONS.GRAPH_INVALID"));
+      error = this._getErrorMessage();
+      return alert(error);
     }
+  },
+  _checkModelIsRunnable: function() {
+    return this.settings.modelIsRunnable = this.graphIsValid && this.settings.duration > 0;
+  },
+  _getErrorMessage: function() {
+    var bullet, message, multipleErrors;
+    multipleErrors = !this.graphIsValid && !(this.settings.duration > 0);
+    message = multipleErrors ? "Your model could not be run due to the following reasons:" : "";
+    bullet = multipleErrors ? "\n\n• " : "";
+    if (!this.graphIsValid) {
+      message += bullet + tr("~DOCUMENT.ACTIONS.GRAPH_INVALID");
+    }
+    if (!(this.settings.duration > 0)) {
+      message += bullet + tr("~DOCUMENT.ACTIONS.DURATION_INVALID");
+    }
+    return message;
   },
   notifyChange: function() {
     this._setUnitsNames();
+    this._setDuration();
+    this._checkModelIsRunnable();
     return this.trigger(_.clone(this.settings));
   },
   importSettings: function(data) {
@@ -59861,6 +59885,7 @@ module.exports = {
   "~DOCUMENT.ACTIONS.UNDO": "Undo",
   "~DOCUMENT.ACTIONS.REDO": "Redo",
   "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n Either remove a link to break the loop, or make one of the variables a collector.",
+  "~DOCUMENT.ACTIONS.DURATION_INVALID": "Your step size is larger than the model duration.",
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)",
@@ -63521,7 +63546,7 @@ module.exports = React.createClass({
     var expanded, runButtonClasses;
     expanded = this.state.simulationPanelExpanded ? "expanded" : "collapsed";
     runButtonClasses = "button";
-    if (!this.state.graphIsValid) {
+    if (!this.state.modelIsRunnable) {
       runButtonClasses += " disabled error";
     }
     return div({
