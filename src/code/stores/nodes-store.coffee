@@ -1,5 +1,5 @@
 PaletteStore       = require './palette-store'
-GraphStore         = require './graph-store'
+GraphActions       = require '../actions/graph-actions'
 
 nodeActions = Reflux.createActions(
   [
@@ -16,7 +16,7 @@ nodeStore   = Reflux.createStore
     @selectedPaletteItem = null
 
     PaletteStore.store.listen @paletteChanged
-    GraphStore.store.listen  @graphChanged
+    GraphActions.graphChanged.listen  @graphChanged
 
   onNodesChanged: (nodes) ->
     @nodes = nodes
