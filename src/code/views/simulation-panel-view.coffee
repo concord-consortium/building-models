@@ -25,7 +25,7 @@ module.exports = React.createClass
   render: ->
     expanded = if @state.simulationPanelExpanded then "expanded" else "collapsed"
     runButtonClasses = "button"
-    if not @state.graphIsValid then runButtonClasses += " disabled error"
+    if not @state.modelIsRunnable then runButtonClasses += " disabled error"
     (div {className: 'simulation-panel-wrapper'},
       (div {className: "top-button #{expanded}", onClick: @toggle},
         (div {},

@@ -33,10 +33,11 @@ SimulationStore   = Reflux.createStore
     options = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
 
     @nodes = []
+    @graphIsValid = true
 
     @settings =
       simulationPanelExpanded: false
-      graphIsValid: true
+      modelIsRunnable: true
       period: 10
       periodUnits: defaultUnit
       periodUnitsName: unitNamePl
@@ -44,6 +45,7 @@ SimulationStore   = Reflux.createStore
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: options
+      duration: 10
       speed: 1
 
   # From AppSettingsStore actions
@@ -63,7 +65,7 @@ SimulationStore   = Reflux.createStore
 
     simulator = new Simulation
       nodes: @nodes
-    @settings.graphIsValid = simulator.graphIsValid()
+    @graphIsValid = simulator.graphIsValid()
     @notifyChange()
 
   onSetPeriod: (n) ->
@@ -92,17 +94,20 @@ SimulationStore   = Reflux.createStore
     pluralize = @settings.period isnt 1
     @settings.periodUnitsName = TimeUnits.toString @settings.periodUnits, pluralize
 
+  _setDuration: ->
+    duration = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
+    @settings.duration = Math.min duration, 5000
+
   onSetSpeed: (s) ->
     @settings.speed = s
     @notifyChange()
 
   onRunSimulation: ->
-    if @settings.graphIsValid
-      steps = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
-      steps = Math.min steps, 5000
+    if @settings.modelIsRunnable
+
       simulator = new Simulation
         nodes: @nodes
-        duration: steps
+        duration: @settings.duration
         speed: @settings.speed
 
         # Simulation events get triggered as Actions here, and are
@@ -116,10 +121,29 @@ SimulationStore   = Reflux.createStore
 
       simulator.run()
     else
-      alert tr "~DOCUMENT.ACTIONS.GRAPH_INVALID"
+      error = @_getErrorMessage()
+      alert error
+
+  _checkModelIsRunnable: ->
+    @settings.modelIsRunnable = @graphIsValid and @settings.duration > 0
+
+  _getErrorMessage: ->
+    multipleErrors = not (@graphIsValid) and not (@settings.duration > 0)
+    message = if multipleErrors
+      "Your model could not be run due to the following reasons:"
+    else ""
+    bullet = if multipleErrors then "\n\n• " else ""
+
+    if not (@graphIsValid)
+      message += bullet + tr "~DOCUMENT.ACTIONS.GRAPH_INVALID"
+    if not (@settings.duration > 0)
+      message += bullet + tr "~DOCUMENT.ACTIONS.DURATION_INVALID"
+    message
 
   notifyChange: ->
     @_setUnitsNames()
+    @_setDuration()
+    @_checkModelIsRunnable()
     @trigger _.clone @settings
 
   importSettings: (data) ->

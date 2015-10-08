@@ -129,6 +129,7 @@ module.exports =
   "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n
                                       Either remove a link to break the loop, or make one
                                       of the variables a collector."
+  "~DOCUMENT.ACTIONS.DURATION_INVALID": "Your step size is larger than the model duration."
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 
