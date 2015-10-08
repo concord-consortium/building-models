@@ -1,6 +1,6 @@
 IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
-CodapStore = require "../stores/codap-store"
 tr = require '../utils/translate'
+CodapStore = null
 module.exports = class CodapConnect
 
   name: 'Building Models Tool'
@@ -176,6 +176,7 @@ module.exports = class CodapConnect
 
   initGameHandler: (result) ->
     if result and result.success
+      CodapStore = require "../stores/codap-store"
       CodapStore.actions.codapLoaded()
 
   #

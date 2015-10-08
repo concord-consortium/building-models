@@ -1,3 +1,5 @@
+CodapConnect = require '../models/codap-connect'
+
 codapActions = Reflux.createActions(
   [
     "codapLoaded"
@@ -9,6 +11,7 @@ codapStore   = Reflux.createStore
   listenables: [codapActions]
 
   init: ->
+    codapConnect = CodapConnect.instance 'building-models'
     @codapHasLoaded = false
     @hideUndoRedo   = false
 

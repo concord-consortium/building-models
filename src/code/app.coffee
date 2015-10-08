@@ -2,7 +2,6 @@ AppView     = React.createFactory require './views/app-view'
 
 ValueSlider  =require './views/value-slider-view'
 GraphStore   = require './stores/graph-store'
-CodapConnect = require './models/codap-connect'
 HashParams   = require './utils/hash-parameters'
 
 getParameterByName = (name) ->
