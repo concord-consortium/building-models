@@ -45,7 +45,7 @@ module.exports = React.createClass
         )
         (div {className: 'edit-row'},
           (label {className: 'node-delete', onClick: @delete},
-            (i {className: "ivy-icon-trash"})
+            (i {className: "icon-codap-trash"})
             tr("~NODE-EDIT.DELETE")
           )
         )

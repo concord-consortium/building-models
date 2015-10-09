@@ -15,7 +15,7 @@ ToolButton = React.createFactory React.createClass
     onClick = =>
       @props.onClick(@props.name) if @props.onClick
 
-    classes = "icon-#{name} tool-button"
+    classes = "icon-codap-#{name} tool-button"
     classes = "#{classes} selected" if @props.selected
     classes = "#{classes} disabled" if @props.disabled
     (div {className: classes, onClick: onClick})
@@ -25,9 +25,9 @@ ToolPanel = React.createFactory React.createClass
 
   buttonData: [
       # {name: "plus",  simple: true, shows: "add", 'enabled': ['nothing','node','link'] }
-      {name: "brush", simple: true, shows: "design",'enabled': ['node','link'] }
-      {name: "ruler", simple: false, shows: "value", 'enabled': ['node'] }
-      {name: "curve", simple: false, shows: "relations",'enabled': ['node']}
+      {name: "styles", simple: true, shows: "design",'enabled': ['node','link'] }
+      {name: "values", simple: false, shows: "value", 'enabled': ['node'] }
+      {name: "qualRel", simple: false, shows: "relations",'enabled': ['node']}
     ]
 
   isDisabled: (button) ->

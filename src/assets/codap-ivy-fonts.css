@@ -1,0 +1,179 @@
+@font-face {
+	font-family: 'CodapIvy';
+	src:url('fonts/CodapIvy.eot?ndvjg4');
+	src:url('fonts/CodapIvy.eot?ndvjg4#iefix') format('embedded-opentype'),
+		url('fonts/CodapIvy.ttf?ndvjg4') format('truetype'),
+		url('fonts/CodapIvy.woff?ndvjg4') format('woff'),
+		url('fonts/CodapIvy.svg?ndvjg4#CodapIvy') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-codap-"], [class*=" icon-codap-"] {
+	font-family: 'CodapIvy';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-codap-table2:before {
+	content: "\31";
+}
+.icon-codap-dataTool:before {
+	content: "\32";
+}
+.icon-codap-graph:before {
+	content: "\33";
+}
+.icon-codap-map:before {
+	content: "\34";
+}
+.icon-codap-slider:before {
+	content: "\35";
+}
+.icon-codap-calc:before {
+	content: "\36";
+}
+.icon-codap-mediaTool:before {
+	content: "\37";
+}
+.icon-codap-noteTool:before {
+	content: "\38";
+}
+.icon-codap-pageFull:before {
+	content: "\41";
+}
+.icon-codap-pageEmpty:before {
+	content: "\42";
+}
+.icon-codap-play:before {
+	content: "\4a";
+}
+.icon-codap-controlsReset:before {
+	content: "\4b";
+}
+.icon-codap-controlsBackward:before {
+	content: "\4d";
+}
+.icon-codap-controlsForward:before {
+	content: "\4e";
+}
+.icon-codap-speedFast:before {
+	content: "\4f";
+}
+.icon-codap-speedSlow:before {
+	content: "\50";
+}
+.icon-codap-smallSliderLines:before {
+	content: "\52";
+}
+.icon-codap-alert:before {
+	content: "\53";
+}
+.icon-codap-checkmark:before {
+	content: "\54";
+}
+.icon-codap-info:before {
+	content: "\55";
+}
+.icon-codap-saveGraph:before {
+	content: "\56";
+}
+.icon-codap-link:before {
+	content: "\57";
+}
+.icon-codap-marquee:before {
+	content: "\58";
+}
+.icon-codap-arrow-undo:before {
+	content: "\61";
+}
+.icon-codap-arrow-redo:before {
+	content: "\62";
+}
+.icon-codap-tileList:before {
+	content: "\63";
+}
+.icon-codap-guide:before {
+	content: "\64";
+}
+.icon-codap-options:before {
+	content: "\65";
+}
+.icon-codap-draw:before {
+	content: "\66";
+}
+.icon-codap-simulateTool:before {
+	content: "\67";
+}
+.icon-codap-help:before {
+	content: "\68";
+}
+.icon-codap-hideShow:before {
+	content: "\69";
+}
+.icon-codap-scaleData:before {
+	content: "\6a";
+}
+.icon-codap-tileScreenshot:before {
+	content: "\6c";
+}
+.icon-codap-search:before {
+	content: "\6d";
+}
+.icon-codap-styles:before {
+	content: "\6e";
+}
+.icon-codap-values:before {
+	content: "\6f";
+}
+.icon-codap-qualRel:before {
+	content: "\70";
+}
+.icon-codap-moreOptions:before {
+	content: "\71";
+}
+.icon-codap-paletteArrow-expand:before {
+	content: "\72";
+}
+.icon-codap-paletteArrow-collapse:before {
+	content: "\73";
+}
+.icon-codap-arrow-expand:before {
+	content: "\74";
+}
+.icon-codap-arrow-collapse:before {
+	content: "\75";
+}
+.icon-codap-inspectorArrow-expand:before {
+	content: "\76";
+}
+.icon-codap-inspectorArrow-collapse:before {
+	content: "\77";
+}
+.icon-codap-swapAxis:before {
+	content: "\78";
+}
+.icon-codap-ex:before {
+	content: "\79";
+}
+.icon-codap-minimize:before {
+	content: "\7a";
+}
+.icon-codap-comment:before {
+	content: "\e609";
+}
+.icon-codap-trash:before {
+	content: "\e629";
+}
+.icon-codap-right-arrow:before {
+	content: "\f061";
+}
+

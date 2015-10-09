@@ -29,9 +29,9 @@ module.exports = React.createClass
     (div {className: 'simulation-panel-wrapper'},
       (div {className: "top-button #{expanded}", onClick: @toggle},
         (div {},
-          (i {className: "ivy-icon-simulateTool"})
+          (i {className: "icon-codap-simulateTool"})
         )
-        (div {}, tr "~DOCUMENT.ACTIONS.SIMULATE")
+        (div {style: {marginTop: -9}}, tr "~DOCUMENT.ACTIONS.SIMULATE")
       )
       (div {className: "simulation-panel #{expanded}"},
         (div {className: "run-panel"},
@@ -56,21 +56,21 @@ module.exports = React.createClass
           (div {className: "row"},
             (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
               tr "~DOCUMENT.ACTIONS.RUN"
-              (i {className: "ivy-icon-play"})
+              (i {className: "icon-codap-play"})
             )
             (div {className: "button disabled"},
-              (i {className: "ivy-icon-controlsReset"})
+              (i {className: "icon-codap-controlsReset"})
             )
             (div {className: "button disabled"},
-              (i {className: "ivy-icon-controlsBackward"})
+              (i {className: "icon-codap-controlsBackward"})
             )
             (div {className: "button disabled"},
-              (i {className: "ivy-icon-controlsForward"})
+              (i {className: "icon-codap-controlsForward"})
             )
           )
           (div {className: "row left"},
             (div {className: "button small disabled"},
-              (i {className: "ivy-icon-saveGraph"})
+              (i {className: "icon-codap-saveGraph"})
               tr "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS"
             )
           )
@@ -93,8 +93,8 @@ module.exports = React.createClass
                 value: @state.speed
                 width: 140
                 stepSize: 0.05
-                minLabel: (i {className: "ivy-icon-speedSlow", style: {fontSize: 10, marginLeft: -5}})
-                maxLabel: (i {className: "ivy-icon-speedFast", style: {fontSize: 15, marginRight: -10}})
+                minLabel: (i {className: "icon-codap-speedSlow", style: {fontSize: 15, marginLeft: -5}})
+                maxLabel: (i {className: "icon-codap-speedFast", style: {fontSize: 15, marginRight: -10}})
                 renderValueTooltip: false
                 onValueChange: SimulationStore.actions.setSpeed
               })

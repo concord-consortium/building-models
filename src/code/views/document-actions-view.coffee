@@ -36,7 +36,7 @@ module.exports = React.createClass
 
   renderSettingsLink: ->
     (span {},
-      (i {className: "ivy-icon-options", onClick: AppSettingsStore.actions.showSettingsDialog})
+      (i {className: "icon-codap-options", onClick: AppSettingsStore.actions.showSettingsDialog})
     )
 
   render: ->
@@ -44,8 +44,8 @@ module.exports = React.createClass
     (div {className: 'document-actions'},
       unless @state.hideUndoRedo
         (div {className: 'misc-actions'},
-          (i {className: "ivy-icon-arrow-undo #{buttonClass @state.canUndo}", onClick: @undoClicked, disabled: not @state.canUndo})
-          (i {className: "ivy-icon-arrow-redo #{buttonClass @state.canRedo}", onClick: @redoClicked, disabled: not @state.canRedo})
+          (i {className: "icon-codap-arrow-undo #{buttonClass @state.canUndo}", onClick: @undoClicked, disabled: not @state.canUndo})
+          (i {className: "icon-codap-arrow-redo #{buttonClass @state.canRedo}", onClick: @redoClicked, disabled: not @state.canRedo})
         )
 
       (div {className: "misc-actions"},

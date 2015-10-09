@@ -9,6 +9,9 @@ by the [Concord Consortium](http://concord.org/).
 * Think of a better name for this tool.
 
 ## See Also:
+* [Codap](https://github.com/concord-consortium/codap) – The Data Analysis Platform
+we are using.
+* [Codap Ivy Icons](https://github.com/concord-consortium/codap-ivy-icons) – A shared icon font for Building Models (ivy) and CODAP.
 * [Live demo site](http://concord-consortium.github.io/building-models/)
 * [MySystem](https://github.com/concord-consortium/mysystem_sc) – a simple concept mapping with node/edge graphs.
 * [Model Survey](http://concord-consortium.github.io/model-survey/) – Assessing available node/edge graphing tools.
@@ -51,3 +54,12 @@ the compiled artifacts, which is less than ideal.
 * Copy `./.env.sample` to `./.env`
 * Edit your AWS credentials in `./.env` -- this file should never go into version control.
 * Run `./build.sh pro` which will run `s3_website push` and deploy the code from `dist` to http://building-models-app.concord.org/ and http://ivy.concord.org/
+
+
+## Updating the shared fonts.
+
+To update the icon fonts used in this project:
+
+1. Checkout and modify the shared icon-font project [Codap Ivy Icons](https://github.com/concord-consortium/codap-ivy-icons)
+2. Follow the directions there to deploy to github pages.
+3. Run `curlfonts.sh` to download a local copy of the CSS and fonts to this project.

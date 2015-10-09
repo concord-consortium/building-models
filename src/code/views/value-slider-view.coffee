@@ -97,7 +97,7 @@ ValueSlider = React.createClass
       "left": centerOfDiv # margin will take care of the rest?
     (div {},
       (div {className: "value-slider-handle", style: style, ref: "handle"},
-        (i {className: "ivy-icon-smallSliderLines"})
+        (i {className: "icon-codap-smallSliderLines"})
         @renderNumber()
       )
     )

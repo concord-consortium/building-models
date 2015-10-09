@@ -123,7 +123,7 @@ module.exports = React.createClass
               (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
                 if @state.searching
                   (div {},
-                    (i {className: "ivy-icon-options spin"})
+                    (i {className: "icon-codap-options spin"})
                     ' '
                     tr "~IMAGE-BROWSER.SEARCHING",
                       scope: if @state.searchingAll then 'all matches for ' else ''

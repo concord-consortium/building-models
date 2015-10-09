@@ -196,8 +196,8 @@ module.exports = NodeView = React.createClass
       (div {className: 'link-target'},
         if @props.selected
           (div {className: "actions"},
-            (div {className: "connection-source action-circle ivy-icon-link", "data-node-key": @props.nodeKey})
-            (div {className: "graph-source action-circle ivy-icon-graph", "data-node-key": @props.nodeKey})
+            (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
+            (div {className: "graph-source action-circle icon-codap-graph", "data-node-key": @props.nodeKey})
           )
 
         (div {className: @topClasses(), "data-node-key": @props.nodeKey},
