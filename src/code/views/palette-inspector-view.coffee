@@ -44,7 +44,7 @@ module.exports = React.createClass
       if @state.selectedPaletteItem
         (div {className: 'palette-about-image'},
           (div {className: 'palette-about-image-title'},
-            (i {className: "ivy-icon-info"})
+            (i {className: "icon-codap-info"})
             (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
             (img {src: @state.selectedPaletteImage})
           )
@@ -52,12 +52,12 @@ module.exports = React.createClass
             (div {className: 'palette-delete', onClick: @delete},
               if @state.paletteItemHasNodes
                 (span {},
-                  (i {className: "ivy-icon-swapAxis"})
+                  (i {className: "icon-codap-swapAxis"})
                   (label {}, tr '~PALETTE-INSPECTOR.REPLACE')
                 )
               else
                 (span {},
-                  (i {className: "ivy-icon-trash"})
+                  (i {className: "icon-codap-trash"})
                   (label {}, tr '~PALETTE-INSPECTOR.DELETE')
                 )
             )
