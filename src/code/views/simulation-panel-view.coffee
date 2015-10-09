@@ -31,7 +31,7 @@ module.exports = React.createClass
         (div {},
           (i {className: "icon-codap-simulateTool"})
         )
-        (div {}, tr "~DOCUMENT.ACTIONS.SIMULATE")
+        (div {style: {marginTop: -9}}, tr "~DOCUMENT.ACTIONS.SIMULATE")
       )
       (div {className: "simulation-panel #{expanded}"},
         (div {className: "run-panel"},
