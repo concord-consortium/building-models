@@ -13,6 +13,8 @@ ValueSlider = React.createClass
     minEditable: false
     maxEditable: false
     stepSize: 1
+    showTicks: false
+    snapToSteps: false
     displayPrecision: 0
     renderValueTooltip: true
     minLabel: null
@@ -49,7 +51,7 @@ ValueSlider = React.createClass
 
   componentDidMount: ->
     handle   = @refs.handle or @
-    $(handle.getDOMNode()).draggable
+    opts =
       axis: "x"
       containment: "parent"
       start: (event, ui) =>
@@ -62,6 +64,14 @@ ValueSlider = React.createClass
       stop: (event, ui) =>
         @setState 'dragging': false
         @updateValue ui.position.left, false
+
+    if (@props.snapToSteps)
+      numTicks = ((@props.max - @props.min) / @props.stepSize)
+      tickDistance = @props.width / numTicks
+      opts.grid = [tickDistance, 0]
+
+    $(handle.getDOMNode()).draggable opts
+
 
   valueFromSliderUI: (displayX) ->
     newV = (displayX / @props.width * (@props.max - @props.min)) + @props.min
@@ -140,6 +150,17 @@ ValueSlider = React.createClass
       @props.maxLabel or @renderEditableProperty "max"
     )
 
+  renderTicks: (center, circleRadius) ->
+    return unless @props.showTicks
+
+    numTicks = ((@props.max - @props.min) / @props.stepSize)
+    tickDistance = @props.width / numTicks
+    tickHeight = circleRadius * 1.5
+    ticks = []
+    for j in [1...numTicks]
+      ticks.push (path {d:"M#{j*tickDistance} #{center-tickHeight} l 0 #{tickHeight * 2}", className:"slider-line"})
+    ticks
+
   render: ->
     center = @props.height / 2
     lengendHeight = 9 + 4.5
@@ -154,6 +175,7 @@ ValueSlider = React.createClass
         (path {d:"M#{circleRadius} #{center} l #{@props.width - circleRadius} 0", className:"slider-line"})
         (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
         (circle {cx:@props.width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
+        @renderTicks(center, circleRadius)
       )
       @renderHandle()
       @renderLegend()
@@ -178,10 +200,13 @@ Demo = React.createClass
         value: @state.value
         min: @state.min
         max: @state.max
+        stepSize: 25
+        showTicks: true
+        snapToSteps: true
         minEditable: true
         maxEditable: true
         onValueChange: @onValueChange
         onRangeChange: @onRangeChange
     )
 
-# window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
+window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
