@@ -14,6 +14,7 @@ ValueSlider = React.createClass
     maxEditable: false
     stepSize: 1
     showTicks: false
+    snapToSteps: false
     displayPrecision: 0
     renderValueTooltip: true
     minLabel: null
@@ -50,7 +51,7 @@ ValueSlider = React.createClass
 
   componentDidMount: ->
     handle   = @refs.handle or @
-    $(handle.getDOMNode()).draggable
+    opts =
       axis: "x"
       containment: "parent"
       start: (event, ui) =>
@@ -63,6 +64,14 @@ ValueSlider = React.createClass
       stop: (event, ui) =>
         @setState 'dragging': false
         @updateValue ui.position.left, false
+
+    if (@props.snapToSteps)
+      numTicks = ((@props.max - @props.min) / @props.stepSize)
+      tickDistance = @props.width / numTicks
+      opts.grid = [tickDistance, 0]
+
+    $(handle.getDOMNode()).draggable opts
+
 
   valueFromSliderUI: (displayX) ->
     newV = (displayX / @props.width * (@props.max - @props.min)) + @props.min
@@ -193,6 +202,7 @@ Demo = React.createClass
         max: @state.max
         stepSize: 25
         showTicks: true
+        snapToSteps: true
         minEditable: true
         maxEditable: true
         onValueChange: @onValueChange
