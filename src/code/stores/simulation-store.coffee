@@ -46,7 +46,7 @@ SimulationStore   = Reflux.createStore
       stepUnitsName: unitName
       timeUnitOptions: options
       duration: 10
-      speed: 1
+      speed: 4
 
   # From AppSettingsStore actions
   onDiagramOnly: ->

@@ -89,10 +89,10 @@ module.exports = React.createClass
             (div {style: {margin: "-11px 0 3px 7px"}},
               (ValueSlider {
                 min: 0
-                max: 1
+                max: 4
                 value: @state.speed
                 width: 140
-                stepSize: 0.25
+                stepSize: 1
                 showTicks: true
                 snapToSteps: true
                 minLabel: (i {className: "icon-codap-speedSlow", style: {fontSize: 15, marginLeft: -5}})
