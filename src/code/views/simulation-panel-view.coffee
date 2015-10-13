@@ -92,7 +92,9 @@ module.exports = React.createClass
                 max: 1
                 value: @state.speed
                 width: 140
-                stepSize: 0.05
+                stepSize: 0.25
+                showTicks: true
+                snapToSteps: true
                 minLabel: (i {className: "icon-codap-speedSlow", style: {fontSize: 15, marginLeft: -5}})
                 maxLabel: (i {className: "icon-codap-speedFast", style: {fontSize: 15, marginRight: -10}})
                 renderValueTooltip: false
