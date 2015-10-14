@@ -36,7 +36,7 @@ module.exports =
   "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words."
   "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS": "Switch to define with words."
   "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS": "Switch to define with numbers."
-  "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator"
+  "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Collector"
   "~NODE-VALUE-EDIT.LOW": "Low"
   "~NODE-VALUE-EDIT.HIGH": "High"
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable"
