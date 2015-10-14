@@ -7,8 +7,8 @@ tr                 = require '../utils/translate'
 
 SimulationActions = Reflux.createActions(
   [
-    "expandSimulationPanel"
-    "collapseSimulationPanel"
+    "simulationPanelExpanded"
+    "simulationPanelCollapsed"
     "runSimulation"
     "setPeriod"
     "setPeriodUnits"
@@ -52,11 +52,11 @@ SimulationStore   = Reflux.createStore
   onDiagramOnly: ->
     SimulationActions.collapseSimulationPanel()
 
-  onExpandSimulationPanel: ->
+  onSimulationPanelExpanded: ->
     @settings.simulationPanelExpanded = true
     @notifyChange()
 
-  onCollapseSimulationPanel: ->
+  onSimulationPanelCollapsed: ->
     @settings.simulationPanelExpanded = false
     @notifyChange()
 

@@ -1,7 +1,6 @@
 {div, span, i, br} = React.DOM
 
 ModalAppSettings = React.createFactory require './modal-app-settings-view'
-SimulationPanel  = React.createFactory require './simulation-panel-view'
 AppSettingsStore = require '../stores/app-settings-store'
 CodapStore       = require "../stores/codap-store"
 tr               = require '../utils/translate'
@@ -31,8 +30,8 @@ module.exports = React.createClass
     @props.graphStore.redo()
 
   renderRunLink: ->
-    if @state.codapHasLoaded and not @props.diagramOnly
-      (SimulationPanel {})
+    # if @state.codapHasLoaded and not @props.diagramOnly
+    #   (SimulationPanel {})
 
   renderSettingsLink: ->
     (span {},
