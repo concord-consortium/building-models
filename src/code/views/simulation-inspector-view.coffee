@@ -11,12 +11,6 @@ module.exports = React.createClass
 
   mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ]
 
-  componentWillMount: ->
-    SimulationStore.actions.simulationPanelExpanded()
-
-  componentWillUnmount: ->
-    SimulationStore.actions.simulationPanelCollapsed()
-
   setDuration: (e) ->
     SimulationStore.actions.setDuration parseInt e.target.value
 
@@ -32,21 +26,6 @@ module.exports = React.createClass
     (div {className: "simulation-panel"},
       (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
       (div {className: "run-panel"},
-        (div {className: "row"},
-          (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
-            tr "~DOCUMENT.ACTIONS.RUN"
-            (i {className: "icon-codap-play"})
-          )
-          (div {className: "button disabled"},
-            (i {className: "icon-codap-controlsReset"})
-          )
-          (div {className: "button disabled"},
-            (i {className: "icon-codap-controlsBackward"})
-          )
-          (div {className: "button disabled"},
-            (i {className: "icon-codap-controlsForward"})
-          )
-        )
         (div {className: "row"},
           tr "~SIMULATION.STEP_UNIT"
           (Dropdown {

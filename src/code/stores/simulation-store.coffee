@@ -1,3 +1,4 @@
+AppSettingsActions = require('./app-settings-store').actions
 ImportActions      = require '../actions/import-actions'
 GraphActions       = require '../actions/graph-actions'
 Simulation         = require "../models/simulation"
@@ -6,8 +7,8 @@ tr                 = require '../utils/translate'
 
 SimulationActions = Reflux.createActions(
   [
-    "simulationPanelExpanded"
-    "simulationPanelCollapsed"
+    "expandSimulationPanel"
+    "collapseSimulationPanel"
     "runSimulation"
     "setDuration"
     "setStepUnits"
@@ -21,7 +22,7 @@ SimulationActions = Reflux.createActions(
 
 SimulationStore   = Reflux.createStore
   listenables: [
-    SimulationActions,
+    SimulationActions, AppSettingsActions,
     ImportActions, GraphActions]
 
   init: ->
@@ -42,11 +43,15 @@ SimulationStore   = Reflux.createStore
       speed: 4
       capNodeValues: false
 
-  onSimulationPanelExpanded: ->
+  # From AppSettingsStore actions
+  onDiagramOnly: ->
+    SimulationActions.collapseSimulationPanel()
+
+  onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
     @notifyChange()
 
-  onSimulationPanelCollapsed: ->
+  onCollapseSimulationPanel: ->
     @settings.simulationPanelExpanded = false
     @notifyChange()
 

@@ -211,7 +211,7 @@ module.exports = React.createClass
             key: node.key
             data: node
             selected: @state.selectedNode is node
-            simulating: @state.simulationPanelExpanded and not @state.diagramOnly
+            simulating: @state.simulationPanelExpanded
             editTitle: @state.editingNode is node
             nodeKey: node.key
             ref: node.key
