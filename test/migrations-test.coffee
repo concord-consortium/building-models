@@ -41,7 +41,8 @@ describe "Migrations",  ->
 
         describe "v-1.4 changes", ->
           it "should have settings and cap value", ->
-            @result.settings.capNodeValues.should.equal false
+            # Removed or changed in 1.9:
+            # @result.settings.capNodeValues.should.equal false
 
         describe "v-1.5 changes", ->
           it "should have settings and cap value", ->
@@ -66,6 +67,10 @@ describe "Migrations",  ->
           it "should have settings for the simulation", ->
             @result.settings.simulation.duration.should.equal 10
             @result.settings.simulation.stepUnits.should.equal "STEP"
+
+        describe "v-1.9 changes", ->
+          it "should have speed setting", ->
+            @result.settings.simulation.speed.should.equal 4
 
     describe "the palette", ->
       it "should exist", ->

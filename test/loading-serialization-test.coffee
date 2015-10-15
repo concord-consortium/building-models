@@ -155,7 +155,6 @@ describe "Serialization and Loading", ->
       @graphStore.loadData(data)
       @graphStore.nodeKeys.should.have.any.keys("a")
       @graphStore.nodeKeys.should.have.any.keys("b")
-      AppSettingsStore.store.settings.capNodeValues.should.equal false
 
     it "should read the settings without error", ->
       data = JSON.parse(@serializedForm)
