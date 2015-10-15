@@ -25,7 +25,6 @@ Relationship   = requireModel 'relationship'
 
 requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
 
-AppSettingsStore  = requireStore('app-settings-store').store
 GraphStore        = requireStore('graph-store').store
 SimulationActions = requireStore('simulation-store').actions
 
@@ -204,7 +203,6 @@ describe "Simulation", ->
 
       _.each scenarios, (scenario, i) ->
         it "should compute scenario #{i} correctly", ->
-          AppSettingsStore.settings.capNodeValues = (scenario.cap is true)
           nodes = {}
           for key, value of scenario
             if key.length == 1
@@ -219,6 +217,7 @@ describe "Simulation", ->
             simulation = new Simulation
               nodes: nodeArray
               duration: j+1
+              capNodeValues: scenario.cap is true
 
             if result is false
               expect(simulation.run.bind(simulation)).to.throw "Graph not valid"
@@ -254,8 +253,8 @@ describe "The SimulationStore, with a network in the GraphStore", ->
   describe "for a fast simulation for 10 iterations", ->
 
     beforeEach ->
-      SimulationActions.setPeriod 10
-      SimulationActions.setSpeed 1
+      SimulationActions.setDuration 10
+      SimulationActions.setSpeed 4
 
     it "should call simulationStarted with the node names", (done) ->
       # calledback is an annoyance to prevent later tests from triggering this
@@ -293,8 +292,8 @@ describe "The SimulationStore, with a network in the GraphStore", ->
   describe "for a slow simulation for 3 iterations", ->
 
     beforeEach ->
-      SimulationActions.setPeriod 3
-      SimulationActions.setSpeed 0.95
+      SimulationActions.setDuration 3
+      SimulationActions.setSpeed 3
 
     it "should call simulationFramesCreated several times, with 3 frames total", (done) ->
       totalCallbacks = 0

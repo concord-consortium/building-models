@@ -1,0 +1,51 @@
+@require 'mixins/fonts'
+@require 'mixins/blender-box-colors'
+
+.simulation-run-panel, .simulation-run-panel>.flow
+  display flex
+  justify-content flex-start
+  .toggle-title
+    position: relative
+    left: 34px
+    label-font()
+    -webkit-transform rotate(-90deg)
+    transform rotate(-90deg)
+    cursor pointer
+  .toggle-title + i
+      padding-top: 3px
+      margin-left: -2px
+      transform: scale(1,1.4)
+      -webkit-transform: scale(1,1.4)
+  .buttons
+    overflow: hidden
+    width: 0px
+    webkit-transition: width 0.4s
+    transition: width 0.4s
+    &.expanded
+      width: 205px
+  .button
+    cursor pointer
+    display inline-block
+    label-font()
+    color white
+    background-color med-blue
+    border-radius(2px)
+    padding 3px 6px 3px 6px
+    margin 3px
+    display flex
+    align-items center
+    justify-content center
+    i
+      padding 5px
+      font-size 17px
+      &:hover
+        color white
+    &.disabled
+      background-color light-blue
+      cursor default
+      i
+        cursor default
+    &.error
+      background-color light-red
+    &:hover:not(.disabled)
+      background-color dark-gray

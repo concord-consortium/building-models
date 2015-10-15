@@ -5,15 +5,10 @@ module.exports =
   "~MENU.SAVE_AS": "Save as …"
   "~MENU.REVERT_TO_ORIGINAL": "Revert To Original"
   "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save"
-  "~MENU.SETTINGS": "Advanced Settings …"
   "~MENU.UNTITLED_MODEL": "Untitled model"
 
   "~GOOGLE_SAVE.TITLE": "Save Document"
   "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)"
-
-  "~APP_SETTINGS.TITLE": "Settings"
-  "~APP_SETTINGS.CAP_VALUES": "Limit node value range between min and max"
-  "~APP_SETTINGS.DIAGRAM_ONLY": "Use simplified tools for static diagrams"
 
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
   "~OPEN_IN_CODAP.DISABLED": "Please save your diagram before opening in CODAP."
@@ -36,7 +31,7 @@ module.exports =
   "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words."
   "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS": "Switch to define with words."
   "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS": "Switch to define with numbers."
-  "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Accumulator"
+  "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Collector"
   "~NODE-VALUE-EDIT.LOW": "Low"
   "~NODE-VALUE-EDIT.HIGH": "High"
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable"
@@ -129,7 +124,14 @@ module.exports =
   "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n
                                       Either remove a link to break the loop, or make one
                                       of the variables a collector."
-  "~DOCUMENT.ACTIONS.DURATION_INVALID": "Your step size is larger than the model duration."
+  "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation."
+
+  "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
+  "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings"
+  "~SIMULATION.STEP_UNIT": "Each calculation is 1"
+  "~SIMULATION.DURATION": "Calculations per run"
+  "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
+  "~SIMULATION.DIAGRAM_ONLY": "diagram only tools"
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 
@@ -141,6 +143,7 @@ module.exports =
   "~CODAP.SIMULATION.STEPS": "steps"
   "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
 
+  "~TIME.STEP":   "Step"
   "~TIME.SECOND": "Second"
   "~TIME.MINUTE": "Minute"
   "~TIME.HOUR":   "Hour"
@@ -149,6 +152,7 @@ module.exports =
   "~TIME.MONTH":  "Month"
   "~TIME.YEAR":   "Year"
 
+  "~TIME.STEP.PLURAL":   "Steps"
   "~TIME.SECOND.PLURAL": "Seconds"
   "~TIME.MINUTE.PLURAL": "Minutes"
   "~TIME.HOUR.PLURAL":   "Hours"

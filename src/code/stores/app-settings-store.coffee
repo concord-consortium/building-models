@@ -3,9 +3,6 @@ ImportActions   = require '../actions/import-actions'
 
 AppSettingsActions = Reflux.createActions(
   [
-    "showSettingsDialog"
-    "close"
-    "capNodeValues"
     "diagramOnly"
   ]
 )
@@ -16,20 +13,7 @@ AppSettingsStore   = Reflux.createStore
   init: ->
     @settings =
       showingSettingsDialog: false
-      capNodeValues: false
       diagramOnly: HashParams.getParam('simplified')
-
-  onShowSettingsDialog: ->
-    @settings.showingSettingsDialog = true
-    @notifyChange()
-
-  onClose: ->
-    @settings.showingSettingsDialog = false
-    @notifyChange()
-
-  onCapNodeValues: (cap) ->
-    @settings.capNodeValues = cap
-    @notifyChange()
 
   onDiagramOnly: (diagramOnly) ->
     @settings.diagramOnly = diagramOnly
@@ -47,7 +31,6 @@ AppSettingsStore   = Reflux.createStore
     @notifyChange()
 
   serialize: ->
-    capNodeValues: @settings.capNodeValues
     diagramOnly: @settings.diagramOnly
 
 mixin =

@@ -1,10 +1,11 @@
 NodeInspectorView = React.createFactory require './node-inspector-view'
 LinkInspectorView = React.createFactory require './link-inspector-view'
-PaletteInspectorView = React.createFactory require './palette-inspector-view'
 LinkValueInspectorView = React.createFactory require './link-value-inspector-view'
 NodeValueInspectorView = React.createFactory require './node-value-inspector-view'
 LinkRelationInspectorView = React.createFactory require './relation-inspector-view'
 NodeRelationInspectorView = React.createFactory require './relation-inspector-view'
+SimulationInspectorView   = React.createFactory require './simulation-inspector-view'
+
 
 {div, i, span} = React.DOM
 
@@ -24,10 +25,10 @@ ToolPanel = React.createFactory React.createClass
   displayName: 'toolPanel'
 
   buttonData: [
-      # {name: "plus",  simple: true, shows: "add", 'enabled': ['nothing','node','link'] }
       {name: "styles", simple: true, shows: "design",'enabled': ['node','link'] }
       {name: "values", simple: false, shows: "value", 'enabled': ['node'] }
       {name: "qualRel", simple: false, shows: "relations",'enabled': ['node']}
+      {name: "options",  simple: true, shows: "simulation", 'enabled': ['nothing'] }
     ]
 
   isDisabled: (button) ->
@@ -80,13 +81,8 @@ module.exports = React.createClass
   setShowing: (item) ->
     @setState(nowShowing: item)
 
-
-  renderPaletteInspector: ->
-    (PaletteInspectorView {
-      palette: @props.palette,
-      toggleImageBrowser: @props.toggleImageBrowser,
-      graphStore: @props.graphStore
-    })
+  renderSimulationInspector: ->
+    (SimulationInspectorView {})
 
   renderDesignInspector: ->
     if @props.node
@@ -114,10 +110,10 @@ module.exports = React.createClass
 
   renderInspectorPanel: ->
     view = switch @state.nowShowing
-      when 'add'       then @renderPaletteInspector()
-      when 'design'    then @renderDesignInspector()
-      when 'value'     then @renderValueInspector()
-      when 'relations' then @renderRelationInspector()
+      when 'simulation' then @renderSimulationInspector()
+      when 'design'     then @renderDesignInspector()
+      when 'value'      then @renderValueInspector()
+      when 'relations'  then @renderRelationInspector()
 
     (div {className: "inspector-panel-content"},
       view

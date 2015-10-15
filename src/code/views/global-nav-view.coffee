@@ -46,9 +46,6 @@ module.exports = React.createClass
     ,
       name: tr "~MENU.REVERT_TO_LAST_SAVE"
       action: if @state.saved and @state.dirty then GoogleFileStore.actions.revertToLastSave else false
-    ,
-      name: tr '~MENU.SETTINGS'
-      action: AppSettingsActions.showSettingsDialog
     ]
 
     (div {className: 'global-nav'},

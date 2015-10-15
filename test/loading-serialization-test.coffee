@@ -83,7 +83,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal 1.7
+        model.version.should.equal 1.9
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -128,24 +128,22 @@ describe "Serialization and Loading", ->
         palette[1].uuid.should.equal "uuid-bee"
 
       it "should be able to serialize the settings", ->
-        AppSettingsStore.store.settings.capNodeValues = true
         AppSettingsStore.store.settings.diagramOnly = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
-        model.settings.capNodeValues.should.equal true
         model.settings.diagramOnly.should.equal true
 
       it "should be able to serialize the simulation settings", ->
-        SimulationStore.store.settings.period = 10
-        SimulationStore.store.settings.periodUnits = "YEAR"
-        SimulationStore.store.settings.stepSize = 1
+        SimulationStore.store.settings.duration = 15
         SimulationStore.store.settings.stepUnits = "SECOND"
+        SimulationStore.store.settings.speed = 3
+        SimulationStore.store.settings.capNodeValues = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
-        model.settings.simulation.period.should.equal 10
-        model.settings.simulation.periodUnits.should.equal "YEAR"
-        model.settings.simulation.stepSize.should.equal 1
+        model.settings.simulation.duration.should.equal 15
         model.settings.simulation.stepUnits.should.equal "SECOND"
+        model.settings.simulation.speed.should.equal 3
+        model.settings.simulation.capNodeValues.should.equal true
 
   describe "loadData", ->
     beforeEach ->
@@ -157,13 +155,12 @@ describe "Serialization and Loading", ->
       @graphStore.loadData(data)
       @graphStore.nodeKeys.should.have.any.keys("a")
       @graphStore.nodeKeys.should.have.any.keys("b")
-      AppSettingsStore.store.settings.capNodeValues.should.equal false
 
     it "should read the settings without error", ->
       data = JSON.parse(@serializedForm)
-      data.settings = {capNodeValues: true}
+      data.settings = {diagramOnly: true}
       @graphStore.loadData(data)
-      AppSettingsStore.store.settings.capNodeValues.should.equal true
+      AppSettingsStore.store.settings.diagramOnly.should.equal true
 
     it "nodes should have paletteItem properties after loading", ->
       data = JSON.parse(@serializedForm)

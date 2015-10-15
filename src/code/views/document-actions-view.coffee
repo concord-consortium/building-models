@@ -1,10 +1,10 @@
 {div, span, i, br} = React.DOM
 
-ModalAppSettings = React.createFactory require './modal-app-settings-view'
-SimulationPanel  = React.createFactory require './simulation-panel-view'
 AppSettingsStore = require '../stores/app-settings-store'
 CodapStore       = require "../stores/codap-store"
 tr               = require '../utils/translate'
+
+SimulationRunPanel = React.createFactory require './simulation-run-panel-view'
 
 module.exports = React.createClass
 
@@ -30,37 +30,20 @@ module.exports = React.createClass
   redoClicked: ->
     @props.graphStore.redo()
 
-  renderRunLink: ->
-    if @state.codapHasLoaded and not @props.diagramOnly
-      (SimulationPanel {})
-
-  renderSettingsLink: ->
-    (span {},
-      (i {className: "icon-codap-options", onClick: AppSettingsStore.actions.showSettingsDialog})
-    )
+  renderRunPanel: ->
+    if not @props.diagramOnly
+      (SimulationRunPanel {})
 
   render: ->
     buttonClass = (enabled) -> if not enabled then 'disabled' else ''
     (div {className: 'document-actions'},
+      (div {className: "misc-actions"},
+        @renderRunPanel()
+      )
+
       unless @state.hideUndoRedo
         (div {className: 'misc-actions'},
           (i {className: "icon-codap-arrow-undo #{buttonClass @state.canUndo}", onClick: @undoClicked, disabled: not @state.canUndo})
           (i {className: "icon-codap-arrow-redo #{buttonClass @state.canRedo}", onClick: @redoClicked, disabled: not @state.canRedo})
         )
-
-      (div {className: "misc-actions"},
-        @renderRunLink()
-      )
-
-      if @props.iframed
-        (div {className: "misc-actions"},
-          @renderSettingsLink()
-        )
-      (ModalAppSettings {
-        showing: @state.showingSettingsDialog
-        capNodeValues: @state.capNodeValues
-        diagramOnly: @state.diagramOnly
-        onClose: ->
-          AppSettingsStore.actions.close()
-      })
     )

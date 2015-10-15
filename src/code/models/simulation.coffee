@@ -1,5 +1,3 @@
-AppSettingsStore  = require('../stores/app-settings-store').store
-
 IntegrationFunction = (t) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
@@ -33,7 +31,7 @@ IntegrationFunction = (t) ->
       value += (nextValue / count)
 
   # if we need to cap, do it at end of all calculations
-  if AppSettingsStore.settings.capNodeValues
+  if @capNodeValues
     value = Math.max @min, Math.min @max, value
 
   value
@@ -41,8 +39,9 @@ IntegrationFunction = (t) ->
 module.exports = class Simulation
 
   constructor: (@opts={}) ->
-    @nodes       = @opts.nodes      or []
-    @duration    = @opts.duration   or 10.0
+    @nodes         = @opts.nodes      or []
+    @duration      = @opts.duration   or 10
+    @capNodeValues = @opts.capNodeValues or false
     @decorateNodes() # extend nodes with integration methods
 
     @onStart     = @opts.onStart or (nodeNames) ->
@@ -79,6 +78,8 @@ module.exports = class Simulation
 
   decorateNodes: ->
     _.each @nodes, (node) =>
+      # make this a local node property (it may eventually be different per node)
+      node.capNodeValues = @capNodeValues
       @addIntegrateMethodTo node
 
   initializeValues: (node) ->
