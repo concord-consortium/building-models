@@ -57379,6 +57379,7 @@ module.exports = Simulation = (function() {
     this.bundleAllFrames = speed === 4;
     this.stepInterval = this._calculateInterval(speed);
     this.recalculateDesiredSteps = false;
+    this.stopRun = false;
   }
 
   Simulation.prototype._calculateInterval = function(speed) {
@@ -57508,8 +57509,13 @@ module.exports = Simulation = (function() {
     return true;
   };
 
+  Simulation.prototype.stop = function() {
+    return this.stopRun = true;
+  };
+
   Simulation.prototype.run = function() {
     var animationFrameLoop, nodeNames, startTime, step, steps, subtract, time;
+    this.stopRun = false;
     time = 0;
     this.framesBundle = [];
     _.each(this.nodes, (function(_this) {
@@ -57547,7 +57553,7 @@ module.exports = Simulation = (function() {
       animationFrameLoop = (function(_this) {
         return function() {
           var desiredStepsTilNow, elapsedTime;
-          if (time < _this.duration) {
+          if (time < _this.duration && !_this.stopRun) {
             requestAnimationFrame(animationFrameLoop);
           } else if (time === _this.duration) {
             return;
@@ -57567,7 +57573,7 @@ module.exports = Simulation = (function() {
           }
           _this.onFrames(_this.framesBundle);
           _this.framesBundle = [];
-          if (time === _this.duration) {
+          if (time === _this.duration || _this.stopRun) {
             return _this.onEnd();
           }
         };
@@ -59062,7 +59068,7 @@ TimeUnits = require('../utils/time-units');
 
 tr = require('../utils/translate');
 
-SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "setDuration", "setStepUnits", "setSpeed", "simulationStarted", "simulationFramesCreated", "simulationEnded", "capNodeValues"]);
+SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "setSpeed", "simulationStarted", "simulationFramesCreated", "simulationEnded", "capNodeValues"]);
 
 SimulationStore = Reflux.createStore({
   listenables: [SimulationActions, AppSettingsActions, ImportActions, GraphActions],
@@ -59088,14 +59094,15 @@ SimulationStore = Reflux.createStore({
     this.currentSimulation = null;
     return this.settings = {
       simulationPanelExpanded: false,
-      modelIsRunnable: true,
       duration: 10,
       stepUnits: defaultUnit,
       stepUnitsName: unitName,
       timeUnitOptions: options,
       speed: 4,
       capNodeValues: false,
-      modelIsRunning: false
+      modelIsRunnable: true,
+      modelIsRunning: false,
+      modelReadyToRun: true
     };
   },
   onDiagramOnly: function() {
@@ -59144,7 +59151,7 @@ SimulationStore = Reflux.createStore({
   },
   onRunSimulation: function() {
     var error;
-    if (this.settings.modelIsRunnable && !this.settings.modelIsRunning) {
+    if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
       this.currentSimulation = new Simulation({
         nodes: this.nodes,
         duration: this.settings.duration,
@@ -59168,11 +59175,19 @@ SimulationStore = Reflux.createStore({
   },
   onSimulationStarted: function() {
     this.settings.modelIsRunning = true;
+    this.settings.modelReadyToRun = false;
     return this.notifyChange();
   },
   onSimulationEnded: function() {
     this.settings.modelIsRunning = false;
     this.currentSimulation = null;
+    return this.notifyChange();
+  },
+  onResetSimulation: function() {
+    if (this.settings.modelIsRunning && this.currentSimulation) {
+      this.currentSimulation.stop();
+    }
+    this.settings.modelReadyToRun = true;
     return this.notifyChange();
   },
   _checkModelIsRunnable: function() {
@@ -63717,7 +63732,7 @@ module.exports = React.createClass({
     }));
   },
   renderControls: function() {
-    var runButtonClasses, wrapperClasses;
+    var resetButtonClasses, runButtonClasses, wrapperClasses;
     wrapperClasses = "buttons flow";
     if (this.state.simulationPanelExpanded) {
       wrapperClasses += " expanded";
@@ -63726,8 +63741,12 @@ module.exports = React.createClass({
     if (!this.state.modelIsRunnable) {
       runButtonClasses += " disabled error";
     }
-    if (this.state.modelIsRunning) {
+    if (!this.state.modelReadyToRun) {
       runButtonClasses += " disabled";
+    }
+    resetButtonClasses = "button";
+    if (this.state.modelReadyToRun) {
+      resetButtonClasses += " disabled";
     }
     return div({
       className: wrapperClasses
@@ -63737,7 +63756,8 @@ module.exports = React.createClass({
     }, tr("~DOCUMENT.ACTIONS.RUN"), i({
       className: "icon-codap-play"
     })), div({
-      className: "button disabled"
+      className: resetButtonClasses,
+      onClick: SimulationStore.actions.resetSimulation
     }, i({
       className: "icon-codap-controlsReset"
     })), div({
