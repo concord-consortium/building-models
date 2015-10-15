@@ -126,8 +126,10 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   serialize: ->
-    duration: @settings.duration
-    stepUnits:@settings.stepUnits
+    duration:       @settings.duration
+    stepUnits:      @settings.stepUnits
+    speed:          @settings.speed
+    capNodeValues:  @settings.capNodeValues
 
 
 mixin =

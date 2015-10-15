@@ -10,6 +10,7 @@ migrations = [
   require "./07_add_diagram_only_setting"
   require "./08_add_simulation_settings"
   require "./09_update_duration_settings"
+  require "./10_add_speed_and_cap"
 ]
 
 module.exports =

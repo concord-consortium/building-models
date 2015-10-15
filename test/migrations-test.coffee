@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.8", ->
-        @result.version.should.equal 1.8
+      it "should be 1.9", ->
+        @result.version.should.equal 1.9
 
     describe "the nodes", ->
       it "should have two nodes", ->
