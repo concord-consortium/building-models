@@ -132,7 +132,6 @@ describe "Serialization and Loading", ->
         AppSettingsStore.store.settings.diagramOnly = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
-        model.settings.capNodeValues.should.equal true
         model.settings.diagramOnly.should.equal true
 
       it "should be able to serialize the simulation settings", ->

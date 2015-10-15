@@ -16,6 +16,7 @@ SimulationActions = Reflux.createActions(
     "simulationStarted"
     "simulationFramesCreated"
     "simulationEnded"
+    "capNodeValues"
   ]
 )
 
@@ -40,6 +41,7 @@ SimulationStore   = Reflux.createStore
       stepUnitsName: unitName
       timeUnitOptions: options
       speed: 4
+      capNodeValues: false
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -78,12 +80,17 @@ SimulationStore   = Reflux.createStore
     @settings.speed = s
     @notifyChange()
 
+  onCapNodeValues: (cap) ->
+    @settings.capNodeValues = cap
+    @notifyChange()
+
   onRunSimulation: ->
     if @settings.modelIsRunnable
       simulator = new Simulation
         nodes: @nodes
         duration: @settings.duration
         speed: @settings.speed
+        capNodeValues: @settings.capNodeValues
 
         # Simulation events get triggered as Actions here, and are
         # available to anyone who listens to this store

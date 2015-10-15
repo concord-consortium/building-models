@@ -25,7 +25,6 @@ Relationship   = requireModel 'relationship'
 
 requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
 
-AppSettingsStore  = requireStore('app-settings-store').store
 GraphStore        = requireStore('graph-store').store
 SimulationActions = requireStore('simulation-store').actions
 
@@ -204,7 +203,6 @@ describe "Simulation", ->
 
       _.each scenarios, (scenario, i) ->
         it "should compute scenario #{i} correctly", ->
-          AppSettingsStore.settings.capNodeValues = (scenario.cap is true)
           nodes = {}
           for key, value of scenario
             if key.length == 1
@@ -219,6 +217,7 @@ describe "Simulation", ->
             simulation = new Simulation
               nodes: nodeArray
               duration: j+1
+              capNodeValues: scenario.cap is true
 
             if result is false
               expect(simulation.run.bind(simulation)).to.throw "Graph not valid"

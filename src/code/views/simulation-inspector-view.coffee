@@ -19,6 +19,9 @@ module.exports = React.createClass
   setDuration: (e) ->
     SimulationStore.actions.setDuration parseInt e.target.value
 
+  setCapNodeValues: (e) ->
+    SimulationStore.actions.capNodeValues e.target.checked
+
   render: ->
     runButtonClasses = "button"
     if not @state.modelIsRunnable then runButtonClasses += " disabled error"
@@ -83,6 +86,12 @@ module.exports = React.createClass
         (div {className: "row left short"},
           (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
           (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
+        )
+      )
+      (div {className: "options-panel"},
+        (div {className: "row left short"},
+          (input {type: 'checkbox', value: 'cap-values', checked: @props.capNodeValues, onChange: @setCapNodeValues})
+          (label {}, tr '~SIMULATION.CAP_VALUES')
         )
       )
     )

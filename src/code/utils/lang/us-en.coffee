@@ -12,7 +12,6 @@ module.exports =
   "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)"
 
   "~APP_SETTINGS.TITLE": "Settings"
-  "~APP_SETTINGS.CAP_VALUES": "Limit node value range between min and max"
   "~APP_SETTINGS.DIAGRAM_ONLY": "Use simplified tools for static diagrams"
 
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
@@ -134,6 +133,7 @@ module.exports =
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
   "~SIMULATION.STEP_UNIT": "Each calculation is 1"
   "~SIMULATION.DURATION": "Calculations per run:"
+  "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 
