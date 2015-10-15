@@ -1,10 +1,9 @@
 @require 'mixins/metrics'
 @require 'mixins/fonts'
 @require 'mixins/blender-box-colors'
-panelWidth = 225px
+panelWidth = 236px
 
 .simulation-panel
-  width 70px
   right panelWidth - 66
   top 36px
   width panelWidth
@@ -16,69 +15,73 @@ panelWidth = 225px
     label-font()
     font-size: 13px
     padding: 14px 0px 6px 4px
-  &>div
-    .row
-      padding 8px 8px 8px 14px
+  .row
+    padding 8px 8px 8px 14px
+    display flex
+    justify-content flex-start
+    &.split
+      justify-content space-between
+    &.short
+      margin-bottom -15px
+    &.tall
+      padding-bottom 14px
+    .button
+      cursor pointer
+      display inline-block
+      label-font()
+      color white
+      background-color med-blue
+      border-radius(2px)
+      padding 3px 6px 3px 6px
+      margin 3px
       display flex
-      justify-content flex-start
-      &.split
-        justify-content space-between
-      &.short
-        padding-bottom 0
-      &.tall
-        padding-bottom 14px
-      .button
-        cursor pointer
-        display inline-block
-        label-font()
-        color white
-        background-color med-blue
-        border-radius(2px)
-        padding 3px 6px 3px 6px
-        margin 3px
-        display flex
-        align-items center
-        justify-content center
+      align-items center
+      justify-content center
+      i
+        padding 5px
+        font-size 17px
+        &:hover
+          color white
+      &.small
+        font-size 9px
         i
-          padding 5px
-          font-size 17px
-          &:hover
-            color white
-        &.small
-          font-size 9px
-          i
-            font-size 11px
-        &.disabled
-          background-color light-blue
+          font-size 11px
+      &.disabled
+        background-color light-blue
+        cursor default
+        i
           cursor default
-          i
-            cursor default
-        &.error
-          background-color light-red
-        &:hover:not(.disabled)
-          background-color dark-gray
-      .menu
-        .menu-anchor
-          default-font()
-        i
-          font-size 6px
-          padding-left 0.6em
-          vertical-align 25%
-        .menu-showing
-          right: 50px
-          min-width: 135px
-      input[type="checkbox"]
-        margin 0.5em
-      input[type="number"]
-        width 5em
-      input[type="number"]:not(.max)
-        width 3em
-        margin -0.2em 0.5em 0 1.2em
-      label
-        margin 0.5em 0 0 0.2em
-  .options-panel
-    background-color #ebebeb
-    border-radius(0,0, 10px, 10px)
+      &.error
+        background-color light-red
+      &:hover:not(.disabled)
+        background-color dark-gray
+    .menu
+      padding-left: 17px
+      .menu-anchor
+        default-font()
+      i
+        font-size 6px
+        padding-left 0.6em
+        vertical-align 25%
+      .menu-showing
+        right: 50px
+        min-width: 135px
+    input[type="checkbox"]
+      margin 0.5em
+    input[type="number"]
+      width 5em
+    input[type="number"]:not(.max)
+      width 3em
+      margin -0.2em 0.5em 0 1.2em
+    label
+      margin 0.5em 0 0 0.2em
+  .run-panel
+    overflow: hidden
+    height: 0px
+    webkit-transition: height 0.7s
+    transition: height 0.7s
+    &.expanded
+      height: 210px
   .full
     width 100%
   .wide

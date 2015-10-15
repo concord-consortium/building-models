@@ -21,11 +21,11 @@ module.exports = React.createClass
     AppSettingsStore.actions.diagramOnly e.target.checked
 
   render: ->
-    runButtonClasses = "button"
-    if not @state.modelIsRunnable then runButtonClasses += " disabled error"
+    runPanelClasses = "run-panel"
+    if not @state.diagramOnly then runPanelClasses += " expanded"
     (div {className: "simulation-panel"},
-      (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
-      (div {className: "run-panel"},
+      (div {className: runPanelClasses},
+        (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
         (div {className: "row"},
           tr "~SIMULATION.STEP_UNIT"
           (Dropdown {
@@ -63,16 +63,16 @@ module.exports = React.createClass
             })
           )
         )
+        (div {className: "row short"},
+          (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
+          (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
+        )
+        (div {className: "row"},
+          (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
+          (label {}, tr '~SIMULATION.CAP_VALUES')
+        )
       )
-      (div {className: "row"},
-        (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
-        (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
-      )
-      (div {className: "row"},
-        (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
-        (label {}, tr '~SIMULATION.CAP_VALUES')
-      )
-      (div {className: "title"}, tr "~SIMULATION.MODEL_SETTINGS")
+      (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
       (div {className: "row"},
         (input {type: 'checkbox', value: 'diagram-only', checked: @state.diagramOnly, onChange: @setDiagramOnly})
         (label {}, tr '~SIMULATION.DIAGRAM_ONLY')

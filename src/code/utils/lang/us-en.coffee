@@ -127,9 +127,9 @@ module.exports =
   "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation."
 
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
-  "~SIMULATION.MODEL_SETTINGS": "Other settings"
+  "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings"
   "~SIMULATION.STEP_UNIT": "Each calculation is 1"
-  "~SIMULATION.DURATION": "Calculations per run:"
+  "~SIMULATION.DURATION": "Calculations per run"
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
   "~SIMULATION.DIAGRAM_ONLY": "diagram only tools"
 
