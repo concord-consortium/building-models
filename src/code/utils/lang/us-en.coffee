@@ -11,9 +11,6 @@ module.exports =
   "~GOOGLE_SAVE.TITLE": "Save Document"
   "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)"
 
-  "~APP_SETTINGS.TITLE": "Settings"
-  "~APP_SETTINGS.DIAGRAM_ONLY": "Use simplified tools for static diagrams"
-
   "~OPEN_IN_CODAP.TITLE": "Open in CODAP"
   "~OPEN_IN_CODAP.DISABLED": "Please save your diagram before opening in CODAP."
   "~PUBLIC_LINK.OPEN": "Open public link"
@@ -131,9 +128,11 @@ module.exports =
   "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation."
 
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
+  "~SIMULATION.MODEL_SETTINGS": "Other settings"
   "~SIMULATION.STEP_UNIT": "Each calculation is 1"
   "~SIMULATION.DURATION": "Calculations per run:"
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
+  "~SIMULATION.DIAGRAM_ONLY": "diagram only tools"
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 

@@ -1,6 +1,7 @@
 Dropdown        = React.createFactory require './dropdown-view'
 ValueSlider     = React.createFactory require './value-slider-view'
 SimulationStore = require '../stores/simulation-store'
+AppSettingsStore = require '../stores/app-settings-store'
 tr              = require '../utils/translate'
 {div, span, i, input, label}  = React.DOM
 
@@ -8,7 +9,7 @@ module.exports = React.createClass
 
   displayName: 'SimulationInspector'
 
-  mixins: [ SimulationStore.mixin ]
+  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ]
 
   componentWillMount: ->
     SimulationStore.actions.simulationPanelExpanded()
@@ -21,6 +22,9 @@ module.exports = React.createClass
 
   setCapNodeValues: (e) ->
     SimulationStore.actions.capNodeValues e.target.checked
+
+  setDiagramOnly: (e) ->
+    AppSettingsStore.actions.diagramOnly e.target.checked
 
   render: ->
     runButtonClasses = "button"
@@ -55,7 +59,6 @@ module.exports = React.createClass
         (div {className: "row"},
           tr "~SIMULATION.DURATION"
           (input {
-            className: 'left'
             type: "number"
             style: {width: "#{Math.max 4, (@state.duration.toString().length+1)}em"}
             value: @state.duration
@@ -82,16 +85,17 @@ module.exports = React.createClass
           )
         )
       )
-      (div {className: "options-panel"},
-        (div {className: "row left short"},
-          (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
-          (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
-        )
+      (div {className: "row"},
+        (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
+        (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
       )
-      (div {className: "options-panel"},
-        (div {className: "row left short"},
-          (input {type: 'checkbox', value: 'cap-values', checked: @props.capNodeValues, onChange: @setCapNodeValues})
-          (label {}, tr '~SIMULATION.CAP_VALUES')
-        )
+      (div {className: "row"},
+        (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
+        (label {}, tr '~SIMULATION.CAP_VALUES')
+      )
+      (div {className: "title"}, tr "~SIMULATION.MODEL_SETTINGS")
+      (div {className: "row"},
+        (input {type: 'checkbox', value: 'diagram-only', checked: @state.diagramOnly, onChange: @setDiagramOnly})
+        (label {}, tr '~SIMULATION.DIAGRAM_ONLY')
       )
     )

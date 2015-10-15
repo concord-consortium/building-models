@@ -17,14 +17,6 @@ AppSettingsStore   = Reflux.createStore
       showingSettingsDialog: false
       diagramOnly: HashParams.getParam('simplified')
 
-  onShowSettingsDialog: ->
-    @settings.showingSettingsDialog = true
-    @notifyChange()
-
-  onClose: ->
-    @settings.showingSettingsDialog = false
-    @notifyChange()
-
   onDiagramOnly: (diagramOnly) ->
     @settings.diagramOnly = diagramOnly
     @notifyChange()

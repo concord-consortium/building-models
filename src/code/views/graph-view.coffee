@@ -9,13 +9,14 @@ LinkStore        = require '../stores/graph-store'
 ImageDialogStore = require '../stores/image-dialog-store'
 
 SimulationStore  = require "../stores/simulation-store"
+AppSettingsStore  = require "../stores/app-settings-store"
 
 {div} = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ LinkStore.mixin, SimulationStore.mixin ]
+  mixins: [ LinkStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin ]
 
   getDefaultProps: ->
     linkTarget: '.link-target'
@@ -210,7 +211,7 @@ module.exports = React.createClass
             key: node.key
             data: node
             selected: @state.selectedNode is node
-            simulating: @state.simulationPanelExpanded
+            simulating: @state.simulationPanelExpanded and not @state.diagramOnly
             editTitle: @state.editingNode is node
             nodeKey: node.key
             ref: node.key
