@@ -56,7 +56,9 @@ module.exports = class Simulation
     speed            = if @opts.speed? then @opts.speed else 4
     @bundleAllFrames = speed is 4               # bundle all frames when at max speed
     @stepInterval = @_calculateInterval speed   # otherwise calc step interval
+
     @recalculateDesiredSteps = false
+    @stopRun = false
 
   _calculateInterval: (speed) ->
     switch speed
@@ -155,8 +157,12 @@ module.exports = class Simulation
 
     return true
 
+  stop: ->
+    @stopRun = true
+
 
   run: ->
+    @stopRun = false
     time = 0
     @framesBundle = []
     _.each @nodes, (node) => @initializeValues node
@@ -186,7 +192,7 @@ module.exports = class Simulation
       steps = 0
       subtract = 0
       animationFrameLoop = =>
-        if time < @duration
+        if time < @duration and not @stopRun
           requestAnimationFrame animationFrameLoop
         else if time is @duration then return
 
@@ -207,5 +213,5 @@ module.exports = class Simulation
         @onFrames(@framesBundle)  # send steps til now
         @framesBundle = []
 
-        if time is @duration then @onEnd()
+        if time is @duration or @stopRun then @onEnd()
       animationFrameLoop()

@@ -27,14 +27,17 @@ module.exports = React.createClass
 
     runButtonClasses = "button"
     if not @state.modelIsRunnable then runButtonClasses += " disabled error"
-    if @state.modelIsRunning then runButtonClasses += " disabled"
+    if not @state.modelReadyToRun then runButtonClasses += " disabled"
+
+    resetButtonClasses = "button"
+    if @state.modelReadyToRun then resetButtonClasses += " disabled"
 
     (div {className: wrapperClasses},
       (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
         tr "~DOCUMENT.ACTIONS.RUN"
         (i {className: "icon-codap-play"})
       )
-      (div {className: "button disabled"},
+      (div {className: resetButtonClasses, onClick: SimulationStore.actions.resetSimulation},
         (i {className: "icon-codap-controlsReset"})
       )
       (div {className: "button disabled"},

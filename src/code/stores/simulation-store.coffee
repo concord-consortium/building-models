@@ -10,6 +10,7 @@ SimulationActions = Reflux.createActions(
     "expandSimulationPanel"
     "collapseSimulationPanel"
     "runSimulation"
+    "resetSimulation"
     "setDuration"
     "setStepUnits"
     "setSpeed"
@@ -36,14 +37,15 @@ SimulationStore   = Reflux.createStore
 
     @settings =
       simulationPanelExpanded: false
-      modelIsRunnable: true
       duration: 10
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: options
       speed: 4
       capNodeValues: false
-      modelIsRunning: false
+      modelIsRunnable: true         # no errors?
+      modelIsRunning: false         # currently running?
+      modelReadyToRun: true         # has been reset?
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -89,7 +91,7 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onRunSimulation: ->
-    if @settings.modelIsRunnable and not @settings.modelIsRunning
+    if @settings.modelIsRunnable and @settings.modelReadyToRun
       @currentSimulation = new Simulation
         nodes: @nodes
         duration: @settings.duration
@@ -112,11 +114,18 @@ SimulationStore   = Reflux.createStore
 
   onSimulationStarted: ->
     @settings.modelIsRunning = true
+    @settings.modelReadyToRun = false
     @notifyChange()
 
   onSimulationEnded: ->
     @settings.modelIsRunning = false
     @currentSimulation = null
+    @notifyChange()
+
+  onResetSimulation: ->
+    if @settings.modelIsRunning and @currentSimulation
+      @currentSimulation.stop()
+    @settings.modelReadyToRun = true
     @notifyChange()
 
   _checkModelIsRunnable: ->
