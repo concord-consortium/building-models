@@ -27,6 +27,7 @@ module.exports = React.createClass
 
     runButtonClasses = "button"
     if not @state.modelIsRunnable then runButtonClasses += " disabled error"
+    if @state.modelIsRunning then runButtonClasses += " disabled"
 
     (div {className: wrapperClasses},
       (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},

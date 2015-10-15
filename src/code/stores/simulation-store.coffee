@@ -42,6 +42,7 @@ SimulationStore   = Reflux.createStore
       timeUnitOptions: options
       speed: 4
       capNodeValues: false
+      modelIsRunning: false
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -85,7 +86,7 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onRunSimulation: ->
-    if @settings.modelIsRunnable
+    if @settings.modelIsRunnable and not @settings.modelIsRunning
       simulator = new Simulation
         nodes: @nodes
         duration: @settings.duration
@@ -102,9 +103,17 @@ SimulationStore   = Reflux.createStore
           SimulationActions.simulationEnded()
 
       simulator.run()
-    else
+    else if not @settings.modelIsRunnable
       error = @_getErrorMessage()
       alert error
+
+  onSimulationStarted: ->
+    @settings.modelIsRunning = true
+    @notifyChange()
+
+  onSimulationEnded: ->
+    @settings.modelIsRunning = false
+    @notifyChange()
 
   _checkModelIsRunnable: ->
     @settings.modelIsRunnable = @graphIsValid and @settings.duration > 0
