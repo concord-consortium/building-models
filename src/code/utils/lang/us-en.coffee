@@ -5,7 +5,6 @@ module.exports =
   "~MENU.SAVE_AS": "Save as …"
   "~MENU.REVERT_TO_ORIGINAL": "Revert To Original"
   "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save"
-  "~MENU.SETTINGS": "Advanced Settings …"
   "~MENU.UNTITLED_MODEL": "Untitled model"
 
   "~GOOGLE_SAVE.TITLE": "Save Document"

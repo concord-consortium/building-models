@@ -3,8 +3,6 @@ ImportActions   = require '../actions/import-actions'
 
 AppSettingsActions = Reflux.createActions(
   [
-    "showSettingsDialog"
-    "close"
     "diagramOnly"
   ]
 )

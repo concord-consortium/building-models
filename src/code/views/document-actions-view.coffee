@@ -1,6 +1,5 @@
 {div, span, i, br} = React.DOM
 
-ModalAppSettings = React.createFactory require './modal-app-settings-view'
 AppSettingsStore = require '../stores/app-settings-store'
 CodapStore       = require "../stores/codap-store"
 tr               = require '../utils/translate'
@@ -33,11 +32,6 @@ module.exports = React.createClass
     # if @state.codapHasLoaded and not @props.diagramOnly
     #   (SimulationPanel {})
 
-  renderSettingsLink: ->
-    (span {},
-      (i {className: "icon-codap-options", onClick: AppSettingsStore.actions.showSettingsDialog})
-    )
-
   render: ->
     buttonClass = (enabled) -> if not enabled then 'disabled' else ''
     (div {className: 'document-actions'},
@@ -50,16 +44,4 @@ module.exports = React.createClass
       (div {className: "misc-actions"},
         @renderRunLink()
       )
-
-      if @props.iframed
-        (div {className: "misc-actions"},
-          @renderSettingsLink()
-        )
-      (ModalAppSettings {
-        showing: @state.showingSettingsDialog
-        capNodeValues: @state.capNodeValues
-        diagramOnly: @state.diagramOnly
-        onClose: ->
-          AppSettingsStore.actions.close()
-      })
     )
