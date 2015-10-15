@@ -22,9 +22,13 @@ module.exports = React.createClass
     )
 
   renderControls: ->
+    wrapperClasses = "buttons flow"
+    if @state.simulationPanelExpanded then wrapperClasses += " expanded"
+
     runButtonClasses = "button"
     if not @state.modelIsRunnable then runButtonClasses += " disabled error"
-    (div {className: "flow"},
+
+    (div {className: wrapperClasses},
       (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
         tr "~DOCUMENT.ACTIONS.RUN"
         (i {className: "icon-codap-play"})
@@ -43,6 +47,5 @@ module.exports = React.createClass
   render: ->
     (div {className: "simulation-run-panel"},
       @renderToggleButton()
-      if @state.simulationPanelExpanded
-        @renderControls()
+      @renderControls()
     )

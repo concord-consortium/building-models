@@ -12,11 +12,17 @@
     transform rotate(-90deg)
     cursor pointer
   .toggle-title + i
+      padding-top: 3px
+      margin-left: -2px
       transform: scale(1,1.4)
       -webkit-transform: scale(1,1.4)
-      &.icon-codap-inspectorArrow-collapse
-        padding-top: 3px
-        margin-left: -2px
+  .buttons
+    overflow: hidden
+    width: 0px
+    webkit-transition: width 0.4s
+    transition: width 0.4s
+    &.expanded
+      width: 205px
   .button
     cursor pointer
     display inline-block
