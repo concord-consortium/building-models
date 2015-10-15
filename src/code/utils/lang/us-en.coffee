@@ -129,7 +129,11 @@ module.exports =
   "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n
                                       Either remove a link to break the loop, or make one
                                       of the variables a collector."
-  "~DOCUMENT.ACTIONS.DURATION_INVALID": "Your step size is larger than the model duration."
+  "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation."
+
+  "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
+  "~SIMULATION.STEP_UNIT": "Each calculation is 1"
+  "~SIMULATION.DURATION": "Calculations per run:"
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 
@@ -141,6 +145,7 @@ module.exports =
   "~CODAP.SIMULATION.STEPS": "steps"
   "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
 
+  "~TIME.STEP":   "Step"
   "~TIME.SECOND": "Second"
   "~TIME.MINUTE": "Minute"
   "~TIME.HOUR":   "Hour"
@@ -149,6 +154,7 @@ module.exports =
   "~TIME.MONTH":  "Month"
   "~TIME.YEAR":   "Year"
 
+  "~TIME.STEP.PLURAL":   "Steps"
   "~TIME.SECOND.PLURAL": "Seconds"
   "~TIME.MINUTE.PLURAL": "Minutes"
   "~TIME.HOUR.PLURAL":   "Hours"

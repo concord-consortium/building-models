@@ -42,7 +42,7 @@ module.exports = class Simulation
 
   constructor: (@opts={}) ->
     @nodes       = @opts.nodes      or []
-    @duration    = @opts.duration   or 10.0
+    @duration    = @opts.duration   or 10
     @decorateNodes() # extend nodes with integration methods
 
     @onStart     = @opts.onStart or (nodeNames) ->

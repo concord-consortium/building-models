@@ -10,9 +10,7 @@ SimulationActions = Reflux.createActions(
     "simulationPanelExpanded"
     "simulationPanelCollapsed"
     "runSimulation"
-    "setPeriod"
-    "setPeriodUnits"
-    "setStepSize"
+    "setDuration"
     "setStepUnits"
     "setSpeed"
     "simulationStarted"
@@ -29,8 +27,7 @@ SimulationStore   = Reflux.createStore
   init: ->
     defaultUnit = TimeUnits.defaultUnit
     unitName    = TimeUnits.toString defaultUnit
-    unitNamePl  = TimeUnits.toString defaultUnit, true
-    options = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
+    options = ({name: TimeUnits.toString(unit, false), unit: unit} for unit in TimeUnits.units)
 
     @nodes = []
     @graphIsValid = true
@@ -38,14 +35,10 @@ SimulationStore   = Reflux.createStore
     @settings =
       simulationPanelExpanded: false
       modelIsRunnable: true
-      period: 10
-      periodUnits: defaultUnit
-      periodUnitsName: unitNamePl
-      stepSize: 1
+      duration: 10
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: options
-      duration: 10
       speed: 4
 
   # From AppSettingsStore actions
@@ -68,35 +61,18 @@ SimulationStore   = Reflux.createStore
     @graphIsValid = simulator.graphIsValid()
     @notifyChange()
 
-  onSetPeriod: (n) ->
-    @settings.period = n
-    @notifyChange()
-
-  onSetPeriodUnits: (unit) ->
-    @settings.periodUnits = unit.unit
-    @notifyChange()
-
-  onSetStepSize: (n) ->
-    @settings.stepSize = n
+  onSetDuration: (n) ->
+    @settings.duration = Math.min n, 5000
     @notifyChange()
 
   onSetStepUnits: (unit) ->
     @settings.stepUnits = unit.unit
+    @settings.stepUnitsName = TimeUnits.toString @settings.stepUnits, false
     @notifyChange()
 
   onImport: (data) ->
     _.merge @settings, data.settings.simulation
     @notifyChange()
-
-  _setUnitsNames: ->
-    pluralize = @settings.stepSize isnt 1
-    @settings.stepUnitsName = TimeUnits.toString @settings.stepUnits, pluralize
-    pluralize = @settings.period isnt 1
-    @settings.periodUnitsName = TimeUnits.toString @settings.periodUnits, pluralize
-
-  _setDuration: ->
-    duration = TimeUnits.stepsInTime @settings.stepSize, @settings.stepUnits, @settings.period, @settings.periodUnits
-    @settings.duration = Math.min duration, 5000
 
   onSetSpeed: (s) ->
     @settings.speed = s
@@ -104,7 +80,6 @@ SimulationStore   = Reflux.createStore
 
   onRunSimulation: ->
     if @settings.modelIsRunnable
-
       simulator = new Simulation
         nodes: @nodes
         duration: @settings.duration
@@ -141,8 +116,6 @@ SimulationStore   = Reflux.createStore
     message
 
   notifyChange: ->
-    @_setUnitsNames()
-    @_setDuration()
     @_checkModelIsRunnable()
     @trigger _.clone @settings
 
@@ -151,9 +124,7 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   serialize: ->
-    period: @settings.period
-    periodUnits: @settings.periodUnits
-    stepSize: @settings.stepSize
+    duration: @settings.duration
     stepUnits:@settings.stepUnits
 
 

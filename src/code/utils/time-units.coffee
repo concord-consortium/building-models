@@ -1,7 +1,8 @@
 tr = require './translate'
 
 units =
-      SECOND:  1
+      STEP: 1
+units.SECOND =  1
 units.MINUTE = 60 * units.SECOND
 units.HOUR   = 60 * units.MINUTE
 units.DAY    = 24 * units.HOUR
@@ -16,7 +17,7 @@ module.exports =
 
   units: _.keys(units)
 
-  defaultUnit: "YEAR"
+  defaultUnit: "STEP"
 
   toString: (unit, plural) ->
     number = if plural then ".PLURAL" else ""

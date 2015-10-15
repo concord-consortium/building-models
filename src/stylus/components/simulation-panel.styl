@@ -12,6 +12,8 @@ panelWidth = 225px
   z-index: 2
   &.collapsed
     display none
+  .title
+    label-font()
   &>div
     .row
       padding 8px
@@ -23,8 +25,6 @@ panelWidth = 225px
         justify-content space-between
       &.short
         padding-bottom 0
-        span
-          margin-top -0.5em
       &.tall
         padding-bottom 14px
       .button
@@ -64,6 +64,9 @@ panelWidth = 225px
           font-size 6px
           padding-left 0.6em
           vertical-align 25%
+        .menu-showing
+          right: 50px
+          min-width: 135px
       input[type="checkbox"]
         margin 0.5em
       input[type="number"]
@@ -73,10 +76,6 @@ panelWidth = 225px
         margin -0.2em 0.5em 0 1.2em
       label
         margin 0.5em 0 0 0.2em
-  .run-panel
-    background-color white
-    border-radius(10px, 10px, 0, 0)
-    border-bottom 1px solid #80c0ab
   .options-panel
     background-color #ebebeb
     border-radius(0,0, 10px, 10px)

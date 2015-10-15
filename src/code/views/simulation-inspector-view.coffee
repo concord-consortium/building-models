@@ -16,35 +16,15 @@ module.exports = React.createClass
   componentWillUnmount: ->
     SimulationStore.actions.simulationPanelCollapsed()
 
-  stepsRangeChanged: (r) ->
-    SimulationStore.actions.setPeriod r.max
-
-  setStepSize: (e) ->
-    SimulationStore.actions.setStepSize parseInt e.target.value
+  setDuration: (e) ->
+    SimulationStore.actions.setDuration parseInt e.target.value
 
   render: ->
     runButtonClasses = "button"
     if not @state.modelIsRunnable then runButtonClasses += " disabled error"
     (div {className: "simulation-panel"},
+      (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
       (div {className: "run-panel"},
-        (div {className: "row short"},
-          (Dropdown {
-            isActionMenu: false
-            onSelect: SimulationStore.actions.setPeriodUnits
-            anchor: @state.periodUnitsName
-            items: @state.timeUnitOptions
-          })
-        )
-        (div {className: "row short"},
-          (ValueSlider {
-            min: 0
-            max: @state.period
-            value: 0
-            width: 180
-            maxEditable: true
-            onRangeChange: @stepsRangeChanged}
-          )
-        )
         (div {className: "row"},
           (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
             tr "~DOCUMENT.ACTIONS.RUN"
@@ -60,30 +40,34 @@ module.exports = React.createClass
             (i {className: "icon-codap-controlsForward"})
           )
         )
-        (div {className: "row left"},
-          (div {className: "button small disabled"},
-            (i {className: "icon-codap-saveGraph"})
-            tr "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS"
-          )
+        (div {className: "row"},
+          tr "~SIMULATION.STEP_UNIT"
+          (Dropdown {
+            isActionMenu: false
+            onSelect: SimulationStore.actions.setStepUnits
+            anchor: @state.stepUnitsName
+            items: @state.timeUnitOptions
+          })
         )
-      )
-      (div {className: "options-panel"},
-        (div {className: "row left short"},
-          (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
-          (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
+        (div {className: "row"},
+          tr "~SIMULATION.DURATION"
+          (input {
+            className: 'left'
+            type: "number"
+            style: {width: "#{Math.max 4, (@state.duration.toString().length+1)}em"}
+            value: @state.duration
+            min: "0"
+            onChange: @setDuration
+          })
         )
-        (div {className: "row left short"},
-          (input {type: 'checkbox', value: 'quick-test', checked: @props.quickTest})
-          (label {}, tr '~DOCUMENT.ACTIONS.QUICK_TEST')
-        )
-        (div {className: "row left", style: {margin: "6px 0 -19px 0"}},
+        (div {className: "row", style: {margin: "6px 0 -19px 0"}},
           (span {style: {marginTop: 2}}, "Speed")
           (div {style: {margin: "-11px 0 3px 7px"}},
             (ValueSlider {
               min: 0
               max: 4
               value: @state.speed
-              width: 140
+              width: 100
               stepSize: 1
               showTicks: true
               snapToSteps: true
@@ -94,22 +78,11 @@ module.exports = React.createClass
             })
           )
         )
-        (div {className: "row left"},
-          "Step"
-          (input {
-            className: 'left'
-            type: "number"
-            style: {width: "#{Math.max 3, (@state.stepSize.toString().length+1)}em"}
-            value: @state.stepSize
-            min: "0"
-            onChange: @setStepSize
-          })
-          (Dropdown {
-            isActionMenu: false
-            onSelect: SimulationStore.actions.setStepUnits
-            anchor: @state.stepUnitsName
-            items: @state.timeUnitOptions
-          })
+      )
+      (div {className: "options-panel"},
+        (div {className: "row left short"},
+          (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
+          (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
         )
       )
     )

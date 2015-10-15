@@ -254,8 +254,8 @@ describe "The SimulationStore, with a network in the GraphStore", ->
   describe "for a fast simulation for 10 iterations", ->
 
     beforeEach ->
-      SimulationActions.setPeriod 10
-      SimulationActions.setSpeed 1
+      SimulationActions.setDuration 10
+      SimulationActions.setSpeed 4
 
     it "should call simulationStarted with the node names", (done) ->
       # calledback is an annoyance to prevent later tests from triggering this
@@ -293,8 +293,8 @@ describe "The SimulationStore, with a network in the GraphStore", ->
   describe "for a slow simulation for 3 iterations", ->
 
     beforeEach ->
-      SimulationActions.setPeriod 3
-      SimulationActions.setSpeed 0.95
+      SimulationActions.setDuration 3
+      SimulationActions.setSpeed 3
 
     it "should call simulationFramesCreated several times, with 3 frames total", (done) ->
       totalCallbacks = 0

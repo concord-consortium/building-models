@@ -9,6 +9,7 @@ migrations = [
   require "./06_add_palette_references"
   require "./07_add_diagram_only_setting"
   require "./08_add_simulation_settings"
+  require "./09_update_duration_settings"
 ]
 
 module.exports =
