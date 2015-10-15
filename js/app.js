@@ -57378,6 +57378,7 @@ module.exports = Simulation = (function() {
     speed = this.opts.speed != null ? this.opts.speed : 4;
     this.bundleAllFrames = speed === 4;
     this.stepInterval = this._calculateInterval(speed);
+    this.recalculateDesiredSteps = false;
   }
 
   Simulation.prototype._calculateInterval = function(speed) {
@@ -57413,7 +57414,15 @@ module.exports = Simulation = (function() {
           default:
             return 1e4 / this.duration;
         }
+        break;
+      case 4:
+        return 0.1;
     }
+  };
+
+  Simulation.prototype.setSpeed = function(speed) {
+    this.stepInterval = this._calculateInterval(speed);
+    return this.recalculateDesiredSteps = true;
   };
 
   Simulation.prototype.decorateNodes = function() {
@@ -57500,7 +57509,7 @@ module.exports = Simulation = (function() {
   };
 
   Simulation.prototype.run = function() {
-    var animationFrameLoop, nodeNames, startTime, step, time;
+    var animationFrameLoop, nodeNames, startTime, step, steps, subtract, time;
     time = 0;
     this.framesBundle = [];
     _.each(this.nodes, (function(_this) {
@@ -57533,6 +57542,8 @@ module.exports = Simulation = (function() {
       return this.onEnd();
     } else {
       startTime = window.performance.now();
+      steps = 0;
+      subtract = 0;
       animationFrameLoop = (function(_this) {
         return function() {
           var desiredStepsTilNow, elapsedTime;
@@ -57541,10 +57552,17 @@ module.exports = Simulation = (function() {
           } else if (time === _this.duration) {
             return;
           }
+          if (_this.recalculateDesiredSteps) {
+            startTime = window.performance.now();
+            steps = 0;
+            subtract = time;
+            _this.recalculateDesiredSteps = false;
+          }
           elapsedTime = window.performance.now() - startTime;
           desiredStepsTilNow = Math.floor(elapsedTime / _this.stepInterval);
-          desiredStepsTilNow = Math.min(desiredStepsTilNow, _this.duration);
-          while (time < desiredStepsTilNow) {
+          desiredStepsTilNow = Math.min(desiredStepsTilNow, _this.duration - subtract);
+          while (steps < desiredStepsTilNow) {
+            steps++;
             step();
           }
           _this.onFrames(_this.framesBundle);
@@ -59067,6 +59085,7 @@ SimulationStore = Reflux.createStore({
     })();
     this.nodes = [];
     this.graphIsValid = true;
+    this.currentSimulation = null;
     return this.settings = {
       simulationPanelExpanded: false,
       modelIsRunnable: true,
@@ -59075,7 +59094,8 @@ SimulationStore = Reflux.createStore({
       stepUnitsName: unitName,
       timeUnitOptions: options,
       speed: 4,
-      capNodeValues: false
+      capNodeValues: false,
+      modelIsRunning: false
     };
   },
   onDiagramOnly: function() {
@@ -59113,6 +59133,9 @@ SimulationStore = Reflux.createStore({
   },
   onSetSpeed: function(s) {
     this.settings.speed = s;
+    if (this.currentSimulation) {
+      this.currentSimulation.setSpeed(s);
+    }
     return this.notifyChange();
   },
   onCapNodeValues: function(cap) {
@@ -59120,9 +59143,9 @@ SimulationStore = Reflux.createStore({
     return this.notifyChange();
   },
   onRunSimulation: function() {
-    var error, simulator;
-    if (this.settings.modelIsRunnable) {
-      simulator = new Simulation({
+    var error;
+    if (this.settings.modelIsRunnable && !this.settings.modelIsRunning) {
+      this.currentSimulation = new Simulation({
         nodes: this.nodes,
         duration: this.settings.duration,
         speed: this.settings.speed,
@@ -59137,11 +59160,20 @@ SimulationStore = Reflux.createStore({
           return SimulationActions.simulationEnded();
         }
       });
-      return simulator.run();
-    } else {
+      return this.currentSimulation.run();
+    } else if (!this.settings.modelIsRunnable) {
       error = this._getErrorMessage();
       return alert(error);
     }
+  },
+  onSimulationStarted: function() {
+    this.settings.modelIsRunning = true;
+    return this.notifyChange();
+  },
+  onSimulationEnded: function() {
+    this.settings.modelIsRunning = false;
+    this.currentSimulation = null;
+    return this.notifyChange();
   },
   _checkModelIsRunnable: function() {
     return this.settings.modelIsRunnable = this.graphIsValid && this.settings.duration > 0;
@@ -63693,6 +63725,9 @@ module.exports = React.createClass({
     runButtonClasses = "button";
     if (!this.state.modelIsRunnable) {
       runButtonClasses += " disabled error";
+    }
+    if (this.state.modelIsRunning) {
+      runButtonClasses += " disabled";
     }
     return div({
       className: wrapperClasses
