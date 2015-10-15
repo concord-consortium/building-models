@@ -56,6 +56,7 @@ module.exports = class Simulation
     speed            = if @opts.speed? then @opts.speed else 4
     @bundleAllFrames = speed is 4               # bundle all frames when at max speed
     @stepInterval = @_calculateInterval speed   # otherwise calc step interval
+    @recalculateDesiredSteps = false
 
   _calculateInterval: (speed) ->
     switch speed
@@ -75,6 +76,13 @@ module.exports = class Simulation
           when @duration <= 20  then Math.min 500, 1000 / @duration
           when @duration <= 200 then 50
           else 1e4 / @duration
+      when 4            #
+        0.1
+
+  setSpeed: (speed) ->
+    # @bundleAllFrames = speed is 4
+    @stepInterval = @_calculateInterval speed
+    @recalculateDesiredSteps = true
 
   decorateNodes: ->
     _.each @nodes, (node) =>
@@ -175,16 +183,25 @@ module.exports = class Simulation
       # generate and send the appropriate number of frames. This is better when we send
       # intermediate values to CODAP, as this can take > 100ms and would tie up setInterval.
       startTime = window.performance.now()
+      steps = 0
+      subtract = 0
       animationFrameLoop = =>
         if time < @duration
           requestAnimationFrame animationFrameLoop
         else if time is @duration then return
 
+        if @recalculateDesiredSteps
+          startTime = window.performance.now()
+          steps = 0
+          subtract = time
+          @recalculateDesiredSteps = false
+
         elapsedTime = window.performance.now() - startTime
         desiredStepsTilNow = Math.floor elapsedTime / @stepInterval
-        desiredStepsTilNow = Math.min desiredStepsTilNow, @duration
+        desiredStepsTilNow = Math.min desiredStepsTilNow, (@duration - subtract)
 
-        while time < desiredStepsTilNow
+        while steps < desiredStepsTilNow
+          steps++
           step()
 
         @onFrames(@framesBundle)  # send steps til now

@@ -32,6 +32,7 @@ SimulationStore   = Reflux.createStore
 
     @nodes = []
     @graphIsValid = true
+    @currentSimulation = null
 
     @settings =
       simulationPanelExpanded: false
@@ -79,6 +80,8 @@ SimulationStore   = Reflux.createStore
 
   onSetSpeed: (s) ->
     @settings.speed = s
+    if @currentSimulation
+      @currentSimulation.setSpeed s
     @notifyChange()
 
   onCapNodeValues: (cap) ->
@@ -87,7 +90,7 @@ SimulationStore   = Reflux.createStore
 
   onRunSimulation: ->
     if @settings.modelIsRunnable and not @settings.modelIsRunning
-      simulator = new Simulation
+      @currentSimulation = new Simulation
         nodes: @nodes
         duration: @settings.duration
         speed: @settings.speed
@@ -102,7 +105,7 @@ SimulationStore   = Reflux.createStore
         onEnd: ->
           SimulationActions.simulationEnded()
 
-      simulator.run()
+      @currentSimulation.run()
     else if not @settings.modelIsRunnable
       error = @_getErrorMessage()
       alert error
@@ -113,6 +116,7 @@ SimulationStore   = Reflux.createStore
 
   onSimulationEnded: ->
     @settings.modelIsRunning = false
+    @currentSimulation = null
     @notifyChange()
 
   _checkModelIsRunnable: ->
