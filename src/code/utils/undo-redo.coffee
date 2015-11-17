@@ -121,6 +121,10 @@ class Manager
     log.info "Undo Stack: [#{(_.pluck (@commands.slice 0, @stackPosition + 1), 'name').join ', '}]"
     log.info "Redo Stack: [#{(_.pluck (@commands.slice @stackPosition + 1), 'name').join ', '}]"
 
+  clearRedo: ->
+    @_clearRedo()
+    @_changed()
+
   _clearRedo: ->
     @commands = @commands.slice 0, @stackPosition + 1
 

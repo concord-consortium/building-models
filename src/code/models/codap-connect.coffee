@@ -164,6 +164,14 @@ module.exports = class CodapConnect
         successes = @graphStore.redo()
         callback {success: @reduceSuccesses(successes) isnt false}
 
+      when 'clearUndo'
+        log.info 'Received clearUndo request from CODAP.'
+        @graphStore.undoRedoManager.clearHistory()
+
+      when 'clearRedo'
+        log.info 'Received clearRedo request from CODAP.'
+        @graphStore.undoRedoManager.clearRedo()
+
       else
         log.info 'Unknown request received from CODAP: ' + operation
 
