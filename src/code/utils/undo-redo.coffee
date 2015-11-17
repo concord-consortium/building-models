@@ -39,7 +39,7 @@ class Manager
     # Only notify CODAP of an undoable action on the first command of a batched command
     if (not @currentBatch) or (@currentBatch.commands.length is 1)
       codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
-      codapConnect.sendUndoableActionPerformed()
+      codapConnect.sendUndoableActionPerformed(name)
 
     result
 

@@ -128,9 +128,12 @@ module.exports = class CodapConnect
       @_sendSimulationData data
     @queue = []
 
-  sendUndoableActionPerformed: ->
+  sendUndoableActionPerformed: (logMessage) ->
     @codapPhone.call
       action: 'undoableActionPerformed'
+      args: {
+        logMessage: logMessage
+      }
 
   codapRequestHandler: (cmd, callback) =>
     operation = cmd.operation
