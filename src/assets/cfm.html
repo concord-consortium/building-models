@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title>Cloud File Manager example</title>
+
+    <!-- Cloud File Manager -->
+    <script type="text/javascript" src="http://concord-consortium.github.io/cloud-file-manager/js/globals.js"></script>
+    <script type="text/javascript" src="http://concord-consortium.github.io/cloud-file-manager/js/app.js"></script>
+    <link rel="stylesheet" href="http://concord-consortium.github.io/cloud-file-manager/css/app.css">
+
+  </head>
+  <body>
+    <div id="wrapper">
+    </div>
+    <script>
+
+      var options = {
+        app: "index.html",
+        providers: [
+          "localStorage",
+          "googleDrive",
+          "documentStore"
+        ]
+      }
+      CloudFileManager.createFrame(options, "wrapper");
+    </script>
+  </body>
+</html>
