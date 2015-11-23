@@ -40,7 +40,38 @@
   <script src="js/globals.js"></script>
   <script src="js/app.js"></script>
   <script type="text/javascript" charset="utf-8">
-    window.initApp(false);
+    Ivy.initApp(false);
+  </script>
+  <script type="text/javascript">
+    var cfm = parent && parent.CloudFileManager ? parent.CloudFileManager : null,
+        clientOptions;
+
+    if (cfm) {
+      clientOptions = {
+        version: '1.0.0',
+        menu: cfm.DefaultMenu
+      };
+      cfm.clientConnect(clientOptions, function (event) {
+        console.log(event);
+        switch (event.type) {
+          case 'connected':
+            // setClient(event.data.client);
+            break;
+
+          case 'getContent':
+            event.callback(Ivy.serializeModel());
+            break;
+
+          case 'newedFile':
+            Ivy.clearModel();
+            break;
+
+          case 'openedFile':
+            Ivy.loadModel(event.data.content);
+            break;
+        }
+      });
+    }
   </script>
 </body>
 </html>

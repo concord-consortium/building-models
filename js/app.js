@@ -1,11 +1,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var AppView, GraphStore, HashParams, ValueSlider, getParameterByName;
+var AppView, GraphStore, HashParams, PaletteStore, ValueSlider, appView, getParameterByName;
 
 AppView = React.createFactory(require('./views/app-view'));
 
 ValueSlider = require('./views/value-slider-view');
 
 GraphStore = require('./stores/graph-store');
+
+PaletteStore = require('./stores/palette-store');
 
 HashParams = require('./utils/hash-parameters');
 
@@ -21,27 +23,43 @@ getParameterByName = function(name) {
   }
 };
 
-window.initApp = function(wireframes) {
-  var appView, elem, opts;
-  if (wireframes == null) {
-    wireframes = false;
+appView = null;
+
+window.Ivy = {
+  initApp: function(wireframes) {
+    var elem, opts;
+    if (wireframes == null) {
+      wireframes = false;
+    }
+    opts = {
+      graphStore: GraphStore.store,
+      publicUrl: HashParams.getParam('publicUrl'),
+      data: HashParams.getParam('data'),
+      googleDoc: HashParams.getParam('googleDoc')
+    };
+    appView = AppView(opts);
+    elem = '#app';
+    return jsPlumb.bind('ready', function() {
+      return React.render(appView, $(elem)[0]);
+    });
+  },
+  clearModel: function() {
+    return appView != null ? appView.props.graphStore.deleteAll() : void 0;
+  },
+  serializeModel: function() {
+    return appView != null ? appView.props.graphStore.toJsonString(PaletteStore.store.palette) : void 0;
+  },
+  loadModel: function(json) {
+    if (appView != null) {
+      appView.props.graphStore.deleteAll();
+    }
+    return appView != null ? appView.props.graphStore.loadData(JSON.parse(json)) : void 0;
   }
-  opts = {
-    graphStore: GraphStore.store,
-    publicUrl: HashParams.getParam('publicUrl'),
-    data: HashParams.getParam('data'),
-    googleDoc: HashParams.getParam('googleDoc')
-  };
-  appView = AppView(opts);
-  elem = '#app';
-  return jsPlumb.bind('ready', function() {
-    return React.render(appView, $(elem)[0]);
-  });
 };
 
 
 
-},{"./stores/graph-store":580,"./utils/hash-parameters":590,"./views/app-view":599,"./views/value-slider-view":637}],2:[function(require,module,exports){
+},{"./stores/graph-store":580,"./stores/palette-store":584,"./utils/hash-parameters":590,"./views/app-view":599,"./views/value-slider-view":637}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -56578,9 +56596,12 @@ module.exports = CodapConnect = (function() {
     return this.queue = [];
   };
 
-  CodapConnect.prototype.sendUndoableActionPerformed = function() {
+  CodapConnect.prototype.sendUndoableActionPerformed = function(logMessage) {
     return this.codapPhone.call({
-      action: 'undoableActionPerformed'
+      action: 'undoableActionPerformed',
+      args: {
+        logMessage: logMessage
+      }
     });
   };
 
@@ -56618,6 +56639,12 @@ module.exports = CodapConnect = (function() {
         return callback({
           success: this.reduceSuccesses(successes) !== false
         });
+      case 'clearUndo':
+        log.info('Received clearUndo request from CODAP.');
+        return this.graphStore.undoRedoManager.clearHistory();
+      case 'clearRedo':
+        log.info('Received clearRedo request from CODAP.');
+        return this.graphStore.undoRedoManager.clearRedo();
       default:
         return log.info('Unknown request received from CODAP: ' + operation);
     }
@@ -60243,7 +60270,7 @@ Manager = (function() {
     result = this.execute(new Command(name, methods));
     if ((!this.currentBatch) || (this.currentBatch.commands.length === 1)) {
       codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
-      codapConnect.sendUndoableActionPerformed();
+      codapConnect.sendUndoableActionPerformed(name);
     }
     return result;
   };
@@ -60366,6 +60393,11 @@ Manager = (function() {
   Manager.prototype.log = function() {
     log.info("Undo Stack: [" + ((_.pluck(this.commands.slice(0, this.stackPosition + 1), 'name')).join(', ')) + "]");
     return log.info("Redo Stack: [" + ((_.pluck(this.commands.slice(this.stackPosition + 1), 'name')).join(', ')) + "]");
+  };
+
+  Manager.prototype.clearRedo = function() {
+    this._clearRedo();
+    return this._changed();
   };
 
   Manager.prototype._clearRedo = function() {
