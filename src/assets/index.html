@@ -47,11 +47,7 @@
         clientOptions;
 
     if (cfm) {
-      clientOptions = {
-        version: '1.0.0',
-        menu: cfm.DefaultMenu
-      };
-      cfm.clientConnect(clientOptions, function (event) {
+      cfm.clientConnect(function (event) {
         console.log(event);
         switch (event.type) {
           case 'connected':
