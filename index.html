@@ -44,14 +44,14 @@
   </script>
   <script type="text/javascript">
     var cfm = parent && parent.CloudFileManager ? parent.CloudFileManager : null,
-        clientOptions;
+        client;
 
     if (cfm) {
       cfm.clientConnect(function (event) {
         console.log(event);
         switch (event.type) {
           case 'connected':
-            // setClient(event.data.client);
+            client = event.data.client;
             break;
 
           case 'getContent':
@@ -67,6 +67,12 @@
             break;
         }
       });
+
+      if (client && client.isAutoSaving()) {
+        Ivy.addChangeListener(function(evt) {
+          client.dirty(evt.dirty);
+        });
+      }
     }
   </script>
 </body>

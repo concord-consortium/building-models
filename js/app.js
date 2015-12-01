@@ -49,11 +49,17 @@ window.Ivy = {
   serializeModel: function() {
     return appView != null ? appView.props.graphStore.toJsonString(PaletteStore.store.palette) : void 0;
   },
-  loadModel: function(json) {
+  loadModel: function(data) {
     if (appView != null) {
       appView.props.graphStore.deleteAll();
     }
-    return appView != null ? appView.props.graphStore.loadData(JSON.parse(json)) : void 0;
+    if (typeof data === "string") {
+      data = JSON.parse(data);
+    }
+    return appView != null ? appView.props.graphStore.loadData(data) : void 0;
+  },
+  addChangeListener: function(listener) {
+    return appView != null ? appView.props.graphStore.addChangeListener(listener) : void 0;
   }
 };
 
