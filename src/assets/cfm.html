@@ -15,6 +15,7 @@
 
       var options = {
         app: "index.html",
+        autoSaveInterval: 5,
         providers: [
           "localStorage",
           {
@@ -27,7 +28,12 @@
             "mimeType": "application/json",
             "clientId": "1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com"
           },
-          "documentStore"
+          {
+            "name": "documentStore",
+            "appName": "Ivy",
+            "appVersion": "0.1",
+            "appBuildNum": "1"
+          }
         ]
       }
       CloudFileManager.createFrame(options, "wrapper");

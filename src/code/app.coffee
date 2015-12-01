@@ -39,6 +39,11 @@ window.Ivy =
   serializeModel: ->
     return appView?.props.graphStore.toJsonString PaletteStore.store.palette
 
-  loadModel: (json) ->
+  loadModel: (data) ->
     appView?.props.graphStore.deleteAll()
-    appView?.props.graphStore.loadData JSON.parse json
+    if typeof data is "string"
+      data = JSON.parse data
+    appView?.props.graphStore.loadData data
+
+  addChangeListener: (listener) ->
+    appView?.props.graphStore.addChangeListener listener
