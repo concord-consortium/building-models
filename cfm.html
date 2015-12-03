@@ -16,6 +16,7 @@
       var options = {
         app: "index.html",
         autoSaveInterval: 5,
+        mimeType: "application/json",
         providers: [
           "localStorage",
           {
@@ -25,14 +26,14 @@
           },
           {
             "name": "googleDrive",
-            "mimeType": "application/json",
             "clientId": "1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com"
           },
           {
             "name": "documentStore",
             "appName": "Ivy",
             "appVersion": "0.1",
-            "appBuildNum": "1"
+            "appBuildNum": "1",
+            "patch": true
           }
         ]
       }
