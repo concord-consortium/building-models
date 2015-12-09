@@ -107,6 +107,11 @@ module.exports = React.createClass
     else if @props.link
       (LinkRelationInspectorView {link:@props.link, graphStore: @props.graphStore})
 
+  # 2015-12-09 NP: Deselection makes inpector panel hide http://bit.ly/1ORBBp2
+  componentWillReceiveProps: (nextProps) ->
+    unless (nextProps.node or nextProps.link)
+      @setState
+        nowShowing: null
 
   renderInspectorPanel: ->
     view = switch @state.nowShowing
