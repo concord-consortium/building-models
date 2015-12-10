@@ -1,18 +1,36 @@
+colored-span(color)
+  background-color color
+  color white
+  padding-left  4px
+  padding-right 4px
+  border-radius 4px
+
 .relation-inspector
-  width: 500px
-  margin 0px
-  padding 0px
+  .tabbed-panel
+    width: 400px
+  .inspector-content.group
+      padding 0px
+      width 100%
+
   label-font()
   text-transform none
   font-size 14px
-  .group
+  width 100%
+
+  .link-relation-view
+    box-sizing border-box
+    line-height 1.5em
+    .source
+      colored-span(green-blue)
+
+    .target
+      colored-span(blue-gray)
+
     enable-flex(wp:wrap)
-    margin-left 0px
-    padding-left 0px
 
   .bb-select
     margin-left 0px
-    margin-top 1em
+    margin-top 0.25em
     overflow hidden
     label
       font-weight bold
@@ -42,7 +60,13 @@
   .left
     text-align left
 
-  i.chart
+  .bottom
+    width 100%
+    margin-top 8px
+    border-top 4px solid green-blue
+
+  .graph
     color #02889d
     font-size 80px
+    width 100%
     margin 20px

@@ -39,8 +39,11 @@ module.exports =
   # views/relation-inspector-view.coffee
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations."
 
-  "~NODE-RELATION-EDIT.INCREASES": "increases"
-  "~NODE-RELATION-EDIT.DECREASES": "decreases"
+  "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in"
+  "~NODE-RELATION-EDIT.CAUSES": "causes"
+  "~NODE-RELATION-EDIT.TO": "to"
+  "~NODE-RELATION-EDIT.INCREASES": "increase"
+  "~NODE-RELATION-EDIT.DECREASES": "decrease"
   "~NODE-RELATION-EDIT.BY": "by"
   "~NODE-RELATION-EDIT.ABOUT_THE_SAME": "about the same"
   "~NODE-RELATION-EDIT.A_LOT": "a lot"

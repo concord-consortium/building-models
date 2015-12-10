@@ -3,7 +3,19 @@
 RelationFactory = require "../models/relation-factory"
 tr = require "../utils/translate"
 
-module.exports = React.createClass
+
+QuantStart = React.createFactory React.createClass
+  render: ->
+    start = tr "~NODE-RELATION-EDIT.SEMI_QUANT_START"
+    (div {},
+      # "Hey"
+      (span {}, "#{tr "~NODE-RELATION-EDIT.AN_INCREASE_IN"} ")
+      (span {className: "source"}, @props.source)
+      (span {}, " #{tr "~NODE-RELATION-EDIT.CAUSES"} ")
+      (span {className: "target"}, @props.target)
+    )
+
+module.exports = LinkRelationView = React.createClass
 
   displayName: 'LinkRelationView'
 
@@ -38,7 +50,7 @@ module.exports = React.createClass
       else
         (option {value: opt.id}, opt.text)
     (div {className: "bb-select"},
-      (label {}, "#{@props.link.targetNode.title} ")
+      (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
       (select {className:"", ref: "vector", onChange: @updateRelation},
       options)
     )
@@ -51,24 +63,30 @@ module.exports = React.createClass
       else
         (option {value: opt.id}, opt.text)
     (div {className: "bb-select"},
-      (label {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
+      (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
       (select {className:"", ref: "scalar", onChange: @updateRelation},
         options
       )
     )
 
   render: ->
+    source = @props.link.sourceNode.title
+    target = @props.link.targetNode.title
     {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
     classname = RelationFactory.iconName(vector, scalar)
     (div {className: 'link-relation-view'},
-      (span {}, "As #{@props.link.sourceNode.title} increases … ")
-      (div {className: 'inspector-content group'},
+      (div {className: 'top'},
+        (QuantStart {source: source, target: target})
         (div {className: 'full'},
           @renderVector(vector)
         )
         (div {className: 'full'},
           @renderScalar(scalar)
         )
-        (i {className: "full chart center #{classname}"})
+      )
+      (div {className: 'bottom'},
+        (div {className: 'graph'},
+          (i {className: "full chart center #{classname}"})
+        )
       )
     )
