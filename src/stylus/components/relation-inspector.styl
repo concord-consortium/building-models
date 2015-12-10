@@ -20,13 +20,12 @@ colored-span(color)
   .link-relation-view
     box-sizing border-box
     line-height 1.5em
+    margin-left 12px
     .source
       colored-span(green-blue)
 
     .target
-      colored-span(blue-gray)
-
-    enable-flex(wp:wrap)
+      colored-span(light-blue)
 
   .bb-select
     margin-left 0px
@@ -62,11 +61,27 @@ colored-span(color)
 
   .bottom
     width 100%
-    margin-top 8px
-    border-top 4px solid green-blue
+    margin-top 12px
 
   .graph
     color #02889d
-    font-size 80px
     width 100%
     margin 20px
+    font-size 14px
+    .yAxis
+      transform-origin left top 0
+      transform rotate(90deg)
+      span
+        margin-left 20px
+        margin-top 10px
+        colored-span(light-blue)
+
+
+    .xAxis
+      margin 10px
+      span
+        colored-span(green-blue)
+
+    i
+      font-size 140px
+      margin 10px

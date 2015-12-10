@@ -1,16 +1,30 @@
-{div, h2, label, span, input, p, i, select, option} = React.DOM
+{br, div, h2, label, span, input, p, i, select, option} = React.DOM
 
 RelationFactory = require "../models/relation-factory"
 tr = require "../utils/translate"
 
 
+Graph = React.createFactory React.createClass
+  render: ->
+    (div {className: 'graph'},
+      div( {className: "yAxis"},
+        (span {}, @props.yAxis)
+      )
+      div({},
+        (i {className: "full chart center #{@props.graphType}"})
+      )
+      (div {className: "xAxis"},
+        (span {}, @props.xAxis)
+      )
+    )
+
 QuantStart = React.createFactory React.createClass
   render: ->
     start = tr "~NODE-RELATION-EDIT.SEMI_QUANT_START"
     (div {},
-      # "Hey"
       (span {}, "#{tr "~NODE-RELATION-EDIT.AN_INCREASE_IN"} ")
       (span {className: "source"}, @props.source)
+      (br {})
       (span {}, " #{tr "~NODE-RELATION-EDIT.CAUSES"} ")
       (span {className: "target"}, @props.target)
     )
@@ -73,7 +87,7 @@ module.exports = LinkRelationView = React.createClass
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
     {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
-    classname = RelationFactory.iconName(vector, scalar)
+    graphType = RelationFactory.iconName(vector, scalar)
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
         (QuantStart {source: source, target: target})
@@ -85,8 +99,6 @@ module.exports = LinkRelationView = React.createClass
         )
       )
       (div {className: 'bottom'},
-        (div {className: 'graph'},
-          (i {className: "full chart center #{classname}"})
-        )
+        (Graph {graphType: graphType, xAxis: source, yAxis: target})
       )
     )
