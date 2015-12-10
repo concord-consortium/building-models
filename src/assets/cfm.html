@@ -17,6 +17,9 @@
         app: "index.html",
         autoSaveInterval: 5,
         mimeType: "application/json",
+        appName: "Ivy",
+        appVersion: "0.1",
+        appBuildNum: "1",
         providers: [
           "localStorage",
           {
@@ -30,14 +33,11 @@
           },
           {
             "name": "documentStore",
-            "appName": "Ivy",
-            "appVersion": "0.1",
-            "appBuildNum": "1",
             "patch": true
           }
         ],
         ui: {
-          menu: ['newFileDialog', 'openFileDialog', 'reopenDialog', 'separator', 'saveFileAsDialog', 'saveCopyDialog', 'downloadDialog', 'renameDialog']
+          menu: CloudFileManager.DefaultMenu
         }
       }
       CloudFileManager.createFrame(options, "wrapper");
