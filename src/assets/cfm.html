@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <title>Cloud File Manager example</title>
+
+    <!-- Cloud File Manager -->
+    <script type="text/javascript" src="http://concord-consortium.github.io/cloud-file-manager/js/globals.js"></script>
+    <script type="text/javascript" src="http://concord-consortium.github.io/cloud-file-manager/js/app.js"></script>
+    <link rel="stylesheet" href="http://concord-consortium.github.io/cloud-file-manager/css/app.css">
+
+  </head>
+  <body>
+    <div id="wrapper">
+    </div>
+    <script>
+
+      var options = {
+        app: "index.html",
+        autoSaveInterval: 5,
+        mimeType: "application/json",
+        providers: [
+          "localStorage",
+          {
+            "name": "readOnly",
+            "displayName": "Ivy Examples",
+            "src": "examples.json"
+          },
+          {
+            "name": "googleDrive",
+            "clientId": "1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com"
+          },
+          {
+            "name": "documentStore",
+            "appName": "Ivy",
+            "appVersion": "0.1",
+            "appBuildNum": "1",
+            "patch": true
+          }
+        ],
+        ui: {
+          menu: ['newFileDialog', 'openFileDialog', 'reopenDialog', 'separator', 'saveFileAsDialog', 'saveCopyDialog', 'downloadDialog', 'renameDialog']
+        }
+      }
+      CloudFileManager.createFrame(options, "wrapper");
+    </script>
+  </body>
+</html>
