@@ -55,7 +55,7 @@
             break;
 
           case 'getContent':
-            event.callback(client.createContent(Ivy.serializeModel()));
+            event.callback(JSON.parse(Ivy.serializeModel()));
             break;
 
           case 'newedFile':
@@ -63,7 +63,7 @@
             break;
 
           case 'openedFile':
-            Ivy.loadModel(event.data.content.getText());
+            Ivy.loadModel(event.data.content);
             break;
         }
       });
