@@ -36,7 +36,7 @@ the compiled artifacts, which is less than ideal.
 
 * Test:
     * `gulp default` — watches the project sources in `./src/` and builds artifacts into `dev`.
-    * Run mocha tests (located in `./test/`):   `./node_modules/mocha/bin/mocha -w`
+    * `./node_modules/mocha/bin/mocha -w` to run mocha tests (located in `./test/`):   
 
 * Learn:
     * `./dev/` dir is fully auto-generated and served by HTTP server.  Write your code in `./src/` dir.

@@ -22,7 +22,7 @@ describe "relationship", ->
     describe "using the defaults", ->
       it "should make a working relationship", ->
         undertest = new Relationship(@arguments)
-        undertest.text.should.equal "increases"
+        undertest.text.should.equal "increase"
         undertest.formula.should.equal "1 * in"
 
   describe "evaluate", ->

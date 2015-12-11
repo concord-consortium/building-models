@@ -231,10 +231,10 @@ describe "The SimulationStore, with a network in the GraphStore", ->
   beforeEach ->
     sandbox = Sinon.sandbox.create()
     sandbox.stub(CodapConnect, "instance", ->
-        return {
-          sendUndoableActionPerformed: -> return ''
-        }
-      )
+      return {
+        sendUndoableActionPerformed: -> return ''
+      }
+    )
 
     @nodeA    = new Node({title: "A", initialValue: 10})
     @nodeB    = new Node({title: "B", initialValue: 0 })
@@ -248,13 +248,15 @@ describe "The SimulationStore, with a network in the GraphStore", ->
     LinkNodes(@nodeA, @nodeB, @formula)
 
   afterEach ->
-      CodapConnect.instance.restore()
+    CodapConnect.instance.restore()
 
   describe "for a fast simulation for 10 iterations", ->
 
     beforeEach ->
-      SimulationActions.setDuration 10
-      SimulationActions.setSpeed 4
+      SimulationActions.resetSimulation.trigger()
+      SimulationActions.setSpeed.trigger(4)
+      SimulationActions.setDuration.trigger(10)
+
 
     it "should call simulationStarted with the node names", (done) ->
       # calledback is an annoyance to prevent later tests from triggering this
@@ -292,8 +294,9 @@ describe "The SimulationStore, with a network in the GraphStore", ->
   describe "for a slow simulation for 3 iterations", ->
 
     beforeEach ->
-      SimulationActions.setDuration 3
-      SimulationActions.setSpeed 3
+      SimulationActions.resetSimulation()
+      SimulationActions.setDuration.trigger(3)
+      SimulationActions.setSpeed.trigger(3)
 
     it "should call simulationFramesCreated several times, with 3 frames total", (done) ->
       totalCallbacks = 0
@@ -308,4 +311,3 @@ describe "The SimulationStore, with a network in the GraphStore", ->
         done()
 
       SimulationActions.runSimulation()
-

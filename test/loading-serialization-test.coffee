@@ -113,7 +113,7 @@ describe "Serialization and Loading", ->
         link.sourceTerminal.should.equal "b"
         link.targetNode.should.equal "b"
         link.targetTerminal.should.equal "a"
-        link.relation.text.should.equal "increases"
+        link.relation.text.should.equal "increase"
         link.relation.formula.should.equal "1 * in"
 
       it "should not serialize certain properties", ->
