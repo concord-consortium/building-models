@@ -7,11 +7,11 @@ tr = require "../utils/translate"
 Graph = React.createFactory React.createClass
   render: ->
     (div {className: 'graph'},
-      div( {className: "yAxis"},
-        (span {}, @props.yAxis)
-      )
       div({},
         (i {className: "full chart center #{@props.graphType}"})
+      )
+      div( {className: "yAxis"},
+        (span {}, @props.yAxis)
       )
       (div {className: "xAxis"},
         (span {}, @props.xAxis)

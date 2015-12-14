@@ -25,7 +25,8 @@ colored-span(color)
       colored-span(green-blue)
 
     .target
-      colored-span(light-blue)
+      // colored-span(light-blue)
+      color gray
 
   .bb-select
     margin-left 0px
@@ -69,19 +70,24 @@ colored-span(color)
     margin 20px
     font-size 14px
     .yAxis
-      transform-origin left top 0
-      transform rotate(90deg)
+      float left
+      position absolute
+      transform-origin left bottom 0
+      transform rotate(-90deg)
+      margin-bottom 0px
+      padding-bottom 0px
       span
-        margin-left 20px
-        margin-top 10px
-        colored-span(light-blue)
+        margin-left 30px
+        padding-bottom 0px
+        margin-bottom 0px
+        color gray
+        // colored-span(light-blue)
 
 
     .xAxis
-      margin 10px
+      margin 5px
       span
         colored-span(green-blue)
 
     i
       font-size 140px
-      margin 10px
