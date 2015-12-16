@@ -1,21 +1,20 @@
 {br, div, h2, label, span, input, p, i, select, option} = React.DOM
 
 RelationFactory = require "../models/relation-factory"
-tr = require "../utils/translate"
+SvgGraph        = React.createFactory require "./svg-graph-view"
+tr              = require "../utils/translate"
 
 
 Graph = React.createFactory React.createClass
   render: ->
     (div {className: 'graph'},
-      div({},
-        (i {className: "full chart center #{@props.graphType}"})
-      )
-      div( {className: "yAxis"},
-        (span {}, @props.yAxis)
-      )
-      (div {className: "xAxis"},
-        (span {}, @props.xAxis)
-      )
+      (SvgGraph {
+        width: 130
+        height: 130
+        yLabel: @props.yAxis
+        xLabel: @props.xAxis
+        formula: @props.formula
+      })
     )
 
 QuantStart = React.createFactory React.createClass
@@ -87,7 +86,7 @@ module.exports = LinkRelationView = React.createClass
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
     {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
-    graphType = RelationFactory.iconName(vector, scalar)
+    formula = @props.link.relation.formula
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
         (QuantStart {source: source, target: target})
@@ -99,6 +98,6 @@ module.exports = LinkRelationView = React.createClass
         )
       )
       (div {className: 'bottom'},
-        (Graph {graphType: graphType, xAxis: source, yAxis: target})
+        (Graph {formula: formula, xAxis: source, yAxis: target})
       )
     )

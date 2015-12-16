@@ -7,7 +7,7 @@ graphStore        = require '../stores/graph-store'
 
 {div, h2, label, span, input, p, i, select, option} = React.DOM
 
-module.exports = React.createClass
+module.exports = RelationInspectorView = React.createClass
 
   displayName: 'RelationInspectorView'
 
