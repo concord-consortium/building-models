@@ -65,7 +65,7 @@ window.Ivy = {
 
 
 
-},{"./stores/graph-store":577,"./stores/palette-store":581,"./utils/hash-parameters":587,"./views/app-view":596,"./views/value-slider-view":634}],2:[function(require,module,exports){
+},{"./stores/graph-store":577,"./stores/palette-store":581,"./utils/hash-parameters":587,"./views/app-view":596,"./views/value-slider-view":635}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /*!
@@ -61045,7 +61045,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":578,"../stores/palette-store":581,"../utils/translate":594,"./image-link-dialog-view":604,"./image-metadata-view":605,"./image-my-computer-dialog-view":606,"./image-search-dialog-view":608,"./modal-tabbed-dialog-view":616,"./tabbed-panel-view":633}],604:[function(require,module,exports){
+},{"../stores/image-dialog-store":578,"../stores/palette-store":581,"../utils/translate":594,"./image-link-dialog-view":604,"./image-metadata-view":605,"./image-my-computer-dialog-view":606,"./image-search-dialog-view":608,"./modal-tabbed-dialog-view":616,"./tabbed-panel-view":634}],604:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -61827,11 +61827,13 @@ module.exports = React.createClass({
 
 
 },{"../utils/translate":594}],611:[function(require,module,exports){
-var Graph, LinkRelationView, QuantStart, RelationFactory, br, div, h2, i, input, label, option, p, ref, select, span, tr;
+var Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, br = ref.br, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
 
 RelationFactory = require("../models/relation-factory");
+
+SvgGraph = React.createFactory(require("./svg-graph-view"));
 
 tr = require("../utils/translate");
 
@@ -61839,13 +61841,13 @@ Graph = React.createFactory(React.createClass({
   render: function() {
     return div({
       className: 'graph'
-    }, div({
-      className: "yAxis"
-    }, span({}, this.props.yAxis)), div({}, i({
-      className: "full chart center " + this.props.graphType
-    })), div({
-      className: "xAxis"
-    }, span({}, this.props.xAxis)));
+    }, SvgGraph({
+      width: 130,
+      height: 130,
+      yLabel: this.props.yAxis,
+      xLabel: this.props.xAxis,
+      formula: this.props.formula
+    }));
   }
 }));
 
@@ -61942,11 +61944,11 @@ module.exports = LinkRelationView = React.createClass({
     }, options));
   },
   render: function() {
-    var graphType, ref1, scalar, source, target, vector;
+    var formula, ref1, scalar, source, target, vector;
     source = this.props.link.sourceNode.title;
     target = this.props.link.targetNode.title;
     ref1 = RelationFactory.selectionsFromRelation(this.props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
-    graphType = RelationFactory.iconName(vector, scalar);
+    formula = this.props.link.relation.formula;
     return div({
       className: 'link-relation-view'
     }, div({
@@ -61961,7 +61963,7 @@ module.exports = LinkRelationView = React.createClass({
     }, this.renderScalar(scalar))), div({
       className: 'bottom'
     }, Graph({
-      graphType: graphType,
+      formula: formula,
       xAxis: source,
       yAxis: target
     })));
@@ -61970,7 +61972,7 @@ module.exports = LinkRelationView = React.createClass({
 
 
 
-},{"../models/relation-factory":570,"../utils/translate":594}],612:[function(require,module,exports){
+},{"../models/relation-factory":570,"../utils/translate":594,"./svg-graph-view":633}],612:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -62163,7 +62165,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":613,"./tabbed-panel-view":633}],617:[function(require,module,exports){
+},{"./modal-dialog-view":613,"./tabbed-panel-view":634}],617:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -62783,7 +62785,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":565,"../utils/translate":594,"./square-image-view":632,"./value-slider-view":634}],621:[function(require,module,exports){
+},{"../mixins/node-title":565,"../utils/translate":594,"./square-image-view":632,"./value-slider-view":635}],621:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -63192,7 +63194,7 @@ module.exports = React.createClass({
 
 
 },{"../stores/image-dialog-store":578,"../stores/palette-store":581,"../utils/translate":594,"./image-metadata-view":605}],629:[function(require,module,exports){
-var LinkRelationView, RelationFactory, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, myView, option, p, ref, select, span, tr;
+var LinkRelationView, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
 
@@ -63249,33 +63251,9 @@ module.exports = RelationInspectorView = React.createClass({
   }
 });
 
-RelationFactory = require("../models/relation-factory");
-
-myView = React.createFactory(RelationInspectorView);
-
-window.testComponent = function(domID) {
-  return React.render(myView({
-    node: {
-      inLinks: function() {
-        return [
-          {
-            sourceNode: {
-              title: "input"
-            },
-            targetNode: {
-              title: "output"
-            },
-            relation: RelationFactory.fromSelections(RelationFactory.increase, RelationFactory.aboutTheSame)
-          }
-        ];
-      }
-    }
-  }), domID);
-};
 
 
-
-},{"../models/relation-factory":570,"../stores/graph-store":577,"../utils/translate":594,"./link-relation-view":611,"./tabbed-panel-view":633}],630:[function(require,module,exports){
+},{"../stores/graph-store":577,"../utils/translate":594,"./link-relation-view":611,"./tabbed-panel-view":634}],630:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -63396,7 +63374,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":574,"../stores/simulation-store":582,"../utils/translate":594,"./dropdown-view":599,"./value-slider-view":634}],631:[function(require,module,exports){
+},{"../stores/app-settings-store":574,"../stores/simulation-store":582,"../utils/translate":594,"./dropdown-view":599,"./value-slider-view":635}],631:[function(require,module,exports){
 var SimulationStore, div, i, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
@@ -63517,6 +63495,188 @@ module.exports = React.createClass({
 
 
 },{}],633:[function(require,module,exports){
+var RelationFactory, SvgGraphView, div, line, math, myView, path, ref, svg, text, tspan;
+
+ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
+
+math = require('mathjs');
+
+module.exports = SvgGraphView = React.createClass({
+  displayName: 'SvgGraphView',
+  getDefaultProps: function() {
+    return {
+      formula: "in ^ 2 * -2 + 5",
+      width: 200,
+      height: 200,
+      strokeWidth: 3,
+      fontSize: 16,
+      xLabel: "x axis",
+      yLabel: "y axis"
+    };
+  },
+  marginal: function() {
+    return this.props.fontSize * 0.4;
+  },
+  margin: function() {
+    return this.props.fontSize + this.marginal();
+  },
+  isExponential: function() {
+    return this.props.formula.indexOf("^") > -1 || this.props.formula.indexOf("sqrt") > -1;
+  },
+  invertPoint: function(point) {
+    return {
+      x: point.x,
+      y: this.props.height - point.y
+    };
+  },
+  graphMapPoint: function(point) {
+    var height, width, x, xOffset, y, yOffset;
+    yOffset = this.margin();
+    xOffset = this.margin();
+    width = this.props.width - (xOffset + this.props.strokeWidth);
+    height = this.props.height - (yOffset + this.props.strokeWidth);
+    x = point.x * width + xOffset;
+    y = point.y * height + yOffset;
+    return this.invertPoint({
+      x: x,
+      y: y
+    });
+  },
+  pointsToPath: function(points) {
+    var data;
+    data = _.map(points, (function(_this) {
+      return function(p) {
+        return _this.graphMapPoint(p);
+      };
+    })(this));
+    data = _.map(data, function(p) {
+      return p.x + " " + p.y;
+    });
+    data = data.join(" L ");
+    return "M " + data;
+  },
+  getPathPoints: function() {
+    var data, maxy, miny, rangex, rangey, scaley;
+    rangex = 20;
+    data = _.range(0, rangex);
+    miny = Infinity;
+    maxy = -Infinity;
+    data = _.map(data, (function(_this) {
+      return function(x) {
+        var error, scope, y;
+        scope = {
+          "in": x,
+          out: 0
+        };
+        try {
+          y = math["eval"](_this.props.formula, scope);
+          if (y < miny) {
+            miny = y;
+          }
+          if (y > maxy) {
+            maxy = y;
+          }
+        } catch (_error) {
+          error = _error;
+          console.log("Errror: " + error);
+        }
+        return {
+          y: y,
+          x: x
+        };
+      };
+    })(this));
+    rangey = maxy - miny;
+    scaley = this.isExponential() ? rangey : rangex;
+    data = _.map(data, function(d) {
+      var x, y;
+      x = d.x, y = d.y;
+      y = y - miny;
+      x = x / rangex;
+      y = y / scaley;
+      return {
+        x: x,
+        y: y
+      };
+    });
+    return data;
+  },
+  renderXLabel: function() {
+    var y;
+    y = this.props.height - this.props.fontSize + 2 * this.marginal();
+    return text({
+      className: "xLabel",
+      x: this.margin(),
+      y: y
+    }, this.props.xLabel);
+  },
+  renderYLabel: function() {
+    var rotate, transform, translate, y;
+    rotate = "rotate(-90 0, " + this.props.height + ")";
+    translate = "translate(" + this.props.fontSize + ")";
+    transform = "" + rotate;
+    y = this.props.height + this.props.fontSize - 3;
+    return text({
+      className: "yLabel",
+      x: this.margin(),
+      y: y,
+      transform: transform
+    }, this.props.yLabel);
+  },
+  renderAxisLines: function() {
+    var data;
+    data = [
+      {
+        x: 0,
+        y: this.props.height
+      }, {
+        x: 0,
+        y: 0
+      }, {
+        x: this.props.width,
+        y: 0
+      }
+    ];
+    return path({
+      className: 'axisLines',
+      d: this.pointsToPath(data)
+    });
+  },
+  renderLineData: function() {
+    var data;
+    data = this.pointsToPath(this.getPathPoints());
+    return path({
+      className: 'data',
+      d: data,
+      "stroke-width": this.props.strokeWidth
+    });
+  },
+  render: function() {
+    return div({
+      className: 'svgGraphView'
+    }, svg({
+      width: this.props.width,
+      height: this.props.height
+    }, this.renderLineData(), this.renderAxisLines(), this.renderXLabel(), this.renderYLabel()));
+  }
+});
+
+RelationFactory = require("../models/relation-factory");
+
+myView = React.createFactory(SvgGraphView);
+
+window.testComponent = function(domID) {
+  return React.render(myView({
+    width: 200,
+    height: 200,
+    yLabel: "this node",
+    xLabel: "input a"
+  }), domID);
+};
+
+
+
+},{"../models/relation-factory":570,"mathjs":168}],634:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -63618,7 +63778,7 @@ module.exports = React.createClass({
 
 
 
-},{}],634:[function(require,module,exports){
+},{}],635:[function(require,module,exports){
 var Demo, Slider, ValueSlider, circle, div, i, input, label, path, rect, ref, span, svg;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect;
