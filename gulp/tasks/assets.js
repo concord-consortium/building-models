@@ -1,6 +1,6 @@
 var gulp        = require('gulp');
 var production  = require('../config').production;
-var buildInfo   = require('../config').buildInfo;
+var buildInfo   = require('../config').buildInfoString;
 var environment = require('../config').environment;
 var config      = require('../config').assets;
 var gulpif      = require('gulp-if');
