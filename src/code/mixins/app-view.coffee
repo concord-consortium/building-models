@@ -13,6 +13,7 @@ module.exports =
       palette: []
       filename: null
       undoRedoShowing: true
+      showBuildInfo: false
     _.extend mixinState, subState
 
   componentDidUpdate: ->
@@ -85,6 +86,13 @@ module.exports =
       GoogleFileStore.actions.addAfterAuthHandler (context) ->
         context.loadFile {id: googleDoc}
 
+  hideBuildInfo: ->
+    @setState
+      showBuildInfo: false
+
+  showBuildInfo: ->
+    @setState
+      showBuildInfo: true
 
   # cross platform undo/redo key-binding ctr-z ctr-y
   _registerUndoRedoKeys: ->
