@@ -209,4 +209,4 @@ Demo = React.createClass
         onRangeChange: @onRangeChange
     )
 
-window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
+# window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
