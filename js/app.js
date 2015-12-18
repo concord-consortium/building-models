@@ -60217,7 +60217,7 @@ module.exports = React.createClass({
       graphStore: this.props.graphStore
     }), this.state.showingDialog ? ImageBrowser({
       graphStore: this.props.graphStore
-    }) : void 0, ModalPaletteDelete({})), BuildInfoView({}));
+    }) : void 0, ModalPaletteDelete({})), this.state.iframed ? BuildInfoView({}) : void 0);
   }
 });
 
@@ -60321,7 +60321,7 @@ module.exports = BuildInfoView = React.createClass({
       }, div({
         className: 'build-info-button',
         onClick: this.open
-      }, "built on: " + this.state.date));
+      }, "built on " + this.state.date));
     }
   }
 });
@@ -60696,7 +60696,7 @@ module.exports = React.createClass({
 
 
 },{"../utils/drop-image-handler":584,"../utils/translate":594}],602:[function(require,module,exports){
-var AppSettingsActions, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
+var AppSettingsActions, BuildInfoView, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
 
@@ -60707,6 +60707,8 @@ Dropdown = React.createFactory(require('./dropdown-view'));
 OpenInCodap = React.createFactory(require('./open-in-codap-view'));
 
 ModalGoogleSave = React.createFactory(require('./modal-google-save-view'));
+
+BuildInfoView = React.createFactory(require('./build-info-view'));
 
 GoogleFileStore = require('../stores/google-file-store');
 
@@ -60777,26 +60779,17 @@ module.exports = React.createClass({
         return GoogleFileStore.actions.close();
       },
       setIsPublic: GoogleFileStore.actions.setIsPublic
-    }), div({
+    }), BuildInfoView({}), div({
       className: 'global-nav-name-and-help'
     }, OpenInCodap({
       disabled: this.state.dirty
-    }), span({
-      className: 'mockup-only'
-    }, this.props.username), span({
-      className: 'mockup-only'
-    }, i({
-      style: {
-        fontSize: "13px"
-      },
-      className: 'icon-codap-help'
-    }))));
+    })));
   }
 });
 
 
 
-},{"../stores/app-settings-store":574,"../stores/google-file-store":576,"../utils/translate":594,"./dropdown-view":600,"./modal-google-save-view":615,"./open-in-codap-view":623}],603:[function(require,module,exports){
+},{"../stores/app-settings-store":574,"../stores/google-file-store":576,"../utils/translate":594,"./build-info-view":597,"./dropdown-view":600,"./modal-google-save-view":615,"./open-in-codap-view":623}],603:[function(require,module,exports){
 var AppSettingsStore, DiagramToolkit, ImageDialogStore, Importer, LinkStore, Node, NodeModel, PaletteStore, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
