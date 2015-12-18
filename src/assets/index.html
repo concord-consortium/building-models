@@ -12,14 +12,20 @@
     <div id="wrapper">
     </div>
     <script>
+      var buildInfo = "__BUILD_INFO__".split(" ");
+      var buildDate = buildInfo[0];
+      var tags      = buildInfo[1];
+      var commit    = buildInfo[2];
+      var versionString = buildDate + " | " + commit;
+
 
       var options = {
         app: "ivy.html",
         autoSaveInterval: 5,
         mimeType: "application/json",
         appName: "Ivy",
-        appVersion: "0.1",
-        appBuildNum: "1",
+        appVersion: tags,
+        appBuildNum: commit,
         providers: [
           "localStorage",
           {
@@ -37,7 +43,10 @@
           }
         ],
         ui: {
-          menu: CloudFileManager.DefaultMenu
+          menu: CloudFileManager.DefaultMenu,
+          menuBar: {
+            info: versionString
+          }
         }
       }
       CloudFileManager.createFrame(options, "wrapper");
