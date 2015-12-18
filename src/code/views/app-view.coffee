@@ -49,7 +49,7 @@ module.exports = React.createClass
             filename: @state.filename
             username: @state.username
             graphStore: @props.graphStore
-            GraphStore: @GraphStore,
+            GraphStore: @GraphStore
           )
         (div {className: 'action-bar'},
           (NodeWell {
@@ -85,5 +85,6 @@ module.exports = React.createClass
           )
         (ModalPaletteDelete {})
       )
-      (BuildInfoView {})
+      if @state.iframed
+        (BuildInfoView {})
     )

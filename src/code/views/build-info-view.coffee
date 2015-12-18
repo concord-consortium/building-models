@@ -68,7 +68,7 @@ module.exports = BuildInfoView = React.createClass
       )
     else
       (div {className: 'build-info-bottom-bar'},
-        (div {className: 'build-info-button', onClick:@open}, "built on: #{@state.date}")
+        (div {className: 'build-info-button', onClick:@open}, "built on #{@state.date}")
       )
 
 #
