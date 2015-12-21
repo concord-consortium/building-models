@@ -21,6 +21,8 @@ IntegrationFunction = (t) ->
       return unless inV               # we simply ignore nodes with no previous value
       outV = @previousValue or @initialValue
       nextValue = link.relation.evaluate(inV, outV)
+      # TODO: Map input range (in.min –> in.max) to domain (out.min -> out.max)
+      nextValue = link.relation.evaluate(inV, outV, sourceNode.max)
       value += nextValue
   else
     _.each links, (link) =>
@@ -90,6 +92,7 @@ module.exports = class Simulation
     _.each @nodes, (node) =>
       # make this a local node property (it may eventually be different per node)
       node.capNodeValues = @capNodeValues
+      node.newIntegration = @newIntegration
       @addIntegrateMethodTo node
 
   initializeValues: (node) ->

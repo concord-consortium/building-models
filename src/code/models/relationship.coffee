@@ -29,11 +29,12 @@ module.exports = class Relationship
   checkFormula: ->
     @evaluate(1, 1) #sets the @hasError flag if there is a problem
 
-  evaluate: (inV,outV)->
+  evaluate: (inV,outV, maxIn=100)->
     result = Relationship.errValue
     scope =
       in: inV
       out: outV
+      maxIn: maxIn
     try
       result = math.eval @formula, scope
     catch error
