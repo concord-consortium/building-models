@@ -64,6 +64,8 @@ SimulationStore   = Reflux.createStore
 
     simulator = new Simulation
       nodes: @nodes
+      newIntegration: true
+
     @graphIsValid = simulator.graphIsValid()
     @notifyChange()
 

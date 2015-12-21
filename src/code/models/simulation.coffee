@@ -20,17 +20,27 @@ IntegrationFunction = (t) ->
       inV = sourceNode.previousValue
       return unless inV               # we simply ignore nodes with no previous value
       outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV)
       # TODO: Map input range (in.min –> in.max) to domain (out.min -> out.max)
       nextValue = link.relation.evaluate(inV, outV, sourceNode.max)
       value += nextValue
   else
+    # include the nodes current value in the average
+    if @newIntegration
+      count  = count + 1
+      outV   = @previousValue or @initialValue
+      value += outV
+
+
     _.each links, (link) =>
       sourceNode = link.sourceNode
-      inV = sourceNode.getCurrentValue(t)     # recursively ask incoming node for current value.
+      if @newIntegration
+        inV = sourceNode.previousValue || sourceNode.initialValue
+      else
+        inV = sourceNode.getCurrentValue(t)     # recursively ask incoming node for current value.
       outV = @previousValue or @initialValue
       nextValue = link.relation.evaluate(inV, outV)
-      value += (nextValue / count)
+      value += nextValue
+    value = value / count
 
   # if we need to cap, do it at end of all calculations
   if @capNodeValues
@@ -41,9 +51,10 @@ IntegrationFunction = (t) ->
 module.exports = class Simulation
 
   constructor: (@opts={}) ->
-    @nodes         = @opts.nodes      or []
-    @duration      = @opts.duration   or 10
-    @capNodeValues = @opts.capNodeValues or false
+    @nodes          = @opts.nodes      or []
+    @duration       = @opts.duration   or 10
+    @capNodeValues  = @opts.capNodeValues or false
+    @newIntegration = @opts.newIntegration or false
     @decorateNodes() # extend nodes with integration methods
 
     @onStart     = @opts.onStart or (nodeNames) ->
@@ -130,6 +141,7 @@ module.exports = class Simulation
   # A graph such as A->B<->C is invalid if B and C connect to each other and
   # neither are accumulators
   graphIsValid: ->
+    return true if @newIntegration
     _.each @nodes, (node) -> node._isValid = null
 
     # Recursive function. We go throw a node's non-independent ancestors, and if
