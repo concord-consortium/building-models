@@ -93,7 +93,10 @@ module.exports = class Node extends GraphPrimitive
     key: @key
 
   canEditValue: ->
-    @inLinks().length is 0 or @isAccumulator
+    true
+    # 2015-12-22 NP: We now always let user set initial value
+    # as part of the new simulation / integration engine
+    # @inLinks().length is 0 or @isAccumulator
 
   paletteItemIs: (paletteItem) ->
     paletteItem.uuid is @paletteItem

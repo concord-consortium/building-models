@@ -17,6 +17,9 @@ module.exports = React.createClass
   setCapNodeValues: (e) ->
     SimulationStore.actions.capNodeValues e.target.checked
 
+  setNewIntegration: (e) ->
+    SimulationStore.actions.setNewIntegration e.target.checked
+
   setDiagramOnly: (e) ->
     AppSettingsStore.actions.diagramOnly e.target.checked
 
@@ -26,7 +29,7 @@ module.exports = React.createClass
     (div {className: "simulation-panel"},
       (div {className: runPanelClasses},
         (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
-        (div {className: "row"},
+        (div {className: "row tall"},
           tr "~SIMULATION.STEP_UNIT"
           (Dropdown {
             isActionMenu: false
@@ -35,7 +38,7 @@ module.exports = React.createClass
             items: @state.timeUnitOptions
           })
         )
-        (div {className: "row"},
+        (div {className: "row tall"},
           tr "~SIMULATION.DURATION"
           (input {
             type: "number"
@@ -45,9 +48,9 @@ module.exports = React.createClass
             onChange: @setDuration
           })
         )
-        (div {className: "row", style: {margin: "6px 0 -19px 0"}},
-          (span {style: {marginTop: 2}}, "Speed")
-          (div {style: {margin: "-11px 0 3px 7px"}},
+        (div {className: "row"},
+          (span {}, "Speed")
+          (div {},
             (ValueSlider {
               min: 0
               max: 4
@@ -63,13 +66,17 @@ module.exports = React.createClass
             })
           )
         )
-        (div {className: "row short"},
+        (div {className: "row"},
           (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
           (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
         )
         (div {className: "row"},
           (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
           (label {}, tr '~SIMULATION.CAP_VALUES')
+        )
+        (div {className: "row"},
+          (input {type: 'checkbox', value: 'new-integration', checked: @state.newIntegration, onChange: @setNewIntegration})
+          (label {}, tr '~SIMULATION.NEW_INTEGRATION')
         )
       )
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")

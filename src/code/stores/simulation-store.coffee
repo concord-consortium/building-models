@@ -14,6 +14,7 @@ SimulationActions = Reflux.createActions(
     "setDuration"
     "setStepUnits"
     "setSpeed"
+    "setNewIntegration"
     "simulationStarted"
     "simulationFramesCreated"
     "simulationEnded"
@@ -46,6 +47,7 @@ SimulationStore   = Reflux.createStore
       modelIsRunnable: true         # no errors?
       modelIsRunning: false         # currently running?
       modelReadyToRun: true         # has been reset?
+      newIntegration: false
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -64,7 +66,7 @@ SimulationStore   = Reflux.createStore
 
     simulator = new Simulation
       nodes: @nodes
-      newIntegration: true
+      newIntegration: @settings.newIntegration
 
     @graphIsValid = simulator.graphIsValid()
     @notifyChange()
@@ -92,6 +94,10 @@ SimulationStore   = Reflux.createStore
     @settings.capNodeValues = cap
     @notifyChange()
 
+  onSetNewIntegration: (newInt) ->
+    @settings.newIntegration = newInt
+    @notifyChange()
+    
   onRunSimulation: ->
     if @settings.modelIsRunnable and @settings.modelReadyToRun
       @currentSimulation = new Simulation
@@ -99,6 +105,8 @@ SimulationStore   = Reflux.createStore
         duration: @settings.duration
         speed: @settings.speed
         capNodeValues: @settings.capNodeValues
+        newIntegration: @settings.newIntegration
+
 
         # Simulation events get triggered as Actions here, and are
         # available to anyone who listens to this store

@@ -134,7 +134,9 @@ module.exports =
   "~SIMULATION.STEP_UNIT": "Each calculation is 1"
   "~SIMULATION.DURATION": "Calculations per run"
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
+  "~SIMULATION.NEW_INTEGRATION": "New simulator"
   "~SIMULATION.DIAGRAM_ONLY": "diagram only tools"
+
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 
