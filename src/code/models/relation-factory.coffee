@@ -12,7 +12,7 @@ module.exports = class RelationFactory
     id: 1
     prefixIco: "dec"
     text: tr "~NODE-RELATION-EDIT.DECREASES"
-    formulaFrag: "-1 *"
+    formulaFrag: "maxIn -"
 
   @aboutTheSame:
     id: 0
@@ -42,7 +42,7 @@ module.exports = class RelationFactory
     id: 4
     text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
-    formulaFrag: "sqrt(in)"
+    formulaFrag: "1/in"
 
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
