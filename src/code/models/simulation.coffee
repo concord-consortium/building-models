@@ -21,7 +21,10 @@ IntegrationFunction = (t) ->
       return unless inV               # we simply ignore nodes with no previous value
       outV = @previousValue or @initialValue
       # TODO: Map input range (in.min –> in.max) to domain (out.min -> out.max)
-      nextValue = link.relation.evaluate(inV, outV, sourceNode.max)
+      # Here we set maxIn to zero because we want to substract inV when
+      # we are in a `(maxIn - inV)` formula for accumulators (decreases by)
+      # Need a better long-term solution for this.
+      nextValue = link.relation.evaluate(inV, outV, 0)
       value += nextValue
   else
     # include the nodes current value in the average
@@ -38,7 +41,7 @@ IntegrationFunction = (t) ->
       else
         inV = sourceNode.getCurrentValue(t)     # recursively ask incoming node for current value.
       outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV)
+      nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max)
       value += nextValue
     value = value / count
 
