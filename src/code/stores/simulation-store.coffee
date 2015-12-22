@@ -63,12 +63,7 @@ SimulationStore   = Reflux.createStore
 
   onGraphChanged: (data)->
     @nodes = data.nodes
-
-    simulator = new Simulation
-      nodes: @nodes
-      newIntegration: @settings.newIntegration
-
-    @graphIsValid = simulator.graphIsValid()
+    @_updateGraphValid()
     @notifyChange()
 
   onSetDuration: (n) ->
@@ -96,8 +91,9 @@ SimulationStore   = Reflux.createStore
 
   onSetNewIntegration: (newInt) ->
     @settings.newIntegration = newInt
+    @_updateGraphValid()
     @notifyChange()
-    
+
   onRunSimulation: ->
     if @settings.modelIsRunnable and @settings.modelReadyToRun
       @currentSimulation = new Simulation
@@ -137,6 +133,12 @@ SimulationStore   = Reflux.createStore
       @currentSimulation.stop()
     @settings.modelReadyToRun = true
     @notifyChange()
+
+  _updateGraphValid: ->
+    simulator = new Simulation
+      nodes: @nodes
+      newIntegration: @settings.newIntegration
+    @graphIsValid = simulator.graphIsValid()
 
   _checkModelIsRunnable: ->
     @settings.modelIsRunnable = @graphIsValid and @settings.duration > 0
