@@ -56585,7 +56585,7 @@ module.exports = Node = (function(superClass) {
   };
 
   Node.prototype.canEditValue = function() {
-    return this.inLinks().length === 0 || this.isAccumulator;
+    return true;
   };
 
   Node.prototype.paletteItemIs = function(paletteItem) {
@@ -56619,7 +56619,7 @@ module.exports = RelationFactory = (function() {
     id: 1,
     prefixIco: "dec",
     text: tr("~NODE-RELATION-EDIT.DECREASES"),
-    formulaFrag: "-1 *"
+    formulaFrag: "maxIn -"
   };
 
   RelationFactory.aboutTheSame = {
@@ -56654,7 +56654,7 @@ module.exports = RelationFactory = (function() {
     id: 4,
     text: tr("~NODE-RELATION-EDIT.LESS_AND_LESS"),
     postfixIco: "less-and-less",
-    formulaFrag: "sqrt(in)"
+    formulaFrag: "1/in"
   };
 
   RelationFactory.iconName = function(incdec, amount) {
@@ -56737,12 +56737,16 @@ module.exports = Relationship = (function() {
     return this.evaluate(1, 1);
   };
 
-  Relationship.prototype.evaluate = function(inV, outV) {
+  Relationship.prototype.evaluate = function(inV, outV, maxIn) {
     var error, result, scope;
+    if (maxIn == null) {
+      maxIn = 100;
+    }
     result = Relationship.errValue;
     scope = {
       "in": inV,
-      out: outV
+      out: outV,
+      maxIn: maxIn
     };
     try {
       result = math["eval"](this.formula, scope);
@@ -56947,7 +56951,7 @@ module.exports = SelectionManager = (function() {
 var IntegrationFunction, Simulation;
 
 IntegrationFunction = function(t) {
-  var count, links, nextValue, value;
+  var count, links, nextValue, outV, value;
   if (this.currentValue) {
     return this.currentValue;
   }
@@ -56969,21 +56973,31 @@ IntegrationFunction = function(t) {
           return;
         }
         outV = _this.previousValue || _this.initialValue;
-        nextValue = link.relation.evaluate(inV, outV);
+        nextValue = link.relation.evaluate(inV, outV, sourceNode.max);
         return value += nextValue;
       };
     })(this));
   } else {
+    if (this.newIntegration) {
+      count = count + 1;
+      outV = this.previousValue || this.initialValue;
+      value += outV;
+    }
     _.each(links, (function(_this) {
       return function(link) {
-        var inV, outV, sourceNode;
+        var inV, sourceNode;
         sourceNode = link.sourceNode;
-        inV = sourceNode.getCurrentValue(t);
+        if (_this.newIntegration) {
+          inV = sourceNode.previousValue || sourceNode.initialValue;
+        } else {
+          inV = sourceNode.getCurrentValue(t);
+        }
         outV = _this.previousValue || _this.initialValue;
         nextValue = link.relation.evaluate(inV, outV);
-        return value += nextValue / count;
+        return value += nextValue;
       };
     })(this));
+    value = value / count;
   }
   if (this.capNodeValues) {
     value = Math.max(this.min, Math.min(this.max, value));
@@ -56998,6 +57012,7 @@ module.exports = Simulation = (function() {
     this.nodes = this.opts.nodes || [];
     this.duration = this.opts.duration || 10;
     this.capNodeValues = this.opts.capNodeValues || false;
+    this.newIntegration = this.opts.newIntegration || false;
     this.decorateNodes();
     this.onStart = this.opts.onStart || function(nodeNames) {
       return log.info("simulation stated: " + nodeNames);
@@ -57063,6 +57078,7 @@ module.exports = Simulation = (function() {
     return _.each(this.nodes, (function(_this) {
       return function(node) {
         node.capNodeValues = _this.capNodeValues;
+        node.newIntegration = _this.newIntegration;
         return _this.addIntegrateMethodTo(node);
       };
     })(this));
@@ -57103,6 +57119,9 @@ module.exports = Simulation = (function() {
 
   Simulation.prototype.graphIsValid = function() {
     var i, isInALoop, j, len, len1, node, nodesSeenInSegment, ref, seen;
+    if (this.newIntegration) {
+      return true;
+    }
     _.each(this.nodes, function(node) {
       return node._isValid = null;
     });
@@ -58701,7 +58720,7 @@ TimeUnits = require('../utils/time-units');
 
 tr = require('../utils/translate');
 
-SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "setSpeed", "simulationStarted", "simulationFramesCreated", "simulationEnded", "capNodeValues"]);
+SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "setSpeed", "setNewIntegration", "simulationStarted", "simulationFramesCreated", "simulationEnded", "capNodeValues"]);
 
 SimulationStore = Reflux.createStore({
   listenables: [SimulationActions, AppSettingsActions, ImportActions, GraphActions],
@@ -58735,7 +58754,8 @@ SimulationStore = Reflux.createStore({
       capNodeValues: false,
       modelIsRunnable: true,
       modelIsRunning: false,
-      modelReadyToRun: true
+      modelReadyToRun: true,
+      newIntegration: false
     };
   },
   onDiagramOnly: function() {
@@ -58753,7 +58773,8 @@ SimulationStore = Reflux.createStore({
     var simulator;
     this.nodes = data.nodes;
     simulator = new Simulation({
-      nodes: this.nodes
+      nodes: this.nodes,
+      newIntegration: this.settings.newIntegration
     });
     this.graphIsValid = simulator.graphIsValid();
     return this.notifyChange();
@@ -58782,6 +58803,10 @@ SimulationStore = Reflux.createStore({
     this.settings.capNodeValues = cap;
     return this.notifyChange();
   },
+  onSetNewIntegration: function(newInt) {
+    this.settings.newIntegration = newInt;
+    return this.notifyChange();
+  },
   onRunSimulation: function() {
     var error;
     if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
@@ -58790,6 +58815,7 @@ SimulationStore = Reflux.createStore({
         duration: this.settings.duration,
         speed: this.settings.speed,
         capNodeValues: this.settings.capNodeValues,
+        newIntegration: this.settings.newIntegration,
         onStart: function(nodeNames) {
           return SimulationActions.simulationStarted(nodeNames);
         },
@@ -59649,6 +59675,7 @@ module.exports = {
   "~SIMULATION.STEP_UNIT": "Each calculation is 1",
   "~SIMULATION.DURATION": "Calculations per run",
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range",
+  "~SIMULATION.NEW_INTEGRATION": "New simulator",
   "~SIMULATION.DIAGRAM_ONLY": "diagram only tools",
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
@@ -63384,6 +63411,9 @@ module.exports = React.createClass({
   setCapNodeValues: function(e) {
     return SimulationStore.actions.capNodeValues(e.target.checked);
   },
+  setNewIntegration: function(e) {
+    return SimulationStore.actions.setNewIntegration(e.target.checked);
+  },
   setDiagramOnly: function(e) {
     return AppSettingsStore.actions.diagramOnly(e.target.checked);
   },
@@ -63400,14 +63430,14 @@ module.exports = React.createClass({
     }, div({
       className: "title"
     }, tr("~SIMULATION.SIMULATION_SETTINGS")), div({
-      className: "row"
+      className: "row tall"
     }, tr("~SIMULATION.STEP_UNIT"), Dropdown({
       isActionMenu: false,
       onSelect: SimulationStore.actions.setStepUnits,
       anchor: this.state.stepUnitsName,
       items: this.state.timeUnitOptions
     })), div({
-      className: "row"
+      className: "row tall"
     }, tr("~SIMULATION.DURATION"), input({
       type: "number",
       style: {
@@ -63417,19 +63447,8 @@ module.exports = React.createClass({
       min: "0",
       onChange: this.setDuration
     })), div({
-      className: "row",
-      style: {
-        margin: "6px 0 -19px 0"
-      }
-    }, span({
-      style: {
-        marginTop: 2
-      }
-    }, "Speed"), div({
-      style: {
-        margin: "-11px 0 3px 7px"
-      }
-    }, ValueSlider({
+      className: "row"
+    }, span({}, "Speed"), div({}, ValueSlider({
       min: 0,
       max: 4,
       value: this.state.speed,
@@ -63454,7 +63473,7 @@ module.exports = React.createClass({
       renderValueTooltip: false,
       onValueChange: SimulationStore.actions.setSpeed
     }))), div({
-      className: "row short"
+      className: "row"
     }, input({
       type: 'checkbox',
       value: 'show-mini',
@@ -63466,7 +63485,14 @@ module.exports = React.createClass({
       value: 'cap-values',
       checked: this.state.capNodeValues,
       onChange: this.setCapNodeValues
-    }), label({}, tr('~SIMULATION.CAP_VALUES')))), div({
+    }), label({}, tr('~SIMULATION.CAP_VALUES'))), div({
+      className: "row"
+    }, input({
+      type: 'checkbox',
+      value: 'new-integration',
+      checked: this.state.newIntegration,
+      onChange: this.setNewIntegration
+    }), label({}, tr('~SIMULATION.NEW_INTEGRATION')))), div({
       className: "title"
     }, tr("~SIMULATION.DIAGRAM_SETTINGS")), div({
       className: "row"
@@ -63673,7 +63699,8 @@ module.exports = SvgGraphView = React.createClass({
         var error, scope, y;
         scope = {
           "in": x,
-          out: 0
+          out: 0,
+          maxIn: rangex
         };
         try {
           y = math["eval"](_this.props.formula, scope);
