@@ -56973,7 +56973,7 @@ IntegrationFunction = function(t) {
           return;
         }
         outV = _this.previousValue || _this.initialValue;
-        nextValue = link.relation.evaluate(inV, outV, sourceNode.max);
+        nextValue = link.relation.evaluate(inV, outV, 0);
         return value += nextValue;
       };
     })(this));
@@ -56993,7 +56993,7 @@ IntegrationFunction = function(t) {
           inV = sourceNode.getCurrentValue(t);
         }
         outV = _this.previousValue || _this.initialValue;
-        nextValue = link.relation.evaluate(inV, outV);
+        nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max);
         return value += nextValue;
       };
     })(this));
@@ -58770,13 +58770,8 @@ SimulationStore = Reflux.createStore({
     return this.notifyChange();
   },
   onGraphChanged: function(data) {
-    var simulator;
     this.nodes = data.nodes;
-    simulator = new Simulation({
-      nodes: this.nodes,
-      newIntegration: this.settings.newIntegration
-    });
-    this.graphIsValid = simulator.graphIsValid();
+    this._updateGraphValid();
     return this.notifyChange();
   },
   onSetDuration: function(n) {
@@ -58805,6 +58800,7 @@ SimulationStore = Reflux.createStore({
   },
   onSetNewIntegration: function(newInt) {
     this.settings.newIntegration = newInt;
+    this._updateGraphValid();
     return this.notifyChange();
   },
   onRunSimulation: function() {
@@ -58848,6 +58844,14 @@ SimulationStore = Reflux.createStore({
     }
     this.settings.modelReadyToRun = true;
     return this.notifyChange();
+  },
+  _updateGraphValid: function() {
+    var simulator;
+    simulator = new Simulation({
+      nodes: this.nodes,
+      newIntegration: this.settings.newIntegration
+    });
+    return this.graphIsValid = simulator.graphIsValid();
   },
   _checkModelIsRunnable: function() {
     return this.settings.modelIsRunnable = this.graphIsValid && this.settings.duration > 0;
