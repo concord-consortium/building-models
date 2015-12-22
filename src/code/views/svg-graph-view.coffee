@@ -47,7 +47,7 @@ module.exports = SvgGraphView = React.createClass
     miny = Infinity
     maxy = -Infinity
     data = _.map data, (x) =>
-      scope = {in: x, out: 0}
+      scope = {in: x, out: 0, maxIn: rangex}
       try
         y = math.eval @props.formula, scope
         if y < miny then miny = y
