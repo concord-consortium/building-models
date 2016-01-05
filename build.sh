@@ -79,7 +79,7 @@ else
 fi
 
 # 6) Let rollbars know of our new staging deploy
-# https://rollbar.com/knowuh/Ivy deployment tracking
+# https://rollbar.com/knowuh/Sage deployment tracking
 ACCESS_TOKEN=daa3852e6c4f46008fc4043793a0ff38
 ENVIRONMENT=$DEPLOY_ENV
 LOCAL_USERNAME=`whoami`
