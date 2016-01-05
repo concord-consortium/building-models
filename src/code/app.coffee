@@ -5,17 +5,11 @@ GraphStore   = require './stores/graph-store'
 PaletteStore = require './stores/palette-store'
 HashParams   = require './utils/hash-parameters'
 
-getParameterByName = (name) ->
-  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
-  regex = new RegExp "[#&]#{name}=([^&]*)"
-  results = regex.exec(location.hash)
-  if results is null then "" else decodeURIComponent results[1].replace(/\+/g, ' ')
-
 appView = null
 
 # App API
-window.Ivy =
-  initApp: (wireframes=false) ->
+window.Sage =
+  initApp: ->
     opts =
       # Valid opts are:
       # graphStore: store for the node-link graph
