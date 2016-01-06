@@ -41,7 +41,7 @@ cloudfront_distribution_config:
     items:
       CNAME0: building-models-app.concord.org
       CNAME1: ivy.concord.org
-
+      CNAME2: sage.concord.org
 
 
 # cloudfront_invalidate_root: true
