@@ -169,7 +169,7 @@ SimulationStore   = Reflux.createStore
     stepUnits:      @settings.stepUnits
     speed:          @settings.speed
     capNodeValues:  @settings.capNodeValues
-
+    newIntegration: @settings.newIntegration
 
 mixin =
   getInitialState: ->
