@@ -1,14 +1,8 @@
 CodapConnect = require '../models/codap-connect'
-
-codapActions = Reflux.createActions(
-  [
-    "codapLoaded"
-    "hideUndoRedo"
-  ]
-)
+CodapActions = require '../actions/codap-actions'
 
 codapStore   = Reflux.createStore
-  listenables: [codapActions]
+  listenables: [CodapActions]
 
   init: ->
     codapConnect = CodapConnect.instance 'building-models'
@@ -43,6 +37,6 @@ mixin =
       hideUndoRedo:   status.hideUndoRedo
 
 module.exports =
-  actions: codapActions
+  actions: CodapActions
   store: codapStore
   mixin: mixin

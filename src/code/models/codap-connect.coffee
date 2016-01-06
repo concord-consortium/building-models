@@ -1,6 +1,6 @@
 IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
 tr = require '../utils/translate'
-CodapStore = null
+CodapActions = require '../actions/codap-actions'
 module.exports = class CodapConnect
 
   name: 'Building Models Tool'
@@ -155,7 +155,7 @@ module.exports = class CodapConnect
 
       when 'externalUndoAvailable'
         log.info 'Received externalUndoAvailable request from CODAP.'
-        CodapStore.actions.hideUndoRedo()
+        CodapActions.hideUndoRedo()
 
       when 'undoAction'
         log.info 'Received undoAction request from CODAP.'
@@ -187,8 +187,7 @@ module.exports = class CodapConnect
 
   initGameHandler: (result) ->
     if result and result.success
-      CodapStore = require "../stores/codap-store"
-      CodapStore.actions.codapLoaded()
+      CodapActions.codapLoaded()
 
   #
   # Requests a CODAP action, if the Building Models tool is configured to reside
