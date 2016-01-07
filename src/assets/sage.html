@@ -14,7 +14,7 @@
     <script>
     if(self != top) {
       // redirect to non CFM wrapped version if we are in an iframe.
-      window.location = window.location.toString().replace("sage","index");
+      window.location.pathname = "index.html"
     }
       var buildInfo = "__BUILD_INFO__".split(" ");
       var buildDate = buildInfo[0];
