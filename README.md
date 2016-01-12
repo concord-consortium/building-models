@@ -30,6 +30,7 @@ the compiled artifacts, which is less than ideal.
     * npm modules needed for gulp plugins &etc. : `npm install`.
 
 * Run:
+    * type `ulimit -n 2560`  (this allows node to open)
     * `gulp default` — watches the project sources in `./src/` and builds artifacts into `dev`.
     * `cd dev && live-server`– starts a live webserver on localhost:8080 with autorefreshing.
     * Fiddle around with files in ./src/, watch live changes in browser.
