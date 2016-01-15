@@ -47,8 +47,13 @@
     else {
       Sage.initApp(false);
 
-      var cfm = parent && parent.CloudFileManager ? parent.CloudFileManager : null,
-          client;
+      var cfm, client;
+      try {
+        cfm = parent && parent.SageCloundFileManager ? parent.SageCloundFileManager : null;
+      }
+      catch(e) {
+        Console.log("Error connecting to CFM: " + e);
+      }
 
       if (cfm) {
         cfm.clientConnect(function (event) {
