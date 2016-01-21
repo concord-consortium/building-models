@@ -3,6 +3,8 @@ tr = require "../utils/translate"
 
 SquareImage = React.createFactory require "./square-image-view"
 SliderView  = React.createFactory require "./value-slider-view"
+CodapConnect = require '../models/codap-connect'
+DEFAULT_CONTEXT_NAME = 'building-models'
 
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
@@ -173,6 +175,10 @@ module.exports = NodeView = React.createClass
     else
       null
 
+  handleGraphClick: (attributeName) ->
+    codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
+    codapConnect.createGraph(attributeName)
+
   nodeClasses: ->
     classes = ['elm']
     if @props.selected
@@ -197,7 +203,11 @@ module.exports = NodeView = React.createClass
         if @props.selected
           (div {className: "actions"},
             (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
-            (div {className: "graph-source action-circle icon-codap-graph", "data-node-key": @props.nodeKey})
+            (div {
+              className: "graph-source action-circle icon-codap-graph",
+              "data-node-key": @props.nodeKey,
+              onClick: (=> @handleGraphClick @props.data.title)
+            })
           )
 
         (div {className: @topClasses(), "data-node-key": @props.nodeKey},

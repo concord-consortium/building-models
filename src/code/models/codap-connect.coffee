@@ -70,7 +70,7 @@ module.exports = class CodapConnect
     _.each nodeNames, (name) ->
       sampleDataAttrs.push
         name: name
-        type: 'numeric'
+        type: 'qualitative'
 
     @codapPhone.call
       action: 'createCollection'
@@ -133,6 +133,18 @@ module.exports = class CodapConnect
       action: 'undoableActionPerformed'
       args: {
         logMessage: logMessage
+      }
+
+  createGraph: (yAttributeName)->
+    @codapPhone.call
+      action: 'createComponent'
+      args: {
+        type: 'DG.GraphView',
+        xAttributeName: 'time',
+        yAttributeName: yAttributeName,
+        size: { width: 242, height: 221 },
+        position: 'bottom'
+        log: false
       }
 
   codapRequestHandler: (cmd, callback) =>
