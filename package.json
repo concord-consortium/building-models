@@ -22,7 +22,7 @@
     "uuid": "^2.0.1"
   },
   "devDependencies": {
-    "execSync": "^1.0.2",
+    "sync-exec": "~0.6.x",
     "browserify": "^9.0.3",
     "chai": "^2.0.0",
     "sinon": "^1.12.2",

@@ -1,4 +1,4 @@
-var execSync = require('execSync').exec,
+var execSync = require('sync-exec'),
     buildDate = execSync('date +"%Y-%m-%d"').stdout,
     gitTags   = execSync('git describe --tags').stdout,
     gitLog = execSync('git log -1 --date=short --pretty=format:"%cd %h %ce"').stdout;
