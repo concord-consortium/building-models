@@ -63,6 +63,7 @@ module.exports = class CodapConnect
 
   _openNewCase: (nodeNames) ->
     @currentCaseID = null
+    nodes = @graphStore.getNodes()
 
     # First column definition is the time index
     timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
@@ -75,9 +76,11 @@ module.exports = class CodapConnect
 
     # Append node names to column descriptions.
     _.each nodeNames, (name) ->
+      node = (nodes.filter (n) -> n.title is name)[0]
+      type = if node.valueDefinedSemiQuantitatively then 'qualitative' else 'numeric'
       sampleDataAttrs.push
         name: name
-        type: 'qualitative'
+        type: type
 
     @codapPhone.call
       action: 'createCollection'
