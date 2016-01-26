@@ -1,6 +1,8 @@
 IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
 tr = require '../utils/translate'
-CodapActions = require '../actions/codap-actions'
+CodapActions    = require '../actions/codap-actions'
+SimulationStore = require '../stores/simulation-store'
+TimeUnits       = require '../utils/time-units'
 module.exports = class CodapConnect
 
   name: 'Building Models Tool'
@@ -24,7 +26,6 @@ module.exports = class CodapConnect
     GraphStore = require '../stores/graph-store'
     @graphStore = GraphStore.store
 
-    SimulationStore = require '../stores/simulation-store'
     SimulationStore.actions.simulationStarted.listen       @_openNewCase.bind(@)
     SimulationStore.actions.simulationFramesCreated.listen @_sendSimulationData.bind(@)
 
@@ -59,9 +60,10 @@ module.exports = class CodapConnect
     @currentCaseID = null
 
     # First column definition is the time index
+    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
     sampleDataAttrs = [
       {
-        name: "time"
+        name: timeUnit
         type: "numeric"
       }
     ]
