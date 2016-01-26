@@ -45,6 +45,11 @@ module.exports = class CodapConnect
             name: 'Simulation'
             attrs: [
               {
+                name: tr '~CODAP.SIMULATION.RUN'
+                formula: 'caseIndex'
+                type: 'nominal'
+              }
+              {
                 name: tr '~CODAP.SIMULATION.STEPS'
                 type: 'numeric'
                 description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
@@ -84,7 +89,7 @@ module.exports = class CodapConnect
       action: 'openCase'
       args: {
         collection: 'Simulation',
-        values: [0]
+        values: [null, 0]
       }
     }, (result) =>
       if result?.success
@@ -122,7 +127,7 @@ module.exports = class CodapConnect
       args: {
         collection: 'Simulation',
         caseID: @currentCaseID
-        values: [@stepsInCurrentCase]
+        values: [null, @stepsInCurrentCase]
       }
 
   _flushQueue: ->
