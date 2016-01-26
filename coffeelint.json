@@ -6,6 +6,6 @@
         "level": "warn"
     },
     "prefer_english_operator": {
-        "level": "warn"
+        "level": "ignore"
     }
 }

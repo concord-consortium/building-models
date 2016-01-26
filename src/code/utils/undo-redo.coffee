@@ -143,7 +143,7 @@ class Command
 
   _call: (method, debug, via) ->
     if debug
-      log.info("Command: #{@name}.#{method}()#{if via then " via #{via}" else ''}")
+      log.info("Command: #{@name}.#{method}()" + (if via then " via #{via}" else ''))
     if @methods.hasOwnProperty method
       @methods[method]()
     else
