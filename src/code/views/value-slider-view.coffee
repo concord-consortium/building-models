@@ -1,4 +1,5 @@
 {div, i, label, span, input, svg, circle, path, rect} = React.DOM
+tr = require "../utils/translate"
 
 ValueSlider = React.createClass
   displayName: 'SVGSlider'
@@ -19,6 +20,7 @@ ValueSlider = React.createClass
     renderValueTooltip: true
     minLabel: null
     maxLabel: null
+    displaySemiQuant: false
     onValueChange: (v) ->
       log.info "new value #{v}"
     onRangeChange: (r) ->
@@ -146,8 +148,10 @@ ValueSlider = React.createClass
 
   renderLegend: ->
     (div {className:"legend"},
-      @props.minLabel or @renderEditableProperty "min"
-      @props.maxLabel or @renderEditableProperty "max"
+      @props.minLabel or
+        if @props.displaySemiQuant then tr "~NODE-VALUE-EDIT.LOW" else @renderEditableProperty "min"
+      @props.maxLabel or
+        if @props.displaySemiQuant then tr "~NODE-VALUE-EDIT.HIGH" else @renderEditableProperty "max"
     )
 
   renderTicks: (center, circleRadius) ->
