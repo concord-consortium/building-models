@@ -32,12 +32,12 @@ the compiled artifacts, which is less than ideal.
 * Run:
     * type `ulimit -n 2560`  (this allows node to open)
     * `gulp default` — watches the project sources in `./src/` and builds artifacts into `dev`.
-    * `cd dev && live-server`– starts a live webserver on localhost:8080 with autorefreshing.
+    * `live-server dev`– starts a live webserver on localhost:8080 with autorefreshing.
     * Fiddle around with files in ./src/, watch live changes in browser.
 
 * Test:
     * `gulp default` — watches the project sources in `./src/` and builds artifacts into `dev`.
-    * `./node_modules/mocha/bin/mocha -w` to run mocha tests (located in `./test/`):   
+    * `./node_modules/mocha/bin/mocha -w` to run mocha tests (located in `./test/`):
 
 * Learn:
     * `./dev/` dir is fully auto-generated and served by HTTP server.  Write your code in `./src/` dir.
