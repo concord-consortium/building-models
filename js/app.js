@@ -65947,7 +65947,7 @@ module.exports = NodeView = React.createClass({
       "data-node-key": this.props.nodeKey
     }, this.props.simulating ? this.props.selected ? div({
       className: 'centered-block'
-    }, this.renderValue(), this.renderSliderView()) : this.renderSliderView() : void 0)));
+    }, !this.props.data.valueDefinedSemiQuantitatively ? this.renderValue() : void 0, this.renderSliderView()) : this.renderSliderView() : void 0)));
   }
 });
 
