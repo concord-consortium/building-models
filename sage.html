@@ -14,9 +14,9 @@
     <script>
     if(self != top) {
       // redirect to non CFM wrapped version if we are in an iframe.
-      window.location.pathname = "index.html"
+      window.location = window.location.toString().replace("sage","index");
     }
-      var buildInfo = "2016-01-27 1.0.0 39125e6 sfentress@concord.org".split(" ");
+      var buildInfo = "2016-01-27 1.0.0 b917225 sfentress@concord.org".split(" ");
       var buildDate = buildInfo[0];
       var tags      = buildInfo[1];
       var commit    = buildInfo[2];
