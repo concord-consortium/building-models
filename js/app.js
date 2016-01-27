@@ -60164,7 +60164,9 @@ module.exports = Simulation = (function() {
 
   Simulation.prototype.graphIsValid = function() {
     var i, isInALoop, j, len, len1, node, nodesSeenInSegment, ref, seen;
-    return true;
+    if (this.newIntegration) {
+      return true;
+    }
     _.each(this.nodes, function(node) {
       return node._isValid = null;
     });
@@ -67115,13 +67117,20 @@ ValueSlider = React.createClass({
       "top": top + "px",
       "left": centerOfDiv
     };
+    if (!this.props.displaySemiQuant) {
+      label = this.renderNumber();
+    } else {
+      label = null;
+    }
     return div({}, div({
       className: "value-slider-handle",
       style: style,
       ref: "handle"
     }, i({
       className: "icon-codap-smallSliderLines"
-    }), this.renderNumber()));
+    }), {
+      label: label
+    }));
   },
   renderEditableProperty: function(property) {
     var classNames, isEditable, keyDown, swapState;
