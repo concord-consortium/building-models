@@ -60032,11 +60032,7 @@ IntegrationFunction = function(t) {
       return function(link) {
         var inV, sourceNode;
         sourceNode = link.sourceNode;
-        if (_this.newIntegration) {
-          inV = sourceNode.previousValue || sourceNode.initialValue;
-        } else {
-          inV = sourceNode.getCurrentValue(t);
-        }
+        inV = sourceNode.previousValue != null ? sourceNode.previousValue : sourceNode.initialValue;
         outV = _this.previousValue || _this.initialValue;
         nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max);
         return value += nextValue;
@@ -60163,46 +60159,6 @@ module.exports = Simulation = (function() {
   };
 
   Simulation.prototype.graphIsValid = function() {
-    var i, isInALoop, j, len, len1, node, nodesSeenInSegment, ref, seen;
-    if (this.newIntegration) {
-      return true;
-    }
-    _.each(this.nodes, function(node) {
-      return node._isValid = null;
-    });
-    isInALoop = function(node) {
-      var i, j, len, len1, link, linksIn, seen;
-      linksIn = node.inLinks();
-      if (node._isValid || node.isAccumulator || linksIn.length === 0) {
-        return false;
-      }
-      for (i = 0, len = nodesSeenInSegment.length; i < len; i++) {
-        seen = nodesSeenInSegment[i];
-        if (seen === node) {
-          return true;
-        }
-      }
-      nodesSeenInSegment.push(node);
-      for (j = 0, len1 = linksIn.length; j < len1; j++) {
-        link = linksIn[j];
-        if (isInALoop(link.sourceNode)) {
-          return true;
-        }
-      }
-      return false;
-    };
-    ref = this.nodes;
-    for (i = 0, len = ref.length; i < len; i++) {
-      node = ref[i];
-      nodesSeenInSegment = [];
-      if (isInALoop(node)) {
-        return false;
-      }
-      for (j = 0, len1 = nodesSeenInSegment.length; j < len1; j++) {
-        seen = nodesSeenInSegment[j];
-        seen._isValid = true;
-      }
-    }
     return true;
   };
 
