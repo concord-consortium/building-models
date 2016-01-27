@@ -230,7 +230,8 @@ module.exports = NodeView = React.createClass
           if @props.simulating
             if @props.selected
               (div {className: 'centered-block'},
-                @renderValue()
+                if not @props.data.valueDefinedSemiQuantitatively
+                  @renderValue()
                 @renderSliderView()
               )
             else
