@@ -42,7 +42,11 @@
   <script type="text/javascript" charset="utf-8">
     if(self == top) {
       // redirect to CFM wrapper if we have none
-      window.location = window.location.toString().replace("index","sage");
+      if (~window.location.href.indexOf("index")) {
+        window.location = window.location.toString().replace("index","sage");
+      } else {
+        window.location = window.location.href + "sage.html";
+      }
     }
     else {
       Sage.initApp(false);
