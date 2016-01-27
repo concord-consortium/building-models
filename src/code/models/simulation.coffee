@@ -36,10 +36,7 @@ IntegrationFunction = (t) ->
 
     _.each links, (link) =>
       sourceNode = link.sourceNode
-      if @newIntegration
-        inV = sourceNode.previousValue || sourceNode.initialValue
-      else
-        inV = sourceNode.getCurrentValue(t)     # recursively ask incoming node for current value.
+      inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
       outV = @previousValue or @initialValue
       nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max)
       value += nextValue
@@ -140,41 +137,6 @@ module.exports = class Simulation
 
     @framesBundle.push frame
 
-  # Tests that the graph contains no loops consisting of dependent variables.
-  # A graph such as A->B<->C is invalid if B and C connect to each other and
-  # neither are accumulators
-  graphIsValid: ->
-    return true if @newIntegration
-    _.each @nodes, (node) -> node._isValid = null
-
-    # Recursive function. We go throw a node's non-independent ancestors, and if
-    # we find ourselves again, or if any of our ancestors find themselves again,
-    # we have a loop.
-    isInALoop = (node) ->
-      linksIn = node.inLinks()
-      # quick exit if we're not a dependent variable, or if we've already been checked
-      return false if node._isValid or node.isAccumulator or linksIn.length is 0
-      for seen in nodesSeenInSegment
-        if seen is node
-          return true
-
-      nodesSeenInSegment.push node
-
-      for link in linksIn
-        return true if isInALoop link.sourceNode
-
-      return false
-
-    for node in @nodes
-      nodesSeenInSegment = []
-      return false if isInALoop node
-      # if node was not in a loop, none of its ancestors were either,
-      # so mark all nodes we've seen as valid for speed
-      for seen in nodesSeenInSegment
-        seen._isValid = true
-
-    return true
-
   stop: ->
     @stopRun = true
 
@@ -184,9 +146,6 @@ module.exports = class Simulation
     time = 0
     @framesBundle = []
     _.each @nodes, (node) => @initializeValues node
-    if not @graphIsValid()
-      # We should normally not get here, as callers ought to check graphIsValid themselves first
-      throw new Error("Graph not valid")
 
     nodeNames = _.pluck @nodes, 'title'
     @onStart(nodeNames)

@@ -33,7 +33,6 @@ SimulationStore   = Reflux.createStore
     options = ({name: TimeUnits.toString(unit, false), unit: unit} for unit in TimeUnits.units)
 
     @nodes = []
-    @graphIsValid = true
     @currentSimulation = null
 
     @settings =
@@ -63,7 +62,6 @@ SimulationStore   = Reflux.createStore
 
   onGraphChanged: (data)->
     @nodes = data.nodes
-    @_updateGraphValid()
     @notifyChange()
 
   onSetDuration: (n) ->
@@ -91,7 +89,6 @@ SimulationStore   = Reflux.createStore
 
   onSetNewIntegration: (newInt) ->
     @settings.newIntegration = newInt
-    @_updateGraphValid()
     @notifyChange()
 
   onRunSimulation: ->
@@ -134,27 +131,14 @@ SimulationStore   = Reflux.createStore
     @settings.modelReadyToRun = true
     @notifyChange()
 
-  _updateGraphValid: ->
-    simulator = new Simulation
-      nodes: @nodes
-      newIntegration: @settings.newIntegration
-    @graphIsValid = simulator.graphIsValid()
-
   _checkModelIsRunnable: ->
-    @settings.modelIsRunnable = @graphIsValid and @settings.duration > 0
+    @settings.modelIsRunnable = @settings.duration > 0
 
   _getErrorMessage: ->
-    multipleErrors = not (@graphIsValid) and not (@settings.duration > 0)
-    message = if multipleErrors
-      "Your model could not be run due to the following reasons:"
-    else ""
-    bullet = if multipleErrors then "\n\n• " else ""
-
-    if not (@graphIsValid)
-      message += bullet + tr "~DOCUMENT.ACTIONS.GRAPH_INVALID"
     if not (@settings.duration > 0)
-      message += bullet + tr "~DOCUMENT.ACTIONS.DURATION_INVALID"
-    message
+      tr "~DOCUMENT.ACTIONS.DURATION_INVALID"
+    else
+      ""
 
   notifyChange: ->
     @_checkModelIsRunnable()

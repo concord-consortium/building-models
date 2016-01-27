@@ -124,9 +124,6 @@ module.exports =
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode"
   "~DOCUMENT.ACTIONS.UNDO": "Undo"
   "~DOCUMENT.ACTIONS.REDO": "Redo"
-  "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n
-                                      Either remove a link to break the loop, or make one
-                                      of the variables a collector."
   "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation."
 
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
