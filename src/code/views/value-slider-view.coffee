@@ -107,10 +107,13 @@ ValueSlider = React.createClass
       "font-size": "#{@props.handleSize / 2}px"
       "top": "#{top}px"
       "left": centerOfDiv # margin will take care of the rest?
+    if not @props.displaySemiQuant
+      label = @renderNumber()
+    else label = null
     (div {},
       (div {className: "value-slider-handle", style: style, ref: "handle"},
         (i {className: "icon-codap-smallSliderLines"})
-        @renderNumber()
+        { label }
       )
     )
 
