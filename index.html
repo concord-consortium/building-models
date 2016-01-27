@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="build-info" content="2016-01-27 1.0.0 b917225 sfentress@concord.org" >
+  <meta name="build-info" content="2016-01-27 1.0.0 c81d60e sfentress@concord.org" >
   <meta name="environment" content="staging" >
   <script>
     var _rollbarConfig = {
@@ -16,7 +16,7 @@
             client: {
                  javascript: {
                    source_map_enabled: true,
-                   code_version: "2016-01-27 1.0.0 b917225 sfentress@concord.org",
+                   code_version: "2016-01-27 1.0.0 c81d60e sfentress@concord.org",
                    // Optionally have Rollbar guess which frames the error was thrown from
                    // when the browser does not provide line and column numbers.
                    guess_uncaught_frames: true
@@ -42,7 +42,11 @@
   <script type="text/javascript" charset="utf-8">
     if(self == top) {
       // redirect to CFM wrapper if we have none
-      window.location = window.location.toString().replace("index","sage");
+      if (~window.location.href.indexOf("index")) {
+        window.location = window.location.toString().replace("index","sage");
+      } else {
+        window.location = window.location.href + "sage.html";
+      }
     }
     else {
       Sage.initApp(false);
