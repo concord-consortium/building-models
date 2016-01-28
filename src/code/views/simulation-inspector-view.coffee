@@ -44,7 +44,6 @@ module.exports = React.createClass
             type: "number"
             style: {width: "#{Math.max 4, (@state.duration.toString().length+1)}em"}
             value: @state.duration
-            min: "0"
             onChange: @setDuration
           })
         )

@@ -43,7 +43,6 @@ SimulationStore   = Reflux.createStore
       timeUnitOptions: options
       speed: 4
       capNodeValues: false
-      modelIsRunnable: true         # no errors?
       modelIsRunning: false         # currently running?
       modelReadyToRun: true         # has been reset?
       newIntegration: false
@@ -65,7 +64,7 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onSetDuration: (n) ->
-    @settings.duration = Math.min n, 5000
+    @settings.duration = Math.max 1, Math.min n, 5000
     @notifyChange()
 
   onSetStepUnits: (unit) ->
@@ -92,7 +91,7 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onRunSimulation: ->
-    if @settings.modelIsRunnable and @settings.modelReadyToRun
+    if @settings.modelReadyToRun
       @currentSimulation = new Simulation
         nodes: @nodes
         duration: @settings.duration
@@ -111,9 +110,6 @@ SimulationStore   = Reflux.createStore
           SimulationActions.simulationEnded()
 
       @currentSimulation.run()
-    else if not @settings.modelIsRunnable
-      error = @_getErrorMessage()
-      alert error
 
   onSimulationStarted: ->
     @settings.modelIsRunning = true
@@ -131,17 +127,7 @@ SimulationStore   = Reflux.createStore
     @settings.modelReadyToRun = true
     @notifyChange()
 
-  _checkModelIsRunnable: ->
-    @settings.modelIsRunnable = @settings.duration > 0
-
-  _getErrorMessage: ->
-    if not (@settings.duration > 0)
-      tr "~DOCUMENT.ACTIONS.DURATION_INVALID"
-    else
-      ""
-
   notifyChange: ->
-    @_checkModelIsRunnable()
     @trigger _.clone @settings
 
   importSettings: (data) ->

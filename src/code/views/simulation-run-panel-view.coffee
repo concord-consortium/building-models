@@ -26,7 +26,6 @@ module.exports = React.createClass
     if @state.simulationPanelExpanded then wrapperClasses += " expanded"
 
     runButtonClasses = "button"
-    if not @state.modelIsRunnable then runButtonClasses += " disabled error"
     if not @state.modelReadyToRun then runButtonClasses += " disabled"
 
     resetButtonClasses = "button"
