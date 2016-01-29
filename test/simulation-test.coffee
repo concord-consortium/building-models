@@ -89,16 +89,16 @@ describe "Simulation", ->
     describe "for other scenarios", ->
       scenarios = [
         # cascade independent and dependent variables (A->B->C)
-        {A: 50, B: null, C: null, AB: "1 * in", BC: "0.1 * in",
+        {A: 50, B: 40, C: 30, AB: "1 * in", BC: "0.1 * in",
         results: [
-            [50, 50, 5]
+            [50, 50, 4]
             [50, 50, 5]
         ]}
 
         # cascade independent and dependent variables with negative relationship (A->B->C)
-        {A: 50, B: null, C: null, AB: "0.1 * in", BC: "-1 * in",
+        {A: 50, B: 40, C: 30, AB: "0.1 * in", BC: "-1 * in",
         results: [
-            [50, 5, -5]
+            [50, 5, -40]
             [50, 5, -5]
         ]}
 
@@ -110,11 +110,11 @@ describe "Simulation", ->
         ]}
 
         # basic collector with feedback (A<->[B])
-        {A:null, B:"50+", AB: "1 * in", BA: "1 * in",
+        {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
           [50, 50]
-          [100, 100]
-          [200, 200]
+          [50, 100]
+          [100, 150]
         ]}
 
         # three-node graph (>-) with averaging
@@ -146,15 +146,6 @@ describe "Simulation", ->
             [10, 1, 18]
         ]}
 
-        # Stocks and flow example
-        {A: 50, B: "0+", C: null, D: "0+", E: null
-        AB: "1 * in", BC: "1 * in", CB: "-1 * in", CD: "1 * in", DE: "1 * in", ED: "-1 * in"
-        results: [
-            [50, 0, 0, 0, 0]
-            [50, 50, 50, 0, 0]
-            [50, 50, 50, 50, 50]
-        ]}
-
         # *** Tests for graphs with bounded ranges ***
         # Note all nodes have min:0 and max:100 by default
 
@@ -177,33 +168,16 @@ describe "Simulation", ->
         ]}
 
         # basic independent and dependent nodes (A->B)
-        {A:120, B:null, AB: "1 * in",
+        {A:120, B:0, AB: "1 * in",
         cap: true
         results: [
           [120, 100]
         ]}
 
-        # *** Tests for invalid graphs (should all throw errors) ***
-
-        # two-node graph in a loop with no accumulators (A<->B)
-        {A: null, B: null, AB: "1 * in", BA: "1 * in",
-        results: [false]
-        }
-
-        # three-node graph in a circle with no accumulators (A->B->C->A)
-        {A: null, B: null, C: null, AB: "1 * in", BC: "1 * in", CA: "1 * in",
-        results: [false]
-        }
-
-        # three-node graph with two non-accumulators in a loop ([A]->B<->C)
-        {A: "50+", B: null, C: null, AB: "1 * in", BC: "1 * in", CB: "1 * in",
-        results: [false]
-        }
-
         # TODO: Test asserting that loops are valid in newIntegration method.
-        # But see below because examples 17, 18, & 19 cover this.
+        # But see below because examples 13, 14, & 15 cover this.
 
-        # 15: Simple a->b test of new 'inertial' integration
+        # 11: Simple a->b test of new 'inertial' integration
         {A:100, B:95, AB: "1 * in",
         cap: false
         newInt: true
@@ -215,7 +189,7 @@ describe "Simulation", ->
           [100, 99.84375]
         ]}
 
-        # 16: A->B with Negative link
+        # 12: A->B with Negative link
         {A:100, B:95, AB: "(maxIn - in)"
         cap: false
         newInt: true
@@ -226,7 +200,7 @@ describe "Simulation", ->
           [100, 5.9375]
         ]}
 
-        # 17: A- ⇄B with Positive / Positive feedback
+        # 13: A- ⇄B with Positive / Positive feedback
         {A:100, B:50, AB: "1 * in", BA: "1 * in"
         cap: false
         newInt: true
@@ -235,7 +209,7 @@ describe "Simulation", ->
           [75, 75]
         ]}
 
-        # 18: A ⇄ B with Postive / Negative feedback
+        # 14: A ⇄ B with Postive / Negative feedback
         {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
         cap: false
         newInt: true
@@ -248,7 +222,7 @@ describe "Simulation", ->
           [56.25, 43.75]
         ]}
 
-        # 18: A ⇄ B with Postive / Negative feedback
+        # 15: A ⇄ B with Postive / Negative feedback
         {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
         cap: false
         newInt: true
@@ -261,7 +235,7 @@ describe "Simulation", ->
           [56.25, 43.75]
         ]}
 
-        # 19: A -> B ->C -> A with Postive /  Positive Negative feedback
+        # 16: A -> B ->C -> A with Postive /  Positive Negative feedback
         {A:100, B:95, C:0, AB: "1 * in", BC: "1 * in", CA: "(maxIn -in)"
         cap: false
         newInt: true
