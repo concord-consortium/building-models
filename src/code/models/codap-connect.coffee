@@ -146,11 +146,12 @@ module.exports = class CodapConnect
       }
 
   createGraph: (yAttributeName)->
+    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
     @codapPhone.call
       action: 'createComponent'
       args: {
         type: 'DG.GraphView',
-        xAttributeName: 'time',
+        xAttributeName: timeUnit,
         yAttributeName: yAttributeName,
         size: { width: 242, height: 221 },
         position: 'bottom'
