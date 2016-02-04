@@ -337,15 +337,15 @@ describe "The SimulationStore, with a network in the GraphStore", ->
       calledback = false
       SimulationActions.simulationFramesCreated.listen (data) ->
         if not calledback
-          data.length.should.equal 10
+          data.length.should.equal 11
 
           frame0 = data[0]
-          frame0.time.should.equal 1
-          frame0.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
+          frame0.time.should.equal 0
+          frame0.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 0 } ]
 
-          frame9 = data[9]
-          frame9.time.should.equal 10
-          frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 10 } ]
+          frame10 = data[10]
+          frame10.time.should.equal 10
+          frame10.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 10 } ]
 
           done()
 
@@ -368,7 +368,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
         totalFrames += data.length
 
       SimulationActions.simulationEnded.listen ->
-        expect(totalFrames).to.equal 3
+        expect(totalFrames).to.equal 4
         expect(totalCallbacks).to.be.above 1
         done()
 
