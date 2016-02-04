@@ -3,6 +3,7 @@ tr = require '../utils/translate'
 CodapActions    = require '../actions/codap-actions'
 SimulationStore = require '../stores/simulation-store'
 TimeUnits       = require '../utils/time-units'
+
 module.exports = class CodapConnect
 
   name: 'Building Models Tool'
@@ -10,6 +11,8 @@ module.exports = class CodapConnect
   codapPhone: null
 
   currentCaseID: null
+
+  standaloneMode: false
 
   stepsInCurrentCase: 0
 
@@ -101,6 +104,8 @@ module.exports = class CodapConnect
         @currentCaseID = result.caseID
         @stepsInCurrentCase = 0
         @_flushQueue()
+        if not @standaloneMode
+          @createTable()
       else
         log.info "CODAP returned an error on 'openCase'"
 
@@ -168,6 +173,14 @@ module.exports = class CodapConnect
         log: false
       }
 
+  createTable: (yAttributeName)->
+    @codapPhone.call
+      action: 'createComponent'
+      args: {
+        type: 'DG.TableView',
+        log: false
+      }
+
   codapRequestHandler: (cmd, callback) =>
     operation = cmd.operation
     args = cmd.args
@@ -192,6 +205,7 @@ module.exports = class CodapConnect
 
       when 'standaloneUndoModeAvailable'
         log.info 'Received standaloneUndoModeAvailable request from CODAP.'
+        @standaloneMode = true
         @graphStore.setCodapStandaloneMode true
 
       when 'undoAction'
