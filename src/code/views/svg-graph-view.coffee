@@ -21,7 +21,7 @@ module.exports = SvgGraphView = React.createClass
   # We want to know because it informs how we scale the
   # graph axis
   isExponential: ->
-    @props.formula.indexOf("^") > -1 or @props.formula.indexOf("sqrt")  > -1
+    @props.formula.indexOf("^") > -1 or @props.formula.indexOf("1/in")  > -1
 
   invertPoint: (point) ->
     {x: point.x, y: @props.height - point.y}
@@ -43,7 +43,8 @@ module.exports = SvgGraphView = React.createClass
 
   getPathPoints: ->
     rangex = 20
-    data = _.range(0,rangex)
+    x0 = if @isExponential() then 1 else 0
+    data = _.range(x0,rangex)
     miny = Infinity
     maxy = -Infinity
     data = _.map data, (x) =>
@@ -67,6 +68,8 @@ module.exports = SvgGraphView = React.createClass
       x = x / rangex
       y = y / scaley
       {x: x, y: y}
+    console.log(@props.formula)
+    console.log(data)
     data
 
   renderXLabel: ->
