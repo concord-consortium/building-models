@@ -130,7 +130,7 @@ module.exports = class Simulation
   generateFrame: (time) ->
     nodes = _.map @nodes, (node) ->
       title: node.title
-      value: node.currentValue
+      value: if time is 0 then node.initialValue else node.currentValue
     frame =
       time: time
       nodes: nodes
@@ -149,6 +149,9 @@ module.exports = class Simulation
 
     nodeNames = _.pluck @nodes, 'title'
     @onStart(nodeNames)
+
+    # start with a single frame, to get initial values
+    @generateFrame(time)
 
     step = =>
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
