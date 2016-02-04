@@ -60183,7 +60183,7 @@ module.exports = Simulation = (function() {
     nodes = _.map(this.nodes, function(node) {
       return {
         title: node.title,
-        value: time === 0 ? node.initialValue : node.currentValue
+        value: node.currentValue
       };
     });
     frame = {
@@ -60209,7 +60209,6 @@ module.exports = Simulation = (function() {
     })(this));
     nodeNames = _.pluck(this.nodes, 'title');
     this.onStart(nodeNames);
-    this.generateFrame(time);
     step = (function(_this) {
       return function() {
         _.each(_this.nodes, function(node) {
