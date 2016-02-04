@@ -10,6 +10,7 @@ PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
 AppSettingsStore    = require "../stores/app-settings-store"
 SimulationStore     = require "../stores/simulation-store"
 GraphActions        = require "../actions/graph-actions"
+CodapActions        = require '../actions/codap-actions'
 
 GraphStore  = Reflux.createStore
   init: (context) ->
@@ -23,6 +24,8 @@ GraphStore  = Reflux.createStore
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 
+    @codapStandaloneMode = false
+
   paletteDelete: (status) ->
     {deleted,paletteItem,replacement} = status
     if deleted and paletteItem and replacement
@@ -30,11 +33,27 @@ GraphStore  = Reflux.createStore
         if node.paletteItemIs paletteItem
           @changeNode({image: replacement.image, paletteItem: replacement.uuid},node)
 
-  undo: ->
-    @undoRedoManager.undo()
+  # This and redo() can be called from three sources, and we can be in two different
+  # modes. It can be called from the 1) button press, 2) keyboard, and 3) CODAP action.
+  # We can be in CODAP standalone mode or not.
+  #
+  # We want to immediately execute the action if EITHER we are not in standalone mode
+  # (for all sources), or if we are in standalone mode and the source is CODAP
+  # (forced == true).
+  #
+  # If we are in standalone mode and the source was not CODAP, we want to send the
+  # event to CODAP.
+  undo: (forced) ->
+    if forced or not @codapStandaloneMode
+      @undoRedoManager.undo()
+    else
+      CodapActions.sendUndoToCODAP()
 
-  redo: ->
-    @undoRedoManager.redo()
+  redo: (forced) ->
+    if forced or not @codapStandaloneMode
+      @undoRedoManager.redo()
+    else
+      CodapActions.sendRedoToCODAP()
 
   setSaved: ->
     @undoRedoManager.save()
@@ -45,8 +64,7 @@ GraphStore  = Reflux.createStore
   revertToLastSave: ->
     @undoRedoManager.revertToLastSave()
 
-  hideUndoRedo: (hide) ->
-    @undoRedoManager.hideUndoRedo(hide)
+  setCodapStandaloneMode: (@codapStandaloneMode) ->
 
   addChangeListener: (listener) ->
     log.info("adding change listener")

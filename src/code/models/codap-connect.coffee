@@ -28,6 +28,8 @@ module.exports = class CodapConnect
 
     SimulationStore.actions.simulationStarted.listen       @_openNewCase.bind(@)
     SimulationStore.actions.simulationFramesCreated.listen @_sendSimulationData.bind(@)
+    CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
+    CodapActions.sendRedoToCODAP.listen @_sendRedoToCODAP.bind(@)
 
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
@@ -133,6 +135,14 @@ module.exports = class CodapConnect
         values: [null, @stepsInCurrentCase]
       }
 
+  _sendUndoToCODAP: ->
+    @codapPhone.call
+      action: 'undo'
+
+  _sendRedoToCODAP: ->
+    @codapPhone.call
+      action: 'redo'
+
   _flushQueue: ->
     for data in @queue
       @_sendSimulationData data
@@ -180,14 +190,18 @@ module.exports = class CodapConnect
         log.info 'Received externalUndoAvailable request from CODAP.'
         CodapActions.hideUndoRedo()
 
+      when 'standaloneUndoModeAvailable'
+        log.info 'Received standaloneUndoModeAvailable request from CODAP.'
+        @graphStore.setCodapStandaloneMode true
+
       when 'undoAction'
         log.info 'Received undoAction request from CODAP.'
-        successes = @graphStore.undo()
+        successes = @graphStore.undo(true)
         callback {success: @reduceSuccesses(successes) isnt false}
 
       when 'redoAction'
         log.info 'Received redoAction request from CODAP.'
-        successes = @graphStore.redo()
+        successes = @graphStore.redo(true)
         callback {success: @reduceSuccesses(successes) isnt false}
 
       when 'clearUndo'
