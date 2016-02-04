@@ -58168,7 +58168,7 @@ exports.createContext = Script.createContext = function (context) {
 };
 
 },{"indexof":98}],513:[function(require,module,exports){
-module.exports = Reflux.createActions(["codapLoaded", "hideUndoRedo"]);
+module.exports = Reflux.createActions(["codapLoaded", "hideUndoRedo", "sendUndoToCODAP", "sendRedoToCODAP"]);
 
 
 
@@ -59087,6 +59087,8 @@ module.exports = CodapConnect = (function() {
 
   CodapConnect.prototype.currentCaseID = null;
 
+  CodapConnect.prototype.standaloneMode = false;
+
   CodapConnect.prototype.stepsInCurrentCase = 0;
 
   CodapConnect.prototype.queue = [];
@@ -59109,6 +59111,8 @@ module.exports = CodapConnect = (function() {
     this.graphStore = GraphStore.store;
     SimulationStore.actions.simulationStarted.listen(this._openNewCase.bind(this));
     SimulationStore.actions.simulationFramesCreated.listen(this._sendSimulationData.bind(this));
+    CodapActions.sendUndoToCODAP.listen(this._sendUndoToCODAP.bind(this));
+    CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
     this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'codap-game', window.parent);
     this.codapPhone.call({
       action: 'initGame',
@@ -59180,7 +59184,10 @@ module.exports = CodapConnect = (function() {
         if (result != null ? result.success : void 0) {
           _this.currentCaseID = result.caseID;
           _this.stepsInCurrentCase = 0;
-          return _this._flushQueue();
+          _this._flushQueue();
+          if (!_this.standaloneMode) {
+            return _this.createTable();
+          }
         } else {
           return log.info("CODAP returned an error on 'openCase'");
         }
@@ -59221,6 +59228,18 @@ module.exports = CodapConnect = (function() {
     });
   };
 
+  CodapConnect.prototype._sendUndoToCODAP = function() {
+    return this.codapPhone.call({
+      action: 'undo'
+    });
+  };
+
+  CodapConnect.prototype._sendRedoToCODAP = function() {
+    return this.codapPhone.call({
+      action: 'redo'
+    });
+  };
+
   CodapConnect.prototype._flushQueue = function() {
     var data, i, len, ref;
     ref = this.queue;
@@ -59241,17 +59260,29 @@ module.exports = CodapConnect = (function() {
   };
 
   CodapConnect.prototype.createGraph = function(yAttributeName) {
+    var timeUnit;
+    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
     return this.codapPhone.call({
       action: 'createComponent',
       args: {
         type: 'DG.GraphView',
-        xAttributeName: 'time',
+        xAttributeName: timeUnit,
         yAttributeName: yAttributeName,
         size: {
           width: 242,
           height: 221
         },
         position: 'bottom',
+        log: false
+      }
+    });
+  };
+
+  CodapConnect.prototype.createTable = function(yAttributeName) {
+    return this.codapPhone.call({
+      action: 'createComponent',
+      args: {
+        type: 'DG.TableView',
         log: false
       }
     });
@@ -59279,15 +59310,19 @@ module.exports = CodapConnect = (function() {
       case 'externalUndoAvailable':
         log.info('Received externalUndoAvailable request from CODAP.');
         return CodapActions.hideUndoRedo();
+      case 'standaloneUndoModeAvailable':
+        log.info('Received standaloneUndoModeAvailable request from CODAP.');
+        this.standaloneMode = true;
+        return this.graphStore.setCodapStandaloneMode(true);
       case 'undoAction':
         log.info('Received undoAction request from CODAP.');
-        successes = this.graphStore.undo();
+        successes = this.graphStore.undo(true);
         return callback({
           success: this.reduceSuccesses(successes) !== false
         });
       case 'redoAction':
         log.info('Received redoAction request from CODAP.');
-        successes = this.graphStore.redo();
+        successes = this.graphStore.redo(true);
         return callback({
           success: this.reduceSuccesses(successes) !== false
         });
@@ -60148,7 +60183,7 @@ module.exports = Simulation = (function() {
     nodes = _.map(this.nodes, function(node) {
       return {
         title: node.title,
-        value: node.currentValue
+        value: time === 0 ? node.initialValue : node.currentValue
       };
     });
     frame = {
@@ -60156,10 +60191,6 @@ module.exports = Simulation = (function() {
       nodes: nodes
     };
     return this.framesBundle.push(frame);
-  };
-
-  Simulation.prototype.graphIsValid = function() {
-    return true;
   };
 
   Simulation.prototype.stop = function() {
@@ -60176,11 +60207,9 @@ module.exports = Simulation = (function() {
         return _this.initializeValues(node);
       };
     })(this));
-    if (!this.graphIsValid()) {
-      throw new Error("Graph not valid");
-    }
     nodeNames = _.pluck(this.nodes, 'title');
     this.onStart(nodeNames);
+    this.generateFrame(time);
     step = (function(_this) {
       return function() {
         _.each(_this.nodes, function(node) {
@@ -60580,7 +60609,7 @@ module.exports = {
 
 
 },{"../utils/google-drive-io":555,"../utils/hash-parameters":557,"../utils/translate":564,"./graph-store":547,"./palette-store":551}],547:[function(require,module,exports){
-var AppSettingsStore, GraphActions, GraphStore, Importer, Link, Migrations, NodeModel, PaletteDeleteStore, PaletteStore, SelectionManager, SimulationStore, UndoRedo, mixin, tr;
+var AppSettingsStore, CodapActions, GraphActions, GraphStore, Importer, Link, Migrations, NodeModel, PaletteDeleteStore, PaletteStore, SelectionManager, SimulationStore, UndoRedo, mixin, tr;
 
 Importer = require('../utils/importer');
 
@@ -60606,6 +60635,8 @@ SimulationStore = require("../stores/simulation-store");
 
 GraphActions = require("../actions/graph-actions");
 
+CodapActions = require('../actions/codap-actions');
+
 GraphStore = Reflux.createStore({
   init: function(context) {
     this.linkKeys = {};
@@ -60618,7 +60649,8 @@ GraphStore = Reflux.createStore({
       context: context
     });
     this.selectionManager = new SelectionManager();
-    return PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
+    PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
+    return this.codapStandaloneMode = false;
   },
   paletteDelete: function(status) {
     var deleted, i, len, node, paletteItem, ref, replacement, results;
@@ -60640,11 +60672,19 @@ GraphStore = Reflux.createStore({
       return results;
     }
   },
-  undo: function() {
-    return this.undoRedoManager.undo();
+  undo: function(forced) {
+    if (forced || !this.codapStandaloneMode) {
+      return this.undoRedoManager.undo();
+    } else {
+      return CodapActions.sendUndoToCODAP();
+    }
   },
-  redo: function() {
-    return this.undoRedoManager.redo();
+  redo: function(forced) {
+    if (forced || !this.codapStandaloneMode) {
+      return this.undoRedoManager.redo();
+    } else {
+      return CodapActions.sendRedoToCODAP();
+    }
   },
   setSaved: function() {
     return this.undoRedoManager.save();
@@ -60655,8 +60695,8 @@ GraphStore = Reflux.createStore({
   revertToLastSave: function() {
     return this.undoRedoManager.revertToLastSave();
   },
-  hideUndoRedo: function(hide) {
-    return this.undoRedoManager.hideUndoRedo(hide);
+  setCodapStandaloneMode: function(codapStandaloneMode) {
+    this.codapStandaloneMode = codapStandaloneMode;
   },
   addChangeListener: function(listener) {
     log.info("adding change listener");
@@ -61135,7 +61175,7 @@ module.exports = {
 
 
 
-},{"../actions/graph-actions":514,"../data/migrations/migrations":531,"../models/link":538,"../models/node":539,"../models/selection-manager":542,"../stores/app-settings-store":544,"../stores/palette-delete-dialog-store":550,"../stores/palette-store":551,"../stores/simulation-store":552,"../utils/importer":558,"../utils/translate":564,"../utils/undo-redo":565}],548:[function(require,module,exports){
+},{"../actions/codap-actions":513,"../actions/graph-actions":514,"../data/migrations/migrations":531,"../models/link":538,"../models/node":539,"../models/selection-manager":542,"../stores/app-settings-store":544,"../stores/palette-delete-dialog-store":550,"../stores/palette-store":551,"../stores/simulation-store":552,"../utils/importer":558,"../utils/translate":564,"../utils/undo-redo":565}],548:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -61743,7 +61783,6 @@ SimulationStore = Reflux.createStore({
       return results;
     })();
     this.nodes = [];
-    this.graphIsValid = true;
     this.currentSimulation = null;
     return this.settings = {
       simulationPanelExpanded: false,
@@ -61753,7 +61792,6 @@ SimulationStore = Reflux.createStore({
       timeUnitOptions: options,
       speed: 4,
       capNodeValues: false,
-      modelIsRunnable: true,
       modelIsRunning: false,
       modelReadyToRun: true,
       newIntegration: false
@@ -61772,11 +61810,10 @@ SimulationStore = Reflux.createStore({
   },
   onGraphChanged: function(data) {
     this.nodes = data.nodes;
-    this._updateGraphValid();
     return this.notifyChange();
   },
   onSetDuration: function(n) {
-    this.settings.duration = Math.min(n, 5000);
+    this.settings.duration = Math.max(1, Math.min(n, 5000));
     return this.notifyChange();
   },
   onSetStepUnits: function(unit) {
@@ -61801,12 +61838,10 @@ SimulationStore = Reflux.createStore({
   },
   onSetNewIntegration: function(newInt) {
     this.settings.newIntegration = newInt;
-    this._updateGraphValid();
     return this.notifyChange();
   },
   onRunSimulation: function() {
-    var error;
-    if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
+    if (this.settings.modelReadyToRun) {
       this.currentSimulation = new Simulation({
         nodes: this.nodes,
         duration: this.settings.duration,
@@ -61824,9 +61859,6 @@ SimulationStore = Reflux.createStore({
         }
       });
       return this.currentSimulation.run();
-    } else if (!this.settings.modelIsRunnable) {
-      error = this._getErrorMessage();
-      return alert(error);
     }
   },
   onSimulationStarted: function() {
@@ -61846,32 +61878,7 @@ SimulationStore = Reflux.createStore({
     this.settings.modelReadyToRun = true;
     return this.notifyChange();
   },
-  _updateGraphValid: function() {
-    var simulator;
-    simulator = new Simulation({
-      nodes: this.nodes,
-      newIntegration: this.settings.newIntegration
-    });
-    return this.graphIsValid = simulator.graphIsValid();
-  },
-  _checkModelIsRunnable: function() {
-    return this.settings.modelIsRunnable = this.graphIsValid && this.settings.duration > 0;
-  },
-  _getErrorMessage: function() {
-    var bullet, message, multipleErrors;
-    multipleErrors = !this.graphIsValid && !(this.settings.duration > 0);
-    message = multipleErrors ? "Your model could not be run due to the following reasons:" : "";
-    bullet = multipleErrors ? "\n\n• " : "";
-    if (!this.graphIsValid) {
-      message += bullet + tr("~DOCUMENT.ACTIONS.GRAPH_INVALID");
-    }
-    if (!(this.settings.duration > 0)) {
-      message += bullet + tr("~DOCUMENT.ACTIONS.DURATION_INVALID");
-    }
-    return message;
-  },
   notifyChange: function() {
-    this._checkModelIsRunnable();
     return this.trigger(_.clone(this.settings));
   },
   importSettings: function(data) {
@@ -62674,7 +62681,6 @@ module.exports = {
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode",
   "~DOCUMENT.ACTIONS.UNDO": "Undo",
   "~DOCUMENT.ACTIONS.REDO": "Redo",
-  "~DOCUMENT.ACTIONS.GRAPH_INVALID": "Your model contains a loop of dependent variables.\n\n Either remove a link to break the loop, or make one of the variables a collector.",
   "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation.",
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings",
   "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings",
@@ -66465,7 +66471,6 @@ module.exports = React.createClass({
         width: (Math.max(4, this.state.duration.toString().length + 1)) + "em"
       },
       value: this.state.duration,
-      min: "0",
       onChange: this.setDuration
     })), div({
       className: "row"
@@ -66566,9 +66571,6 @@ module.exports = React.createClass({
       wrapperClasses += " expanded";
     }
     runButtonClasses = "button";
-    if (!this.state.modelIsRunnable) {
-      runButtonClasses += " disabled error";
-    }
     if (!this.state.modelReadyToRun) {
       runButtonClasses += " disabled";
     }
@@ -66675,7 +66677,7 @@ module.exports = SvgGraphView = React.createClass({
     return this.props.fontSize + this.marginal();
   },
   isExponential: function() {
-    return this.props.formula.indexOf("^") > -1 || this.props.formula.indexOf("sqrt") > -1;
+    return this.props.formula.indexOf("^") > -1 || this.props.formula.indexOf("1/in") > -1;
   },
   invertPoint: function(point) {
     return {
@@ -66710,9 +66712,10 @@ module.exports = SvgGraphView = React.createClass({
     return "M " + data;
   },
   getPathPoints: function() {
-    var data, maxy, miny, rangex, rangey, scaley;
+    var data, maxy, miny, rangex, rangey, scaley, x0;
     rangex = 20;
-    data = _.range(0, rangex);
+    x0 = this.isExponential() ? 1 : 0;
+    data = _.range(x0, rangex);
     miny = Infinity;
     maxy = -Infinity;
     data = _.map(data, (function(_this) {
@@ -66754,6 +66757,8 @@ module.exports = SvgGraphView = React.createClass({
         y: y
       };
     });
+    console.log(this.props.formula);
+    console.log(data);
     return data;
   },
   renderXLabel: function() {
