@@ -60752,6 +60752,7 @@ GraphStore = Reflux.createStore({
     return this.addLink(link);
   },
   addLink: function(link) {
+    this.endNodeEdit();
     return this.undoRedoManager.createAndExecuteCommand('addLink', {
       execute: (function(_this) {
         return function() {
@@ -60774,6 +60775,7 @@ GraphStore = Reflux.createStore({
     return this.updateListeners();
   },
   removeLink: function(link) {
+    this.endNodeEdit();
     return this.undoRedoManager.createAndExecuteCommand('removeLink', {
       execute: (function(_this) {
         return function() {
@@ -60799,6 +60801,7 @@ GraphStore = Reflux.createStore({
     return this.updateListeners();
   },
   addNode: function(node) {
+    this.endNodeEdit();
     return this.undoRedoManager.createAndExecuteCommand('addNode', {
       execute: (function(_this) {
         return function() {
@@ -60814,6 +60817,7 @@ GraphStore = Reflux.createStore({
   },
   removeNode: function(nodeKey) {
     var links, node;
+    this.endNodeEdit();
     node = this.nodeKeys[nodeKey];
     links = node.links.slice();
     return this.undoRedoManager.createAndExecuteCommand('removeNode', {
@@ -60853,6 +60857,7 @@ GraphStore = Reflux.createStore({
   },
   moveNodeCompleted: function(nodeKey, pos, originalPos) {
     var node;
+    this.endNodeEdit();
     node = this.nodeKeys[nodeKey];
     if (!node) {
       return;
@@ -60890,6 +60895,7 @@ GraphStore = Reflux.createStore({
     return this.selectionManager.selectForTitleEditing(this.nodeKeys[nodeKey]);
   },
   selectNode: function(nodeKey) {
+    this.endNodeEdit();
     return this.selectionManager.selectForInspection(this.nodeKeys[nodeKey]);
   },
   _notifyNodeChanged: function(node) {
