@@ -100,6 +100,7 @@ GraphStore  = Reflux.createStore
     @addLink(link)
 
   addLink: (link) ->
+    @endNodeEdit()
     @undoRedoManager.createAndExecuteCommand 'addLink',
       execute: => @_addLink link
       undo: => @_removeLink link
@@ -113,6 +114,7 @@ GraphStore  = Reflux.createStore
 
 
   removeLink: (link) ->
+    @endNodeEdit()
     @undoRedoManager.createAndExecuteCommand 'removeLink',
       execute: => @_removeLink link
       undo: => @_addLink link
@@ -125,11 +127,13 @@ GraphStore  = Reflux.createStore
 
 
   addNode: (node) ->
+    @endNodeEdit()
     @undoRedoManager.createAndExecuteCommand 'addNode',
       execute: => @_addNode node
       undo: => @_removeNode node
 
   removeNode: (nodeKey) ->
+    @endNodeEdit()
     node = @nodeKeys[nodeKey]
 
     # create a copy of the list of links
@@ -153,6 +157,7 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   moveNodeCompleted: (nodeKey, pos, originalPos) ->
+    @endNodeEdit()
     node = @nodeKeys[nodeKey]
     return unless node
     @undoRedoManager.createAndExecuteCommand 'moveNode',
@@ -176,6 +181,7 @@ GraphStore  = Reflux.createStore
     @selectionManager.selectForTitleEditing(@nodeKeys[nodeKey])
 
   selectNode: (nodeKey) ->
+    @endNodeEdit()
     @selectionManager.selectForInspection(@nodeKeys[nodeKey])
 
 
