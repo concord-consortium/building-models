@@ -235,7 +235,7 @@ GraphStore  = Reflux.createStore
       @changeNode(data,node)
 
   startNodeEdit: ->
-    @undoRedoManager.startCommandBatch()
+    @undoRedoManager.startCommandBatch("changeNode")
 
   endNodeEdit: ->
     @undoRedoManager.endCommandBatch()

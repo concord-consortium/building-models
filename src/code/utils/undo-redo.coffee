@@ -21,8 +21,14 @@ class Manager
     @undo.listen @_undo, @
     @redo.listen @_redo, @
 
-  startCommandBatch: ->
-    @currentBatch = new CommandBatch() unless @currentBatch
+  # @param optionName: If we provide an optionalName then any command that is sent to
+  # the undo manager with a different name will automatically end the current batch.
+  # This allows us to group similar commands together and not worry that an unrelated
+  # command might be inserted into this same batch before it is closed.
+  startCommandBatch: (optionalName) ->
+    if @currentBatch and not @currentBatch.matches(optionalName)
+      @_endComandBatch()
+    @currentBatch = new CommandBatch(optionalName) unless @currentBatch
 
   endCommandBatch: Reflux.createAction()
 
@@ -34,6 +40,9 @@ class Manager
       @currentBatch = null
 
   createAndExecuteCommand: (name, methods) ->
+    if @currentBatch and not @currentBatch.matches(name)
+      @_endComandBatch()
+
     result = @execute (new Command name, methods)
 
     # Only notify CODAP of an undoable action on the first command of a batched command
@@ -154,7 +163,7 @@ class Command
   redo: (debug) -> @_call 'execute', debug, 'redo'
 
 class CommandBatch
-  constructor: ->
+  constructor: (@name) ->
     @commands = []
 
   push: (command) ->
@@ -164,6 +173,11 @@ class CommandBatch
     command.undo(debug) for command in @commands by -1
   redo: (debug) ->
     command.redo(debug) for command in @commands
+
+  matches: (name) ->
+    if @name and @name isnt name
+      return false
+    true
 
 instances = {}
 instance  = (opts={}) ->
