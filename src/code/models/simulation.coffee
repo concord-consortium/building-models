@@ -1,4 +1,4 @@
-IntegrationFunction = (t) ->
+IntegrationFunction = ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
   if @currentValue
@@ -104,7 +104,10 @@ module.exports = class Simulation
       # make this a local node property (it may eventually be different per node)
       node.capNodeValues = @capNodeValues
       node.newIntegration = @newIntegration
-      @addIntegrateMethodTo node
+      # Create a bound method on this node.
+      # Put the functionality here rather than in the class "Node".
+      # Keep all the logic for integration here in one file for clarity.
+      node.getCurrentValue = IntegrationFunction.bind(node)
 
   initializeValues: (node) ->
     node.currentValue = null
@@ -114,16 +117,8 @@ module.exports = class Simulation
     node.previousValue = node.currentValue
     node.currentValue = null
 
-  addIntegrateMethodTo: (node)->
-    # Create a bound method on this node.
-    # Put the functionality here rather than in the class "Node".
-    # Keep all the logic for integration here in one file for clarity.
-    node.getCurrentValue = IntegrationFunction.bind(node)
-
-
-  # for some integrators, timeIndex might matter
-  evaluateNode: (node, t) ->
-    node.currentValue = node.getCurrentValue(t)
+  evaluateNode: (node) ->
+    node.currentValue = node.getCurrentValue()
 
   # create an object representation of the current timeStep and add
   # it to the current bundle of frames.
@@ -152,7 +147,7 @@ module.exports = class Simulation
 
     step = =>
       _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
-      _.each @nodes, (node) => @evaluateNode node, time
+      _.each @nodes, (node) => @evaluateNode node
       time++
       @generateFrame(time)
 
