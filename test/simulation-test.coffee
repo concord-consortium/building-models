@@ -88,57 +88,57 @@ describe "Simulation", ->
     # node on each step.
     describe "for other scenarios", ->
       scenarios = [
-        # cascade independent and dependent variables (A->B->C)
+        # 0: cascade independent and dependent variables (A->B->C)
         {A: 50, B: 40, C: 30, AB: "1 * in", BC: "0.1 * in",
         results: [
-            [50, 50, 4]
+            [50, 50, 5]
             [50, 50, 5]
         ]}
 
-        # cascade independent and dependent variables with negative relationship (A->B->C)
+        # 1: cascade independent and dependent variables with negative relationship (A->B->C)
         {A: 50, B: 40, C: 30, AB: "0.1 * in", BC: "-1 * in",
         results: [
-            [50, 5, -40]
+            [50, 5, -5]
             [50, 5, -5]
         ]}
 
-        # basic collector (A->[B])
+        # 2: basic collector (A->[B])
         {A:5, B:"50+", AB: "1 * in",
         results: [
           [5, 50]
           [5, 55]
         ]}
 
-        # basic collector with feedback (A<->[B])
+        # 3: basic collector with feedback (A<->[B])
         {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
           [50, 50]
-          [50, 100]
-          [100, 150]
+          [100, 100]
+          [200, 200]
         ]}
 
-        # three-node graph (>-) with averaging
+        # 4: three-node graph (>-) with averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "1 * in",
         results: [
             [10, 20, 15]
             [10, 20, 15]
         ]}
 
-        # three-node graph (>-) with non-linear averaging
+        # 5: three-node graph (>-) with non-linear averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "0.1 * in",
         results: [
             [10, 20, 6]
             [10, 20, 6]
         ]}
 
-        # three-node graph with collector (>-[C])
+        # 6: three-node graph with collector (>-[C])
         {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
         results: [
             [10, 20, 0]
             [10, 20, 12]
         ]}
 
-        # three-node graph with collector (>-[C]) and negative relationship
+        # 7: three-node graph with collector (>-[C]) and negative relationship
         {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
         results: [
             [10, 1, 0]
@@ -149,7 +149,7 @@ describe "Simulation", ->
         # *** Tests for graphs with bounded ranges ***
         # Note all nodes have min:0 and max:100 by default
 
-        # basic collector (A->[B])
+        # 8: basic collector (A->[B])
         {A:30, B:"50+", AB: "1 * in",
         cap: true
         results: [
@@ -158,7 +158,7 @@ describe "Simulation", ->
           [30, 100]
         ]}
 
-        # basic subtracting collector (A- -1 ->[B])
+        # 9: basic subtracting collector (A- -1 ->[B])
         {A:30, B:"50+", AB: "-1 * in",
         cap: true
         results: [
@@ -167,7 +167,7 @@ describe "Simulation", ->
           [30, 0]
         ]}
 
-        # basic independent and dependent nodes (A->B)
+        # 10: basic independent and dependent nodes (A->B)
         {A:120, B:0, AB: "1 * in",
         cap: true
         results: [
@@ -178,88 +178,88 @@ describe "Simulation", ->
         # But see below because examples 13, 14, & 15 cover this.
 
         # 11: Simple a->b test of new 'inertial' integration
-        {A:100, B:95, AB: "1 * in",
-        cap: false
-        newInt: true
-        results: [
-          [100, 97.5],
-          [100, 98.75],
-          [100, 99.375],
-          [100, 99.6875],
-          [100, 99.84375]
-        ]}
+        # {A:100, B:95, AB: "1 * in",
+        # cap: false
+        # newInt: true
+        # results: [
+        #   [100, 97.5],
+        #   [100, 98.75],
+        #   [100, 99.375],
+        #   [100, 99.6875],
+        #   [100, 99.84375]
+        # ]}
 
         # 12: A->B with Negative link
-        {A:100, B:95, AB: "(maxIn - in)"
-        cap: false
-        newInt: true
-        results: [
-          [100, 47.5],
-          [100, 23.75],
-          [100, 11.875],
-          [100, 5.9375]
-        ]}
+        # {A:100, B:95, AB: "(maxIn - in)"
+        # cap: false
+        # newInt: true
+        # results: [
+        #   [100, 47.5],
+        #   [100, 23.75],
+        #   [100, 11.875],
+        #   [100, 5.9375]
+        # ]}
 
         # 13: A- ⇄B with Positive / Positive feedback
-        {A:100, B:50, AB: "1 * in", BA: "1 * in"
-        cap: false
-        newInt: true
-        results: [
-          [75, 75],
-          [75, 75]
-        ]}
+        # {A:100, B:50, AB: "1 * in", BA: "1 * in"
+        # cap: false
+        # newInt: true
+        # results: [
+        #   [75, 75],
+        #   [75, 75]
+        # ]}
 
         # 14: A ⇄ B with Postive / Negative feedback
-        {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
-        cap: false
-        newInt: true
-        results: [
-          [50,   100]
-          [25,    75]
-          [25,    50]
-          [37.5,  37.5]
-          [50,	  37.5]
-          [56.25, 43.75]
-        ]}
+        # {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
+        # cap: false
+        # newInt: true
+        # results: [
+        #   [50,   100]
+        #   [25,    75]
+        #   [25,    50]
+        #   [37.5,  37.5]
+        #   [50,	  37.5]
+        #   [56.25, 43.75]
+        # ]}
 
         # 15: A ⇄ B with Postive / Negative feedback
-        {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
-        cap: false
-        newInt: true
-        results: [
-          [50,   100]
-          [25,    75]
-          [25,    50]
-          [37.5,  37.5]
-          [50,	  37.5]
-          [56.25, 43.75]
-        ]}
+        # {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
+        # cap: false
+        # newInt: true
+        # results: [
+        #   [50,   100]
+        #   [25,    75]
+        #   [25,    50]
+        #   [37.5,  37.5]
+        #   [50,	  37.5]
+        #   [56.25, 43.75]
+        # ]}
 
         # 16: A -> B ->C -> A with Postive /  Positive Negative feedback
-        {A:100, B:95, C:0, AB: "1 * in", BC: "1 * in", CA: "(maxIn -in)"
-        cap: false
-        newInt: true
-        results: [
-          [100,	97.5,	47.5]
-          [76.25,	98.75,	72.5]
-          [51.875,	87.5,	85.625]
-          [33.125,	69.6875,	86.5625]
-          [23.28125,	51.40625,	78.125]
-          [22.578125,	37.34375,	64.765625]
-          [28.90625,	29.9609375,	51.0546875]
-          [38.92578125,	29.43359375,	40.5078125]
-          [49.208984375,	34.1796875, 34.970703125]
-          [57.11914063,	41.69433594,	34.57519531]
-          [61.27197266,	49.40673828,	38.13476563]
-          [61.56860352,	55.33935547,	43.77075195]
-          [58.89892578,	58.45397949,	49.55505371]
-          [54.67193604,	58.67645264,	54.0045166]
-          [50.33370972,	56.67419434,	56.34048462]
-          [46.99661255,	53.50395203,	56.50733948]
-          [45.24463654,	50.25028229,	55.00564575]
-          [45.11949539,	47.74745941,	52.62796402]
-          [46.24576569,	46.4334774, 50.18771172]
-        ]}
+        # {A:100, B:95, C:0, AB: "1 * in", BC: "1 * in", CA: "(maxIn -in)"
+        # cap: false
+        # newInt: true
+        # results: [
+        #   [100,	97.5,	47.5]
+        #   [76.25,	98.75,	72.5]
+        #   [51.875,	87.5,	85.625]
+        #   [33.125,	69.6875,	86.5625]
+        #   [23.28125,	51.40625,	78.125]
+        #   [22.578125,	37.34375,	64.765625]
+        #   [28.90625,	29.9609375,	51.0546875]
+        #   [38.92578125,	29.43359375,	40.5078125]
+        #   [49.208984375,	34.1796875, 34.970703125]
+        #   [57.11914063,	41.69433594,	34.57519531]
+        #   [61.27197266,	49.40673828,	38.13476563]
+        #   [61.56860352,	55.33935547,	43.77075195]
+        #   [58.89892578,	58.45397949,	49.55505371]
+        #   [54.67193604,	58.67645264,	54.0045166]
+        #   [50.33370972,	56.67419434,	56.34048462]
+        #   [46.99661255,	53.50395203,	56.50733948]
+        #   [45.24463654,	50.25028229,	55.00564575]
+        #   [45.11949539,	47.74745941,	52.62796402]
+        #   [46.24576569,	46.4334774, 50.18771172]
+        # ]}
       ]
 
       _.each scenarios, (scenario, i) ->
@@ -300,7 +300,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
     @nodeA    = new Node({title: "A", initialValue: 10})
     @nodeB    = new Node({title: "B", initialValue: 0 })
-    @formula  = "out + 0.1 * in"
+    @formula  = "0.1 * in"
 
     GraphStore.init()
 
@@ -345,7 +345,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
           frame9 = data[9]
           frame9.time.should.equal 10
-          frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 10 } ]
+          frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
           done()
 
