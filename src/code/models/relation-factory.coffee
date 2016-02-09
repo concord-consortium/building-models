@@ -7,42 +7,58 @@ module.exports = class RelationFactory
     prefixIco: "inc"
     text: tr "~NODE-RELATION-EDIT.INCREASES"
     formulaFrag: "1 *"
+    func: (scalarFunc) ->
+      return (scope) ->
+        scalarFunc(scope)
 
   @decrease:
     id: 1
     prefixIco: "dec"
     text: tr "~NODE-RELATION-EDIT.DECREASES"
     formulaFrag: "maxIn -"
+    func: (scalarFunc) ->
+      return (scope) ->
+        scope.maxIn - scalarFunc(scope)
 
   @aboutTheSame:
     id: 0
     text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
     postfixIco: "the-same"
     formulaFrag: "in"
+    func: (scope) ->
+      return scope.in
 
   @aLot:
     id: 1
     text: tr "~NODE-RELATION-EDIT.A_LOT"
     postfixIco: "a-lot"
     formulaFrag: "in * 5"
+    func: (scope) ->
+      return scope.in * 5
 
   @aLittle:
     id: 2
     text: tr "~NODE-RELATION-EDIT.A_LITTLE"
     postfixIco: "a-little"
     formulaFrag: "in / 5"
+    func: (scope) ->
+      return scope.in / 5
 
   @moreAndMore:
     id: 3
     text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
     postfixIco: "more-and-more"
     formulaFrag: "in ^ 2"
+    func: (scope) ->
+      return scope.in * scope.in
 
   @lessAndLess:
     id: 4
     text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
     formulaFrag: "1/in"
+    func: (scope) ->
+      return 1 / scope.in
 
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
@@ -59,7 +75,8 @@ module.exports = class RelationFactory
   @fromSelections: (vector,scalar) ->
     name = "#{vector.text} #{scalar.text}"
     formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
-    new Relationship({text: name, formula: formula})
+    func = vector.func(scalar.func)
+    new Relationship({text: name, formula: formula, func: func})
 
   @selectionsFromRelation: (relation) ->
     vector = _.find @vectors, (v) ->
