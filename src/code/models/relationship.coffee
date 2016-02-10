@@ -32,12 +32,13 @@ module.exports = class Relationship
   checkFormula: ->
     @evaluate(1, 1) #sets the @hasError flag if there is a problem
 
-  evaluate: (inV,outV, maxIn=100)->
+  evaluate: (inV,outV, maxIn=100, maxOut=100)->
     result = Relationship.errValue
     scope =
       in: inV
       out: outV
       maxIn: maxIn
+      maxOut: maxOut
     if @func
       result = @func scope
     else
