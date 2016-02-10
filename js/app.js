@@ -60970,7 +60970,7 @@ GraphStore = Reflux.createStore({
     }
   },
   startNodeEdit: function() {
-    return this.undoRedoManager.startCommandBatch();
+    return this.undoRedoManager.startCommandBatch("changeNode");
   },
   endNodeEdit: function() {
     return this.undoRedoManager.endCommandBatch();
@@ -62901,9 +62901,12 @@ Manager = (function() {
     this.redo.listen(this._redo, this);
   }
 
-  Manager.prototype.startCommandBatch = function() {
+  Manager.prototype.startCommandBatch = function(optionalName) {
+    if (this.currentBatch && !this.currentBatch.matches(optionalName)) {
+      this._endComandBatch();
+    }
     if (!this.currentBatch) {
-      return this.currentBatch = new CommandBatch();
+      return this.currentBatch = new CommandBatch(optionalName);
     }
   };
 
@@ -62921,6 +62924,9 @@ Manager = (function() {
 
   Manager.prototype.createAndExecuteCommand = function(name, methods) {
     var codapConnect, result;
+    if (this.currentBatch && !this.currentBatch.matches(name)) {
+      this._endComandBatch();
+    }
     result = this.execute(new Command(name, methods));
     if ((!this.currentBatch) || (this.currentBatch.commands.length === 1)) {
       codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
@@ -63116,7 +63122,8 @@ Command = (function() {
 })();
 
 CommandBatch = (function() {
-  function CommandBatch() {
+  function CommandBatch(name1) {
+    this.name = name1;
     this.commands = [];
   }
 
@@ -63144,6 +63151,13 @@ CommandBatch = (function() {
       results.push(command.redo(debug));
     }
     return results;
+  };
+
+  CommandBatch.prototype.matches = function(name) {
+    if (this.name && this.name !== name) {
+      return false;
+    }
+    return true;
   };
 
   return CommandBatch;
