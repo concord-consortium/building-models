@@ -20,8 +20,16 @@ module.exports = SvgGraphView = React.createClass
   # TODO: This is a hack. We parse the formula.
   # We want to know because it informs how we scale the
   # graph axis
-  isExponential: ->
-    @props.formula.indexOf("^") > -1 or @props.formula.indexOf("1/in")  > -1
+  getYScale: (xrange, yrange) ->
+    if @props.formula.indexOf("^") > -1
+      yrange
+    else if (@props.formula.indexOf("log")  > -1) and (@props.formula.indexOf("maxIn -") is -1)
+      yrange * 3
+    else
+      xrange
+
+  startAt1: ->
+    @props.formula.indexOf("log")  > -1
 
   invertPoint: (point) ->
     {x: point.x, y: @props.height - point.y}
@@ -42,13 +50,13 @@ module.exports = SvgGraphView = React.createClass
     "M #{data}"
 
   getPathPoints: ->
-    rangex = 20
-    x0 = if @isExponential() then 1 else 0
+    rangex = 60
+    x0 = if @startAt1() then 1 else 0
     data = _.range(x0,rangex)
     miny = Infinity
     maxy = -Infinity
     data = _.map data, (x) =>
-      scope = {in: x, out: 0, maxIn: rangex}
+      scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex}
       try
         y = math.eval @props.formula, scope
         if y < miny then miny = y
@@ -61,15 +69,12 @@ module.exports = SvgGraphView = React.createClass
 
     # if we aren't doing exponential graphing, then keep
     # then use the range of x for axis scaling
-    scaley = if @isExponential() then rangey else rangex
+    scaley = @getYScale(rangex, rangey)
     data = _.map data, (d) ->
       {x,y} = d
-      y = (y - miny)
       x = x / rangex
       y = y / scaley
       {x: x, y: y}
-    console.log(@props.formula)
-    console.log(data)
     data
 
   renderXLabel: ->
@@ -98,8 +103,8 @@ module.exports = SvgGraphView = React.createClass
   render: ->
     (div {className: 'svgGraphView'},
       (svg {width: @props.width, height: @props.height},
-        @renderLineData()
         @renderAxisLines()
+        @renderLineData()
         @renderXLabel()
         @renderYLabel()
       )
