@@ -59692,49 +59692,74 @@ module.exports = RelationFactory = (function() {
     id: 0,
     prefixIco: "inc",
     text: tr("~NODE-RELATION-EDIT.INCREASES"),
-    formulaFrag: "1 *"
+    formulaFrag: "1 *",
+    func: function(scalarFunc) {
+      return function(scope) {
+        return scalarFunc(scope);
+      };
+    }
   };
 
   RelationFactory.decrease = {
     id: 1,
     prefixIco: "dec",
     text: tr("~NODE-RELATION-EDIT.DECREASES"),
-    formulaFrag: "maxIn -"
+    formulaFrag: "maxIn -",
+    func: function(scalarFunc) {
+      return function(scope) {
+        return scope.maxIn - scalarFunc(scope);
+      };
+    }
   };
 
   RelationFactory.aboutTheSame = {
     id: 0,
     text: tr("~NODE-RELATION-EDIT.ABOUT_THE_SAME"),
     postfixIco: "the-same",
-    formulaFrag: "in"
+    formulaFrag: "in",
+    func: function(scope) {
+      return scope["in"];
+    }
   };
 
   RelationFactory.aLot = {
     id: 1,
     text: tr("~NODE-RELATION-EDIT.A_LOT"),
     postfixIco: "a-lot",
-    formulaFrag: "in * 5"
+    formulaFrag: "in * 5",
+    func: function(scope) {
+      return scope["in"] * 5;
+    }
   };
 
   RelationFactory.aLittle = {
     id: 2,
     text: tr("~NODE-RELATION-EDIT.A_LITTLE"),
     postfixIco: "a-little",
-    formulaFrag: "in / 5"
+    formulaFrag: "in / 5",
+    func: function(scope) {
+      return scope["in"] / 5;
+    }
   };
 
   RelationFactory.moreAndMore = {
     id: 3,
     text: tr("~NODE-RELATION-EDIT.MORE_AND_MORE"),
     postfixIco: "more-and-more",
-    formulaFrag: "in ^ 2"
+    formulaFrag: "in ^ 2",
+    func: function(scope) {
+      return scope["in"] * scope["in"];
+    }
   };
 
   RelationFactory.lessAndLess = {
     id: 4,
     text: tr("~NODE-RELATION-EDIT.LESS_AND_LESS"),
     postfixIco: "less-and-less",
-    formulaFrag: "1/in"
+    formulaFrag: "1/in",
+    func: function(scope) {
+      return 1 / scope["in"];
+    }
   };
 
   RelationFactory.iconName = function(incdec, amount) {
@@ -59746,12 +59771,14 @@ module.exports = RelationFactory = (function() {
   RelationFactory.scalars = [RelationFactory.aboutTheSame, RelationFactory.aLot, RelationFactory.aLittle, RelationFactory.moreAndMore, RelationFactory.lessAndLess];
 
   RelationFactory.fromSelections = function(vector, scalar) {
-    var formula, name;
+    var formula, func, name;
     name = vector.text + " " + scalar.text;
     formula = vector.formulaFrag + " " + scalar.formulaFrag;
+    func = vector.func(scalar.func);
     return new Relationship({
       text: name,
-      formula: formula
+      formula: formula,
+      func: func
     });
   };
 
@@ -59791,6 +59818,10 @@ module.exports = Relationship = (function() {
 
   Relationship.errValue = -1;
 
+  Relationship.defaultFunc = function(scope) {
+    return scope["in"];
+  };
+
   Relationship.defaultErrHandler = function(error, expr, vars) {
     log.error("Error in eval: " + Error);
     log.error("Expression:    " + expr);
@@ -59804,6 +59835,7 @@ module.exports = Relationship = (function() {
     formula = this.opts.formula || Relationship.defaultFormula;
     this.graphThumb = this.opts.graphThumb || Relationship.defaultGraphThumb;
     this.errHandler = this.opts.errHandler || Relationship.defaultErrHandler;
+    this.func = this.opts.func || (formula === Relationship.defaultFormula ? Relationship.defaultFunc : null);
     this.hasError = false;
     this.setFormula(formula);
   }
@@ -59828,12 +59860,16 @@ module.exports = Relationship = (function() {
       out: outV,
       maxIn: maxIn
     };
-    try {
-      result = math["eval"](this.formula, scope);
-    } catch (error1) {
-      error = error1;
-      this.hasError = true;
-      this.errHandler(error, this.formula, inV, outV);
+    if (this.func) {
+      result = this.func(scope);
+    } else {
+      try {
+        result = math["eval"](this.formula, scope);
+      } catch (error1) {
+        error = error1;
+        this.hasError = true;
+        this.errHandler(error, this.formula, inV, outV);
+      }
     }
     return result;
   };
@@ -60030,10 +60066,13 @@ module.exports = SelectionManager = (function() {
 },{"../utils/importer":558,"../utils/translate":564,"./link":538,"./node":539}],543:[function(require,module,exports){
 var IntegrationFunction, Simulation;
 
-IntegrationFunction = function(t) {
+IntegrationFunction = function(incrementAccumulators) {
   var count, links, nextValue, outV, value;
   if (this.currentValue) {
     return this.currentValue;
+  }
+  if (this.isAccumulator && !incrementAccumulators) {
+    return this.previousValue;
   }
   links = this.inLinks();
   count = links.length;
@@ -60155,7 +60194,8 @@ module.exports = Simulation = (function() {
       return function(node) {
         node.capNodeValues = _this.capNodeValues;
         node.newIntegration = _this.newIntegration;
-        return _this.addIntegrateMethodTo(node);
+        node._cumulativeValue = 0;
+        return node.getCurrentValue = IntegrationFunction.bind(node);
       };
     })(this));
   };
@@ -60170,12 +60210,8 @@ module.exports = Simulation = (function() {
     return node.currentValue = null;
   };
 
-  Simulation.prototype.addIntegrateMethodTo = function(node) {
-    return node.getCurrentValue = IntegrationFunction.bind(node);
-  };
-
-  Simulation.prototype.evaluateNode = function(node, t) {
-    return node.currentValue = node.getCurrentValue(t);
+  Simulation.prototype.evaluateNode = function(node, firstTime) {
+    return node.currentValue = node.getCurrentValue(firstTime);
   };
 
   Simulation.prototype.generateFrame = function(time) {
@@ -60211,11 +60247,26 @@ module.exports = Simulation = (function() {
     this.onStart(nodeNames);
     step = (function(_this) {
       return function() {
+        var i, j, k;
+        for (i = j = 0; j < 10; i = ++j) {
+          _.each(_this.nodes, function(node) {
+            return _this.nextStep(node);
+          });
+          _.each(_this.nodes, function(node) {
+            return _this.evaluateNode(node, i === 0);
+          });
+        }
+        for (i = k = 0; k < 20; i = ++k) {
+          _.each(_this.nodes, function(node) {
+            return _this.nextStep(node);
+          });
+          _.each(_this.nodes, function(node) {
+            return node._cumulativeValue += _this.evaluateNode(node);
+          });
+        }
         _.each(_this.nodes, function(node) {
-          return _this.nextStep(node);
-        });
-        _.each(_this.nodes, function(node) {
-          return _this.evaluateNode(node, time);
+          node.currentValue = node._cumulativeValue / 20;
+          return node._cumulativeValue = 0;
         });
         time++;
         return _this.generateFrame(time);
