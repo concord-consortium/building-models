@@ -40,7 +40,7 @@ IntegrationFunction = (incrementAccumulators) ->
       sourceNode = link.sourceNode
       inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
       outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max)
+      nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max, @max)
       value += nextValue
     value = value / count
 
