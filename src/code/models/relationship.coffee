@@ -7,6 +7,8 @@ module.exports = class Relationship
   @defaultFormula:    "1 * in"
   @defaultGraphThumb: "TBD"
   @errValue:          -1
+  @defaultFunc: (scope) ->
+    scope.in
 
 
   @defaultErrHandler: (error,expr,vars)->
@@ -19,6 +21,7 @@ module.exports = class Relationship
     formula      = @opts.formula    or Relationship.defaultFormula
     @graphThumb  = @opts.graphThumb or Relationship.defaultGraphThumb
     @errHandler  = @opts.errHandler or Relationship.defaultErrHandler
+    @func        = @opts.func       or if formula is Relationship.defaultFormula then Relationship.defaultFunc else null
     @hasError    = false
     @setFormula(formula)
 
@@ -35,11 +38,14 @@ module.exports = class Relationship
       in: inV
       out: outV
       maxIn: maxIn
-    try
-      result = math.eval @formula, scope
-    catch error
-      @hasError = true
-      @errHandler(error, @formula, inV, outV)
+    if @func
+      result = @func scope
+    else
+      try
+        result = math.eval @formula, scope
+      catch error
+        @hasError = true
+        @errHandler(error, @formula, inV, outV)
     result
 
   toExport: ->
