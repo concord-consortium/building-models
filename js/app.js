@@ -59679,11 +59679,13 @@ module.exports = Node = (function(superClass) {
 
 
 },{"../utils/colors":553,"../utils/translate":564,"./graph-primitive":537}],540:[function(require,module,exports){
-var RelationFactory, Relationship, tr;
+var RelationFactory, Relationship, ln12, tr;
 
 tr = require("../utils/translate");
 
 Relationship = require("./relationship");
+
+ln12 = Math.log(1.2);
 
 module.exports = RelationFactory = (function() {
   function RelationFactory() {}
@@ -59726,9 +59728,9 @@ module.exports = RelationFactory = (function() {
     id: 1,
     text: tr("~NODE-RELATION-EDIT.A_LOT"),
     postfixIco: "a-lot",
-    formulaFrag: "in * 5",
+    formulaFrag: "min(in * 2, maxOut)",
     func: function(scope) {
-      return scope["in"] * 5;
+      return Math.min(scope["in"] * 2, scope.maxOut);
     }
   };
 
@@ -59736,9 +59738,9 @@ module.exports = RelationFactory = (function() {
     id: 2,
     text: tr("~NODE-RELATION-EDIT.A_LITTLE"),
     postfixIco: "a-little",
-    formulaFrag: "in / 5",
+    formulaFrag: "in / 2",
     func: function(scope) {
-      return scope["in"] / 5;
+      return scope["in"] / 2;
     }
   };
 
@@ -59746,9 +59748,9 @@ module.exports = RelationFactory = (function() {
     id: 3,
     text: tr("~NODE-RELATION-EDIT.MORE_AND_MORE"),
     postfixIco: "more-and-more",
-    formulaFrag: "in ^ 2",
+    formulaFrag: "min((in ^ 2)/10, maxOut)",
     func: function(scope) {
-      return scope["in"] * scope["in"];
+      return Math.min((scope["in"] * scope["in"]) / 10, scope.maxOut);
     }
   };
 
@@ -59756,9 +59758,9 @@ module.exports = RelationFactory = (function() {
     id: 4,
     text: tr("~NODE-RELATION-EDIT.LESS_AND_LESS"),
     postfixIco: "less-and-less",
-    formulaFrag: "1/in",
+    formulaFrag: "log(in) / 0.1823215",
     func: function(scope) {
-      return 1 / scope["in"];
+      return Math.log(scope["in"]) / ln12;
     }
   };
 
@@ -59849,16 +59851,20 @@ module.exports = Relationship = (function() {
     return this.evaluate(1, 1);
   };
 
-  Relationship.prototype.evaluate = function(inV, outV, maxIn) {
+  Relationship.prototype.evaluate = function(inV, outV, maxIn, maxOut) {
     var error, error1, result, scope;
     if (maxIn == null) {
       maxIn = 100;
+    }
+    if (maxOut == null) {
+      maxOut = 100;
     }
     result = Relationship.errValue;
     scope = {
       "in": inV,
       out: outV,
-      maxIn: maxIn
+      maxIn: maxIn,
+      maxOut: maxOut
     };
     if (this.func) {
       result = this.func(scope);
@@ -60108,7 +60114,7 @@ IntegrationFunction = function(incrementAccumulators) {
         sourceNode = link.sourceNode;
         inV = sourceNode.previousValue != null ? sourceNode.previousValue : sourceNode.initialValue;
         outV = _this.previousValue || _this.initialValue;
-        nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max);
+        nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max, _this.max);
         return value += nextValue;
       };
     })(this));
@@ -66746,8 +66752,17 @@ module.exports = SvgGraphView = React.createClass({
   margin: function() {
     return this.props.fontSize + this.marginal();
   },
-  isExponential: function() {
-    return this.props.formula.indexOf("^") > -1 || this.props.formula.indexOf("1/in") > -1;
+  getYScale: function(xrange, yrange) {
+    if (this.props.formula.indexOf("^") > -1) {
+      return yrange;
+    } else if ((this.props.formula.indexOf("log") > -1) && (this.props.formula.indexOf("maxIn -") === -1)) {
+      return yrange * 3;
+    } else {
+      return xrange;
+    }
+  },
+  startAt1: function() {
+    return this.props.formula.indexOf("log") > -1;
   },
   invertPoint: function(point) {
     return {
@@ -66784,7 +66799,7 @@ module.exports = SvgGraphView = React.createClass({
   getPathPoints: function() {
     var data, maxy, miny, rangex, rangey, scaley, x0;
     rangex = 20;
-    x0 = this.isExponential() ? 1 : 0;
+    x0 = this.startAt1() ? 1 : 0;
     data = _.range(x0, rangex);
     miny = Infinity;
     maxy = -Infinity;
@@ -66794,7 +66809,8 @@ module.exports = SvgGraphView = React.createClass({
         scope = {
           "in": x,
           out: 0,
-          maxIn: rangex
+          maxIn: rangex,
+          maxOut: rangex
         };
         try {
           y = math["eval"](_this.props.formula, scope);
@@ -66815,11 +66831,10 @@ module.exports = SvgGraphView = React.createClass({
       };
     })(this));
     rangey = maxy - miny;
-    scaley = this.isExponential() ? rangey : rangex;
+    scaley = this.getYScale(rangex, rangey);
     data = _.map(data, function(d) {
       var x, y;
       x = d.x, y = d.y;
-      y = y - miny;
       x = x / rangex;
       y = y / scaley;
       return {
@@ -66827,8 +66842,6 @@ module.exports = SvgGraphView = React.createClass({
         y: y
       };
     });
-    console.log(this.props.formula);
-    console.log(data);
     return data;
   },
   renderXLabel: function() {
