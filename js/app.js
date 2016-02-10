@@ -59260,8 +59260,30 @@ module.exports = CodapConnect = (function() {
   };
 
   CodapConnect.prototype.createGraph = function(yAttributeName) {
-    var timeUnit;
+    var nodes, sampleDataAttrs, timeUnit;
     timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
+    nodes = this.graphStore.getNodes();
+    sampleDataAttrs = [
+      {
+        name: timeUnit,
+        type: "numeric"
+      }
+    ];
+    _.each(nodes, function(node) {
+      var type;
+      type = node.valueDefinedSemiQuantitatively ? 'qualitative' : 'numeric';
+      return sampleDataAttrs.push({
+        name: node.title,
+        type: type
+      });
+    });
+    this.codapPhone.call({
+      action: 'createCollection',
+      args: {
+        name: 'Samples',
+        attrs: sampleDataAttrs
+      }
+    });
     return this.codapPhone.call({
       action: 'createComponent',
       args: {
