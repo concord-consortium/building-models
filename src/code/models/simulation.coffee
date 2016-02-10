@@ -1,8 +1,10 @@
-IntegrationFunction = ->
+IntegrationFunction = (incrementAccumulators) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
   if @currentValue
     return @currentValue
+  if @isAccumulator and not incrementAccumulators
+    return @previousValue
 
   links = @inLinks()
   count = links.length
@@ -118,8 +120,8 @@ module.exports = class Simulation
     node.previousValue = node.currentValue
     node.currentValue = null
 
-  evaluateNode: (node) ->
-    node.currentValue = node.getCurrentValue()
+  evaluateNode: (node, firstTime) ->
+    node.currentValue = node.getCurrentValue(firstTime)
 
   # create an object representation of the current timeStep and add
   # it to the current bundle of frames.
@@ -162,7 +164,7 @@ module.exports = class Simulation
       # push values down chain
       for i in [0...10]
         _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
-        _.each @nodes, (node) => @evaluateNode node
+        _.each @nodes, (node) => @evaluateNode node, i is 0
 
       # accumulate values for later averaging
       for i in [0...20]
