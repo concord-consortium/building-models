@@ -68,30 +68,8 @@ module.exports = class CodapConnect
 
   _openNewCase: (nodeNames) ->
     @currentCaseID = null
-    nodes = @graphStore.getNodes()
 
-    # First column definition is the time index
-    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
-    sampleDataAttrs = [
-      {
-        name: timeUnit
-        type: "numeric"
-      }
-    ]
-
-    # Append node names to column descriptions.
-    _.each nodeNames, (name) ->
-      node = (nodes.filter (n) -> n.title is name)[0]
-      type = if node.valueDefinedSemiQuantitatively then 'qualitative' else 'numeric'
-      sampleDataAttrs.push
-        name: name
-        type: type
-
-    @codapPhone.call
-      action: 'createCollection'
-      args:
-        name: 'Samples'
-        attrs: sampleDataAttrs
+    @_createCollection(nodeNames)
 
     @codapPhone.call {
       action: 'openCase'
@@ -108,6 +86,39 @@ module.exports = class CodapConnect
           @createTable()
       else
         log.info "CODAP returned an error on 'openCase'"
+
+  _createCollection: (nodeNames) ->
+    nodes = @graphStore.getNodes()
+
+    # First column definition is the time index
+    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
+    sampleDataAttrs = [
+      {
+        name: timeUnit
+        type: "numeric"
+      }
+    ]
+
+    addSampleDataAttr = (node) ->
+      type = if node.valueDefinedSemiQuantitatively then 'qualitative' else 'numeric'
+      sampleDataAttrs.push
+        name: node.title
+        type: type
+
+    # Append node names to column descriptions.
+    if (nodeNames)
+      _.each nodeNames, (name) ->
+        node = (nodes.filter (n) -> n.title is name)[0]
+        addSampleDataAttr(node)
+    else
+      _.each nodes, (node) ->
+        addSampleDataAttr(node)
+
+    @codapPhone.call
+      action: 'createCollection'
+      args:
+        name: 'Samples'
+        attrs: sampleDataAttrs
 
   _sendSimulationData: (data) ->
     if not @currentCaseID
@@ -162,6 +173,29 @@ module.exports = class CodapConnect
 
   createGraph: (yAttributeName)->
     timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
+    nodes = @graphStore.getNodes()
+
+    # First column definition is the time index
+    sampleDataAttrs = [
+      {
+        name: timeUnit
+        type: "numeric"
+      }
+    ]
+
+    # Append node names to column descriptions.
+    _.each nodes, (node) ->
+      type = if node.valueDefinedSemiQuantitatively then 'qualitative' else 'numeric'
+      sampleDataAttrs.push
+        name: node.title
+        type: type
+
+    @codapPhone.call
+      action: 'createCollection'
+      args:
+        name: 'Samples'
+        attrs: sampleDataAttrs
+
     @codapPhone.call
       action: 'createComponent'
       args: {
