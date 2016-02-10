@@ -66820,7 +66820,7 @@ module.exports = SvgGraphView = React.createClass({
   },
   getPathPoints: function() {
     var data, maxy, miny, rangex, rangey, scaley, x0;
-    rangex = 20;
+    rangex = 60;
     x0 = this.startAt1() ? 1 : 0;
     data = _.range(x0, rangex);
     miny = Infinity;
@@ -66922,7 +66922,7 @@ module.exports = SvgGraphView = React.createClass({
     }, svg({
       width: this.props.width,
       height: this.props.height
-    }, this.renderLineData(), this.renderAxisLines(), this.renderXLabel(), this.renderYLabel()));
+    }, this.renderAxisLines(), this.renderLineData(), this.renderXLabel(), this.renderYLabel()));
   }
 });
 
