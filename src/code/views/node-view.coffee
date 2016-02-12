@@ -163,17 +163,14 @@ module.exports = NodeView = React.createClass
     )
 
   renderSliderView: ->
-    if @props.data.canEditValue()
-      (SliderView
-        width: 70
-        onValueChange: @changeValue
-        value: @props.data.initialValue
-        displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
-        max: @props.data.max
-        min: @props.data.min
-      )
-    else
-      null
+    (SliderView
+      width: 70
+      onValueChange: @changeValue
+      value: @props.data.initialValue
+      displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
+      max: @props.data.max
+      min: @props.data.min
+    )
 
   handleGraphClick: (attributeName) ->
     codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
