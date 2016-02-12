@@ -163,6 +163,7 @@ module.exports = NodeView = React.createClass
     )
 
   renderSliderView: ->
+    enabled = not @props.running or @props.data.canEditValueWhileRunning()
     (SliderView
       width: 70
       onValueChange: @changeValue
@@ -170,6 +171,7 @@ module.exports = NodeView = React.createClass
       displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
       max: @props.data.max
       min: @props.data.min
+      enabled: enabled
     )
 
   handleGraphClick: (attributeName) ->

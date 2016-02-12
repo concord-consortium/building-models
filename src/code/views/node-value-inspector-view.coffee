@@ -1,10 +1,13 @@
 {div, h2, label, span, input, p, i} = React.DOM
 
+SimulationStore = require '../stores/simulation-store'
 tr = require "../utils/translate"
 
 module.exports = React.createClass
 
   displayName: 'NodeValueInspectorView'
+
+  mixins: [ SimulationStore.mixin ]
 
   propTypes:
     max: React.PropTypes.number
@@ -29,6 +32,10 @@ module.exports = React.createClass
     return Math.max(@props.node.min, Math.min(@props.node.max, inputValue))
 
   updateValue:  (evt) ->
+    if @state.modelIsRunning and not @props.node.canEditValueWhileRunning()
+      # don't do anything; effectively disables slider
+      return
+
     if value = evt.target.value
       value = @trim(parseInt(value))
       @props.graphStore.changeNode(initialValue:value)
