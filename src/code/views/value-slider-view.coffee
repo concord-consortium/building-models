@@ -21,6 +21,7 @@ ValueSlider = React.createClass
     minLabel: null
     maxLabel: null
     displaySemiQuant: false
+    enabled: true
     onValueChange: (v) ->
       log.info "new value #{v}"
     onRangeChange: (r) ->
@@ -73,7 +74,15 @@ ValueSlider = React.createClass
       opts.grid = [tickDistance, 0]
 
     $(handle.getDOMNode()).draggable opts
+    if not @props.enabled
+      $(handle.getDOMNode()).draggable( "disable" )
 
+  componentDidUpdate: ->
+    handle = @refs.handle or @
+    if @props.enabled
+      $(handle.getDOMNode()).draggable( "enable" )
+    else
+      $(handle.getDOMNode()).draggable( "disable" )
 
   valueFromSliderUI: (displayX) ->
     newV = (displayX / @props.width * (@props.max - @props.min)) + @props.min
@@ -177,10 +186,12 @@ ValueSlider = React.createClass
       width: "#{@props.width}px"
       minHeight:"#{@props.height + lengendHeight}px"
     circleRadius = 2
-    (div {className: "value-slider", style: style},
+    classNames = "value-slider"
+    if not @props.enabled then classNames += " disabled"
+    (div {className: classNames, style: style},
       (svg {className: "svg-background", width: "#{@props.width}px", height:"#{@props.height}px", viewBox: "0 0 #{@props.width} #{@props.height}"},
-        (path {d:"M#{circleRadius} #{center} l #{@props.width - circleRadius} 0", className:"slider-line"})
-        (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
+        (path {d:"M#{circleRadius} #{center} l #{@props.width - circleRadius} 0", className:"slider-line", stroke:"blue"})
+        (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"blue"})
         (circle {cx:@props.width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
         @renderTicks(center, circleRadius)
       )
