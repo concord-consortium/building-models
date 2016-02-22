@@ -212,6 +212,7 @@ module.exports = React.createClass
             data: node
             selected: @state.selectedNode is node
             simulating: @state.simulationPanelExpanded
+            running: @state.modelIsRunning
             editTitle: @state.editingNode is node
             nodeKey: node.key
             ref: node.key

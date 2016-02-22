@@ -1,10 +1,13 @@
 {div, h2, label, span, input, p, i} = React.DOM
 
+SimulationStore = require '../stores/simulation-store'
 tr = require "../utils/translate"
 
 module.exports = React.createClass
 
   displayName: 'NodeValueInspectorView'
+
+  mixins: [ SimulationStore.mixin ]
 
   propTypes:
     max: React.PropTypes.number
@@ -29,6 +32,10 @@ module.exports = React.createClass
     return Math.max(@props.node.min, Math.min(@props.node.max, inputValue))
 
   updateValue:  (evt) ->
+    if @state.modelIsRunning and not @props.node.canEditValueWhileRunning()
+      # don't do anything; effectively disables slider
+      return
+
     if value = evt.target.value
       value = @trim(parseInt(value))
       @props.graphStore.changeNode(initialValue:value)
@@ -87,40 +94,34 @@ module.exports = React.createClass
 
   render: ->
     node = @props.node
-    canEditValue = node.canEditValue()
     (div {className: 'value-inspector'},
       (div {className: 'inspector-content group'},
-        if canEditValue
-          (div {className: 'full'},
-            unless node.valueDefinedSemiQuantitatively
-              (span {className: 'full'},
-                (label {className: 'right'}, tr "~NODE-VALUE-EDIT.INITIAL-VALUE")
-                (input {
-                  className: 'left'
-                  type: "number",
-                  min: "#{node.min}",
-                  max: "#{node.max}",
-                  value: "#{node.initialValue}",
-                  onClick: @selectText,
-                  onChange: @updateValue}
-                )
-              )
-            (div {className: "slider group full"},
+        (div {className: 'full'},
+          unless node.valueDefinedSemiQuantitatively
+            (span {className: 'full'},
+              (label {className: 'right'}, tr "~NODE-VALUE-EDIT.INITIAL-VALUE")
               (input {
-                className: "full"
-                type: "range",
+                className: 'left'
+                type: "number",
                 min: "#{node.min}",
                 max: "#{node.max}",
                 value: "#{node.initialValue}",
+                onClick: @selectText,
                 onChange: @updateValue}
               )
-              @renderMinAndMax(node)
             )
+          (div {className: "slider group full"},
+            (input {
+              className: "full"
+              type: "range",
+              min: "#{node.min}",
+              max: "#{node.max}",
+              value: "#{node.initialValue}",
+              onChange: @updateValue}
+            )
+            @renderMinAndMax(node)
           )
-        else
-          (div {className: 'full'},
-            (label {className: 'right'}, tr "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE")
-          )
+        )
         (span {className: "checkbox group full"},
           (span {},
             (input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked})
@@ -129,16 +130,15 @@ module.exports = React.createClass
         )
       )
 
-      if canEditValue
-        (div {className: "bottom-pane"},
-          (p {},
-            if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS"
-            else  tr "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")
-          (p {},
-            (label {className: 'node-switch-edit-mode', onClick: @updateDefiningType},
-              if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS"
-              else tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS"
-            )
+      (div {className: "bottom-pane"},
+        (p {},
+          if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS"
+          else  tr "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")
+        (p {},
+          (label {className: 'node-switch-edit-mode', onClick: @updateDefiningType},
+            if node.valueDefinedSemiQuantitatively then tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS"
+            else tr "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS"
           )
         )
+      )
     )
