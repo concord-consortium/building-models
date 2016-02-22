@@ -60395,8 +60395,8 @@ module.exports = Node = (function(superClass) {
     };
   };
 
-  Node.prototype.canEditValueWhileRunning = function() {
-    return this.inLinks().length === 0 || this.isAccumulator;
+  Node.prototype.canEditValue = function() {
+    return true;
   };
 
   Node.prototype.paletteItemIs = function(paletteItem) {
@@ -64923,7 +64923,6 @@ module.exports = React.createClass({
           data: node,
           selected: this.state.selectedNode === node,
           simulating: this.state.simulationPanelExpanded,
-          running: this.state.modelIsRunning,
           editTitle: this.state.editingNode === node,
           nodeKey: node.key,
           ref: node.key,
@@ -66240,17 +66239,14 @@ module.exports = React.createClass({
 
 
 },{"../mixins/node-title":622,"../utils/translate":651,"./color-picker-view":655,"./image-picker-view":665}],677:[function(require,module,exports){
-var SimulationStore, div, h2, i, input, label, p, ref, span, tr;
+var div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
-
-SimulationStore = require('../stores/simulation-store');
 
 tr = require("../utils/translate");
 
 module.exports = React.createClass({
   displayName: 'NodeValueInspectorView',
-  mixins: [SimulationStore.mixin],
   propTypes: {
     max: React.PropTypes.number,
     min: React.PropTypes.number,
@@ -66275,9 +66271,6 @@ module.exports = React.createClass({
   },
   updateValue: function(evt) {
     var value;
-    if (this.state.modelIsRunning && !this.props.node.canEditValueWhileRunning()) {
-      return;
-    }
     if (value = evt.target.value) {
       value = this.trim(parseInt(value));
       return this.props.graphStore.changeNode({
@@ -66369,13 +66362,14 @@ module.exports = React.createClass({
     }
   },
   render: function() {
-    var node;
+    var canEditValue, node;
     node = this.props.node;
+    canEditValue = node.canEditValue();
     return div({
       className: 'value-inspector'
     }, div({
       className: 'inspector-content group'
-    }, div({
+    }, canEditValue ? div({
       className: 'full'
     }, !node.valueDefinedSemiQuantitatively ? span({
       className: 'full'
@@ -66398,24 +66392,28 @@ module.exports = React.createClass({
       max: "" + node.max,
       value: "" + node.initialValue,
       onChange: this.updateValue
-    }), this.renderMinAndMax(node))), span({
+    }), this.renderMinAndMax(node))) : div({
+      className: 'full'
+    }, label({
+      className: 'right'
+    }, tr("~NODE-VALUE-EDIT.DEPENDENT_VARIABLE"))), span({
       className: "checkbox group full"
     }, span({}, input({
       type: "checkbox",
       checked: node.isAccumulator,
       onChange: this.updateChecked
-    }), label({}, tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR"))))), div({
+    }), label({}, tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR"))))), canEditValue ? div({
       className: "bottom-pane"
     }, p({}, node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.DEFINING_WITH_WORDS") : tr("~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")), p({}, label({
       className: 'node-switch-edit-mode',
       onClick: this.updateDefiningType
-    }, node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS") : tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS")))));
+    }, node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS") : tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS")))) : void 0);
   }
 });
 
 
 
-},{"../stores/simulation-store":639,"../utils/translate":651}],678:[function(require,module,exports){
+},{"../utils/translate":651}],678:[function(require,module,exports){
 var CodapConnect, DEFAULT_CONTEXT_NAME, NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
@@ -66629,17 +66627,18 @@ module.exports = NodeView = React.createClass({
     }));
   },
   renderSliderView: function() {
-    var enabled;
-    enabled = !this.props.running || this.props.data.canEditValueWhileRunning();
-    return SliderView({
-      width: 70,
-      onValueChange: this.changeValue,
-      value: this.props.data.initialValue,
-      displaySemiQuant: this.props.data.valueDefinedSemiQuantitatively,
-      max: this.props.data.max,
-      min: this.props.data.min,
-      enabled: enabled
-    });
+    if (this.props.data.canEditValue()) {
+      return SliderView({
+        width: 70,
+        onValueChange: this.changeValue,
+        value: this.props.data.initialValue,
+        displaySemiQuant: this.props.data.valueDefinedSemiQuantitatively,
+        max: this.props.data.max,
+        min: this.props.data.min
+      });
+    } else {
+      return null;
+    }
   },
   handleGraphClick: function(attributeName) {
     var codapConnect;
@@ -67780,7 +67779,6 @@ ValueSlider = React.createClass({
       minLabel: null,
       maxLabel: null,
       displaySemiQuant: false,
-      enabled: true,
       onValueChange: function(v) {
         return log.info("new value " + v);
       },
@@ -67852,19 +67850,7 @@ ValueSlider = React.createClass({
       tickDistance = this.props.width / numTicks;
       opts.grid = [tickDistance, 0];
     }
-    $(handle.getDOMNode()).draggable(opts);
-    if (!this.props.enabled) {
-      return $(handle.getDOMNode()).draggable("disable");
-    }
-  },
-  componentDidUpdate: function() {
-    var handle;
-    handle = this.refs.handle || this;
-    if (this.props.enabled) {
-      return $(handle.getDOMNode()).draggable("enable");
-    } else {
-      return $(handle.getDOMNode()).draggable("disable");
-    }
+    return $(handle.getDOMNode()).draggable(opts);
   },
   valueFromSliderUI: function(displayX) {
     var newV;
@@ -67994,7 +67980,7 @@ ValueSlider = React.createClass({
     return ticks;
   },
   render: function() {
-    var center, circleRadius, classNames, lengendHeight, style;
+    var center, circleRadius, lengendHeight, style;
     center = this.props.height / 2;
     lengendHeight = 9 + 4.5;
     style = {
@@ -68004,12 +67990,8 @@ ValueSlider = React.createClass({
       minHeight: (this.props.height + lengendHeight) + "px"
     };
     circleRadius = 2;
-    classNames = "value-slider";
-    if (!this.props.enabled) {
-      classNames += " disabled";
-    }
     return div({
-      className: classNames,
+      className: "value-slider",
       style: style
     }, svg({
       className: "svg-background",
@@ -68018,14 +68000,12 @@ ValueSlider = React.createClass({
       viewBox: "0 0 " + this.props.width + " " + this.props.height
     }, path({
       d: "M" + circleRadius + " " + center + " l " + (this.props.width - circleRadius) + " 0",
-      className: "slider-line",
-      stroke: "blue"
+      className: "slider-line"
     }), circle({
       cx: circleRadius,
       cy: center,
       r: circleRadius,
-      className: "slider-shape",
-      stroke: "blue"
+      className: "slider-shape"
     }), circle({
       cx: this.props.width - circleRadius,
       cy: center,
