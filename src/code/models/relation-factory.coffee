@@ -1,8 +1,6 @@
 tr           = require "../utils/translate"
 Relationship = require "./relationship"
 
-ln12 = Math.log(1.2)
-
 module.exports = class RelationFactory
   @increase:
     id: 0
@@ -50,17 +48,17 @@ module.exports = class RelationFactory
     id: 3
     text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
     postfixIco: "more-and-more"
-    formulaFrag: "min((in ^ 2)/10, maxOut)"
+    formulaFrag: "min(exp(in/21.7)-1, maxOut)"
     func: (scope) ->
-      return Math.min((scope.in * scope.in)/10, scope.maxOut)
+      return Math.min(Math.exp(scope.in/21.7)-1, scope.maxOut)
 
   @lessAndLess:
     id: 4
     text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
-    formulaFrag: "log(in) / 0.1823215"
+    formulaFrag: "21.7 * log(in+1)"
     func: (scope) ->
-      return Math.log(scope.in) / ln12
+      return 21.7 * Math.log(scope.in+1)
 
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"

@@ -17,20 +17,6 @@ module.exports = SvgGraphView = React.createClass
   margin: ->
     @props.fontSize + @marginal()
 
-  # TODO: This is a hack. We parse the formula.
-  # We want to know because it informs how we scale the
-  # graph axis
-  getYScale: (xrange, yrange) ->
-    if @props.formula.indexOf("^") > -1
-      yrange
-    else if (@props.formula.indexOf("log")  > -1) and (@props.formula.indexOf("maxIn -") is -1)
-      yrange * 3
-    else
-      xrange
-
-  startAt1: ->
-    @props.formula.indexOf("log")  > -1
-
   invertPoint: (point) ->
     {x: point.x, y: @props.height - point.y}
 
@@ -50,9 +36,8 @@ module.exports = SvgGraphView = React.createClass
     "M #{data}"
 
   getPathPoints: ->
-    rangex = 60
-    x0 = if @startAt1() then 1 else 0
-    data = _.range(x0,rangex)
+    rangex = 100
+    data = _.range(0,rangex)
     miny = Infinity
     maxy = -Infinity
     data = _.map data, (x) =>
@@ -65,15 +50,10 @@ module.exports = SvgGraphView = React.createClass
         console.log "Errror: #{error}"
       { y: y, x: x}
 
-    rangey = maxy - miny
-
-    # if we aren't doing exponential graphing, then keep
-    # then use the range of x for axis scaling
-    scaley = @getYScale(rangex, rangey)
     data = _.map data, (d) ->
       {x,y} = d
       x = x / rangex
-      y = y / scaley
+      y = y / rangex
       {x: x, y: y}
     data
 
