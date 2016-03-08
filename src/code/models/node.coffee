@@ -7,21 +7,27 @@ module.exports = class Node extends GraphPrimitive
   # Properties that can be changed.
   @fields: [
     'title', 'image', 'color', 'paletteItem',
-    'initialValue', 'min', 'max', 'value',
+    'initialValue', 'min', 'max',
     'isAccumulator', 'valueDefinedSemiQuantitatively']
 
-  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50,min:0,max:100,isAccumulator:false, valueDefinedSemiQuantitatively:false}, key) ->
+  constructor: (nodeSpec={}, key) ->
     super()
     if key
       @key = key
     @links = []
-    {@x, @y, @title, @image, @initialValue, @isAccumulator, @valueDefinedSemiQuantitatively, @paletteItem} = nodeSpec
-    @initialValue  ?= 50
-    @min ?= 0
-    @max ?= 100
-    @isAccumulator ?= false
+    {
+      @x=0
+      @y=0
+      @title="untitled"
+      @image
+      @initialValue=50
+      @min=0
+      @max=100
+      @isAccumulator=false
+      @valueDefinedSemiQuantitatively=true,
+      @paletteItem
+    } = nodeSpec
     @color ?= Colors[0].value
-    @valueDefinedSemiQuantitatively ?= true
 
   type: 'Node'
   addLink: (link) ->
