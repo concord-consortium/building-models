@@ -263,7 +263,7 @@ GraphStore  = Reflux.createStore
   _changeLink: (link, changes) ->
     log.info "Change  for #{link.title}"
     for key in ['title','color', 'relation']
-      if changes[key]
+      if changes[key]?
         log.info "Change #{key} for #{link.title}"
         link[key] = changes[key]
     @_maybeChangeSelectedItem link
