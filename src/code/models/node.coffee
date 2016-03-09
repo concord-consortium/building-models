@@ -3,25 +3,78 @@ Colors = require '../utils/colors'
 
 tr = require '../utils/translate'
 
+SEMIQUANT_MIN = 0
+SEMIQUANT_MAX = 100
+
+# Enable ES5 getters and setters
+Function::property = (prop, desc) ->
+  Object.defineProperty @prototype, prop, desc
+
 module.exports = class Node extends GraphPrimitive
   # Properties that can be changed.
   @fields: [
     'title', 'image', 'color', 'paletteItem',
-    'initialValue', 'min', 'max', 'value',
+    'initialValue', 'min', 'max',
     'isAccumulator', 'valueDefinedSemiQuantitatively']
 
-  constructor: (nodeSpec={x:0,y:0,title:"untitled",image:null,initialValue:50,min:0,max:100,isAccumulator:false, valueDefinedSemiQuantitatively:false}, key) ->
+  constructor: (nodeSpec={}, key) ->
     super()
     if key
       @key = key
     @links = []
-    {@x, @y, @title, @image, @initialValue, @isAccumulator, @valueDefinedSemiQuantitatively, @paletteItem} = nodeSpec
-    @initialValue  ?= 50
-    @min ?= 0
-    @max ?= 100
-    @isAccumulator ?= false
+
+    {
+      @x=0
+      @y=0
+      @title="untitled"
+      @image
+      @isAccumulator=false
+      @valueDefinedSemiQuantitatively=true,
+      @paletteItem
+    } = nodeSpec
+
+    # Save internal values of min, max and initialValues. Actual values retreived
+    # using @min or node.min will depend on whether we are in quantitative or
+    # semi-quantitative mode. (See getters and setters below).
+    @_min = nodeSpec.min ? SEMIQUANT_MIN
+    @_max = nodeSpec.max ? SEMIQUANT_MAX
+    @_initialValue = nodeSpec.initialValue ? 50
+
     @color ?= Colors[0].value
-    @valueDefinedSemiQuantitatively ?= true
+
+  # Scale the value of initialValue such that, if we are in semi-quantitative mode,
+  # we always return a value between 0 and 100. Likewise, if we try to set a value while
+  # we are in SQ mode, we set the actual internal value to the same proportion between
+  # the internal min and max
+  @property 'initialValue',
+    get: ->
+      if not @valueDefinedSemiQuantitatively
+        @_initialValue
+      else
+        @mapQuantToSemiquant(@_initialValue)
+    set: (val) ->
+      if not @valueDefinedSemiQuantitatively
+        @_initialValue = val
+      else
+        @_initialValue = @mapSemiquantToQuant(val)
+
+  @property 'min',
+    get: ->
+      if not @valueDefinedSemiQuantitatively
+        @_min
+      else
+        SEMIQUANT_MIN
+    set: (val) ->
+      if not @valueDefinedSemiQuantitatively then @_min = val
+
+  @property 'max',
+    get: ->
+      if not @valueDefinedSemiQuantitatively
+        @_max
+      else
+        SEMIQUANT_MAX
+    set: (val) ->
+      if not @valueDefinedSemiQuantitatively then @_max = val
 
   type: 'Node'
   addLink: (link) ->
@@ -78,6 +131,15 @@ module.exports = class Node extends GraphPrimitive
     else
       @max = Math.max @max, @min
     @initialValue = Math.max @min, Math.min @max, @initialValue
+
+  # Given a value between _min and _max, calculate the SQ proportion
+  mapQuantToSemiquant: (val) ->
+    SEMIQUANT_MIN + (val - @_min) / (@_max - @_min) * (SEMIQUANT_MAX - SEMIQUANT_MIN)
+
+  # Given an SQ value (i.e. between 0 and 100), calculate quantatative value
+  # (i.e. between _min and _max)
+  mapSemiquantToQuant: (val) ->
+    @_min + (val - SEMIQUANT_MIN) / (SEMIQUANT_MAX - SEMIQUANT_MIN) * (@_max - @_min)
 
   toExport: ->
     data:

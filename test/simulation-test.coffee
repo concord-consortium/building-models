@@ -173,93 +173,6 @@ describe "Simulation", ->
         results: [
           [120, 100]
         ]}
-
-        # TODO: Test asserting that loops are valid in newIntegration method.
-        # But see below because examples 13, 14, & 15 cover this.
-
-        # 11: Simple a->b test of new 'inertial' integration
-        # {A:100, B:95, AB: "1 * in",
-        # cap: false
-        # newInt: true
-        # results: [
-        #   [100, 97.5],
-        #   [100, 98.75],
-        #   [100, 99.375],
-        #   [100, 99.6875],
-        #   [100, 99.84375]
-        # ]}
-
-        # 12: A->B with Negative link
-        # {A:100, B:95, AB: "(maxIn - in)"
-        # cap: false
-        # newInt: true
-        # results: [
-        #   [100, 47.5],
-        #   [100, 23.75],
-        #   [100, 11.875],
-        #   [100, 5.9375]
-        # ]}
-
-        # 13: A- ⇄B with Positive / Positive feedback
-        # {A:100, B:50, AB: "1 * in", BA: "1 * in"
-        # cap: false
-        # newInt: true
-        # results: [
-        #   [75, 75],
-        #   [75, 75]
-        # ]}
-
-        # 14: A ⇄ B with Postive / Negative feedback
-        # {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
-        # cap: false
-        # newInt: true
-        # results: [
-        #   [50,   100]
-        #   [25,    75]
-        #   [25,    50]
-        #   [37.5,  37.5]
-        #   [50,	  37.5]
-        #   [56.25, 43.75]
-        # ]}
-
-        # 15: A ⇄ B with Postive / Negative feedback
-        # {A:100, B:100, BA: "(maxIn - in)", AB: "1 * in"
-        # cap: false
-        # newInt: true
-        # results: [
-        #   [50,   100]
-        #   [25,    75]
-        #   [25,    50]
-        #   [37.5,  37.5]
-        #   [50,	  37.5]
-        #   [56.25, 43.75]
-        # ]}
-
-        # 16: A -> B ->C -> A with Postive /  Positive Negative feedback
-        # {A:100, B:95, C:0, AB: "1 * in", BC: "1 * in", CA: "(maxIn -in)"
-        # cap: false
-        # newInt: true
-        # results: [
-        #   [100,	97.5,	47.5]
-        #   [76.25,	98.75,	72.5]
-        #   [51.875,	87.5,	85.625]
-        #   [33.125,	69.6875,	86.5625]
-        #   [23.28125,	51.40625,	78.125]
-        #   [22.578125,	37.34375,	64.765625]
-        #   [28.90625,	29.9609375,	51.0546875]
-        #   [38.92578125,	29.43359375,	40.5078125]
-        #   [49.208984375,	34.1796875, 34.970703125]
-        #   [57.11914063,	41.69433594,	34.57519531]
-        #   [61.27197266,	49.40673828,	38.13476563]
-        #   [61.56860352,	55.33935547,	43.77075195]
-        #   [58.89892578,	58.45397949,	49.55505371]
-        #   [54.67193604,	58.67645264,	54.0045166]
-        #   [50.33370972,	56.67419434,	56.34048462]
-        #   [46.99661255,	53.50395203,	56.50733948]
-        #   [45.24463654,	50.25028229,	55.00564575]
-        #   [45.11949539,	47.74745941,	52.62796402]
-        #   [46.24576569,	46.4334774, 50.18771172]
-        # ]}
       ]
 
       _.each scenarios, (scenario, i) ->
@@ -287,6 +200,50 @@ describe "Simulation", ->
               simulation.run()
               for node, k in nodeArray
                 node.currentValue.should.be.closeTo result[k], 0.000001
+
+    describe "for mixed semiquantitative and quantitative nodes", ->
+      beforeEach ->
+        @nodeA    = new Node({initialValue: 20})
+        @nodeB    = new Node({initialValue: 50})
+        @formula  = "1 * in"
+        @arguments =
+          nodes: [@nodeA, @nodeB]
+          duration: 1
+
+        LinkNodes(@nodeA, @nodeB, @formula)
+        @simulation = new Simulation(@arguments)
+
+      describe "when the input is SQ and the output is Q", ->
+        beforeEach ->
+          @nodeA.valueDefinedSemiQuantitatively = true
+          @nodeB.valueDefinedSemiQuantitatively = false
+
+        # sanity check
+        it "should be no different when both have the same range", ->
+          @simulation.run()
+          @nodeB.currentValue.should.equal 20
+
+        it.only "should scale between output's min and max", ->
+          @nodeB.min = 50
+          @nodeB.max = 100
+          @simulation.run()
+          @nodeB.currentValue.should.equal 60
+
+      describe "when the input is Q and the output is SQ", ->
+        beforeEach ->
+          @nodeA.valueDefinedSemiQuantitatively = false
+          @nodeB.valueDefinedSemiQuantitatively = true
+
+        # sanity check
+        it "should be no different when both have the same range", ->
+          @simulation.run()
+          @nodeB.currentValue.should.equal 20
+
+        it.only "should scale between output's min and max", ->
+          @nodeA.min = 0
+          @nodeA.max = 50
+          @simulation.run()
+          @nodeB.currentValue.should.equal 40
 
 
 describe "The SimulationStore, with a network in the GraphStore", ->
