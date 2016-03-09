@@ -1,3 +1,12 @@
+scaleInput = (val, nodeIn, nodeOut) ->
+  if (nodeIn.valueDefinedSemiQuantitatively isnt nodeOut.valueDefinedSemiQuantitatively)
+    if (nodeIn.valueDefinedSemiQuantitatively)
+      return nodeOut.mapSemiquantToQuant val
+    else
+      return nodeIn.mapQuantToSemiquant val
+  else
+    return val
+
 IntegrationFunction = (incrementAccumulators) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
@@ -22,7 +31,9 @@ IntegrationFunction = (incrementAccumulators) ->
       inV = sourceNode.previousValue
       return unless inV               # we simply ignore nodes with no previous value
       outV = @previousValue or @initialValue
-      # TODO: Map input range (in.min –> in.max) to domain (out.min -> out.max)
+
+      inV = scaleInput(inV, sourceNode, this)
+
       # Here we set maxIn to zero because we want to substract inV when
       # we are in a `(maxIn - inV)` formula for accumulators (decreases by)
       # Need a better long-term solution for this.
@@ -39,6 +50,7 @@ IntegrationFunction = (incrementAccumulators) ->
     _.each links, (link) =>
       sourceNode = link.sourceNode
       inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
+      inV = scaleInput(inV, sourceNode, this)
       outV = @previousValue or @initialValue
       nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max, @max)
       value += nextValue

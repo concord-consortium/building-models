@@ -288,6 +288,50 @@ describe "Simulation", ->
               for node, k in nodeArray
                 node.currentValue.should.be.closeTo result[k], 0.000001
 
+    describe "for mixed semiquantitative and quantitative nodes", ->
+      beforeEach ->
+        @nodeA    = new Node({initialValue: 20})
+        @nodeB    = new Node({initialValue: 50})
+        @formula  = "1 * in"
+        @arguments =
+          nodes: [@nodeA, @nodeB]
+          duration: 1
+
+        LinkNodes(@nodeA, @nodeB, @formula)
+        @simulation = new Simulation(@arguments)
+
+      describe "when the input is SQ and the output is Q", ->
+        beforeEach ->
+          @nodeA.valueDefinedSemiQuantitatively = true
+          @nodeB.valueDefinedSemiQuantitatively = false
+
+        # sanity check
+        it "should be no different when both have the same range", ->
+          @simulation.run()
+          @nodeB.currentValue.should.equal 20
+
+        it.only "should scale between output's min and max", ->
+          @nodeB.min = 50
+          @nodeB.max = 100
+          @simulation.run()
+          @nodeB.currentValue.should.equal 60
+
+      describe "when the input is Q and the output is SQ", ->
+        beforeEach ->
+          @nodeA.valueDefinedSemiQuantitatively = false
+          @nodeB.valueDefinedSemiQuantitatively = true
+
+        # sanity check
+        it "should be no different when both have the same range", ->
+          @simulation.run()
+          @nodeB.currentValue.should.equal 20
+
+        it.only "should scale between output's min and max", ->
+          @nodeA.min = 0
+          @nodeA.max = 50
+          @simulation.run()
+          @nodeB.currentValue.should.equal 40
+
 
 describe "The SimulationStore, with a network in the GraphStore", ->
   beforeEach ->
