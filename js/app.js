@@ -59081,7 +59081,7 @@ SimulationStore = require('../stores/simulation-store');
 TimeUnits = require('../utils/time-units');
 
 module.exports = CodapConnect = (function() {
-  CodapConnect.prototype.name = 'Building Models Tool';
+  CodapConnect.prototype.name = 'SageModeler';
 
   CodapConnect.prototype.codapPhone = null;
 
@@ -59733,8 +59733,8 @@ module.exports = Node = (function(superClass) {
         y: this.y,
         paletteItem: this.paletteItem,
         initialValue: this.initialValue,
-        min: this.min,
-        max: this.max,
+        min: this._min,
+        max: this._max,
         isAccumulator: this.isAccumulator,
         valueDefinedSemiQuantitatively: this.valueDefinedSemiQuantitatively
       },
