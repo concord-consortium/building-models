@@ -59531,7 +59531,7 @@ module.exports = Link = (function(superClass) {
 
 
 },{"./graph-primitive":537,"./relationship":541}],539:[function(require,module,exports){
-var Colors, GraphPrimitive, Node, tr,
+var Colors, GraphPrimitive, Node, SEMIQUANT_MAX, SEMIQUANT_MIN, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -59541,50 +59541,84 @@ Colors = require('../utils/colors');
 
 tr = require('../utils/translate');
 
+SEMIQUANT_MIN = 0;
+
+SEMIQUANT_MAX = 100;
+
+Function.prototype.property = function(prop, desc) {
+  return Object.defineProperty(this.prototype, prop, desc);
+};
+
 module.exports = Node = (function(superClass) {
   extend(Node, superClass);
 
-  Node.fields = ['title', 'image', 'color', 'paletteItem', 'initialValue', 'min', 'max', 'value', 'isAccumulator', 'valueDefinedSemiQuantitatively'];
+  Node.fields = ['title', 'image', 'color', 'paletteItem', 'initialValue', 'min', 'max', 'isAccumulator', 'valueDefinedSemiQuantitatively'];
 
   function Node(nodeSpec, key) {
+    var ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
     if (nodeSpec == null) {
-      nodeSpec = {
-        x: 0,
-        y: 0,
-        title: "untitled",
-        image: null,
-        initialValue: 50,
-        min: 0,
-        max: 100,
-        isAccumulator: false,
-        valueDefinedSemiQuantitatively: false
-      };
+      nodeSpec = {};
     }
     Node.__super__.constructor.call(this);
     if (key) {
       this.key = key;
     }
     this.links = [];
-    this.x = nodeSpec.x, this.y = nodeSpec.y, this.title = nodeSpec.title, this.image = nodeSpec.image, this.initialValue = nodeSpec.initialValue, this.isAccumulator = nodeSpec.isAccumulator, this.valueDefinedSemiQuantitatively = nodeSpec.valueDefinedSemiQuantitatively, this.paletteItem = nodeSpec.paletteItem;
-    if (this.initialValue == null) {
-      this.initialValue = 50;
-    }
-    if (this.min == null) {
-      this.min = 0;
-    }
-    if (this.max == null) {
-      this.max = 100;
-    }
-    if (this.isAccumulator == null) {
-      this.isAccumulator = false;
-    }
+    this.x = (ref = nodeSpec.x) != null ? ref : 0, this.y = (ref1 = nodeSpec.y) != null ? ref1 : 0, this.title = (ref2 = nodeSpec.title) != null ? ref2 : "untitled", this.image = nodeSpec.image, this.isAccumulator = (ref3 = nodeSpec.isAccumulator) != null ? ref3 : false, this.valueDefinedSemiQuantitatively = (ref4 = nodeSpec.valueDefinedSemiQuantitatively) != null ? ref4 : true, this.paletteItem = nodeSpec.paletteItem;
+    this._min = (ref5 = nodeSpec.min) != null ? ref5 : SEMIQUANT_MIN;
+    this._max = (ref6 = nodeSpec.max) != null ? ref6 : SEMIQUANT_MAX;
+    this._initialValue = (ref7 = nodeSpec.initialValue) != null ? ref7 : 50;
     if (this.color == null) {
       this.color = Colors[0].value;
     }
-    if (this.valueDefinedSemiQuantitatively == null) {
-      this.valueDefinedSemiQuantitatively = true;
-    }
   }
+
+  Node.property('initialValue', {
+    get: function() {
+      if (!this.valueDefinedSemiQuantitatively) {
+        return this._initialValue;
+      } else {
+        return this.mapQuantToSemiquant(this._initialValue);
+      }
+    },
+    set: function(val) {
+      if (!this.valueDefinedSemiQuantitatively) {
+        return this._initialValue = val;
+      } else {
+        return this._initialValue = this.mapSemiquantToQuant(val);
+      }
+    }
+  });
+
+  Node.property('min', {
+    get: function() {
+      if (!this.valueDefinedSemiQuantitatively) {
+        return this._min;
+      } else {
+        return SEMIQUANT_MIN;
+      }
+    },
+    set: function(val) {
+      if (!this.valueDefinedSemiQuantitatively) {
+        return this._min = val;
+      }
+    }
+  });
+
+  Node.property('max', {
+    get: function() {
+      if (!this.valueDefinedSemiQuantitatively) {
+        return this._max;
+      } else {
+        return SEMIQUANT_MAX;
+      }
+    },
+    set: function(val) {
+      if (!this.valueDefinedSemiQuantitatively) {
+        return this._max = val;
+      }
+    }
+  });
 
   Node.prototype.type = 'Node';
 
@@ -59683,6 +59717,14 @@ module.exports = Node = (function(superClass) {
     return this.initialValue = Math.max(this.min, Math.min(this.max, this.initialValue));
   };
 
+  Node.prototype.mapQuantToSemiquant = function(val) {
+    return SEMIQUANT_MIN + (val - this._min) / (this._max - this._min) * (SEMIQUANT_MAX - SEMIQUANT_MIN);
+  };
+
+  Node.prototype.mapSemiquantToQuant = function(val) {
+    return this._min + (val - SEMIQUANT_MIN) / (SEMIQUANT_MAX - SEMIQUANT_MIN) * (this._max - this._min);
+  };
+
   Node.prototype.toExport = function() {
     return {
       data: {
@@ -59715,13 +59757,11 @@ module.exports = Node = (function(superClass) {
 
 
 },{"../utils/colors":553,"../utils/translate":564,"./graph-primitive":537}],540:[function(require,module,exports){
-var RelationFactory, Relationship, ln12, tr;
+var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
 
 Relationship = require("./relationship");
-
-ln12 = Math.log(1.2);
 
 module.exports = RelationFactory = (function() {
   function RelationFactory() {}
@@ -59784,9 +59824,9 @@ module.exports = RelationFactory = (function() {
     id: 3,
     text: tr("~NODE-RELATION-EDIT.MORE_AND_MORE"),
     postfixIco: "more-and-more",
-    formulaFrag: "min((in ^ 2)/10, maxOut)",
+    formulaFrag: "min(exp(in/21.7)-1, maxOut)",
     func: function(scope) {
-      return Math.min((scope["in"] * scope["in"]) / 10, scope.maxOut);
+      return Math.min(Math.exp(scope["in"] / 21.7) - 1, scope.maxOut);
     }
   };
 
@@ -59794,9 +59834,9 @@ module.exports = RelationFactory = (function() {
     id: 4,
     text: tr("~NODE-RELATION-EDIT.LESS_AND_LESS"),
     postfixIco: "less-and-less",
-    formulaFrag: "log(in) / 0.1823215",
+    formulaFrag: "21.7 * log(in+1)",
     func: function(scope) {
-      return Math.log(scope["in"]) / ln12;
+      return 21.7 * Math.log(scope["in"] + 1);
     }
   };
 
@@ -60106,7 +60146,19 @@ module.exports = SelectionManager = (function() {
 
 
 },{"../utils/importer":558,"../utils/translate":564,"./link":538,"./node":539}],543:[function(require,module,exports){
-var IntegrationFunction, Simulation;
+var IntegrationFunction, Simulation, scaleInput;
+
+scaleInput = function(val, nodeIn, nodeOut) {
+  if (nodeIn.valueDefinedSemiQuantitatively !== nodeOut.valueDefinedSemiQuantitatively) {
+    if (nodeIn.valueDefinedSemiQuantitatively) {
+      return nodeOut.mapSemiquantToQuant(val);
+    } else {
+      return nodeIn.mapQuantToSemiquant(val);
+    }
+  } else {
+    return val;
+  }
+};
 
 IntegrationFunction = function(incrementAccumulators) {
   var count, links, nextValue, outV, value;
@@ -60134,6 +60186,7 @@ IntegrationFunction = function(incrementAccumulators) {
           return;
         }
         outV = _this.previousValue || _this.initialValue;
+        inV = scaleInput(inV, sourceNode, _this);
         nextValue = link.relation.evaluate(inV, outV, 0);
         return value += nextValue;
       };
@@ -60149,6 +60202,7 @@ IntegrationFunction = function(incrementAccumulators) {
         var inV, sourceNode;
         sourceNode = link.sourceNode;
         inV = sourceNode.previousValue != null ? sourceNode.previousValue : sourceNode.initialValue;
+        inV = scaleInput(inV, sourceNode, _this);
         outV = _this.previousValue || _this.initialValue;
         nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max, _this.max);
         return value += nextValue;
@@ -66789,18 +66843,6 @@ module.exports = SvgGraphView = React.createClass({
   margin: function() {
     return this.props.fontSize + this.marginal();
   },
-  getYScale: function(xrange, yrange) {
-    if (this.props.formula.indexOf("^") > -1) {
-      return yrange;
-    } else if ((this.props.formula.indexOf("log") > -1) && (this.props.formula.indexOf("maxIn -") === -1)) {
-      return yrange * 3;
-    } else {
-      return xrange;
-    }
-  },
-  startAt1: function() {
-    return this.props.formula.indexOf("log") > -1;
-  },
   invertPoint: function(point) {
     return {
       x: point.x,
@@ -66834,10 +66876,9 @@ module.exports = SvgGraphView = React.createClass({
     return "M " + data;
   },
   getPathPoints: function() {
-    var data, maxy, miny, rangex, rangey, scaley, x0;
-    rangex = 60;
-    x0 = this.startAt1() ? 1 : 0;
-    data = _.range(x0, rangex);
+    var data, maxy, miny, rangex;
+    rangex = 100;
+    data = _.range(0, rangex);
     miny = Infinity;
     maxy = -Infinity;
     data = _.map(data, (function(_this) {
@@ -66867,13 +66908,11 @@ module.exports = SvgGraphView = React.createClass({
         };
       };
     })(this));
-    rangey = maxy - miny;
-    scaley = this.getYScale(rangex, rangey);
     data = _.map(data, function(d) {
       var x, y;
       x = d.x, y = d.y;
       x = x / rangex;
-      y = y / scaley;
+      y = y / rangex;
       return {
         x: x,
         y: y
