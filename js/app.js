@@ -61163,7 +61163,7 @@ GraphStore = Reflux.createStore({
     ref = ['title', 'color', 'relation'];
     for (i = 0, len = ref.length; i < len; i++) {
       key = ref[i];
-      if (changes[key]) {
+      if (changes[key] != null) {
         log.info("Change " + key + " for " + link.title);
         link[key] = changes[key];
       }
