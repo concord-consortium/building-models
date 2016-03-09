@@ -6,7 +6,7 @@ TimeUnits       = require '../utils/time-units'
 
 module.exports = class CodapConnect
 
-  name: 'Building Models Tool'
+  name: 'SageModeler'
 
   codapPhone: null
 
