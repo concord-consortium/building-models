@@ -148,8 +148,8 @@ module.exports = class Node extends GraphPrimitive
       y: @y
       paletteItem: @paletteItem
       initialValue: @initialValue
-      min: @min
-      max: @max
+      min: @_min
+      max: @_max
       isAccumulator: @isAccumulator
       valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
     key: @key
