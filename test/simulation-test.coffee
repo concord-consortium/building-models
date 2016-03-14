@@ -223,7 +223,7 @@ describe "Simulation", ->
           @simulation.run()
           @nodeB.currentValue.should.equal 20
 
-        it.only "should scale between output's min and max", ->
+        it "should scale between output's min and max", ->
           @nodeB.min = 50
           @nodeB.max = 100
           @simulation.run()
@@ -239,7 +239,7 @@ describe "Simulation", ->
           @simulation.run()
           @nodeB.currentValue.should.equal 20
 
-        it.only "should scale between output's min and max", ->
+        it "should scale between output's min and max", ->
           @nodeA.min = 0
           @nodeA.max = 50
           @simulation.run()
