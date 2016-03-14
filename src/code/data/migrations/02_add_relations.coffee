@@ -1,7 +1,7 @@
 Relationship = require '../../models/relationship'
 
 migration =
-  version: 1.1
+  version: "1.1.0"
   description: "Adds initial values and relationships."
   date: "2015-08-13"
 

@@ -26,4 +26,4 @@ module.exports =
     @lastMigration().version
 
   lastMigration: ->
-    _.max migrations, (m) -> m.version
+    migrations[migrations.length-1]

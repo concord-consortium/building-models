@@ -3,7 +3,7 @@ uuid = require 'uuid'
 imageToUUIDMap= {}
 
 migration =
-  version: 1.5
+  version: "1.5.0"
   description: "Nodes reference PaletteItems"
   date: "2015-09-16"
 

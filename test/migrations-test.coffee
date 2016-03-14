@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.95", ->
-        @result.version.should.equal 1.95
+      it "should be 1.10.0", ->
+        @result.version.should.equal "1.10.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -72,7 +72,7 @@ describe "Migrations",  ->
           it "should have speed setting", ->
             @result.settings.simulation.speed.should.equal 4
 
-        describe "v-1.95 changes", ->
+        describe "v-1.10 changes", ->
           it "should have newIntegration setting", ->
             @result.settings.simulation.newIntegration.should.equal false
 
