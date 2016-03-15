@@ -4,6 +4,7 @@ ImportActions   = require '../actions/import-actions'
 AppSettingsActions = Reflux.createActions(
   [
     "diagramOnly"
+    "showMinigraphs"
   ]
 )
 
@@ -14,6 +15,7 @@ AppSettingsStore   = Reflux.createStore
     @settings =
       showingSettingsDialog: false
       diagramOnly: HashParams.getParam('simplified')
+      showingMinigraphs: false
 
   onDiagramOnly: (diagramOnly) ->
     @settings.diagramOnly = diagramOnly
@@ -32,6 +34,7 @@ AppSettingsStore   = Reflux.createStore
 
   serialize: ->
     diagramOnly: @settings.diagramOnly
+    showingMinigraphs: @settings.showingMinigraphs
 
 mixin =
   getInitialState: ->
