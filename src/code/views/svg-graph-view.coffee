@@ -73,7 +73,7 @@ module.exports = SvgGraphView = React.createClass
     )
 
   renderAxisLines: ->
-    data = [ {x:0, y:@props.height}, {x:0, y:0}, {x:@props.width, y:0}]
+    data = [ {x:0, y:1}, {x:0, y:0}, {x:1, y:0}]
     (path {className: 'axisLines', d: @pointsToPath(data)})
 
   renderLineData: ->
