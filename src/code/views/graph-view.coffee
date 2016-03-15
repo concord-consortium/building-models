@@ -5,7 +5,7 @@ DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
 PaletteStore     = require '../stores/palette-store'
-LinkStore        = require '../stores/graph-store'
+GraphStore       = require '../stores/graph-store'
 ImageDialogStore = require '../stores/image-dialog-store'
 
 SimulationStore  = require "../stores/simulation-store"
@@ -16,7 +16,7 @@ AppSettingsStore  = require "../stores/app-settings-store"
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ LinkStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin ]
 
   getDefaultProps: ->
     linkTarget: '.link-target'
@@ -27,7 +27,7 @@ module.exports = React.createClass
     @diagramToolkit = new DiagramToolkit $container,
       Container:     $container[0]
       handleConnect: @handleConnect
-      handleClick:   @handleClick
+      handleClick:   @handleLinkClick
 
     @props.selectionManager.addSelectionListener (manager) =>
       lastLinkSelection = @state.selectedLink
@@ -115,24 +115,24 @@ module.exports = React.createClass
 
   onNodeMoved: (node_event) ->
     @handleEvent ->
-      LinkStore.store.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+      GraphStore.store.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
 
   onNodeMoveComplete: (node_event) ->
     @handleEvent ->
       {left, top} = node_event.extra.position
-      LinkStore.store.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+      GraphStore.store.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
 
   onNodeDeleted: (node_event) ->
     @handleEvent ->
-      LinkStore.store.removeNode node_event.nodeKey
+      GraphStore.store.removeNode node_event.nodeKey
 
   handleConnect: (info, evnt) ->
     @handleEvent ->
-      LinkStore.store.newLinkFromEvent info, evnt
+      GraphStore.store.newLinkFromEvent info, evnt
 
-  handleClick: (connection, evnt) ->
+  handleLinkClick: (connection, evnt) ->
     @handleEvent ->
-      LinkStore.store.selectLink connection.linkModel
+      GraphStore.store.clickLink connection.linkModel
 
   # TODO, can we get rid of this?
   _nodeForName: (name) ->

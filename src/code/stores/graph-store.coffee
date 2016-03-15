@@ -191,7 +191,7 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   selectedNode: ->
-    @selectionManager.selection(SelectionManager.NodeInpsection)[0] or null
+    @selectionManager.selection(SelectionManager.NodeInspection)[0] or null
 
   editingNode: ->
     @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
@@ -259,7 +259,7 @@ GraphStore  = Reflux.createStore
   endNodeEdit: ->
     @undoRedoManager.endCommandBatch()
 
-  selectLink: (link) ->
+  clickLink: (link) ->
     @selectionManager.selectLink(link)
 
   changeLink: (link, changes={}) ->

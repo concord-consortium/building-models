@@ -6,7 +6,7 @@ tr          = require "../utils/translate"
 
 module.exports = class SelectionManager
   @NodeTitleEditing   = "NodeTitleEditing"
-  @NodeInpsection     = "NodeInpsection"
+  @NodeInspection     = "NodeInspection"
   @LinkSelection      = "LinkSelection"
 
   constructor: ->
@@ -65,7 +65,7 @@ module.exports = class SelectionManager
     @selectOnly(graphprimitive,SelectionManager.NodeTitleEditing)
     # unselect the inspection selection, unless its this same graphprimitive.
     unless @isSelectedForInspection(graphprimitive)
-      @clearInspection()
+      @clearNodeInspection()
 
   clearTitleEditing: ->
     @clearSelection(SelectionManager.NodeTitleEditing)
@@ -77,29 +77,28 @@ module.exports = class SelectionManager
     @selection(SelectionManager.NodeTitleEditing)
 
   selectForInspection: (graphprimitive) ->
-    @selectOnly(graphprimitive, SelectionManager.NodeInpsection)
+    @selectOnly(graphprimitive, SelectionManager.NodeInspection)
     @clearLinkSelection()
 
     # unselect the title selection, unless its this same graphprimitive.
     unless @isSelectedForTitleEditing(graphprimitive)
       @clearTitleEditing()
 
-
-  clearInspection: ->
-    @clearSelection(SelectionManager.NodeInpsection)
+  clearNodeInspection: ->
+    @clearSelection(SelectionManager.NodeInspection)
 
   isSelectedForInspection: (graphprimitive) ->
-    @isSelected(graphprimitive,SelectionManager.NodeInpsection)
+    @isSelected(graphprimitive,SelectionManager.NodeInspection)
 
   getInspection: ->
-    @selection(SelectionManager.NodeInpsection)
+    @selection(SelectionManager.NodeInspection)
 
   getLinkSelection: ->
     @selection(SelectionManager.LinkSelection)
 
   selectLink: (graphprimitive)->
-    @clearInspection()
     @selectOnly(graphprimitive, SelectionManager.LinkSelection)
+    @clearNodeInspection()
 
   _deselect: (opts)->
     pickNonEmpty    = _.partial _.pick, _, _.identity
