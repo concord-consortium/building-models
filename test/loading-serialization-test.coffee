@@ -83,7 +83,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.10.0"
+        model.version.should.equal "1.11.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -129,9 +129,11 @@ describe "Serialization and Loading", ->
 
       it "should be able to serialize the settings", ->
         AppSettingsStore.store.settings.diagramOnly = true
+        AppSettingsStore.store.settings.showingMinigraphs = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
         model.settings.diagramOnly.should.equal true
+        model.settings.showingMinigraphs.should.equal true
 
       it "should be able to serialize the simulation settings", ->
         SimulationStore.store.settings.duration = 15
@@ -160,9 +162,10 @@ describe "Serialization and Loading", ->
 
     it "should read the settings without error", ->
       data = JSON.parse(@serializedForm)
-      data.settings = {diagramOnly: true}
+      data.settings = {diagramOnly: true, showMinigraphs: true}
       @graphStore.loadData(data)
       AppSettingsStore.store.settings.diagramOnly.should.equal true
+      AppSettingsStore.store.settings.showMinigraphs.should.equal true
 
     it "nodes should have paletteItem properties after loading", ->
       data = JSON.parse(@serializedForm)

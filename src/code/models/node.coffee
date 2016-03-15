@@ -15,7 +15,8 @@ module.exports = class Node extends GraphPrimitive
   @fields: [
     'title', 'image', 'color', 'paletteItem',
     'initialValue', 'min', 'max',
-    'isAccumulator', 'valueDefinedSemiQuantitatively']
+    'isAccumulator', 'valueDefinedSemiQuantitatively'
+    'frames']
 
   constructor: (nodeSpec={}, key) ->
     super()
@@ -41,6 +42,9 @@ module.exports = class Node extends GraphPrimitive
     @_initialValue = nodeSpec.initialValue ? 50
 
     @color ?= Colors[0].value
+
+    # Values of the previous run. Used for the minigraphs. Not serialized
+    @frames = []
 
   # Scale the value of initialValue such that, if we are in semi-quantitative mode,
   # we always return a value between 0 and 100. Likewise, if we try to set a value while

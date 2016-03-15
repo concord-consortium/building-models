@@ -221,6 +221,7 @@ module.exports = React.createClass
             onDelete: @onNodeDeleted
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
+            showMinigraph: @state.showingMinigraphs
           })
       )
     )

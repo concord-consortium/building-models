@@ -23,6 +23,9 @@ module.exports = React.createClass
   setDiagramOnly: (e) ->
     AppSettingsStore.actions.diagramOnly e.target.checked
 
+  setShowingMinigraphs: (e) ->
+    AppSettingsStore.actions.showMinigraphs e.target.checked
+
   render: ->
     runPanelClasses = "run-panel"
     if not @state.diagramOnly then runPanelClasses += " expanded"
@@ -66,7 +69,7 @@ module.exports = React.createClass
           )
         )
         (div {className: "row"},
-          (input {type: 'checkbox', value: 'show-mini', checked: @props.showMiniGraphs})
+          (input {type: 'checkbox', value: 'show-mini', checked: @state.showingMinigraphs, onChange: @setShowingMinigraphs})
           (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
         )
         (div {className: "row"},

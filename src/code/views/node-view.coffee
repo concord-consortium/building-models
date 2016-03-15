@@ -3,6 +3,7 @@ tr = require "../utils/translate"
 
 SquareImage = React.createFactory require "./square-image-view"
 SliderView  = React.createFactory require "./value-slider-view"
+GraphView   = React.createFactory require "./node-svg-graph-view"
 CodapConnect = require '../models/codap-connect'
 DEFAULT_CONTEXT_NAME = 'building-models'
 
@@ -190,6 +191,19 @@ module.exports = NodeView = React.createClass
       classes.push "link-target"
     classes.join " "
 
+  renderNodeInternal: ->
+    if @props.showMinigraph
+      (GraphView {
+        min: @props.data.min
+        max: @props.data.max
+        data: @props.data.frames
+      })
+    else
+      (SquareImage {
+        image: @props.data.image,
+        ref: "thumbnail"
+      })
+
 
   render: ->
     style =
@@ -215,7 +229,7 @@ module.exports = NodeView = React.createClass
             onClick: (=> @handleSelected true)
             onTouchend: (=> @handleSelected true)
             },
-            (SquareImage {image: @props.data.image, ref: "thumbnail"})
+            @renderNodeInternal()
           )
           (NodeTitle {
             isEditing: @props.editTitle

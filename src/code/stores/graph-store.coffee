@@ -24,7 +24,25 @@ GraphStore  = Reflux.createStore
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 
+    SimulationStore.actions.resetSimulation.listen         @resetSimulation.bind(@)
+    SimulationStore.actions.setDuration.listen             @resetSimulation.bind(@)
+    SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)
+
     @codapStandaloneMode = false
+
+  resetSimulation: ->
+    for node in @getNodes()
+      node.frames = []
+    @updateListeners()
+
+  updateSimulationData: (data) ->
+    nodes = @getNodes()
+    for frame in data
+      for node, i in frame.nodes
+        nodes[i].frames.push node.value
+    if AppSettingsStore.store.settings.showingMinigraphs
+      @updateListeners()
+
 
   paletteDelete: (status) ->
     {deleted,paletteItem,replacement} = status
