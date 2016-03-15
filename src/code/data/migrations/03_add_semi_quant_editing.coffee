@@ -1,5 +1,3 @@
-Relationship = require '../../models/relationship'
-
 migration =
   version: "1.2.0"
   description: "Adds initial value for defining node semiquantitatively."
@@ -7,7 +5,6 @@ migration =
 
   doUpdate: (data) ->
     @updateNodes(data)
-    data
 
   # Add initialValue if it doesn't exist
   updateNodes: (data) ->

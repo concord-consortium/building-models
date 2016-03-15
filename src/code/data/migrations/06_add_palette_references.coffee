@@ -10,7 +10,6 @@ migration =
   doUpdate: (data) ->
     @updatePalette(data)
     @updateNodes(data)
-    data
 
   updatePalette: (data) ->
     _.each data.palette, (paletteItem) ->

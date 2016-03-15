@@ -1,5 +1,3 @@
-Relationship = require '../../models/relationship'
-
 migration =
   version: "1.4.0"
   description: "Adds settings object and cap default."
@@ -8,6 +6,5 @@ migration =
   doUpdate: (data) ->
     data.settings ?= {}
     data.settings.capNodeValues ?= false
-    data
 
 module.exports = _.mixin migration, require './migration-mixin'

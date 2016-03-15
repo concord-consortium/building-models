@@ -10,7 +10,6 @@ migration =
     @updateNodes(data)
     @updateLinks(data)
     @updatePalette(data)
-    data
 
   updateNodes: (data) ->
     data.nodes = _.map (data.nodes or []), (node) ->

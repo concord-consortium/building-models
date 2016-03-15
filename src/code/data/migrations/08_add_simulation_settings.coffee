@@ -1,4 +1,3 @@
-Relationship = require '../../models/relationship'
 TimeUnits = require '../../utils/time-units'
 
 migration =

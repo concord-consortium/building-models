@@ -8,7 +8,6 @@ migration =
   doUpdate: (data) ->
     @updateNodes(data)
     @updateLinks(data)
-    data
 
   # Add initialValue if it doesn't exist
   updateNodes: (data) ->
