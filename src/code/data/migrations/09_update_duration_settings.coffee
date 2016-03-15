@@ -1,8 +1,5 @@
-Relationship = require '../../models/relationship'
-TimeUnits = require '../../utils/time-units'
-
 migration =
-  version: 1.8
+  version: "1.8.0"
   description: "Updates duration settings"
   date: "2015-10-14"
 

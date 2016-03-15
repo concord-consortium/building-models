@@ -1,8 +1,5 @@
-Relationship = require '../../models/relationship'
-TimeUnits = require '../../utils/time-units'
-
 migration =
-  version: 1.9
+  version: "1.9.0"
   description: "Adds simulation speed and capNodeValues settings"
   date: "2015-10-14"
 

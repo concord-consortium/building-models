@@ -1,8 +1,7 @@
-Relationship = require '../../models/relationship'
 TimeUnits = require '../../utils/time-units'
 
 migration =
-  version: 1.7
+  version: "1.7.0"
   description: "Adds Simulation settings"
   date: "2015-10-02"
 

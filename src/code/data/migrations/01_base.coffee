@@ -2,7 +2,7 @@
 # FORMAT AFTER THIS TRANSFORM:  in serialized-test-data-1.0.coffee
 
 migration =
-  version: 1.0
+  version: "1.0.0"
   description: "The initial migrations from old mysystem style file format."
   date: "2015-08-12"
 
@@ -10,7 +10,6 @@ migration =
     @updateNodes(data)
     @updateLinks(data)
     @updatePalette(data)
-    data
 
   updateNodes: (data) ->
     data.nodes = _.map (data.nodes or []), (node) ->
