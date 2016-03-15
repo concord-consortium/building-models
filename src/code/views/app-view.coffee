@@ -37,9 +37,11 @@ module.exports = React.createClass
       username: 'Jane Doe'
       filename: tr "~MENU.UNTITLED_MODEL"
 
+  selectionUpdated: ->
+    this.refs.inspectorPanel?.nodeSelectionChanged()
+
   toggleImageBrowser: ->
     @setState showImageBrowser: not @state.showImageBrowser
-
 
   render: ->
     (div {className: 'app'},
@@ -78,6 +80,7 @@ module.exports = React.createClass
           diagramOnly: @state.diagramOnly
           toggleImageBrowser: @toggleImageBrowser
           graphStore: @props.graphStore
+          ref: "inspectorPanel"
         )
         if @state.showingDialog
           (ImageBrowser

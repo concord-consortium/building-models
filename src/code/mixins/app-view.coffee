@@ -70,6 +70,8 @@ module.exports =
       editingNode: editingNode
       selectedLink: selectedLink
 
+    @selectionUpdated()
+
   _loadInitialData: ->
     if @props.data?.length > 0
       @props.graphStore.addAfterAuthHandler JSON.parse @props.data
