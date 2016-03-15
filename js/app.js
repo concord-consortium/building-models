@@ -50,7 +50,7 @@ window.Sage = {
 
 
 
-},{"./stores/graph-store":547,"./stores/palette-store":551,"./utils/hash-parameters":557,"./views/app-view":566,"./views/value-slider-view":606}],2:[function(require,module,exports){
+},{"./stores/graph-store":549,"./stores/palette-store":553,"./utils/hash-parameters":559,"./views/app-view":568,"./views/value-slider-view":609}],2:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');
@@ -122,7 +122,7 @@ Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
   return this._getEncoder(enc).encode(data, reporter);
 };
 
-},{"../asn1":2,"inherits":99,"vm":512}],4:[function(require,module,exports){
+},{"../asn1":2,"inherits":99,"vm":513}],4:[function(require,module,exports){
 var inherits = require('inherits');
 var Reporter = require('../base').Reporter;
 var Buffer = require('buffer').Buffer;
@@ -6732,7 +6732,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./algos":39,"./sign":42,"./verify":43,"buffer":45,"create-hash":50,"inherits":99,"stream":508}],41:[function(require,module,exports){
+},{"./algos":39,"./sign":42,"./verify":43,"buffer":45,"create-hash":50,"inherits":99,"stream":509}],41:[function(require,module,exports){
 'use strict'
 exports['1.3.132.0.10'] = 'secp256k1'
 
@@ -8709,7 +8709,7 @@ CipherBase.prototype._toString = function (value, enc, final) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":45,"inherits":99,"stream":508,"string_decoder":509}],48:[function(require,module,exports){
+},{"buffer":45,"inherits":99,"stream":509,"string_decoder":510}],48:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9002,7 +9002,7 @@ module.exports = function createHash (alg) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":52,"buffer":45,"cipher-base":47,"inherits":99,"ripemd160":499,"sha.js":501}],51:[function(require,module,exports){
+},{"./md5":52,"buffer":45,"cipher-base":47,"inherits":99,"ripemd160":499,"sha.js":502}],51:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var intSize = 4;
@@ -9268,7 +9268,7 @@ module.exports = function createHmac(alg, key) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":45,"create-hash/browser":50,"inherits":99,"stream":508}],54:[function(require,module,exports){
+},{"buffer":45,"create-hash/browser":50,"inherits":99,"stream":509}],54:[function(require,module,exports){
 'use strict'
 
 exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes')
@@ -54509,7 +54509,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":472,"_process":463,"buffer":45,"core-util-is":48,"events":84,"inherits":99,"isarray":101,"stream":508,"string_decoder/":509,"util":19}],475:[function(require,module,exports){
+},{"./_stream_duplex":472,"_process":463,"buffer":45,"core-util-is":48,"events":84,"inherits":99,"isarray":101,"stream":509,"string_decoder/":510,"util":19}],475:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -55201,7 +55201,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":472,"_process":463,"buffer":45,"core-util-is":48,"inherits":99,"stream":508}],477:[function(require,module,exports){
+},{"./_stream_duplex":472,"_process":463,"buffer":45,"core-util-is":48,"inherits":99,"stream":509}],477:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
 },{"./lib/_stream_passthrough.js":473}],478:[function(require,module,exports){
@@ -55213,7 +55213,7 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":472,"./lib/_stream_passthrough.js":473,"./lib/_stream_readable.js":474,"./lib/_stream_transform.js":475,"./lib/_stream_writable.js":476,"stream":508}],479:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":472,"./lib/_stream_passthrough.js":473,"./lib/_stream_readable.js":474,"./lib/_stream_transform.js":475,"./lib/_stream_writable.js":476,"stream":509}],479:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
 },{"./lib/_stream_transform.js":475}],480:[function(require,module,exports){
@@ -56631,6 +56631,1198 @@ module.exports = ripemd160
 
 }).call(this,require("buffer").Buffer)
 },{"buffer":45}],500:[function(require,module,exports){
+(function (process){
+exports = module.exports = SemVer;
+
+// The debug function is excluded entirely from the minified version.
+/* nomin */ var debug;
+/* nomin */ if (typeof process === 'object' &&
+    /* nomin */ process.env &&
+    /* nomin */ process.env.NODE_DEBUG &&
+    /* nomin */ /\bsemver\b/i.test(process.env.NODE_DEBUG))
+  /* nomin */ debug = function() {
+    /* nomin */ var args = Array.prototype.slice.call(arguments, 0);
+    /* nomin */ args.unshift('SEMVER');
+    /* nomin */ console.log.apply(console, args);
+    /* nomin */ };
+/* nomin */ else
+  /* nomin */ debug = function() {};
+
+// Note: this is the semver.org version of the spec that it implements
+// Not necessarily the package version of this code.
+exports.SEMVER_SPEC_VERSION = '2.0.0';
+
+var MAX_LENGTH = 256;
+var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+
+// The actual regexps go on exports.re
+var re = exports.re = [];
+var src = exports.src = [];
+var R = 0;
+
+// The following Regular Expressions can be used for tokenizing,
+// validating, and parsing SemVer version strings.
+
+// ## Numeric Identifier
+// A single `0`, or a non-zero digit followed by zero or more digits.
+
+var NUMERICIDENTIFIER = R++;
+src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
+var NUMERICIDENTIFIERLOOSE = R++;
+src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
+
+
+// ## Non-numeric Identifier
+// Zero or more digits, followed by a letter or hyphen, and then zero or
+// more letters, digits, or hyphens.
+
+var NONNUMERICIDENTIFIER = R++;
+src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
+
+
+// ## Main Version
+// Three dot-separated numeric identifiers.
+
+var MAINVERSION = R++;
+src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')';
+
+var MAINVERSIONLOOSE = R++;
+src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
+
+// ## Pre-release Version Identifier
+// A numeric identifier, or a non-numeric identifier.
+
+var PRERELEASEIDENTIFIER = R++;
+src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
+                            '|' + src[NONNUMERICIDENTIFIER] + ')';
+
+var PRERELEASEIDENTIFIERLOOSE = R++;
+src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
+                                 '|' + src[NONNUMERICIDENTIFIER] + ')';
+
+
+// ## Pre-release Version
+// Hyphen, followed by one or more dot-separated pre-release version
+// identifiers.
+
+var PRERELEASE = R++;
+src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
+                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
+
+var PRERELEASELOOSE = R++;
+src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
+                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
+
+// ## Build Metadata Identifier
+// Any combination of digits, letters, or hyphens.
+
+var BUILDIDENTIFIER = R++;
+src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
+
+// ## Build Metadata
+// Plus sign, followed by one or more period-separated build metadata
+// identifiers.
+
+var BUILD = R++;
+src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
+             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
+
+
+// ## Full Version String
+// A main version, followed optionally by a pre-release version and
+// build metadata.
+
+// Note that the only major, minor, patch, and pre-release sections of
+// the version string are capturing groups.  The build metadata is not a
+// capturing group, because it should not ever be used in version
+// comparison.
+
+var FULL = R++;
+var FULLPLAIN = 'v?' + src[MAINVERSION] +
+                src[PRERELEASE] + '?' +
+                src[BUILD] + '?';
+
+src[FULL] = '^' + FULLPLAIN + '$';
+
+// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
+// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
+// common in the npm registry.
+var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
+                 src[PRERELEASELOOSE] + '?' +
+                 src[BUILD] + '?';
+
+var LOOSE = R++;
+src[LOOSE] = '^' + LOOSEPLAIN + '$';
+
+var GTLT = R++;
+src[GTLT] = '((?:<|>)?=?)';
+
+// Something like "2.*" or "1.2.x".
+// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Only the first item is strictly required.
+var XRANGEIDENTIFIERLOOSE = R++;
+src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
+var XRANGEIDENTIFIER = R++;
+src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*';
+
+var XRANGEPLAIN = R++;
+src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:' + src[PRERELEASE] + ')?' +
+                   src[BUILD] + '?' +
+                   ')?)?';
+
+var XRANGEPLAINLOOSE = R++;
+src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:' + src[PRERELEASELOOSE] + ')?' +
+                        src[BUILD] + '?' +
+                        ')?)?';
+
+var XRANGE = R++;
+src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
+var XRANGELOOSE = R++;
+src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
+
+// Tilde ranges.
+// Meaning is "reasonably at or greater than"
+var LONETILDE = R++;
+src[LONETILDE] = '(?:~>?)';
+
+var TILDETRIM = R++;
+src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
+re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
+var tildeTrimReplace = '$1~';
+
+var TILDE = R++;
+src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
+var TILDELOOSE = R++;
+src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
+
+// Caret ranges.
+// Meaning is "at least and backwards compatible with"
+var LONECARET = R++;
+src[LONECARET] = '(?:\\^)';
+
+var CARETTRIM = R++;
+src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
+re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
+var caretTrimReplace = '$1^';
+
+var CARET = R++;
+src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
+var CARETLOOSE = R++;
+src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
+
+// A simple gt/lt/eq thing, or just "" to indicate "any version"
+var COMPARATORLOOSE = R++;
+src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
+var COMPARATOR = R++;
+src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
+
+
+// An expression to strip any whitespace between the gtlt and the thing
+// it modifies, so that `> 1.2.3` ==> `>1.2.3`
+var COMPARATORTRIM = R++;
+src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
+                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
+
+// this one has to use the /g flag
+re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
+var comparatorTrimReplace = '$1$2$3';
+
+
+// Something like `1.2.3 - 1.2.4`
+// Note that these all use the loose form, because they'll be
+// checked against either the strict or loose comparator form
+// later.
+var HYPHENRANGE = R++;
+src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
+                   '\\s+-\\s+' +
+                   '(' + src[XRANGEPLAIN] + ')' +
+                   '\\s*$';
+
+var HYPHENRANGELOOSE = R++;
+src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s+-\\s+' +
+                        '(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s*$';
+
+// Star ranges basically just allow anything at all.
+var STAR = R++;
+src[STAR] = '(<|>)?=?\\s*\\*';
+
+// Compile to actual regexp objects.
+// All are flag-free, unless they were created above with a flag.
+for (var i = 0; i < R; i++) {
+  debug(i, src[i]);
+  if (!re[i])
+    re[i] = new RegExp(src[i]);
+}
+
+exports.parse = parse;
+function parse(version, loose) {
+  if (version instanceof SemVer)
+    return version;
+
+  if (typeof version !== 'string')
+    return null;
+
+  if (version.length > MAX_LENGTH)
+    return null;
+
+  var r = loose ? re[LOOSE] : re[FULL];
+  if (!r.test(version))
+    return null;
+
+  try {
+    return new SemVer(version, loose);
+  } catch (er) {
+    return null;
+  }
+}
+
+exports.valid = valid;
+function valid(version, loose) {
+  var v = parse(version, loose);
+  return v ? v.version : null;
+}
+
+
+exports.clean = clean;
+function clean(version, loose) {
+  var s = parse(version.trim().replace(/^[=v]+/, ''), loose);
+  return s ? s.version : null;
+}
+
+exports.SemVer = SemVer;
+
+function SemVer(version, loose) {
+  if (version instanceof SemVer) {
+    if (version.loose === loose)
+      return version;
+    else
+      version = version.version;
+  } else if (typeof version !== 'string') {
+    throw new TypeError('Invalid Version: ' + version);
+  }
+
+  if (version.length > MAX_LENGTH)
+    throw new TypeError('version is longer than ' + MAX_LENGTH + ' characters')
+
+  if (!(this instanceof SemVer))
+    return new SemVer(version, loose);
+
+  debug('SemVer', version, loose);
+  this.loose = loose;
+  var m = version.trim().match(loose ? re[LOOSE] : re[FULL]);
+
+  if (!m)
+    throw new TypeError('Invalid Version: ' + version);
+
+  this.raw = version;
+
+  // these are actually numbers
+  this.major = +m[1];
+  this.minor = +m[2];
+  this.patch = +m[3];
+
+  if (this.major > MAX_SAFE_INTEGER || this.major < 0)
+    throw new TypeError('Invalid major version')
+
+  if (this.minor > MAX_SAFE_INTEGER || this.minor < 0)
+    throw new TypeError('Invalid minor version')
+
+  if (this.patch > MAX_SAFE_INTEGER || this.patch < 0)
+    throw new TypeError('Invalid patch version')
+
+  // numberify any prerelease numeric ids
+  if (!m[4])
+    this.prerelease = [];
+  else
+    this.prerelease = m[4].split('.').map(function(id) {
+      if (/^[0-9]+$/.test(id)) {
+        var num = +id
+        if (num >= 0 && num < MAX_SAFE_INTEGER)
+          return num
+      }
+      return id;
+    });
+
+  this.build = m[5] ? m[5].split('.') : [];
+  this.format();
+}
+
+SemVer.prototype.format = function() {
+  this.version = this.major + '.' + this.minor + '.' + this.patch;
+  if (this.prerelease.length)
+    this.version += '-' + this.prerelease.join('.');
+  return this.version;
+};
+
+SemVer.prototype.toString = function() {
+  return this.version;
+};
+
+SemVer.prototype.compare = function(other) {
+  debug('SemVer.compare', this.version, this.loose, other);
+  if (!(other instanceof SemVer))
+    other = new SemVer(other, this.loose);
+
+  return this.compareMain(other) || this.comparePre(other);
+};
+
+SemVer.prototype.compareMain = function(other) {
+  if (!(other instanceof SemVer))
+    other = new SemVer(other, this.loose);
+
+  return compareIdentifiers(this.major, other.major) ||
+         compareIdentifiers(this.minor, other.minor) ||
+         compareIdentifiers(this.patch, other.patch);
+};
+
+SemVer.prototype.comparePre = function(other) {
+  if (!(other instanceof SemVer))
+    other = new SemVer(other, this.loose);
+
+  // NOT having a prerelease is > having one
+  if (this.prerelease.length && !other.prerelease.length)
+    return -1;
+  else if (!this.prerelease.length && other.prerelease.length)
+    return 1;
+  else if (!this.prerelease.length && !other.prerelease.length)
+    return 0;
+
+  var i = 0;
+  do {
+    var a = this.prerelease[i];
+    var b = other.prerelease[i];
+    debug('prerelease compare', i, a, b);
+    if (a === undefined && b === undefined)
+      return 0;
+    else if (b === undefined)
+      return 1;
+    else if (a === undefined)
+      return -1;
+    else if (a === b)
+      continue;
+    else
+      return compareIdentifiers(a, b);
+  } while (++i);
+};
+
+// preminor will bump the version up to the next minor release, and immediately
+// down to pre-release. premajor and prepatch work the same way.
+SemVer.prototype.inc = function(release, identifier) {
+  switch (release) {
+    case 'premajor':
+      this.prerelease.length = 0;
+      this.patch = 0;
+      this.minor = 0;
+      this.major++;
+      this.inc('pre', identifier);
+      break;
+    case 'preminor':
+      this.prerelease.length = 0;
+      this.patch = 0;
+      this.minor++;
+      this.inc('pre', identifier);
+      break;
+    case 'prepatch':
+      // If this is already a prerelease, it will bump to the next version
+      // drop any prereleases that might already exist, since they are not
+      // relevant at this point.
+      this.prerelease.length = 0;
+      this.inc('patch', identifier);
+      this.inc('pre', identifier);
+      break;
+    // If the input is a non-prerelease version, this acts the same as
+    // prepatch.
+    case 'prerelease':
+      if (this.prerelease.length === 0)
+        this.inc('patch', identifier);
+      this.inc('pre', identifier);
+      break;
+
+    case 'major':
+      // If this is a pre-major version, bump up to the same major version.
+      // Otherwise increment major.
+      // 1.0.0-5 bumps to 1.0.0
+      // 1.1.0 bumps to 2.0.0
+      if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0)
+        this.major++;
+      this.minor = 0;
+      this.patch = 0;
+      this.prerelease = [];
+      break;
+    case 'minor':
+      // If this is a pre-minor version, bump up to the same minor version.
+      // Otherwise increment minor.
+      // 1.2.0-5 bumps to 1.2.0
+      // 1.2.1 bumps to 1.3.0
+      if (this.patch !== 0 || this.prerelease.length === 0)
+        this.minor++;
+      this.patch = 0;
+      this.prerelease = [];
+      break;
+    case 'patch':
+      // If this is not a pre-release version, it will increment the patch.
+      // If it is a pre-release it will bump up to the same patch version.
+      // 1.2.0-5 patches to 1.2.0
+      // 1.2.0 patches to 1.2.1
+      if (this.prerelease.length === 0)
+        this.patch++;
+      this.prerelease = [];
+      break;
+    // This probably shouldn't be used publicly.
+    // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
+    case 'pre':
+      if (this.prerelease.length === 0)
+        this.prerelease = [0];
+      else {
+        var i = this.prerelease.length;
+        while (--i >= 0) {
+          if (typeof this.prerelease[i] === 'number') {
+            this.prerelease[i]++;
+            i = -2;
+          }
+        }
+        if (i === -1) // didn't increment anything
+          this.prerelease.push(0);
+      }
+      if (identifier) {
+        // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
+        // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
+        if (this.prerelease[0] === identifier) {
+          if (isNaN(this.prerelease[1]))
+            this.prerelease = [identifier, 0];
+        } else
+          this.prerelease = [identifier, 0];
+      }
+      break;
+
+    default:
+      throw new Error('invalid increment argument: ' + release);
+  }
+  this.format();
+  this.raw = this.version;
+  return this;
+};
+
+exports.inc = inc;
+function inc(version, release, loose, identifier) {
+  if (typeof(loose) === 'string') {
+    identifier = loose;
+    loose = undefined;
+  }
+
+  try {
+    return new SemVer(version, loose).inc(release, identifier).version;
+  } catch (er) {
+    return null;
+  }
+}
+
+exports.diff = diff;
+function diff(version1, version2) {
+  if (eq(version1, version2)) {
+    return null;
+  } else {
+    var v1 = parse(version1);
+    var v2 = parse(version2);
+    if (v1.prerelease.length || v2.prerelease.length) {
+      for (var key in v1) {
+        if (key === 'major' || key === 'minor' || key === 'patch') {
+          if (v1[key] !== v2[key]) {
+            return 'pre'+key;
+          }
+        }
+      }
+      return 'prerelease';
+    }
+    for (var key in v1) {
+      if (key === 'major' || key === 'minor' || key === 'patch') {
+        if (v1[key] !== v2[key]) {
+          return key;
+        }
+      }
+    }
+  }
+}
+
+exports.compareIdentifiers = compareIdentifiers;
+
+var numeric = /^[0-9]+$/;
+function compareIdentifiers(a, b) {
+  var anum = numeric.test(a);
+  var bnum = numeric.test(b);
+
+  if (anum && bnum) {
+    a = +a;
+    b = +b;
+  }
+
+  return (anum && !bnum) ? -1 :
+         (bnum && !anum) ? 1 :
+         a < b ? -1 :
+         a > b ? 1 :
+         0;
+}
+
+exports.rcompareIdentifiers = rcompareIdentifiers;
+function rcompareIdentifiers(a, b) {
+  return compareIdentifiers(b, a);
+}
+
+exports.major = major;
+function major(a, loose) {
+  return new SemVer(a, loose).major;
+}
+
+exports.minor = minor;
+function minor(a, loose) {
+  return new SemVer(a, loose).minor;
+}
+
+exports.patch = patch;
+function patch(a, loose) {
+  return new SemVer(a, loose).patch;
+}
+
+exports.compare = compare;
+function compare(a, b, loose) {
+  return new SemVer(a, loose).compare(b);
+}
+
+exports.compareLoose = compareLoose;
+function compareLoose(a, b) {
+  return compare(a, b, true);
+}
+
+exports.rcompare = rcompare;
+function rcompare(a, b, loose) {
+  return compare(b, a, loose);
+}
+
+exports.sort = sort;
+function sort(list, loose) {
+  return list.sort(function(a, b) {
+    return exports.compare(a, b, loose);
+  });
+}
+
+exports.rsort = rsort;
+function rsort(list, loose) {
+  return list.sort(function(a, b) {
+    return exports.rcompare(a, b, loose);
+  });
+}
+
+exports.gt = gt;
+function gt(a, b, loose) {
+  return compare(a, b, loose) > 0;
+}
+
+exports.lt = lt;
+function lt(a, b, loose) {
+  return compare(a, b, loose) < 0;
+}
+
+exports.eq = eq;
+function eq(a, b, loose) {
+  return compare(a, b, loose) === 0;
+}
+
+exports.neq = neq;
+function neq(a, b, loose) {
+  return compare(a, b, loose) !== 0;
+}
+
+exports.gte = gte;
+function gte(a, b, loose) {
+  return compare(a, b, loose) >= 0;
+}
+
+exports.lte = lte;
+function lte(a, b, loose) {
+  return compare(a, b, loose) <= 0;
+}
+
+exports.cmp = cmp;
+function cmp(a, op, b, loose) {
+  var ret;
+  switch (op) {
+    case '===':
+      if (typeof a === 'object') a = a.version;
+      if (typeof b === 'object') b = b.version;
+      ret = a === b;
+      break;
+    case '!==':
+      if (typeof a === 'object') a = a.version;
+      if (typeof b === 'object') b = b.version;
+      ret = a !== b;
+      break;
+    case '': case '=': case '==': ret = eq(a, b, loose); break;
+    case '!=': ret = neq(a, b, loose); break;
+    case '>': ret = gt(a, b, loose); break;
+    case '>=': ret = gte(a, b, loose); break;
+    case '<': ret = lt(a, b, loose); break;
+    case '<=': ret = lte(a, b, loose); break;
+    default: throw new TypeError('Invalid operator: ' + op);
+  }
+  return ret;
+}
+
+exports.Comparator = Comparator;
+function Comparator(comp, loose) {
+  if (comp instanceof Comparator) {
+    if (comp.loose === loose)
+      return comp;
+    else
+      comp = comp.value;
+  }
+
+  if (!(this instanceof Comparator))
+    return new Comparator(comp, loose);
+
+  debug('comparator', comp, loose);
+  this.loose = loose;
+  this.parse(comp);
+
+  if (this.semver === ANY)
+    this.value = '';
+  else
+    this.value = this.operator + this.semver.version;
+
+  debug('comp', this);
+}
+
+var ANY = {};
+Comparator.prototype.parse = function(comp) {
+  var r = this.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var m = comp.match(r);
+
+  if (!m)
+    throw new TypeError('Invalid comparator: ' + comp);
+
+  this.operator = m[1];
+  if (this.operator === '=')
+    this.operator = '';
+
+  // if it literally is just '>' or '' then allow anything.
+  if (!m[2])
+    this.semver = ANY;
+  else
+    this.semver = new SemVer(m[2], this.loose);
+};
+
+Comparator.prototype.toString = function() {
+  return this.value;
+};
+
+Comparator.prototype.test = function(version) {
+  debug('Comparator.test', version, this.loose);
+
+  if (this.semver === ANY)
+    return true;
+
+  if (typeof version === 'string')
+    version = new SemVer(version, this.loose);
+
+  return cmp(version, this.operator, this.semver, this.loose);
+};
+
+
+exports.Range = Range;
+function Range(range, loose) {
+  if ((range instanceof Range) && range.loose === loose)
+    return range;
+
+  if (!(this instanceof Range))
+    return new Range(range, loose);
+
+  this.loose = loose;
+
+  // First, split based on boolean or ||
+  this.raw = range;
+  this.set = range.split(/\s*\|\|\s*/).map(function(range) {
+    return this.parseRange(range.trim());
+  }, this).filter(function(c) {
+    // throw out any that are not relevant for whatever reason
+    return c.length;
+  });
+
+  if (!this.set.length) {
+    throw new TypeError('Invalid SemVer Range: ' + range);
+  }
+
+  this.format();
+}
+
+Range.prototype.format = function() {
+  this.range = this.set.map(function(comps) {
+    return comps.join(' ').trim();
+  }).join('||').trim();
+  return this.range;
+};
+
+Range.prototype.toString = function() {
+  return this.range;
+};
+
+Range.prototype.parseRange = function(range) {
+  var loose = this.loose;
+  range = range.trim();
+  debug('range', range, loose);
+  // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
+  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
+  range = range.replace(hr, hyphenReplace);
+  debug('hyphen replace', range);
+  // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
+  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
+  debug('comparator trim', range, re[COMPARATORTRIM]);
+
+  // `~ 1.2.3` => `~1.2.3`
+  range = range.replace(re[TILDETRIM], tildeTrimReplace);
+
+  // `^ 1.2.3` => `^1.2.3`
+  range = range.replace(re[CARETTRIM], caretTrimReplace);
+
+  // normalize spaces
+  range = range.split(/\s+/).join(' ');
+
+  // At this point, the range is completely trimmed and
+  // ready to be split into comparators.
+
+  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
+  var set = range.split(' ').map(function(comp) {
+    return parseComparator(comp, loose);
+  }).join(' ').split(/\s+/);
+  if (this.loose) {
+    // in loose mode, throw out any that are not valid comparators
+    set = set.filter(function(comp) {
+      return !!comp.match(compRe);
+    });
+  }
+  set = set.map(function(comp) {
+    return new Comparator(comp, loose);
+  });
+
+  return set;
+};
+
+// Mostly just for testing and legacy API reasons
+exports.toComparators = toComparators;
+function toComparators(range, loose) {
+  return new Range(range, loose).set.map(function(comp) {
+    return comp.map(function(c) {
+      return c.value;
+    }).join(' ').trim().split(' ');
+  });
+}
+
+// comprised of xranges, tildes, stars, and gtlt's at this point.
+// already replaced the hyphen ranges
+// turn into a set of JUST comparators.
+function parseComparator(comp, loose) {
+  debug('comp', comp);
+  comp = replaceCarets(comp, loose);
+  debug('caret', comp);
+  comp = replaceTildes(comp, loose);
+  debug('tildes', comp);
+  comp = replaceXRanges(comp, loose);
+  debug('xrange', comp);
+  comp = replaceStars(comp, loose);
+  debug('stars', comp);
+  return comp;
+}
+
+function isX(id) {
+  return !id || id.toLowerCase() === 'x' || id === '*';
+}
+
+// ~, ~> --> * (any, kinda silly)
+// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
+// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
+// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
+// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
+// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
+function replaceTildes(comp, loose) {
+  return comp.trim().split(/\s+/).map(function(comp) {
+    return replaceTilde(comp, loose);
+  }).join(' ');
+}
+
+function replaceTilde(comp, loose) {
+  var r = loose ? re[TILDELOOSE] : re[TILDE];
+  return comp.replace(r, function(_, M, m, p, pr) {
+    debug('tilde', comp, _, M, m, p, pr);
+    var ret;
+
+    if (isX(M))
+      ret = '';
+    else if (isX(m))
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    else if (isX(p))
+      // ~1.2 == >=1.2.0- <1.3.0-
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+    else if (pr) {
+      debug('replaceTilde pr', pr);
+      if (pr.charAt(0) !== '-')
+        pr = '-' + pr;
+      ret = '>=' + M + '.' + m + '.' + p + pr +
+            ' <' + M + '.' + (+m + 1) + '.0';
+    } else
+      // ~1.2.3 == >=1.2.3 <1.3.0
+      ret = '>=' + M + '.' + m + '.' + p +
+            ' <' + M + '.' + (+m + 1) + '.0';
+
+    debug('tilde return', ret);
+    return ret;
+  });
+}
+
+// ^ --> * (any, kinda silly)
+// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
+// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
+// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
+// ^1.2.3 --> >=1.2.3 <2.0.0
+// ^1.2.0 --> >=1.2.0 <2.0.0
+function replaceCarets(comp, loose) {
+  return comp.trim().split(/\s+/).map(function(comp) {
+    return replaceCaret(comp, loose);
+  }).join(' ');
+}
+
+function replaceCaret(comp, loose) {
+  debug('caret', comp, loose);
+  var r = loose ? re[CARETLOOSE] : re[CARET];
+  return comp.replace(r, function(_, M, m, p, pr) {
+    debug('caret', comp, _, M, m, p, pr);
+    var ret;
+
+    if (isX(M))
+      ret = '';
+    else if (isX(m))
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    else if (isX(p)) {
+      if (M === '0')
+        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+      else
+        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0';
+    } else if (pr) {
+      debug('replaceCaret pr', pr);
+      if (pr.charAt(0) !== '-')
+        pr = '-' + pr;
+      if (M === '0') {
+        if (m === '0')
+          ret = '>=' + M + '.' + m + '.' + p + pr +
+                ' <' + M + '.' + m + '.' + (+p + 1);
+        else
+          ret = '>=' + M + '.' + m + '.' + p + pr +
+                ' <' + M + '.' + (+m + 1) + '.0';
+      } else
+        ret = '>=' + M + '.' + m + '.' + p + pr +
+              ' <' + (+M + 1) + '.0.0';
+    } else {
+      debug('no pr');
+      if (M === '0') {
+        if (m === '0')
+          ret = '>=' + M + '.' + m + '.' + p +
+                ' <' + M + '.' + m + '.' + (+p + 1);
+        else
+          ret = '>=' + M + '.' + m + '.' + p +
+                ' <' + M + '.' + (+m + 1) + '.0';
+      } else
+        ret = '>=' + M + '.' + m + '.' + p +
+              ' <' + (+M + 1) + '.0.0';
+    }
+
+    debug('caret return', ret);
+    return ret;
+  });
+}
+
+function replaceXRanges(comp, loose) {
+  debug('replaceXRanges', comp, loose);
+  return comp.split(/\s+/).map(function(comp) {
+    return replaceXRange(comp, loose);
+  }).join(' ');
+}
+
+function replaceXRange(comp, loose) {
+  comp = comp.trim();
+  var r = loose ? re[XRANGELOOSE] : re[XRANGE];
+  return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
+    debug('xRange', comp, ret, gtlt, M, m, p, pr);
+    var xM = isX(M);
+    var xm = xM || isX(m);
+    var xp = xm || isX(p);
+    var anyX = xp;
+
+    if (gtlt === '=' && anyX)
+      gtlt = '';
+
+    if (xM) {
+      if (gtlt === '>' || gtlt === '<') {
+        // nothing is allowed
+        ret = '<0.0.0';
+      } else {
+        // nothing is forbidden
+        ret = '*';
+      }
+    } else if (gtlt && anyX) {
+      // replace X with 0
+      if (xm)
+        m = 0;
+      if (xp)
+        p = 0;
+
+      if (gtlt === '>') {
+        // >1 => >=2.0.0
+        // >1.2 => >=1.3.0
+        // >1.2.3 => >= 1.2.4
+        gtlt = '>=';
+        if (xm) {
+          M = +M + 1;
+          m = 0;
+          p = 0;
+        } else if (xp) {
+          m = +m + 1;
+          p = 0;
+        }
+      } else if (gtlt === '<=') {
+        // <=0.7.x is actually <0.8.0, since any 0.7.x should
+        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
+        gtlt = '<'
+        if (xm)
+          M = +M + 1
+        else
+          m = +m + 1
+      }
+
+      ret = gtlt + M + '.' + m + '.' + p;
+    } else if (xm) {
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+    } else if (xp) {
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+    }
+
+    debug('xRange return', ret);
+
+    return ret;
+  });
+}
+
+// Because * is AND-ed with everything else in the comparator,
+// and '' means "any version", just remove the *s entirely.
+function replaceStars(comp, loose) {
+  debug('replaceStars', comp, loose);
+  // Looseness is ignored here.  star is always as loose as it gets!
+  return comp.trim().replace(re[STAR], '');
+}
+
+// This function is passed to string.replace(re[HYPHENRANGE])
+// M, m, patch, prerelease, build
+// 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
+// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
+// 1.2 - 3.4 => >=1.2.0 <3.5.0
+function hyphenReplace($0,
+                       from, fM, fm, fp, fpr, fb,
+                       to, tM, tm, tp, tpr, tb) {
+
+  if (isX(fM))
+    from = '';
+  else if (isX(fm))
+    from = '>=' + fM + '.0.0';
+  else if (isX(fp))
+    from = '>=' + fM + '.' + fm + '.0';
+  else
+    from = '>=' + from;
+
+  if (isX(tM))
+    to = '';
+  else if (isX(tm))
+    to = '<' + (+tM + 1) + '.0.0';
+  else if (isX(tp))
+    to = '<' + tM + '.' + (+tm + 1) + '.0';
+  else if (tpr)
+    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr;
+  else
+    to = '<=' + to;
+
+  return (from + ' ' + to).trim();
+}
+
+
+// if ANY of the sets match ALL of its comparators, then pass
+Range.prototype.test = function(version) {
+  if (!version)
+    return false;
+
+  if (typeof version === 'string')
+    version = new SemVer(version, this.loose);
+
+  for (var i = 0; i < this.set.length; i++) {
+    if (testSet(this.set[i], version))
+      return true;
+  }
+  return false;
+};
+
+function testSet(set, version) {
+  for (var i = 0; i < set.length; i++) {
+    if (!set[i].test(version))
+      return false;
+  }
+
+  if (version.prerelease.length) {
+    // Find the set of versions that are allowed to have prereleases
+    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
+    // That should allow `1.2.3-pr.2` to pass.
+    // However, `1.2.4-alpha.notready` should NOT be allowed,
+    // even though it's within the range set by the comparators.
+    for (var i = 0; i < set.length; i++) {
+      debug(set[i].semver);
+      if (set[i].semver === ANY)
+        continue;
+
+      if (set[i].semver.prerelease.length > 0) {
+        var allowed = set[i].semver;
+        if (allowed.major === version.major &&
+            allowed.minor === version.minor &&
+            allowed.patch === version.patch)
+          return true;
+      }
+    }
+
+    // Version has a -pre, but it's not one of the ones we like.
+    return false;
+  }
+
+  return true;
+}
+
+exports.satisfies = satisfies;
+function satisfies(version, range, loose) {
+  try {
+    range = new Range(range, loose);
+  } catch (er) {
+    return false;
+  }
+  return range.test(version);
+}
+
+exports.maxSatisfying = maxSatisfying;
+function maxSatisfying(versions, range, loose) {
+  return versions.filter(function(version) {
+    return satisfies(version, range, loose);
+  }).sort(function(a, b) {
+    return rcompare(a, b, loose);
+  })[0] || null;
+}
+
+exports.validRange = validRange;
+function validRange(range, loose) {
+  try {
+    // Return '*' instead of '' so that truthiness works.
+    // This will throw if it's invalid anyway
+    return new Range(range, loose).range || '*';
+  } catch (er) {
+    return null;
+  }
+}
+
+// Determine if version is less than all the versions possible in the range
+exports.ltr = ltr;
+function ltr(version, range, loose) {
+  return outside(version, range, '<', loose);
+}
+
+// Determine if version is greater than all the versions possible in the range.
+exports.gtr = gtr;
+function gtr(version, range, loose) {
+  return outside(version, range, '>', loose);
+}
+
+exports.outside = outside;
+function outside(version, range, hilo, loose) {
+  version = new SemVer(version, loose);
+  range = new Range(range, loose);
+
+  var gtfn, ltefn, ltfn, comp, ecomp;
+  switch (hilo) {
+    case '>':
+      gtfn = gt;
+      ltefn = lte;
+      ltfn = lt;
+      comp = '>';
+      ecomp = '>=';
+      break;
+    case '<':
+      gtfn = lt;
+      ltefn = gte;
+      ltfn = gt;
+      comp = '<';
+      ecomp = '<=';
+      break;
+    default:
+      throw new TypeError('Must provide a hilo val of "<" or ">"');
+  }
+
+  // If it satisifes the range it is not outside
+  if (satisfies(version, range, loose)) {
+    return false;
+  }
+
+  // From now on, variable terms are as if we're in "gtr" mode.
+  // but note that everything is flipped for the "ltr" function.
+
+  for (var i = 0; i < range.set.length; ++i) {
+    var comparators = range.set[i];
+
+    var high = null;
+    var low = null;
+
+    comparators.forEach(function(comparator) {
+      if (comparator.semver === ANY) {
+        comparator = new Comparator('>=0.0.0')
+      }
+      high = high || comparator;
+      low = low || comparator;
+      if (gtfn(comparator.semver, high.semver, loose)) {
+        high = comparator;
+      } else if (ltfn(comparator.semver, low.semver, loose)) {
+        low = comparator;
+      }
+    });
+
+    // If the edge version comparator has a operator then our version
+    // isn't outside it
+    if (high.operator === comp || high.operator === ecomp) {
+      return false;
+    }
+
+    // If the lowest version comparator has an operator and our version
+    // is less than it then it isn't higher than the range
+    if ((!low.operator || low.operator === comp) &&
+        ltefn(version, low.semver)) {
+      return false;
+    } else if (low.operator === ecomp && ltfn(version, low.semver)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+}).call(this,require('_process'))
+},{"_process":463}],501:[function(require,module,exports){
 (function (Buffer){
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -56703,7 +57895,7 @@ Hash.prototype._update = function () {
 module.exports = Hash
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":45}],501:[function(require,module,exports){
+},{"buffer":45}],502:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -56720,7 +57912,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":502,"./sha1":503,"./sha224":504,"./sha256":505,"./sha384":506,"./sha512":507}],502:[function(require,module,exports){
+},{"./sha":503,"./sha1":504,"./sha224":505,"./sha256":506,"./sha384":507,"./sha512":508}],503:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
@@ -56824,7 +58016,7 @@ module.exports = Sha
 
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":500,"buffer":45,"inherits":99}],503:[function(require,module,exports){
+},{"./hash":501,"buffer":45,"inherits":99}],504:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
@@ -56924,7 +58116,7 @@ Sha1.prototype._hash = function () {
 module.exports = Sha1
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":500,"buffer":45,"inherits":99}],504:[function(require,module,exports){
+},{"./hash":501,"buffer":45,"inherits":99}],505:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -56980,7 +58172,7 @@ Sha224.prototype._hash = function () {
 module.exports = Sha224
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":500,"./sha256":505,"buffer":45,"inherits":99}],505:[function(require,module,exports){
+},{"./hash":501,"./sha256":506,"buffer":45,"inherits":99}],506:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -57125,7 +58317,7 @@ Sha256.prototype._hash = function () {
 module.exports = Sha256
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":500,"buffer":45,"inherits":99}],506:[function(require,module,exports){
+},{"./hash":501,"buffer":45,"inherits":99}],507:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
@@ -57185,7 +58377,7 @@ Sha384.prototype._hash = function () {
 module.exports = Sha384
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":500,"./sha512":507,"buffer":45,"inherits":99}],507:[function(require,module,exports){
+},{"./hash":501,"./sha512":508,"buffer":45,"inherits":99}],508:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var Hash = require('./hash')
@@ -57455,7 +58647,7 @@ Sha512.prototype._hash = function () {
 module.exports = Sha512
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":500,"buffer":45,"inherits":99}],508:[function(require,module,exports){
+},{"./hash":501,"buffer":45,"inherits":99}],509:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -57584,7 +58776,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":84,"inherits":99,"readable-stream/duplex.js":471,"readable-stream/passthrough.js":477,"readable-stream/readable.js":478,"readable-stream/transform.js":479,"readable-stream/writable.js":480}],509:[function(require,module,exports){
+},{"events":84,"inherits":99,"readable-stream/duplex.js":471,"readable-stream/passthrough.js":477,"readable-stream/readable.js":478,"readable-stream/transform.js":479,"readable-stream/writable.js":480}],510:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -57807,7 +58999,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":45}],510:[function(require,module,exports){
+},{"buffer":45}],511:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -57842,7 +59034,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],511:[function(require,module,exports){
+},{}],512:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -58027,7 +59219,7 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":510}],512:[function(require,module,exports){
+},{"./rng":511}],513:[function(require,module,exports){
 var indexOf = require('indexof');
 
 var Object_keys = function (obj) {
@@ -58167,22 +59359,22 @@ exports.createContext = Script.createContext = function (context) {
     return copy;
 };
 
-},{"indexof":98}],513:[function(require,module,exports){
+},{"indexof":98}],514:[function(require,module,exports){
 module.exports = Reflux.createActions(["codapLoaded", "hideUndoRedo", "sendUndoToCODAP", "sendRedoToCODAP"]);
 
 
 
-},{}],514:[function(require,module,exports){
+},{}],515:[function(require,module,exports){
 module.exports = Reflux.createActions(["graphChanged"]);
 
 
 
-},{}],515:[function(require,module,exports){
+},{}],516:[function(require,module,exports){
 module.exports = Reflux.createActions(["import"]);
 
 
 
-},{}],516:[function(require,module,exports){
+},{}],517:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -58199,7 +59391,7 @@ module.exports = [
 
 
 
-},{}],517:[function(require,module,exports){
+},{}],518:[function(require,module,exports){
 module.exports = [
   {
     "id": "2",
@@ -58276,7 +59468,7 @@ module.exports = [
 
 
 
-},{}],518:[function(require,module,exports){
+},{}],519:[function(require,module,exports){
 var optgroup, option, ref;
 
 ref = React.DOM, option = ref.option, optgroup = ref.optgroup;
@@ -58356,18 +59548,17 @@ module.exports = {
 
 
 
-},{}],519:[function(require,module,exports){
+},{}],520:[function(require,module,exports){
 var migration;
 
 migration = {
-  version: 1.0,
+  version: "1.0.0",
   description: "The initial migrations from old mysystem style file format.",
   date: "2015-08-12",
   doUpdate: function(data) {
     this.updateNodes(data);
     this.updateLinks(data);
-    this.updatePalette(data);
-    return data;
+    return this.updatePalette(data);
   },
   updateNodes: function(data) {
     return data.nodes = _.map(data.nodes || [], function(node) {
@@ -58423,19 +59614,18 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":530}],520:[function(require,module,exports){
+},{"./migration-mixin":532}],521:[function(require,module,exports){
 var Relationship, migration;
 
 Relationship = require('../../models/relationship');
 
 migration = {
-  version: 1.1,
+  version: "1.1.0",
   description: "Adds initial values and relationships.",
   date: "2015-08-13",
   doUpdate: function(data) {
     this.updateNodes(data);
-    this.updateLinks(data);
-    return data;
+    return this.updateLinks(data);
   },
   updateNodes: function(data) {
     var i, len, node, ref, results;
@@ -58469,18 +59659,15 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"./migration-mixin":530}],521:[function(require,module,exports){
-var Relationship, migration;
-
-Relationship = require('../../models/relationship');
+},{"../../models/relationship":543,"./migration-mixin":532}],522:[function(require,module,exports){
+var migration;
 
 migration = {
-  version: 1.2,
+  version: "1.2.0",
   description: "Adds initial value for defining node semiquantitatively.",
   date: "2015-09-02",
   doUpdate: function(data) {
-    this.updateNodes(data);
-    return data;
+    return this.updateNodes(data);
   },
   updateNodes: function(data) {
     var i, len, node, ref, results;
@@ -58499,18 +59686,15 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"./migration-mixin":530}],522:[function(require,module,exports){
-var Relationship, migration;
-
-Relationship = require('../../models/relationship');
+},{"./migration-mixin":532}],523:[function(require,module,exports){
+var migration;
 
 migration = {
-  version: 1.3,
+  version: "1.3.0",
   description: "Adds min and max values for nodes.",
   date: "2015-09-03",
   doUpdate: function(data) {
-    this.updateNodes(data);
-    return data;
+    return this.updateNodes(data);
   },
   updateNodes: function(data) {
     var i, len, node, ref, results;
@@ -58530,13 +59714,11 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"./migration-mixin":530}],523:[function(require,module,exports){
-var Relationship, migration;
-
-Relationship = require('../../models/relationship');
+},{"./migration-mixin":532}],524:[function(require,module,exports){
+var migration;
 
 migration = {
-  version: 1.4,
+  version: "1.4.0",
   description: "Adds settings object and cap default.",
   date: "2015-09-17",
   doUpdate: function(data) {
@@ -58544,10 +59726,7 @@ migration = {
     if (data.settings == null) {
       data.settings = {};
     }
-    if ((base = data.settings).capNodeValues == null) {
-      base.capNodeValues = false;
-    }
-    return data;
+    return (base = data.settings).capNodeValues != null ? base.capNodeValues : base.capNodeValues = false;
   }
 };
 
@@ -58555,7 +59734,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"./migration-mixin":530}],524:[function(require,module,exports){
+},{"./migration-mixin":532}],525:[function(require,module,exports){
 var imageToUUIDMap, migration, uuid;
 
 uuid = require('uuid');
@@ -58563,13 +59742,12 @@ uuid = require('uuid');
 imageToUUIDMap = {};
 
 migration = {
-  version: 1.5,
+  version: "1.5.0",
   description: "Nodes reference PaletteItems",
   date: "2015-09-16",
   doUpdate: function(data) {
     this.updatePalette(data);
-    this.updateNodes(data);
-    return data;
+    return this.updateNodes(data);
   },
   updatePalette: function(data) {
     return _.each(data.palette, function(paletteItem) {
@@ -58597,13 +59775,11 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":530,"uuid":511}],525:[function(require,module,exports){
-var Relationship, migration;
-
-Relationship = require('../../models/relationship');
+},{"./migration-mixin":532,"uuid":512}],526:[function(require,module,exports){
+var migration;
 
 migration = {
-  version: 1.6,
+  version: "1.6.0",
   description: "Adds diagramOnly setting. Default == false",
   date: "2015-09-22",
   doUpdate: function(data) {
@@ -58611,10 +59787,7 @@ migration = {
     if (data.settings == null) {
       data.settings = {};
     }
-    if ((base = data.settings).diagramOnly == null) {
-      base.diagramOnly = false;
-    }
-    return data;
+    return (base = data.settings).diagramOnly != null ? base.diagramOnly : base.diagramOnly = false;
   }
 };
 
@@ -58622,15 +59795,13 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"./migration-mixin":530}],526:[function(require,module,exports){
-var Relationship, TimeUnits, migration;
-
-Relationship = require('../../models/relationship');
+},{"./migration-mixin":532}],527:[function(require,module,exports){
+var TimeUnits, migration;
 
 TimeUnits = require('../../utils/time-units');
 
 migration = {
-  version: 1.7,
+  version: "1.7.0",
   description: "Adds Simulation settings",
   date: "2015-10-02",
   doUpdate: function(data) {
@@ -58656,15 +59827,11 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"../../utils/time-units":563,"./migration-mixin":530}],527:[function(require,module,exports){
-var Relationship, TimeUnits, migration;
-
-Relationship = require('../../models/relationship');
-
-TimeUnits = require('../../utils/time-units');
+},{"../../utils/time-units":565,"./migration-mixin":532}],528:[function(require,module,exports){
+var migration;
 
 migration = {
-  version: 1.8,
+  version: "1.8.0",
   description: "Updates duration settings",
   date: "2015-10-14",
   doUpdate: function(data) {
@@ -58693,15 +59860,11 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"../../utils/time-units":563,"./migration-mixin":530}],528:[function(require,module,exports){
-var Relationship, TimeUnits, migration;
-
-Relationship = require('../../models/relationship');
-
-TimeUnits = require('../../utils/time-units');
+},{"./migration-mixin":532}],529:[function(require,module,exports){
+var migration;
 
 migration = {
-  version: 1.9,
+  version: "1.9.0",
   description: "Adds simulation speed and capNodeValues settings",
   date: "2015-10-14",
   doUpdate: function(data) {
@@ -58730,15 +59893,11 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"../../utils/time-units":563,"./migration-mixin":530}],529:[function(require,module,exports){
-var Relationship, TimeUnits, migration;
-
-Relationship = require('../../models/relationship');
-
-TimeUnits = require('../../utils/time-units');
+},{"./migration-mixin":532}],530:[function(require,module,exports){
+var migration;
 
 migration = {
-  version: 1.95,
+  version: "1.10.0",
   description: "Adds simulation engine settings",
   date: "2016-01-16",
   doUpdate: function(data) {
@@ -58757,10 +59916,39 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":541,"../../utils/time-units":563,"./migration-mixin":530}],530:[function(require,module,exports){
+},{"./migration-mixin":532}],531:[function(require,module,exports){
+var migration;
+
+migration = {
+  version: "1.11.0",
+  description: "Adds minigraphs settings",
+  date: "2016-03-15",
+  doUpdate: function(data) {
+    var base;
+    if (data.settings == null) {
+      data.settings = {};
+    }
+    return (base = data.settings).showMinigraphs != null ? base.showMinigraphs : base.showMinigraphs = false;
+  }
+};
+
+module.exports = _.mixin(migration, require('./migration-mixin'));
+
+
+
+},{"./migration-mixin":532}],532:[function(require,module,exports){
+var semver;
+
+semver = require("semver");
+
 module.exports = {
   needsUpdate: function(data) {
-    return (data.version || 0) < this.version;
+    var version;
+    version = data.version || "0.0.0";
+    if (typeof version === "number") {
+      version = this._semverize(version);
+    }
+    return semver.gt(this.version, version);
   },
   name: function() {
     return this.version + " – " + this.date + " : " + this.description;
@@ -58774,15 +59962,22 @@ module.exports = {
       log.info("  skipped : " + (this.name()));
     }
     return data;
+  },
+  _semverize: function(v) {
+    if (v === 1.95) {
+      return "1.9.5";
+    } else {
+      return v + ".0";
+    }
   }
 };
 
 
 
-},{}],531:[function(require,module,exports){
+},{"semver":500}],533:[function(require,module,exports){
 var migrations;
 
-migrations = [require("./01_base"), require("./02_add_relations"), require("./03_add_semi_quant_editing"), require("./04_add_min_max"), require("./05_add_settings_and_cap"), require("./06_add_palette_references"), require("./07_add_diagram_only_setting"), require("./08_add_simulation_settings"), require("./09_update_duration_settings"), require("./10_add_speed_and_cap"), require("./11_simulation_engine_settings")];
+migrations = [require("./01_base"), require("./02_add_relations"), require("./03_add_semi_quant_editing"), require("./04_add_min_max"), require("./05_add_settings_and_cap"), require("./06_add_palette_references"), require("./07_add_diagram_only_setting"), require("./08_add_simulation_settings"), require("./09_update_duration_settings"), require("./10_add_speed_and_cap"), require("./11_simulation_engine_settings"), require("./12_add_minigraphs_visibility")];
 
 module.exports = {
   migrations: migrations,
@@ -58800,15 +59995,13 @@ module.exports = {
     return this.lastMigration().version;
   },
   lastMigration: function() {
-    return _.max(migrations, function(m) {
-      return m.version;
-    });
+    return migrations[migrations.length - 1];
   }
 };
 
 
 
-},{"./01_base":519,"./02_add_relations":520,"./03_add_semi_quant_editing":521,"./04_add_min_max":522,"./05_add_settings_and_cap":523,"./06_add_palette_references":524,"./07_add_diagram_only_setting":525,"./08_add_simulation_settings":526,"./09_update_duration_settings":527,"./10_add_speed_and_cap":528,"./11_simulation_engine_settings":529}],532:[function(require,module,exports){
+},{"./01_base":520,"./02_add_relations":521,"./03_add_semi_quant_editing":522,"./04_add_min_max":523,"./05_add_settings_and_cap":524,"./06_add_palette_references":525,"./07_add_diagram_only_setting":526,"./08_add_simulation_settings":527,"./09_update_duration_settings":528,"./10_add_speed_and_cap":529,"./11_simulation_engine_settings":530,"./12_add_minigraphs_visibility":531}],534:[function(require,module,exports){
 var CodapStore, GoogleFileStore, HashParams, PaletteStore, tr;
 
 PaletteStore = require("../stores/palette-store");
@@ -58891,11 +60084,12 @@ module.exports = {
     selectedNode = manager.getInspection()[0] || null;
     editingNode = manager.getTitleEditing()[0] || null;
     selectedLink = manager.getLinkSelection()[0] || null;
-    return this.setState({
+    this.setState({
       selectedNode: selectedNode,
       editingNode: editingNode,
       selectedLink: selectedLink
     });
+    return this.selectionUpdated();
   },
   _loadInitialData: function() {
     var googleDoc, publicUrl, ref, ref1, ref2;
@@ -58963,7 +60157,7 @@ module.exports = {
 
 
 
-},{"../stores/codap-store":545,"../stores/google-file-store":546,"../stores/palette-store":551,"../utils/hash-parameters":557,"../utils/translate":564}],533:[function(require,module,exports){
+},{"../stores/codap-store":547,"../stores/google-file-store":548,"../stores/palette-store":553,"../utils/hash-parameters":559,"../utils/translate":566}],535:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -59002,7 +60196,7 @@ module.exports = {
 
 
 
-},{}],534:[function(require,module,exports){
+},{}],536:[function(require,module,exports){
 var ImageDialogStore, PreviewImage, hasValidImageExtension;
 
 PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
@@ -59033,7 +60227,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":548,"../utils/has-valid-image-extension":556,"../views/preview-image-dialog-view":599}],535:[function(require,module,exports){
+},{"../stores/image-dialog-store":550,"../utils/has-valid-image-extension":558,"../views/preview-image-dialog-view":602}],537:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -59066,7 +60260,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":564}],536:[function(require,module,exports){
+},{"../utils/translate":566}],538:[function(require,module,exports){
 var CodapActions, CodapConnect, IframePhoneRpcEndpoint, SimulationStore, TimeUnits, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -59421,7 +60615,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../actions/codap-actions":513,"../stores/graph-store":547,"../stores/palette-store":551,"../stores/simulation-store":552,"../utils/time-units":563,"../utils/translate":564,"iframe-phone":97}],537:[function(require,module,exports){
+},{"../actions/codap-actions":514,"../stores/graph-store":549,"../stores/palette-store":553,"../stores/simulation-store":554,"../utils/time-units":565,"../utils/translate":566,"iframe-phone":97}],539:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -59452,7 +60646,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 
-},{}],538:[function(require,module,exports){
+},{}],540:[function(require,module,exports){
 var GraphPrimitive, Link, Relation,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -59530,7 +60724,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":537,"./relationship":541}],539:[function(require,module,exports){
+},{"./graph-primitive":539,"./relationship":543}],541:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, SEMIQUANT_MAX, SEMIQUANT_MIN, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -59552,7 +60746,7 @@ Function.prototype.property = function(prop, desc) {
 module.exports = Node = (function(superClass) {
   extend(Node, superClass);
 
-  Node.fields = ['title', 'image', 'color', 'paletteItem', 'initialValue', 'min', 'max', 'isAccumulator', 'valueDefinedSemiQuantitatively'];
+  Node.fields = ['title', 'image', 'color', 'paletteItem', 'initialValue', 'min', 'max', 'isAccumulator', 'valueDefinedSemiQuantitatively', 'frames'];
 
   function Node(nodeSpec, key) {
     var ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
@@ -59571,6 +60765,7 @@ module.exports = Node = (function(superClass) {
     if (this.color == null) {
       this.color = Colors[0].value;
     }
+    this.frames = [];
   }
 
   Node.property('initialValue', {
@@ -59756,7 +60951,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":553,"../utils/translate":564,"./graph-primitive":537}],540:[function(require,module,exports){
+},{"../utils/colors":555,"../utils/translate":566,"./graph-primitive":539}],542:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -59880,7 +61075,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":564,"./relationship":541}],541:[function(require,module,exports){
+},{"../utils/translate":566,"./relationship":543}],543:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -59969,7 +61164,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":564,"mathjs":102}],542:[function(require,module,exports){
+},{"../utils/translate":566,"mathjs":102}],544:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, tr;
 
 Importer = require('../utils/importer');
@@ -60145,7 +61340,7 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":558,"../utils/translate":564,"./link":538,"./node":539}],543:[function(require,module,exports){
+},{"../utils/importer":560,"../utils/translate":566,"./link":540,"./node":541}],545:[function(require,module,exports){
 var IntegrationFunction, Simulation, scaleInput;
 
 scaleInput = function(val, nodeIn, nodeOut) {
@@ -60416,25 +61611,30 @@ module.exports = Simulation = (function() {
 
 
 
-},{}],544:[function(require,module,exports){
+},{}],546:[function(require,module,exports){
 var AppSettingsActions, AppSettingsStore, HashParams, ImportActions, mixin;
 
 HashParams = require('../utils/hash-parameters');
 
 ImportActions = require('../actions/import-actions');
 
-AppSettingsActions = Reflux.createActions(["diagramOnly"]);
+AppSettingsActions = Reflux.createActions(["diagramOnly", "showMinigraphs"]);
 
 AppSettingsStore = Reflux.createStore({
   listenables: [AppSettingsActions, ImportActions],
   init: function() {
     return this.settings = {
       showingSettingsDialog: false,
-      diagramOnly: HashParams.getParam('simplified')
+      diagramOnly: HashParams.getParam('simplified'),
+      showingMinigraphs: false
     };
   },
   onDiagramOnly: function(diagramOnly) {
     this.settings.diagramOnly = diagramOnly;
+    return this.notifyChange();
+  },
+  onShowMinigraphs: function(show) {
+    this.settings.showingMinigraphs = show;
     return this.notifyChange();
   },
   notifyChange: function() {
@@ -60451,7 +61651,8 @@ AppSettingsStore = Reflux.createStore({
   },
   serialize: function() {
     return {
-      diagramOnly: this.settings.diagramOnly
+      diagramOnly: this.settings.diagramOnly,
+      showingMinigraphs: this.settings.showingMinigraphs
     };
   }
 });
@@ -60461,7 +61662,10 @@ mixin = {
     return _.clone(AppSettingsStore.settings);
   },
   componentDidMount: function() {
-    return AppSettingsStore.listen(this.onAppSettingsChange);
+    return this.unsubscribe = AppSettingsStore.listen(this.onAppSettingsChange);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onAppSettingsChange: function(newData) {
     return this.setState(_.clone(newData));
@@ -60476,7 +61680,7 @@ module.exports = {
 
 
 
-},{"../actions/import-actions":515,"../utils/hash-parameters":557}],545:[function(require,module,exports){
+},{"../actions/import-actions":516,"../utils/hash-parameters":559}],547:[function(require,module,exports){
 var CodapActions, CodapConnect, codapStore, mixin;
 
 CodapConnect = require('../models/codap-connect');
@@ -60517,7 +61721,10 @@ mixin = {
     };
   },
   componentDidMount: function() {
-    return codapStore.listen(this.onCodapStateChange);
+    return this.unsubscribe = codapStore.listen(this.onCodapStateChange);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onCodapStateChange: function(status) {
     return this.setState({
@@ -60535,7 +61742,7 @@ module.exports = {
 
 
 
-},{"../actions/codap-actions":513,"../models/codap-connect":536}],546:[function(require,module,exports){
+},{"../actions/codap-actions":514,"../models/codap-connect":538}],548:[function(require,module,exports){
 var GoogleDrive, GoogleDriveIO, GoogleFileActions, GoogleFileStore, GraphStore, HashParams, PaletteStore, mixin, tr, waitForAuthCheck;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -60739,7 +61946,10 @@ mixin = {
     };
   },
   componentDidMount: function() {
-    return GoogleFileStore.listen(this.onGoogleChange);
+    return this.unsubscribe = GoogleFileStore.listen(this.onGoogleChange);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onGoogleChange: function(newData) {
     return this.setState(_.clone(newData));
@@ -60754,7 +61964,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":555,"../utils/hash-parameters":557,"../utils/translate":564,"./graph-store":547,"./palette-store":551}],547:[function(require,module,exports){
+},{"../utils/google-drive-io":557,"../utils/hash-parameters":559,"../utils/translate":566,"./graph-store":549,"./palette-store":553}],549:[function(require,module,exports){
 var AppSettingsStore, CodapActions, GraphActions, GraphStore, Importer, Link, Migrations, NodeModel, PaletteDeleteStore, PaletteStore, SelectionManager, SimulationStore, UndoRedo, mixin, tr;
 
 Importer = require('../utils/importer');
@@ -60796,16 +62006,43 @@ GraphStore = Reflux.createStore({
     });
     this.selectionManager = new SelectionManager();
     PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
+    SimulationStore.actions.resetSimulation.listen(this.resetSimulation.bind(this));
+    SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
+    SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
     return this.codapStandaloneMode = false;
   },
+  resetSimulation: function() {
+    var j, len, node, ref;
+    ref = this.getNodes();
+    for (j = 0, len = ref.length; j < len; j++) {
+      node = ref[j];
+      node.frames = [];
+    }
+    return this.updateListeners();
+  },
+  updateSimulationData: function(data) {
+    var frame, i, j, k, len, len1, node, nodes, ref;
+    nodes = this.getNodes();
+    for (j = 0, len = data.length; j < len; j++) {
+      frame = data[j];
+      ref = frame.nodes;
+      for (i = k = 0, len1 = ref.length; k < len1; i = ++k) {
+        node = ref[i];
+        nodes[i].frames.push(node.value);
+      }
+    }
+    if (AppSettingsStore.store.settings.showingMinigraphs) {
+      return this.updateListeners();
+    }
+  },
   paletteDelete: function(status) {
-    var deleted, i, len, node, paletteItem, ref, replacement, results;
+    var deleted, j, len, node, paletteItem, ref, replacement, results;
     deleted = status.deleted, paletteItem = status.paletteItem, replacement = status.replacement;
     if (deleted && paletteItem && replacement) {
       ref = this.getNodes();
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        node = ref[i];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node = ref[j];
         if (node.paletteItemIs(paletteItem)) {
           results.push(this.changeNode({
             image: replacement.image,
@@ -60853,12 +62090,12 @@ GraphStore = Reflux.createStore({
     return this.filenameListeners.push(listener);
   },
   setFilename: function(filename) {
-    var i, len, listener, ref, results;
+    var j, len, listener, ref, results;
     this.filename = filename;
     ref = this.filenameListeners;
     results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      listener = ref[i];
+    for (j = 0, len = ref.length; j < len; j++) {
+      listener = ref[j];
       results.push(listener(filename));
     }
     return results;
@@ -60970,9 +62207,9 @@ GraphStore = Reflux.createStore({
     return this.undoRedoManager.createAndExecuteCommand('removeNode', {
       execute: (function(_this) {
         return function() {
-          var i, len, link;
-          for (i = 0, len = links.length; i < len; i++) {
-            link = links[i];
+          var j, len, link;
+          for (j = 0, len = links.length; j < len; j++) {
+            link = links[j];
             _this._removeLink(link);
           }
           return _this._removeNode(node);
@@ -60980,11 +62217,11 @@ GraphStore = Reflux.createStore({
       })(this),
       undo: (function(_this) {
         return function() {
-          var i, len, link, results;
+          var j, len, link, results;
           _this._addNode(node);
           results = [];
-          for (i = 0, len = links.length; i < len; i++) {
-            link = links[i];
+          for (j = 0, len = links.length; j < len; j++) {
+            link = links[j];
             results.push(_this._addLink(link));
           }
           return results;
@@ -61090,11 +62327,11 @@ GraphStore = Reflux.createStore({
     }
   },
   _changeNode: function(node, data) {
-    var i, key, len, ref;
+    var j, key, len, ref;
     log.info("Change for " + node.title);
     ref = NodeModel.fields;
-    for (i = 0, len = ref.length; i < len; i++) {
-      key = ref[i];
+    for (j = 0, len = ref.length; j < len; j++) {
+      key = ref[j];
       if (data.hasOwnProperty(key)) {
         log.info("Change " + key + " for " + node.title);
         node[key] = data[key];
@@ -61158,11 +62395,11 @@ GraphStore = Reflux.createStore({
     }
   },
   _changeLink: function(link, changes) {
-    var i, key, len, ref;
+    var j, key, len, ref;
     log.info("Change  for " + link.title);
     ref = ['title', 'color', 'relation'];
-    for (i = 0, len = ref.length; i < len; i++) {
-      key = ref[i];
+    for (j = 0, len = ref.length; j < len; j++) {
+      key = ref[j];
       if (changes[key] != null) {
         log.info("Change " + key + " for " + link.title);
         link[key] = changes[key];
@@ -61221,11 +62458,11 @@ GraphStore = Reflux.createStore({
     }
   },
   removeLinksForNode: function(node) {
-    var i, len, link, ref, results;
+    var j, len, link, ref, results;
     ref = node.links;
     results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      link = ref[i];
+    for (j = 0, len = ref.length; j < len; j++) {
+      link = ref[j];
       results.push(this.removeLink(link));
     }
     return results;
@@ -61308,7 +62545,10 @@ mixin = {
     };
   },
   componentDidMount: function() {
-    return GraphActions.graphChanged.listen(this.onGraphChanged);
+    return this.unsubscribe = GraphActions.graphChanged.listen(this.onGraphChanged);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onGraphChanged: function(status) {
     var ref;
@@ -61327,7 +62567,7 @@ module.exports = {
 
 
 
-},{"../actions/codap-actions":513,"../actions/graph-actions":514,"../data/migrations/migrations":531,"../models/link":538,"../models/node":539,"../models/selection-manager":542,"../stores/app-settings-store":544,"../stores/palette-delete-dialog-store":550,"../stores/palette-store":551,"../stores/simulation-store":552,"../utils/importer":558,"../utils/translate":564,"../utils/undo-redo":565}],548:[function(require,module,exports){
+},{"../actions/codap-actions":514,"../actions/graph-actions":515,"../data/migrations/migrations":533,"../models/link":540,"../models/node":541,"../models/selection-manager":544,"../stores/app-settings-store":546,"../stores/palette-delete-dialog-store":552,"../stores/palette-store":553,"../stores/simulation-store":554,"../utils/importer":560,"../utils/translate":566,"../utils/undo-redo":567}],550:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -61432,7 +62672,10 @@ listenerMixin = {
     };
   },
   componentDidMount: function() {
-    return store.listen(this.onChange);
+    return this.unsubscribe = store.listen(this.onChange);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onChange: function(status) {
     return this.setState({
@@ -61452,7 +62695,7 @@ module.exports = {
 
 
 
-},{"./palette-store":551}],549:[function(require,module,exports){
+},{"./palette-store":553}],551:[function(require,module,exports){
 var GraphActions, PaletteStore, mixin, nodeActions, nodeStore;
 
 PaletteStore = require('./palette-store');
@@ -61514,7 +62757,10 @@ mixin = {
     };
   },
   componentDidMount: function() {
-    return nodeStore.listen(this.onNodesChange);
+    return this.unsubscribe = nodeStore.listen(this.onNodesChange);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onNodesChange: function(status) {
     return this.setState({
@@ -61531,7 +62777,7 @@ module.exports = {
 
 
 
-},{"../actions/graph-actions":514,"./palette-store":551}],550:[function(require,module,exports){
+},{"../actions/graph-actions":515,"./palette-store":553}],552:[function(require,module,exports){
 var PaletteStore, UndoRedo, listenerMixin, paletteDialogActions, store;
 
 PaletteStore = require('./palette-store');
@@ -61630,7 +62876,10 @@ listenerMixin = {
     };
   },
   componentDidMount: function() {
-    return store.listen(this.onChange);
+    return this.unsubscribe = store.listen(this.onChange);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onChange: function(status) {
     return this.setState({
@@ -61652,7 +62901,7 @@ module.exports = {
 
 
 
-},{"../utils/undo-redo":565,"./nodes-store":549,"./palette-store":551}],551:[function(require,module,exports){
+},{"../utils/undo-redo":567,"./nodes-store":551,"./palette-store":553}],553:[function(require,module,exports){
 var ImportActions, UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage, uuid;
 
 resizeImage = require('../utils/resize-image');
@@ -61874,7 +63123,10 @@ mixin = {
     };
   },
   componentDidMount: function() {
-    return paletteStore.listen(this.onPaletteChange);
+    return this.unsubscribe = paletteStore.listen(this.onPaletteChange);
+  },
+  componentWillUnmount: function() {
+    return this.unsubscribe();
   },
   onPaletteChange: function(status) {
     return this.setState({
@@ -61898,7 +63150,7 @@ window.PaletteStore = module.exports;
 
 
 
-},{"../actions/import-actions":515,"../data/initial-palette":516,"../data/internal-library":517,"../utils/resize-image":562,"../utils/undo-redo":565,"uuid":511}],552:[function(require,module,exports){
+},{"../actions/import-actions":516,"../data/initial-palette":517,"../data/internal-library":518,"../utils/resize-image":564,"../utils/undo-redo":567,"uuid":512}],554:[function(require,module,exports){
 var AppSettingsActions, GraphActions, ImportActions, Simulation, SimulationActions, SimulationStore, TimeUnits, mixin, tr;
 
 AppSettingsActions = require('./app-settings-store').actions;
@@ -62053,7 +63305,10 @@ mixin = {
     return _.clone(SimulationStore.settings);
   },
   componentDidMount: function() {
-    return SimulationStore.listen(this.onSimulationStoreChange);
+    return this.simulationUnsubscribe = SimulationStore.listen(this.onSimulationStoreChange);
+  },
+  componentWillUnmount: function() {
+    return this.simulationUnsubscribe();
   },
   onSimulationStoreChange: function(newData) {
     return this.setState(_.clone(newData));
@@ -62068,7 +63323,7 @@ module.exports = {
 
 
 
-},{"../actions/graph-actions":514,"../actions/import-actions":515,"../models/simulation":543,"../utils/time-units":563,"../utils/translate":564,"./app-settings-store":544}],553:[function(require,module,exports){
+},{"../actions/graph-actions":515,"../actions/import-actions":516,"../models/simulation":545,"../utils/time-units":565,"../utils/translate":566,"./app-settings-store":546}],555:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -62088,7 +63343,7 @@ module.exports = [
 
 
 
-},{"./translate":564}],554:[function(require,module,exports){
+},{"./translate":566}],556:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -62141,7 +63396,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":556,"./resize-image":562}],555:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":558,"./resize-image":564}],557:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -62349,7 +63604,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],556:[function(require,module,exports){
+},{}],558:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -62368,7 +63623,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":564}],557:[function(require,module,exports){
+},{"./translate":566}],559:[function(require,module,exports){
 var HashParameters, PARAM_TOKEN, VALUE_TOKEN;
 
 PARAM_TOKEN = /[?|&]/g;
@@ -62459,7 +63714,7 @@ module.exports = new HashParameters();
 
 
 
-},{}],558:[function(require,module,exports){
+},{}],560:[function(require,module,exports){
 var DiagramNode, ImportActions, Migrations, MySystemImporter;
 
 Migrations = require('../data/migrations/migrations');
@@ -62522,7 +63777,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{"../actions/import-actions":515,"../data/migrations/migrations":531,"../models/node":539}],559:[function(require,module,exports){
+},{"../actions/import-actions":516,"../data/migrations/migrations":533,"../models/node":541}],561:[function(require,module,exports){
 var DiagramToolkit;
 
 module.exports = DiagramToolkit = (function() {
@@ -62730,7 +63985,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],560:[function(require,module,exports){
+},{}],562:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -62868,7 +64123,7 @@ module.exports = {
 
 
 
-},{}],561:[function(require,module,exports){
+},{}],563:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -62905,7 +64160,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],562:[function(require,module,exports){
+},{}],564:[function(require,module,exports){
 module.exports = function(src, callback) {
   var fail, img, maxHeight, maxWidth;
   fail = function() {
@@ -62947,7 +64202,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],563:[function(require,module,exports){
+},{}],565:[function(require,module,exports){
 var toSeconds, tr, units;
 
 tr = require('./translate');
@@ -62992,7 +64247,7 @@ module.exports = {
 
 
 
-},{"./translate":564}],564:[function(require,module,exports){
+},{"./translate":566}],566:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -63025,7 +64280,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":560}],565:[function(require,module,exports){
+},{"./lang/us-en":562}],567:[function(require,module,exports){
 var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances;
 
 CodapConnect = require('../models/codap-connect');
@@ -63332,7 +64587,7 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":536}],566:[function(require,module,exports){
+},{"../models/codap-connect":538}],568:[function(require,module,exports){
 var AppSettingsStore, BuildInfoView, DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
 
 Reflux = require('reflux');
@@ -63381,6 +64636,10 @@ module.exports = React.createClass({
       filename: tr("~MENU.UNTITLED_MODEL")
     });
   },
+  selectionUpdated: function() {
+    var ref1;
+    return (ref1 = this.refs.inspectorPanel) != null ? ref1.nodeSelectionChanged() : void 0;
+  },
   toggleImageBrowser: function() {
     return this.setState({
       showImageBrowser: !this.state.showImageBrowser
@@ -63420,7 +64679,8 @@ module.exports = React.createClass({
       palette: this.state.palette,
       diagramOnly: this.state.diagramOnly,
       toggleImageBrowser: this.toggleImageBrowser,
-      graphStore: this.props.graphStore
+      graphStore: this.props.graphStore,
+      ref: "inspectorPanel"
     }), this.state.showingDialog ? ImageBrowser({
       graphStore: this.props.graphStore
     }) : void 0, ModalPaletteDelete({})), this.state.iframed ? BuildInfoView({}) : void 0);
@@ -63429,7 +64689,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":532,"../stores/app-settings-store":544,"../stores/image-dialog-store":548,"../utils/hash-parameters":557,"../utils/translate":564,"./build-info-view":567,"./document-actions-view":569,"./global-nav-view":572,"./graph-view":573,"./image-browser-view":574,"./inspector-panel-view":580,"./modal-palette-delete-view":586,"./node-well-view":592,"./placeholder-view":598,"reflux":496}],567:[function(require,module,exports){
+},{"../mixins/app-view":534,"../stores/app-settings-store":546,"../stores/image-dialog-store":550,"../utils/hash-parameters":559,"../utils/translate":566,"./build-info-view":569,"./document-actions-view":571,"./global-nav-view":574,"./graph-view":575,"./image-browser-view":576,"./inspector-panel-view":582,"./modal-palette-delete-view":588,"./node-well-view":595,"./placeholder-view":601,"reflux":496}],569:[function(require,module,exports){
 var BuildInfoView, Migration, a, div, ref, span, table, td, tr;
 
 ref = React.DOM, div = ref.div, a = ref.a, span = ref.span, table = ref.table, tr = ref.tr, td = ref.td;
@@ -63534,7 +64794,7 @@ module.exports = BuildInfoView = React.createClass({
 
 
 
-},{"../data/migrations/migrations":531}],568:[function(require,module,exports){
+},{"../data/migrations/migrations":533}],570:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -63616,7 +64876,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":553,"../utils/translate":564}],569:[function(require,module,exports){
+},{"../utils/colors":555,"../utils/translate":566}],571:[function(require,module,exports){
 var AppSettingsStore, CodapStore, SimulationRunPanel, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
@@ -63687,7 +64947,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":544,"../stores/codap-store":545,"../utils/translate":564,"./simulation-run-panel-view":602}],570:[function(require,module,exports){
+},{"../stores/app-settings-store":546,"../stores/codap-store":547,"../utils/translate":566,"./simulation-run-panel-view":605}],572:[function(require,module,exports){
 var Demo, DemoDropDown, DropDown, DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -63846,7 +65106,7 @@ Demo = React.createClass({
 
 
 
-},{}],571:[function(require,module,exports){
+},{}],573:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -63901,7 +65161,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":554,"../utils/translate":564}],572:[function(require,module,exports){
+},{"../utils/drop-image-handler":556,"../utils/translate":566}],574:[function(require,module,exports){
 var AppSettingsActions, BuildInfoView, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -63995,7 +65255,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":544,"../stores/google-file-store":546,"../utils/translate":564,"./build-info-view":567,"./dropdown-view":570,"./modal-google-save-view":585,"./open-in-codap-view":593}],573:[function(require,module,exports){
+},{"../stores/app-settings-store":546,"../stores/google-file-store":548,"../utils/translate":566,"./build-info-view":569,"./dropdown-view":572,"./modal-google-save-view":587,"./open-in-codap-view":596}],575:[function(require,module,exports){
 var AppSettingsStore, DiagramToolkit, ImageDialogStore, Importer, LinkStore, Node, NodeModel, PaletteStore, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -64290,7 +65550,8 @@ module.exports = React.createClass({
           onMoveComplete: this.onNodeMoveComplete,
           onDelete: this.onNodeDeleted,
           graphStore: this.props.graphStore,
-          selectionManager: this.props.selectionManager
+          selectionManager: this.props.selectionManager,
+          showMinigraph: this.state.showingMinigraphs
         }));
       }
       return results;
@@ -64300,7 +65561,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/node":539,"../stores/app-settings-store":544,"../stores/graph-store":547,"../stores/image-dialog-store":548,"../stores/palette-store":551,"../stores/simulation-store":552,"../utils/drop-image-handler":554,"../utils/importer":558,"../utils/js-plumb-diagram-toolkit":559,"../utils/translate":564,"./node-view":591}],574:[function(require,module,exports){
+},{"../models/node":541,"../stores/app-settings-store":546,"../stores/graph-store":549,"../stores/image-dialog-store":550,"../stores/palette-store":553,"../stores/simulation-store":554,"../utils/drop-image-handler":556,"../utils/importer":560,"../utils/js-plumb-diagram-toolkit":561,"../utils/translate":566,"./node-view":594}],576:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -64359,7 +65620,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":548,"../stores/palette-store":551,"../utils/translate":564,"./image-link-dialog-view":575,"./image-metadata-view":576,"./image-my-computer-dialog-view":577,"./image-search-dialog-view":579,"./modal-tabbed-dialog-view":587,"./tabbed-panel-view":605}],575:[function(require,module,exports){
+},{"../stores/image-dialog-store":550,"../stores/palette-store":553,"../utils/translate":566,"./image-link-dialog-view":577,"./image-metadata-view":578,"./image-my-computer-dialog-view":579,"./image-search-dialog-view":581,"./modal-tabbed-dialog-view":589,"./tabbed-panel-view":608}],577:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -64408,7 +65669,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":534,"../stores/image-dialog-store":548,"../utils/translate":564,"./dropzone-view":571}],576:[function(require,module,exports){
+},{"../mixins/image-dialog-view":536,"../stores/image-dialog-store":550,"../utils/translate":566,"./dropzone-view":573}],578:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -64496,7 +65757,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":518,"../stores/image-dialog-store":548,"../utils/translate":564}],577:[function(require,module,exports){
+},{"../data/licenses":519,"../stores/image-dialog-store":550,"../utils/translate":566}],579:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -64550,7 +65811,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":534,"../stores/image-dialog-store":548,"../utils/translate":564,"./dropzone-view":571}],578:[function(require,module,exports){
+},{"../mixins/image-dialog-view":536,"../stores/image-dialog-store":550,"../utils/translate":566,"./dropzone-view":573}],580:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -64638,7 +65899,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":551,"../utils/translate":564,"./palette-add-view":594}],579:[function(require,module,exports){
+},{"../stores/palette-store":553,"../utils/translate":566,"./palette-add-view":597}],581:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -64850,7 +66111,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":534,"../stores/image-dialog-store":548,"../utils/open-clipart":561,"../utils/translate":564}],580:[function(require,module,exports){
+},{"../mixins/image-dialog-view":536,"../stores/image-dialog-store":550,"../utils/open-clipart":563,"../utils/translate":566}],582:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, SimulationInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -65039,8 +66300,8 @@ module.exports = React.createClass({
       });
     }
   },
-  componentWillReceiveProps: function(nextProps) {
-    if (!(nextProps.node || nextProps.link)) {
+  nodeSelectionChanged: function() {
+    if (!(this.props.node || this.props.link)) {
       return this.setState({
         nowShowing: null
       });
@@ -65084,7 +66345,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":581,"./link-value-inspector-view":583,"./node-inspector-view":589,"./node-value-inspector-view":590,"./relation-inspector-view":600,"./simulation-inspector-view":601}],581:[function(require,module,exports){
+},{"./link-inspector-view":583,"./link-value-inspector-view":585,"./node-inspector-view":591,"./node-value-inspector-view":593,"./relation-inspector-view":603,"./simulation-inspector-view":604}],583:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -65140,7 +66401,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":564}],582:[function(require,module,exports){
+},{"../utils/translate":566}],584:[function(require,module,exports){
 var Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, br = ref.br, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
@@ -65286,7 +66547,7 @@ module.exports = LinkRelationView = React.createClass({
 
 
 
-},{"../models/relation-factory":540,"../utils/translate":564,"./svg-graph-view":604}],583:[function(require,module,exports){
+},{"../models/relation-factory":542,"../utils/translate":566,"./svg-graph-view":607}],585:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -65304,7 +66565,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":564}],584:[function(require,module,exports){
+},{"../utils/translate":566}],586:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -65337,7 +66598,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":588}],585:[function(require,module,exports){
+},{"./modal-view":590}],587:[function(require,module,exports){
 var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -65416,7 +66677,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":564,"./modal-dialog-view":584}],586:[function(require,module,exports){
+},{"../utils/translate":566,"./modal-dialog-view":586}],588:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -65458,7 +66719,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":549,"../stores/palette-delete-dialog-store":550,"../utils/translate":564,"./modal-dialog-view":584,"./palette-delete-view":595}],587:[function(require,module,exports){
+},{"../stores/nodes-store":551,"../stores/palette-delete-dialog-store":552,"../utils/translate":566,"./modal-dialog-view":586,"./palette-delete-view":598}],589:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -65479,7 +66740,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":584,"./tabbed-panel-view":605}],588:[function(require,module,exports){
+},{"./modal-dialog-view":586,"./tabbed-panel-view":608}],590:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -65511,7 +66772,7 @@ module.exports = React.createClass({
 
 
 
-},{}],589:[function(require,module,exports){
+},{}],591:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -65598,7 +66859,105 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":535,"../utils/translate":564,"./color-picker-view":568,"./image-picker-view":578}],590:[function(require,module,exports){
+},{"../mixins/node-title":537,"../utils/translate":566,"./color-picker-view":570,"./image-picker-view":580}],592:[function(require,module,exports){
+var NodeSvgGraphView, SimulationStore, div, line, path, ref, svg, text, tspan;
+
+ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
+
+SimulationStore = require('../stores/simulation-store');
+
+module.exports = NodeSvgGraphView = React.createClass({
+  displayName: 'NodeSvgGraphView',
+  mixins: [SimulationStore.mixin],
+  getDefaultProps: function() {
+    return {
+      width: 46,
+      height: 46,
+      strokeWidth: 3,
+      min: 0,
+      max: 100,
+      data: []
+    };
+  },
+  invertPoint: function(point) {
+    return {
+      x: point.x,
+      y: this.props.height - point.y
+    };
+  },
+  graphMapPoint: function(point) {
+    var x, y;
+    x = point.x * (this.props.width + 1);
+    y = point.y * (this.props.height + 1);
+    return this.invertPoint({
+      x: x,
+      y: y
+    });
+  },
+  pointsToPath: function(points) {
+    var data;
+    if (!points.length) {
+      return "";
+    }
+    data = _.map(points, (function(_this) {
+      return function(p) {
+        return _this.graphMapPoint(p);
+      };
+    })(this));
+    data = _.map(data, function(p) {
+      return p.x + " " + p.y;
+    });
+    data = data.join(" L ");
+    return "M " + data;
+  },
+  getPathPoints: function() {
+    var data, j, len, max, min, point, rangex, rangey;
+    max = this.props.max;
+    min = this.props.min;
+    data = this.props.data;
+    for (j = 0, len = data.length; j < len; j++) {
+      point = data[j];
+      if (point > max) {
+        max = point;
+      }
+      if (point < min) {
+        min = point;
+      }
+    }
+    rangex = this.state.duration - 1;
+    rangey = max - min;
+    data = _.map(data, function(d, i) {
+      var x, y;
+      x = i / rangex;
+      y = d / rangey;
+      return {
+        x: x,
+        y: y
+      };
+    });
+    return data;
+  },
+  renderLineData: function() {
+    var data;
+    data = this.pointsToPath(this.getPathPoints());
+    return path({
+      d: data,
+      strokeWidth: this.props.strokeWidth,
+      stroke: "#a1d083",
+      fill: "none"
+    });
+  },
+  render: function() {
+    return div({}, svg({
+      width: this.props.width,
+      height: this.props.height
+    }, this.renderLineData()));
+  }
+});
+
+
+
+},{"../stores/simulation-store":554}],593:[function(require,module,exports){
 var SimulationStore, div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -65774,8 +67133,8 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":552,"../utils/translate":564}],591:[function(require,module,exports){
-var CodapConnect, DEFAULT_CONTEXT_NAME, NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
+},{"../stores/simulation-store":554,"../utils/translate":566}],594:[function(require,module,exports){
+var CodapConnect, DEFAULT_CONTEXT_NAME, GraphView, NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
 
@@ -65784,6 +67143,8 @@ tr = require("../utils/translate");
 SquareImage = React.createFactory(require("./square-image-view"));
 
 SliderView = React.createFactory(require("./value-slider-view"));
+
+GraphView = React.createFactory(require("./node-svg-graph-view"));
 
 CodapConnect = require('../models/codap-connect');
 
@@ -66021,6 +67382,20 @@ module.exports = NodeView = React.createClass({
     }
     return classes.join(" ");
   },
+  renderNodeInternal: function() {
+    if (this.props.showMinigraph) {
+      return GraphView({
+        min: this.props.data.min,
+        max: this.props.data.max,
+        data: this.props.data.frames
+      });
+    } else {
+      return SquareImage({
+        image: this.props.data.image,
+        ref: "thumbnail"
+      });
+    }
+  },
   render: function() {
     var style;
     style = {
@@ -66062,10 +67437,7 @@ module.exports = NodeView = React.createClass({
           return _this.handleSelected(true);
         };
       })(this))
-    }, SquareImage({
-      image: this.props.data.image,
-      ref: "thumbnail"
-    })), NodeTitle({
+    }, this.renderNodeInternal()), NodeTitle({
       isEditing: this.props.editTitle,
       title: this.props.data.title,
       onChange: this.changeTitle,
@@ -66113,7 +67485,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":535,"../models/codap-connect":536,"../utils/translate":564,"./square-image-view":603,"./value-slider-view":606}],592:[function(require,module,exports){
+},{"../mixins/node-title":537,"../models/codap-connect":538,"../utils/translate":566,"./node-svg-graph-view":592,"./square-image-view":606,"./value-slider-view":609}],595:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -66174,7 +67546,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":551,"./palette-inspector-view":596}],593:[function(require,module,exports){
+},{"../stores/palette-store":553,"./palette-inspector-view":599}],596:[function(require,module,exports){
 var Dropdown, a, ref, span, tr;
 
 ref = React.DOM, a = ref.a, span = ref.span;
@@ -66223,7 +67595,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":564,"./dropdown-view":570}],594:[function(require,module,exports){
+},{"../utils/translate":566,"./dropdown-view":572}],597:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -66260,7 +67632,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":533,"../stores/image-dialog-store":548,"../utils/translate":564}],595:[function(require,module,exports){
+},{"../mixins/draggable":535,"../stores/image-dialog-store":550,"../utils/translate":566}],598:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -66339,7 +67711,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":550,"../utils/translate":564,"./image-picker-view":578}],596:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":552,"../utils/translate":566,"./image-picker-view":580}],599:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -66412,7 +67784,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":549,"../stores/palette-delete-dialog-store":550,"../stores/palette-store":551,"../utils/translate":564,"./image-metadata-view":576,"./palette-add-view":594,"./palette-item-view":597}],597:[function(require,module,exports){
+},{"../stores/nodes-store":551,"../stores/palette-delete-dialog-store":552,"../stores/palette-store":553,"../utils/translate":566,"./image-metadata-view":578,"./palette-add-view":597,"./palette-item-view":600}],600:[function(require,module,exports){
 var Draggable, SquareImage, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -66452,7 +67824,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":533,"./square-image-view":603}],598:[function(require,module,exports){
+},{"../mixins/draggable":535,"./square-image-view":606}],601:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -66470,7 +67842,7 @@ module.exports = React.createClass({
 
 
 
-},{}],599:[function(require,module,exports){
+},{}],602:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -66521,7 +67893,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":548,"../stores/palette-store":551,"../utils/translate":564,"./image-metadata-view":576}],600:[function(require,module,exports){
+},{"../stores/image-dialog-store":550,"../stores/palette-store":553,"../utils/translate":566,"./image-metadata-view":578}],603:[function(require,module,exports){
 var LinkRelationView, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -66581,7 +67953,7 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 
-},{"../stores/graph-store":547,"../utils/translate":564,"./link-relation-view":582,"./tabbed-panel-view":605}],601:[function(require,module,exports){
+},{"../stores/graph-store":549,"../utils/translate":566,"./link-relation-view":584,"./tabbed-panel-view":608}],604:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -66610,6 +67982,9 @@ module.exports = React.createClass({
   },
   setDiagramOnly: function(e) {
     return AppSettingsStore.actions.diagramOnly(e.target.checked);
+  },
+  setShowingMinigraphs: function(e) {
+    return AppSettingsStore.actions.showMinigraphs(e.target.checked);
   },
   render: function() {
     var runPanelClasses;
@@ -66670,7 +68045,8 @@ module.exports = React.createClass({
     }, input({
       type: 'checkbox',
       value: 'show-mini',
-      checked: this.props.showMiniGraphs
+      checked: this.state.showingMinigraphs,
+      onChange: this.setShowingMinigraphs
     }), label({}, tr('~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS'))), div({
       className: "row"
     }, input({
@@ -66700,7 +68076,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":544,"../stores/simulation-store":552,"../utils/translate":564,"./dropdown-view":570,"./value-slider-view":606}],602:[function(require,module,exports){
+},{"../stores/app-settings-store":546,"../stores/simulation-store":554,"../utils/translate":566,"./dropdown-view":572,"./value-slider-view":609}],605:[function(require,module,exports){
 var SimulationStore, div, i, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
@@ -66776,7 +68152,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":552,"../utils/translate":564}],603:[function(require,module,exports){
+},{"../stores/simulation-store":554,"../utils/translate":566}],606:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -66817,7 +68193,7 @@ module.exports = React.createClass({
 
 
 
-},{}],604:[function(require,module,exports){
+},{}],607:[function(require,module,exports){
 var RelationFactory, SvgGraphView, div, line, math, myView, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -66947,12 +68323,12 @@ module.exports = SvgGraphView = React.createClass({
     data = [
       {
         x: 0,
-        y: this.props.height
+        y: 1
       }, {
         x: 0,
         y: 0
       }, {
-        x: this.props.width,
+        x: 1,
         y: 0
       }
     ];
@@ -66995,7 +68371,7 @@ window.testComponent = function(domID) {
 
 
 
-},{"../models/relation-factory":540,"mathjs":102}],605:[function(require,module,exports){
+},{"../models/relation-factory":542,"mathjs":102}],608:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -67097,7 +68473,7 @@ module.exports = React.createClass({
 
 
 
-},{}],606:[function(require,module,exports){
+},{}],609:[function(require,module,exports){
 var Demo, Slider, ValueSlider, circle, div, i, input, label, path, rect, ref, span, svg, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect;
@@ -67420,4 +68796,4 @@ Demo = React.createClass({
 
 
 
-},{"../utils/translate":564}]},{},[1]);
+},{"../utils/translate":566}]},{},[1]);
