@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.10.0", ->
-        @result.version.should.equal "1.10.0"
+      it "should be 1.11.0", ->
+        @result.version.should.equal "1.11.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -96,4 +96,8 @@ describe "Migrations",  ->
     describe "v-1.10 changes", ->
       it "should have newIntegration setting", ->
         @result.settings.simulation.newIntegration.should.equal false
+
+    describe "v-1.11.0 changes", ->
+      it "should have minigraphs setting", ->
+        @result.settings.showMinigraphs.should.equal false
 
