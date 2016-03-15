@@ -21,6 +21,10 @@ AppSettingsStore   = Reflux.createStore
     @settings.diagramOnly = diagramOnly
     @notifyChange()
 
+  onShowMinigraphs: (show) ->
+    @settings.showingMinigraphs = show
+    @notifyChange()
+
   notifyChange: ->
     @trigger _.clone @settings
     if @settings.diagramOnly
