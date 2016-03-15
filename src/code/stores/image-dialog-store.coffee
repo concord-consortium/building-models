@@ -95,7 +95,10 @@ listenerMixin =
     selectedImage: store.paletteItem
 
   componentDidMount: ->
-    store.listen @onChange
+    @unsubscribe = store.listen @onChange
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onChange: (status) ->
     @setState

@@ -40,6 +40,7 @@ GraphStore  = Reflux.createStore
     for frame in data
       for node, i in frame.nodes
         nodes[i].frames.push node.value
+
     if AppSettingsStore.store.settings.showingMinigraphs
       @updateListeners()
 
@@ -381,7 +382,10 @@ mixin =
     links: GraphStore.links
 
   componentDidMount: ->
-    GraphActions.graphChanged.listen @onGraphChanged
+    @unsubscribe = GraphActions.graphChanged.listen @onGraphChanged
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onGraphChanged: (status) ->
     @setState

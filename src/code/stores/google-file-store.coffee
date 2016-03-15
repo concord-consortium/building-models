@@ -171,7 +171,10 @@ mixin =
     showingSaveDialog: false
 
   componentDidMount: ->
-    GoogleFileStore.listen @onGoogleChange
+    @unsubscribe = GoogleFileStore.listen @onGoogleChange
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onGoogleChange: (newData) ->
     @setState _.clone newData

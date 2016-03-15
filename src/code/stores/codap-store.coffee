@@ -29,7 +29,10 @@ mixin =
     hideUndoRedo:   codapStore.hideUndoRedo
 
   componentDidMount: ->
-    codapStore.listen @onCodapStateChange
+    @unsubscribe = codapStore.listen @onCodapStateChange
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onCodapStateChange: (status) ->
     @setState

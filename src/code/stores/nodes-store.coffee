@@ -50,7 +50,10 @@ mixin =
     paletteItemHasNodes: nodeStore.paletteItemHasNodes
 
   componentDidMount: ->
-    nodeStore.listen @onNodesChange
+    @unsubscribe = nodeStore.listen @onNodesChange
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onNodesChange: (status) ->
     @setState

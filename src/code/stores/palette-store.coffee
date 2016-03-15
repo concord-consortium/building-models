@@ -178,7 +178,10 @@ mixin =
     imageMetadata: paletteStore.imageMetadata
 
   componentDidMount: ->
-    paletteStore.listen @onPaletteChange
+    @unsubscribe = paletteStore.listen @onPaletteChange
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onPaletteChange: (status) ->
     @setState

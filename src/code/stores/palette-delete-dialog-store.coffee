@@ -88,7 +88,10 @@ listenerMixin =
     showReplacement: store.showReplacement
 
   componentDidMount: ->
-    store.listen @onChange
+    @unsubscribe = store.listen @onChange
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onChange: (status) ->
     @setState

@@ -146,7 +146,12 @@ mixin =
     _.clone SimulationStore.settings
 
   componentDidMount: ->
-    SimulationStore.listen @onSimulationStoreChange
+    @simulationUnsubscribe = SimulationStore.listen @onSimulationStoreChange
+
+  componentWillUnmount: ->
+    # this one named explicitly as we have views that mixin both simulationStore
+    # and appSettingsStore
+    @simulationUnsubscribe()
 
   onSimulationStoreChange: (newData) ->
     @setState _.clone newData

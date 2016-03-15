@@ -45,7 +45,10 @@ mixin =
     _.clone AppSettingsStore.settings
 
   componentDidMount: ->
-    AppSettingsStore.listen @onAppSettingsChange
+    @unsubscribe = AppSettingsStore.listen @onAppSettingsChange
+
+  componentWillUnmount: ->
+    @unsubscribe()
 
   onAppSettingsChange: (newData) ->
     @setState _.clone newData
