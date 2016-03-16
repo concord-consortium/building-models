@@ -13,6 +13,7 @@ migrations = [
   require "./10_add_speed_and_cap"
   require "./11_simulation_engine_settings"
   require "./12_add_minigraphs_visibility"
+  require "./13_add_frames_to_nodes"
 ]
 
 module.exports =

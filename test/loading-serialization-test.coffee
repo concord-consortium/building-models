@@ -62,7 +62,7 @@ describe "Serialization and Loading", ->
       @graphStore.init()
 
       @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo"}, 'a')
-      @nodeB = new Node({title: "b", x:20, y:25, paletteItem:"uuid-bee"}, 'b')
+      @nodeB = new Node({title: "b", x:20, y:25, paletteItem:"uuid-bee", frames: [50]}, 'b')
       @link = new Link({
         sourceNode: @nodeA
         targetNode: @nodeB
@@ -83,7 +83,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.11.0"
+        model.version.should.equal "1.12.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -103,6 +103,9 @@ describe "Serialization and Loading", ->
         expect(nodeA.data.image).to.not.exist
         expect(nodeA.data.paletteItem).to.equal "uuid-dingo"
         expect(nodeB.data.paletteItem).to.equal "uuid-bee"
+        nodeA.data.frames.length.should.equal 0
+        nodeB.data.frames.length.should.equal 1
+        nodeB.data.frames[0].should.equal 50
 
       it "should correctly serialize a link", ->
         jsonString = @graphStore.toJsonString()
@@ -178,3 +181,11 @@ describe "Serialization and Loading", ->
       @graphStore.loadData(data)
       @graphStore.nodeKeys['a'].image.should.equal "img/nodes/chicken.png"
       @graphStore.nodeKeys['b'].image.should.equal "img/nodes/egg.png"
+
+    it "should load the nodes previous frames", ->
+      data = JSON.parse(@serializedForm)
+      data.nodes[1].frames = [50]
+      @graphStore.loadData(data)
+      @graphStore.nodeKeys['a'].frames.length.should.equal 0
+      @graphStore.nodeKeys['b'].frames.length.should.equal 1
+      @graphStore.nodeKeys['b'].frames[0].should.equal 50

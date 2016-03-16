@@ -7,8 +7,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.11.0", ->
-        @result.version.should.equal "1.11.0"
+      it "should be 1.12.0", ->
+        @result.version.should.equal "1.12.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -100,4 +100,9 @@ describe "Migrations",  ->
     describe "v-1.11.0 changes", ->
       it "should have minigraphs setting", ->
         @result.settings.showMinigraphs.should.equal false
+
+    describe "v-1.12.0 changes", ->
+      it "should have frames array", ->
+        for node in @result.nodes
+          node.data.frames.should.exist
 
