@@ -169,13 +169,13 @@ describe 'SelectionManager', () ->
 
     describe "When nothing else is selected", ->
       it "'a' should be selected for title editing", ->
-        selectionMngr.selectForTitleEditing(a)
+        selectionMngr.selectNodeForTitleEditing(a)
         selectionMngr.isSelectedForTitleEditing(a).should.equal true
 
     describe "When 'b' is already selected for title editing", ->
       beforeEach ->
-        selectionMngr.selectForTitleEditing(b)
-        selectionMngr.selectForTitleEditing(a)
+        selectionMngr.selectNodeForTitleEditing(b)
+        selectionMngr.selectNodeForTitleEditing(a)
 
       it "'a' should be selected for title editing", ->
         selectionMngr.isSelectedForTitleEditing(a).should.equal true
@@ -186,8 +186,8 @@ describe 'SelectionManager', () ->
 
     describe "When 'a'  is selected for inspection", ->
       beforeEach ->
-        selectionMngr.selectForInspection(a)
-        selectionMngr.selectForTitleEditing(a)
+        selectionMngr.selectNodeForInspection(a)
+        selectionMngr.selectNodeForTitleEditing(a)
 
       it "'a' should be selected for title editing", ->
         selectionMngr.isSelectedForTitleEditing(a).should.equal true
@@ -195,10 +195,19 @@ describe 'SelectionManager', () ->
       it "'a' should still be selected for inspection too", ->
         selectionMngr.isSelectedForInspection(a).should.equal true
 
-    describe "When 'b' is selected for inspection", ->
+    describe "When 'b' is a node selected for inspection", ->
       beforeEach ->
-        selectionMngr.selectForInspection(b)
-        selectionMngr.selectForTitleEditing(a)
+        selectionMngr.selectNodeForInspection(b)
+        selectionMngr.selectNodeForTitleEditing(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'a' should not be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal false
+
+      it "'b' should not be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(b).should.equal false
 
       it "'a' should be selected for title editing", ->
         selectionMngr.isSelectedForTitleEditing(a).should.equal true
@@ -219,13 +228,13 @@ describe 'SelectionManager', () ->
 
     describe "When nothing else is selected", ->
       it "'a' should be selected for title editing", ->
-        selectionMngr.selectForInspection(a)
+        selectionMngr.selectNodeForInspection(a)
         selectionMngr.isSelectedForInspection(a).should.equal true
 
     describe "When 'b' is already selected for inspection", ->
       beforeEach ->
-        selectionMngr.selectForInspection(b)
-        selectionMngr.selectForInspection(a)
+        selectionMngr.selectNodeForInspection(b)
+        selectionMngr.selectNodeForInspection(a)
 
       it "'a' should be selected for title editing", ->
         selectionMngr.isSelectedForInspection(a).should.equal true
@@ -236,8 +245,8 @@ describe 'SelectionManager', () ->
 
     describe "When 'a' is selected for title editing", ->
       beforeEach ->
-        selectionMngr.selectForTitleEditing(a)
-        selectionMngr.selectForInspection(a)
+        selectionMngr.selectNodeForTitleEditing(a)
+        selectionMngr.selectNodeForInspection(a)
 
       it "'a' should be selected for title editing", ->
         selectionMngr.isSelectedForTitleEditing(a).should.equal true
@@ -247,8 +256,8 @@ describe 'SelectionManager', () ->
 
     describe "When 'b' is selected for title Editing", ->
       beforeEach ->
-        selectionMngr.selectForTitleEditing(b)
-        selectionMngr.selectForInspection(a)
+        selectionMngr.selectNodeForTitleEditing(b)
+        selectionMngr.selectNodeForInspection(a)
 
       it "'b' should not be selected for title editing", ->
         selectionMngr.isSelectedForTitleEditing(b).should.equal false

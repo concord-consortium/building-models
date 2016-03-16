@@ -61,9 +61,9 @@ module.exports =
 
   # Update Selections. #TODO Move elsewhere
   _updateSelection: (manager) ->
-    selectedNode = manager.getInspection()[0] or null
-    editingNode  = manager.getTitleEditing()[0] or null
-    selectedLink = manager.getLinkSelection()[0] or null
+    selectedNode = manager.getNodeInspection()[0] or null
+    editingNode  = manager.getNodeTitleEditing()[0] or null
+    selectedLink = manager.getLinkInspection()[0] or null
 
     @setState
       selectedNode: selectedNode
