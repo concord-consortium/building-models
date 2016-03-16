@@ -69,10 +69,6 @@ module.exports = React.createClass
           )
         )
         (div {className: "row"},
-          (input {type: 'checkbox', value: 'show-mini', checked: @state.showingMinigraphs, onChange: @setShowingMinigraphs})
-          (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
-        )
-        (div {className: "row"},
           (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
           (label {}, tr '~SIMULATION.CAP_VALUES')
         )
@@ -82,6 +78,10 @@ module.exports = React.createClass
         )
       )
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
+      (div {className: "row"},
+        (input {type: 'checkbox', value: 'show-mini', checked: @state.showingMinigraphs, onChange: @setShowingMinigraphs})
+        (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
+      )
       (div {className: "row"},
         (input {type: 'checkbox', value: 'diagram-only', checked: @state.diagramOnly, onChange: @setDiagramOnly})
         (label {}, tr '~SIMULATION.DIAGRAM_ONLY')
