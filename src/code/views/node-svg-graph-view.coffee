@@ -18,8 +18,8 @@ module.exports = NodeSvgGraphView = React.createClass
     {x: point.x, y: @props.height - point.y}
 
   graphMapPoint: (point) ->
-    x = point.x * (@props.width + 1)
-    y = point.y * (@props.height + 1)
+    x = point.x * @props.width
+    y = (@props.strokeWidth-1) + point.y * (@props.height - (@props.strokeWidth+1))
     @invertPoint x:x, y:y
 
   pointsToPath: (points)->
