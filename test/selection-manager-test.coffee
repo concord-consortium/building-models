@@ -172,9 +172,20 @@ describe 'SelectionManager', () ->
         selectionMngr.selectNodeForTitleEditing(a)
         selectionMngr.isSelectedForTitleEditing(a).should.equal true
 
-    describe "When 'b' is already selected for title editing", ->
+    describe "When 'b' is a node already selected for title editing", ->
       beforeEach ->
         selectionMngr.selectNodeForTitleEditing(b)
+        selectionMngr.selectNodeForTitleEditing(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'b' should become unselected'", ->
+        selectionMngr.isSelectedForTitleEditing(b).should.equal false
+
+    describe "When 'b' is a link already selected for title editing", ->
+      beforeEach ->
+        selectionMngr.selectLinkForTitleEditing(b)
         selectionMngr.selectNodeForTitleEditing(a)
 
       it "'a' should be selected for title editing", ->
@@ -209,6 +220,85 @@ describe 'SelectionManager', () ->
       it "'b' should not be selected for inspection", ->
         selectionMngr.isSelectedForInspection(b).should.equal false
 
+    describe "When 'b' is a link selected for inspection", ->
+      beforeEach ->
+        selectionMngr.selectLinkForInspection(b)
+        selectionMngr.selectNodeForTitleEditing(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'a' should not be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal false
+
+      it "'b' should not be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(b).should.equal false
+
+  describe "Selecting link 'a' for title editing", ->
+    a = null
+    b = null
+    beforeEach ->
+      a = new GraphPrimitive()
+      b = new GraphPrimitive()
+
+    describe "When nothing else is selected", ->
+      it "'a' should be selected for title editing", ->
+        selectionMngr.selectLinkForTitleEditing(a)
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+    describe "When 'b' is a node already selected for title editing", ->
+      beforeEach ->
+        selectionMngr.selectNodeForTitleEditing(b)
+        selectionMngr.selectLinkForTitleEditing(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'b' should become unselected'", ->
+        selectionMngr.isSelectedForTitleEditing(b).should.equal false
+
+    describe "When 'b' is a link already selected for title editing", ->
+      beforeEach ->
+        selectionMngr.selectLinkForTitleEditing(b)
+        selectionMngr.selectLinkForTitleEditing(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'b' should become unselected'", ->
+        selectionMngr.isSelectedForTitleEditing(b).should.equal false
+
+
+    describe "When 'a'  is selected for inspection", ->
+      beforeEach ->
+        selectionMngr.selectLinkForInspection(a)
+        selectionMngr.selectLinkForTitleEditing(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'a' should still be selected for inspection too", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+    describe "When 'b' is a node selected for inspection", ->
+      beforeEach ->
+        selectionMngr.selectNodeForInspection(b)
+        selectionMngr.selectLinkForTitleEditing(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'a' should not be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal false
+
+      it "'b' should not be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(b).should.equal false
+
+    describe "When 'b' is a link selected for inspection", ->
+      beforeEach ->
+        selectionMngr.selectLinkForInspection(b)
+        selectionMngr.selectLinkForTitleEditing(a)
+
       it "'a' should be selected for title editing", ->
         selectionMngr.isSelectedForTitleEditing(a).should.equal true
 
@@ -227,16 +317,27 @@ describe 'SelectionManager', () ->
       b = new GraphPrimitive()
 
     describe "When nothing else is selected", ->
-      it "'a' should be selected for title editing", ->
+      it "'a' should be selected for inspection", ->
         selectionMngr.selectNodeForInspection(a)
         selectionMngr.isSelectedForInspection(a).should.equal true
 
-    describe "When 'b' is already selected for inspection", ->
+    describe "When 'b' is a node already selected for inspection", ->
       beforeEach ->
         selectionMngr.selectNodeForInspection(b)
         selectionMngr.selectNodeForInspection(a)
 
-      it "'a' should be selected for title editing", ->
+      it "'a' should be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+      it "'b' should become unselected'", ->
+        selectionMngr.isSelectedForInspection(b).should.equal false
+
+    describe "When 'b' is a link already selected for inspection", ->
+      beforeEach ->
+        selectionMngr.selectLinkForInspection(b)
+        selectionMngr.selectNodeForInspection(a)
+
+      it "'a' should be selected for inspection", ->
         selectionMngr.isSelectedForInspection(a).should.equal true
 
       it "'b' should become unselected'", ->
@@ -254,10 +355,89 @@ describe 'SelectionManager', () ->
       it "'a' should still be selected for inspection too", ->
         selectionMngr.isSelectedForInspection(a).should.equal true
 
-    describe "When 'b' is selected for title Editing", ->
+    describe "When 'b' is a node selected for title Editing", ->
       beforeEach ->
         selectionMngr.selectNodeForTitleEditing(b)
         selectionMngr.selectNodeForInspection(a)
+
+      it "'b' should not be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(b).should.equal false
+
+      it "'a' should be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+    describe "When 'b' is a link selected for title Editing", ->
+      beforeEach ->
+        selectionMngr.selectLinkForTitleEditing(b)
+        selectionMngr.selectNodeForInspection(a)
+
+      it "'b' should not be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(b).should.equal false
+
+      it "'a' should be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+  describe "Selecting link 'a' for inspection", ->
+    a = null
+    b = null
+    beforeEach ->
+      a = new GraphPrimitive()
+      b = new GraphPrimitive()
+
+    describe "When nothing else is selected", ->
+      it "'a' should be selected for inspection", ->
+        selectionMngr.selectLinkForInspection(a)
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+    describe "When 'b' is a node already selected for inspection", ->
+      beforeEach ->
+        selectionMngr.selectNodeForInspection(b)
+        selectionMngr.selectLinkForInspection(a)
+
+      it "'a' should be selected for inspecting", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+      it "'b' should become unselected'", ->
+        selectionMngr.isSelectedForInspection(b).should.equal false
+
+    describe "When 'b' is a link already selected for inspection", ->
+      beforeEach ->
+        selectionMngr.selectLinkForInspection(b)
+        selectionMngr.selectLinkForInspection(a)
+
+      it "'a' should be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+      it "'b' should become unselected'", ->
+        selectionMngr.isSelectedForInspection(b).should.equal false
+
+
+    describe "When 'a' is selected for title editing", ->
+      beforeEach ->
+        selectionMngr.selectLinkForTitleEditing(a)
+        selectionMngr.selectLinkForInspection(a)
+
+      it "'a' should be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(a).should.equal true
+
+      it "'a' should still be selected for inspection too", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+    describe "When 'b' is a node selected for title Editing", ->
+      beforeEach ->
+        selectionMngr.selectNodeForTitleEditing(b)
+        selectionMngr.selectLinkForInspection(a)
+
+      it "'b' should not be selected for title editing", ->
+        selectionMngr.isSelectedForTitleEditing(b).should.equal false
+
+      it "'a' should be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+    describe "When 'b' is a link selected for title Editing", ->
+      beforeEach ->
+        selectionMngr.selectLinkForTitleEditing(b)
+        selectionMngr.selectLinkForInspection(a)
 
       it "'b' should not be selected for title editing", ->
         selectionMngr.isSelectedForTitleEditing(b).should.equal false

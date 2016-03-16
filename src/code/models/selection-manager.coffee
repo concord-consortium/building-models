@@ -7,6 +7,7 @@ tr          = require "../utils/translate"
 module.exports = class SelectionManager
   @NodeTitleEditing   = "NodeTitleEditing"
   @NodeInspection     = "NodeInspection"
+  @LinkTitleEditing   = "LinkTitleEditing"
   @LinkInspection     = "LinkInspection"
 
   constructor: ->
@@ -65,6 +66,10 @@ module.exports = class SelectionManager
     @_selectForTitleEditing(graphprimitive, SelectionManager.NodeTitleEditing)
     @clearSelection(SelectionManager.LinkTitleEditing)
 
+  selectLinkForTitleEditing: (graphprimitive) ->
+    @_selectForTitleEditing(graphprimitive, SelectionManager.LinkTitleEditing)
+    @clearSelection(SelectionManager.NodeTitleEditing)
+
   _selectForTitleEditing: (graphprimitive, context) ->
     @selectOnly(graphprimitive, context)
     # unselect the inspection selection, unless its this same graphprimitive.
@@ -106,6 +111,9 @@ module.exports = class SelectionManager
 
   getLinkInspection: ->
     @selection(SelectionManager.LinkInspection)
+
+  getLinkTitleEditing: ->
+    @selection(SelectionManager.LinkTitleEditing)
 
   selectLinkForInspection: (graphprimitive)->
     @selectOnly(graphprimitive, SelectionManager.LinkInspection)
