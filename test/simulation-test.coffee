@@ -192,7 +192,6 @@ describe "Simulation", ->
               nodes: nodeArray
               duration: j+1
               capNodeValues: scenario.cap is true
-              newIntegration: scenario.newInt is true
 
             if result is false
               expect(simulation.run.bind(simulation)).to.throw "Graph not valid"

@@ -83,7 +83,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.12.0"
+        model.version.should.equal "1.13.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 1
 
@@ -143,14 +143,12 @@ describe "Serialization and Loading", ->
         SimulationStore.store.settings.stepUnits = "SECOND"
         SimulationStore.store.settings.speed = 3
         SimulationStore.store.settings.capNodeValues = true
-        SimulationStore.store.settings.newIntegration = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
         model.settings.simulation.duration.should.equal 15
         model.settings.simulation.stepUnits.should.equal "SECOND"
         model.settings.simulation.speed.should.equal 3
         model.settings.simulation.capNodeValues.should.equal true
-        model.settings.simulation.newIntegration.should.equal true
 
   describe "loadData", ->
     beforeEach ->

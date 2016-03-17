@@ -40,13 +40,6 @@ IntegrationFunction = (incrementAccumulators) ->
       nextValue = link.relation.evaluate(inV, outV, 0)
       value += nextValue
   else
-    # include the nodes current value in the average
-    if @newIntegration
-      count  = count + 1
-      outV   = @previousValue or @initialValue
-      value += outV
-
-
     _.each links, (link) =>
       sourceNode = link.sourceNode
       inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
@@ -68,7 +61,6 @@ module.exports = class Simulation
     @nodes          = @opts.nodes      or []
     @duration       = @opts.duration   or 10
     @capNodeValues  = @opts.capNodeValues or false
-    @newIntegration = @opts.newIntegration or false
     @decorateNodes() # extend nodes with integration methods
 
     @onStart     = @opts.onStart or (nodeNames) ->
@@ -117,7 +109,6 @@ module.exports = class Simulation
     _.each @nodes, (node) =>
       # make this a local node property (it may eventually be different per node)
       node.capNodeValues = @capNodeValues
-      node.newIntegration = @newIntegration
       node._cumulativeValue = 0  # for averaging
       # Create a bound method on this node.
       # Put the functionality here rather than in the class "Node".

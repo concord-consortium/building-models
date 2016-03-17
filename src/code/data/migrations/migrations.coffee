@@ -14,6 +14,7 @@ migrations = [
   require "./11_simulation_engine_settings"
   require "./12_add_minigraphs_visibility"
   require "./13_add_frames_to_nodes"
+  require "./14_remove_new_integration"
 ]
 
 module.exports =

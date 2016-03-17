@@ -17,9 +17,6 @@ module.exports = React.createClass
   setCapNodeValues: (e) ->
     SimulationStore.actions.capNodeValues e.target.checked
 
-  setNewIntegration: (e) ->
-    SimulationStore.actions.setNewIntegration e.target.checked
-
   setDiagramOnly: (e) ->
     AppSettingsStore.actions.diagramOnly e.target.checked
 
@@ -74,10 +71,6 @@ module.exports = React.createClass
         (div {className: "row"},
           (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
           (label {}, tr '~SIMULATION.CAP_VALUES')
-        )
-        (div {className: "row"},
-          (input {type: 'checkbox', value: 'new-integration', checked: @state.newIntegration, onChange: @setNewIntegration})
-          (label {}, tr '~SIMULATION.NEW_INTEGRATION')
         )
       )
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
