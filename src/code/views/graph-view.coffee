@@ -222,6 +222,7 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
             showMinigraph: @state.showingMinigraphs
+            showGraphButton: @props.graphStore.codapStandaloneMode and not @state.diagramOnly
           })
       )
     )
