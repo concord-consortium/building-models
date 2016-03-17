@@ -29,6 +29,9 @@ module.exports = React.createClass
   render: ->
     runPanelClasses = "run-panel"
     if not @state.diagramOnly then runPanelClasses += " expanded"
+    minigraphsCheckboxClass = "row"
+    if @state.diagramOnly then minigraphsCheckboxClass += " disabled"
+
     (div {className: "simulation-panel"},
       (div {className: runPanelClasses},
         (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
@@ -78,8 +81,8 @@ module.exports = React.createClass
         )
       )
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
-      (div {className: "row"},
-        (input {type: 'checkbox', value: 'show-mini', checked: @state.showingMinigraphs, onChange: @setShowingMinigraphs})
+      (div {className: minigraphsCheckboxClass},
+        (input {type: 'checkbox', value: 'show-mini', checked: @state.showingMinigraphs, disabled: @state.diagramOnly, onChange: @setShowingMinigraphs})
         (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
       )
       (div {className: "row"},
