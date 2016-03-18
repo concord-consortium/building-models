@@ -40,7 +40,6 @@ module.exports = class DiagramToolkit
   makeSource: (div) ->
     @kit.addEndpoint(div,
       isSource: true
-      connector: ["Bezier"]
       dropOptions:
         activeClass: "dragActive"
       anchor: "Center"
@@ -58,7 +57,6 @@ module.exports = class DiagramToolkit
     @kit.addEndpoint(div,
       isTarget: true
       isSource: false
-      connector: ["Bezier"]
       anchor: "Center"
       endpoint: ["Rectangle",
         height: size
