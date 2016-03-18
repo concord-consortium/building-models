@@ -63841,7 +63841,20 @@ module.exports = DiagramToolkit = (function() {
   }
 
   DiagramToolkit.prototype.registerListeners = function() {
-    return this.kit.bind('connection', this.handleConnect.bind(this));
+    this.kit.bind('connection', this.handleConnect.bind(this));
+    this.kit.bind('beforeDrag', (function(_this) {
+      return function(source) {
+        _this.$currentSource = $(source.source);
+        _this.$currentSource.addClass("show-drag");
+        return true;
+      };
+    })(this));
+    return this.kit.bind(['connectionAborted', 'beforeDrop'], (function(_this) {
+      return function(args) {
+        _this.$currentSource.removeClass("show-drag");
+        return true;
+      };
+    })(this));
   };
 
   DiagramToolkit.prototype.handleConnect = function(info, evnt) {
@@ -63878,9 +63891,9 @@ module.exports = DiagramToolkit = (function() {
   ];
 
   DiagramToolkit.prototype.makeSource = function(div) {
-    return this.kit.addEndpoint(div, {
+    var addHoverState, endpoints;
+    endpoints = this.kit.addEndpoint(div, {
       isSource: true,
-      connector: ["Bezier"],
       dropOptions: {
         activeClass: "dragActive"
       },
@@ -63894,6 +63907,19 @@ module.exports = DiagramToolkit = (function() {
       ],
       maxConnections: -1
     });
+    addHoverState = function(endpoint) {
+      endpoint.bind("mouseover", function() {
+        return $(endpoint.element).addClass("show-hover");
+      });
+      return endpoint.bind("mouseout", function() {
+        return $(endpoint.element).removeClass("show-hover");
+      });
+    };
+    if (endpoints != null ? endpoints.element : void 0) {
+      return addHoverState(endpoints);
+    } else if (endpoints != null ? endpoints.length : void 0) {
+      return _.forEach(endpoints, addHoverState);
+    }
   };
 
   DiagramToolkit.prototype.makeTarget = function(div) {
@@ -63902,7 +63928,6 @@ module.exports = DiagramToolkit = (function() {
     return this.kit.addEndpoint(div, {
       isTarget: true,
       isSource: false,
-      connector: ["Bezier"],
       anchor: "Center",
       endpoint: [
         "Rectangle", {
@@ -65314,7 +65339,7 @@ AppSettingsStore = require("../stores/app-settings-store");
 div = React.DOM.div;
 
 module.exports = React.createClass({
-  displayName: 'LinkView',
+  displayName: 'GraphView',
   mixins: [LinkStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin],
   getDefaultProps: function() {
     return {
@@ -67440,21 +67465,21 @@ module.exports = NodeView = React.createClass({
       ref: "node",
       style: style
     }, div({
-      className: 'link-target'
-    }, this.props.selected ? div({
+      className: 'link-target',
+      "data-node-key": this.props.nodeKey
+    }, div({
       className: "actions"
     }, div({
       className: "connection-source action-circle icon-codap-link",
       "data-node-key": this.props.nodeKey
-    }), this.props.showGraphButton ? div({
+    }), this.props.selected && this.props.showGraphButton ? div({
       className: "graph-source action-circle icon-codap-graph",
-      "data-node-key": this.props.nodeKey,
       onClick: ((function(_this) {
         return function() {
           return _this.handleGraphClick(_this.props.data.title);
         };
       })(this))
-    }) : void 0) : void 0, div({
+    }) : void 0), div({
       className: this.topClasses(),
       "data-node-key": this.props.nodeKey
     }, div({
