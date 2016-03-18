@@ -74,10 +74,11 @@ $big-elm-height   = 164px
     padding 5px
     color white
     border 1px solid
-    display none
+    opacity 0
     box-shadow 0px 1px 1px rgba(0, 0, 0, 0.25)
     font-size 14px
-    // z-index 1
+    &.show-hover,&.show-drag
+      opacity 1
 
   .connection-source
     top 5px
@@ -87,9 +88,10 @@ $big-elm-height   = 164px
     font-size 12px
   .top
     height 72px
-  &.selected
+  &.selected,&:hover
     .action-circle
-      display block
+      opacity 1
+  &.selected
     box-shadow 0px 0px 3px hsla(0,0,0,0.3)
     background-color white
     height auto

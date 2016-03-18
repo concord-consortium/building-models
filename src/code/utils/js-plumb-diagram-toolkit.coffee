@@ -18,6 +18,13 @@ module.exports = class DiagramToolkit
 
   registerListeners: ->
     @kit.bind 'connection', @handleConnect.bind @
+    @kit.bind 'beforeDrag', (source) =>
+      @$currentSource = $(source.source)
+      @$currentSource.addClass("show-drag")
+      true
+    @kit.bind ['connectionAborted', 'beforeDrop'], (args) =>
+      @$currentSource.removeClass("show-drag")
+      true
 
   handleConnect: (info, evnt)  ->
     @options.handleConnect? info, evnt
@@ -38,7 +45,7 @@ module.exports = class DiagramToolkit
   _endpointOptions: [ "Dot", { radius:15 } ]
 
   makeSource: (div) ->
-    @kit.addEndpoint(div,
+    endpoints = @kit.addEndpoint(div,
       isSource: true
       dropOptions:
         activeClass: "dragActive"
@@ -51,6 +58,17 @@ module.exports = class DiagramToolkit
       ]
       maxConnections: -1
     )
+
+    addHoverState = (endpoint) ->
+      endpoint.bind "mouseover", ->
+        $(endpoint.element).addClass("show-hover")
+      endpoint.bind "mouseout", ->
+        $(endpoint.element).removeClass("show-hover")
+
+    if endpoints?.element
+      addHoverState endpoints
+    else if endpoints?.length
+      _.forEach endpoints, addHoverState
 
   makeTarget: (div) ->
     size = 60

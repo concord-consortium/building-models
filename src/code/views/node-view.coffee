@@ -212,16 +212,15 @@ module.exports = NodeView = React.createClass
       "color": @props.data.color
 
     (div { className: @nodeClasses(), ref: "node", style: style},
-        if @props.selected
       (div {className: 'link-target', "data-node-key": @props.nodeKey},
-          (div {className: "actions"},
-            (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
-            if @props.showGraphButton
-              (div {
-                className: "graph-source action-circle icon-codap-graph",
-                onClick: (=> @handleGraphClick @props.data.title)
-              })
-          )
+        (div {className: "actions"},
+          (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
+          if @props.selected and @props.showGraphButton
+            (div {
+              className: "graph-source action-circle icon-codap-graph",
+              onClick: (=> @handleGraphClick @props.data.title)
+            })
+        )
 
         (div {className: @topClasses(), "data-node-key": @props.nodeKey},
           (div {
