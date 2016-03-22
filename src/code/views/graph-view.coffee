@@ -174,8 +174,9 @@ module.exports = React.createClass
       source = $(@_nodeForName link.sourceNode.key).find(@props.linkTarget)
       target = $(@_nodeForName link.targetNode.key).find(@props.linkTarget)
       isSelected = @props.selectionManager.isSelected(link)
+      isEditing = link is @state.editingLink
       if source and target
-        @diagramToolkit.addLink source, target, link.title, link.color, isSelected, link
+        @diagramToolkit.addLink source, target, link.title, link.color, isSelected, isEditing, link
 
   onDragOver: (e) ->
     if not @state.canDrop
@@ -211,6 +212,10 @@ module.exports = React.createClass
     if e.target is @refs.container.getDOMNode()
       # deselect links when background is clicked
       @props.selectionManager.clearSelection()
+
+  handleLabelEdit: (title) ->
+    @props.graphStore.changeLink @state.editingLink, {title: title}
+    @props.selectionManager.clearSelection()
 
   render: ->
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
