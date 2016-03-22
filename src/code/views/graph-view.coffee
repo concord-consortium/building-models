@@ -25,20 +25,24 @@ module.exports = React.createClass
     $container = $(@refs.container.getDOMNode())
 
     @diagramToolkit = new DiagramToolkit $container,
-      Container:     $container[0]
-      handleConnect: @handleConnect
-      handleClick:   @handleLinkClick
+      Container:            $container[0]
+      handleConnect:        @handleConnect
+      handleClick:          @handleLinkClick
+      handleDoubleClick:    @handleLinkEditClick
+      handleLabelEdit:      @handleLabelEdit
 
     @props.selectionManager.addSelectionListener (manager) =>
       lastLinkSelection = @state.selectedLink
       selectedNode      = manager.getNodeInspection()[0] or null
       editingNode       = manager.getNodeTitleEditing()[0] or null
       selectedLink      = manager.getLinkInspection()[0] or null
+      editingLink       = manager.getLinkTitleEditing()[0] or null
 
       @setState
         selectedNode: selectedNode
         editingNode:  editingNode
         selectedLink: selectedLink
+        editingLink: editingLink
 
       if lastLinkSelection is not @state.selectedLink
         @_updateToolkit()
@@ -98,6 +102,7 @@ module.exports = React.createClass
     selectedNode: null
     editingNode: null
     selectedLink: null
+    editingLink: null
     canDrop: false
 
   componentWillUpdate: ->
@@ -133,6 +138,10 @@ module.exports = React.createClass
   handleLinkClick: (connection, evnt) ->
     @handleEvent ->
       GraphStore.store.clickLink connection.linkModel
+
+  handleLinkEditClick: (connection, evnt) ->
+    @handleEvent ->
+      GraphStore.store.editLink connection.linkModel
 
   # TODO, can we get rid of this?
   _nodeForName: (name) ->

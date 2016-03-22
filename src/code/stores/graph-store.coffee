@@ -260,7 +260,13 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.endCommandBatch()
 
   clickLink: (link) ->
-    @selectionManager.selectLinkForInspection(link)
+    if @selectionManager.isSelected(link)
+      @selectionManager.selectLinkForTitleEditing(link)
+    else
+      @selectionManager.selectLinkForInspection(link)
+
+  editLink: (link) ->
+    @selectionManager.selectLinkForTitleEditing(link)
 
   changeLink: (link, changes={}) ->
     if changes.deleted

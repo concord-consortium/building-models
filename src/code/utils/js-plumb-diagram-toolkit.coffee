@@ -33,8 +33,11 @@ module.exports = class DiagramToolkit
   handleClick: (connection, evnt) ->
     @options.handleClick? connection, evnt
 
+  handleDoubleClick: (connection, evnt) ->
+    @options.handleDoubleClick? connection, evnt
+
   handleLabelClick: (label, evnt) ->
-    @options.handleClick? label.component, evnt
+    @options.handleDoubleClick? label.component, evnt
 
   handleDisconnect: (info, evnt) ->
     return (@options.handleDisconnect? info, evnt) or true
@@ -139,6 +142,7 @@ module.exports = class DiagramToolkit
       ]
 
     connection.bind 'click', @handleClick.bind @
+    connection.bind 'dblclick', @handleDoubleClick.bind @
     connection.linkModel = linkModel
 
   setSuspendDrawing: (shouldwestop) ->
