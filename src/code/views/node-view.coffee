@@ -92,7 +92,7 @@ module.exports = NodeView = React.createClass
   handleSelected: (actually_select) ->
     if @props.selectionManager
       selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-      @props.selectionManager.selectForInspection(@props.data)
+      @props.selectionManager.selectNodeForInspection(@props.data)
 
   propTypes:
     onDelete: React.PropTypes.func
@@ -146,7 +146,7 @@ module.exports = NodeView = React.createClass
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
 
   startEditing: ->
-    @props.selectionManager.selectForTitleEditing(@props.data)
+    @props.selectionManager.selectNodeForTitleEditing(@props.data)
 
   stopEditing: ->
     @props.graphStore.endNodeEdit()

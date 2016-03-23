@@ -33,8 +33,11 @@ module.exports = class DiagramToolkit
   handleClick: (connection, evnt) ->
     @options.handleClick? connection, evnt
 
+  handleDoubleClick: (connection, evnt) ->
+    @options.handleDoubleClick? connection, evnt
+
   handleLabelClick: (label, evnt) ->
-    @options.handleClick? label.component, evnt
+    @options.handleDoubleClick? label.component, evnt
 
   handleDisconnect: (info, evnt) ->
     return (@options.handleDisconnect? info, evnt) or true
@@ -100,26 +103,47 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected) ->
+  _overlays: (label, selected, editingLabel=true) ->
     results = [["Arrow", {
       location: 1.0
       length: 10
       width: 10
-      events: { click: @handleLabelClick.bind @ }
     }]]
-    if label?.length > 0
+    if editingLabel
+      results.push  ["Custom", {
+        create: @_createEditLabel(label)
+        location: 0.5
+        id:"customOverlay"
+      }]
+    else if label?.length > 0
       results.push ["Label", {
         location: 0.5,
         events: { click: @handleLabelClick.bind @ },
         label: label or '',
         cssClass: "label#{if selected then ' selected' else ''}"
       }]
+
     results
+
+  _createEditLabel: (label) ->
+    width =
+      if label.length < 13 then 90
+      else if label.length < 19 then 130
+      else 200
+    style = {width: width}
+    return =>
+      _self = this
+      $("<input>").val(label).css(style)
+      .show ->
+        $(@).focus()
+      .change ->
+        _self.options.handleLabelEdit? this.value
+
 
   _clean_borked_endpoints: ->
     $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove()
 
-  addLink: (source, target, label, color, isSelected, linkModel) ->
+  addLink: (source, target, label, color, isSelected, isEditing, linkModel) ->
     paintStyle = @_paintStyle color
     paintStyle.outlineColor = "none"
     paintStyle.outlineWidth = 20
@@ -131,7 +155,7 @@ module.exports = class DiagramToolkit
       source: source
       target: target
       paintStyle: paintStyle
-      overlays: @_overlays label, isSelected
+      overlays: @_overlays label, isSelected, isEditing
       endpoint: ["Rectangle",
         width: 10
         height: 10
@@ -139,6 +163,7 @@ module.exports = class DiagramToolkit
       ]
 
     connection.bind 'click', @handleClick.bind @
+    connection.bind 'dblclick', @handleDoubleClick.bind @
     connection.linkModel = linkModel
 
   setSuspendDrawing: (shouldwestop) ->

@@ -191,17 +191,17 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   selectedNode: ->
-    @selectionManager.selection(SelectionManager.NodeInpsection)[0] or null
+    @selectionManager.selection(SelectionManager.NodeInspection)[0] or null
 
   editingNode: ->
     @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
 
   editNode: (nodeKey) ->
-    @selectionManager.selectForTitleEditing(@nodeKeys[nodeKey])
+    @selectionManager.selectNodeForTitleEditing(@nodeKeys[nodeKey])
 
   selectNode: (nodeKey) ->
     @endNodeEdit()
-    @selectionManager.selectForInspection(@nodeKeys[nodeKey])
+    @selectionManager.selectNodeForInspection(@nodeKeys[nodeKey])
 
 
   _notifyNodeChanged: (node) ->
@@ -259,8 +259,14 @@ GraphStore  = Reflux.createStore
   endNodeEdit: ->
     @undoRedoManager.endCommandBatch()
 
-  selectLink: (link) ->
-    @selectionManager.selectLink(link)
+  clickLink: (link) ->
+    if @selectionManager.isSelected(link)
+      @selectionManager.selectLinkForTitleEditing(link)
+    else
+      @selectionManager.selectLinkForInspection(link)
+
+  editLink: (link) ->
+    @selectionManager.selectLinkForTitleEditing(link)
 
   changeLink: (link, changes={}) ->
     if changes.deleted
@@ -324,7 +330,7 @@ GraphStore  = Reflux.createStore
       @selectionManager.clearSelection()
 
   removeSelectedLink: ->
-    selectedLink = @selectionManager.getLinkSelection()[0] or null
+    selectedLink = @selectionManager.getLinkInspection()[0] or null
     if selectedLink
       @removeLink(selectedLink)
       @selectionManager.clearLinkSelection()

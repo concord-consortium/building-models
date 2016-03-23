@@ -6,8 +6,9 @@ tr          = require "../utils/translate"
 
 module.exports = class SelectionManager
   @NodeTitleEditing   = "NodeTitleEditing"
-  @NodeInpsection     = "NodeInpsection"
-  @LinkSelection      = "LinkSelection"
+  @NodeInspection     = "NodeInspection"
+  @LinkTitleEditing   = "LinkTitleEditing"
+  @LinkInspection     = "LinkInspection"
 
   constructor: ->
     @selections = []
@@ -27,12 +28,11 @@ module.exports = class SelectionManager
     entry = {graphprimitive: graphprimitive, context: context, key: graphprimitive.key}
     unless @isSelected(graphprimitive,context)
       @selections.push entry
-      @_notifySelectionChange()
 
 
   selectOnly: (graphprimitive, context) ->
     unless @isSelected(graphprimitive, context)
-      @clearSelection(context)
+      @_clearSelection(context)
       @addToSelection(graphprimitive,context)
 
   selection: (context) ->
@@ -44,11 +44,15 @@ module.exports = class SelectionManager
       obj.graphprimitive
     .value()
 
-  clearSelection: (context=null) ->
+  _clearSelection: (context=null) ->
     @_deselect({context:context})
 
-  clearLinkSelection: ->
-    @clearSelection(SelectionManager.LinkSelection)
+  clearSelection: (context=null) ->
+    @_clearSelection(context)
+    @_notifySelectionChange()
+
+  clearLinkInspection: ->
+    @_clearSelection(SelectionManager.LinkInspection)
 
   clearSelectionFor:(graphprimitive, context=null) ->
     @_deselect({key:graphprimitive.key, context:context})
@@ -61,45 +65,72 @@ module.exports = class SelectionManager
     .value()
     found.length > 0
 
-  selectForTitleEditing: (graphprimitive) ->
-    @selectOnly(graphprimitive,SelectionManager.NodeTitleEditing)
+  selectNodeForTitleEditing: (graphprimitive) ->
+    @_selectForTitleEditing(graphprimitive, SelectionManager.NodeTitleEditing)
+    @_clearSelection(SelectionManager.LinkTitleEditing)
+    @_notifySelectionChange()
+
+  selectLinkForTitleEditing: (graphprimitive) ->
+    @_selectForTitleEditing(graphprimitive, SelectionManager.LinkTitleEditing)
+    @_clearSelection(SelectionManager.NodeTitleEditing)
+    @_notifySelectionChange()
+
+  _selectForTitleEditing: (graphprimitive, context) ->
+    @selectOnly(graphprimitive, context)
     # unselect the inspection selection, unless its this same graphprimitive.
     unless @isSelectedForInspection(graphprimitive)
       @clearInspection()
 
+  clearInspection: ->
+    @clearNodeInspection()
+    @clearLinkInspection()
+
   clearTitleEditing: ->
-    @clearSelection(SelectionManager.NodeTitleEditing)
+    @_clearSelection(SelectionManager.NodeTitleEditing)
+    @_clearSelection(SelectionManager.LinkTitleEditing)
 
   isSelectedForTitleEditing: (graphprimitive)->
-    @isSelected(graphprimitive,SelectionManager.NodeTitleEditing)
+    @isSelected(graphprimitive,SelectionManager.NodeTitleEditing) or
+      @isSelected(graphprimitive,SelectionManager.LinkTitleEditing)
 
-  getTitleEditing: ->
+  getNodeTitleEditing: ->
     @selection(SelectionManager.NodeTitleEditing)
 
-  selectForInspection: (graphprimitive) ->
-    @selectOnly(graphprimitive, SelectionManager.NodeInpsection)
-    @clearLinkSelection()
+  selectNodeForInspection: (graphprimitive) ->
+    @selectOnly(graphprimitive, SelectionManager.NodeInspection)
+    @clearLinkInspection()
 
     # unselect the title selection, unless its this same graphprimitive.
     unless @isSelectedForTitleEditing(graphprimitive)
       @clearTitleEditing()
 
+    @_notifySelectionChange()
 
-  clearInspection: ->
-    @clearSelection(SelectionManager.NodeInpsection)
+  clearNodeInspection: ->
+    @_clearSelection(SelectionManager.NodeInspection)
 
   isSelectedForInspection: (graphprimitive) ->
-    @isSelected(graphprimitive,SelectionManager.NodeInpsection)
+    @isSelected(graphprimitive,SelectionManager.NodeInspection) or
+      @isSelected(graphprimitive,SelectionManager.LinkInspection)
 
-  getInspection: ->
-    @selection(SelectionManager.NodeInpsection)
+  getNodeInspection: ->
+    @selection(SelectionManager.NodeInspection)
 
-  getLinkSelection: ->
-    @selection(SelectionManager.LinkSelection)
+  getLinkInspection: ->
+    @selection(SelectionManager.LinkInspection)
 
-  selectLink: (graphprimitive)->
-    @clearInspection()
-    @selectOnly(graphprimitive, SelectionManager.LinkSelection)
+  getLinkTitleEditing: ->
+    @selection(SelectionManager.LinkTitleEditing)
+
+  selectLinkForInspection: (graphprimitive)->
+    @selectOnly(graphprimitive, SelectionManager.LinkInspection)
+    @clearNodeInspection()
+
+    # unselect the title selection, unless its this same graphprimitive.
+    unless @isSelectedForTitleEditing(graphprimitive)
+      @clearTitleEditing()
+
+    @_notifySelectionChange()
 
   _deselect: (opts)->
     pickNonEmpty    = _.partial _.pick, _, _.identity
@@ -112,4 +143,3 @@ module.exports = class SelectionManager
       log.info "in collection #{_.pluck @selections, 'key'}"
     else
       @selections = []
-    @_notifySelectionChange()
