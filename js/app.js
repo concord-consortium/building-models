@@ -60124,9 +60124,9 @@ module.exports = {
   },
   _updateSelection: function(manager) {
     var editingNode, selectedLink, selectedNode;
-    selectedNode = manager.getInspection()[0] || null;
-    editingNode = manager.getTitleEditing()[0] || null;
-    selectedLink = manager.getLinkSelection()[0] || null;
+    selectedNode = manager.getNodeInspection()[0] || null;
+    editingNode = manager.getNodeTitleEditing()[0] || null;
+    selectedLink = manager.getLinkInspection()[0] || null;
     this.setState({
       selectedNode: selectedNode,
       editingNode: editingNode,
@@ -61221,9 +61221,11 @@ tr = require("../utils/translate");
 module.exports = SelectionManager = (function() {
   SelectionManager.NodeTitleEditing = "NodeTitleEditing";
 
-  SelectionManager.NodeInpsection = "NodeInpsection";
+  SelectionManager.NodeInspection = "NodeInspection";
 
-  SelectionManager.LinkSelection = "LinkSelection";
+  SelectionManager.LinkTitleEditing = "LinkTitleEditing";
+
+  SelectionManager.LinkInspection = "LinkInspection";
 
   function SelectionManager() {
     this.selections = [];
@@ -61255,14 +61257,13 @@ module.exports = SelectionManager = (function() {
       key: graphprimitive.key
     };
     if (!this.isSelected(graphprimitive, context)) {
-      this.selections.push(entry);
-      return this._notifySelectionChange();
+      return this.selections.push(entry);
     }
   };
 
   SelectionManager.prototype.selectOnly = function(graphprimitive, context) {
     if (!this.isSelected(graphprimitive, context)) {
-      this.clearSelection(context);
+      this._clearSelection(context);
       return this.addToSelection(graphprimitive, context);
     }
   };
@@ -61278,7 +61279,7 @@ module.exports = SelectionManager = (function() {
     }).value();
   };
 
-  SelectionManager.prototype.clearSelection = function(context) {
+  SelectionManager.prototype._clearSelection = function(context) {
     if (context == null) {
       context = null;
     }
@@ -61287,8 +61288,16 @@ module.exports = SelectionManager = (function() {
     });
   };
 
-  SelectionManager.prototype.clearLinkSelection = function() {
-    return this.clearSelection(SelectionManager.LinkSelection);
+  SelectionManager.prototype.clearSelection = function(context) {
+    if (context == null) {
+      context = null;
+    }
+    this._clearSelection(context);
+    return this._notifySelectionChange();
+  };
+
+  SelectionManager.prototype.clearLinkInspection = function() {
+    return this._clearSelection(SelectionManager.LinkInspection);
   };
 
   SelectionManager.prototype.clearSelectionFor = function(graphprimitive, context) {
@@ -61313,52 +61322,79 @@ module.exports = SelectionManager = (function() {
     return found.length > 0;
   };
 
-  SelectionManager.prototype.selectForTitleEditing = function(graphprimitive) {
-    this.selectOnly(graphprimitive, SelectionManager.NodeTitleEditing);
+  SelectionManager.prototype.selectNodeForTitleEditing = function(graphprimitive) {
+    this._selectForTitleEditing(graphprimitive, SelectionManager.NodeTitleEditing);
+    this._clearSelection(SelectionManager.LinkTitleEditing);
+    return this._notifySelectionChange();
+  };
+
+  SelectionManager.prototype.selectLinkForTitleEditing = function(graphprimitive) {
+    this._selectForTitleEditing(graphprimitive, SelectionManager.LinkTitleEditing);
+    this._clearSelection(SelectionManager.NodeTitleEditing);
+    return this._notifySelectionChange();
+  };
+
+  SelectionManager.prototype._selectForTitleEditing = function(graphprimitive, context) {
+    this.selectOnly(graphprimitive, context);
     if (!this.isSelectedForInspection(graphprimitive)) {
       return this.clearInspection();
     }
   };
 
+  SelectionManager.prototype.clearInspection = function() {
+    this.clearNodeInspection();
+    return this.clearLinkInspection();
+  };
+
   SelectionManager.prototype.clearTitleEditing = function() {
-    return this.clearSelection(SelectionManager.NodeTitleEditing);
+    this._clearSelection(SelectionManager.NodeTitleEditing);
+    return this._clearSelection(SelectionManager.LinkTitleEditing);
   };
 
   SelectionManager.prototype.isSelectedForTitleEditing = function(graphprimitive) {
-    return this.isSelected(graphprimitive, SelectionManager.NodeTitleEditing);
+    return this.isSelected(graphprimitive, SelectionManager.NodeTitleEditing) || this.isSelected(graphprimitive, SelectionManager.LinkTitleEditing);
   };
 
-  SelectionManager.prototype.getTitleEditing = function() {
+  SelectionManager.prototype.getNodeTitleEditing = function() {
     return this.selection(SelectionManager.NodeTitleEditing);
   };
 
-  SelectionManager.prototype.selectForInspection = function(graphprimitive) {
-    this.selectOnly(graphprimitive, SelectionManager.NodeInpsection);
-    this.clearLinkSelection();
+  SelectionManager.prototype.selectNodeForInspection = function(graphprimitive) {
+    this.selectOnly(graphprimitive, SelectionManager.NodeInspection);
+    this.clearLinkInspection();
     if (!this.isSelectedForTitleEditing(graphprimitive)) {
-      return this.clearTitleEditing();
+      this.clearTitleEditing();
     }
+    return this._notifySelectionChange();
   };
 
-  SelectionManager.prototype.clearInspection = function() {
-    return this.clearSelection(SelectionManager.NodeInpsection);
+  SelectionManager.prototype.clearNodeInspection = function() {
+    return this._clearSelection(SelectionManager.NodeInspection);
   };
 
   SelectionManager.prototype.isSelectedForInspection = function(graphprimitive) {
-    return this.isSelected(graphprimitive, SelectionManager.NodeInpsection);
+    return this.isSelected(graphprimitive, SelectionManager.NodeInspection) || this.isSelected(graphprimitive, SelectionManager.LinkInspection);
   };
 
-  SelectionManager.prototype.getInspection = function() {
-    return this.selection(SelectionManager.NodeInpsection);
+  SelectionManager.prototype.getNodeInspection = function() {
+    return this.selection(SelectionManager.NodeInspection);
   };
 
-  SelectionManager.prototype.getLinkSelection = function() {
-    return this.selection(SelectionManager.LinkSelection);
+  SelectionManager.prototype.getLinkInspection = function() {
+    return this.selection(SelectionManager.LinkInspection);
   };
 
-  SelectionManager.prototype.selectLink = function(graphprimitive) {
-    this.clearInspection();
-    return this.selectOnly(graphprimitive, SelectionManager.LinkSelection);
+  SelectionManager.prototype.getLinkTitleEditing = function() {
+    return this.selection(SelectionManager.LinkTitleEditing);
+  };
+
+  SelectionManager.prototype.selectLinkForInspection = function(graphprimitive) {
+    this.selectOnly(graphprimitive, SelectionManager.LinkInspection);
+    this.clearNodeInspection();
+    if (!this.isSelectedForTitleEditing(graphprimitive)) {
+      this.clearTitleEditing();
+    }
+    return this._notifySelectionChange();
   };
 
   SelectionManager.prototype._deselect = function(opts) {
@@ -61370,11 +61406,10 @@ module.exports = SelectionManager = (function() {
       log.info("removing " + removeCritereon.key);
       log.info("in collection " + (_.pluck(this.selections, 'key')));
       _.remove(this.selections, removeCritereon);
-      log.info("in collection " + (_.pluck(this.selections, 'key')));
+      return log.info("in collection " + (_.pluck(this.selections, 'key')));
     } else {
-      this.selections = [];
+      return this.selections = [];
     }
-    return this._notifySelectionChange();
   };
 
   return SelectionManager;
@@ -62309,17 +62344,17 @@ GraphStore = Reflux.createStore({
     return this.updateListeners();
   },
   selectedNode: function() {
-    return this.selectionManager.selection(SelectionManager.NodeInpsection)[0] || null;
+    return this.selectionManager.selection(SelectionManager.NodeInspection)[0] || null;
   },
   editingNode: function() {
     return this.selectionManager.selection(SelectionManager.NodeTitleEditing)[0] || null;
   },
   editNode: function(nodeKey) {
-    return this.selectionManager.selectForTitleEditing(this.nodeKeys[nodeKey]);
+    return this.selectionManager.selectNodeForTitleEditing(this.nodeKeys[nodeKey]);
   },
   selectNode: function(nodeKey) {
     this.endNodeEdit();
-    return this.selectionManager.selectForInspection(this.nodeKeys[nodeKey]);
+    return this.selectionManager.selectNodeForInspection(this.nodeKeys[nodeKey]);
   },
   _notifyNodeChanged: function(node) {
     this._maybeChangeSelectedItem(node);
@@ -62398,8 +62433,15 @@ GraphStore = Reflux.createStore({
   endNodeEdit: function() {
     return this.undoRedoManager.endCommandBatch();
   },
-  selectLink: function(link) {
-    return this.selectionManager.selectLink(link);
+  clickLink: function(link) {
+    if (this.selectionManager.isSelected(link)) {
+      return this.selectionManager.selectLinkForTitleEditing(link);
+    } else {
+      return this.selectionManager.selectLinkForInspection(link);
+    }
+  },
+  editLink: function(link) {
+    return this.selectionManager.selectLinkForTitleEditing(link);
   },
   changeLink: function(link, changes) {
     var originalData;
@@ -62490,7 +62532,7 @@ GraphStore = Reflux.createStore({
   },
   removeSelectedLink: function() {
     var selectedLink;
-    selectedLink = this.selectionManager.getLinkSelection()[0] || null;
+    selectedLink = this.selectionManager.getLinkInspection()[0] || null;
     if (selectedLink) {
       this.removeLink(selectedLink);
       return this.selectionManager.clearLinkSelection();
@@ -63870,9 +63912,14 @@ module.exports = DiagramToolkit = (function() {
     return typeof (base = this.options).handleClick === "function" ? base.handleClick(connection, evnt) : void 0;
   };
 
+  DiagramToolkit.prototype.handleDoubleClick = function(connection, evnt) {
+    var base;
+    return typeof (base = this.options).handleDoubleClick === "function" ? base.handleDoubleClick(connection, evnt) : void 0;
+  };
+
   DiagramToolkit.prototype.handleLabelClick = function(label, evnt) {
     var base;
-    return typeof (base = this.options).handleClick === "function" ? base.handleClick(label.component, evnt) : void 0;
+    return typeof (base = this.options).handleDoubleClick === "function" ? base.handleDoubleClick(label.component, evnt) : void 0;
   };
 
   DiagramToolkit.prototype.handleDisconnect = function(info, evnt) {
@@ -63962,21 +64009,29 @@ module.exports = DiagramToolkit = (function() {
     };
   };
 
-  DiagramToolkit.prototype._overlays = function(label, selected) {
+  DiagramToolkit.prototype._overlays = function(label, selected, editingLabel) {
     var results;
+    if (editingLabel == null) {
+      editingLabel = true;
+    }
     results = [
       [
         "Arrow", {
           location: 1.0,
           length: 10,
-          width: 10,
-          events: {
-            click: this.handleLabelClick.bind(this)
-          }
+          width: 10
         }
       ]
     ];
-    if ((label != null ? label.length : void 0) > 0) {
+    if (editingLabel) {
+      results.push([
+        "Custom", {
+          create: this._createEditLabel(label),
+          location: 0.5,
+          id: "customOverlay"
+        }
+      ]);
+    } else if ((label != null ? label.length : void 0) > 0) {
       results.push([
         "Label", {
           location: 0.5,
@@ -63991,11 +64046,31 @@ module.exports = DiagramToolkit = (function() {
     return results;
   };
 
+  DiagramToolkit.prototype._createEditLabel = function(label) {
+    var style, width;
+    width = label.length < 13 ? 90 : label.length < 19 ? 130 : 200;
+    style = {
+      width: width
+    };
+    return (function(_this) {
+      return function() {
+        var _self;
+        _self = _this;
+        return $("<input>").val(label).css(style).show(function() {
+          return $(this).focus();
+        }).change(function() {
+          var base;
+          return typeof (base = _self.options).handleLabelEdit === "function" ? base.handleLabelEdit(this.value) : void 0;
+        });
+      };
+    })(this);
+  };
+
   DiagramToolkit.prototype._clean_borked_endpoints = function() {
     return $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove();
   };
 
-  DiagramToolkit.prototype.addLink = function(source, target, label, color, isSelected, linkModel) {
+  DiagramToolkit.prototype.addLink = function(source, target, label, color, isSelected, isEditing, linkModel) {
     var connection, paintStyle;
     paintStyle = this._paintStyle(color);
     paintStyle.outlineColor = "none";
@@ -64008,7 +64083,7 @@ module.exports = DiagramToolkit = (function() {
       source: source,
       target: target,
       paintStyle: paintStyle,
-      overlays: this._overlays(label, isSelected),
+      overlays: this._overlays(label, isSelected, isEditing),
       endpoint: [
         "Rectangle", {
           width: 10,
@@ -64018,6 +64093,7 @@ module.exports = DiagramToolkit = (function() {
       ]
     });
     connection.bind('click', this.handleClick.bind(this));
+    connection.bind('dblclick', this.handleDoubleClick.bind(this));
     return connection.linkModel = linkModel;
   };
 
@@ -65312,7 +65388,7 @@ module.exports = React.createClass({
 
 
 },{"../stores/app-settings-store":548,"../stores/google-file-store":550,"../utils/translate":568,"./build-info-view":571,"./dropdown-view":574,"./modal-google-save-view":589,"./open-in-codap-view":598}],577:[function(require,module,exports){
-var AppSettingsStore, DiagramToolkit, ImageDialogStore, Importer, LinkStore, Node, NodeModel, PaletteStore, SimulationStore, div, dropImageHandler, tr;
+var AppSettingsStore, DiagramToolkit, GraphStore, ImageDialogStore, Importer, Node, NodeModel, PaletteStore, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
 
@@ -65328,7 +65404,7 @@ tr = require('../utils/translate');
 
 PaletteStore = require('../stores/palette-store');
 
-LinkStore = require('../stores/graph-store');
+GraphStore = require('../stores/graph-store');
 
 ImageDialogStore = require('../stores/image-dialog-store');
 
@@ -65339,8 +65415,8 @@ AppSettingsStore = require("../stores/app-settings-store");
 div = React.DOM.div;
 
 module.exports = React.createClass({
-  displayName: 'GraphView',
-  mixins: [LinkStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin],
+  displayName: 'LinkView',
+  mixins: [GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin],
   getDefaultProps: function() {
     return {
       linkTarget: '.link-target'
@@ -65352,19 +65428,23 @@ module.exports = React.createClass({
     this.diagramToolkit = new DiagramToolkit($container, {
       Container: $container[0],
       handleConnect: this.handleConnect,
-      handleClick: this.handleClick
+      handleClick: this.handleLinkClick,
+      handleDoubleClick: this.handleLinkEditClick,
+      handleLabelEdit: this.handleLabelEdit
     });
     this.props.selectionManager.addSelectionListener((function(_this) {
       return function(manager) {
-        var editingNode, lastLinkSelection, selectedLink, selectedNode;
+        var editingLink, editingNode, lastLinkSelection, selectedLink, selectedNode;
         lastLinkSelection = _this.state.selectedLink;
-        selectedNode = manager.getInspection()[0] || null;
-        editingNode = manager.getTitleEditing()[0] || null;
-        selectedLink = manager.getLinkSelection()[0] || null;
+        selectedNode = manager.getNodeInspection()[0] || null;
+        editingNode = manager.getNodeTitleEditing()[0] || null;
+        selectedLink = manager.getLinkInspection()[0] || null;
+        editingLink = manager.getLinkTitleEditing()[0] || null;
         _this.setState({
           selectedNode: selectedNode,
           editingNode: editingNode,
-          selectedLink: selectedLink
+          selectedLink: selectedLink,
+          editingLink: editingLink
         });
         if (lastLinkSelection === !_this.state.selectedLink) {
           return _this._updateToolkit();
@@ -65432,6 +65512,7 @@ module.exports = React.createClass({
       selectedNode: null,
       editingNode: null,
       selectedLink: null,
+      editingLink: null,
       canDrop: false
     };
   },
@@ -65452,29 +65533,34 @@ module.exports = React.createClass({
   },
   onNodeMoved: function(node_event) {
     return this.handleEvent(function() {
-      return LinkStore.store.moveNode(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
+      return GraphStore.store.moveNode(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
     });
   },
   onNodeMoveComplete: function(node_event) {
     return this.handleEvent(function() {
       var left, ref, top;
       ref = node_event.extra.position, left = ref.left, top = ref.top;
-      return LinkStore.store.moveNodeCompleted(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
+      return GraphStore.store.moveNodeCompleted(node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition);
     });
   },
   onNodeDeleted: function(node_event) {
     return this.handleEvent(function() {
-      return LinkStore.store.removeNode(node_event.nodeKey);
+      return GraphStore.store.removeNode(node_event.nodeKey);
     });
   },
   handleConnect: function(info, evnt) {
     return this.handleEvent(function() {
-      return LinkStore.store.newLinkFromEvent(info, evnt);
+      return GraphStore.store.newLinkFromEvent(info, evnt);
     });
   },
-  handleClick: function(connection, evnt) {
+  handleLinkClick: function(connection, evnt) {
     return this.handleEvent(function() {
-      return LinkStore.store.selectLink(connection.linkModel);
+      return GraphStore.store.clickLink(connection.linkModel);
+    });
+  },
+  handleLinkEditClick: function(connection, evnt) {
+    return this.handleEvent(function() {
+      return GraphStore.store.editLink(connection.linkModel);
     });
   },
   _nodeForName: function(name) {
@@ -65513,7 +65599,7 @@ module.exports = React.createClass({
     return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find(this.props.linkTarget));
   },
   _redrawLinks: function() {
-    var i, isSelected, len, link, ref, results, source, target;
+    var i, isEditing, isSelected, len, link, ref, results, source, target;
     ref = this.state.links;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -65521,8 +65607,9 @@ module.exports = React.createClass({
       source = $(this._nodeForName(link.sourceNode.key)).find(this.props.linkTarget);
       target = $(this._nodeForName(link.targetNode.key)).find(this.props.linkTarget);
       isSelected = this.props.selectionManager.isSelected(link);
+      isEditing = link === this.state.editingLink;
       if (source && target) {
-        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, isSelected, link));
+        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, isSelected, isEditing, link));
       } else {
         results.push(void 0);
       }
@@ -65574,6 +65661,12 @@ module.exports = React.createClass({
     if (e.target === this.refs.container.getDOMNode()) {
       return this.props.selectionManager.clearSelection();
     }
+  },
+  handleLabelEdit: function(title) {
+    this.props.graphStore.changeLink(this.state.editingLink, {
+      title: title
+    });
+    return this.props.selectionManager.clearSelection();
   },
   render: function() {
     var node;
@@ -67311,7 +67404,7 @@ module.exports = NodeView = React.createClass({
     var selectionKey;
     if (this.props.selectionManager) {
       selectionKey = actually_select ? this.props.nodeKey : "dont-select-anything";
-      return this.props.selectionManager.selectForInspection(this.props.data);
+      return this.props.selectionManager.selectNodeForInspection(this.props.data);
     }
   },
   propTypes: {
@@ -67384,7 +67477,7 @@ module.exports = NodeView = React.createClass({
     });
   },
   startEditing: function() {
-    return this.props.selectionManager.selectForTitleEditing(this.props.data);
+    return this.props.selectionManager.selectNodeForTitleEditing(this.props.data);
   },
   stopEditing: function() {
     this.props.graphStore.endNodeEdit();
