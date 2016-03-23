@@ -60903,6 +60903,11 @@ module.exports = Node = (function(superClass) {
     });
   };
 
+  Node.prototype.isDependent = function() {
+    var ref;
+    return ((ref = this.inLinks()) != null ? ref.length : void 0) > 0;
+  };
+
   Node.prototype.infoString = function() {
     var link, linkNamer, outs;
     linkNamer = function(link) {
@@ -66323,7 +66328,7 @@ ToolPanel = React.createFactory(React.createClass({
       name: "qualRel",
       simple: false,
       shows: "relations",
-      'enabled': ['node']
+      'enabled': ['dependent-node']
     }, {
       name: "options",
       simple: true,
@@ -66332,10 +66337,14 @@ ToolPanel = React.createFactory(React.createClass({
     }
   ],
   isDisabled: function(button) {
+    var ref1;
     if (_.includes(button.enabled, 'nothing')) {
       return false;
     }
     if (_.includes(button.enabled, 'node') && this.props.node) {
+      return false;
+    }
+    if (_.includes(button.enabled, 'dependent-node') && ((ref1 = this.props.node) != null ? ref1.isDependent() : void 0)) {
       return false;
     }
     if (_.includes(button.enabled, 'link') && this.props.link) {
@@ -66438,7 +66447,8 @@ module.exports = React.createClass({
     }
   },
   renderRelationInspector: function() {
-    if (this.props.node) {
+    var ref1;
+    if ((ref1 = this.props.node) != null ? ref1.isDependent() : void 0) {
       return NodeRelationInspectorView({
         node: this.props.node,
         graphStore: this.props.graphStore
@@ -66448,6 +66458,8 @@ module.exports = React.createClass({
         link: this.props.link,
         graphStore: this.props.graphStore
       });
+    } else {
+      return null;
     }
   },
   nodeSelectionChanged: function() {
