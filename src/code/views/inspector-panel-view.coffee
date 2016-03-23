@@ -27,13 +27,14 @@ ToolPanel = React.createFactory React.createClass
   buttonData: [
       {name: "styles", simple: true, shows: "design",'enabled': ['node','link'] }
       {name: "values", simple: false, shows: "value", 'enabled': ['node'] }
-      {name: "qualRel", simple: false, shows: "relations",'enabled': ['node']}
+      {name: "qualRel", simple: false, shows: "relations",'enabled': ['dependent-node']}
       {name: "options",  simple: true, shows: "simulation", 'enabled': ['nothing'] }
     ]
 
   isDisabled: (button) ->
     return false if _.includes(button.enabled, 'nothing')
     return false if _.includes(button.enabled, 'node') and @props.node
+    return false if _.includes(button.enabled, 'dependent-node') and @props.node?.isDependent()
     return false if _.includes(button.enabled, 'link') and @props.link
     return true
 
@@ -102,10 +103,12 @@ module.exports = React.createClass
       (LinkValueInspectorView {link:@props.link})
 
   renderRelationInspector: ->
-    if @props.node
+    if @props.node?.isDependent()
       (NodeRelationInspectorView {node:@props.node, graphStore: @props.graphStore})
     else if @props.link
       (LinkRelationInspectorView {link:@props.link, graphStore: @props.graphStore})
+    else
+      return null
 
   # 2015-12-09 NP: Deselection makes inpector panel hide http://bit.ly/1ORBBp2
   # 2016-03-15 SF: Changed this to a function explicitly called when selection changes
