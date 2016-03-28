@@ -122,7 +122,7 @@ ValueSlider = React.createClass
     (div {},
       (div {className: "value-slider-handle", style: style, ref: "handle"},
         (i {className: "icon-codap-smallSliderLines"})
-        { label }
+        ( label )
       )
     )
 
