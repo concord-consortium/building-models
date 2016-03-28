@@ -25,7 +25,7 @@ window.Sage =
     elem = '#app'
 
     jsPlumb.bind 'ready', ->
-      React.render appView, $(elem)[0]
+      ReactDOM.render appView, $(elem)[0]
 
   clearModel: ->
     appView?.props.graphStore.deleteAll()

@@ -134,10 +134,10 @@ ValueSlider = React.createClass
       return if not isEditable
       # first copy state value to model if we were editing
       if @state["editing-#{property}"]
-        newValue = parseInt React.findDOMNode(this.refs.focusable)?.value
+        newValue = parseInt ReactDOM.findDOMNode(this.refs.focusable)?.value
         if newValue? then @updateRange property, newValue
       @setState "editing-#{property}": not @state["editing-#{property}"], ->
-        React.findDOMNode(this.refs.focusable)?.focus()
+        ReactDOM.findDOMNode(this.refs.focusable)?.focus()
 
     keyDown = (evt) ->
       if evt.key is 'Enter'
@@ -227,4 +227,4 @@ Demo = React.createClass
         onRangeChange: @onRangeChange
     )
 
-# window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
+# window.testComponent = (domID) -> ReactDOM.render React.createElement(Demo,{}), domID

@@ -284,4 +284,4 @@ groupView = React.createFactory React.createClass
       (myView unselected)
     )
 
-# window.testComponent = (domID) -> React.render groupView(), domID
+# window.testComponent = (domID) -> ReactDOM.render groupView(), domID

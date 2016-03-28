@@ -48,11 +48,11 @@ module.exports = LinkRelationView = React.createClass
     @props.graphStore.changeLink(link, {relation: relation})
 
   getVector: ->
-    id = parseInt React.findDOMNode(@refs.vector).value
+    id = parseInt ReactDOM.findDOMNode(@refs.vector).value
     RelationFactory.vectors[id]
 
   getScalar: ->
-    id = parseInt React.findDOMNode(@refs.scalar).value
+    id = parseInt ReactDOM.findDOMNode(@refs.scalar).value
     RelationFactory.scalars[id]
 
   renderVector: (increaseOrDecrease)->
