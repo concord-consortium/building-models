@@ -19,7 +19,7 @@ module.exports =
         $(v).attr('data-reactid', null)
       clone
 
-    $(domRef.getDOMNode()).draggable
+    $(ReactDOM.findDOMNode(domRef)).draggable
       drag: @doMove
       revert: true
       helper: reactSafeClone

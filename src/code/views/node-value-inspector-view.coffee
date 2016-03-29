@@ -56,7 +56,7 @@ module.exports = React.createClass
       if @state["editing-#{property}"]
         @props.graphStore.changeNodeProperty property, @state["#{property}-value"]
       @setState "editing-#{property}": not @state["editing-#{property}"], ->
-        React.findDOMNode(this.refs.focusable)?.focus()
+        this.refs.focusable?.focus()
 
     updateProperty = (evt) =>
       # just update internal state while typing

@@ -73,16 +73,16 @@ ValueSlider = React.createClass
       tickDistance = @props.width / numTicks
       opts.grid = [tickDistance, 0]
 
-    $(handle.getDOMNode()).draggable opts
+    $(handle).draggable opts
     if not @props.enabled
-      $(handle.getDOMNode()).draggable( "disable" )
+      $(handle).draggable( "disable" )
 
   componentDidUpdate: ->
     handle = @refs.handle or @
     if @props.enabled
-      $(handle.getDOMNode()).draggable( "enable" )
+      $(handle).draggable( "enable" )
     else
-      $(handle.getDOMNode()).draggable( "disable" )
+      $(handle).draggable( "disable" )
 
   valueFromSliderUI: (displayX) ->
     newV = (displayX / @props.width * (@props.max - @props.min)) + @props.min
@@ -111,9 +111,9 @@ ValueSlider = React.createClass
     style =
       "width": width
       "height": height
-      "margin-left": "-#{@props.handleSize/2}px"
-      "margin-right": "-#{@props.handleSize/2}px"
-      "font-size": "#{@props.handleSize / 2}px"
+      "marginLeft": "-#{@props.handleSize/2}px"
+      "marginRight": "-#{@props.handleSize/2}px"
+      "fontSize": "#{@props.handleSize / 2}px"
       "top": "#{top}px"
       "left": centerOfDiv # margin will take care of the rest?
     if not @props.displaySemiQuant
@@ -122,7 +122,7 @@ ValueSlider = React.createClass
     (div {},
       (div {className: "value-slider-handle", style: style, ref: "handle"},
         (i {className: "icon-codap-smallSliderLines"})
-        { label }
+        ( label )
       )
     )
 
@@ -134,10 +134,10 @@ ValueSlider = React.createClass
       return if not isEditable
       # first copy state value to model if we were editing
       if @state["editing-#{property}"]
-        newValue = parseInt React.findDOMNode(this.refs.focusable)?.value
+        newValue = parseInt ReactDOM.findDOMNode(this.refs.focusable)?.value
         if newValue? then @updateRange property, newValue
       @setState "editing-#{property}": not @state["editing-#{property}"], ->
-        React.findDOMNode(this.refs.focusable)?.focus()
+        this.refs.focusable?.focus()
 
     keyDown = (evt) ->
       if evt.key is 'Enter'
@@ -174,7 +174,7 @@ ValueSlider = React.createClass
     tickHeight = circleRadius * 1.5
     ticks = []
     for j in [1...numTicks]
-      ticks.push (path {d:"M#{j*tickDistance} #{center-tickHeight} l 0 #{tickHeight * 2}", className:"slider-line"})
+      ticks.push (path {key: j, d:"M#{j*tickDistance} #{center-tickHeight} l 0 #{tickHeight * 2}", className:"slider-line"})
     ticks
 
   render: ->
@@ -227,4 +227,4 @@ Demo = React.createClass
         onRangeChange: @onRangeChange
     )
 
-# window.testComponent = (domID) -> React.render React.createElement(Demo,{}), domID
+# window.testComponent = (domID) -> ReactDOM.render React.createElement(Demo,{}), domID

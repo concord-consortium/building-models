@@ -47,7 +47,7 @@ module.exports = React.createClass
     @search limitResults: false
 
   search: (options) ->
-    query = $.trim @refs.search.getDOMNode().value
+    query = $.trim @refs.search.value
     validQuery = query.length > 0
 
     queryRegEx = new RegExp query, 'i'
@@ -72,7 +72,7 @@ module.exports = React.createClass
         numExternalMatches: numMatches
 
   componentDidMount: ->
-    @refs.search.getDOMNode().focus()
+    @refs.search.focus()
 
   isDisabledInInternalLibrary: (node) ->
     @props.inPalette node

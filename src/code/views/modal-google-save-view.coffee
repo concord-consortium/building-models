@@ -8,7 +8,6 @@ module.exports = React.createClass
   displayName: 'ModalGoogleSave'
 
   onSave: ->
-    # name = $.trim @refs.fileName.getDOMNode().value
     @props.onRename? @state.filename
     @props.setIsPublic? @state.isPublic
     @props.onSave()

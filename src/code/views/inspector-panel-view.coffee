@@ -64,8 +64,9 @@ ToolPanel = React.createFactory React.createClass
     buttons = @buttonData.slice 0
     if @props.diagramOnly
       buttons = _.filter buttons, (button) -> button.simple
-    buttonsView = _.map buttons, (button) =>
+    buttonsView = _.map buttons, (button, i) =>
       props = @buttonProps(button)
+      props.key = i
       (ToolButton props)
 
     (div {className: 'tool-panel'}, buttonsView)

@@ -73,4 +73,4 @@ module.exports = BuildInfoView = React.createClass
 
 #
 # myView = React.createFactory BuildInfoView
-# window.testComponent = (domID) -> React.render myView({}), domID
+# window.testComponent = (domID) -> ReactDOM.render myView({}), domID

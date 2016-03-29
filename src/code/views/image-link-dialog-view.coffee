@@ -12,7 +12,7 @@ module.exports = React.createClass
 
   previewImage: (e) ->
     e.preventDefault()
-    url = $.trim @refs.url.getDOMNode().value
+    url = $.trim @refs.url.value
     if url.length is 0
       alert tr "~IMAGE-BROWSER.PLEASE_DROP_IMAGE"
     else if @hasValidImageExtension url

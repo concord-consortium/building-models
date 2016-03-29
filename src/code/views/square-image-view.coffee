@@ -15,10 +15,10 @@ module.exports = React.createClass
     (img {src: @props.image})
 
   css: ->
-    "background-image": @image()
-    "background-size": "contain"
-    "background-position": "center"
-    "background-repeat": "no-repeat"
+    "backgroundImage": @image()
+    "backgroundSize": "contain"
+    "backgroundPosition": "center"
+    "backgroundRepeat": "no-repeat"
     "margin": "0px"
     "padding": "0px"
     "height": "100%"

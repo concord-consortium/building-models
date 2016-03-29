@@ -78,7 +78,7 @@ module.exports = SvgGraphView = React.createClass
 
   renderLineData: ->
     data = @pointsToPath(@getPathPoints())
-    (path {className: 'data', d:data, "stroke-width":@props.strokeWidth})
+    (path {className: 'data', d:data, strokeWidth:@props.strokeWidth})
 
   render: ->
     (div {className: 'svgGraphView'},
@@ -94,7 +94,7 @@ module.exports = SvgGraphView = React.createClass
 RelationFactory = require "../models/relation-factory"
 myView = React.createFactory SvgGraphView
 window.testComponent = (domID) ->
-  React.render myView({
+  ReactDOM.render myView({
     width: 200
     height: 200
     yLabel: "this node"
