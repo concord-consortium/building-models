@@ -25,7 +25,7 @@ window.Sage = {
     appView = AppView(opts);
     elem = '#app';
     return jsPlumb.bind('ready', function() {
-      return React.render(appView, $(elem)[0]);
+      return ReactDOM.render(appView, $(elem)[0]);
     });
   },
   clearModel: function() {
@@ -60102,7 +60102,7 @@ module.exports = {
     PaletteStore.store.listen(this.onPaletteChange);
     return CodapStore.store.listen(this.onCodapStateChange);
   },
-  componentDidUnmount: function() {
+  componentWillUnmount: function() {
     return this.addDeleteKeyHandler(false);
   },
   onPaletteChange: function(status) {
@@ -60225,7 +60225,7 @@ module.exports = {
       });
       return clone;
     };
-    return $(domRef.getDOMNode()).draggable({
+    return $(ReactDOM.findDOMNode(domRef)).draggable({
       drag: this.doMove,
       revert: true,
       helper: reactSafeClone,
@@ -63209,10 +63209,10 @@ mixin = {
     };
   },
   componentDidMount: function() {
-    return this.unsubscribe = paletteStore.listen(this.onPaletteChange);
+    return this.paletteUnsubscribe = paletteStore.listen(this.onPaletteChange);
   },
   componentWillUnmount: function() {
-    return this.unsubscribe();
+    return this.paletteUnsubscribe();
   },
   onPaletteChange: function(status) {
     return this.setState({
@@ -64959,7 +64959,7 @@ ColorChoice = React.createFactory(React.createClass({
     }, div({
       className: 'color-swatch',
       style: {
-        'background-color': value
+        'backgroundColor': value
       }
     }), div({
       className: 'color-label'
@@ -65429,7 +65429,7 @@ module.exports = React.createClass({
   },
   componentDidMount: function() {
     var $container;
-    $container = $(this.refs.container.getDOMNode());
+    $container = $(this.refs.container);
     this.diagramToolkit = new DiagramToolkit($container, {
       Container: $container[0],
       handleConnect: this.handleConnect,
@@ -65499,7 +65499,7 @@ module.exports = React.createClass({
   addPaletteNode: function(ui, paletteItem) {
     var newNode, offset, title;
     title = tr("~NODE.UNTITLED");
-    offset = $(this.refs.linkView.getDOMNode()).offset();
+    offset = $(this.refs.linkView).offset();
     newNode = new NodeModel({
       x: ui.offset.left - offset.left,
       y: ui.offset.top - offset.top,
@@ -65568,10 +65568,6 @@ module.exports = React.createClass({
       return GraphStore.store.editLink(connection.linkModel);
     });
   },
-  _nodeForName: function(name) {
-    var ref;
-    return ((ref = this.refs[name]) != null ? ref.getDOMNode() : void 0) || false;
-  },
   _updateNodeValue: function(name, key, value) {
     var changed, i, len, node, ref;
     changed = 0;
@@ -65600,8 +65596,8 @@ module.exports = React.createClass({
     }
   },
   _redrawTargets: function() {
-    this.diagramToolkit.makeSource($(this.refs.linkView.getDOMNode()).find('.connection-source'));
-    return this.diagramToolkit.makeTarget($(this.refs.linkView.getDOMNode()).find(this.props.linkTarget));
+    this.diagramToolkit.makeSource($(this.refs.linkView).find('.connection-source'));
+    return this.diagramToolkit.makeTarget($(this.refs.linkView).find(this.props.linkTarget));
   },
   _redrawLinks: function() {
     var i, isEditing, isSelected, len, link, ref, results, source, target;
@@ -65609,8 +65605,8 @@ module.exports = React.createClass({
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
       link = ref[i];
-      source = $(this._nodeForName(link.sourceNode.key)).find(this.props.linkTarget);
-      target = $(this._nodeForName(link.targetNode.key)).find(this.props.linkTarget);
+      source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])).find(this.props.linkTarget);
+      target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])).find(this.props.linkTarget);
       isSelected = this.props.selectionManager.isSelected(link);
       isEditing = link === this.state.editingLink;
       if (source && target) {
@@ -65641,7 +65637,7 @@ module.exports = React.createClass({
       canDrop: false
     });
     e.preventDefault();
-    offset = $(this.refs.linkView.getDOMNode()).offset();
+    offset = $(this.refs.linkView).offset();
     dropPos = {
       x: e.clientX - offset.left,
       y: e.clientY - offset.top
@@ -65663,7 +65659,7 @@ module.exports = React.createClass({
     })(this));
   },
   onContainerClicked: function(e) {
-    if (e.target === this.refs.container.getDOMNode()) {
+    if (e.target === this.refs.container) {
       return this.props.selectionManager.clearSelection();
     }
   },
@@ -65792,7 +65788,7 @@ module.exports = React.createClass({
   previewImage: function(e) {
     var url;
     e.preventDefault();
-    url = $.trim(this.refs.url.getDOMNode().value);
+    url = $.trim(this.refs.url.value);
     if (url.length === 0) {
       return alert(tr("~IMAGE-BROWSER.PLEASE_DROP_IMAGE"));
     } else if (this.hasValidImageExtension(url)) {
@@ -65851,9 +65847,9 @@ module.exports = React.createClass({
   changed: function() {
     var newMetaData;
     newMetaData = {
-      title: this.refs.title.getDOMNode().value,
-      link: this.refs.link.getDOMNode().value,
-      license: this.refs.license.getDOMNode().value,
+      title: this.refs.title.value,
+      link: this.refs.link.value,
+      license: this.refs.license.value,
       source: 'external'
     };
     return this.props.update({
@@ -65929,7 +65925,7 @@ module.exports = React.createClass({
   previewImage: function(e) {
     var files, reader, title;
     e.preventDefault();
-    files = this.refs.file.getDOMNode().files;
+    files = this.refs.file.files;
     if (files.length === 0) {
       return alert(tr("~IMAGE-BROWSER.PLEASE_DROP_FILE"));
     } else if (this.hasValidImageExtension(files[0].name)) {
@@ -66130,7 +66126,7 @@ module.exports = React.createClass({
   },
   search: function(options) {
     var internalResults, query, queryRegEx, validQuery;
-    query = $.trim(this.refs.search.getDOMNode().value);
+    query = $.trim(this.refs.search.value);
     validQuery = query.length > 0;
     queryRegEx = new RegExp(query, 'i');
     internalResults = _.filter(this.props.internalLibrary, function(node) {
@@ -66158,7 +66154,7 @@ module.exports = React.createClass({
     })(this));
   },
   componentDidMount: function() {
-    return this.refs.search.getDOMNode().focus();
+    return this.refs.search.focus();
   },
   isDisabledInInternalLibrary: function(node) {
     return this.props.inPalette(node);
@@ -66392,9 +66388,10 @@ ToolPanel = React.createFactory(React.createClass({
       });
     }
     buttonsView = _.map(buttons, (function(_this) {
-      return function(button) {
+      return function(button, i) {
         var props;
         props = _this.buttonProps(button);
+        props.key = i;
         return ToolButton(props);
       };
     })(this));
@@ -66626,55 +66623,43 @@ module.exports = LinkRelationView = React.createClass({
   },
   getVector: function() {
     var id;
-    id = parseInt(React.findDOMNode(this.refs.vector).value);
+    id = parseInt(this.refs.vector.value);
     return RelationFactory.vectors[id];
   },
   getScalar: function() {
     var id;
-    id = parseInt(React.findDOMNode(this.refs.scalar).value);
+    id = parseInt(this.refs.scalar.value);
     return RelationFactory.scalars[id];
   },
   renderVector: function(increaseOrDecrease) {
-    var options, selected_id;
-    selected_id = increaseOrDecrease.id;
-    options = _.map(RelationFactory.vectors, function(opt) {
-      if (opt.id === selected_id) {
-        return option({
-          value: opt.id,
-          selected: 'true'
-        }, opt.text);
-      } else {
-        return option({
-          value: opt.id
-        }, opt.text);
-      }
+    var options;
+    options = _.map(RelationFactory.vectors, function(opt, i) {
+      return option({
+        value: opt.id,
+        key: i
+      }, opt.text);
     });
     return div({
       className: "bb-select"
     }, span({}, (tr("~NODE-RELATION-EDIT.TO")) + " "), select({
+      value: increaseOrDecrease.id,
       className: "",
       ref: "vector",
       onChange: this.updateRelation
     }, options));
   },
   renderScalar: function(amount) {
-    var options, selected_id;
-    selected_id = amount.id;
-    options = _.map(RelationFactory.scalars, function(opt) {
-      if (opt.id === selected_id) {
-        return option({
-          value: opt.id,
-          selected: 'true'
-        }, opt.text);
-      } else {
-        return option({
-          value: opt.id
-        }, opt.text);
-      }
+    var options;
+    options = _.map(RelationFactory.scalars, function(opt, i) {
+      return option({
+        value: opt.id,
+        key: i
+      }, opt.text);
     });
     return div({
       className: "bb-select"
     }, span({}, (tr("~NODE-RELATION-EDIT.BY")) + " "), select({
+      value: amount.id,
       className: "",
       ref: "scalar",
       onChange: this.updateRelation
@@ -67194,7 +67179,7 @@ module.exports = React.createClass({
           obj
         ), function() {
           var ref1;
-          return (ref1 = React.findDOMNode(this.refs.focusable)) != null ? ref1.focus() : void 0;
+          return (ref1 = this.refs.focusable) != null ? ref1.focus() : void 0;
         });
       };
     })(this);
@@ -67337,7 +67322,7 @@ NodeTitle = React.createFactory(React.createClass({
     }
   },
   inputElm: function() {
-    return $(this.refs.input.getDOMNode());
+    return $(this.refs.input);
   },
   inputValue: function() {
     return this.inputElm().val();
@@ -67371,7 +67356,7 @@ NodeTitle = React.createFactory(React.createClass({
       className: "node-title",
       onChange: this.updateTitle,
       value: displayTitle,
-      maxlength: this.maxTitleLength,
+      maxLength: this.maxTitleLength,
       placeholder: this.titlePlaceholder(),
       onBlur: (function(_this) {
         return function() {
@@ -67395,12 +67380,12 @@ module.exports = NodeView = React.createClass({
     if (this.props.selected) {
       handle = null;
     }
-    $elem = $(this.refs.node.getDOMNode());
+    $elem = $(this.refs.node);
     return $elem.draggable("option", "handle", handle);
   },
   componentDidMount: function() {
     var $elem;
-    $elem = $(this.refs.node.getDOMNode());
+    $elem = $(this.refs.node);
     return $elem.draggable({
       drag: this.doMove,
       stop: this.doStop,
@@ -67454,7 +67439,7 @@ module.exports = NodeView = React.createClass({
     return this.props.onMove({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
-      domElement: this.refs.node.getDOMNode(),
+      domElement: this.refs.node,
       syntheticEvent: evt,
       extra: extra
     });
@@ -67463,7 +67448,7 @@ module.exports = NodeView = React.createClass({
     return this.props.onMoveComplete({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
-      domElement: this.refs.node.getDOMNode(),
+      domElement: this.refs.node,
       syntheticEvent: evt,
       extra: extra
     });
@@ -67472,7 +67457,7 @@ module.exports = NodeView = React.createClass({
     return this.props.onDelete({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
-      domElement: this.refs.node.getDOMNode(),
+      domElement: this.refs.node,
       syntheticEvent: evt
     });
   },
@@ -68331,10 +68316,10 @@ module.exports = React.createClass({
   },
   css: function() {
     return {
-      "background-image": this.image(),
-      "background-size": "contain",
-      "background-position": "center",
-      "background-repeat": "no-repeat",
+      "backgroundImage": this.image(),
+      "backgroundSize": "contain",
+      "backgroundPosition": "center",
+      "backgroundRepeat": "no-repeat",
       "margin": "0px",
       "padding": "0px",
       "height": "100%",
@@ -68500,7 +68485,7 @@ module.exports = SvgGraphView = React.createClass({
     return path({
       className: 'data',
       d: data,
-      "stroke-width": this.props.strokeWidth
+      strokeWidth: this.props.strokeWidth
     });
   },
   render: function() {
@@ -68518,7 +68503,7 @@ RelationFactory = require("../models/relation-factory");
 myView = React.createFactory(SvgGraphView);
 
 window.testComponent = function(domID) {
-  return React.render(myView({
+  return ReactDOM.render(myView({
     width: 200,
     height: 200,
     yLabel: "this node",
@@ -68591,16 +68576,16 @@ module.exports = React.createClass({
     var index, tab;
     return div({
       className: 'workspace-tabs'
-    }, (function() {
+    }, ul({}, (function() {
       var i, len, ref1, results;
       ref1 = this.props.tabs;
       results = [];
       for (index = i = 0, len = ref1.length; i < len; index = ++i) {
         tab = ref1[index];
-        results.push(ul({}, this.renderTab(tab, index)));
+        results.push(this.renderTab(tab, index));
       }
       return results;
-    }).call(this));
+    }).call(this)));
   },
   renderSelectedPanel: function() {
     var index, tab;
@@ -68613,6 +68598,7 @@ module.exports = React.createClass({
       for (index = i = 0, len = ref1.length; i < len; index = ++i) {
         tab = ref1[index];
         results.push(div({
+          key: index,
           style: {
             display: index === this.state.selectedTabIndex ? 'block' : 'none'
           }
@@ -68729,18 +68715,18 @@ ValueSlider = React.createClass({
       tickDistance = this.props.width / numTicks;
       opts.grid = [tickDistance, 0];
     }
-    $(handle.getDOMNode()).draggable(opts);
+    $(handle).draggable(opts);
     if (!this.props.enabled) {
-      return $(handle.getDOMNode()).draggable("disable");
+      return $(handle).draggable("disable");
     }
   },
   componentDidUpdate: function() {
     var handle;
     handle = this.refs.handle || this;
     if (this.props.enabled) {
-      return $(handle.getDOMNode()).draggable("enable");
+      return $(handle).draggable("enable");
     } else {
-      return $(handle.getDOMNode()).draggable("disable");
+      return $(handle).draggable("disable");
     }
   },
   valueFromSliderUI: function(displayX) {
@@ -68777,9 +68763,9 @@ ValueSlider = React.createClass({
     style = {
       "width": width,
       "height": height,
-      "margin-left": "-" + (this.props.handleSize / 2) + "px",
-      "margin-right": "-" + (this.props.handleSize / 2) + "px",
-      "font-size": (this.props.handleSize / 2) + "px",
+      "marginLeft": "-" + (this.props.handleSize / 2) + "px",
+      "marginRight": "-" + (this.props.handleSize / 2) + "px",
+      "fontSize": (this.props.handleSize / 2) + "px",
       "top": top + "px",
       "left": centerOfDiv
     };
@@ -68794,9 +68780,7 @@ ValueSlider = React.createClass({
       ref: "handle"
     }, i({
       className: "icon-codap-smallSliderLines"
-    }), {
-      label: label
-    }));
+    }), label));
   },
   renderEditableProperty: function(property) {
     var classNames, isEditable, keyDown, swapState;
@@ -68808,7 +68792,7 @@ ValueSlider = React.createClass({
           return;
         }
         if (_this.state["editing-" + property]) {
-          newValue = parseInt((ref1 = React.findDOMNode(_this.refs.focusable)) != null ? ref1.value : void 0);
+          newValue = parseInt((ref1 = ReactDOM.findDOMNode(_this.refs.focusable)) != null ? ref1.value : void 0);
           if (newValue != null) {
             _this.updateRange(property, newValue);
           }
@@ -68819,7 +68803,7 @@ ValueSlider = React.createClass({
           obj
         ), function() {
           var ref2;
-          return (ref2 = React.findDOMNode(this.refs.focusable)) != null ? ref2.focus() : void 0;
+          return (ref2 = this.refs.focusable) != null ? ref2.focus() : void 0;
         });
       };
     })(this);
@@ -68864,6 +68848,7 @@ ValueSlider = React.createClass({
     ticks = [];
     for (j = k = 1, ref1 = numTicks; 1 <= ref1 ? k < ref1 : k > ref1; j = 1 <= ref1 ? ++k : --k) {
       ticks.push(path({
+        key: j,
         d: "M" + (j * tickDistance) + " " + (center - tickHeight) + " l 0 " + (tickHeight * 2),
         className: "slider-line"
       }));
