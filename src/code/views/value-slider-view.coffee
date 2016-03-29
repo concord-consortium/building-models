@@ -111,9 +111,9 @@ ValueSlider = React.createClass
     style =
       "width": width
       "height": height
-      "margin-left": "-#{@props.handleSize/2}px"
-      "margin-right": "-#{@props.handleSize/2}px"
-      "font-size": "#{@props.handleSize / 2}px"
+      "marginLeft": "-#{@props.handleSize/2}px"
+      "marginRight": "-#{@props.handleSize/2}px"
+      "fontSize": "#{@props.handleSize / 2}px"
       "top": "#{top}px"
       "left": centerOfDiv # margin will take care of the rest?
     if not @props.displaySemiQuant
@@ -174,7 +174,7 @@ ValueSlider = React.createClass
     tickHeight = circleRadius * 1.5
     ticks = []
     for j in [1...numTicks]
-      ticks.push (path {d:"M#{j*tickDistance} #{center-tickHeight} l 0 #{tickHeight * 2}", className:"slider-line"})
+      ticks.push (path {key: j, d:"M#{j*tickDistance} #{center-tickHeight} l 0 #{tickHeight * 2}", className:"slider-line"})
     ticks
 
   render: ->

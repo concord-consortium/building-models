@@ -56,28 +56,20 @@ module.exports = LinkRelationView = React.createClass
     RelationFactory.scalars[id]
 
   renderVector: (increaseOrDecrease)->
-    selected_id = increaseOrDecrease.id
-    options = _.map RelationFactory.vectors, (opt) ->
-      if opt.id is selected_id
-        (option {value: opt.id, selected: 'true'}, opt.text)
-      else
-        (option {value: opt.id}, opt.text)
+    options = _.map RelationFactory.vectors, (opt, i) ->
+      (option {value: opt.id, key: i}, opt.text)
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
-      (select {className:"", ref: "vector", onChange: @updateRelation},
+      (select {value: increaseOrDecrease.id, className:"", ref: "vector", onChange: @updateRelation},
       options)
     )
 
   renderScalar:(amount) ->
-    selected_id = amount.id
-    options = _.map RelationFactory.scalars, (opt) ->
-      if opt.id is selected_id
-        (option {value: opt.id, selected: 'true'}, opt.text)
-      else
-        (option {value: opt.id}, opt.text)
+    options = _.map RelationFactory.scalars, (opt, i) ->
+      (option {value: opt.id, key: i}, opt.text)
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-      (select {className:"", ref: "scalar", onChange: @updateRelation},
+      (select {value: amount.id, className:"", ref: "scalar", onChange: @updateRelation},
         options
       )
     )

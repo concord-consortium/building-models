@@ -41,7 +41,7 @@ module.exports =
     PaletteStore.store.listen @onPaletteChange
     CodapStore.store.listen @onCodapStateChange
 
-  componentDidUnmount: ->
+  componentWillUnmount: ->
     @addDeleteKeyHandler false
 
   onPaletteChange: (status) ->

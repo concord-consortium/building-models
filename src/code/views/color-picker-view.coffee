@@ -16,7 +16,7 @@ ColorChoice = React.createFactory React.createClass
       className = 'color-choice selected'
 
     (div {className: className, onClick: @selectColor},
-      (div {className: 'color-swatch', style: {'background-color': value}})
+      (div {className: 'color-swatch', style: {'backgroundColor': value}})
       (div {className: 'color-label'}, name)
     )
 

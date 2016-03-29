@@ -54,7 +54,7 @@ NodeTitle = React.createFactory React.createClass
       className: "node-title"
       onChange: @updateTitle
       value: displayTitle
-      maxlength: @maxTitleLength
+      maxLength: @maxTitleLength
       placeholder: @titlePlaceholder()
       onBlur: =>
         @finishEditing()

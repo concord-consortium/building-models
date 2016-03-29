@@ -78,7 +78,7 @@ module.exports = SvgGraphView = React.createClass
 
   renderLineData: ->
     data = @pointsToPath(@getPathPoints())
-    (path {className: 'data', d:data, "stroke-width":@props.strokeWidth})
+    (path {className: 'data', d:data, strokeWidth:@props.strokeWidth})
 
   render: ->
     (div {className: 'svgGraphView'},
