@@ -73,16 +73,16 @@ ValueSlider = React.createClass
       tickDistance = @props.width / numTicks
       opts.grid = [tickDistance, 0]
 
-    $(handle.getDOMNode()).draggable opts
+    $(handle).draggable opts
     if not @props.enabled
-      $(handle.getDOMNode()).draggable( "disable" )
+      $(handle).draggable( "disable" )
 
   componentDidUpdate: ->
     handle = @refs.handle or @
     if @props.enabled
-      $(handle.getDOMNode()).draggable( "enable" )
+      $(handle).draggable( "enable" )
     else
-      $(handle.getDOMNode()).draggable( "disable" )
+      $(handle).draggable( "disable" )
 
   valueFromSliderUI: (displayX) ->
     newV = (displayX / @props.width * (@props.max - @props.min)) + @props.min
@@ -137,7 +137,7 @@ ValueSlider = React.createClass
         newValue = parseInt ReactDOM.findDOMNode(this.refs.focusable)?.value
         if newValue? then @updateRange property, newValue
       @setState "editing-#{property}": not @state["editing-#{property}"], ->
-        ReactDOM.findDOMNode(this.refs.focusable)?.focus()
+        this.refs.focusable?.focus()
 
     keyDown = (evt) ->
       if evt.key is 'Enter'

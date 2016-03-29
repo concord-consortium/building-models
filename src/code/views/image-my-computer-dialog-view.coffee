@@ -12,7 +12,7 @@ module.exports = React.createClass
 
   previewImage: (e) ->
     e.preventDefault()
-    files = @refs.file.getDOMNode().files
+    files = @refs.file.files
     if files.length is 0
       alert tr "~IMAGE-BROWSER.PLEASE_DROP_FILE"
     else if @hasValidImageExtension files[0].name

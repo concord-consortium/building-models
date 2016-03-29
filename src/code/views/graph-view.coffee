@@ -22,7 +22,7 @@ module.exports = React.createClass
     linkTarget: '.link-target'
 
   componentDidMount: ->
-    $container = $(@refs.container.getDOMNode())
+    $container = $(@refs.container)
 
     @diagramToolkit = new DiagramToolkit $container,
       Container:            $container[0]
@@ -85,7 +85,7 @@ module.exports = React.createClass
   addPaletteNode: (ui, paletteItem) ->
     # Default new nodes are untitled
     title = tr "~NODE.UNTITLED"
-    offset = $(@refs.linkView.getDOMNode()).offset()
+    offset = $(@refs.linkView).offset()
     newNode = new NodeModel
       x: ui.offset.left - offset.left
       y: ui.offset.top - offset.top
@@ -143,10 +143,6 @@ module.exports = React.createClass
     @handleEvent ->
       GraphStore.store.editLink connection.linkModel
 
-  # TODO, can we get rid of this?
-  _nodeForName: (name) ->
-    @refs[name]?.getDOMNode() or false
-
   _updateNodeValue: (name, key, value) ->
     changed = 0
     for node in @state.nodes
@@ -166,13 +162,13 @@ module.exports = React.createClass
       @ignoringEvents = false
 
   _redrawTargets: ->
-    @diagramToolkit.makeSource $(@refs.linkView.getDOMNode()).find '.connection-source'
-    @diagramToolkit.makeTarget $(@refs.linkView.getDOMNode()).find @props.linkTarget
+    @diagramToolkit.makeSource $(@refs.linkView).find '.connection-source'
+    @diagramToolkit.makeTarget $(@refs.linkView).find @props.linkTarget
 
   _redrawLinks: ->
     for link in @state.links
-      source = $(@_nodeForName link.sourceNode.key).find(@props.linkTarget)
-      target = $(@_nodeForName link.targetNode.key).find(@props.linkTarget)
+      source = $(ReactDOM.findDOMNode this.refs[link.sourceNode.key]).find(@props.linkTarget)
+      target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.linkTarget)
       isSelected = @props.selectionManager.isSelected(link)
       isEditing = link is @state.editingLink
       if source and target
@@ -192,7 +188,7 @@ module.exports = React.createClass
     e.preventDefault()
 
     # figure out where to drop files
-    offset = $(@refs.linkView.getDOMNode()).offset()
+    offset = $(@refs.linkView).offset()
     dropPos =
       x: e.clientX - offset.left
       y: e.clientY - offset.top
@@ -209,7 +205,7 @@ module.exports = React.createClass
       @props.graphStore.editNode(node.key)
 
   onContainerClicked: (e) ->
-    if e.target is @refs.container.getDOMNode()
+    if e.target is @refs.container
       # deselect links when background is clicked
       @props.selectionManager.clearSelection()
 

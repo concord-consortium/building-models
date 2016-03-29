@@ -27,7 +27,7 @@ NodeTitle = React.createFactory React.createClass
           @finishEditing()
 
   inputElm: ->
-    $(@refs.input.getDOMNode())
+    $(@refs.input)
 
   inputValue: ->
     @inputElm().val()
@@ -76,11 +76,11 @@ module.exports = NodeView = React.createClass
     handle = '.img-background'
     if @props.selected
       handle = null
-    $elem = $(@refs.node.getDOMNode())
+    $elem = $(@refs.node)
     $elem.draggable( "option", "handle", handle)
 
   componentDidMount: ->
-    $elem = $(@refs.node.getDOMNode())
+    $elem = $(@refs.node)
     $elem.draggable
       drag: @doMove
       stop: @doStop
@@ -118,7 +118,7 @@ module.exports = NodeView = React.createClass
     @props.onMove
       nodeKey: @props.nodeKey
       reactComponent: this
-      domElement: @refs.node.getDOMNode()
+      domElement: @refs.node
       syntheticEvent: evt
       extra: extra
 
@@ -126,7 +126,7 @@ module.exports = NodeView = React.createClass
     @props.onMoveComplete
       nodeKey: @props.nodeKey
       reactComponent: this
-      domElement: @refs.node.getDOMNode()
+      domElement: @refs.node
       syntheticEvent: evt
       extra: extra
 
@@ -134,7 +134,7 @@ module.exports = NodeView = React.createClass
     @props.onDelete
       nodeKey: @props.nodeKey
       reactComponent: this
-      domElement: @refs.node.getDOMNode()
+      domElement: @refs.node
       syntheticEvent: evt
 
   changeValue: (newValue) ->

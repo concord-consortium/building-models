@@ -20,9 +20,9 @@ module.exports = React.createClass
 
   changed: ->
     newMetaData =
-      title: @refs.title.getDOMNode().value
-      link: @refs.link.getDOMNode().value
-      license: @refs.license.getDOMNode().value
+      title: @refs.title.value
+      link: @refs.link.value
+      license: @refs.license.value
       source: 'external'
 
     @props.update {metadata: newMetaData}
