@@ -9,6 +9,7 @@ InspectorPanel     = React.createFactory require './inspector-panel-view'
 ImageBrowser       = React.createFactory require './image-browser-view'
 DocumentActions    = React.createFactory require './document-actions-view'
 ModalPaletteDelete = React.createFactory require './modal-palette-delete-view'
+AboutView          = React.createFactory require './about-view'
 BuildInfoView      = React.createFactory require './build-info-view'
 
 window.HashParameters = require "../utils/hash-parameters"
@@ -88,6 +89,8 @@ module.exports = React.createClass
           )
         (ModalPaletteDelete {})
       )
+      if @state.iframed
+        (AboutView {})
       if @state.iframed
         (BuildInfoView {})
     )
