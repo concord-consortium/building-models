@@ -55,21 +55,30 @@ module.exports = LinkRelationView = React.createClass
     id = parseInt @refs.scalar.value
     RelationFactory.scalars[id]
 
-  renderVector: (increaseOrDecrease)->
+  renderVectorPulldown: (increaseOrDecrease)->
     options = _.map RelationFactory.vectors, (opt, i) ->
       (option {value: opt.id, key: i}, opt.text)
+
+    if not increaseOrDecrease?
+      options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
+        tr "~NODE-RELATION-EDIT.UNSELECTED")
+      currentOption = "unselected"
+    else
+      currentOption = increaseOrDecrease.id
+
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
-      (select {value: increaseOrDecrease.id, className:"", ref: "vector", onChange: @updateRelation},
+      (select {value: currentOption, className:"", ref: "vector", onChange: @updateRelation},
       options)
     )
 
-  renderScalar:(amount) ->
+  renderScalarPulldown:(amount) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
       (option {value: opt.id, key: i}, opt.text)
+    currentOption = amount?.id ? 0
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-      (select {value: amount.id, className:"", ref: "scalar", onChange: @updateRelation},
+      (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: if amount then false else "disabled"},
         options
       )
     )
@@ -83,10 +92,10 @@ module.exports = LinkRelationView = React.createClass
       (div {className: 'top'},
         (QuantStart {source: source, target: target})
         (div {className: 'full'},
-          @renderVector(vector)
+          @renderVectorPulldown(vector)
         )
         (div {className: 'full'},
-          @renderScalar(scalar)
+          @renderScalarPulldown(scalar)
         )
       )
       (div {className: 'bottom'},
