@@ -1,6 +1,9 @@
 Migrations     = require "../src/code/data/migrations/migrations"
 originalData   = require "./serialized-test-data/v-0.1"
 
+chai   = require('chai')
+expect = chai.expect
+
 describe "Migrations",  ->
   describe "update", ->
     beforeEach ->
@@ -41,8 +44,8 @@ describe "Migrations",  ->
       it "should have valid relationship values", ->
         for link in @result.links
           link.relation.should.exist
-          link.relation.text.should.exist
-          link.relation.formula.should.exist
+          expect(link.relation.text).to.be.undefined
+          expect(link.relation.formula).to.be.undefined
 
     describe "v-1.2 node changes", ->
       it "should have initial node values", ->

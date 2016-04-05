@@ -3,9 +3,6 @@ tr   = require "../utils/translate"
 
 module.exports = class Relationship
 
-  @defaultText:       tr "~NODE-RELATION-EDIT.INCREASES"
-  @defaultFormula:    "1 * in"
-  @defaultGraphThumb: "TBD"
   @errValue:          -1
   @defaultFunc: (scope) ->
     scope.in
@@ -17,11 +14,11 @@ module.exports = class Relationship
     log.error "vars=#{vars}"
 
   constructor: (@opts={}) ->
-    @text        = @opts.text       or Relationship.defaultText
-    formula      = @opts.formula    or Relationship.defaultFormula
-    @graphThumb  = @opts.graphThumb or Relationship.defaultGraphThumb
+    @text        = @opts.text
+    formula      = @opts.formula
+    @func        = @opts.func
     @errHandler  = @opts.errHandler or Relationship.defaultErrHandler
-    @func        = @opts.func       or if formula is Relationship.defaultFormula then Relationship.defaultFunc else null
+    @isDefined   = @opts.formula? or @opts.func?
     @hasError    = false
     @setFormula(formula)
 
@@ -30,7 +27,9 @@ module.exports = class Relationship
     @checkFormula()
 
   checkFormula: ->
-    @evaluate(1, 1) #sets the @hasError flag if there is a problem
+    @isDefined   = @opts.formula? or @opts.func?
+    if @isDefined
+      @evaluate(1, 1) #sets the @hasError flag if there is a problem
 
   evaluate: (inV,outV, maxIn=100, maxOut=100)->
     result = Relationship.errValue

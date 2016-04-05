@@ -20,10 +20,11 @@ describe "relationship", ->
     beforeEach ->
       @arguments = {}
     describe "using the defaults", ->
-      it "should make a working relationship", ->
+      it "should make an undefined relationship", ->
         undertest = new Relationship(@arguments)
-        undertest.text.should.equal "increase"
-        undertest.formula.should.equal "1 * in"
+        undertest.isDefined.should.equal false
+        expect(undertest.text).to.be.undefined
+        expect(undertest.formula).to.be.undefined
 
   describe "evaluate", ->
     describe "a simple formula", ->
@@ -31,6 +32,9 @@ describe "relationship", ->
         @inFormula = "2 * in ^ 2 + out"
         @arguments = {formula: @inFormula}
         @undertest = new Relationship(@arguments)
+
+      it "should be defined", ->
+        @undertest.isDefined.should.equal true
 
       it "should do the math correctly", ->
         @undertest.evaluate(2,2).should.equal 10

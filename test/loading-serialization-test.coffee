@@ -18,6 +18,7 @@ GraphStore       = require "#{__dirname}/../src/code/stores/graph-store"
 AppSettingsStore = require "#{__dirname}/../src/code/stores/app-settings-store"
 SimulationStore  = require "#{__dirname}/../src/code/stores/simulation-store"
 CodapConnect     = requireModel 'codap-connect'
+RelationFactory  = requireModel 'relation-factory'
 
 SerializedTestData = require "./serialized-test-data/v-0.1"
 
@@ -63,16 +64,25 @@ describe "Serialization and Loading", ->
 
       @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo"}, 'a')
       @nodeB = new Node({title: "b", x:20, y:25, paletteItem:"uuid-bee", frames: [50]}, 'b')
-      @link = new Link({
+      @linkA = new Link({
         sourceNode: @nodeA
         targetNode: @nodeB
         targetTerminal: "a"
         sourceTerminal: "b"
       })
+      @linkB = new Link({
+        sourceNode: @nodeB
+        targetNode: @nodeA
+        targetTerminal: "a"
+        sourceTerminal: "b"
+      })
+      relationB = RelationFactory.fromSelections(RelationFactory.increase, RelationFactory.aboutTheSame)
 
       @graphStore.addNode @nodeA
       @graphStore.addNode @nodeB
-      @graphStore.addLink @link
+      @graphStore.addLink @linkA
+      @graphStore.addLink @linkB
+      @graphStore.changeLink(@linkB, {relation: relationB})
 
     describe "The toJsonString function", ->
       it "should serialize all the properties of the model", ->
@@ -85,7 +95,7 @@ describe "Serialization and Loading", ->
 
         model.version.should.equal "1.13.0"
         model.nodes.length.should.equal 2
-        model.links.length.should.equal 1
+        model.links.length.should.equal 2
 
       it "should correctly serialize a node", ->
         jsonString = @graphStore.toJsonString()
@@ -107,17 +117,20 @@ describe "Serialization and Loading", ->
         nodeB.data.frames.length.should.equal 1
         nodeB.data.frames[0].should.equal 50
 
-      it "should correctly serialize a link", ->
+      it "should correctly serialize links", ->
         jsonString = @graphStore.toJsonString()
-        link = JSON.parse(jsonString).links[0]
-        link.title.should.equal ""
-        link.color.should.equal "#777"
-        link.sourceNode.should.equal "a"
-        link.sourceTerminal.should.equal "b"
-        link.targetNode.should.equal "b"
-        link.targetTerminal.should.equal "a"
-        link.relation.text.should.equal "increase"
-        link.relation.formula.should.equal "1 * in"
+        linkA = JSON.parse(jsonString).links[0]
+        linkA.title.should.equal ""
+        linkA.color.should.equal "#777"
+        linkA.sourceNode.should.equal "a"
+        linkA.sourceTerminal.should.equal "b"
+        linkA.targetNode.should.equal "b"
+        linkA.targetTerminal.should.equal "a"
+        linkA.relation.should.be.empty
+
+        linkB = JSON.parse(jsonString).links[1]
+        linkB.relation.text.should.equal "increase about the same"
+        linkB.relation.formula.should.equal "1 * in"
 
       it "should not serialize certain properties", ->
         jsonString = @graphStore.toJsonString()
