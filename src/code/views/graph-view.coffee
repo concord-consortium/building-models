@@ -7,6 +7,7 @@ tr               = require '../utils/translate'
 PaletteStore     = require '../stores/palette-store'
 GraphStore       = require '../stores/graph-store'
 ImageDialogStore = require '../stores/image-dialog-store'
+RelationFactory  = require "../models/relation-factory"
 
 SimulationStore  = require "../stores/simulation-store"
 AppSettingsStore  = require "../stores/app-settings-store"
@@ -172,9 +173,9 @@ module.exports = React.createClass
       isSelected = @props.selectionManager.isSelected(link)
       isEditing = link is @state.editingLink
       isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
-      thickness = 1
+      magnitude = link.relation.magnitude
       if source and target
-        @diagramToolkit.addLink source, target, link.title, link.color, thickness, isDashed, isSelected, isEditing, link
+        @diagramToolkit.addLink source, target, link.title, link.color, magnitude, isDashed, isSelected, isEditing, link
 
   onDragOver: (e) ->
     if not @state.canDrop

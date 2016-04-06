@@ -7,6 +7,7 @@ module.exports = class RelationFactory
     prefixIco: "inc"
     text: tr "~NODE-RELATION-EDIT.INCREASES"
     formulaFrag: "1 *"
+    magnitude: 1
     func: (scalarFunc) ->
       return (scope) ->
         scalarFunc(scope)
@@ -16,6 +17,7 @@ module.exports = class RelationFactory
     prefixIco: "dec"
     text: tr "~NODE-RELATION-EDIT.DECREASES"
     formulaFrag: "maxIn -"
+    magnitude: -1
     func: (scalarFunc) ->
       return (scope) ->
         scope.maxIn - scalarFunc(scope)
@@ -25,6 +27,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
     postfixIco: "the-same"
     formulaFrag: "in"
+    magnitude: 1
     func: (scope) ->
       return scope.in
 
@@ -33,6 +36,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.A_LOT"
     postfixIco: "a-lot"
     formulaFrag: "min(in * 2, maxOut)"
+    magnitude: 2
     func: (scope) ->
       return Math.min(scope.in * 2, scope.maxOut)
 
@@ -41,6 +45,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.A_LITTLE"
     postfixIco: "a-little"
     formulaFrag: "in / 2"
+    magnitude: 0.5
     func: (scope) ->
       return scope.in / 2
 
@@ -49,6 +54,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
     postfixIco: "more-and-more"
     formulaFrag: "min(exp(in/21.7)-1, maxOut)"
+    magnitude: 3
     func: (scope) ->
       return Math.min(Math.exp(scope.in/21.7)-1, scope.maxOut)
 
@@ -57,6 +63,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
     formulaFrag: "21.7 * log(in+1)"
+    magnitude: 1
     func: (scope) ->
       return 21.7 * Math.log(scope.in+1)
 
@@ -76,7 +83,8 @@ module.exports = class RelationFactory
     name = "#{vector.text} #{scalar.text}"
     formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
     func = vector.func(scalar.func)
-    new Relationship({text: name, formula: formula, func: func})
+    magnitude = vector.magnitude * scalar.magnitude
+    new Relationship({text: name, formula: formula, func: func, magnitude: magnitude})
 
   @selectionsFromRelation: (relation) ->
     vector = _.find @vectors, (v) ->
