@@ -54,7 +54,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
     postfixIco: "more-and-more"
     formulaFrag: "min(exp(in/21.7)-1, maxOut)"
-    magnitude: 3
+    magnitude: 2
     func: (scope) ->
       return Math.min(Math.exp(scope.in/21.7)-1, scope.maxOut)
 
