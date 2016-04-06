@@ -103,11 +103,11 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected, editingLabel=true) ->
+  _overlays: (label, selected, editingLabel=true, thickness) ->
     results = [["Arrow", {
       location: 1.0
-      length: 10
-      width: 10
+      length: 10 + thickness
+      width: 10 + thickness
     }]]
     if editingLabel
       results.push  ["Custom", {
@@ -164,7 +164,7 @@ module.exports = class DiagramToolkit
       source: source
       target: target
       paintStyle: paintStyle
-      overlays: @_overlays label, isSelected, isEditing
+      overlays: @_overlays label, isSelected, isEditing, Math.abs(magnitude)
       endpoint: ["Rectangle",
         width: 10
         height: 10
