@@ -124,7 +124,7 @@ module.exports =
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode"
   "~DOCUMENT.ACTIONS.UNDO": "Undo"
   "~DOCUMENT.ACTIONS.REDO": "Redo"
-  "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation."
+  "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship."
 
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
   "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings"
