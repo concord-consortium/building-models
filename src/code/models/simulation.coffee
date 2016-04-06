@@ -27,6 +27,7 @@ IntegrationFunction = (incrementAccumulators) ->
   if @isAccumulator
     value = if @previousValue? then @previousValue else @initialValue            # start from our last value
     _.each links, (link) =>
+      return unless link.relation.isDefined
       sourceNode = link.sourceNode
       inV = sourceNode.previousValue
       return unless inV               # we simply ignore nodes with no previous value
@@ -41,13 +42,19 @@ IntegrationFunction = (incrementAccumulators) ->
       value += nextValue
   else
     _.each links, (link) =>
+      if not link.relation.isDefined
+        count--
+        return
       sourceNode = link.sourceNode
       inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
       inV = scaleInput(inV, sourceNode, this)
       outV = @previousValue or @initialValue
       nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max, @max)
       value += nextValue
-    value = value / count
+    if count >= 1
+      value = value / count
+    else
+      value = @previousValue or @initialValue       # we had no defined inbound links
 
   # if we need to cap, do it at end of all calculations
   if @capNodeValues
