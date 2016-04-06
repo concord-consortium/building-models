@@ -50,7 +50,7 @@ window.Sage = {
 
 
 
-},{"./stores/graph-store":551,"./stores/palette-store":555,"./utils/hash-parameters":561,"./views/app-view":570,"./views/value-slider-view":611}],2:[function(require,module,exports){
+},{"./stores/graph-store":551,"./stores/palette-store":555,"./utils/hash-parameters":561,"./views/app-view":571,"./views/value-slider-view":612}],2:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');
@@ -60270,7 +60270,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":552,"../utils/has-valid-image-extension":560,"../views/preview-image-dialog-view":604}],539:[function(require,module,exports){
+},{"../stores/image-dialog-store":552,"../utils/has-valid-image-extension":560,"../views/preview-image-dialog-view":605}],539:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -61131,12 +61131,6 @@ math = require('mathjs');
 tr = require("../utils/translate");
 
 module.exports = Relationship = (function() {
-  Relationship.defaultText = tr("~NODE-RELATION-EDIT.INCREASES");
-
-  Relationship.defaultFormula = "1 * in";
-
-  Relationship.defaultGraphThumb = "TBD";
-
   Relationship.errValue = -1;
 
   Relationship.defaultFunc = function(scope) {
@@ -61152,11 +61146,11 @@ module.exports = Relationship = (function() {
   function Relationship(opts) {
     var formula;
     this.opts = opts != null ? opts : {};
-    this.text = this.opts.text || Relationship.defaultText;
-    formula = this.opts.formula || Relationship.defaultFormula;
-    this.graphThumb = this.opts.graphThumb || Relationship.defaultGraphThumb;
+    this.text = this.opts.text;
+    formula = this.opts.formula;
+    this.func = this.opts.func;
     this.errHandler = this.opts.errHandler || Relationship.defaultErrHandler;
-    this.func = this.opts.func || (formula === Relationship.defaultFormula ? Relationship.defaultFunc : null);
+    this.isDefined = (this.opts.formula != null) || (this.opts.func != null);
     this.hasError = false;
     this.setFormula(formula);
   }
@@ -61167,7 +61161,10 @@ module.exports = Relationship = (function() {
   };
 
   Relationship.prototype.checkFormula = function() {
-    return this.evaluate(1, 1);
+    this.isDefined = (this.opts.formula != null) || (this.opts.func != null);
+    if (this.isDefined) {
+      return this.evaluate(1, 1);
+    }
   };
 
   Relationship.prototype.evaluate = function(inV, outV, maxIn, maxOut) {
@@ -61458,6 +61455,9 @@ IntegrationFunction = function(incrementAccumulators) {
     _.each(links, (function(_this) {
       return function(link) {
         var inV, outV, sourceNode;
+        if (!link.relation.isDefined) {
+          return;
+        }
         sourceNode = link.sourceNode;
         inV = sourceNode.previousValue;
         if (!inV) {
@@ -61473,6 +61473,10 @@ IntegrationFunction = function(incrementAccumulators) {
     _.each(links, (function(_this) {
       return function(link) {
         var inV, outV, sourceNode;
+        if (!link.relation.isDefined) {
+          count--;
+          return;
+        }
         sourceNode = link.sourceNode;
         inV = sourceNode.previousValue != null ? sourceNode.previousValue : sourceNode.initialValue;
         inV = scaleInput(inV, sourceNode, _this);
@@ -61481,7 +61485,11 @@ IntegrationFunction = function(incrementAccumulators) {
         return value += nextValue;
       };
     })(this));
-    value = value / count;
+    if (count >= 1) {
+      value = value / count;
+    } else {
+      value = this.previousValue || this.initialValue;
+    }
   }
   if (this.capNodeValues) {
     value = Math.max(this.min, Math.min(this.max, value));
@@ -63283,7 +63291,8 @@ SimulationStore = Reflux.createStore({
       speed: 4,
       capNodeValues: false,
       modelIsRunning: false,
-      modelReadyToRun: true
+      modelReadyToRun: true,
+      modelIsRunnable: true
     };
   },
   onDiagramOnly: function() {
@@ -63299,6 +63308,7 @@ SimulationStore = Reflux.createStore({
   },
   onGraphChanged: function(data) {
     this.nodes = data.nodes;
+    this.settings.modelIsRunnable = this._checkModelIsRunnable();
     return this.notifyChange();
   },
   onSetDuration: function(n) {
@@ -63326,7 +63336,8 @@ SimulationStore = Reflux.createStore({
     return this.notifyChange();
   },
   onRunSimulation: function() {
-    if (this.settings.modelReadyToRun) {
+    var error;
+    if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
       this.currentSimulation = new Simulation({
         nodes: this.nodes,
         duration: this.settings.duration,
@@ -63343,6 +63354,9 @@ SimulationStore = Reflux.createStore({
         }
       });
       return this.currentSimulation.run();
+    } else if (!this.settings.modelIsRunnable) {
+      error = this._getErrorMessage();
+      return alert(error);
     }
   },
   onSimulationStarted: function() {
@@ -63361,6 +63375,24 @@ SimulationStore = Reflux.createStore({
     }
     this.settings.modelReadyToRun = true;
     return this.notifyChange();
+  },
+  _checkModelIsRunnable: function() {
+    var i, j, len, len1, link, node, ref, ref1;
+    ref = this.nodes;
+    for (i = 0, len = ref.length; i < len; i++) {
+      node = ref[i];
+      ref1 = node.links;
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        link = ref1[j];
+        if (link.relation.isDefined) {
+          return true;
+        }
+      }
+    }
+    return false;
+  },
+  _getErrorMessage: function() {
+    return tr("~DOCUMENT.ACTIONS.NO_DEFINED_LINKS");
   },
   notifyChange: function() {
     return this.trigger(_.clone(this.settings));
@@ -63693,7 +63725,7 @@ module.exports = function(imageName) {
   link = document.createElement('a');
   link.setAttribute('href', imageName);
   ref = link.pathname.split('.'), extension = ref[ref.length - 1];
-  valid = (['gif', 'png', 'jpg', 'jpeg'].indexOf(extension)) !== -1;
+  valid = (['gif', 'png', 'jpg', 'jpeg'].indexOf(extension.toLowerCase())) !== -1;
   if (!valid) {
     alert(tr("~DROP.ONLY_IMAGES_ALLOWED"));
   }
@@ -64157,6 +64189,7 @@ module.exports = {
   "~NODE-VALUE-EDIT.HIGH": "High",
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable",
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations.",
+  "~NODE-RELATION-EDIT.UNSELECTED": "Select an option...",
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in",
   "~NODE-RELATION-EDIT.CAUSES": "causes",
   "~NODE-RELATION-EDIT.TO": "to",
@@ -64226,7 +64259,7 @@ module.exports = {
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode",
   "~DOCUMENT.ACTIONS.UNDO": "Undo",
   "~DOCUMENT.ACTIONS.REDO": "Redo",
-  "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation.",
+  "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship.",
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings",
   "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings",
   "~SIMULATION.STEP_UNIT": "Each calculation is 1",
@@ -64725,7 +64758,85 @@ module.exports = {
 
 
 },{"../models/codap-connect":540}],570:[function(require,module,exports){
-var AppSettingsStore, BuildInfoView, DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
+var AboutView, a, br, div, h2, i, p, ref;
+
+ref = React.DOM, div = ref.div, a = ref.a, i = ref.i, h2 = ref.h2, p = ref.p, br = ref.br;
+
+module.exports = AboutView = React.createClass({
+  displayName: 'AboutView',
+  componentWillMount: function() {
+    var build_info, year;
+    build_info = $('html').find("meta[name='build-info']").attr('content');
+    year = build_info.split(' ')[0].split('-')[0];
+    return this.setState({
+      year: year
+    });
+  },
+  getInitialState: function() {
+    return {
+      showing: false
+    };
+  },
+  close: function() {
+    return this.setState({
+      showing: false
+    });
+  },
+  open: function() {
+    return this.setState({
+      showing: true
+    });
+  },
+  render: function() {
+    return div({
+      className: 'build-info-bottom-bar'
+    }, i({
+      className: 'icon-codap-help build-info-button',
+      style: {
+        fontSize: 12,
+        right: 100
+      },
+      onClick: this.open
+    }), this.state.showing ? div({
+      className: "BuildInfoView",
+      onClick: this.close
+    }, div({
+      className: "content",
+      onClick: function(e) {
+        return e.stopPropagation();
+      }
+    }, div({
+      className: "top",
+      style: {
+        textAlign: "right"
+      }
+    }, i({
+      className: 'icon-codap-ex',
+      style: {
+        padding: 0,
+        cursor: "pointer"
+      },
+      onClick: this.close
+    })), div({
+      className: "inner",
+      style: {
+        paddingTop: 0,
+        textAlign: "center"
+      }
+    }, h2({}, "SageModeler"), p({}, "Copyright © " + this.state.year + " The Concord Consortium. All rights reserved."), p({}, "The software is licensed under the ", a({
+      href: "https://github.com/concord-consortium/building-models/blob/master/LICENSE",
+      target: '_blank'
+    }, "MIT license"), "."), p({}, "Please provide attribution to The Concord Consortium", br({}), "and the URL ", a({
+      href: "https://concord.org/",
+      target: '_blank'
+    }, "https://concord.org"), ".")))) : void 0);
+  }
+});
+
+
+
+},{}],571:[function(require,module,exports){
+var AboutView, AppSettingsStore, BuildInfoView, DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
 
 Reflux = require('reflux');
 
@@ -64746,6 +64857,8 @@ ImageBrowser = React.createFactory(require('./image-browser-view'));
 DocumentActions = React.createFactory(require('./document-actions-view'));
 
 ModalPaletteDelete = React.createFactory(require('./modal-palette-delete-view'));
+
+AboutView = React.createFactory(require('./about-view'));
 
 BuildInfoView = React.createFactory(require('./build-info-view'));
 
@@ -64820,16 +64933,16 @@ module.exports = React.createClass({
       ref: "inspectorPanel"
     }), this.state.showingDialog ? ImageBrowser({
       graphStore: this.props.graphStore
-    }) : void 0, ModalPaletteDelete({})), this.state.iframed ? BuildInfoView({}) : void 0);
+    }) : void 0, ModalPaletteDelete({})), this.state.iframed ? AboutView({}) : void 0, this.state.iframed ? BuildInfoView({}) : void 0);
   }
 });
 
 
 
-},{"../mixins/app-view":536,"../stores/app-settings-store":548,"../stores/image-dialog-store":552,"../utils/hash-parameters":561,"../utils/translate":568,"./build-info-view":571,"./document-actions-view":573,"./global-nav-view":576,"./graph-view":577,"./image-browser-view":578,"./inspector-panel-view":584,"./modal-palette-delete-view":590,"./node-well-view":597,"./placeholder-view":603,"reflux":496}],571:[function(require,module,exports){
-var BuildInfoView, Migration, a, div, ref, span, table, td, tr;
+},{"../mixins/app-view":536,"../stores/app-settings-store":548,"../stores/image-dialog-store":552,"../utils/hash-parameters":561,"../utils/translate":568,"./about-view":570,"./build-info-view":572,"./document-actions-view":574,"./global-nav-view":577,"./graph-view":578,"./image-browser-view":579,"./inspector-panel-view":585,"./modal-palette-delete-view":591,"./node-well-view":598,"./placeholder-view":604,"reflux":496}],572:[function(require,module,exports){
+var BuildInfoView, Migration, a, div, i, ref, table, td, tr;
 
-ref = React.DOM, div = ref.div, a = ref.a, span = ref.span, table = ref.table, tr = ref.tr, td = ref.td;
+ref = React.DOM, div = ref.div, a = ref.a, table = ref.table, tr = ref.tr, td = ref.td, i = ref.i;
 
 Migration = require("../data/migrations/migrations");
 
@@ -64872,66 +64985,71 @@ module.exports = BuildInfoView = React.createClass({
   },
   render: function() {
     var className;
-    if (this.state.showing) {
-      className = "BuildInfoView";
-      return div({
-        className: "BuildInfoView",
-        onClick: this.close
-      }, div({
-        className: "close button"
-      }), div({
-        className: "content",
-        onClick: function(e) {
-          return e.stopPropagation();
-        }
-      }, table({}, tr({
-        className: "date"
-      }, td({
-        className: "key"
-      }, "released on:"), td({
-        className: "value"
-      }, this.state.date)), tr({
-        className: "commit"
-      }, td({
-        className: "key"
-      }, "commit:"), td({
-        className: "value"
-      }, a({
-        href: this.link(),
-        target: "_blank"
-      }, this.state.commit))), tr({
-        className: "tag"
-      }, td({
-        className: "key"
-      }, "tag:"), td({
-        className: "value"
-      }, this.state.tag)), tr({
-        className: "commit"
-      }, td({
-        className: "key"
-      }, "commiter:"), td({
-        className: "value"
-      }, this.state.commiter)), tr({
-        className: "buildInfo"
-      }, td({
-        className: "key"
-      }, "data format version:"), td({
-        className: "value"
-      }, this.state.dataVersion)))));
-    } else {
-      return div({
-        className: 'build-info-bottom-bar'
-      }, div({
-        className: 'build-info-button',
-        onClick: this.open
-      }, "built on " + this.state.date));
-    }
+    return div({
+      className: 'build-info-bottom-bar'
+    }, div({
+      className: 'build-info-button',
+      onClick: this.open
+    }, "built on " + this.state.date), this.state.showing ? (className = "BuildInfoView", div({
+      className: "BuildInfoView",
+      onClick: this.close
+    }, div({
+      className: "content",
+      onClick: function(e) {
+        return e.stopPropagation();
+      }
+    }, div({
+      className: "top",
+      style: {
+        textAlign: "right"
+      }
+    }, i({
+      className: 'icon-codap-ex',
+      style: {
+        padding: 0,
+        cursor: "pointer"
+      },
+      onClick: this.close
+    })), table({}, tr({
+      className: "date"
+    }, td({
+      className: "key"
+    }, "released on:"), td({
+      className: "value"
+    }, this.state.date)), tr({
+      className: "commit"
+    }, td({
+      className: "key"
+    }, "commit:"), td({
+      className: "value"
+    }, a({
+      href: this.link(),
+      target: "_blank"
+    }, this.state.commit))), tr({
+      className: "tag"
+    }, td({
+      className: "key"
+    }, "tag:"), td({
+      className: "value"
+    }, this.state.tag)), tr({
+      className: "commit"
+    }, td({
+      className: "key"
+    }, "commiter:"), td({
+      className: "value"
+    }, this.state.commiter)), tr({
+      className: "buildInfo"
+    }, td({
+      className: "key"
+    }, "data format version:"), td({
+      className: "value"
+    }, this.state.dataVersion)))))) : void 0);
   }
 });
 
 
 
-},{"../data/migrations/migrations":535}],572:[function(require,module,exports){
+},{"../data/migrations/migrations":535}],573:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -65013,7 +65131,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":557,"../utils/translate":568}],573:[function(require,module,exports){
+},{"../utils/colors":557,"../utils/translate":568}],574:[function(require,module,exports){
 var AppSettingsStore, CodapStore, SimulationRunPanel, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
@@ -65084,7 +65202,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":548,"../stores/codap-store":549,"../utils/translate":568,"./simulation-run-panel-view":607}],574:[function(require,module,exports){
+},{"../stores/app-settings-store":548,"../stores/codap-store":549,"../utils/translate":568,"./simulation-run-panel-view":608}],575:[function(require,module,exports){
 var Demo, DemoDropDown, DropDown, DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -65243,7 +65361,7 @@ Demo = React.createClass({
 
 
 
-},{}],575:[function(require,module,exports){
+},{}],576:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -65298,8 +65416,8 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":558,"../utils/translate":568}],576:[function(require,module,exports){
-var AppSettingsActions, BuildInfoView, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
+},{"../utils/drop-image-handler":558,"../utils/translate":568}],577:[function(require,module,exports){
+var AboutView, AppSettingsActions, BuildInfoView, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
 
@@ -65310,6 +65428,8 @@ Dropdown = React.createFactory(require('./dropdown-view'));
 OpenInCodap = React.createFactory(require('./open-in-codap-view'));
 
 ModalGoogleSave = React.createFactory(require('./modal-google-save-view'));
+
+AboutView = React.createFactory(require('./about-view'));
 
 BuildInfoView = React.createFactory(require('./build-info-view'));
 
@@ -65382,7 +65502,7 @@ module.exports = React.createClass({
         return GoogleFileStore.actions.close();
       },
       setIsPublic: GoogleFileStore.actions.setIsPublic
-    }), BuildInfoView({}), div({
+    }), AboutView({}), BuildInfoView({}), div({
       className: 'global-nav-name-and-help'
     }, OpenInCodap({
       disabled: this.state.dirty
@@ -65392,7 +65512,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":548,"../stores/google-file-store":550,"../utils/translate":568,"./build-info-view":571,"./dropdown-view":574,"./modal-google-save-view":589,"./open-in-codap-view":598}],577:[function(require,module,exports){
+},{"../stores/app-settings-store":548,"../stores/google-file-store":550,"../utils/translate":568,"./about-view":570,"./build-info-view":572,"./dropdown-view":575,"./modal-google-save-view":590,"./open-in-codap-view":599}],578:[function(require,module,exports){
 var AppSettingsStore, DiagramToolkit, GraphStore, ImageDialogStore, Importer, Node, NodeModel, PaletteStore, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -65712,7 +65832,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/node":543,"../stores/app-settings-store":548,"../stores/graph-store":551,"../stores/image-dialog-store":552,"../stores/palette-store":555,"../stores/simulation-store":556,"../utils/drop-image-handler":558,"../utils/importer":562,"../utils/js-plumb-diagram-toolkit":563,"../utils/translate":568,"./node-view":596}],578:[function(require,module,exports){
+},{"../models/node":543,"../stores/app-settings-store":548,"../stores/graph-store":551,"../stores/image-dialog-store":552,"../stores/palette-store":555,"../stores/simulation-store":556,"../utils/drop-image-handler":558,"../utils/importer":562,"../utils/js-plumb-diagram-toolkit":563,"../utils/translate":568,"./node-view":597}],579:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -65771,7 +65891,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":552,"../stores/palette-store":555,"../utils/translate":568,"./image-link-dialog-view":579,"./image-metadata-view":580,"./image-my-computer-dialog-view":581,"./image-search-dialog-view":583,"./modal-tabbed-dialog-view":591,"./tabbed-panel-view":610}],579:[function(require,module,exports){
+},{"../stores/image-dialog-store":552,"../stores/palette-store":555,"../utils/translate":568,"./image-link-dialog-view":580,"./image-metadata-view":581,"./image-my-computer-dialog-view":582,"./image-search-dialog-view":584,"./modal-tabbed-dialog-view":592,"./tabbed-panel-view":611}],580:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -65820,7 +65940,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":538,"../stores/image-dialog-store":552,"../utils/translate":568,"./dropzone-view":575}],580:[function(require,module,exports){
+},{"../mixins/image-dialog-view":538,"../stores/image-dialog-store":552,"../utils/translate":568,"./dropzone-view":576}],581:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -65908,7 +66028,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":519,"../stores/image-dialog-store":552,"../utils/translate":568}],581:[function(require,module,exports){
+},{"../data/licenses":519,"../stores/image-dialog-store":552,"../utils/translate":568}],582:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -65962,7 +66082,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":538,"../stores/image-dialog-store":552,"../utils/translate":568,"./dropzone-view":575}],582:[function(require,module,exports){
+},{"../mixins/image-dialog-view":538,"../stores/image-dialog-store":552,"../utils/translate":568,"./dropzone-view":576}],583:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -66050,7 +66170,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":555,"../utils/translate":568,"./palette-add-view":599}],583:[function(require,module,exports){
+},{"../stores/palette-store":555,"../utils/translate":568,"./palette-add-view":600}],584:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -66262,7 +66382,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":538,"../stores/image-dialog-store":552,"../utils/open-clipart":565,"../utils/translate":568}],584:[function(require,module,exports){
+},{"../mixins/image-dialog-view":538,"../stores/image-dialog-store":552,"../utils/open-clipart":565,"../utils/translate":568}],585:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, SimulationInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -66504,7 +66624,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":585,"./link-value-inspector-view":587,"./node-inspector-view":593,"./node-value-inspector-view":595,"./relation-inspector-view":605,"./simulation-inspector-view":606}],585:[function(require,module,exports){
+},{"./link-inspector-view":586,"./link-value-inspector-view":588,"./node-inspector-view":594,"./node-value-inspector-view":596,"./relation-inspector-view":606,"./simulation-inspector-view":607}],586:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -66560,7 +66680,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":568}],586:[function(require,module,exports){
+},{"../utils/translate":568}],587:[function(require,module,exports){
 var Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, br = ref.br, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
@@ -66631,38 +66751,50 @@ module.exports = LinkRelationView = React.createClass({
     id = parseInt(this.refs.scalar.value);
     return RelationFactory.scalars[id];
   },
-  renderVector: function(increaseOrDecrease) {
-    var options;
+  renderVectorPulldown: function(increaseOrDecrease) {
+    var currentOption, options;
     options = _.map(RelationFactory.vectors, function(opt, i) {
       return option({
         value: opt.id,
         key: i
       }, opt.text);
     });
+    if (increaseOrDecrease == null) {
+      options.unshift(option({
+        key: "placeholder",
+        value: "unselected",
+        disabled: "disabled"
+      }, tr("~NODE-RELATION-EDIT.UNSELECTED")));
+      currentOption = "unselected";
+    } else {
+      currentOption = increaseOrDecrease.id;
+    }
     return div({
       className: "bb-select"
     }, span({}, (tr("~NODE-RELATION-EDIT.TO")) + " "), select({
-      value: increaseOrDecrease.id,
+      value: currentOption,
       className: "",
       ref: "vector",
       onChange: this.updateRelation
     }, options));
   },
-  renderScalar: function(amount) {
-    var options;
+  renderScalarPulldown: function(amount) {
+    var currentOption, options, ref1;
     options = _.map(RelationFactory.scalars, function(opt, i) {
       return option({
         value: opt.id,
         key: i
       }, opt.text);
     });
+    currentOption = (ref1 = amount != null ? amount.id : void 0) != null ? ref1 : 0;
     return div({
       className: "bb-select"
     }, span({}, (tr("~NODE-RELATION-EDIT.BY")) + " "), select({
-      value: amount.id,
+      value: currentOption,
       className: "",
       ref: "scalar",
-      onChange: this.updateRelation
+      onChange: this.updateRelation,
+      disabled: amount ? false : "disabled"
     }, options));
   },
   render: function() {
@@ -66680,9 +66812,9 @@ module.exports = LinkRelationView = React.createClass({
       target: target
     }), div({
       className: 'full'
-    }, this.renderVector(vector)), div({
+    }, this.renderVectorPulldown(vector)), div({
       className: 'full'
-    }, this.renderScalar(scalar))), div({
+    }, this.renderScalarPulldown(scalar))), div({
       className: 'bottom'
     }, Graph({
       formula: formula,
@@ -66694,7 +66826,7 @@ module.exports = LinkRelationView = React.createClass({
 
 
 
-},{"../models/relation-factory":544,"../utils/translate":568,"./svg-graph-view":609}],587:[function(require,module,exports){
+},{"../models/relation-factory":544,"../utils/translate":568,"./svg-graph-view":610}],588:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -66712,7 +66844,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":568}],588:[function(require,module,exports){
+},{"../utils/translate":568}],589:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -66745,7 +66877,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":592}],589:[function(require,module,exports){
+},{"./modal-view":593}],590:[function(require,module,exports){
 var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -66824,7 +66956,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":568,"./modal-dialog-view":588}],590:[function(require,module,exports){
+},{"../utils/translate":568,"./modal-dialog-view":589}],591:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -66866,7 +66998,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":553,"../stores/palette-delete-dialog-store":554,"../utils/translate":568,"./modal-dialog-view":588,"./palette-delete-view":600}],591:[function(require,module,exports){
+},{"../stores/nodes-store":553,"../stores/palette-delete-dialog-store":554,"../utils/translate":568,"./modal-dialog-view":589,"./palette-delete-view":601}],592:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -66887,7 +67019,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":588,"./tabbed-panel-view":610}],592:[function(require,module,exports){
+},{"./modal-dialog-view":589,"./tabbed-panel-view":611}],593:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -66919,7 +67051,7 @@ module.exports = React.createClass({
 
 
 
-},{}],593:[function(require,module,exports){
+},{}],594:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -67006,7 +67138,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":539,"../utils/translate":568,"./color-picker-view":572,"./image-picker-view":582}],594:[function(require,module,exports){
+},{"../mixins/node-title":539,"../utils/translate":568,"./color-picker-view":573,"./image-picker-view":583}],595:[function(require,module,exports){
 var NodeSvgGraphView, SimulationStore, div, line, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -67104,7 +67236,7 @@ module.exports = NodeSvgGraphView = React.createClass({
 
 
 
-},{"../stores/simulation-store":556}],595:[function(require,module,exports){
+},{"../stores/simulation-store":556}],596:[function(require,module,exports){
 var SimulationStore, div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -67280,7 +67412,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":556,"../utils/translate":568}],596:[function(require,module,exports){
+},{"../stores/simulation-store":556,"../utils/translate":568}],597:[function(require,module,exports){
 var CodapConnect, DEFAULT_CONTEXT_NAME, GraphView, NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
@@ -67632,7 +67764,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":539,"../models/codap-connect":540,"../utils/translate":568,"./node-svg-graph-view":594,"./square-image-view":608,"./value-slider-view":611}],597:[function(require,module,exports){
+},{"../mixins/node-title":539,"../models/codap-connect":540,"../utils/translate":568,"./node-svg-graph-view":595,"./square-image-view":609,"./value-slider-view":612}],598:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -67693,7 +67825,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":555,"./palette-inspector-view":601}],598:[function(require,module,exports){
+},{"../stores/palette-store":555,"./palette-inspector-view":602}],599:[function(require,module,exports){
 var Dropdown, a, ref, span, tr;
 
 ref = React.DOM, a = ref.a, span = ref.span;
@@ -67742,7 +67874,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":568,"./dropdown-view":574}],599:[function(require,module,exports){
+},{"../utils/translate":568,"./dropdown-view":575}],600:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -67779,7 +67911,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":537,"../stores/image-dialog-store":552,"../utils/translate":568}],600:[function(require,module,exports){
+},{"../mixins/draggable":537,"../stores/image-dialog-store":552,"../utils/translate":568}],601:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -67858,7 +67990,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":554,"../utils/translate":568,"./image-picker-view":582}],601:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":554,"../utils/translate":568,"./image-picker-view":583}],602:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -67931,7 +68063,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":553,"../stores/palette-delete-dialog-store":554,"../stores/palette-store":555,"../utils/translate":568,"./image-metadata-view":580,"./palette-add-view":599,"./palette-item-view":602}],602:[function(require,module,exports){
+},{"../stores/nodes-store":553,"../stores/palette-delete-dialog-store":554,"../stores/palette-store":555,"../utils/translate":568,"./image-metadata-view":581,"./palette-add-view":600,"./palette-item-view":603}],603:[function(require,module,exports){
 var Draggable, SquareImage, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -67971,7 +68103,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":537,"./square-image-view":608}],603:[function(require,module,exports){
+},{"../mixins/draggable":537,"./square-image-view":609}],604:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -67989,7 +68121,7 @@ module.exports = React.createClass({
 
 
 
-},{}],604:[function(require,module,exports){
+},{}],605:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -68040,7 +68172,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":552,"../stores/palette-store":555,"../utils/translate":568,"./image-metadata-view":580}],605:[function(require,module,exports){
+},{"../stores/image-dialog-store":552,"../stores/palette-store":555,"../utils/translate":568,"./image-metadata-view":581}],606:[function(require,module,exports){
 var LinkRelationView, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -68064,8 +68196,10 @@ module.exports = RelationInspectorView = React.createClass({
       link: link,
       graphStore: this.props.graphStore
     });
+    label = link.relation.isDefined ? "☑ " : "☐ ";
+    label += link.sourceNode.title;
     return Tabber.Tab({
-      label: link.sourceNode.title,
+      label: label,
       component: relationView
     });
   },
@@ -68100,7 +68234,7 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 
-},{"../stores/graph-store":551,"../utils/translate":568,"./link-relation-view":586,"./tabbed-panel-view":610}],606:[function(require,module,exports){
+},{"../stores/graph-store":551,"../utils/translate":568,"./link-relation-view":587,"./tabbed-panel-view":611}],607:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -68218,7 +68352,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":548,"../stores/simulation-store":556,"../utils/translate":568,"./dropdown-view":574,"./value-slider-view":611}],607:[function(require,module,exports){
+},{"../stores/app-settings-store":548,"../stores/simulation-store":556,"../utils/translate":568,"./dropdown-view":575,"./value-slider-view":612}],608:[function(require,module,exports){
 var SimulationStore, div, i, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
@@ -68256,6 +68390,9 @@ module.exports = React.createClass({
       wrapperClasses += " expanded";
     }
     runButtonClasses = "button";
+    if (!this.state.modelIsRunnable) {
+      runButtonClasses += " disabled error";
+    }
     if (!this.state.modelReadyToRun) {
       runButtonClasses += " disabled";
     }
@@ -68294,7 +68431,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":556,"../utils/translate":568}],608:[function(require,module,exports){
+},{"../stores/simulation-store":556,"../utils/translate":568}],609:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -68335,7 +68472,7 @@ module.exports = React.createClass({
 
 
 
-},{}],609:[function(require,module,exports){
+},{}],610:[function(require,module,exports){
 var RelationFactory, SvgGraphView, div, line, math, myView, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -68346,7 +68483,6 @@ module.exports = SvgGraphView = React.createClass({
   displayName: 'SvgGraphView',
   getDefaultProps: function() {
     return {
-      formula: "in ^ 2 * -2 + 5",
       width: 200,
       height: 200,
       strokeWidth: 3,
@@ -68494,7 +68630,9 @@ module.exports = SvgGraphView = React.createClass({
     }, svg({
       width: this.props.width,
       height: this.props.height
-    }, this.renderAxisLines(), this.renderLineData(), this.renderXLabel(), this.renderYLabel()));
+    }, this.renderAxisLines(), this.props.formula ? this.renderLineData() : void 0, this.renderXLabel(), this.renderYLabel()), !this.props.formula ? div({
+      className: 'unknown-graph'
+    }, "?") : void 0);
   }
 });
 
@@ -68513,7 +68651,7 @@ window.testComponent = function(domID) {
 
 
 
-},{"../models/relation-factory":544,"mathjs":102}],610:[function(require,module,exports){
+},{"../models/relation-factory":544,"mathjs":102}],611:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -68616,7 +68754,7 @@ module.exports = React.createClass({
 
 
 
-},{}],611:[function(require,module,exports){
+},{}],612:[function(require,module,exports){
 var Demo, Slider, ValueSlider, circle, div, i, input, label, path, rect, ref, span, svg, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect;
