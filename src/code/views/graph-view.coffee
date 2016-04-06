@@ -171,8 +171,10 @@ module.exports = React.createClass
       target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.linkTarget)
       isSelected = @props.selectionManager.isSelected(link)
       isEditing = link is @state.editingLink
+      isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
+      thickness = 1
       if source and target
-        @diagramToolkit.addLink source, target, link.title, link.color, isSelected, isEditing, link
+        @diagramToolkit.addLink source, target, link.title, link.color, thickness, isDashed, isSelected, isEditing, link
 
   onDragOver: (e) ->
     if not @state.canDrop

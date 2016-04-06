@@ -143,10 +143,13 @@ module.exports = class DiagramToolkit
   _clean_borked_endpoints: ->
     $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove()
 
-  addLink: (source, target, label, color, isSelected, isEditing, linkModel) ->
+  addLink: (source, target, label, color, thickness, isDashed, isSelected, isEditing, linkModel) ->
     paintStyle = @_paintStyle color
     paintStyle.outlineColor = "none"
     paintStyle.outlineWidth = 20
+    if isDashed
+      paintStyle.dashstyle = "4 2"
+      paintStyle.color = "#aaa"
     if isSelected
       paintStyle.outlineColor = "#f6bf33"
       paintStyle.outlineWidth = 1
