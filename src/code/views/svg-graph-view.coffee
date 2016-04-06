@@ -3,7 +3,6 @@ math = require 'mathjs'  # For formula parsing...
 module.exports = SvgGraphView = React.createClass
   displayName: 'SvgGraphView'
   getDefaultProps: ->
-    formula: "in ^ 2 * -2 + 5"
     width: 200
     height: 200
     strokeWidth: 3
@@ -84,10 +83,14 @@ module.exports = SvgGraphView = React.createClass
     (div {className: 'svgGraphView'},
       (svg {width: @props.width, height: @props.height},
         @renderAxisLines()
-        @renderLineData()
+        if @props.formula then @renderLineData()
         @renderXLabel()
         @renderYLabel()
       )
+      if not @props.formula
+        (div {className: 'unknown-graph'},
+          "?"
+        )
     )
 
 # TO DEBUG THIS VIEW:

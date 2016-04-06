@@ -38,7 +38,7 @@ module.exports =
 
   # views/relation-inspector-view.coffee
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations."
-
+  "~NODE-RELATION-EDIT.UNSELECTED": "Select an option..."
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in"
   "~NODE-RELATION-EDIT.CAUSES": "causes"
   "~NODE-RELATION-EDIT.TO": "to"
@@ -124,7 +124,7 @@ module.exports =
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode"
   "~DOCUMENT.ACTIONS.UNDO": "Undo"
   "~DOCUMENT.ACTIONS.REDO": "Redo"
-  "~DOCUMENT.ACTIONS.DURATION_INVALID": "You must run for at least one calculation."
+  "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship."
 
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
   "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings"

@@ -44,6 +44,7 @@ SimulationStore   = Reflux.createStore
       capNodeValues: false
       modelIsRunning: false         # currently running?
       modelReadyToRun: true         # has been reset?
+      modelIsRunnable: true         # is the model valid?
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -59,6 +60,7 @@ SimulationStore   = Reflux.createStore
 
   onGraphChanged: (data)->
     @nodes = data.nodes
+    @settings.modelIsRunnable = @_checkModelIsRunnable()
     @notifyChange()
 
   onSetDuration: (n) ->
@@ -85,7 +87,7 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onRunSimulation: ->
-    if @settings.modelReadyToRun
+    if @settings.modelIsRunnable and @settings.modelReadyToRun
       @currentSimulation = new Simulation
         nodes: @nodes
         duration: @settings.duration
@@ -104,6 +106,10 @@ SimulationStore   = Reflux.createStore
 
       @currentSimulation.run()
 
+    else if not @settings.modelIsRunnable
+      error = @_getErrorMessage()
+      alert error
+
   onSimulationStarted: ->
     @settings.modelIsRunning = true
     @settings.modelReadyToRun = false
@@ -119,6 +125,16 @@ SimulationStore   = Reflux.createStore
       @currentSimulation.stop()
     @settings.modelReadyToRun = true
     @notifyChange()
+
+  _checkModelIsRunnable: ->
+    for node in @nodes
+      for link in node.links
+        if link.relation.isDefined then return true
+    false
+
+  _getErrorMessage: ->
+    # we just have the one error state right now
+    tr "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS"
 
   notifyChange: ->
     @trigger _.clone @settings
