@@ -4,7 +4,6 @@ tr = require '../utils/translate'
 Dropdown           = React.createFactory require './dropdown-view'
 OpenInCodap        = React.createFactory require './open-in-codap-view'
 ModalGoogleSave    = React.createFactory require './modal-google-save-view'
-AboutView          = React.createFactory require './about-view'
 BuildInfoView      = React.createFactory require './build-info-view'
 GoogleFileStore    = require '../stores/google-file-store'
 AppSettingsActions = require('../stores/app-settings-store').actions
@@ -72,7 +71,6 @@ module.exports = React.createClass
           GoogleFileStore.actions.close()
         setIsPublic: GoogleFileStore.actions.setIsPublic
       })
-      (AboutView {})
       (BuildInfoView {})
       (div {className: 'global-nav-name-and-help'},
         (OpenInCodap { disabled: @state.dirty })

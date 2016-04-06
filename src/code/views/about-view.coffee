@@ -22,8 +22,10 @@ module.exports = AboutView = React.createClass
       showing: true
 
   render: ->
-    (div {className: 'build-info-bottom-bar'},
-      (i {className: 'icon-codap-help build-info-button', style: {fontSize: 12, right: 100}, onClick:@open})
+    (div {},
+      (div {className: 'misc-actions'},
+        (i {className: "icon-codap-help", onClick: @open})
+      )
       if @state.showing
         (div {className: "BuildInfoView", onClick: @close },
           (div {className: "content", onClick: (e)-> e.stopPropagation() },
@@ -35,7 +37,7 @@ module.exports = AboutView = React.createClass
                 "Copyright © #{@state.year} The Concord Consortium. All rights reserved."
               )
               (p {},
-                "The software is licensed under the "
+                "This open-source software is licensed under the "
                 (a {href: "https://github.com/concord-consortium/building-models/blob/master/LICENSE", target: '_blank'}, "MIT license")
                 "."
               )

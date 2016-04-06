@@ -1,7 +1,7 @@
 {div, span, i, br} = React.DOM
-
+AboutView        = React.createFactory require './about-view'
 AppSettingsStore = require '../stores/app-settings-store'
-CodapStore       = require "../stores/codap-store"
+CodapStore       = require '../stores/codap-store'
 tr               = require '../utils/translate'
 
 SimulationRunPanel = React.createFactory require './simulation-run-panel-view'
@@ -46,4 +46,6 @@ module.exports = React.createClass
           (i {className: "icon-codap-arrow-undo #{buttonClass @state.canUndo}", onClick: @undoClicked, disabled: not @state.canUndo})
           (i {className: "icon-codap-arrow-redo #{buttonClass @state.canRedo}", onClick: @redoClicked, disabled: not @state.canRedo})
         )
+
+      (AboutView {})
     )
