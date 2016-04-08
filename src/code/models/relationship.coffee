@@ -21,7 +21,6 @@ module.exports = class Relationship
     @isDefined   = @opts.formula? or @opts.func?
     @hasError    = false
     @setFormula(formula)
-    @magnitude   = @opts.magnitude or 0
 
   setFormula: (newf) ->
     @formula = newf

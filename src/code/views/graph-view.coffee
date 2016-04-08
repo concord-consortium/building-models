@@ -173,9 +173,13 @@ module.exports = React.createClass
       isSelected = @props.selectionManager.isSelected(link)
       isEditing = link is @state.editingLink
       isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
-      magnitude = link.relation.magnitude
+      relationDetails = RelationFactory.selectionsFromRelation(link.relation)
+      magnitude = relationDetails.magnitude
+      gradual = relationDetails.gradual
+      useGradient = false
+      useVariableThickness = true
       if source and target
-        @diagramToolkit.addLink source, target, link.title, link.color, magnitude, isDashed, isSelected, isEditing, link
+        @diagramToolkit.addLink source, target, link.title, link.color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, link
 
   onDragOver: (e) ->
     if not @state.canDrop

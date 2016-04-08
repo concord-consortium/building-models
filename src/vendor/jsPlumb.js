@@ -11664,9 +11664,39 @@
                 x1: _sx, y1: _sy, x2: _tx, y2: _ty,
                 cp1x: _CP[0], cp1y: _CP[1], cp2x: _CP2[0], cp2y: _CP2[1]
             });
+
+            var vw = params.variableWidth;
+            if (vw){
+                var incDir = vw > 0 ? 1 : 0;
+                var decDir = vw < 0 ? 1 : 0;
+                var xMod = 0, yMod = 0;
+                
+                if (incDir === 1) {
+                    xMod = (tp[3] === 0 || tp[3] === 1) ? 1 : 0;
+                    yMod = (tp[2] === 0 || tp[2] === 1) ? 1 : 0;
+                }
+                else {
+                    xMod = (sp[3] === 0 || sp[3] === 1) ? 1 : 0;
+                    yMod = (sp[2] === 0 || sp[2] === 1) ? 1 : 0;
+                }
+                
+                for (var i = 0; i < Math.abs(vw); i++){
+                    var x1i = xMod * i * incDir;
+                    var y1i = yMod * i * incDir;
+                    var x2i = xMod * i * decDir;
+                    var y2i = yMod * i * decDir;
+                    
+                    _super.addSegment(this, "Bezier", {
+                        x1: _sx + x1i, y1: _sy + y1i, x2: _tx + x2i, y2: _ty + y2i,
+                        cp1x: _CP[0], cp1y: _CP[1], cp2x: _CP2[0], cp2y: _CP2[1]
+                    });
+                    _super.addSegment(this, "Bezier", {
+                        x1: _sx - x1i, y1: _sy - y1i, x2: _tx - x2i, y2: _ty - y2i,
+                        cp1x: _CP[0], cp1y: _CP[1], cp2x: _CP2[0], cp2y: _CP2[1]
+                    });
+                }
+            }
         };
-
-
     };
 
     _ju.extend(Bezier, _jp.Connectors.AbstractBezierConnector);

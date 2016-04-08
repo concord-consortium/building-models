@@ -27,7 +27,8 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
     postfixIco: "the-same"
     formulaFrag: "in"
-    magnitude: 1
+    magnitude: 2
+    gradual: false
     func: (scope) ->
       return scope.in
 
@@ -36,7 +37,8 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.A_LOT"
     postfixIco: "a-lot"
     formulaFrag: "min(in * 2, maxOut)"
-    magnitude: 2
+    magnitude: 4
+    gradual: false
     func: (scope) ->
       return Math.min(scope.in * 2, scope.maxOut)
 
@@ -45,7 +47,8 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.A_LITTLE"
     postfixIco: "a-little"
     formulaFrag: "in / 2"
-    magnitude: 0.5
+    magnitude: 1
+    gradual: false
     func: (scope) ->
       return scope.in / 2
 
@@ -55,6 +58,7 @@ module.exports = class RelationFactory
     postfixIco: "more-and-more"
     formulaFrag: "min(exp(in/21.7)-1, maxOut)"
     magnitude: 2
+    gradual: 1
     func: (scope) ->
       return Math.min(Math.exp(scope.in/21.7)-1, scope.maxOut)
 
@@ -63,7 +67,8 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
     formulaFrag: "21.7 * log(in+1)"
-    magnitude: 1
+    magnitude: 2
+    gradual: -1
     func: (scope) ->
       return 21.7 * Math.log(scope.in+1)
 
@@ -91,4 +96,9 @@ module.exports = class RelationFactory
       _.startsWith relation.formula, v.formulaFrag
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
-    {vector: vector, scalar: scalar}
+    magnitude = 0
+    gradual = 0
+    if vector && scalar
+      magnitude = vector.magnitude * scalar.magnitude
+      gradual = scalar.gradual
+    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
