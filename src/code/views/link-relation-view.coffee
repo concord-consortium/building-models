@@ -39,13 +39,25 @@ module.exports = LinkRelationView = React.createClass
       sourceNode:
         title: "default source node"
 
-  updateRelation: ->
-    vector   = @getVector()
-    scalar   = @getScalar()
+  getInitialState: ->
+    selectedVector: null
 
-    relation = RelationFactory.fromSelections(vector, scalar)
-    link = @props.link
-    @props.graphStore.changeLink(link, {relation: relation})
+  componentWillReceiveProps: (newProps) ->
+    if @props.link isnt newProps.link
+      @setState
+        selectedVector: null
+
+  updateRelation: ->
+    selectedVector = @getVector()
+    selectedScalar = @getScalar()
+
+    @setState {selectedVector}
+
+
+    if selectedVector? and selectedScalar?
+      relation = RelationFactory.fromSelections(selectedVector, selectedScalar)
+      link = @props.link
+      @props.graphStore.changeLink(link, {relation: relation})
 
   getVector: ->
     id = parseInt @refs.vector.value
@@ -75,10 +87,19 @@ module.exports = LinkRelationView = React.createClass
   renderScalarPulldown:(amount) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
       (option {value: opt.id, key: i}, opt.text)
-    currentOption = amount?.id ? 0
+
+    if not amount?
+      options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
+        tr "~NODE-RELATION-EDIT.UNSELECTED")
+      currentOption = "unselected"
+    else
+      currentOption = amount.id
+
+    disabled = "disabled" unless @state.selectedVector or amount?
+
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-      (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: if amount then false else "disabled"},
+      (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: disabled},
         options
       )
     )
@@ -87,6 +108,7 @@ module.exports = LinkRelationView = React.createClass
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
     {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
+    vector ?= @state.selectedVector
     formula = @props.link.relation.formula
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
