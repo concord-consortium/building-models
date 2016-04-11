@@ -1,5 +1,5 @@
 .header
-  margin-bottom 20px
+  margin 10px 0px
   font-size 15px
 
 .image-search-dialog
@@ -15,8 +15,10 @@
       modal-button()
 
   .image-search-dialog-results
-    margin 20px 0 12px
-    max-height 220px
+    margin 0px
+    min-height 50px
+    max-height 120px
+
     overflow none
     &.show-all
       overflow auto
@@ -24,13 +26,15 @@
       max-width 50px
       max-height 50px
       display inline
-      margin 0 15px 15px 15px
+      margin 0 11px 11px
       cursor pointer
 
     .in-palette
       opacity 0.25
       cursor not-allowed
-
+  .image-search-dialog-results-text
+    margin 10px 0px 0px
+    
 .preview-image
   margin-bottom 20px
   display inline-block

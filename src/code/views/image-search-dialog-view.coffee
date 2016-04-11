@@ -135,14 +135,14 @@ module.exports = React.createClass
                   for node, index in @state.externalResults
                     (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
               )
-              if @state.externalResults.length < @state.numExternalMatches
-                (div {},
-                  tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
-                    numResults: @state.externalResults.length
-                    numTotalResults: @state.numExternalMatches
-                    query: @state.query
-                  (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')
-                )
+            )
+          if @state.externalResults.length < @state.numExternalMatches
+            (div {className: "image-search-dialog-results-text"},
+              tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
+              numResults: @state.externalResults.length
+              numTotalResults: @state.numExternalMatches
+              query: @state.query
+              (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')
             )
         )
     )
