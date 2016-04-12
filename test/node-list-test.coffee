@@ -4,6 +4,7 @@ global.Reflux = require 'reflux'
 
 global.window = { location: '' }
 
+
 chai = require('chai')
 chai.config.includeStack = true
 
@@ -18,6 +19,17 @@ Link           = requireModel 'link'
 Node           = requireModel 'node'
 GraphStore    = require "#{__dirname}/../src/code/stores/graph-store"
 CodapConnect   = requireModel 'codap-connect'
+Relationship   = requireModel 'relationship'
+
+LinkNodes = (sourceNode, targetNode, formula) ->
+  link = new Link
+    title: "function"
+    sourceNode: sourceNode
+    targetNode: targetNode
+    relation: new Relationship
+      formula: formula
+  sourceNode.addLink(link)
+  targetNode.addLink(link)
 
 describe 'GraphPrimitive', ->
   it 'GraphPrimitive should exists', ->
@@ -201,3 +213,84 @@ describe 'Node', ->
         it "should not add the new link", ->
           @graphStore.addLink(@newLink)
           @graphStore.linkKeys['newLink'].should.equal('oldValue')
+
+describe "Graph Topology", ->
+
+  beforeEach ->
+    sandbox = Sinon.sandbox.create()
+    sandbox.stub(CodapConnect, "instance", ->
+      return {
+        sendUndoableActionPerformed: -> return ''
+      }
+    )
+
+  afterEach ->
+    CodapConnect.instance.restore()
+
+
+  # A -> B  -> C -> E
+  #      └< D <┘
+  describe "a graph with cycles", ->
+    beforeEach ->
+      @nodeA    = new Node()
+      @nodeB    = new Node()
+      @nodeC    = new Node()
+      @nodeD    = new Node()
+      @nodeE    = new Node()
+      @formula  = "1 * in"
+
+      LinkNodes(@nodeA, @nodeB, @formula)
+      LinkNodes(@nodeB, @nodeC, @formula)
+      LinkNodes(@nodeC, @nodeD, @formula)
+      LinkNodes(@nodeD, @nodeB, @formula)
+      LinkNodes(@nodeC, @nodeE, @formula)
+
+      graphStore = GraphStore.store
+      graphStore.init()
+      graphStore.addNode @nodeA
+      graphStore.addNode @nodeB
+      graphStore.addNode @nodeC
+      graphStore.addNode @nodeD
+      graphStore.addNode @nodeE
+
+    it "should mark the nodes that can have initial values edited", ->
+      @nodeA.canEditInitialValue().should.equal true
+      @nodeB.canEditInitialValue().should.equal true
+      @nodeC.canEditInitialValue().should.equal true
+      @nodeD.canEditInitialValue().should.equal true
+      @nodeE.canEditInitialValue().should.equal false
+
+    it "should mark the nodes that can have values edited while running", ->
+      @nodeA.canEditValueWhileRunning().should.equal true
+      @nodeB.canEditValueWhileRunning().should.equal false
+      @nodeC.canEditValueWhileRunning().should.equal false
+      @nodeD.canEditValueWhileRunning().should.equal false
+      @nodeE.canEditValueWhileRunning().should.equal false
+
+
+  # A -> B+ -> C
+  describe "a graph with collectors", ->
+    beforeEach ->
+      @nodeA    = new Node()
+      @nodeB    = new Node({isAccumulator: true})
+      @nodeC    = new Node()
+      @formula  = "1 * in"
+
+      LinkNodes(@nodeA, @nodeB, @formula)
+      LinkNodes(@nodeB, @nodeC, @formula)
+
+      graphStore = GraphStore.store
+      graphStore.init()
+      graphStore.addNode @nodeA
+      graphStore.addNode @nodeB
+      graphStore.addNode @nodeC
+
+    it "should mark the nodes that can have initial values edited", ->
+      @nodeA.canEditInitialValue().should.equal true
+      @nodeB.canEditInitialValue().should.equal true
+      @nodeC.canEditInitialValue().should.equal false
+
+    it "should mark the nodes that can have values edited while running", ->
+      @nodeA.canEditValueWhileRunning().should.equal true
+      @nodeB.canEditValueWhileRunning().should.equal false
+      @nodeC.canEditValueWhileRunning().should.equal false

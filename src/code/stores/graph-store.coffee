@@ -129,6 +129,7 @@ GraphStore  = Reflux.createStore
       @linkKeys[link.terminalKey()] = link
       @nodeKeys[link.sourceNode.key].addLink(link)
       @nodeKeys[link.targetNode.key].addLink(link)
+    @_graphUpdated()
     @updateListeners()
 
 
@@ -142,6 +143,7 @@ GraphStore  = Reflux.createStore
     delete @linkKeys[link.terminalKey()]
     @nodeKeys[link.sourceNode.key]?.removeLink(link)
     @nodeKeys[link.targetNode.key]?.removeLink(link)
+    @_graphUpdated()
     @updateListeners()
 
 
@@ -169,11 +171,16 @@ GraphStore  = Reflux.createStore
   _addNode: (node) ->
     unless @hasNode node
       @nodeKeys[node.key] = node
+      @_graphUpdated()
       @updateListeners()
 
   _removeNode: (node) ->
     delete @nodeKeys[node.key]
+    @_graphUpdated()
     @updateListeners()
+
+  _graphUpdated: ->
+    node.checkIsInCycle() for key, node of @nodeKeys
 
   moveNodeCompleted: (nodeKey, pos, originalPos) ->
     @endNodeEdit()

@@ -44,6 +44,8 @@ module.exports = class Node extends GraphPrimitive
 
     @color ?= Colors[0].value
 
+    @isInCycle = false      # we always initalize with no links, so we can't be in cycle
+
   # Scale the value of initialValue such that, if we are in semi-quantitative mode,
   # we always return a value between 0 and 100. Likewise, if we try to set a value while
   # we are in SQ mode, we set the actual internal value to the same proportion between
@@ -107,6 +109,21 @@ module.exports = class Node extends GraphPrimitive
   isDependent: ->
     @inLinks()?.length > 0
 
+  checkIsInCycle: ->
+    visitedNodes = []
+    original = this
+
+    visit = (node) ->
+      visitedNodes.push node
+      for link in node.outLinks()
+        downstreamNode = link.targetNode
+        return true if downstreamNode is original
+        unless _.contains visitedNodes, downstreamNode
+          if visit downstreamNode
+            return true
+
+    @isInCycle = visit(@) or false
+
   infoString: ->
     linkNamer = (link) ->
       " --#{link.title}-->[#{link.targetNode.title}]"
@@ -160,8 +177,11 @@ module.exports = class Node extends GraphPrimitive
       frames: @frames
     key: @key
 
+  canEditInitialValue: ->
+    @inLinks().length is 0 or @isAccumulator or @isInCycle
+
   canEditValueWhileRunning: ->
-    @inLinks().length is 0 or @isAccumulator
+    @inLinks().length is 0
 
   paletteItemIs: (paletteItem) ->
     paletteItem.uuid is @paletteItem
