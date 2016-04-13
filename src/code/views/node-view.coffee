@@ -164,6 +164,7 @@ module.exports = NodeView = React.createClass
     )
 
   renderSliderView: ->
+    if not @props.data.canEditInitialValue() then return null
     enabled = not @props.running or @props.data.canEditValueWhileRunning()
     (SliderView
       width: 70
