@@ -15,11 +15,12 @@
       modal-button()
 
   .image-search-dialog-results
-    margin 0px
-    min-height 50px
-    max-height 120px
+    position absolute
+    margin 24px 0px 20px
+    bottom 0px
+    top 0px
+    overflow auto
 
-    overflow none
     &.show-all
       overflow auto
     img
@@ -33,8 +34,17 @@
       opacity 0.25
       cursor not-allowed
   .image-search-dialog-results-text
-    margin 10px 0px 0px
-    
+    position absolute
+    bottom 2px
+  .image-search-main-results
+    height 330px
+    .image-search-section
+      position relative
+      .header
+        position absolute
+        top 0
+        margin 0    
+      
 .preview-image
   margin-bottom 20px
   display inline-block

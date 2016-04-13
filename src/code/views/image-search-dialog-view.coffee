@@ -36,11 +36,15 @@ module.exports = React.createClass
     @getInitialImageDialogViewState
       searching: false
       searched: false
+      topHeight: 100
+      bottomHeight: 50
       internalResults: []
       externalResults: []
 
   searchClicked: (e) ->
     e.preventDefault()
+    if @state.topHeight = 100
+      @state.topHeight = 50
     @search limitResults: true
 
   showAllMatches: ->
@@ -86,7 +90,13 @@ module.exports = React.createClass
     else @state.internalResults
 
   render: ->
-    showNoResultsAlert = @state.searchable and @state.searched and (@state.internalResults.length + @state.externalResults.length) is 0
+    resultsCount = @state.internalResults.length + @state.externalResults.length
+    showNoResultsAlert = @state.searchable and @state.searched and resultsCount is 0
+    
+    if resultsCount > 0
+      topHeightPercent = (@state.internalResults.length / resultsCount) * 100
+      @state.topHeight = Math.max(33, Math.min(topHeightPercent, 66))
+      @state.bottomHeight = 100 - @state.topHeight
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
@@ -107,42 +117,47 @@ module.exports = React.createClass
               tr '~IMAGE-BROWSER.TRY_ANOTHER_SEARCH'
             )
 
-          (div {className: 'header'}, tr '~IMAGE-BROWSER.LIBRARY_HEADER'),
-          (div {className: 'image-search-dialog-results'},
-            if @state.internalResults.length is 0 and (@state.searching or @state.externalResults.length > 0)
-              tr '~IMAGE-BROWSER.NO_INTERNAL_FOUND', query: @state.query
-            else
-              for node, index in @internalListSource()
-                if node.image
-                  (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
-          )
-
-          if @state.searchable and not showNoResultsAlert
-            (div {},
-              (div {className: 'header'}, tr 'Openclipart.org Images'),
-              (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
-                if @state.searching
-                  (div {},
-                    (i {className: "icon-codap-options spin"})
-                    ' '
-                    tr "~IMAGE-BROWSER.SEARCHING",
-                      scope: if @state.searchingAll then 'all matches for ' else ''
-                      query: @state.query
-                  )
-                else if @state.externalResults.length is 0
-                  tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
+          (div {className: 'image-search-main-results'},[
+            (div {className: 'image-search-section', style: height: @state.topHeight + '%'},[
+              (div {className: 'header'}, tr '~IMAGE-BROWSER.LIBRARY_HEADER'),
+              (div {className: 'image-search-dialog-results'},
+                if @state.internalResults.length is 0 and (@state.searching or @state.externalResults.length > 0)
+                  tr '~IMAGE-BROWSER.NO_INTERNAL_FOUND', query: @state.query
                 else
-                  for node, index in @state.externalResults
-                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
+                  for node, index in @internalListSource()
+                    if node.image
+                      (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
               )
-            )
-          if @state.externalResults.length < @state.numExternalMatches
-            (div {className: "image-search-dialog-results-text"},
-              tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
-              numResults: @state.externalResults.length
-              numTotalResults: @state.numExternalMatches
-              query: @state.query
-              (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')
-            )
+            ])
+
+            if @state.searchable and not showNoResultsAlert
+              (div {className: 'image-search-section', style: height: @state.bottomHeight + '%'},[
+                (div {className: 'header'}, tr 'Openclipart.org Images'),
+                (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
+                  if @state.searching
+                    (div {},
+                      (i {className: "icon-codap-options spin"})
+                      ' '
+                      tr "~IMAGE-BROWSER.SEARCHING",
+                        scope: if @state.searchingAll then 'all matches for ' else ''
+                        query: @state.query
+                    )
+                  else if @state.externalResults.length is 0
+                    tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
+                  else
+                    for node, index in @state.externalResults
+                      (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
+                )
+
+              if @state.externalResults.length < @state.numExternalMatches
+                (div {className: "image-search-dialog-results-text"},
+                  tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
+                  numResults: @state.externalResults.length
+                  numTotalResults: @state.numExternalMatches
+                  query: @state.query
+                  (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')
+                )
+              ])
+          ])
         )
     )
