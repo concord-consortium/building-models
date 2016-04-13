@@ -299,6 +299,7 @@ GraphStore  = Reflux.createStore
         log.info "Change #{key} for #{link.title}"
         link[key] = changes[key]
     @_maybeChangeSelectedItem link
+    @_graphUpdated()
     @updateListeners()
 
   _nameForNode: (node) ->
