@@ -294,3 +294,30 @@ describe "Graph Topology", ->
       @nodeA.canEditValueWhileRunning().should.equal true
       @nodeB.canEditValueWhileRunning().should.equal false
       @nodeC.canEditValueWhileRunning().should.equal false
+
+  # A -x-> B -> C
+  describe "a graph with undefined relations", ->
+    beforeEach ->
+      @nodeA    = new Node()
+      @nodeB    = new Node({isAccumulator: true})
+      @nodeC    = new Node()
+      @formula  = "1 * in"
+
+      LinkNodes(@nodeA, @nodeB)
+      LinkNodes(@nodeB, @nodeC, @formula)
+
+      graphStore = GraphStore.store
+      graphStore.init()
+      graphStore.addNode @nodeA
+      graphStore.addNode @nodeB
+      graphStore.addNode @nodeC
+
+    it "should mark the nodes that can have initial values edited", ->
+      @nodeA.canEditInitialValue().should.equal true
+      @nodeB.canEditInitialValue().should.equal true
+      @nodeC.canEditInitialValue().should.equal false
+
+    it "should mark the nodes that can have values edited while running", ->
+      @nodeA.canEditValueWhileRunning().should.equal true
+      @nodeB.canEditValueWhileRunning().should.equal true
+      @nodeC.canEditValueWhileRunning().should.equal false

@@ -107,7 +107,10 @@ module.exports = class Node extends GraphPrimitive
     _.map @inLinks(), (link) -> link.sourceNode
 
   isDependent: ->
-    @inLinks()?.length > 0
+    for link in @inLinks()
+      if link.relation and link.relation.isDefined
+        return false
+    return true
 
   checkIsInCycle: ->
     visitedNodes = []
@@ -178,10 +181,10 @@ module.exports = class Node extends GraphPrimitive
     key: @key
 
   canEditInitialValue: ->
-    @inLinks().length is 0 or @isAccumulator or @isInCycle
+    not @isDependent() or @isAccumulator or @isInCycle
 
   canEditValueWhileRunning: ->
-    @inLinks().length is 0
+    not @isDependent()
 
   paletteItemIs: (paletteItem) ->
     paletteItem.uuid is @paletteItem
