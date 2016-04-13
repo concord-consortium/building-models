@@ -176,7 +176,7 @@ module.exports = React.createClass
       relationDetails = RelationFactory.selectionsFromRelation(link.relation)
       magnitude = relationDetails.magnitude
       gradual = relationDetails.gradual
-      useGradient = false
+      useGradient = true
       useVariableThickness = true
       if source and target
         @diagramToolkit.addLink source, target, link.title, link.color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, link

@@ -6,8 +6,10 @@ module.exports = class DiagramToolkit
     @type      = "jsPlumbWrappingDiagramToolkit"
     @defaultLinkColor         = '#777'
     @defaultFadedLinkColor    = "rgba(120,120,120,0)"
-    @linkIncreaseColor        = "rgba(230,40,20,255)"
-    @linkDecreaseColor        = "rgba(0,110,200,255)"
+    @linkIncreaseColor        = "rgba(230,40,20,1)"
+    @linkDecreaseColor        = "rgba(0,110,200,1)"
+    @linkIncreaseFadedColor   = "rgba(230,40,20,0.1)"
+    @linkDecreaseFadedColor   = "rgba(0,110,200,0.1)"
     @linkDashedColor          = "#aaa"
     @linkSelectedOutlineColor = "#f6bf33"
     @color     = @options.color or '#233'
@@ -166,6 +168,7 @@ module.exports = class DiagramToolkit
     startColor = @defaultLinkColor
     finalColor = @defaultLinkColor
     fixedColor = @defaultLinkColor
+    fadedColor = @defaultFadedLinkColor
     
     thickness = Math.abs(magnitude)
     if (!thickness)
@@ -179,8 +182,10 @@ module.exports = class DiagramToolkit
       paintStyle.outlineWidth = 1
     if magnitude < 0
       fixedColor = @linkDecreaseColor
+      fadedColor = @linkDecreaseFadedColor
     if magnitude > 0
       fixedColor = @linkIncreaseColor
+      fadedColor = @linkIncreaseFadedColor
     if color != @defaultLinkColor
       fixedColor = color
 
@@ -190,9 +195,9 @@ module.exports = class DiagramToolkit
     if (useGradient)
       startColor = finalColor = fixedColor
       if gradual < 0
-        finalColor = @defaultFadedLinkColor
+        finalColor = fadedColor
       if gradual > 0
-        startColor = @defaultFadedLinkColor
+        startColor = fadedColor
       paintStyle.gradient = @_gradient startColor, finalColor
       
     paintStyle.strokeStyle = fixedColor
