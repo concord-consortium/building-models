@@ -180,7 +180,7 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   _graphUpdated: ->
-    node.checkIsInCycle() for key, node of @nodeKeys
+    node.checkIsInIndependentCycle() for key, node of @nodeKeys
 
   moveNodeCompleted: (nodeKey, pos, originalPos) ->
     @endNodeEdit()

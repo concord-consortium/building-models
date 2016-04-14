@@ -115,20 +115,23 @@ module.exports = class Node extends GraphPrimitive
     else
       @inLinks()?.length > 0
 
-  checkIsInCycle: ->
+  checkIsInIndependentCycle: ->
     visitedNodes = []
     original = this
+    isOwnGrandpa = false
 
     visit = (node) ->
       visitedNodes.push node
-      for link in node.outLinks() when link.relation?.isDefined
-        downstreamNode = link.targetNode
-        return true if downstreamNode is original
-        unless _.contains visitedNodes, downstreamNode
-          if visit downstreamNode
-            return true
+      for link in node.inLinks() when link.relation?.isDefined
+        upstreamNode = link.sourceNode
+        return true unless upstreamNode.isDependent(true)      # fast exit if we have an independent ancestor
+        if upstreamNode is original then isOwnGrandpa = true
+        unless _.contains visitedNodes, upstreamNode
+          return true if visit upstreamNode
 
-    @isInCycle = visit(@) or false
+    hasIndependentAncestor = visit @
+
+    @isInCycle = not hasIndependentAncestor and isOwnGrandpa
 
   infoString: ->
     linkNamer = (link) ->

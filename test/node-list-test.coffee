@@ -227,10 +227,44 @@ describe "Graph Topology", ->
   afterEach ->
     CodapConnect.instance.restore()
 
+  # A ->  B  -> D
+  # └< C <┘
+  describe "a graph with a totally independent cycle", ->
+    beforeEach ->
+      @nodeA    = new Node()
+      @nodeB    = new Node()
+      @nodeC    = new Node()
+      @nodeD    = new Node()
+      @formula  = "1 * in"
+
+      LinkNodes(@nodeA, @nodeB, @formula)
+      LinkNodes(@nodeB, @nodeC, @formula)
+      LinkNodes(@nodeC, @nodeA, @formula)
+      LinkNodes(@nodeB, @nodeD, @formula)
+
+      graphStore = GraphStore.store
+      graphStore.init()
+      graphStore.addNode @nodeA
+      graphStore.addNode @nodeB
+      graphStore.addNode @nodeC
+      graphStore.addNode @nodeD
+
+    it "should mark the nodes that can have initial values edited", ->
+      @nodeA.canEditInitialValue().should.equal true
+      @nodeB.canEditInitialValue().should.equal true
+      @nodeC.canEditInitialValue().should.equal true
+      @nodeD.canEditInitialValue().should.equal false
+
+    it "should mark the nodes that can have values edited while running", ->
+      @nodeA.canEditValueWhileRunning().should.equal false
+      @nodeB.canEditValueWhileRunning().should.equal false
+      @nodeC.canEditValueWhileRunning().should.equal false
+      @nodeD.canEditValueWhileRunning().should.equal false
+
 
   # A -> B  -> C -> E
   #      └< D <┘
-  describe "a graph with cycles", ->
+  describe "a graph with cycles with independent inputs", ->
     beforeEach ->
       @nodeA    = new Node()
       @nodeB    = new Node()
@@ -255,9 +289,9 @@ describe "Graph Topology", ->
 
     it "should mark the nodes that can have initial values edited", ->
       @nodeA.canEditInitialValue().should.equal true
-      @nodeB.canEditInitialValue().should.equal true
-      @nodeC.canEditInitialValue().should.equal true
-      @nodeD.canEditInitialValue().should.equal true
+      @nodeB.canEditInitialValue().should.equal false
+      @nodeC.canEditInitialValue().should.equal false
+      @nodeD.canEditInitialValue().should.equal false
       @nodeE.canEditInitialValue().should.equal false
 
     it "should mark the nodes that can have values edited while running", ->
