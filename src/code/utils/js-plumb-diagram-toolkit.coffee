@@ -15,7 +15,7 @@ module.exports = class DiagramToolkit
     @color     = @options.color or '#233'
     @lineWidth = @options.lineWidth or 1
     @lineWidth = 1
-    @lineWidthVariation = 6
+    @lineWidthVariation = 4
     @kit       = jsPlumb.getInstance {Container: @domContext}
     @kit.importDefaults
       Connector:        ["Bezier", {curviness: 60}],
@@ -197,9 +197,12 @@ module.exports = class DiagramToolkit
     paintStyle.strokeStyle = fixedColor
     paintStyle.vertical = true
     
+    variableWidthMagnitude = 0
+    
     if (gradual && useVariableThickness)
+      variableWidthMagnitude = @lineWidthVariation * gradual
       @kit.importDefaults
-        Connector: ["Bezier", {curviness: 60, variableWidth: @lineWidthVariation * gradual}]
+        Connector: ["Bezier", {curviness: 60, variableWidth: variableWidthMagnitude}]
       if (gradual > 0)
         thickness = thickness * @lineWidthVariation
 
@@ -207,7 +210,7 @@ module.exports = class DiagramToolkit
       source: source
       target: target
       paintStyle: paintStyle
-      overlays: @_overlays label, isSelected, isEditing, thickness, fixedColor, (useVariableThickness && gradual)
+      overlays: @_overlays label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude
       endpoint: @_endpointOptions("Rectangle", thickness, 'node-link-endpoint')
 
     connection.bind 'click', @handleClick.bind @

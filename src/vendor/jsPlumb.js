@@ -10706,12 +10706,12 @@
                     // adjust position of overlay arrow at destination to prevent box overlap
                     var adjustX = (hxy.x - mid.x)/2;
                     var adjustY = (hxy.y - mid.y)/2;
-                    
-                    if (params.variableWidth && params.variableWidth == 1){
+
+                    if (params.variableWidth && params.variableWidth > 1){
                         if (Math.abs(adjustX) > Math.abs(adjustY))
-                          adjustY += 4;
+                          adjustY += params.variableWidth-1;
                         else 
-                          adjustX += 4;
+                          adjustX += params.variableWidth-1;
                     }
                     
                     hxy.x += adjustX;
@@ -10720,6 +10720,7 @@
                     mid.y += adjustY;
                     txy.x += adjustX;
                     txy.y += adjustY;
+                    // end adjust
                     
                     if (direction == -1) {
                         var _ = txy;
