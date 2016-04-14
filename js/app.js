@@ -60920,31 +60920,36 @@ module.exports = Node = (function(superClass) {
     }
   };
 
-  Node.prototype.checkIsInCycle = function() {
-    var original, visit, visitedNodes;
+  Node.prototype.checkIsInIndependentCycle = function() {
+    var hasIndependentAncestor, isOwnGrandpa, original, visit, visitedNodes;
     visitedNodes = [];
     original = this;
+    isOwnGrandpa = false;
     visit = function(node) {
-      var downstreamNode, i, len, link, ref, ref1;
+      var i, len, link, ref, ref1, upstreamNode;
       visitedNodes.push(node);
-      ref = node.outLinks();
+      ref = node.inLinks();
       for (i = 0, len = ref.length; i < len; i++) {
         link = ref[i];
         if (!((ref1 = link.relation) != null ? ref1.isDefined : void 0)) {
           continue;
         }
-        downstreamNode = link.targetNode;
-        if (downstreamNode === original) {
+        upstreamNode = link.sourceNode;
+        if (!upstreamNode.isDependent(true)) {
           return true;
         }
-        if (!_.contains(visitedNodes, downstreamNode)) {
-          if (visit(downstreamNode)) {
+        if (upstreamNode === original) {
+          isOwnGrandpa = true;
+        }
+        if (!_.contains(visitedNodes, upstreamNode)) {
+          if (visit(upstreamNode)) {
             return true;
           }
         }
       }
     };
-    return this.isInCycle = visit(this) || false;
+    hasIndependentAncestor = visit(this);
+    return this.isInCycle = !hasIndependentAncestor && isOwnGrandpa;
   };
 
   Node.prototype.infoString = function() {
@@ -62401,7 +62406,7 @@ GraphStore = Reflux.createStore({
     results = [];
     for (key in ref) {
       node = ref[key];
-      results.push(node.checkIsInCycle());
+      results.push(node.checkIsInIndependentCycle());
     }
     return results;
   },
