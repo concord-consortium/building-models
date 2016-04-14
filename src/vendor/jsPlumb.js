@@ -10702,7 +10702,18 @@
                     hxy = component.pointOnPath(this.loc);
                     mid = component.pointAlongPathFrom(this.loc, -(this.length));
                     txy = _jg.pointOnLine(hxy, mid, this.length);
+                    
+                    // adjust position of overlay arrow at destination to prevent box overlap
+                    var adjustX = (hxy.x - mid.x)/2;
+                    var adjustY = (hxy.y - mid.y)/2;
 
+                    hxy.x += adjustX;
+                    hxy.y += adjustY;
+                    mid.x += adjustX;
+                    mid.y += adjustY;
+                    txy.x += adjustX;
+                    txy.y += adjustY;
+                    
                     if (direction == -1) {
                         var _ = txy;
                         txy = hxy;
