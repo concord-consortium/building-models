@@ -341,7 +341,7 @@ GraphStore  = Reflux.createStore
     selectedLink = @selectionManager.getLinkInspection()[0] or null
     if selectedLink
       @removeLink(selectedLink)
-      @selectionManager.clearLinkSelection()
+      @selectionManager.clearSelection()
 
   removeLinksForNode: (node) ->
     @removeLink(link) for link in node.links
