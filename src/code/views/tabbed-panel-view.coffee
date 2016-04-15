@@ -2,7 +2,7 @@
 
 class TabInfo
   constructor: (settings={}) ->
-    {@label, @component} = settings
+    {@label, @component, @defined} = settings
 
 Tab = React.createFactory React.createClass
 
@@ -13,7 +13,8 @@ Tab = React.createFactory React.createClass
     @props.onSelected @props.index
 
   render: ->
-    classname = if @props.selected then 'tab-selected' else ''
+    classname = if @props.defined then 'tab-link-defined' else ''
+    if @props.selected then classname += ' tab-selected'
     (li {className: classname, onClick: @clicked}, @props.label)
 
 module.exports = React.createClass
@@ -34,6 +35,7 @@ module.exports = React.createClass
       label: tab.label
       key: index
       index: index
+      defined: tab.defined
       selected: (index is @state.selectedTabIndex)
       onSelected: @selectedTab
     )
