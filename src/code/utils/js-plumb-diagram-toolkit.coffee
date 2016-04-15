@@ -6,14 +6,16 @@ module.exports = class DiagramToolkit
     @type      = "jsPlumbWrappingDiagramToolkit"
     @defaultLinkColor         = '#777'
     @defaultFadedLinkColor    = "rgba(120,120,120,0)"
-    @linkIncreaseColor        = "rgba(230,40,20,255)"
-    @linkDecreaseColor        = "rgba(0,110,200,255)"
+    @linkIncreaseColor        = "rgba(230,40,20,1)"
+    @linkDecreaseColor        = "rgba(0,110,200,1)"
+    @linkIncreaseFadedColor   = "rgba(230,40,20,0.2)"
+    @linkDecreaseFadedColor   = "rgba(0,110,200,0.2)"
     @linkDashedColor          = "#aaa"
     @linkSelectedOutlineColor = "#f6bf33"
     @color     = @options.color or '#233'
     @lineWidth = @options.lineWidth or 1
     @lineWidth = 1
-    @lineWidthVariation = 3
+    @lineWidthVariation = 4
     @kit       = jsPlumb.getInstance {Container: @domContext}
     @kit.importDefaults
       Connector:        ["Bezier", {curviness: 60}],
@@ -52,17 +54,10 @@ module.exports = class DiagramToolkit
   repaint: ->
     @kit.repaintEverything()
 
-  _endpointOptions: (size, cssClass) ->
-    results = [ "Rectangle",
+  _endpointOptions: (style, size, cssClass) ->
+    results = [ style,
       width: size
       height: size
-      cssClass: cssClass
-    ]
-    results
-
-  _endpointOptionsRounded: (size, cssClass) ->
-    results = [ "Dot",
-      radius: size
       cssClass: cssClass
     ]
     results
@@ -73,7 +68,7 @@ module.exports = class DiagramToolkit
       dropOptions:
         activeClass: "dragActive"
       anchor: "Center"
-      endpoint: @_endpointOptions(19, 'node-link-button')
+      endpoint: @_endpointOptions("Rectangle", 19, 'node-link-button')
       maxConnections: -1
     )
 
@@ -94,7 +89,7 @@ module.exports = class DiagramToolkit
       isTarget: true
       isSource: false
       anchor: "Center"
-      endpoint: @_endpointOptions(size, 'node-link-target')
+      endpoint: @_endpointOptions("Rectangle", size, 'node-link-target')
       maxConnections: -1
       dropOptions:
         activeClass: "dragActive"
@@ -114,10 +109,11 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected, editingLabel=true, thickness, finalColor) ->
+  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth) ->
     results = [["Arrow", {
       location: 1.0
       length: 10
+      variableWidth: variableWidth
       width: 9 + thickness
     }]]
     if editingLabel
@@ -166,6 +162,7 @@ module.exports = class DiagramToolkit
     startColor = @defaultLinkColor
     finalColor = @defaultLinkColor
     fixedColor = @defaultLinkColor
+    fadedColor = @defaultFadedLinkColor
     
     thickness = Math.abs(magnitude)
     if (!thickness)
@@ -179,8 +176,10 @@ module.exports = class DiagramToolkit
       paintStyle.outlineWidth = 1
     if magnitude < 0
       fixedColor = @linkDecreaseColor
+      fadedColor = @linkDecreaseFadedColor
     if magnitude > 0
       fixedColor = @linkIncreaseColor
+      fadedColor = @linkIncreaseFadedColor
     if color != @defaultLinkColor
       fixedColor = color
 
@@ -190,17 +189,20 @@ module.exports = class DiagramToolkit
     if (useGradient)
       startColor = finalColor = fixedColor
       if gradual < 0
-        finalColor = @defaultFadedLinkColor
+        finalColor = fadedColor
       if gradual > 0
-        startColor = @defaultFadedLinkColor
+        startColor = fadedColor
       paintStyle.gradient = @_gradient startColor, finalColor
       
     paintStyle.strokeStyle = fixedColor
     paintStyle.vertical = true
     
+    variableWidthMagnitude = 0
+    
     if (gradual && useVariableThickness)
+      variableWidthMagnitude = @lineWidthVariation * gradual
       @kit.importDefaults
-        Connector: ["Bezier", {curviness: 60, variableWidth: @lineWidthVariation * gradual}]
+        Connector: ["Bezier", {curviness: 60, variableWidth: variableWidthMagnitude}]
       if (gradual > 0)
         thickness = thickness * @lineWidthVariation
 
@@ -208,8 +210,8 @@ module.exports = class DiagramToolkit
       source: source
       target: target
       paintStyle: paintStyle
-      overlays: @_overlays label, isSelected, isEditing, thickness, fixedColor
-      endpoint: @_endpointOptionsRounded(thickness, 'node-link-endpoint')
+      overlays: @_overlays label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude
+      endpoint: @_endpointOptions("Rectangle", thickness, 'node-link-endpoint')
 
     connection.bind 'click', @handleClick.bind @
     connection.bind 'dblclick', @handleDoubleClick.bind @
