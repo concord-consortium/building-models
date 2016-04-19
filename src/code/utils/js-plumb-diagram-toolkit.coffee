@@ -157,7 +157,7 @@ module.exports = class DiagramToolkit
   addLink: (source, target, label, color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, linkModel) ->
     paintStyle = @_paintStyle @defaultLinkColor
     paintStyle.outlineColor = "none"
-    paintStyle.outlineWidth = 1
+    paintStyle.outlineWidth = 10
     
     startColor = @defaultLinkColor
     finalColor = @defaultLinkColor
