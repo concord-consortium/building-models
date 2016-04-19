@@ -37,14 +37,14 @@ module.exports = React.createClass
       searching: false
       searched: false
       topHeight: 100
-      bottomHeight: 50
+      bottomHeight: 70
       internalResults: []
       externalResults: []
 
   searchClicked: (e) ->
     e.preventDefault()
     if @state.topHeight = 100
-      @state.topHeight = 50
+      @state.topHeight = 30
     @search limitResults: true
 
   showAllMatches: ->
@@ -94,9 +94,8 @@ module.exports = React.createClass
     showNoResultsAlert = @state.searchable and @state.searched and resultsCount is 0
     
     if resultsCount > 0
-      topHeightPercent = (@state.internalResults.length / resultsCount) * 100
-      @state.topHeight = Math.max(33, Math.min(topHeightPercent, 66))
-      @state.bottomHeight = 100 - @state.topHeight
+      @state.topHeight = 30
+      @state.bottomHeight = 70
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
