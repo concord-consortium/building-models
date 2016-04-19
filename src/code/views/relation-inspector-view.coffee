@@ -15,9 +15,8 @@ module.exports = RelationInspectorView = React.createClass
 
   renderTabforLink: (link) ->
     relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
-    label = if link.relation.isDefined then "☑ " else "☐ "
-    label += link.sourceNode.title
-    (Tabber.Tab {label: label, component: relationView})
+    label = link.sourceNode.title
+    (Tabber.Tab {label: label, component: relationView, defined: link.relation.isDefined})
 
   renderNodeRelationInspector: ->
     tabs = _.map @props.node.inLinks(), (link) => @renderTabforLink(link)
