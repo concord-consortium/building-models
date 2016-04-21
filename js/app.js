@@ -42538,7 +42538,7 @@ GraphStore = Reflux.createStore({
     selectedLink = this.selectionManager.getLinkInspection()[0] || null;
     if (selectedLink) {
       this.removeLink(selectedLink);
-      return this.selectionManager.clearLinkSelection();
+      return this.selectionManager.clearSelection();
     }
   },
   removeLinksForNode: function(node) {
@@ -44113,7 +44113,7 @@ module.exports = DiagramToolkit = (function() {
     var connection, fadedColor, finalColor, fixedColor, paintStyle, startColor, thickness, variableWidthMagnitude;
     paintStyle = this._paintStyle(this.defaultLinkColor);
     paintStyle.outlineColor = "none";
-    paintStyle.outlineWidth = 1;
+    paintStyle.outlineWidth = 10;
     startColor = this.defaultLinkColor;
     finalColor = this.defaultLinkColor;
     fixedColor = this.defaultLinkColor;
@@ -46288,7 +46288,7 @@ module.exports = React.createClass({
       searching: false,
       searched: false,
       topHeight: 100,
-      bottomHeight: 50,
+      bottomHeight: 70,
       internalResults: [],
       externalResults: []
     });
@@ -46296,7 +46296,7 @@ module.exports = React.createClass({
   searchClicked: function(e) {
     e.preventDefault();
     if (this.state.topHeight = 100) {
-      this.state.topHeight = 50;
+      this.state.topHeight = 30;
     }
     return this.search({
       limitResults: true
@@ -46353,13 +46353,12 @@ module.exports = React.createClass({
     }
   },
   render: function() {
-    var index, node, ref1, resultsCount, showNoResultsAlert, topHeightPercent;
+    var index, node, ref1, resultsCount, showNoResultsAlert;
     resultsCount = this.state.internalResults.length + this.state.externalResults.length;
     showNoResultsAlert = this.state.searchable && this.state.searched && resultsCount === 0;
     if (resultsCount > 0) {
-      topHeightPercent = (this.state.internalResults.length / resultsCount) * 100;
-      this.state.topHeight = Math.max(33, Math.min(topHeightPercent, 66));
-      this.state.bottomHeight = 100 - this.state.topHeight;
+      this.state.topHeight = 30;
+      this.state.bottomHeight = 70;
     }
     return div({
       className: 'image-search-dialog'
@@ -48320,11 +48319,11 @@ module.exports = RelationInspectorView = React.createClass({
       link: link,
       graphStore: this.props.graphStore
     });
-    label = link.relation.isDefined ? "☑ " : "☐ ";
-    label += link.sourceNode.title;
+    label = link.sourceNode.title;
     return Tabber.Tab({
       label: label,
-      component: relationView
+      component: relationView,
+      defined: link.relation.isDefined
     });
   },
   renderNodeRelationInspector: function() {
@@ -48785,7 +48784,7 @@ TabInfo = (function() {
     if (settings == null) {
       settings = {};
     }
-    this.label = settings.label, this.component = settings.component;
+    this.label = settings.label, this.component = settings.component, this.defined = settings.defined;
   }
 
   return TabInfo;
@@ -48800,7 +48799,10 @@ Tab = React.createFactory(React.createClass({
   },
   render: function() {
     var classname;
-    classname = this.props.selected ? 'tab-selected' : '';
+    classname = this.props.defined ? 'tab-link-defined' : '';
+    if (this.props.selected) {
+      classname += ' tab-selected';
+    }
     return li({
       className: classname,
       onClick: this.clicked
@@ -48830,6 +48832,7 @@ module.exports = React.createClass({
       label: tab.label,
       key: index,
       index: index,
+      defined: tab.defined,
       selected: index === this.state.selectedTabIndex,
       onSelected: this.selectedTab
     });
