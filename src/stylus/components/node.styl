@@ -10,7 +10,8 @@ $big-elm-height   = 164px
 .elm
   .debugging
     opacity 0.5
-
+  &.selected
+    border-top 6px solid transparent
   *
     box-sizing border-box
     no-select()
@@ -169,6 +170,11 @@ $big-elm-height   = 164px
 .node-link-target
   opacity 0.2
   z-index -1
+  
+.link-target
+  margin-top 6px
+  margin-bottom 6px
+  
 
 .node-link-endpoint
   opacity 0
