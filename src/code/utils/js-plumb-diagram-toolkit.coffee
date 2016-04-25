@@ -11,7 +11,7 @@ module.exports = class DiagramToolkit
     @linkIncreaseFadedColor   = "rgba(230,40,20,0.2)"
     @linkDecreaseFadedColor   = "rgba(0,110,200,0.2)"
     @linkDashedColor          = "#aaa"
-    @linkSelectedOutlineColor = "#f6bf33"
+    @linkSelectedOutlineColor = "rgba(250,200,60,0.7)"
     @color     = @options.color or '#233'
     @lineWidth = @options.lineWidth or 1
     @lineWidth = 1
@@ -157,7 +157,7 @@ module.exports = class DiagramToolkit
   addLink: (source, target, label, color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, linkModel) ->
     paintStyle = @_paintStyle @defaultLinkColor
     paintStyle.outlineColor = "none"
-    paintStyle.outlineWidth = 10
+    paintStyle.outlineWidth = 4
     
     startColor = @defaultLinkColor
     finalColor = @defaultLinkColor
@@ -173,7 +173,6 @@ module.exports = class DiagramToolkit
       fixedColor = fixedColor = @linkDashedColor
     if isSelected
       paintStyle.outlineColor = @linkSelectedOutlineColor
-      paintStyle.outlineWidth = 1
     if magnitude < 0
       fixedColor = @linkDecreaseColor
       fadedColor = @linkDecreaseFadedColor
