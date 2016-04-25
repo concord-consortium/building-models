@@ -18,7 +18,7 @@ module.exports = class DiagramToolkit
     @lineWidthVariation = 4
     @kit       = jsPlumb.getInstance {Container: @domContext}
     @kit.importDefaults
-      Connector:        ["Bezier", {curviness: 60}],
+      Connector:        ["Bezier", {curviness: 80}],
       Anchor:           "Continuous",
       DragOptions :     {cursor: 'pointer', zIndex:2000},
       ConnectionsDetachable: true,
@@ -201,7 +201,7 @@ module.exports = class DiagramToolkit
     if (gradual && useVariableThickness)
       variableWidthMagnitude = @lineWidthVariation * gradual
       @kit.importDefaults
-        Connector: ["Bezier", {curviness: 60, variableWidth: variableWidthMagnitude}]
+        Connector: ["Bezier", {curviness: 120, variableWidth: variableWidthMagnitude}]
       if (gradual > 0)
         thickness = thickness * @lineWidthVariation
 
