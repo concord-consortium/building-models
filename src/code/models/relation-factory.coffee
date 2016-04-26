@@ -22,6 +22,16 @@ module.exports = class RelationFactory
       return (scope) ->
         scope.maxIn - scalarFunc(scope)
 
+  @vary:
+    id: 2
+    prefixIco: "var"
+    text: tr "~NODE-RELATION-EDIT.VARIES"
+    formulaFrag: "0+1 *"
+    magnitude: 0
+    func: (scalarFunc) ->
+      return (scope) ->
+        scalarFunc(scope)
+
   @aboutTheSame:
     id: 0
     text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
@@ -60,7 +70,7 @@ module.exports = class RelationFactory
     magnitude: 2
     gradual: 1
     func: (scope) ->
-      return Math.min(Math.exp(scope.in/21.7)-1, scope.maxOut)
+      return Math.min(Math.exp(scope.in / 21.7)-1, scope.maxOut)
 
   @lessAndLess:
     id: 4
@@ -72,16 +82,27 @@ module.exports = class RelationFactory
     func: (scope) ->
       return 21.7 * Math.log(scope.in+1)
 
+  @custom:
+    id: 5
+    text: tr "~NODE-RELATION-EDIT.CUSTOM"
+    postfixIco: "cus"
+    formulaFrag: "1 / (( 1 / ( 12.5 * sqrt(2 * PI) ) ) * pow(E,(pow((in - 50), 2)) / (2 * pow(12.5,2)))) * 3"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return 1 / (( 1 / ( 12.5 * Math.sqrt(2 * Math.PI) ) ) * Math.pow(Math.E , Math.pow(scope.in - 50, 2) / (2 * Math.pow(12.5,2))))*3
+   
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
-  @vectors: [@increase, @decrease]
+  @vectors: [@increase, @decrease, @vary]
   @scalars: [
     @aboutTheSame
     @aLot
     @aLittle
     @moreAndMore
     @lessAndLess
+    @custom
   ]
 
   @fromSelections: (vector,scalar) ->
@@ -96,9 +117,12 @@ module.exports = class RelationFactory
       _.startsWith relation.formula, v.formulaFrag
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
+    useCustomData = false
+    if scalar == @custom
+      useCustomData = true
     magnitude = 0
     gradual = 0
     if vector && scalar
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
-    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
+    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual, useCustomData: useCustomData}

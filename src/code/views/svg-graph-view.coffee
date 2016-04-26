@@ -9,6 +9,7 @@ module.exports = SvgGraphView = React.createClass
     fontSize: 16
     xLabel: "x axis"
     yLabel: "y axis"
+    customData: null
 
   marginal: ->
     @props.fontSize * 0.4
@@ -39,15 +40,24 @@ module.exports = SvgGraphView = React.createClass
     data = _.range(0,rangex)
     miny = Infinity
     maxy = -Infinity
-    data = _.map data, (x) =>
-      scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex}
-      try
-        y = math.eval @props.formula, scope
+    actualData = @props.customData
+    if actualData?
+      data = _.map actualData, (point) ->
+        x = _.first point
+        y = _.last point
         if y < miny then miny = y
         if y > maxy then maxy = y
-      catch error
-        console.log "Errror: #{error}"
-      { y: y, x: x}
+        { y: y, x: x}
+    else
+      data = _.map data, (x) =>
+        scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex}
+        try
+          y = math.eval @props.formula, scope
+          if y < miny then miny = y
+          if y > maxy then maxy = y
+        catch error
+          console.log "Errror: #{error}"
+        { y: y, x: x}
 
     data = _.map data, (d) ->
       {x,y} = d

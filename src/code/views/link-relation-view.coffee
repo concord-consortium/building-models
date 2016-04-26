@@ -3,7 +3,7 @@
 RelationFactory = require "../models/relation-factory"
 SvgGraph        = React.createFactory require "./svg-graph-view"
 tr              = require "../utils/translate"
-
+CustomData      = require "./custom-relationship-view"
 
 Graph = React.createFactory React.createClass
   render: ->
@@ -14,6 +14,7 @@ Graph = React.createFactory React.createClass
         yLabel: @props.yAxis
         xLabel: @props.xAxis
         formula: @props.formula
+        customData: @props.customData
       })
     )
 
@@ -50,9 +51,7 @@ module.exports = LinkRelationView = React.createClass
   updateRelation: ->
     selectedVector = @getVector()
     selectedScalar = @getScalar()
-
     @setState {selectedVector}
-
 
     if selectedVector? and selectedScalar?
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar)
@@ -67,16 +66,16 @@ module.exports = LinkRelationView = React.createClass
     id = parseInt @refs.scalar.value
     RelationFactory.scalars[id]
 
-  renderVectorPulldown: (increaseOrDecrease)->
+  renderVectorPulldown: (vectorSelection)->
     options = _.map RelationFactory.vectors, (opt, i) ->
       (option {value: opt.id, key: i}, opt.text)
 
-    if not increaseOrDecrease?
+    if not vectorSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
         tr "~NODE-RELATION-EDIT.UNSELECTED")
       currentOption = "unselected"
     else
-      currentOption = increaseOrDecrease.id
+      currentOption = vectorSelection.id
 
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
@@ -84,18 +83,18 @@ module.exports = LinkRelationView = React.createClass
       options)
     )
 
-  renderScalarPulldown:(amount) ->
+  renderScalarPulldown:(scalarSelection) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
       (option {value: opt.id, key: i}, opt.text)
 
-    if not amount?
+    if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
         tr "~NODE-RELATION-EDIT.UNSELECTED")
       currentOption = "unselected"
     else
-      currentOption = amount.id
+      currentOption = scalarSelection.id
 
-    disabled = "disabled" unless @state.selectedVector or amount?
+    disabled = "disabled" unless @state.selectedVector or scalarSelection?
 
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
@@ -107,9 +106,11 @@ module.exports = LinkRelationView = React.createClass
   render: ->
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
-    {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
+    {vector, scalar, useCustomData} = RelationFactory.selectionsFromRelation @props.link.relation
     vector ?= @state.selectedVector
     formula = @props.link.relation.formula
+    if useCustomData
+      @props.link.relation.loadCustomData CustomData
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
         (QuantStart {source: source, target: target})
@@ -121,6 +122,6 @@ module.exports = LinkRelationView = React.createClass
         )
       )
       (div {className: 'bottom'},
-        (Graph {formula: formula, xAxis: source, yAxis: target})
+        (Graph {formula: formula, xAxis: source, yAxis: target, customData: @props.link.relation.customData})
       )
     )
