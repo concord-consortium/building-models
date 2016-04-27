@@ -43893,7 +43893,7 @@ module.exports = DiagramToolkit = (function() {
     this.linkIncreaseFadedColor = "rgba(230,40,20,0.2)";
     this.linkDecreaseFadedColor = "rgba(0,110,200,0.2)";
     this.linkDashedColor = "#aaa";
-    this.linkSelectedOutlineColor = "#f6bf33";
+    this.linkSelectedOutlineColor = "rgba(250,200,60,0.7)";
     this.color = this.options.color || '#233';
     this.lineWidth = this.options.lineWidth || 1;
     this.lineWidth = 1;
@@ -43904,7 +43904,7 @@ module.exports = DiagramToolkit = (function() {
     this.kit.importDefaults({
       Connector: [
         "Bezier", {
-          curviness: 60
+          curviness: 80
         }
       ],
       Anchor: "Continuous",
@@ -44113,7 +44113,7 @@ module.exports = DiagramToolkit = (function() {
     var connection, fadedColor, finalColor, fixedColor, paintStyle, startColor, thickness, variableWidthMagnitude;
     paintStyle = this._paintStyle(this.defaultLinkColor);
     paintStyle.outlineColor = "none";
-    paintStyle.outlineWidth = 10;
+    paintStyle.outlineWidth = 4;
     startColor = this.defaultLinkColor;
     finalColor = this.defaultLinkColor;
     fixedColor = this.defaultLinkColor;
@@ -44128,7 +44128,6 @@ module.exports = DiagramToolkit = (function() {
     }
     if (isSelected) {
       paintStyle.outlineColor = this.linkSelectedOutlineColor;
-      paintStyle.outlineWidth = 1;
     }
     if (magnitude < 0) {
       fixedColor = this.linkDecreaseColor;
@@ -44161,7 +44160,7 @@ module.exports = DiagramToolkit = (function() {
       this.kit.importDefaults({
         Connector: [
           "Bezier", {
-            curviness: 60,
+            curviness: 120,
             variableWidth: variableWidthMagnitude
           }
         ]
