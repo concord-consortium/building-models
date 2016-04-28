@@ -47,11 +47,13 @@ module.exports = LinkRelationView = React.createClass
     if @props.link isnt newProps.link
       @setState
         selectedVector: null
+        selectedScalar: null
+        selectedCustom: null
 
   updateRelation: ->
     selectedVector = @getVector()
     selectedScalar = @getScalar()
-    @setState {selectedVector}
+    @setState {selectedVector, selectedScalar}
 
     if selectedVector? and selectedScalar?
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar)
@@ -82,17 +84,24 @@ module.exports = LinkRelationView = React.createClass
       (select {value: currentOption, className:"", ref: "vector", onChange: @updateRelation},
       options)
     )
-
+      
   renderScalarPulldown:(scalarSelection) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.text)
-
+      (option {value: opt.id, key: i, className: opt.className}, opt.text)
+      
     if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
         tr "~NODE-RELATION-EDIT.UNSELECTED")
       currentOption = "unselected"
     else
       currentOption = scalarSelection.id
+
+    if RelationFactory.customRelation @state.selectedVector
+      $(".option-scalar").hide()
+      $(".option-custom").show()
+    else
+      $(".option-scalar").show()
+      $(".option-custom").hide()
 
     disabled = "disabled" unless @state.selectedVector or scalarSelection?
 

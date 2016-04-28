@@ -39,6 +39,7 @@ module.exports = class RelationFactory
     formulaFrag: "in"
     magnitude: 2
     gradual: false
+    className: "option-scalar"
     func: (scope) ->
       return scope.in
 
@@ -49,6 +50,7 @@ module.exports = class RelationFactory
     formulaFrag: "min(in * 2, maxOut)"
     magnitude: 4
     gradual: false
+    className: "option-scalar"
     func: (scope) ->
       return Math.min(scope.in * 2, scope.maxOut)
 
@@ -59,6 +61,7 @@ module.exports = class RelationFactory
     formulaFrag: "in / 2"
     magnitude: 1
     gradual: false
+    className: "option-scalar"
     func: (scope) ->
       return scope.in / 2
 
@@ -69,6 +72,7 @@ module.exports = class RelationFactory
     formulaFrag: "min(exp(in/21.7)-1, maxOut)"
     magnitude: 2
     gradual: 1
+    className: "option-scalar"
     func: (scope) ->
       return Math.min(Math.exp(scope.in / 21.7)-1, scope.maxOut)
 
@@ -79,6 +83,7 @@ module.exports = class RelationFactory
     formulaFrag: "21.7 * log(in+1)"
     magnitude: 2
     gradual: -1
+    className: "option-scalar"
     func: (scope) ->
       return 21.7 * Math.log(scope.in+1)
 
@@ -89,6 +94,7 @@ module.exports = class RelationFactory
     formulaFrag: "1 / (( 1 / ( 12.5 * sqrt(2 * PI) ) ) * pow(E,(pow((in - 50), 2)) / (2 * pow(12.5,2)))) * 3"
     magnitude: 0
     gradual: 0
+    className: "option-custom"
     func: (scope) ->
       return 1 / (( 1 / ( 12.5 * Math.sqrt(2 * Math.PI) ) ) * Math.pow(Math.E , Math.pow(scope.in - 50, 2) / (2 * Math.pow(12.5,2))))*3
    
@@ -106,6 +112,11 @@ module.exports = class RelationFactory
   ]
 
   @fromSelections: (vector,scalar) ->
+    if @customRelation vector
+      scalar = @custom
+      useCustomData = true
+    else if scalar == @custom
+      scalar = @aboutTheSame
     name = "#{vector.text} #{scalar.text}"
     formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
     func = vector.func(scalar.func)
@@ -118,11 +129,20 @@ module.exports = class RelationFactory
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
     useCustomData = false
-    if scalar == @custom
+    if @customRelation vector
+      scalar = @custom
       useCustomData = true
+    else if scalar == @custom
+      scalar = @aboutTheSame
     magnitude = 0
     gradual = 0
     if vector && scalar
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
     {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual, useCustomData: useCustomData}
+    
+  @customRelation: (vector) ->
+    isCustomRelation = false
+    if vector? and vector.id == @vary.id
+      isCustomRelation = true
+    isCustomRelation
