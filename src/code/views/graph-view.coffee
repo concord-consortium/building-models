@@ -11,6 +11,7 @@ RelationFactory  = require "../models/relation-factory"
 
 SimulationStore  = require "../stores/simulation-store"
 AppSettingsStore  = require "../stores/app-settings-store"
+LinkColors       = require "../utils/link-colors"
 
 {div} = React.DOM
 
@@ -174,6 +175,10 @@ module.exports = React.createClass
       isEditing = link is @state.editingLink
       isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
       relationDetails = RelationFactory.selectionsFromRelation(link.relation)
+      if relationDetails.useCustomData
+        link.color = LinkColors.customRelationship
+      else
+        link.color = LinkColors.default
       magnitude = relationDetails.magnitude
       gradual = relationDetails.gradual
       useGradient = false

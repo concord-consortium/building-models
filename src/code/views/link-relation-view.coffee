@@ -96,6 +96,7 @@ module.exports = LinkRelationView = React.createClass
     else
       currentOption = scalarSelection.id
 
+    # Temporary solution to control which options appear in the scalar box
     if RelationFactory.customRelation @state.selectedVector
       $(".option-scalar").hide()
       $(".option-custom").show()

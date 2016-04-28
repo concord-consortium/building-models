@@ -27,7 +27,7 @@ module.exports = class RelationFactory
     prefixIco: "var"
     text: tr "~NODE-RELATION-EDIT.VARIES"
     formulaFrag: "0+1 *"
-    magnitude: 0
+    magnitude: 1
     func: (scalarFunc) ->
       return (scope) ->
         scalarFunc(scope)
@@ -92,7 +92,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.CUSTOM"
     postfixIco: "cus"
     formulaFrag: "1 / (( 1 / ( 12.5 * sqrt(2 * PI) ) ) * pow(E,(pow((in - 50), 2)) / (2 * pow(12.5,2)))) * 3"
-    magnitude: 0
+    magnitude: 2
     gradual: 0
     className: "option-custom"
     func: (scope) ->
