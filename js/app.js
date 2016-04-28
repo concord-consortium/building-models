@@ -50,7 +50,7 @@ window.Sage = {
 
 
 
-},{"./stores/graph-store":422,"./stores/palette-store":426,"./utils/hash-parameters":432,"./views/app-view":442,"./views/value-slider-view":483}],2:[function(require,module,exports){
+},{"./stores/graph-store":422,"./stores/palette-store":426,"./utils/hash-parameters":432,"./views/app-view":443,"./views/value-slider-view":485}],2:[function(require,module,exports){
 /*! decimal.js v4.0.4 https://github.com/MikeMcl/decimal.js/LICENCE */
 ;(function (global) {
     'use strict';
@@ -39732,7 +39732,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../utils/time-units":438,"./migration-mixin":405}],399:[function(require,module,exports){
+},{"../../utils/time-units":439,"./migration-mixin":405}],399:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -40105,7 +40105,7 @@ module.exports = {
 
 
 
-},{"../stores/codap-store":420,"../stores/google-file-store":421,"../stores/palette-store":426,"../utils/hash-parameters":432,"../utils/translate":439}],408:[function(require,module,exports){
+},{"../stores/codap-store":420,"../stores/google-file-store":421,"../stores/palette-store":426,"../utils/hash-parameters":432,"../utils/translate":440}],408:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -40175,7 +40175,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":423,"../utils/has-valid-image-extension":431,"../views/preview-image-dialog-view":476}],410:[function(require,module,exports){
+},{"../stores/image-dialog-store":423,"../utils/has-valid-image-extension":431,"../views/preview-image-dialog-view":478}],410:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -40208,7 +40208,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":439}],411:[function(require,module,exports){
+},{"../utils/translate":440}],411:[function(require,module,exports){
 var CodapActions, CodapConnect, IframePhoneRpcEndpoint, SimulationStore, TimeUnits, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -40563,7 +40563,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../actions/codap-actions":385,"../stores/graph-store":422,"../stores/palette-store":426,"../stores/simulation-store":427,"../utils/time-units":438,"../utils/translate":439,"iframe-phone":8}],412:[function(require,module,exports){
+},{"../actions/codap-actions":385,"../stores/graph-store":422,"../stores/palette-store":426,"../stores/simulation-store":427,"../utils/time-units":439,"../utils/translate":440,"iframe-phone":8}],412:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -40595,7 +40595,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 },{}],413:[function(require,module,exports){
-var GraphPrimitive, Link, Relation,
+var GraphPrimitive, Link, LinkColors, Relation,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
@@ -40603,10 +40603,12 @@ GraphPrimitive = require('./graph-primitive');
 
 Relation = require("./relationship");
 
+LinkColors = require("../utils/link-colors");
+
 module.exports = Link = (function(superClass) {
   extend(Link, superClass);
 
-  Link.defaultColor = "#777";
+  Link.defaultColor = LinkColors["default"];
 
   Link.defaultRelation = new Relation({
     formula: "1 * in"
@@ -40672,7 +40674,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"./graph-primitive":412,"./relationship":416}],414:[function(require,module,exports){
+},{"../utils/link-colors":436,"./graph-primitive":412,"./relationship":416}],414:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, SEMIQUANT_MAX, SEMIQUANT_MIN, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -40952,7 +40954,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":428,"../utils/translate":439,"./graph-primitive":412}],415:[function(require,module,exports){
+},{"../utils/colors":428,"../utils/translate":440,"./graph-primitive":412}],415:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -40988,6 +40990,19 @@ module.exports = RelationFactory = (function() {
     }
   };
 
+  RelationFactory.vary = {
+    id: 2,
+    prefixIco: "var",
+    text: tr("~NODE-RELATION-EDIT.VARIES"),
+    formulaFrag: "0+1 *",
+    magnitude: 1,
+    func: function(scalarFunc) {
+      return function(scope) {
+        return scalarFunc(scope);
+      };
+    }
+  };
+
   RelationFactory.aboutTheSame = {
     id: 0,
     text: tr("~NODE-RELATION-EDIT.ABOUT_THE_SAME"),
@@ -40995,6 +41010,7 @@ module.exports = RelationFactory = (function() {
     formulaFrag: "in",
     magnitude: 2,
     gradual: false,
+    className: "option-scalar",
     func: function(scope) {
       return scope["in"];
     }
@@ -41007,6 +41023,7 @@ module.exports = RelationFactory = (function() {
     formulaFrag: "min(in * 2, maxOut)",
     magnitude: 4,
     gradual: false,
+    className: "option-scalar",
     func: function(scope) {
       return Math.min(scope["in"] * 2, scope.maxOut);
     }
@@ -41019,6 +41036,7 @@ module.exports = RelationFactory = (function() {
     formulaFrag: "in / 2",
     magnitude: 1,
     gradual: false,
+    className: "option-scalar",
     func: function(scope) {
       return scope["in"] / 2;
     }
@@ -41031,6 +41049,7 @@ module.exports = RelationFactory = (function() {
     formulaFrag: "min(exp(in/21.7)-1, maxOut)",
     magnitude: 2,
     gradual: 1,
+    className: "option-scalar",
     func: function(scope) {
       return Math.min(Math.exp(scope["in"] / 21.7) - 1, scope.maxOut);
     }
@@ -41043,21 +41062,39 @@ module.exports = RelationFactory = (function() {
     formulaFrag: "21.7 * log(in+1)",
     magnitude: 2,
     gradual: -1,
+    className: "option-scalar",
     func: function(scope) {
       return 21.7 * Math.log(scope["in"] + 1);
     }
+  };
+
+  RelationFactory.custom = {
+    id: 5,
+    text: tr("~NODE-RELATION-EDIT.CUSTOM"),
+    postfixIco: "cus",
+    formulaFrag: "",
+    magnitude: 2,
+    gradual: 0,
+    className: "option-custom",
+    func: function(scope) {}
   };
 
   RelationFactory.iconName = function(incdec, amount) {
     return "icon-" + incdec.prefixIco + "-" + amount.postfixIco;
   };
 
-  RelationFactory.vectors = [RelationFactory.increase, RelationFactory.decrease];
+  RelationFactory.vectors = [RelationFactory.increase, RelationFactory.decrease, RelationFactory.vary];
 
-  RelationFactory.scalars = [RelationFactory.aboutTheSame, RelationFactory.aLot, RelationFactory.aLittle, RelationFactory.moreAndMore, RelationFactory.lessAndLess];
+  RelationFactory.scalars = [RelationFactory.aboutTheSame, RelationFactory.aLot, RelationFactory.aLittle, RelationFactory.moreAndMore, RelationFactory.lessAndLess, RelationFactory.custom];
 
   RelationFactory.fromSelections = function(vector, scalar) {
-    var formula, func, magnitude, name;
+    var formula, func, magnitude, name, useCustomData;
+    if (this.customRelation(vector)) {
+      scalar = this.custom;
+      useCustomData = true;
+    } else if (scalar === this.custom) {
+      scalar = this.aboutTheSame;
+    }
     name = vector.text + " " + scalar.text;
     formula = vector.formulaFrag + " " + scalar.formulaFrag;
     func = vector.func(scalar.func);
@@ -41071,13 +41108,20 @@ module.exports = RelationFactory = (function() {
   };
 
   RelationFactory.selectionsFromRelation = function(relation) {
-    var gradual, magnitude, scalar, vector;
+    var gradual, magnitude, scalar, useCustomData, vector;
     vector = _.find(this.vectors, function(v) {
       return _.startsWith(relation.formula, v.formulaFrag);
     });
     scalar = _.find(this.scalars, function(s) {
       return _.endsWith(relation.formula, s.formulaFrag);
     });
+    useCustomData = false;
+    if (this.customRelation(vector)) {
+      scalar = this.custom;
+      useCustomData = true;
+    } else if (scalar === this.custom) {
+      scalar = this.aboutTheSame;
+    }
     magnitude = 0;
     gradual = 0;
     if (vector && scalar) {
@@ -41088,8 +41132,18 @@ module.exports = RelationFactory = (function() {
       vector: vector,
       scalar: scalar,
       magnitude: magnitude,
-      gradual: gradual
+      gradual: gradual,
+      useCustomData: useCustomData
     };
+  };
+
+  RelationFactory.customRelation = function(vector) {
+    var isCustomRelation;
+    isCustomRelation = false;
+    if ((vector != null) && vector.id === this.vary.id) {
+      isCustomRelation = true;
+    }
+    return isCustomRelation;
   };
 
   return RelationFactory;
@@ -41098,7 +41152,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":439,"./relationship":416}],416:[function(require,module,exports){
+},{"../utils/translate":440,"./relationship":416}],416:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -41128,6 +41182,8 @@ module.exports = Relationship = (function() {
     this.isDefined = (this.opts.formula != null) || (this.opts.func != null);
     this.hasError = false;
     this.setFormula(formula);
+    this.dataPoints;
+    this.customData;
   }
 
   Relationship.prototype.setFormula = function(newf) {
@@ -41157,7 +41213,13 @@ module.exports = Relationship = (function() {
       maxIn: maxIn,
       maxOut: maxOut
     };
-    if (this.func) {
+    if (this.customData) {
+      if (this.dataPoints[inV] != null) {
+        result = this.dataPoints[inV].y;
+      } else {
+        result = 0;
+      }
+    } else if (this.func) {
       result = this.func(scope);
     } else {
       try {
@@ -41169,6 +41231,21 @@ module.exports = Relationship = (function() {
       }
     }
     return result;
+  };
+
+  Relationship.prototype.loadCustomData = function(source) {
+    var points;
+    this.customData = source;
+    points = _.map(source, function(point) {
+      var x, y;
+      x = _.first(point);
+      y = _.last(point);
+      return {
+        y: y,
+        x: x
+      };
+    });
+    return this.dataPoints = _.indexBy(points, 'x');
   };
 
   Relationship.prototype.toExport = function() {
@@ -41184,7 +41261,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":439,"mathjs":9}],417:[function(require,module,exports){
+},{"../utils/translate":440,"mathjs":9}],417:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, tr;
 
 Importer = require('../utils/importer');
@@ -41395,7 +41472,7 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":433,"../utils/translate":439,"./link":413,"./node":414}],418:[function(require,module,exports){
+},{"../utils/importer":433,"../utils/translate":440,"./link":413,"./node":414}],418:[function(require,module,exports){
 var IntegrationFunction, Simulation, scaleInput;
 
 scaleInput = function(val, nodeIn, nodeOut) {
@@ -42026,7 +42103,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":430,"../utils/hash-parameters":432,"../utils/translate":439,"./graph-store":422,"./palette-store":426}],422:[function(require,module,exports){
+},{"../utils/google-drive-io":430,"../utils/hash-parameters":432,"../utils/translate":440,"./graph-store":422,"./palette-store":426}],422:[function(require,module,exports){
 var AppSettingsStore, CodapActions, GraphActions, GraphStore, Importer, Link, Migrations, NodeModel, PaletteDeleteStore, PaletteStore, SelectionManager, SimulationStore, UndoRedo, mixin, tr;
 
 Importer = require('../utils/importer');
@@ -42651,7 +42728,7 @@ module.exports = {
 
 
 
-},{"../actions/codap-actions":385,"../actions/graph-actions":386,"../data/migrations/migrations":406,"../models/link":413,"../models/node":414,"../models/selection-manager":417,"../stores/app-settings-store":419,"../stores/palette-delete-dialog-store":425,"../stores/palette-store":426,"../stores/simulation-store":427,"../utils/importer":433,"../utils/translate":439,"../utils/undo-redo":440}],423:[function(require,module,exports){
+},{"../actions/codap-actions":385,"../actions/graph-actions":386,"../data/migrations/migrations":406,"../models/link":413,"../models/node":414,"../models/selection-manager":417,"../stores/app-settings-store":419,"../stores/palette-delete-dialog-store":425,"../stores/palette-store":426,"../stores/simulation-store":427,"../utils/importer":433,"../utils/translate":440,"../utils/undo-redo":441}],423:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -42985,7 +43062,7 @@ module.exports = {
 
 
 
-},{"../utils/undo-redo":440,"./nodes-store":424,"./palette-store":426}],426:[function(require,module,exports){
+},{"../utils/undo-redo":441,"./nodes-store":424,"./palette-store":426}],426:[function(require,module,exports){
 var ImportActions, UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage, uuid;
 
 resizeImage = require('../utils/resize-image');
@@ -43234,7 +43311,7 @@ window.PaletteStore = module.exports;
 
 
 
-},{"../actions/import-actions":387,"../data/initial-palette":388,"../data/internal-library":389,"../utils/resize-image":437,"../utils/undo-redo":440,"uuid":384}],427:[function(require,module,exports){
+},{"../actions/import-actions":387,"../data/initial-palette":388,"../data/internal-library":389,"../utils/resize-image":438,"../utils/undo-redo":441,"uuid":384}],427:[function(require,module,exports){
 var AppSettingsActions, GraphActions, ImportActions, Simulation, SimulationActions, SimulationStore, TimeUnits, mixin, tr;
 
 AppSettingsActions = require('./app-settings-store').actions;
@@ -43424,7 +43501,7 @@ module.exports = {
 
 
 
-},{"../actions/graph-actions":386,"../actions/import-actions":387,"../models/simulation":418,"../utils/time-units":438,"../utils/translate":439,"./app-settings-store":419}],428:[function(require,module,exports){
+},{"../actions/graph-actions":386,"../actions/import-actions":387,"../models/simulation":418,"../utils/time-units":439,"../utils/translate":440,"./app-settings-store":419}],428:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -43444,7 +43521,7 @@ module.exports = [
 
 
 
-},{"./translate":439}],429:[function(require,module,exports){
+},{"./translate":440}],429:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -43497,7 +43574,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":431,"./resize-image":437}],430:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":431,"./resize-image":438}],430:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -43724,7 +43801,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":439}],432:[function(require,module,exports){
+},{"./translate":440}],432:[function(require,module,exports){
 var HashParameters, PARAM_TOKEN, VALUE_TOKEN;
 
 PARAM_TOKEN = /[?|&]/g;
@@ -43879,22 +43956,16 @@ module.exports = MySystemImporter = (function() {
 
 
 },{"../actions/import-actions":387,"../data/migrations/migrations":406,"../models/node":414}],434:[function(require,module,exports){
-var DiagramToolkit;
+var DiagramToolkit, LinkColors;
+
+LinkColors = require("../utils/link-colors");
 
 module.exports = DiagramToolkit = (function() {
   function DiagramToolkit(domContext, options) {
     this.domContext = domContext;
     this.options = options != null ? options : {};
     this.type = "jsPlumbWrappingDiagramToolkit";
-    this.defaultLinkColor = '#777';
-    this.defaultFadedLinkColor = "rgba(120,120,120,0)";
-    this.linkIncreaseColor = "rgba(230,40,20,1)";
-    this.linkDecreaseColor = "rgba(0,110,200,1)";
-    this.linkIncreaseFadedColor = "rgba(230,40,20,0.2)";
-    this.linkDecreaseFadedColor = "rgba(0,110,200,0.2)";
-    this.linkDashedColor = "#aaa";
-    this.linkSelectedOutlineColor = "rgba(250,200,60,0.7)";
-    this.color = this.options.color || '#233';
+    this.color = this.options.color || LinkColors.defaultLight;
     this.lineWidth = this.options.lineWidth || 1;
     this.lineWidth = 1;
     this.lineWidthVariation = 4;
@@ -44111,33 +44182,33 @@ module.exports = DiagramToolkit = (function() {
 
   DiagramToolkit.prototype.addLink = function(source, target, label, color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, linkModel) {
     var connection, fadedColor, finalColor, fixedColor, paintStyle, startColor, thickness, variableWidthMagnitude;
-    paintStyle = this._paintStyle(this.defaultLinkColor);
+    paintStyle = this._paintStyle(LinkColors["default"]);
     paintStyle.outlineColor = "none";
     paintStyle.outlineWidth = 4;
-    startColor = this.defaultLinkColor;
-    finalColor = this.defaultLinkColor;
-    fixedColor = this.defaultLinkColor;
-    fadedColor = this.defaultFadedLinkColor;
+    startColor = LinkColors["default"];
+    finalColor = LinkColors["default"];
+    fixedColor = LinkColors["default"];
+    fadedColor = LinkColors.defaultFaded;
     thickness = Math.abs(magnitude);
     if (!thickness) {
       thickness = 1;
     }
     if (isDashed) {
       paintStyle.dashstyle = "4 2";
-      fixedColor = fixedColor = this.linkDashedColor;
+      fixedColor = fixedColor = LinkColors.dashed;
     }
     if (isSelected) {
-      paintStyle.outlineColor = this.linkSelectedOutlineColor;
+      paintStyle.outlineColor = LinkColors.selectedOutline;
     }
     if (magnitude < 0) {
-      fixedColor = this.linkDecreaseColor;
-      fadedColor = this.linkDecreaseFadedColor;
+      fixedColor = LinkColors.decrease;
+      fadedColor = LinkColors.decreaseFaded;
     }
     if (magnitude > 0) {
-      fixedColor = this.linkIncreaseColor;
-      fadedColor = this.linkIncreaseFadedColor;
+      fixedColor = LinkColors.increase;
+      fadedColor = LinkColors.increaseFaded;
     }
-    if (color !== this.defaultLinkColor) {
+    if (color !== LinkColors["default"]) {
       fixedColor = color;
     }
     paintStyle.lineWidth = thickness;
@@ -44210,7 +44281,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{}],435:[function(require,module,exports){
+},{"../utils/link-colors":436}],435:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -44250,12 +44321,14 @@ module.exports = {
   "~NODE-RELATION-EDIT.TO": "to",
   "~NODE-RELATION-EDIT.INCREASES": "increase",
   "~NODE-RELATION-EDIT.DECREASES": "decrease",
+  "~NODE-RELATION-EDIT.VARIES": "varies",
   "~NODE-RELATION-EDIT.BY": "by",
   "~NODE-RELATION-EDIT.ABOUT_THE_SAME": "about the same",
   "~NODE-RELATION-EDIT.A_LOT": "a lot",
   "~NODE-RELATION-EDIT.A_LITTLE": "a little",
   "~NODE-RELATION-EDIT.MORE_AND_MORE": "more and more",
   "~NODE-RELATION-EDIT.LESS_AND_LESS": "less and less",
+  "~NODE-RELATION-EDIT.CUSTOM": "create new relationship",
   "~LINK-EDIT.DELETE": "✖ Delete Link",
   "~LINK-EDIT.TITLE": "Title",
   "~LINK-EDIT.COLOR": "Color",
@@ -44349,6 +44422,22 @@ module.exports = {
 
 
 },{}],436:[function(require,module,exports){
+module.exports = {
+  "default": '#777',
+  defaultFaded: "rgba(120,120,120,0)",
+  increase: "rgba(230,40,20,1)",
+  decrease: "rgba(0,110,200,1)",
+  increaseFaded: "rgba(230,40,20,0.2)",
+  decreaseFaded: "rgba(0,110,200,0.2)",
+  dashed: "#aaa",
+  selectedOutline: "rgba(250,200,60,0.7)",
+  customRelationship: "#778",
+  defaultLight: '#233'
+};
+
+
+
+},{}],437:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -44385,7 +44474,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],437:[function(require,module,exports){
+},{}],438:[function(require,module,exports){
 module.exports = function(src, callback) {
   var fail, img, maxHeight, maxWidth;
   fail = function() {
@@ -44427,7 +44516,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],438:[function(require,module,exports){
+},{}],439:[function(require,module,exports){
 var toSeconds, tr, units;
 
 tr = require('./translate');
@@ -44472,7 +44561,7 @@ module.exports = {
 
 
 
-},{"./translate":439}],439:[function(require,module,exports){
+},{"./translate":440}],440:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -44505,7 +44594,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":435}],440:[function(require,module,exports){
+},{"./lang/us-en":435}],441:[function(require,module,exports){
 var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances;
 
 CodapConnect = require('../models/codap-connect');
@@ -44812,7 +44901,7 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":411}],441:[function(require,module,exports){
+},{"../models/codap-connect":411}],442:[function(require,module,exports){
 var AboutView, a, br, div, h2, i, p, ref;
 
 ref = React.DOM, div = ref.div, a = ref.a, i = ref.i, h2 = ref.h2, p = ref.p, br = ref.br;
@@ -44886,7 +44975,7 @@ module.exports = AboutView = React.createClass({
 
 
 
-},{}],442:[function(require,module,exports){
+},{}],443:[function(require,module,exports){
 var AppSettingsStore, BuildInfoView, DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
 
 Reflux = require('reflux');
@@ -44988,7 +45077,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":407,"../stores/app-settings-store":419,"../stores/image-dialog-store":423,"../utils/hash-parameters":432,"../utils/translate":439,"./build-info-view":443,"./document-actions-view":445,"./global-nav-view":448,"./graph-view":449,"./image-browser-view":450,"./inspector-panel-view":456,"./modal-palette-delete-view":462,"./node-well-view":469,"./placeholder-view":475,"reflux":379}],443:[function(require,module,exports){
+},{"../mixins/app-view":407,"../stores/app-settings-store":419,"../stores/image-dialog-store":423,"../utils/hash-parameters":432,"../utils/translate":440,"./build-info-view":444,"./document-actions-view":447,"./global-nav-view":450,"./graph-view":451,"./image-browser-view":452,"./inspector-panel-view":458,"./modal-palette-delete-view":464,"./node-well-view":471,"./placeholder-view":477,"reflux":379}],444:[function(require,module,exports){
 var BuildInfoView, Migration, a, div, i, ref, table, td, tr;
 
 ref = React.DOM, div = ref.div, a = ref.a, table = ref.table, tr = ref.tr, td = ref.td, i = ref.i;
@@ -45098,7 +45187,7 @@ module.exports = BuildInfoView = React.createClass({
 
 
 
-},{"../data/migrations/migrations":406}],444:[function(require,module,exports){
+},{"../data/migrations/migrations":406}],445:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -45180,7 +45269,12 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":428,"../utils/translate":439}],445:[function(require,module,exports){
+},{"../utils/colors":428,"../utils/translate":440}],446:[function(require,module,exports){
+module.exports = [[0, 0.0315330040568425], [1, 0.0432862375572867], [2, 0.059041155121282], [3, 0.0800166505716637], [4, 0.107752264517118], [5, 0.144175995627215], [6, 0.191681424232947], [7, 0.253213940282686], [8, 0.332365326565821], [9, 0.433475269072082], [10, 0.561737548442409], [11, 0.723307718598223], [12, 0.925408022040759], [13, 1.17642416171993], [14, 1.48598739860325], [15, 1.86503434072018], [16, 2.32583581830341], [17, 2.88198549955238], [18, 3.54833850149776], [19, 4.34089030372386], [20, 5.27658688911547], [21, 6.37305831225372], [22, 7.64826990598602], [23, 9.1200881187303], [24, 10.8057615224151], [25, 12.7213217818534], [26, 14.880914207311], [27, 17.2960727347483], [28, 19.9749595412518], [29, 22.9215946992212], [30, 26.135105951927], [31, 29.6090324814472], [32, 33.3307190645567], [33, 37.2808379282536], [34, 41.4330746381835], [35, 45.7540112823635], [36, 50.2032349662931], [37, 54.7336922664505], [38, 59.2923009983467], [39, 63.8208197942859], [40, 68.2569640471871], [41, 72.5357443717836], [42, 76.5909915604364], [43, 80.357020807414], [44, 83.7703784749983], [45, 86.7716075485052], [46, 89.3069637335701], [47, 91.3300132864565], [48, 92.8030463388882], [49, 93.6982456653885], [50, 93.9985602986625], [51, 93.6982456653885], [52, 92.8030463388882], [53, 91.3300132864565], [54, 89.3069637335701], [55, 86.7716075485052], [56, 83.7703784749983], [57, 80.357020807414], [58, 76.5909915604364], [59, 72.5357443717836], [60, 68.2569640471871], [61, 63.8208197942859], [62, 59.2923009983467], [63, 54.7336922664505], [64, 50.2032349662931], [65, 45.7540112823635], [66, 41.4330746381835], [67, 37.2808379282536], [68, 33.3307190645567], [69, 29.6090324814472], [70, 26.135105951927], [71, 22.9215946992212], [72, 19.9749595412518], [73, 17.2960727347483], [74, 14.880914207311], [75, 12.7213217818534], [76, 10.8057615224151], [77, 9.1200881187303], [78, 7.64826990598602], [79, 6.37305831225372], [80, 5.27658688911547], [81, 4.34089030372386], [82, 3.54833850149776], [83, 2.88198549955238], [84, 2.32583581830341], [85, 1.86503434072018], [86, 1.48598739860325], [87, 1.17642416171993], [88, 0.925408022040759], [89, 0.723307718598223], [90, 0.561737548442409], [91, 0.433475269072082], [92, 0.332365326565821], [93, 0.253213940282686], [94, 0.191681424232947], [95, 0.144175995627215], [96, 0.107752264517118], [97, 0.0800166505716637], [98, 0.059041155121282], [99, 0.0432862375572867]];
+
+
+
+},{}],447:[function(require,module,exports){
 var AboutView, AppSettingsStore, CodapStore, SimulationRunPanel, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
@@ -45253,7 +45347,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":419,"../stores/codap-store":420,"../utils/translate":439,"./about-view":441,"./simulation-run-panel-view":479}],446:[function(require,module,exports){
+},{"../stores/app-settings-store":419,"../stores/codap-store":420,"../utils/translate":440,"./about-view":442,"./simulation-run-panel-view":481}],448:[function(require,module,exports){
 var Demo, DemoDropDown, DropDown, DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -45412,7 +45506,7 @@ Demo = React.createClass({
 
 
 
-},{}],447:[function(require,module,exports){
+},{}],449:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -45467,7 +45561,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":429,"../utils/translate":439}],448:[function(require,module,exports){
+},{"../utils/drop-image-handler":429,"../utils/translate":440}],450:[function(require,module,exports){
 var AppSettingsActions, BuildInfoView, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -45561,8 +45655,8 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":419,"../stores/google-file-store":421,"../utils/translate":439,"./build-info-view":443,"./dropdown-view":446,"./modal-google-save-view":461,"./open-in-codap-view":470}],449:[function(require,module,exports){
-var AppSettingsStore, DiagramToolkit, GraphStore, ImageDialogStore, Importer, Node, NodeModel, PaletteStore, RelationFactory, SimulationStore, div, dropImageHandler, tr;
+},{"../stores/app-settings-store":419,"../stores/google-file-store":421,"../utils/translate":440,"./build-info-view":444,"./dropdown-view":448,"./modal-google-save-view":463,"./open-in-codap-view":472}],451:[function(require,module,exports){
+var AppSettingsStore, DiagramToolkit, GraphStore, ImageDialogStore, Importer, LinkColors, Node, NodeModel, PaletteStore, RelationFactory, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
 
@@ -45587,6 +45681,8 @@ RelationFactory = require("../models/relation-factory");
 SimulationStore = require("../stores/simulation-store");
 
 AppSettingsStore = require("../stores/app-settings-store");
+
+LinkColors = require("../utils/link-colors");
 
 div = React.DOM.div;
 
@@ -45782,6 +45878,11 @@ module.exports = React.createClass({
       isEditing = link === this.state.editingLink;
       isDashed = !link.relation.isDefined && this.state.simulationPanelExpanded;
       relationDetails = RelationFactory.selectionsFromRelation(link.relation);
+      if (relationDetails.useCustomData) {
+        link.color = LinkColors.customRelationship;
+      } else {
+        link.color = LinkColors["default"];
+      }
       magnitude = relationDetails.magnitude;
       gradual = relationDetails.gradual;
       useGradient = false;
@@ -45889,7 +45990,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/node":414,"../models/relation-factory":415,"../stores/app-settings-store":419,"../stores/graph-store":422,"../stores/image-dialog-store":423,"../stores/palette-store":426,"../stores/simulation-store":427,"../utils/drop-image-handler":429,"../utils/importer":433,"../utils/js-plumb-diagram-toolkit":434,"../utils/translate":439,"./node-view":468}],450:[function(require,module,exports){
+},{"../models/node":414,"../models/relation-factory":415,"../stores/app-settings-store":419,"../stores/graph-store":422,"../stores/image-dialog-store":423,"../stores/palette-store":426,"../stores/simulation-store":427,"../utils/drop-image-handler":429,"../utils/importer":433,"../utils/js-plumb-diagram-toolkit":434,"../utils/link-colors":436,"../utils/translate":440,"./node-view":470}],452:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -45948,7 +46049,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":423,"../stores/palette-store":426,"../utils/translate":439,"./image-link-dialog-view":451,"./image-metadata-view":452,"./image-my-computer-dialog-view":453,"./image-search-dialog-view":455,"./modal-tabbed-dialog-view":463,"./tabbed-panel-view":482}],451:[function(require,module,exports){
+},{"../stores/image-dialog-store":423,"../stores/palette-store":426,"../utils/translate":440,"./image-link-dialog-view":453,"./image-metadata-view":454,"./image-my-computer-dialog-view":455,"./image-search-dialog-view":457,"./modal-tabbed-dialog-view":465,"./tabbed-panel-view":484}],453:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -45997,7 +46098,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":409,"../stores/image-dialog-store":423,"../utils/translate":439,"./dropzone-view":447}],452:[function(require,module,exports){
+},{"../mixins/image-dialog-view":409,"../stores/image-dialog-store":423,"../utils/translate":440,"./dropzone-view":449}],454:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -46085,7 +46186,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":390,"../stores/image-dialog-store":423,"../utils/translate":439}],453:[function(require,module,exports){
+},{"../data/licenses":390,"../stores/image-dialog-store":423,"../utils/translate":440}],455:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -46139,7 +46240,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":409,"../stores/image-dialog-store":423,"../utils/translate":439,"./dropzone-view":447}],454:[function(require,module,exports){
+},{"../mixins/image-dialog-view":409,"../stores/image-dialog-store":423,"../utils/translate":440,"./dropzone-view":449}],456:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -46227,7 +46328,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":426,"../utils/translate":439,"./palette-add-view":471}],455:[function(require,module,exports){
+},{"../stores/palette-store":426,"../utils/translate":440,"./palette-add-view":473}],457:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -46469,7 +46570,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":409,"../stores/image-dialog-store":423,"../utils/open-clipart":436,"../utils/translate":439}],456:[function(require,module,exports){
+},{"../mixins/image-dialog-view":409,"../stores/image-dialog-store":423,"../utils/open-clipart":437,"../utils/translate":440}],458:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, SimulationInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -46711,7 +46812,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":457,"./link-value-inspector-view":459,"./node-inspector-view":465,"./node-value-inspector-view":467,"./relation-inspector-view":477,"./simulation-inspector-view":478}],457:[function(require,module,exports){
+},{"./link-inspector-view":459,"./link-value-inspector-view":461,"./node-inspector-view":467,"./node-value-inspector-view":469,"./relation-inspector-view":479,"./simulation-inspector-view":480}],459:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -46767,8 +46868,8 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":439}],458:[function(require,module,exports){
-var Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
+},{"../utils/translate":440}],460:[function(require,module,exports){
+var CustomData, Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, br = ref.br, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
 
@@ -46777,6 +46878,8 @@ RelationFactory = require("../models/relation-factory");
 SvgGraph = React.createFactory(require("./svg-graph-view"));
 
 tr = require("../utils/translate");
+
+CustomData = require("./custom-relationship-view");
 
 Graph = React.createFactory(React.createClass({
   render: function() {
@@ -46787,7 +46890,8 @@ Graph = React.createFactory(React.createClass({
       height: 130,
       yLabel: this.props.yAxis,
       xLabel: this.props.xAxis,
-      formula: this.props.formula
+      formula: this.props.formula,
+      customData: this.props.customData
     }));
   }
 }));
@@ -46826,7 +46930,9 @@ module.exports = LinkRelationView = React.createClass({
   componentWillReceiveProps: function(newProps) {
     if (this.props.link !== newProps.link) {
       return this.setState({
-        selectedVector: null
+        selectedVector: null,
+        selectedScalar: null,
+        selectedCustom: null
       });
     }
   },
@@ -46835,7 +46941,8 @@ module.exports = LinkRelationView = React.createClass({
     selectedVector = this.getVector();
     selectedScalar = this.getScalar();
     this.setState({
-      selectedVector: selectedVector
+      selectedVector: selectedVector,
+      selectedScalar: selectedScalar
     });
     if ((selectedVector != null) && (selectedScalar != null)) {
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar);
@@ -46855,7 +46962,7 @@ module.exports = LinkRelationView = React.createClass({
     id = parseInt(this.refs.scalar.value);
     return RelationFactory.scalars[id];
   },
-  renderVectorPulldown: function(increaseOrDecrease) {
+  renderVectorPulldown: function(vectorSelection) {
     var currentOption, options;
     options = _.map(RelationFactory.vectors, function(opt, i) {
       return option({
@@ -46863,7 +46970,7 @@ module.exports = LinkRelationView = React.createClass({
         key: i
       }, opt.text);
     });
-    if (increaseOrDecrease == null) {
+    if (vectorSelection == null) {
       options.unshift(option({
         key: "placeholder",
         value: "unselected",
@@ -46871,7 +46978,7 @@ module.exports = LinkRelationView = React.createClass({
       }, tr("~NODE-RELATION-EDIT.UNSELECTED")));
       currentOption = "unselected";
     } else {
-      currentOption = increaseOrDecrease.id;
+      currentOption = vectorSelection.id;
     }
     return div({
       className: "bb-select"
@@ -46882,15 +46989,16 @@ module.exports = LinkRelationView = React.createClass({
       onChange: this.updateRelation
     }, options));
   },
-  renderScalarPulldown: function(amount) {
+  renderScalarPulldown: function(scalarSelection) {
     var currentOption, disabled, options;
     options = _.map(RelationFactory.scalars, function(opt, i) {
       return option({
         value: opt.id,
-        key: i
+        key: i,
+        className: opt.className
       }, opt.text);
     });
-    if (amount == null) {
+    if (scalarSelection == null) {
       options.unshift(option({
         key: "placeholder",
         value: "unselected",
@@ -46898,9 +47006,16 @@ module.exports = LinkRelationView = React.createClass({
       }, tr("~NODE-RELATION-EDIT.UNSELECTED")));
       currentOption = "unselected";
     } else {
-      currentOption = amount.id;
+      currentOption = scalarSelection.id;
     }
-    if (!(this.state.selectedVector || (amount != null))) {
+    if (RelationFactory.customRelation(this.state.selectedVector)) {
+      $(".option-scalar").hide();
+      $(".option-custom").show();
+    } else {
+      $(".option-scalar").show();
+      $(".option-custom").hide();
+    }
+    if (!(this.state.selectedVector || (scalarSelection != null))) {
       disabled = "disabled";
     }
     return div({
@@ -46914,14 +47029,17 @@ module.exports = LinkRelationView = React.createClass({
     }, options));
   },
   render: function() {
-    var formula, ref1, scalar, source, target, vector;
+    var formula, ref1, scalar, source, target, useCustomData, vector;
     source = this.props.link.sourceNode.title;
     target = this.props.link.targetNode.title;
-    ref1 = RelationFactory.selectionsFromRelation(this.props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
+    ref1 = RelationFactory.selectionsFromRelation(this.props.link.relation), vector = ref1.vector, scalar = ref1.scalar, useCustomData = ref1.useCustomData;
     if (vector == null) {
       vector = this.state.selectedVector;
     }
     formula = this.props.link.relation.formula;
+    if (useCustomData) {
+      this.props.link.relation.loadCustomData(CustomData);
+    }
     return div({
       className: 'link-relation-view'
     }, div({
@@ -46938,14 +47056,15 @@ module.exports = LinkRelationView = React.createClass({
     }, Graph({
       formula: formula,
       xAxis: source,
-      yAxis: target
+      yAxis: target,
+      customData: this.props.link.relation.customData
     })));
   }
 });
 
 
 
-},{"../models/relation-factory":415,"../utils/translate":439,"./svg-graph-view":481}],459:[function(require,module,exports){
+},{"../models/relation-factory":415,"../utils/translate":440,"./custom-relationship-view":446,"./svg-graph-view":483}],461:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -46963,7 +47082,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":439}],460:[function(require,module,exports){
+},{"../utils/translate":440}],462:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -46996,7 +47115,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":464}],461:[function(require,module,exports){
+},{"./modal-view":466}],463:[function(require,module,exports){
 var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47075,7 +47194,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":439,"./modal-dialog-view":460}],462:[function(require,module,exports){
+},{"../utils/translate":440,"./modal-dialog-view":462}],464:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47117,7 +47236,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":424,"../stores/palette-delete-dialog-store":425,"../utils/translate":439,"./modal-dialog-view":460,"./palette-delete-view":472}],463:[function(require,module,exports){
+},{"../stores/nodes-store":424,"../stores/palette-delete-dialog-store":425,"../utils/translate":440,"./modal-dialog-view":462,"./palette-delete-view":474}],465:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47138,7 +47257,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":460,"./tabbed-panel-view":482}],464:[function(require,module,exports){
+},{"./modal-dialog-view":462,"./tabbed-panel-view":484}],466:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -47170,7 +47289,7 @@ module.exports = React.createClass({
 
 
 
-},{}],465:[function(require,module,exports){
+},{}],467:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -47257,7 +47376,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":410,"../utils/translate":439,"./color-picker-view":444,"./image-picker-view":454}],466:[function(require,module,exports){
+},{"../mixins/node-title":410,"../utils/translate":440,"./color-picker-view":445,"./image-picker-view":456}],468:[function(require,module,exports){
 var NodeSvgGraphView, SimulationStore, div, line, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -47355,7 +47474,7 @@ module.exports = NodeSvgGraphView = React.createClass({
 
 
 
-},{"../stores/simulation-store":427}],467:[function(require,module,exports){
+},{"../stores/simulation-store":427}],469:[function(require,module,exports){
 var SimulationStore, div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -47531,7 +47650,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":427,"../utils/translate":439}],468:[function(require,module,exports){
+},{"../stores/simulation-store":427,"../utils/translate":440}],470:[function(require,module,exports){
 var CodapConnect, DEFAULT_CONTEXT_NAME, GraphView, NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
@@ -47886,7 +48005,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":410,"../models/codap-connect":411,"../utils/translate":439,"./node-svg-graph-view":466,"./square-image-view":480,"./value-slider-view":483}],469:[function(require,module,exports){
+},{"../mixins/node-title":410,"../models/codap-connect":411,"../utils/translate":440,"./node-svg-graph-view":468,"./square-image-view":482,"./value-slider-view":485}],471:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -47947,7 +48066,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":426,"./palette-inspector-view":473}],470:[function(require,module,exports){
+},{"../stores/palette-store":426,"./palette-inspector-view":475}],472:[function(require,module,exports){
 var Dropdown, a, ref, span, tr;
 
 ref = React.DOM, a = ref.a, span = ref.span;
@@ -47996,7 +48115,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":439,"./dropdown-view":446}],471:[function(require,module,exports){
+},{"../utils/translate":440,"./dropdown-view":448}],473:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -48033,7 +48152,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":408,"../stores/image-dialog-store":423,"../utils/translate":439}],472:[function(require,module,exports){
+},{"../mixins/draggable":408,"../stores/image-dialog-store":423,"../utils/translate":440}],474:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -48112,7 +48231,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":425,"../utils/translate":439,"./image-picker-view":454}],473:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":425,"../utils/translate":440,"./image-picker-view":456}],475:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -48185,7 +48304,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":424,"../stores/palette-delete-dialog-store":425,"../stores/palette-store":426,"../utils/translate":439,"./image-metadata-view":452,"./palette-add-view":471,"./palette-item-view":474}],474:[function(require,module,exports){
+},{"../stores/nodes-store":424,"../stores/palette-delete-dialog-store":425,"../stores/palette-store":426,"../utils/translate":440,"./image-metadata-view":454,"./palette-add-view":473,"./palette-item-view":476}],476:[function(require,module,exports){
 var Draggable, SquareImage, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -48225,7 +48344,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":408,"./square-image-view":480}],475:[function(require,module,exports){
+},{"../mixins/draggable":408,"./square-image-view":482}],477:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -48243,7 +48362,7 @@ module.exports = React.createClass({
 
 
 
-},{}],476:[function(require,module,exports){
+},{}],478:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -48294,7 +48413,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":423,"../stores/palette-store":426,"../utils/translate":439,"./image-metadata-view":452}],477:[function(require,module,exports){
+},{"../stores/image-dialog-store":423,"../stores/palette-store":426,"../utils/translate":440,"./image-metadata-view":454}],479:[function(require,module,exports){
 var LinkRelationView, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -48356,7 +48475,7 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 
-},{"../stores/graph-store":422,"../utils/translate":439,"./link-relation-view":458,"./tabbed-panel-view":482}],478:[function(require,module,exports){
+},{"../stores/graph-store":422,"../utils/translate":440,"./link-relation-view":460,"./tabbed-panel-view":484}],480:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -48474,7 +48593,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":419,"../stores/simulation-store":427,"../utils/translate":439,"./dropdown-view":446,"./value-slider-view":483}],479:[function(require,module,exports){
+},{"../stores/app-settings-store":419,"../stores/simulation-store":427,"../utils/translate":440,"./dropdown-view":448,"./value-slider-view":485}],481:[function(require,module,exports){
 var SimulationStore, div, i, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
@@ -48553,7 +48672,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":427,"../utils/translate":439}],480:[function(require,module,exports){
+},{"../stores/simulation-store":427,"../utils/translate":440}],482:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -48594,7 +48713,7 @@ module.exports = React.createClass({
 
 
 
-},{}],481:[function(require,module,exports){
+},{}],483:[function(require,module,exports){
 var RelationFactory, SvgGraphView, div, line, math, myView, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -48610,7 +48729,8 @@ module.exports = SvgGraphView = React.createClass({
       strokeWidth: 3,
       fontSize: 16,
       xLabel: "x axis",
-      yLabel: "y axis"
+      yLabel: "y axis",
+      customData: null
     };
   },
   marginal: function() {
@@ -48652,38 +48772,57 @@ module.exports = SvgGraphView = React.createClass({
     return "M " + data;
   },
   getPathPoints: function() {
-    var data, maxy, miny, rangex;
+    var actualData, data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
     miny = Infinity;
     maxy = -Infinity;
-    data = _.map(data, (function(_this) {
-      return function(x) {
-        var error, error1, scope, y;
-        scope = {
-          "in": x,
-          out: 0,
-          maxIn: rangex,
-          maxOut: rangex
-        };
-        try {
-          y = math["eval"](_this.props.formula, scope);
-          if (y < miny) {
-            miny = y;
-          }
-          if (y > maxy) {
-            maxy = y;
-          }
-        } catch (error1) {
-          error = error1;
-          console.log("Errror: " + error);
+    actualData = this.props.customData;
+    if (actualData != null) {
+      data = _.map(actualData, function(point) {
+        var x, y;
+        x = _.first(point);
+        y = _.last(point);
+        if (y < miny) {
+          miny = y;
+        }
+        if (y > maxy) {
+          maxy = y;
         }
         return {
           y: y,
           x: x
         };
-      };
-    })(this));
+      });
+    } else {
+      data = _.map(data, (function(_this) {
+        return function(x) {
+          var error, error1, scope, y;
+          scope = {
+            "in": x,
+            out: 0,
+            maxIn: rangex,
+            maxOut: rangex
+          };
+          try {
+            y = math["eval"](_this.props.formula, scope);
+            if (y < miny) {
+              miny = y;
+            }
+            if (y > maxy) {
+              maxy = y;
+            }
+          } catch (error1) {
+            error = error1;
+            console.log("Errror: " + error);
+          }
+          return {
+            y: y,
+            x: x
+          };
+        };
+      })(this));
+    }
     data = _.map(data, function(d) {
       var x, y;
       x = d.x, y = d.y;
@@ -48773,7 +48912,7 @@ window.testComponent = function(domID) {
 
 
 
-},{"../models/relation-factory":415,"mathjs":9}],482:[function(require,module,exports){
+},{"../models/relation-factory":415,"mathjs":9}],484:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -48880,7 +49019,7 @@ module.exports = React.createClass({
 
 
 
-},{}],483:[function(require,module,exports){
+},{}],485:[function(require,module,exports){
 var Demo, Slider, ValueSlider, circle, div, i, input, label, path, rect, ref, span, svg, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect;
@@ -49202,4 +49341,4 @@ Demo = React.createClass({
 
 
 
-},{"../utils/translate":439}]},{},[1]);
+},{"../utils/translate":440}]},{},[1]);
