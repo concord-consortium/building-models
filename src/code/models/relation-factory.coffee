@@ -91,12 +91,12 @@ module.exports = class RelationFactory
     id: 5
     text: tr "~NODE-RELATION-EDIT.CUSTOM"
     postfixIco: "cus"
-    formulaFrag: "1 / (( 1 / ( 12.5 * sqrt(2 * PI) ) ) * pow(E,(pow((in - 50), 2)) / (2 * pow(12.5,2)))) * 3"
+    formulaFrag: ""
     magnitude: 2
     gradual: 0
     className: "option-custom"
     func: (scope) ->
-      return 1 / (( 1 / ( 12.5 * Math.sqrt(2 * Math.PI) ) ) * Math.pow(Math.E , Math.pow(scope.in - 50, 2) / (2 * Math.pow(12.5,2))))*3
+      return
    
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
