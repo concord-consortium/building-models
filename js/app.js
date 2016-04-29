@@ -41199,7 +41199,7 @@ module.exports = Relationship = (function() {
   };
 
   Relationship.prototype.evaluate = function(inV, outV, maxIn, maxOut) {
-    var error, error1, result, scope;
+    var error, error1, result, roundedInV, scope;
     if (maxIn == null) {
       maxIn = 100;
     }
@@ -41214,8 +41214,9 @@ module.exports = Relationship = (function() {
       maxOut: maxOut
     };
     if (this.customData) {
-      if (this.dataPoints[inV] != null) {
-        result = this.dataPoints[inV].y;
+      roundedInV = Math.round(inV);
+      if (this.dataPoints[roundedInV] != null) {
+        result = this.dataPoints[roundedInV].y;
       } else {
         result = 0;
       }
@@ -44328,7 +44329,7 @@ module.exports = {
   "~NODE-RELATION-EDIT.A_LITTLE": "a little",
   "~NODE-RELATION-EDIT.MORE_AND_MORE": "more and more",
   "~NODE-RELATION-EDIT.LESS_AND_LESS": "less and less",
-  "~NODE-RELATION-EDIT.CUSTOM": "create new relationship",
+  "~NODE-RELATION-EDIT.CUSTOM": "custom",
   "~LINK-EDIT.DELETE": "✖ Delete Link",
   "~LINK-EDIT.TITLE": "Title",
   "~LINK-EDIT.COLOR": "Color",
