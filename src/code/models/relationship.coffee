@@ -41,8 +41,9 @@ module.exports = class Relationship
       maxIn: maxIn
       maxOut: maxOut
     if @customData
-      if @dataPoints[inV]?
-        result = @dataPoints[inV].y
+      roundedInV = Math.round(inV)
+      if @dataPoints[roundedInV]?
+        result = @dataPoints[roundedInV].y
       else result = 0
     else if @func
       result = @func scope
