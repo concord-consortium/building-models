@@ -22,6 +22,16 @@ module.exports = class RelationFactory
       return (scope) ->
         scope.maxIn - scalarFunc(scope)
 
+  @vary:
+    id: 2
+    prefixIco: "var"
+    text: tr "~NODE-RELATION-EDIT.VARIES"
+    formulaFrag: "0+1 *"
+    magnitude: 1
+    func: (scalarFunc) ->
+      return (scope) ->
+        scalarFunc(scope)
+
   @aboutTheSame:
     id: 0
     text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
@@ -29,6 +39,7 @@ module.exports = class RelationFactory
     formulaFrag: "in"
     magnitude: 2
     gradual: false
+    className: "option-scalar"
     func: (scope) ->
       return scope.in
 
@@ -39,6 +50,7 @@ module.exports = class RelationFactory
     formulaFrag: "min(in * 2, maxOut)"
     magnitude: 4
     gradual: false
+    className: "option-scalar"
     func: (scope) ->
       return Math.min(scope.in * 2, scope.maxOut)
 
@@ -49,6 +61,7 @@ module.exports = class RelationFactory
     formulaFrag: "in / 2"
     magnitude: 1
     gradual: false
+    className: "option-scalar"
     func: (scope) ->
       return scope.in / 2
 
@@ -59,8 +72,9 @@ module.exports = class RelationFactory
     formulaFrag: "min(exp(in/21.7)-1, maxOut)"
     magnitude: 2
     gradual: 1
+    className: "option-scalar"
     func: (scope) ->
-      return Math.min(Math.exp(scope.in/21.7)-1, scope.maxOut)
+      return Math.min(Math.exp(scope.in / 21.7)-1, scope.maxOut)
 
   @lessAndLess:
     id: 4
@@ -69,22 +83,40 @@ module.exports = class RelationFactory
     formulaFrag: "21.7 * log(in+1)"
     magnitude: 2
     gradual: -1
+    className: "option-scalar"
     func: (scope) ->
       return 21.7 * Math.log(scope.in+1)
 
+  @custom:
+    id: 5
+    text: tr "~NODE-RELATION-EDIT.CUSTOM"
+    postfixIco: "cus"
+    formulaFrag: "~"
+    magnitude: 2
+    gradual: 0
+    className: "option-custom"
+    func: (scope) ->
+      return
+   
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
-  @vectors: [@increase, @decrease]
+  @vectors: [@increase, @decrease, @vary]
   @scalars: [
     @aboutTheSame
     @aLot
     @aLittle
     @moreAndMore
     @lessAndLess
+    @custom
   ]
 
   @fromSelections: (vector,scalar) ->
+    if @customRelation vector
+      scalar = @custom
+      useCustomData = true
+    else if scalar == @custom
+      scalar = @aboutTheSame
     name = "#{vector.text} #{scalar.text}"
     formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
     func = vector.func(scalar.func)
@@ -96,9 +128,22 @@ module.exports = class RelationFactory
       _.startsWith relation.formula, v.formulaFrag
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
+    useCustomData = false
+    if vector?
+      if @customRelation vector
+        scalar = @custom
+        useCustomData = true
+      else if scalar == @custom
+        scalar = @aboutTheSame
     magnitude = 0
     gradual = 0
     if vector && scalar
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
-    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
+    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual, useCustomData: useCustomData}
+    
+  @customRelation: (vector) ->
+    isCustomRelation = false
+    if vector? and vector.id == @vary.id
+      isCustomRelation = true
+    isCustomRelation

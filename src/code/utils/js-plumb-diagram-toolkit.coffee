@@ -1,18 +1,11 @@
 # Purpose of this class: Provide an abstraction over our chosen diagramming toolkit.
+LinkColors = require "../utils/link-colors"
 
 module.exports = class DiagramToolkit
 
   constructor: (@domContext, @options = {}) ->
     @type      = "jsPlumbWrappingDiagramToolkit"
-    @defaultLinkColor         = '#777'
-    @defaultFadedLinkColor    = "rgba(120,120,120,0)"
-    @linkIncreaseColor        = "rgba(230,40,20,1)"
-    @linkDecreaseColor        = "rgba(0,110,200,1)"
-    @linkIncreaseFadedColor   = "rgba(230,40,20,0.2)"
-    @linkDecreaseFadedColor   = "rgba(0,110,200,0.2)"
-    @linkDashedColor          = "#aaa"
-    @linkSelectedOutlineColor = "rgba(250,200,60,0.7)"
-    @color     = @options.color or '#233'
+    @color     = @options.color or LinkColors.defaultLight
     @lineWidth = @options.lineWidth or 1
     @lineWidth = 1
     @lineWidthVariation = 4
@@ -155,14 +148,14 @@ module.exports = class DiagramToolkit
     $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove()
 
   addLink: (source, target, label, color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, linkModel) ->
-    paintStyle = @_paintStyle @defaultLinkColor
+    paintStyle = @_paintStyle LinkColors.default
     paintStyle.outlineColor = "none"
     paintStyle.outlineWidth = 4
     
-    startColor = @defaultLinkColor
-    finalColor = @defaultLinkColor
-    fixedColor = @defaultLinkColor
-    fadedColor = @defaultFadedLinkColor
+    startColor = LinkColors.default
+    finalColor = LinkColors.default
+    fixedColor = LinkColors.default
+    fadedColor = LinkColors.defaultFaded
     
     thickness = Math.abs(magnitude)
     if (!thickness)
@@ -170,16 +163,16 @@ module.exports = class DiagramToolkit
     
     if isDashed
       paintStyle.dashstyle = "4 2"
-      fixedColor = fixedColor = @linkDashedColor
+      fixedColor = fixedColor = LinkColors.dashed
     if isSelected
-      paintStyle.outlineColor = @linkSelectedOutlineColor
+      paintStyle.outlineColor = LinkColors.selectedOutline
     if magnitude < 0
-      fixedColor = @linkDecreaseColor
-      fadedColor = @linkDecreaseFadedColor
+      fixedColor = LinkColors.decrease
+      fadedColor = LinkColors.decreaseFaded
     if magnitude > 0
-      fixedColor = @linkIncreaseColor
-      fadedColor = @linkIncreaseFadedColor
-    if color != @defaultLinkColor
+      fixedColor = LinkColors.increase
+      fadedColor = LinkColors.increaseFaded
+    if color != LinkColors.default
       fixedColor = color
 
     paintStyle.lineWidth = thickness

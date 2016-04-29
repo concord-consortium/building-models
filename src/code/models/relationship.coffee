@@ -21,6 +21,8 @@ module.exports = class Relationship
     @isDefined   = @opts.formula? or @opts.func?
     @hasError    = false
     @setFormula(formula)
+    @dataPoints
+    @customData
 
   setFormula: (newf) ->
     @formula = newf
@@ -38,7 +40,12 @@ module.exports = class Relationship
       out: outV
       maxIn: maxIn
       maxOut: maxOut
-    if @func
+    if @customData
+      roundedInV = Math.round(inV)
+      if @dataPoints[roundedInV]?
+        result = @dataPoints[roundedInV].y
+      else result = 0
+    else if @func
       result = @func scope
     else
       try
@@ -48,6 +55,14 @@ module.exports = class Relationship
         @errHandler(error, @formula, inV, outV)
     result
 
+  loadCustomData: (source)->
+    @customData = source
+    points = _.map source, (point) ->
+      x = _.first point
+      y = _.last point
+      { y: y, x: x}
+    @dataPoints = _.indexBy points, 'x'
+    
   toExport: ->
     text        : @text
     formula     : @formula

@@ -1,8 +1,10 @@
 GraphPrimitive = require './graph-primitive'
-Relation = require "./relationship"
+Relation       = require "./relationship"
+LinkColors     = require "../utils/link-colors"
+
 module.exports = class Link extends GraphPrimitive
 
-  @defaultColor = "#777"
+  @defaultColor = LinkColors.default
   @defaultRelation = new Relation
     formula: "1 * in"
 
