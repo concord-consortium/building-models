@@ -44,7 +44,7 @@ module.exports =
   "~NODE-RELATION-EDIT.TO": "to"
   "~NODE-RELATION-EDIT.INCREASES": "increase"
   "~NODE-RELATION-EDIT.DECREASES": "decrease"
-  "~NODE-RELATION-EDIT.VARIES": "varies"
+  "~NODE-RELATION-EDIT.VARIES": "vary"
   "~NODE-RELATION-EDIT.BY": "by"
   "~NODE-RELATION-EDIT.ABOUT_THE_SAME": "about the same"
   "~NODE-RELATION-EDIT.A_LOT": "a lot"
