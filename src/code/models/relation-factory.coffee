@@ -91,7 +91,7 @@ module.exports = class RelationFactory
     id: 5
     text: tr "~NODE-RELATION-EDIT.CUSTOM"
     postfixIco: "cus"
-    formulaFrag: ""
+    formulaFrag: "~"
     magnitude: 2
     gradual: 0
     className: "option-custom"
@@ -129,11 +129,12 @@ module.exports = class RelationFactory
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
     useCustomData = false
-    if @customRelation vector
-      scalar = @custom
-      useCustomData = true
-    else if scalar == @custom
-      scalar = @aboutTheSame
+    if vector?
+      if @customRelation vector
+        scalar = @custom
+        useCustomData = true
+      else if scalar == @custom
+        scalar = @aboutTheSame
     magnitude = 0
     gradual = 0
     if vector && scalar
