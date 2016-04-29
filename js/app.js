@@ -41072,7 +41072,7 @@ module.exports = RelationFactory = (function() {
     id: 5,
     text: tr("~NODE-RELATION-EDIT.CUSTOM"),
     postfixIco: "cus",
-    formulaFrag: "",
+    formulaFrag: "~",
     magnitude: 2,
     gradual: 0,
     className: "option-custom",
@@ -41116,11 +41116,13 @@ module.exports = RelationFactory = (function() {
       return _.endsWith(relation.formula, s.formulaFrag);
     });
     useCustomData = false;
-    if (this.customRelation(vector)) {
-      scalar = this.custom;
-      useCustomData = true;
-    } else if (scalar === this.custom) {
-      scalar = this.aboutTheSame;
+    if (vector != null) {
+      if (this.customRelation(vector)) {
+        scalar = this.custom;
+        useCustomData = true;
+      } else if (scalar === this.custom) {
+        scalar = this.aboutTheSame;
+      }
     }
     magnitude = 0;
     gradual = 0;
@@ -44322,7 +44324,7 @@ module.exports = {
   "~NODE-RELATION-EDIT.TO": "to",
   "~NODE-RELATION-EDIT.INCREASES": "increase",
   "~NODE-RELATION-EDIT.DECREASES": "decrease",
-  "~NODE-RELATION-EDIT.VARIES": "varies",
+  "~NODE-RELATION-EDIT.VARIES": "vary",
   "~NODE-RELATION-EDIT.BY": "by",
   "~NODE-RELATION-EDIT.ABOUT_THE_SAME": "about the same",
   "~NODE-RELATION-EDIT.A_LOT": "a lot",
