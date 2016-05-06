@@ -19,8 +19,11 @@ module.exports = SvgGraphView = React.createClass
     pointPathData: null
 
   componentWillMount: ->
-    if not @state.pointPathData? and @props.customData?
-      @updatePointData null, @props.customData
+    if not @state.pointPathData?
+      if @props.customData?
+        @updatePointData null, @props.customData
+      else
+        @updatePointData @props.formula, @props.customData
   
   componentWillReceiveProps: (newProps) ->
     if newProps.formula or newProps.customData

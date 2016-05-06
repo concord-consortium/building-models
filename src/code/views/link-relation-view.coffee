@@ -41,7 +41,15 @@ module.exports = LinkRelationView = React.createClass
 
   getInitialState: ->
     selectedVector: null
+    selectedScalar: null
 
+  componentWillMount: ->
+    if not @state.selectedVector? and not @props.link.relation.customData?
+      {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
+      selectedVector = vector
+      selectedScalar = scalar
+      @setState {selectedVector, selectedScalar}
+      
   componentWillReceiveProps: (newProps) ->
     if @props.link isnt newProps.link
       @setState

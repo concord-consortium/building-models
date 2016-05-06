@@ -22,15 +22,16 @@ module.exports = class Relationship
     @hasError    = false
     @setFormula(formula)
     @dataPoints
-    @customData
+    @customData  = @opts.customData
 
   setFormula: (newf) ->
     @formula = newf
-    @checkFormula()
+    if newf is not 'vary'
+      @checkFormula()
 
   checkFormula: ->
     @isDefined   = @opts.formula? or @opts.func?
-    if @isDefined
+    if @isDefined and @opts.formula
       @evaluate(1, 1) #sets the @hasError flag if there is a problem
 
   evaluate: (inV,outV, maxIn=100, maxOut=100)->
