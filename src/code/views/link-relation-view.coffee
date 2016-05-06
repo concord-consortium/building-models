@@ -13,6 +13,8 @@ Graph = React.createFactory React.createClass
       xLabel: @props.xAxis
       formula: @props.formula
       customData: @props.customData
+      link: @props.link
+      graphStore: @props.graphStore
     })
 
 QuantStart = React.createFactory React.createClass
@@ -36,7 +38,6 @@ module.exports = LinkRelationView = React.createClass
         title: "default target node"
       sourceNode:
         title: "default source node"
-    customGraph: null
 
   getInitialState: ->
     selectedVector: null
@@ -46,20 +47,20 @@ module.exports = LinkRelationView = React.createClass
       @setState
         selectedVector: null
         selectedScalar: null
-        selectedCustom: null
 
   updateRelation: ->
     selectedVector = @getVector()
     selectedScalar = @getScalar()
-    if selectedVector? and RelationFactory.customRelation selectedVector
+    if selectedVector? and RelationFactory.isCustomRelationship selectedVector
       selectedScalar = RelationFactory.custom
     @setState {selectedVector, selectedScalar}
     if not selectedScalar?
       selectedScalar = RelationFactory.unknown
     
     if selectedVector?
-      relation = RelationFactory.fromSelections(selectedVector, selectedScalar)
       link = @props.link
+      existingData = link.relation.customData
+      relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData)
       @props.graphStore.changeLink(link, {relation: relation})
 
   getVector: ->
@@ -101,7 +102,7 @@ module.exports = LinkRelationView = React.createClass
 
     disabled = "disabled" unless @state.selectedVector or scalarSelection?
     if @state.selectedVector
-      if RelationFactory.customRelation @state.selectedVector
+      if RelationFactory.isCustomRelationship @state.selectedVector
         (div {className: "bb-select"},
           (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM"}")
         )
@@ -116,14 +117,12 @@ module.exports = LinkRelationView = React.createClass
   render: ->
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
-    {vector, scalar, useCustomData} = RelationFactory.selectionsFromRelation @props.link.relation
+    {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
 
     vector ?= @state.selectedVector
     formula = @props.link.relation.formula
-    cd = null
-    if useCustomData
-      #load from custom data somehow
-      @props.link.relation.loadCustomData cd
+    if RelationFactory.isCustomRelationship(vector)
+      formula = null
       
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
@@ -137,7 +136,7 @@ module.exports = LinkRelationView = React.createClass
       )
       (div {className: 'bottom'},
         (div {className: 'graph', id:'relation-graph'},
-          (Graph {formula: formula, xAxis: source, yAxis: target, customData: @props.link.relation.customData})
+          (Graph {formula: formula, xAxis: source, yAxis: target, link: @props.link, customData: @props.link.relation.customData, graphStore: @props.graphStore})
         )
       )
     )

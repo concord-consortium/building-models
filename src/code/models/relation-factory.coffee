@@ -26,7 +26,7 @@ module.exports = class RelationFactory
     id: 2
     prefixIco: "var"
     text: tr "~NODE-RELATION-EDIT.VARIES"
-    formulaFrag: "0+1 * min(exp(in/21.7)-1, maxOut)"
+    formulaFrag: "vary"
     magnitude: 1
     func: (scalarFunc) ->
       return (scope) ->
@@ -86,7 +86,7 @@ module.exports = class RelationFactory
     id: 5
     text: tr "~NODE-RELATION-EDIT.CUSTOM"
     postfixIco: "cus"
-    formulaFrag: " * 1"
+    formulaFrag: ""
     magnitude: 2
     gradual: 0
     func: (scope) ->
@@ -114,32 +114,27 @@ module.exports = class RelationFactory
     @lessAndLess
   ]
 
-  @fromSelections: (vector,scalar) ->
-    if @customRelation vector
+  @fromSelections: (vector,scalar,existingData) ->
+    if @isCustomRelationship vector
       scalar = @custom
-      useCustomData = true
     else if scalar == @custom
       scalar = @aboutTheSame
-
     if not scalar?
       scalar = @unknown
-      
     name = "#{vector.text} #{scalar.text}"
     formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
     func = vector.func(scalar.func)
     magnitude = vector.magnitude * scalar.magnitude
-    new Relationship({text: name, formula: formula, func: func, magnitude: magnitude})
+    new Relationship({text: name, formula: formula, func: func, magnitude: magnitude, customData: existingData})
 
   @selectionsFromRelation: (relation) ->
     vector = _.find @vectors, (v) ->
       _.startsWith relation.formula, v.formulaFrag
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
-    useCustomData = false
     if vector?
-      if @customRelation vector
+      if @isCustomRelationship vector
         scalar = @custom
-        useCustomData = true
       else if scalar == @custom
         scalar = @aboutTheSame
     magnitude = 0
@@ -147,10 +142,10 @@ module.exports = class RelationFactory
     if vector && scalar
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
-    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual, useCustomData: useCustomData}
+    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
     
-  @customRelation: (vector) ->
-    isCustomRelation = false
+  @isCustomRelationship: (vector) ->
+    customRelationship = false
     if vector? and vector.id == @vary.id
-      isCustomRelation = true
-    isCustomRelation
+      customRelationship = true
+    customRelationship
