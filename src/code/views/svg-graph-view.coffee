@@ -11,6 +11,27 @@ module.exports = SvgGraphView = React.createClass
     yLabel: "y axis"
     customData: null
 
+  drawing: false
+  
+  getInitialState: ->
+    currentData: null
+    pointPathData: null
+
+  componentWillReceiveProps: (newProps) ->
+    if newProps.formula
+      @setState
+        currentData: null
+        pointPathData: null
+        
+      currentData = newProps.actualData
+      @updatePointData newProps.formula, currentData
+        
+  updatePointData: (formula, currentData) ->
+    if not currentData?
+      currentData = @loadCustomDataFromFormula formula
+    pointPathData = @getPathPoints(currentData)
+    @setState {currentData, pointPathData}
+    
   marginal: ->
     @props.fontSize * 0.4
 
@@ -28,35 +49,47 @@ module.exports = SvgGraphView = React.createClass
     x = point.x * width + xOffset
     y = point.y * height + yOffset
     @invertPoint x:x, y:y
-
+    
+  findClosestPoint:(path, pointX, pointY) ->
+    graphOrigin = @graphMapPoint {x:0, y:0}
+    x = pointX - $(path).offset().left
+    y = pointX - $(path).offset().top
+    p = {x: x, y: y}
+    p
+    
   pointsToPath: (points)->
     data = _.map points, (p) => @graphMapPoint(p)
     data = _.map data,   (p) -> "#{p.x} #{p.y}"
     data = data.join " L "
     "M #{data}"
 
-  getPathPoints: ->
+  loadCustomDataFromFormula: (formula) ->
     rangex = 100
     data = _.range(0,rangex)
     miny = Infinity
     maxy = -Infinity
-    actualData = @props.customData
-    if actualData?
-      data = _.map actualData, (point) ->
+
+    data = _.map data, (x) ->
+      scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex}
+      try
+        y = math.eval formula, scope
+        if y < miny then miny = y
+        if y > maxy then maxy = y
+      catch error
+        console.log "Error: #{error}"
+      [x,y]
+
+  getPathPoints: (currentData) ->
+    rangex = 100
+    data = _.range(0,rangex)
+    miny = Infinity
+    maxy = -Infinity
+    if currentData?
+      data = _.map currentData, (point) ->
         x = _.first point
         y = _.last point
         if y < miny then miny = y
         if y > maxy then maxy = y
-        { y: y, x: x}
-    else
-      data = _.map data, (x) =>
-        scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex}
-        try
-          y = math.eval @props.formula, scope
-          if y < miny then miny = y
-          if y > maxy then maxy = y
-        catch error
-          console.log "Errror: #{error}"
         { y: y, x: x}
 
     data = _.map data, (d) ->
@@ -86,12 +119,37 @@ module.exports = SvgGraphView = React.createClass
     (path {className: 'axisLines', d: @pointsToPath(data)})
 
   renderLineData: ->
-    data = @pointsToPath(@getPathPoints())
+    #data = @pointsToPath(@getPathPoints())
+    data = @pointsToPath(@state.pointPathData)
     (path {className: 'data', d:data, strokeWidth:@props.strokeWidth})
+    
+  startDrawCurve: (evt) ->
+    if (@props.customData)
+      @drawing = true
+      @drawCurve(evt)
+    
+  drawCurve: (evt) ->
+    if @drawing
+      evt.preventDefault()
+      rect = evt.target.getBoundingClientRect()
+      coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
+      scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
+      
+      if scaledCoords.x >= 0 && scaledCoords.x <= 100 && scaledCoords.y >= 0 && scaledCoords.y <= 100
+        newData = _.map @state.currentData, (d) ->
+          x = d[0]
+          y = d[1]
+          if x > scaledCoords.x - 3 && x < scaledCoords.x + 3
+            y = scaledCoords.y
+          [x, y]
+        @updatePointData @props.formula, newData
 
+  endDrawCurve: (evt) ->
+    @drawing = false
+    
   render: ->
-    (div {className: 'svgGraphView'},
-      (svg {width: @props.width, height: @props.height},
+    (div {className: 'svgGraphView' },
+      (svg {width: @props.width, height: @props.height },
         @renderAxisLines()
         if @props.formula then @renderLineData()
         @renderXLabel()
@@ -101,8 +159,9 @@ module.exports = SvgGraphView = React.createClass
         (div {className: 'unknown-graph'},
           "?"
         )
+      (div {className: 'draw-graph drawing', onMouseDown: @startDrawCurve, onMouseMove: @drawCurve, onMouseUp: @endDrawCurve, onMouseOut: @endDrawCurve})
     )
-
+    
 # TO DEBUG THIS VIEW:
 RelationFactory = require "../models/relation-factory"
 myView = React.createFactory SvgGraphView

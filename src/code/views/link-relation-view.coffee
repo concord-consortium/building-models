@@ -3,20 +3,17 @@
 RelationFactory = require "../models/relation-factory"
 SvgGraph        = React.createFactory require "./svg-graph-view"
 tr              = require "../utils/translate"
-CustomData      = require "./custom-relationship-view"
 
 Graph = React.createFactory React.createClass
   render: ->
-    (div {className: 'graph'},
-      (SvgGraph {
-        width: 130
-        height: 130
-        yLabel: @props.yAxis
-        xLabel: @props.xAxis
-        formula: @props.formula
-        customData: @props.customData
-      })
-    )
+    (SvgGraph {
+      width: 130
+      height: 130
+      yLabel: @props.yAxis
+      xLabel: @props.xAxis
+      formula: @props.formula
+      customData: @props.customData
+    })
 
 QuantStart = React.createFactory React.createClass
   render: ->
@@ -39,6 +36,7 @@ module.exports = LinkRelationView = React.createClass
         title: "default target node"
       sourceNode:
         title: "default source node"
+    customGraph: null
 
   getInitialState: ->
     selectedVector: null
@@ -53,9 +51,13 @@ module.exports = LinkRelationView = React.createClass
   updateRelation: ->
     selectedVector = @getVector()
     selectedScalar = @getScalar()
+    if selectedVector? and RelationFactory.customRelation selectedVector
+      selectedScalar = RelationFactory.custom
     @setState {selectedVector, selectedScalar}
-
-    if selectedVector? and selectedScalar?
+    if not selectedScalar?
+      selectedScalar = RelationFactory.unknown
+    
+    if selectedVector?
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar)
       link = @props.link
       @props.graphStore.changeLink(link, {relation: relation})
@@ -65,8 +67,9 @@ module.exports = LinkRelationView = React.createClass
     RelationFactory.vectors[id]
 
   getScalar: ->
-    id = parseInt @refs.scalar.value
-    RelationFactory.scalars[id]
+    if @refs.scalar
+      id = parseInt @refs.scalar.value
+      RelationFactory.scalars[id]
 
   renderVectorPulldown: (vectorSelection)->
     options = _.map RelationFactory.vectors, (opt, i) ->
@@ -87,7 +90,7 @@ module.exports = LinkRelationView = React.createClass
       
   renderScalarPulldown:(scalarSelection) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
-      (option {value: opt.id, key: i, className: opt.className}, opt.text)
+      (option {value: opt.id, key: i}, opt.text)
       
     if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -96,31 +99,32 @@ module.exports = LinkRelationView = React.createClass
     else
       currentOption = scalarSelection.id
 
-    # Temporary solution to control which options appear in the scalar box
-    if RelationFactory.customRelation @state.selectedVector
-      $(".option-scalar").hide()
-      $(".option-custom").show()
-    else
-      $(".option-scalar").show()
-      $(".option-custom").hide()
-
     disabled = "disabled" unless @state.selectedVector or scalarSelection?
-
-    (div {className: "bb-select"},
-      (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-      (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: disabled},
-        options
-      )
-    )
+    if @state.selectedVector
+      if RelationFactory.customRelation @state.selectedVector
+        (div {className: "bb-select"},
+          (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM"}")
+        )
+      else
+        (div {className: "bb-select"},
+          (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
+          (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: disabled},
+            options
+          )
+        )
 
   render: ->
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
     {vector, scalar, useCustomData} = RelationFactory.selectionsFromRelation @props.link.relation
+
     vector ?= @state.selectedVector
     formula = @props.link.relation.formula
+    cd = null
     if useCustomData
-      @props.link.relation.loadCustomData CustomData
+      #load from custom data somehow
+      @props.link.relation.loadCustomData cd
+      
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
         (QuantStart {source: source, target: target})
@@ -132,6 +136,10 @@ module.exports = LinkRelationView = React.createClass
         )
       )
       (div {className: 'bottom'},
-        (Graph {formula: formula, xAxis: source, yAxis: target, customData: @props.link.relation.customData})
+        (div {className: 'graph', id:'relation-graph'},
+          (Graph {formula: formula, xAxis: source, yAxis: target, customData: @props.link.relation.customData})
+        )
       )
     )
+    
+
