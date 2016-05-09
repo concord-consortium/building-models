@@ -6,6 +6,7 @@ module.exports = SvgGraphView = React.createClass
     width: 200
     height: 200
     strokeWidth: 3
+    strokeDasharray: "10,6"
     fontSize: 16
     xLabel: "x axis"
     yLabel: "y axis"
@@ -17,30 +18,53 @@ module.exports = SvgGraphView = React.createClass
   getInitialState: ->
     currentData: null
     pointPathData: null
+    # control state of the graph rendering
+    newCustomData: false
+    canDraw: false
+    definedRelationship: false
 
   componentWillMount: ->
-    if not @state.pointPathData?
-      if @props.customData?
-        @updatePointData null, @props.customData
+    newCustomData = false
+    definedRelationship = @props.link.relation.customData? or @props.formula?
+    canDraw = not @props.formula?
+    @setState {newCustomData, definedRelationship, canDraw}
+    
+    if not @state.pointPathData? and definedRelationship
+      if @props.link.relation.customData?
+        @updatePointData null, @props.link.relation.customData
       else
-        @updatePointData @props.formula, @props.customData
+        @updatePointData @props.formula, @props.link.relation.customData
   
   componentWillReceiveProps: (newProps) ->
-    if newProps.formula or newProps.customData
+    if @props.link isnt newProps.link
+      # Clear view of old relationship
+      @setState
+        currentData: null
+        pointPathData: null
+
+    definedRelationship = newProps.customData? or newProps.formula?
+    newCustomData = newProps.customData and not newProps.link.relation.customData
+    canDraw = not newProps.formula?
+    @setState {definedRelationship, canDraw, newCustomData}
+    
+    if definedRelationship and not newCustomData
       @setState
         currentData: null
         pointPathData: null
         
-      currentData = newProps.customData
+      currentData = newProps.link.relation.customData
       @updatePointData newProps.formula, currentData
       
-    else
+    if newCustomData
+      # if we have no formula we can assume a new custom / varying relationship
       @setState
         currentData: null
         pointPathData: null
+        canDraw: true
         
+      # default for new custom relationship is a more-and-more relationship
       currentData = [[0,0],[1,0.0471612686578851],[2,0.0965467225771919],[3,0.148261257156578],[4,0.202414714794781],[5,0.259122118197412],[6,0.318503914686805],[7,0.380686232033823],[8,0.445801146355014],[9,0.513986962644141],[10,0.585388508533937],[11,0.66015744191203],[12,0.738452573044431],[13,0.820440201890771],[14,0.906294471327756],[15,0.996197737031086],[16,1.09034095480147],[17,1.18892408615744],[18,1.29215652305643],[19,1.40025753264622],[20,1.51345672299146],[21,1.63199453076443],[22,1.7561227319359],[23,1.88610497655083],[24,2.0222173487248],[25,2.16474895305053],[26,2.31400252866011],[27,2.47029509224716],[28,2.63395861141477],[29,2.80534070977934],[30,2.98480540532803],[31,3.1727338835981],[32,3.36952530732033],[33,3.57559766424629],[34,3.7913886549602],[35,4.01735662256112],[36,4.25398152619015],[37,4.50176596047037],[38,4.76123622302492],[39,5.03294343234054],[40,5.31746469835097],[41,5.61540434822661],[42,5.92739520997387],[43,6.25409995657079],[44,6.59621251349378],[45,6.95445953262505],[46,7.32960193567146],[47,7.7224365303729],[48,8.13379770293317],[49,8.56455919026798],[50,9.01563593583445],[51,9.4879860329839],[52,9.98261275996561],[53,10.5005667109039],[54,11.0429480272747],[55,11.610908734622],[56,12.2056551894756],[57,12.8284506416698],[58,13.4806179175039],[59,14.1635422294435],[60,14.8786741183315],[61,15.6275325343571],[62,16.4117080633277],[63,17.2328663050949],[64,18.0927514113128],[65,18.9931897900399],[66,19.9360939850561],[67,20.9234667381321],[68,21.9574052428813],[69,23.0401055992288],[70,24.173867477958],[71,25.3610990052439],[72,26.6043218775474],[73,27.9061767177331],[74,29.2694286837904],[75,30.6969733420674],[76,32.1918428174944],[77,33.7572122338606],[78,35.3964064578208],[79,37.1129071609597],[80,38.9103602149107],[81,40.7925834352391],[82,42.7635746905355],[83,44.8275203939453],[84,46.9888043951689],[85,49.2520172918201],[86,51.6219661799204],[87,54.1036848642377],[88,56.7024445501595],[89,59.4237650398063],[90,62.2734264561695],[91,65.2574815201738],[92,68.3822684067416],[93,71.6544242071655],[94,75.0808990263836],[95,78.6689707451003],[96,82.4262604781072],[97,86.3607487616379],[98,90.4807925041396],[99,94.7951427364635],[100,99.3129631991784]]
-      @updatePointData newProps.formula, currentData
+      @updatePointData null, currentData
         
   updatePointData: (formula, currentData) ->
     if not currentData?
@@ -135,13 +159,19 @@ module.exports = SvgGraphView = React.createClass
     (path {className: 'axisLines', d: @pointsToPath(data)})
 
   renderLineData: ->
-    #data = @pointsToPath(@getPathPoints())
-    data = @pointsToPath(@state.pointPathData)
-    (path {className: 'data', d:data, strokeWidth:@props.strokeWidth})
+    if @state.definedRelationship
+      data = @pointsToPath(@state.pointPathData)
+      if @state.newCustomData
+        (path {className: 'data', d:data, strokeWidth:@props.strokeWidth, strokeDasharray:@props.strokeDasharray})
+      else
+        (path {className: 'data', d:data, strokeWidth:@props.strokeWidth})
     
   startDrawCurve: (evt) ->
-    if not @props.formula? and @state.pointPathData
+    # can only draw on custom relationships
+    if (@state.definedRelationship and @state.canDraw)
       @drawing = true
+      newCustomData = false
+      @setState {newCustomData}
       @drawCurve(evt)
     
   drawCurve: (evt) ->
@@ -164,26 +194,27 @@ module.exports = SvgGraphView = React.createClass
     if @drawing
       @drawing = false
       #update relation with custom data
-      console.log(@props)
       link = @props.link
       relation = link.relation
       relation.updateCustomData(@state.currentData)
-      #relation.customData = @state.currentData
       @props.graphStore.changeLink(link, {relation: relation})
     
   render: ->
     (div {className: 'svgGraphView' },
       (svg {width: @props.width, height: @props.height },
         @renderAxisLines()
-        if @state.pointPathData then @renderLineData()
+        if @state.pointPathData and @state.definedRelationship then @renderLineData()
         @renderXLabel()
         @renderYLabel()
       )
-      if not (@props.formula or @props.customData or @state.pointPathData)
-        (div {className: 'unknown-graph'},
+      if not @state.definedRelationship
+        (div {className: 'unknown-graph', onMouseDown: @startDrawCurve},
           "?"
         )
-      (div {className: 'draw-graph drawing', onMouseDown: @startDrawCurve, onMouseMove: @drawCurve, onMouseUp: @endDrawCurve, onMouseOut: @endDrawCurve})
+      else
+        drawClass = 'draw-graph'
+        if @state.canDraw then drawClass += ' drawing'
+        (div {className: drawClass, onMouseDown: @startDrawCurve, onMouseMove: @drawCurve, onMouseUp: @endDrawCurve, onMouseOut: @endDrawCurve})
     )
     
 # TO DEBUG THIS VIEW:

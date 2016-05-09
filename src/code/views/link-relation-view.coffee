@@ -49,12 +49,20 @@ module.exports = LinkRelationView = React.createClass
       selectedVector = vector
       selectedScalar = scalar
       @setState {selectedVector, selectedScalar}
+    else if @props.link.relation.customData?
+      selectedVector = RelationFactory.vary
+      selectedScalar = RelationFactory.custom
+      @setState {selectedVector, selectedScalar}
       
   componentWillReceiveProps: (newProps) ->
     if @props.link isnt newProps.link
+      {vector, scalar} = RelationFactory.selectionsFromRelation newProps.link.relation
+      if newProps.link.relation.customData?
+        vector = RelationFactory.vary
+        scalar = RelationFactory.custom
       @setState
-        selectedVector: null
-        selectedScalar: null
+        selectedVector: vector
+        selectedScalar: scalar
 
   updateRelation: ->
     selectedVector = @getVector()
@@ -62,8 +70,6 @@ module.exports = LinkRelationView = React.createClass
     if selectedVector? and RelationFactory.isCustomRelationship selectedVector
       selectedScalar = RelationFactory.custom
     @setState {selectedVector, selectedScalar}
-    if not selectedScalar?
-      selectedScalar = RelationFactory.unknown
     
     if selectedVector?
       link = @props.link
@@ -125,26 +131,31 @@ module.exports = LinkRelationView = React.createClass
   render: ->
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
-    {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
-
-    vector ?= @state.selectedVector
     formula = @props.link.relation.formula
-    if RelationFactory.isCustomRelationship(vector)
+    
+    if not @state.selectedScalar
       formula = null
+
+    customData = null
+    if RelationFactory.isCustomRelationship(@state.selectedVector)
+      formula = null
+      customData = @props.link.relation.customData
+      if not customData?
+        customData = true
       
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
         (QuantStart {source: source, target: target})
         (div {className: 'full'},
-          @renderVectorPulldown(vector)
+          @renderVectorPulldown(@state.selectedVector)
         )
         (div {className: 'full'},
-          @renderScalarPulldown(scalar)
+          @renderScalarPulldown(@state.selectedScalar)
         )
       )
       (div {className: 'bottom'},
         (div {className: 'graph', id:'relation-graph'},
-          (Graph {formula: formula, xAxis: source, yAxis: target, link: @props.link, customData: @props.link.relation.customData, graphStore: @props.graphStore})
+          (Graph {formula: formula, xAxis: source, yAxis: target, link: @props.link, customData: customData, graphStore: @props.graphStore})
         )
       )
     )

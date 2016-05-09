@@ -118,6 +118,7 @@ module.exports = class RelationFactory
     if @isCustomRelationship vector
       scalar = @custom
     else if scalar == @custom
+      # user switched back from custom relationship to defined
       scalar = @aboutTheSame
     if not scalar?
       scalar = @unknown
