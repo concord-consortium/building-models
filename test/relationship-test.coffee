@@ -53,5 +53,20 @@ describe "relationship", ->
       it "should return a magic error number", ->
         @undertest.evaluate(2,2).should.equal Relationship.errValue
 
-      it "should indivcate an error", ->
+      it "should indicate an error", ->
         @undertest.hasError.should.be.true
+
+    describe "a custom relationship", ->
+      beforeEach ->
+        @customData = [[1,5],[2,16],[3,11],[4,16]]
+        @arguments = {customData: @customData}
+        @undertest = new Relationship(@arguments)
+        
+      it "should retrieve a point via lookup", ->
+        @undertest.evaluate(3,0).should.equal 11
+      
+      it "should handle out-of-range lookups", ->
+        @undertest.evaluate(5,0).should.equal 0
+      
+      it "should handle non-integer lookups via rounding", ->
+        @undertest.evaluate(2.9,0).should.equal 11
