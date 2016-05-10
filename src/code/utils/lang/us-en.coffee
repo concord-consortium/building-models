@@ -51,7 +51,7 @@ module.exports =
   "~NODE-RELATION-EDIT.A_LITTLE": "a little"
   "~NODE-RELATION-EDIT.MORE_AND_MORE": "more and more"
   "~NODE-RELATION-EDIT.LESS_AND_LESS": "less and less"
-  "~NODE-RELATION-EDIT.CUSTOM": "custom"
+  "~NODE-RELATION-EDIT.CUSTOM": "as described below:"
 
   "~LINK-EDIT.DELETE": "✖ Delete Link"
   "~LINK-EDIT.TITLE": "Title"

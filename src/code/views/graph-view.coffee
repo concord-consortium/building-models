@@ -175,7 +175,7 @@ module.exports = React.createClass
       isEditing = link is @state.editingLink
       isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
       relationDetails = RelationFactory.selectionsFromRelation(link.relation)
-      if relationDetails.useCustomData
+      if RelationFactory.isCustomRelationship(relationDetails.vector)
         link.color = LinkColors.customRelationship
       else
         link.color = LinkColors.default

@@ -3,20 +3,19 @@
 RelationFactory = require "../models/relation-factory"
 SvgGraph        = React.createFactory require "./svg-graph-view"
 tr              = require "../utils/translate"
-CustomData      = require "./custom-relationship-view"
 
 Graph = React.createFactory React.createClass
   render: ->
-    (div {className: 'graph'},
-      (SvgGraph {
-        width: 130
-        height: 130
-        yLabel: @props.yAxis
-        xLabel: @props.xAxis
-        formula: @props.formula
-        customData: @props.customData
-      })
-    )
+    (SvgGraph {
+      width: 130
+      height: 130
+      yLabel: @props.yAxis
+      xLabel: @props.xAxis
+      formula: @props.formula
+      customData: @props.customData
+      link: @props.link
+      graphStore: @props.graphStore
+    })
 
 QuantStart = React.createFactory React.createClass
   render: ->
@@ -42,22 +41,40 @@ module.exports = LinkRelationView = React.createClass
 
   getInitialState: ->
     selectedVector: null
+    selectedScalar: null
 
+  componentWillMount: ->
+    if not @state.selectedVector? and not @props.link.relation.customData?
+      {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
+      selectedVector = vector
+      selectedScalar = scalar
+      @setState {selectedVector, selectedScalar}
+    else if @props.link.relation.customData?
+      selectedVector = RelationFactory.vary
+      selectedScalar = RelationFactory.custom
+      @setState {selectedVector, selectedScalar}
+      
   componentWillReceiveProps: (newProps) ->
     if @props.link isnt newProps.link
+      {vector, scalar} = RelationFactory.selectionsFromRelation newProps.link.relation
+      if newProps.link.relation.customData?
+        vector = RelationFactory.vary
+        scalar = RelationFactory.custom
       @setState
-        selectedVector: null
-        selectedScalar: null
-        selectedCustom: null
+        selectedVector: vector
+        selectedScalar: scalar
 
   updateRelation: ->
     selectedVector = @getVector()
     selectedScalar = @getScalar()
+    if selectedVector? and RelationFactory.isCustomRelationship selectedVector
+      selectedScalar = RelationFactory.custom
     @setState {selectedVector, selectedScalar}
-
-    if selectedVector? and selectedScalar?
-      relation = RelationFactory.fromSelections(selectedVector, selectedScalar)
+    
+    if selectedVector?
       link = @props.link
+      existingData = link.relation.customData
+      relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData)
       @props.graphStore.changeLink(link, {relation: relation})
 
   getVector: ->
@@ -65,8 +82,9 @@ module.exports = LinkRelationView = React.createClass
     RelationFactory.vectors[id]
 
   getScalar: ->
-    id = parseInt @refs.scalar.value
-    RelationFactory.scalars[id]
+    if @refs.scalar
+      id = parseInt @refs.scalar.value
+      RelationFactory.scalars[id]
 
   renderVectorPulldown: (vectorSelection)->
     options = _.map RelationFactory.vectors, (opt, i) ->
@@ -87,7 +105,7 @@ module.exports = LinkRelationView = React.createClass
       
   renderScalarPulldown:(scalarSelection) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
-      (option {value: opt.id, key: i, className: opt.className}, opt.text)
+      (option {value: opt.id, key: i}, opt.text)
       
     if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -96,42 +114,50 @@ module.exports = LinkRelationView = React.createClass
     else
       currentOption = scalarSelection.id
 
-    # Temporary solution to control which options appear in the scalar box
-    if RelationFactory.customRelation @state.selectedVector
-      $(".option-scalar").hide()
-      $(".option-custom").show()
-    else
-      $(".option-scalar").show()
-      $(".option-custom").hide()
-
     disabled = "disabled" unless @state.selectedVector or scalarSelection?
-
-    (div {className: "bb-select"},
-      (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-      (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: disabled},
-        options
-      )
-    )
+    if @state.selectedVector
+      if RelationFactory.isCustomRelationship @state.selectedVector
+        (div {className: "bb-select"},
+          (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM"}")
+        )
+      else
+        (div {className: "bb-select"},
+          (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
+          (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: disabled},
+            options
+          )
+        )
 
   render: ->
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
-    {vector, scalar, useCustomData} = RelationFactory.selectionsFromRelation @props.link.relation
-    vector ?= @state.selectedVector
     formula = @props.link.relation.formula
-    if useCustomData
-      @props.link.relation.loadCustomData CustomData
+    
+    if not @state.selectedScalar
+      formula = null
+
+    customData = null
+    if RelationFactory.isCustomRelationship(@state.selectedVector)
+      formula = null
+      customData = @props.link.relation.customData
+      if not customData?
+        customData = true
+      
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
         (QuantStart {source: source, target: target})
         (div {className: 'full'},
-          @renderVectorPulldown(vector)
+          @renderVectorPulldown(@state.selectedVector)
         )
         (div {className: 'full'},
-          @renderScalarPulldown(scalar)
+          @renderScalarPulldown(@state.selectedScalar)
         )
       )
       (div {className: 'bottom'},
-        (Graph {formula: formula, xAxis: source, yAxis: target, customData: @props.link.relation.customData})
+        (div {className: 'graph', id:'relation-graph'},
+          (Graph {formula: formula, xAxis: source, yAxis: target, link: @props.link, customData: customData, graphStore: @props.graphStore})
+        )
       )
     )
+    
+
