@@ -26,7 +26,7 @@ module.exports = class RelationFactory
     id: 2
     prefixIco: "var"
     text: tr "~NODE-RELATION-EDIT.VARIES"
-    formulaFrag: "vary"
+    formulaFrag: "0"
     magnitude: 1
     func: (scalarFunc) ->
       return (scope) ->

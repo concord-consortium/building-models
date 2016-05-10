@@ -26,12 +26,11 @@ module.exports = class Relationship
 
   setFormula: (newf) ->
     @formula = newf
-    if newf is not 'vary'
-      @checkFormula()
+    @checkFormula()
 
   checkFormula: ->
     @isDefined   = @opts.formula? or @opts.func?
-    if @isDefined and @opts.formula
+    if @isDefined
       @evaluate(1, 1) #sets the @hasError flag if there is a problem
 
   evaluate: (inV,outV, maxIn=100, maxOut=100)->
@@ -43,6 +42,7 @@ module.exports = class Relationship
       maxOut: maxOut
     if @customData
       roundedInV = Math.round(inV)
+      if not @dataPoints then @updateCustomData @customdata
       if @dataPoints[roundedInV]?
         result = @dataPoints[roundedInV].y
       else result = 0
