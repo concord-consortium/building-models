@@ -10942,14 +10942,14 @@
                     txy = _jg.pointOnLine(hxy, mid, this.length);
 
                     // Begin CC: adjust position of overlay arrow at destination to prevent box overlap
-                    var adjustX = (hxy.x - mid.x)/2;
-                    var adjustY = (hxy.y - mid.y)/2;
+                    var adjustX = (hxy.x - mid.x)/1.5;
+                    var adjustY = (hxy.y - mid.y)/1.5;
 
                     if (params.variableWidth && params.variableWidth > 1){
                         if (Math.abs(adjustX) > Math.abs(adjustY))
-                          adjustY += params.variableWidth-1;
+                          adjustY += params.variableWidth-0.5;
                         else 
-                          adjustX += params.variableWidth-1;
+                          adjustX += params.variableWidth-0.5;
                     }
                     
                     hxy.x += adjustX;

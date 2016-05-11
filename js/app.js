@@ -44123,7 +44123,7 @@ module.exports = DiagramToolkit = (function() {
     };
   };
 
-  DiagramToolkit.prototype._overlays = function(label, selected, editingLabel, thickness, finalColor, variableWidth) {
+  DiagramToolkit.prototype._overlays = function(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback) {
     var results;
     if (editingLabel == null) {
       editingLabel = true;
@@ -44134,7 +44134,8 @@ module.exports = DiagramToolkit = (function() {
           location: 1.0,
           length: 10,
           variableWidth: variableWidth,
-          width: 9 + thickness
+          width: 9 + thickness,
+          foldback: arrowFoldback
         }
       ]
     ];
@@ -44194,7 +44195,7 @@ module.exports = DiagramToolkit = (function() {
   };
 
   DiagramToolkit.prototype.addLink = function(source, target, label, color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, linkModel) {
-    var connection, fadedColor, finalColor, fixedColor, paintStyle, startColor, thickness, variableWidthMagnitude;
+    var arrowFoldback, connection, fadedColor, finalColor, fixedColor, paintStyle, startColor, thickness, variableWidthMagnitude;
     paintStyle = this._paintStyle(LinkColors["default"]);
     paintStyle.outlineColor = "none";
     paintStyle.outlineWidth = 4;
@@ -44239,8 +44240,10 @@ module.exports = DiagramToolkit = (function() {
     paintStyle.strokeStyle = fixedColor;
     paintStyle.vertical = true;
     variableWidthMagnitude = 0;
+    arrowFoldback = 0.6;
     if (gradual && useVariableThickness) {
       variableWidthMagnitude = this.lineWidthVariation * gradual;
+      arrowFoldback = 0.8;
       this.kit.importDefaults({
         Connector: [
           "Bezier", {
@@ -44257,7 +44260,7 @@ module.exports = DiagramToolkit = (function() {
       source: source,
       target: target,
       paintStyle: paintStyle,
-      overlays: this._overlays(label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude),
+      overlays: this._overlays(label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback),
       endpoint: this._endpointOptions("Rectangle", thickness, 'node-link-endpoint')
     });
     connection.bind('click', this.handleClick.bind(this));
