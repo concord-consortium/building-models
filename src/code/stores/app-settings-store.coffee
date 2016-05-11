@@ -5,6 +5,7 @@ AppSettingsActions = Reflux.createActions(
   [
     "diagramOnly"
     "showMinigraphs"
+    "relationshipSymbols"
   ]
 )
 
@@ -16,6 +17,7 @@ AppSettingsStore   = Reflux.createStore
       showingSettingsDialog: false
       diagramOnly: HashParams.getParam('simplified')
       showingMinigraphs: false
+      relationshipSymbols: false
 
   onDiagramOnly: (diagramOnly) ->
     @settings.diagramOnly = diagramOnly
@@ -24,6 +26,10 @@ AppSettingsStore   = Reflux.createStore
 
   onShowMinigraphs: (show) ->
     @settings.showingMinigraphs = show
+    @notifyChange()
+    
+  onRelationshipSymbols: (show) ->
+    @settings.relationshipSymbols = show
     @notifyChange()
 
   notifyChange: ->
@@ -40,6 +46,7 @@ AppSettingsStore   = Reflux.createStore
   serialize: ->
     diagramOnly: @settings.diagramOnly
     showingMinigraphs: @settings.showingMinigraphs
+    relationshipSymbols: @settings.relationshipSymbols
 
 mixin =
   getInitialState: ->

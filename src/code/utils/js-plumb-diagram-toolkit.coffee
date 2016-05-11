@@ -102,7 +102,7 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback) ->
+  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator) ->
     results = [["Arrow", {
       location: 1.0
       length: 10
@@ -110,6 +110,18 @@ module.exports = class DiagramToolkit
       width: 9 + thickness
       foldback: arrowFoldback
     }]]
+    if changeIndicator && variableWidth != 0
+      results.push ["Label", {
+        location: 0.1,
+        label: changeIndicator or '',
+        cssClass: "link-indicator#{if changeIndicator == '+' then ' increase' else ' decrease'}"
+      }]
+    else if changeIndicator
+      results.push ["Label", {
+        location: 0.9,
+        label: changeIndicator or '',
+        cssClass: "link-indicator#{if changeIndicator == '+' then ' increase' else ' decrease'}"
+      }]
     if editingLabel
       results.push  ["Custom", {
         create: @_createEditLabel(label)
@@ -124,7 +136,6 @@ module.exports = class DiagramToolkit
         cssClass: "label#{if selected then ' selected' else ''}"
       }]
     results
-
 
   _gradient: (startColor, endColor, offset) ->
     result = stops: [[0.0,startColor], [1.0,endColor]]
@@ -148,7 +159,8 @@ module.exports = class DiagramToolkit
   _clean_borked_endpoints: ->
     $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove()
 
-  addLink: (source, target, label, color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, linkModel) ->
+
+  addLink: (opts) ->
     paintStyle = @_paintStyle LinkColors.default
     paintStyle.outlineColor = "none"
     paintStyle.outlineWidth = 4
@@ -157,33 +169,37 @@ module.exports = class DiagramToolkit
     finalColor = LinkColors.default
     fixedColor = LinkColors.default
     fadedColor = LinkColors.defaultFaded
+    changeIndicator = ''
     
-    thickness = Math.abs(magnitude)
+    thickness = Math.abs(opts.magnitude)
     if (!thickness)
       thickness = 1
     
-    if isDashed
+    if opts.isDashed
       paintStyle.dashstyle = "4 2"
       fixedColor = fixedColor = LinkColors.dashed
-    if isSelected
+    if opts.isSelected
       paintStyle.outlineColor = LinkColors.selectedOutline
-    if magnitude < 0
+    if opts.magnitude < 0
       fixedColor = LinkColors.decrease
       fadedColor = LinkColors.decreaseFaded
-    if magnitude > 0
+      changeIndicator = '-'
+    if opts.magnitude > 0
       fixedColor = LinkColors.increase
       fadedColor = LinkColors.increaseFaded
-    if color != LinkColors.default
-      fixedColor = color
+      changeIndicator = '+'
+    if opts.color != LinkColors.default
+      fixedColor = opts.color
+      thickness = 2
 
     paintStyle.lineWidth = thickness
     startColor = finalColor
     
-    if (useGradient)
+    if (opts.useGradient)
       startColor = finalColor = fixedColor
-      if gradual < 0
+      if opts.gradual < 0
         finalColor = fadedColor
-      if gradual > 0
+      if opts.gradual > 0
         startColor = fadedColor
       paintStyle.gradient = @_gradient startColor, finalColor
       
@@ -193,24 +209,27 @@ module.exports = class DiagramToolkit
     variableWidthMagnitude = 0
     arrowFoldback = 0.6
     
-    if (gradual && useVariableThickness)
-      variableWidthMagnitude = @lineWidthVariation * gradual
+    if (opts.gradual && opts.useVariableThickness)
+      variableWidthMagnitude = @lineWidthVariation * opts.gradual
       arrowFoldback = 0.8
       @kit.importDefaults
         Connector: ["Bezier", {curviness: 120, variableWidth: variableWidthMagnitude}]
-      if (gradual > 0)
+      if (opts.gradual > 0)
         thickness = thickness * @lineWidthVariation
 
+    if opts.showIndicators? and not opts.showIndicators
+      changeIndicator = null
+
     connection = @kit.connect
-      source: source
-      target: target
+      source: opts.source
+      target: opts.target
       paintStyle: paintStyle
-      overlays: @_overlays label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback
+      overlays: @_overlays opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator
       endpoint: @_endpointOptions("Rectangle", thickness, 'node-link-endpoint')
 
     connection.bind 'click', @handleClick.bind @
     connection.bind 'dblclick', @handleDoubleClick.bind @
-    connection.linkModel = linkModel
+    connection.linkModel = opts.linkModel
     
     @kit.importDefaults
       Connector: ["Bezier", {curviness: 60, variableWidth: null}]
