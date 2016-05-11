@@ -6,16 +6,27 @@ $small-elm-width  = 58px
 $big-elm-width    = 90px
 $node-title-width = 90px
 $big-elm-height   = 164px
+$node-design-height = 94px
 
 .elm
+  box-sizing border-box
+  border-top 6px solid transparent
+  background-color transparent  
+  height auto
+  
+  
+  .top
+    height auto
+    margin-top 6px
+    margin-bottom 6px
+  .bottom
+    border-radius 0px 0px 5px 5px
+    box-sizing content-box
+    overflow hidden
+    width $big-elm-width
   .debugging
     opacity 0.5
-  &.selected
-    border-top 6px solid transparent
-  *
-    box-sizing border-box
-    no-select()
-
+    
   input
     -moz-user-select text
     -webkit-user-select text
@@ -36,7 +47,7 @@ $big-elm-height   = 164px
   position absolute
   margin 0px
   padding 0px
-  padding-top 10px
+  padding-top 8px
   width $big-elm-width
 
   enable-flex(direction: column, alignContent:center, alignItems:center, justify:flex-start)
@@ -67,6 +78,7 @@ $big-elm-height   = 164px
       padding 0px
   .centered-block
     enable-flex(direction: column, alignContent:center, alignItems:center, justify:flex-start)
+    min-height 10px
   .action-circle
     position absolute
     background-color light-blue
@@ -89,21 +101,22 @@ $big-elm-height   = 164px
     font-size 12px
   .top
     height 72px
+  .bottom
+    background-color transparent
   &.selected,&:hover
     .action-circle
       opacity 1
   &.selected
     box-shadow 0px 0px 3px hsla(0,0,0,0.3)
     background-color white
-    height auto
-    .top
-      height auto
+    
     .bottom
-      background-color light-gray
       border-radius 0px 0px 5px 5px
       box-sizing content-box
-      orverflow hidden
+      overflow hidden
       width $big-elm-width
+    .slider
+      background-color light-gray
     &:hover
       .img-background
         box-shadow 0px 0px 0px rgba(0, 0, 0, 0.0)
@@ -123,11 +136,11 @@ $big-elm-height   = 164px
     text-align center
     cursor pointer
     word-wrap break-word
-    margin-top 10px
+    margin-top 4px
     margin-bottom 8px
   input[type=text].node-title
-    margin-top 6px
-    margin-bottom 4px
+    margin-top 4px
+    margin-bottom 8px
     padding 0px
   .untitled
     italic-font(size:10px)
@@ -174,12 +187,13 @@ $big-elm-height   = 164px
 .link-target
   margin-top 6px
   margin-bottom 6px
-  
+  height $node-design-height
+  &.simulate
+    height auto
 
 .node-link-endpoint
   opacity 0
   z-index -1
-
 
 .label
   no-select()
