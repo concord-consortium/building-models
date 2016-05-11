@@ -22,6 +22,9 @@ module.exports = React.createClass
 
   setShowingMinigraphs: (e) ->
     AppSettingsStore.actions.showMinigraphs e.target.checked
+    
+  setRelationshipSymbols: (e) ->
+    AppSettingsStore.actions.relationshipSymbols e.target.checked
 
   render: ->
     runPanelClasses = "run-panel"
@@ -82,4 +85,9 @@ module.exports = React.createClass
         (input {type: 'checkbox', value: 'diagram-only', checked: @state.diagramOnly, onChange: @setDiagramOnly})
         (label {}, tr '~SIMULATION.DIAGRAM_ONLY')
       )
+      (div {className: "row"},
+        (input {type: 'checkbox', value: 'relationship-symbols', checked: @state.relationshipSymbols, onChange: @setRelationshipSymbols})
+        (label {}, tr '~SIMULATION.RELATIONSHIP_SYMBOLS')
+      )
+
     )

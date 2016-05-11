@@ -184,7 +184,22 @@ module.exports = React.createClass
       useGradient = false
       useVariableThickness = true
       if source and target
-        @diagramToolkit.addLink source, target, link.title, link.color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, link
+        opts = {
+          source: source,
+          target: target,
+          label: link.title,
+          color: link.color,
+          magnitude: magnitude,
+          isDashed: isDashed,
+          isSelected: isSelected,
+          isEditing: isEditing,
+          gradual: gradual,
+          useGradient: useGradient,
+          useVariableThickness: useVariableThickness,
+          linkModel: link,
+          showIndicators: @state.relationshipSymbols
+        }
+        @diagramToolkit.addLink opts
 
   onDragOver: (e) ->
     if not @state.canDrop

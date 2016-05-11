@@ -87,7 +87,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.CUSTOM"
     postfixIco: "cus"
     formulaFrag: ""
-    magnitude: 2
+    magnitude: 0
     gradual: 0
     func: (scope) ->
       return

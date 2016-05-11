@@ -134,7 +134,7 @@ module.exports =
   "~SIMULATION.DURATION": "Calculations per run"
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
   "~SIMULATION.DIAGRAM_ONLY": "Diagram only tools"
-
+  "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols"
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."
 
