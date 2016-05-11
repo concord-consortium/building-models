@@ -192,6 +192,18 @@ module.exports = NodeView = React.createClass
       classes.push "link-target"
     classes.join " "
 
+  linkTargetClasses: ->
+    classes = ['link-target']
+    if @props.simulating
+      classes.push "simulate"
+    classes.join " "
+
+  nodeSliderClasses: ->
+    classes = ['bottom','centered-block']
+    if @props.simulating and @props.data.canEditInitialValue()
+      classes.push 'slider'
+    classes.join " "
+
   renderNodeInternal: ->
     if @props.showMinigraph
       (GraphView {
@@ -213,7 +225,7 @@ module.exports = NodeView = React.createClass
       "color": @props.data.color
 
     (div { className: @nodeClasses(), ref: "node", style: style},
-      (div {className: 'link-target', "data-node-key": @props.nodeKey},
+      (div {className: @linkTargetClasses(), "data-node-key": @props.nodeKey},
         (div {className: "actions"},
           (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
           if @props.selected and @props.showGraphButton
@@ -239,16 +251,13 @@ module.exports = NodeView = React.createClass
             onStartEditing: @startEditing
           })
         )
-        (div {className: 'bottom centered-block' ,"data-node-key": @props.nodeKey},
+        (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},
           if @props.simulating
-            if @props.selected
-              (div {className: 'centered-block'},
-                if not @props.data.valueDefinedSemiQuantitatively
-                  @renderValue()
-                @renderSliderView()
-              )
-            else
+            (div {className: 'centered-block'},
+              if not @props.data.valueDefinedSemiQuantitatively
+                @renderValue()
               @renderSliderView()
+            )
         )
       )
     )
