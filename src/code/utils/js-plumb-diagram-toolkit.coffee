@@ -102,12 +102,13 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth) ->
+  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback) ->
     results = [["Arrow", {
       location: 1.0
       length: 10
       variableWidth: variableWidth
       width: 9 + thickness
+      foldback: arrowFoldback
     }]]
     if editingLabel
       results.push  ["Custom", {
@@ -190,9 +191,11 @@ module.exports = class DiagramToolkit
     paintStyle.vertical = true
     
     variableWidthMagnitude = 0
+    arrowFoldback = 0.6
     
     if (gradual && useVariableThickness)
       variableWidthMagnitude = @lineWidthVariation * gradual
+      arrowFoldback = 0.8
       @kit.importDefaults
         Connector: ["Bezier", {curviness: 120, variableWidth: variableWidthMagnitude}]
       if (gradual > 0)
@@ -202,7 +205,7 @@ module.exports = class DiagramToolkit
       source: source
       target: target
       paintStyle: paintStyle
-      overlays: @_overlays label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude
+      overlays: @_overlays label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback
       endpoint: @_endpointOptions("Rectangle", thickness, 'node-link-endpoint')
 
     connection.bind 'click', @handleClick.bind @
