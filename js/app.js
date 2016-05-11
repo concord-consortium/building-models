@@ -47948,6 +47948,22 @@ module.exports = NodeView = React.createClass({
     }
     return classes.join(" ");
   },
+  linkTargetClasses: function() {
+    var classes;
+    classes = ['link-target'];
+    if (this.props.simulating) {
+      classes.push("simulate");
+    }
+    return classes.join(" ");
+  },
+  nodeSliderClasses: function() {
+    var classes;
+    classes = ['bottom', 'centered-block'];
+    if (this.props.simulating && this.props.data.canEditInitialValue()) {
+      classes.push('slider');
+    }
+    return classes.join(" ");
+  },
   renderNodeInternal: function() {
     if (this.props.showMinigraph) {
       return GraphView({
@@ -47974,7 +47990,7 @@ module.exports = NodeView = React.createClass({
       ref: "node",
       style: style
     }, div({
-      className: 'link-target',
+      className: this.linkTargetClasses(),
       "data-node-key": this.props.nodeKey
     }, div({
       className: "actions"
@@ -48010,11 +48026,11 @@ module.exports = NodeView = React.createClass({
       onStopEditing: this.stopEditing,
       onStartEditing: this.startEditing
     })), div({
-      className: 'bottom centered-block',
+      className: this.nodeSliderClasses(),
       "data-node-key": this.props.nodeKey
-    }, this.props.simulating ? this.props.selected ? div({
+    }, this.props.simulating ? div({
       className: 'centered-block'
-    }, !this.props.data.valueDefinedSemiQuantitatively ? this.renderValue() : void 0, this.renderSliderView()) : this.renderSliderView() : void 0)));
+    }, !this.props.data.valueDefinedSemiQuantitatively ? this.renderValue() : void 0, this.renderSliderView()) : void 0)));
   }
 });
 
