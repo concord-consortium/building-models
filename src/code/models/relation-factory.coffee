@@ -91,16 +91,6 @@ module.exports = class RelationFactory
     gradual: 0
     func: (scope) ->
       return
-  
-  @unknown:
-    id: -1
-    text: tr ""
-    postfixIco: ""
-    formulaFrag: "in"
-    magnitude: 0
-    gradual: 0
-    func: (scope) ->
-      return
    
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
@@ -120,12 +110,11 @@ module.exports = class RelationFactory
     else if scalar == @custom
       # user switched back from custom relationship to defined
       scalar = @aboutTheSame
-    if not scalar?
-      scalar = @unknown
-    name = "#{vector.text} #{scalar.text}"
-    formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
-    func = vector.func(scalar.func)
-    magnitude = vector.magnitude * scalar.magnitude
+    if scalar?
+      name = "#{vector.text} #{scalar.text}"
+      formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
+      func = vector.func(scalar.func)
+      magnitude = vector.magnitude * scalar.magnitude
     new Relationship({text: name, formula: formula, func: func, magnitude: magnitude, customData: existingData})
 
   @selectionsFromRelation: (relation) ->
