@@ -50,9 +50,6 @@ module.exports = SvgGraphView = React.createClass
         definedRelationship: definedRelationship
 
       if newProps.formula?
-        if newProps.formula != @props.formula
-          @updateRelationCustomData(null)
-          
         canDraw: false
         newCustomData: false
         @setState {canDraw, newCustomData}
