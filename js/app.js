@@ -41068,16 +41068,6 @@ module.exports = RelationFactory = (function() {
     text: tr("~NODE-RELATION-EDIT.CUSTOM"),
     postfixIco: "cus",
     formulaFrag: "",
-    magnitude: 2,
-    gradual: 0,
-    func: function(scope) {}
-  };
-
-  RelationFactory.unknown = {
-    id: -1,
-    text: tr(""),
-    postfixIco: "",
-    formulaFrag: "in",
     magnitude: 0,
     gradual: 0,
     func: function(scope) {}
@@ -41098,13 +41088,12 @@ module.exports = RelationFactory = (function() {
     } else if (scalar === this.custom) {
       scalar = this.aboutTheSame;
     }
-    if (scalar == null) {
-      scalar = this.unknown;
+    if (scalar != null) {
+      name = vector.text + " " + scalar.text;
+      formula = vector.formulaFrag + " " + scalar.formulaFrag;
+      func = vector.func(scalar.func);
+      magnitude = vector.magnitude * scalar.magnitude;
     }
-    name = vector.text + " " + scalar.text;
-    formula = vector.formulaFrag + " " + scalar.formulaFrag;
-    func = vector.func(scalar.func);
-    magnitude = vector.magnitude * scalar.magnitude;
     return new Relationship({
       text: name,
       formula: formula,
@@ -41767,7 +41756,7 @@ HashParams = require('../utils/hash-parameters');
 
 ImportActions = require('../actions/import-actions');
 
-AppSettingsActions = Reflux.createActions(["diagramOnly", "showMinigraphs"]);
+AppSettingsActions = Reflux.createActions(["diagramOnly", "showMinigraphs", "relationshipSymbols"]);
 
 AppSettingsStore = Reflux.createStore({
   listenables: [AppSettingsActions, ImportActions],
@@ -41775,7 +41764,8 @@ AppSettingsStore = Reflux.createStore({
     return this.settings = {
       showingSettingsDialog: false,
       diagramOnly: HashParams.getParam('simplified'),
-      showingMinigraphs: false
+      showingMinigraphs: false,
+      relationshipSymbols: false
     };
   },
   onDiagramOnly: function(diagramOnly) {
@@ -41787,6 +41777,10 @@ AppSettingsStore = Reflux.createStore({
   },
   onShowMinigraphs: function(show) {
     this.settings.showingMinigraphs = show;
+    return this.notifyChange();
+  },
+  onRelationshipSymbols: function(show) {
+    this.settings.relationshipSymbols = show;
     return this.notifyChange();
   },
   notifyChange: function() {
@@ -41804,7 +41798,8 @@ AppSettingsStore = Reflux.createStore({
   serialize: function() {
     return {
       diagramOnly: this.settings.diagramOnly,
-      showingMinigraphs: this.settings.showingMinigraphs
+      showingMinigraphs: this.settings.showingMinigraphs,
+      relationshipSymbols: this.settings.relationshipSymbols
     };
   }
 });
@@ -44123,7 +44118,7 @@ module.exports = DiagramToolkit = (function() {
     };
   };
 
-  DiagramToolkit.prototype._overlays = function(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback) {
+  DiagramToolkit.prototype._overlays = function(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator) {
     var results;
     if (editingLabel == null) {
       editingLabel = true;
@@ -44139,6 +44134,23 @@ module.exports = DiagramToolkit = (function() {
         }
       ]
     ];
+    if (changeIndicator && variableWidth !== 0) {
+      results.push([
+        "Label", {
+          location: 0.1,
+          label: changeIndicator || '',
+          cssClass: "link-indicator" + (changeIndicator === '+' ? ' increase' : ' decrease')
+        }
+      ]);
+    } else if (changeIndicator) {
+      results.push([
+        "Label", {
+          location: 0.9,
+          label: changeIndicator || '',
+          cssClass: "link-indicator" + (changeIndicator === '+' ? ' increase' : ' decrease')
+        }
+      ]);
+    }
     if (editingLabel) {
       results.push([
         "Custom", {
@@ -44194,8 +44206,8 @@ module.exports = DiagramToolkit = (function() {
     return $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove();
   };
 
-  DiagramToolkit.prototype.addLink = function(source, target, label, color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, linkModel) {
-    var arrowFoldback, connection, fadedColor, finalColor, fixedColor, paintStyle, startColor, thickness, variableWidthMagnitude;
+  DiagramToolkit.prototype.addLink = function(opts) {
+    var arrowFoldback, changeIndicator, connection, fadedColor, finalColor, fixedColor, paintStyle, startColor, thickness, variableWidthMagnitude;
     paintStyle = this._paintStyle(LinkColors["default"]);
     paintStyle.outlineColor = "none";
     paintStyle.outlineWidth = 4;
@@ -44203,36 +44215,43 @@ module.exports = DiagramToolkit = (function() {
     finalColor = LinkColors["default"];
     fixedColor = LinkColors["default"];
     fadedColor = LinkColors.defaultFaded;
-    thickness = Math.abs(magnitude);
+    changeIndicator = '';
+    thickness = Math.abs(opts.magnitude);
     if (!thickness) {
       thickness = 1;
     }
-    if (isDashed) {
+    if (opts.isDashed) {
       paintStyle.dashstyle = "4 2";
       fixedColor = fixedColor = LinkColors.dashed;
     }
-    if (isSelected) {
+    if (opts.isSelected) {
       paintStyle.outlineColor = LinkColors.selectedOutline;
     }
-    if (magnitude < 0) {
+    if (opts.isSelected && opts.isDashed) {
+      paintStyle.dashstyle = void 0;
+    }
+    if (opts.magnitude < 0) {
       fixedColor = LinkColors.decrease;
       fadedColor = LinkColors.decreaseFaded;
+      changeIndicator = '-';
     }
-    if (magnitude > 0) {
+    if (opts.magnitude > 0) {
       fixedColor = LinkColors.increase;
       fadedColor = LinkColors.increaseFaded;
+      changeIndicator = '+';
     }
-    if (color !== LinkColors["default"]) {
-      fixedColor = color;
+    if (opts.color !== LinkColors["default"]) {
+      fixedColor = opts.color;
+      thickness = 2;
     }
     paintStyle.lineWidth = thickness;
     startColor = finalColor;
-    if (useGradient) {
+    if (opts.useGradient) {
       startColor = finalColor = fixedColor;
-      if (gradual < 0) {
+      if (opts.gradual < 0) {
         finalColor = fadedColor;
       }
-      if (gradual > 0) {
+      if (opts.gradual > 0) {
         startColor = fadedColor;
       }
       paintStyle.gradient = this._gradient(startColor, finalColor);
@@ -44241,8 +44260,8 @@ module.exports = DiagramToolkit = (function() {
     paintStyle.vertical = true;
     variableWidthMagnitude = 0;
     arrowFoldback = 0.6;
-    if (gradual && useVariableThickness) {
-      variableWidthMagnitude = this.lineWidthVariation * gradual;
+    if (opts.gradual && opts.useVariableThickness) {
+      variableWidthMagnitude = this.lineWidthVariation * opts.gradual;
       arrowFoldback = 0.8;
       this.kit.importDefaults({
         Connector: [
@@ -44252,20 +44271,23 @@ module.exports = DiagramToolkit = (function() {
           }
         ]
       });
-      if (gradual > 0) {
+      if (opts.gradual > 0) {
         thickness = thickness * this.lineWidthVariation;
       }
     }
+    if ((opts.showIndicators != null) && !opts.showIndicators) {
+      changeIndicator = null;
+    }
     connection = this.kit.connect({
-      source: source,
-      target: target,
+      source: opts.source,
+      target: opts.target,
       paintStyle: paintStyle,
-      overlays: this._overlays(label, isSelected, isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback),
+      overlays: this._overlays(opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator),
       endpoint: this._endpointOptions("Rectangle", thickness, 'node-link-endpoint')
     });
     connection.bind('click', this.handleClick.bind(this));
     connection.bind('dblclick', this.handleDoubleClick.bind(this));
-    connection.linkModel = linkModel;
+    connection.linkModel = opts.linkModel;
     return this.kit.importDefaults({
       Connector: [
         "Bezier", {
@@ -44410,6 +44432,7 @@ module.exports = {
   "~SIMULATION.DURATION": "Calculations per run",
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range",
   "~SIMULATION.DIAGRAM_ONLY": "Diagram only tools",
+  "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols",
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
   "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)",
@@ -45878,7 +45901,7 @@ module.exports = React.createClass({
     return this.diagramToolkit.makeTarget($(this.refs.linkView).find(this.props.linkTarget));
   },
   _redrawLinks: function() {
-    var gradual, i, isDashed, isEditing, isSelected, len, link, magnitude, ref, relationDetails, results, source, target, useGradient, useVariableThickness;
+    var gradual, i, isDashed, isEditing, isSelected, len, link, magnitude, opts, ref, relationDetails, results, source, target, useGradient, useVariableThickness;
     ref = this.state.links;
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -45899,7 +45922,22 @@ module.exports = React.createClass({
       useGradient = false;
       useVariableThickness = true;
       if (source && target) {
-        results.push(this.diagramToolkit.addLink(source, target, link.title, link.color, magnitude, isDashed, isSelected, isEditing, gradual, useGradient, useVariableThickness, link));
+        opts = {
+          source: source,
+          target: target,
+          label: link.title,
+          color: link.color,
+          magnitude: magnitude,
+          isDashed: isDashed,
+          isSelected: isSelected,
+          isEditing: isEditing,
+          gradual: gradual,
+          useGradient: useGradient,
+          useVariableThickness: useVariableThickness,
+          linkModel: link,
+          showIndicators: this.state.relationshipSymbols
+        };
+        results.push(this.diagramToolkit.addLink(opts));
       } else {
         results.push(void 0);
       }
@@ -46900,7 +46938,8 @@ Graph = React.createFactory(React.createClass({
       formula: this.props.formula,
       customData: this.props.customData,
       link: this.props.link,
-      graphStore: this.props.graphStore
+      graphStore: this.props.graphStore,
+      isDefined: this.props.isDefined
     });
   }
 }));
@@ -46934,12 +46973,13 @@ module.exports = LinkRelationView = React.createClass({
   getInitialState: function() {
     return {
       selectedVector: null,
-      selectedScalar: null
+      selectedScalar: null,
+      selectedVectorHasChanged: false
     };
   },
   componentWillMount: function() {
     var ref1, scalar, selectedScalar, selectedVector, vector;
-    if ((this.state.selectedVector == null) && (this.props.link.relation.customData == null)) {
+    if (this.state.selectedVector == null) {
       ref1 = RelationFactory.selectionsFromRelation(this.props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
       selectedVector = vector;
       selectedScalar = scalar;
@@ -46971,7 +47011,7 @@ module.exports = LinkRelationView = React.createClass({
     }
   },
   updateRelation: function() {
-    var existingData, link, relation, selectedScalar, selectedVector;
+    var existingData, link, relation, relationshipIsDefined, selectedScalar, selectedVector;
     selectedVector = this.getVector();
     selectedScalar = this.getScalar();
     if ((selectedVector != null) && RelationFactory.isCustomRelationship(selectedVector)) {
@@ -46985,14 +47025,27 @@ module.exports = LinkRelationView = React.createClass({
       link = this.props.link;
       existingData = link.relation.customData;
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData);
+      relationshipIsDefined = (selectedVector != null) && (selectedScalar != null);
+      if (!RelationFactory.isCustomRelationship(selectedVector)) {
+        relation.customData = null;
+      }
       return this.props.graphStore.changeLink(link, {
-        relation: relation
+        relation: relation,
+        isDefined: relationshipIsDefined
       });
     }
   },
   getVector: function() {
-    var id;
+    var id, newVector, selectedVectorHasChanged;
     id = parseInt(this.refs.vector.value);
+    newVector = RelationFactory.vectors[id];
+    selectedVectorHasChanged = false;
+    if (this.state.selectedVector && id !== this.state.selectedVector.id) {
+      selectedVectorHasChanged = true;
+    }
+    this.setState({
+      selectedVectorHasChanged: selectedVectorHasChanged
+    });
     return RelationFactory.vectors[id];
   },
   getScalar: function() {
@@ -47000,6 +47053,8 @@ module.exports = LinkRelationView = React.createClass({
     if (this.refs.scalar) {
       id = parseInt(this.refs.scalar.value);
       return RelationFactory.scalars[id];
+    } else {
+      return void 0;
     }
   },
   renderVectorPulldown: function(vectorSelection) {
@@ -47069,7 +47124,7 @@ module.exports = LinkRelationView = React.createClass({
     }
   },
   render: function() {
-    var customData, formula, source, target;
+    var customData, formula, relationshipIsDefined, source, target;
     source = this.props.link.sourceNode.title;
     target = this.props.link.targetNode.title;
     formula = this.props.link.relation.formula;
@@ -47084,6 +47139,7 @@ module.exports = LinkRelationView = React.createClass({
         customData = true;
       }
     }
+    relationshipIsDefined = (this.state.selectedVector != null) && ((this.state.selectedScalar != null) || (customData != null));
     return div({
       className: 'link-relation-view'
     }, div({
@@ -47106,7 +47162,8 @@ module.exports = LinkRelationView = React.createClass({
       yAxis: target,
       link: this.props.link,
       customData: customData,
-      graphStore: this.props.graphStore
+      graphStore: this.props.graphStore,
+      isDefined: relationshipIsDefined
     }))));
   }
 });
@@ -48570,6 +48627,9 @@ module.exports = React.createClass({
   setShowingMinigraphs: function(e) {
     return AppSettingsStore.actions.showMinigraphs(e.target.checked);
   },
+  setRelationshipSymbols: function(e) {
+    return AppSettingsStore.actions.relationshipSymbols(e.target.checked);
+  },
   render: function() {
     var minigraphsCheckboxClass, runPanelClasses;
     runPanelClasses = "run-panel";
@@ -48652,7 +48712,14 @@ module.exports = React.createClass({
       value: 'diagram-only',
       checked: this.state.diagramOnly,
       onChange: this.setDiagramOnly
-    }), label({}, tr('~SIMULATION.DIAGRAM_ONLY'))));
+    }), label({}, tr('~SIMULATION.DIAGRAM_ONLY'))), div({
+      className: "row"
+    }, input({
+      type: 'checkbox',
+      value: 'relationship-symbols',
+      checked: this.state.relationshipSymbols,
+      onChange: this.setRelationshipSymbols
+    }), label({}, tr('~SIMULATION.RELATIONSHIP_SYMBOLS'))));
   }
 });
 
@@ -48797,7 +48864,8 @@ module.exports = SvgGraphView = React.createClass({
       xLabel: "x axis",
       yLabel: "y axis",
       link: null,
-      customData: null
+      customData: null,
+      isDefined: false
     };
   },
   drawing: false,
@@ -48805,18 +48873,16 @@ module.exports = SvgGraphView = React.createClass({
     return {
       currentData: null,
       pointPathData: null,
-      newCustomData: false,
       canDraw: false,
-      definedRelationship: false
+      definedRelationship: false,
+      newCustomData: false
     };
   },
   componentWillMount: function() {
-    var canDraw, definedRelationship, newCustomData;
-    newCustomData = false;
-    definedRelationship = (this.props.link.relation.customData != null) || (this.props.formula != null);
+    var canDraw, definedRelationship;
+    definedRelationship = this.props.isDefined;
     canDraw = this.props.formula == null;
     this.setState({
-      newCustomData: newCustomData,
       definedRelationship: definedRelationship,
       canDraw: canDraw
     });
@@ -48830,36 +48896,36 @@ module.exports = SvgGraphView = React.createClass({
   },
   componentWillReceiveProps: function(newProps) {
     var canDraw, currentData, definedRelationship, newCustomData;
-    if (this.props.link !== newProps.link) {
-      this.setState({
-        currentData: null,
-        pointPathData: null
-      });
-    }
-    definedRelationship = (newProps.customData != null) || (newProps.formula != null);
-    newCustomData = newProps.customData && !newProps.link.relation.customData;
-    canDraw = newProps.formula == null;
-    this.setState({
-      definedRelationship: definedRelationship,
-      canDraw: canDraw,
-      newCustomData: newCustomData
-    });
-    if (definedRelationship && !newCustomData) {
-      this.setState({
-        currentData: null,
-        pointPathData: null
-      });
+    if (newProps) {
+      canDraw = newProps.formula == null;
       currentData = newProps.link.relation.customData;
-      this.updatePointData(newProps.formula, currentData);
-    }
-    if (newCustomData) {
+      definedRelationship = newProps.isDefined;
       this.setState({
-        currentData: null,
+        currentData: currentData,
         pointPathData: null,
-        canDraw: true
+        canDraw: canDraw,
+        newCustomData: false,
+        definedRelationship: definedRelationship
       });
-      currentData = [[0, 0], [1, 0.0471612686578851], [2, 0.0965467225771919], [3, 0.148261257156578], [4, 0.202414714794781], [5, 0.259122118197412], [6, 0.318503914686805], [7, 0.380686232033823], [8, 0.445801146355014], [9, 0.513986962644141], [10, 0.585388508533937], [11, 0.66015744191203], [12, 0.738452573044431], [13, 0.820440201890771], [14, 0.906294471327756], [15, 0.996197737031086], [16, 1.09034095480147], [17, 1.18892408615744], [18, 1.29215652305643], [19, 1.40025753264622], [20, 1.51345672299146], [21, 1.63199453076443], [22, 1.7561227319359], [23, 1.88610497655083], [24, 2.0222173487248], [25, 2.16474895305053], [26, 2.31400252866011], [27, 2.47029509224716], [28, 2.63395861141477], [29, 2.80534070977934], [30, 2.98480540532803], [31, 3.1727338835981], [32, 3.36952530732033], [33, 3.57559766424629], [34, 3.7913886549602], [35, 4.01735662256112], [36, 4.25398152619015], [37, 4.50176596047037], [38, 4.76123622302492], [39, 5.03294343234054], [40, 5.31746469835097], [41, 5.61540434822661], [42, 5.92739520997387], [43, 6.25409995657079], [44, 6.59621251349378], [45, 6.95445953262505], [46, 7.32960193567146], [47, 7.7224365303729], [48, 8.13379770293317], [49, 8.56455919026798], [50, 9.01563593583445], [51, 9.4879860329839], [52, 9.98261275996561], [53, 10.5005667109039], [54, 11.0429480272747], [55, 11.610908734622], [56, 12.2056551894756], [57, 12.8284506416698], [58, 13.4806179175039], [59, 14.1635422294435], [60, 14.8786741183315], [61, 15.6275325343571], [62, 16.4117080633277], [63, 17.2328663050949], [64, 18.0927514113128], [65, 18.9931897900399], [66, 19.9360939850561], [67, 20.9234667381321], [68, 21.9574052428813], [69, 23.0401055992288], [70, 24.173867477958], [71, 25.3610990052439], [72, 26.6043218775474], [73, 27.9061767177331], [74, 29.2694286837904], [75, 30.6969733420674], [76, 32.1918428174944], [77, 33.7572122338606], [78, 35.3964064578208], [79, 37.1129071609597], [80, 38.9103602149107], [81, 40.7925834352391], [82, 42.7635746905355], [83, 44.8275203939453], [84, 46.9888043951689], [85, 49.2520172918201], [86, 51.6219661799204], [87, 54.1036848642377], [88, 56.7024445501595], [89, 59.4237650398063], [90, 62.2734264561695], [91, 65.2574815201738], [92, 68.3822684067416], [93, 71.6544242071655], [94, 75.0808990263836], [95, 78.6689707451003], [96, 82.4262604781072], [97, 86.3607487616379], [98, 90.4807925041396], [99, 94.7951427364635], [100, 99.3129631991784]];
-      return this.updatePointData(null, currentData);
+      if (newProps.formula != null) {
+        ({
+          canDraw: false,
+          newCustomData: false
+        });
+        this.setState({
+          canDraw: canDraw,
+          newCustomData: newCustomData
+        });
+        return this.updatePointData(newProps.formula, null);
+      } else if (currentData) {
+        return this.updatePointData(null, currentData);
+      } else {
+        newCustomData = true;
+        this.setState({
+          newCustomData: newCustomData
+        });
+        return this.updatePointData("1 * min(exp(in/21.7)-1, maxOut)", currentData);
+      }
     }
   },
   updatePointData: function(formula, currentData) {
@@ -49079,7 +49145,7 @@ module.exports = SvgGraphView = React.createClass({
           var x, y;
           x = d[0];
           y = d[1];
-          if (x > scaledCoords.x - 3 && x < scaledCoords.x + 3) {
+          if (x > scaledCoords.x - 4 && x < scaledCoords.x + 4) {
             y = scaledCoords.y;
           }
           return [x, y];
@@ -49089,16 +49155,19 @@ module.exports = SvgGraphView = React.createClass({
     }
   },
   endDrawCurve: function(evt) {
-    var link, relation;
     if (this.drawing) {
       this.drawing = false;
-      link = this.props.link;
-      relation = link.relation;
-      relation.updateCustomData(this.state.currentData);
-      return this.props.graphStore.changeLink(link, {
-        relation: relation
-      });
+      return this.updateRelationCustomData(this.state.currentData);
     }
+  },
+  updateRelationCustomData: function(customData) {
+    var link, relation;
+    link = this.props.link;
+    relation = link.relation;
+    relation.updateCustomData(customData);
+    return this.props.graphStore.changeLink(link, {
+      relation: relation
+    });
   },
   render: function() {
     var drawClass;
