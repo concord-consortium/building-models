@@ -65,7 +65,7 @@ module.exports = class Relationship
       y = _.last point
       { y: y, x: x}
     @dataPoints = _.indexBy points, 'x'
-    
+
   toExport: ->
     text        : @text
     formula     : @formula

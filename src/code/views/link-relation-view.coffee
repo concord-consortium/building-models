@@ -15,6 +15,7 @@ Graph = React.createFactory React.createClass
       customData: @props.customData
       link: @props.link
       graphStore: @props.graphStore
+      isDefined: @props.isDefined
     })
 
 QuantStart = React.createFactory React.createClass
@@ -42,9 +43,10 @@ module.exports = LinkRelationView = React.createClass
   getInitialState: ->
     selectedVector: null
     selectedScalar: null
+    selectedVectorHasChanged: false
 
   componentWillMount: ->
-    if not @state.selectedVector? and not @props.link.relation.customData?
+    if not @state.selectedVector? # and not @props.link.relation.customData?
       {vector, scalar} = RelationFactory.selectionsFromRelation @props.link.relation
       selectedVector = vector
       selectedScalar = scalar
@@ -75,16 +77,28 @@ module.exports = LinkRelationView = React.createClass
       link = @props.link
       existingData = link.relation.customData
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData)
-      @props.graphStore.changeLink(link, {relation: relation})
+      relationshipIsDefined = selectedVector? and selectedScalar?
+      if not RelationFactory.isCustomRelationship(selectedVector)
+        relation.customData = null
+      @props.graphStore.changeLink(link, {relation: relation, isDefined: relationshipIsDefined})
 
   getVector: ->
     id = parseInt @refs.vector.value
+    newVector = RelationFactory.vectors[id]
+    
+    selectedVectorHasChanged = false
+    if @state.selectedVector and id != @state.selectedVector.id
+      selectedVectorHasChanged = true
+          
+    @setState { selectedVectorHasChanged }
     RelationFactory.vectors[id]
 
   getScalar: ->
     if @refs.scalar
       id = parseInt @refs.scalar.value
       RelationFactory.scalars[id]
+    else
+      undefined
 
   renderVectorPulldown: (vectorSelection)->
     options = _.map RelationFactory.vectors, (opt, i) ->
@@ -96,7 +110,7 @@ module.exports = LinkRelationView = React.createClass
       currentOption = "unselected"
     else
       currentOption = vectorSelection.id
-
+    
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
       (select {value: currentOption, className:"", ref: "vector", onChange: @updateRelation},
@@ -142,6 +156,7 @@ module.exports = LinkRelationView = React.createClass
       customData = @props.link.relation.customData
       if not customData?
         customData = true
+    relationshipIsDefined = @state.selectedVector? and (@state.selectedScalar? or customData?)
       
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
@@ -155,7 +170,7 @@ module.exports = LinkRelationView = React.createClass
       )
       (div {className: 'bottom'},
         (div {className: 'graph', id:'relation-graph'},
-          (Graph {formula: formula, xAxis: source, yAxis: target, link: @props.link, customData: customData, graphStore: @props.graphStore})
+          (Graph {formula: formula, xAxis: source, yAxis: target, link: @props.link, customData: customData, graphStore: @props.graphStore, isDefined: relationshipIsDefined})
         )
       )
     )
