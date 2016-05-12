@@ -57,15 +57,17 @@ module.exports = class Relationship
     result
 
   updateCustomData: (source)->
-    if source?
-      @customData = source
-
-    points = _.map @customData, (point) ->
-      x = _.first point
-      y = _.last point
-      { y: y, x: x}
-    @dataPoints = _.indexBy points, 'x'
+    @customData = source
     
+    if @customData?
+      points = _.map @customData, (point) ->
+        x = _.first point
+        y = _.last point
+        { y: y, x: x}
+      @dataPoints = _.indexBy points, 'x'
+    else
+      @dataPoints = null
+      
   toExport: ->
     text        : @text
     formula     : @formula
