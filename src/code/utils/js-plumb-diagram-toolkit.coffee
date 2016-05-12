@@ -180,6 +180,8 @@ module.exports = class DiagramToolkit
       fixedColor = fixedColor = LinkColors.dashed
     if opts.isSelected
       paintStyle.outlineColor = LinkColors.selectedOutline
+    if opts.isSelected and opts.isDashed
+      paintStyle.dashstyle = undefined
     if opts.magnitude < 0
       fixedColor = LinkColors.decrease
       fadedColor = LinkColors.decreaseFaded
