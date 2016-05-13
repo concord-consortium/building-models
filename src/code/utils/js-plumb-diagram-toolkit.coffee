@@ -185,7 +185,7 @@ module.exports = class DiagramToolkit
     if opts.magnitude < 0
       fixedColor = LinkColors.decrease
       fadedColor = LinkColors.decreaseFaded
-      changeIndicator = '-'
+      changeIndicator = '\u2013'
     if opts.magnitude > 0
       fixedColor = LinkColors.increase
       fadedColor = LinkColors.increaseFaded
