@@ -85,9 +85,11 @@ module.exports = class DiagramToolkit
       isSource: false
       anchor: "Center"
       endpoint: @_endpointOptions("Rectangle", size, 'node-link-target' )
+      paintStyle: { fillStyle: "transparent"}
       maxConnections: -1
       dropOptions:
         activeClass: "dragActive"
+        hoverClass: "droppable"
      )
 
   clear: ->
