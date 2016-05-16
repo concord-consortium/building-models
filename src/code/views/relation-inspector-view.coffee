@@ -1,4 +1,5 @@
 LinkRelationView = React.createFactory require "./link-relation-view"
+RelationFactory = require "../models/relation-factory"
 TabbedPanel = React.createFactory require './tabbed-panel-view'
 Tabber = require './tabbed-panel-view'
 tr = require "../utils/translate"
@@ -16,7 +17,12 @@ module.exports = RelationInspectorView = React.createClass
   renderTabforLink: (link) ->
     relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
     label = link.sourceNode.title
-    (Tabber.Tab {label: label, component: relationView, defined: link.relation.isDefined})
+    {vector, scalar} = RelationFactory.selectionsFromRelation link.relation
+    isFullyDefined = (link.relation.isDefined and vector? and scalar?) or link.relation.customData?
+    #if vector? and vector.isCustomRelationship
+    #  isFullyDefined = link.relation.customData?
+    # console.log(link.relation)
+    (Tabber.Tab {label: label, component: relationView, defined: isFullyDefined})
 
   renderNodeRelationInspector: ->
     tabs = _.map @props.node.inLinks(), (link) => @renderTabforLink(link)

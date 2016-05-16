@@ -11,8 +11,6 @@ module.exports = SvgGraphView = React.createClass
     xLabel: "x axis"
     yLabel: "y axis"
     link: null
-    customData: null
-    isDefined: false
 
   drawing: false
   
@@ -26,47 +24,67 @@ module.exports = SvgGraphView = React.createClass
     newCustomData: false
 
   componentWillMount: ->
-    definedRelationship = @props.isDefined
-    canDraw = not @props.formula?
-    @setState {definedRelationship, canDraw}
+    canDraw = false
+    currentData = @props.link.relation.customData
+    isDefined = @props.link.relation.isDefined
+    formula = @props.link.relation.formula
+    newCustomData = false
     
-    if not @state.pointPathData? and definedRelationship
-      if @props.link.relation.customData?
-        @updatePointData null, @props.link.relation.customData
-      else
-        @updatePointData @props.formula, @props.link.relation.customData
-  
+    if @props.link.relation.isCustomRelationship or (currentData? and isDefined)
+      canDraw = true
+      formula = null
+      newCustomData = not currentData?
+
+    @setState {
+      currentData: currentData,
+      canDraw: canDraw,
+      newCustomData: newCustomData,
+      definedRelationship: isDefined
+    }
+
+    if not @state.pointPathData? and isDefined
+      if currentData?
+        @updatePointData null, currentData
+      else if formula?
+        @updatePointData formula, null
+    
   componentWillReceiveProps: (newProps) ->
     if newProps
-      canDraw = not newProps.formula?
+      canDraw = false
       currentData = newProps.link.relation.customData
-      definedRelationship = newProps.isDefined
+      isDefined = newProps.link.relation.isDefined
+      formula = newProps.link.relation.formula
       
-      @setState
-        currentData: currentData
-        pointPathData: null
-        canDraw: canDraw
-        newCustomData: false
-        definedRelationship: definedRelationship
+      if newProps.link.relation.isCustomRelationship or (currentData? and isDefined)
+        canDraw = true
+        if not isDefined
+          newCustomData = true
+          formula = "1 * min(exp(in/21.7)-1, maxOut)"
+        else
+          formula = null
 
-      if newProps.formula?
-        canDraw: false
-        newCustomData: false
-        @setState {canDraw, newCustomData}
-        @updatePointData newProps.formula, null
-      else if currentData
-        @updatePointData null, currentData
-      else
-        newCustomData = true
-        @setState {newCustomData}
-        @updatePointData "1 * min(exp(in/21.7)-1, maxOut)", currentData
+      else if formula?
+        canDraw = false
+        newCustomData = false
+        currentData = null
       
+      @setState {
+        currentData: currentData,
+        pointPathData: null,
+        canDraw: canDraw,
+        newCustomData: newCustomData,
+        definedRelationship: isDefined
+      }
+
+      @updatePointData formula, currentData
         
   updatePointData: (formula, currentData) ->
-    if not currentData?
+    if not currentData? and formula?
       currentData = @loadCustomDataFromFormula formula
+    else if currentData?
+      @setState { definedRelationship: true }
     pointPathData = @getPathPoints(currentData)
-    @setState {currentData, pointPathData}
+    @setState {currentData: currentData, pointPathData: pointPathData}
 
   marginal: ->
     @props.fontSize * 0.4
@@ -154,7 +172,7 @@ module.exports = SvgGraphView = React.createClass
     (path {className: 'axisLines', d: @pointsToPath(data)})
 
   renderLineData: ->
-    if @state.definedRelationship
+    if @state.definedRelationship or @state.newCustomData
       data = @pointsToPath(@state.pointPathData)
       if @state.newCustomData
         (path {className: 'data', d:data, strokeWidth:@props.strokeWidth, strokeDasharray:@props.strokeDasharray})
@@ -163,10 +181,10 @@ module.exports = SvgGraphView = React.createClass
     
   startDrawCurve: (evt) ->
     # can only draw on custom relationships
-    if (@state.definedRelationship and @state.canDraw)
+    if @state.canDraw
       @drawing = true
       newCustomData = false
-      @setState {newCustomData}
+      @setState {newCustomData: newCustomData}
       @drawCurve(evt)
     
   drawCurve: (evt) ->
@@ -193,19 +211,19 @@ module.exports = SvgGraphView = React.createClass
     
   updateRelationCustomData: (customData) ->
     link = @props.link
-    relation = link.relation
-    relation.updateCustomData(customData)
-    @props.graphStore.changeLink(link, {relation: relation})
+    link.relation.customData = customData
+    link.relation.isDefined = customData?
+    @props.graphStore.changeLink(link, {relation: link.relation})
   
   render: ->
     (div {className: 'svgGraphView' },
       (svg {width: @props.width, height: @props.height },
         @renderAxisLines()
-        if @state.pointPathData and @state.definedRelationship then @renderLineData()
+        @renderLineData()
         @renderXLabel()
         @renderYLabel()
       )
-      if not @state.definedRelationship
+      if not (@state.definedRelationship or @state.newCustomData)
         (div {className: 'unknown-graph', onMouseDown: @startDrawCurve},
           "?"
         )

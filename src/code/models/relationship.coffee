@@ -23,13 +23,13 @@ module.exports = class Relationship
     @setFormula(formula)
     @dataPoints
     @customData  = @opts.customData
+    @isCustomRelationship = false
 
   setFormula: (newf) ->
     @formula = newf
     @checkFormula()
 
   checkFormula: ->
-    @isDefined   = @opts.formula? or @opts.func?
     if @isDefined
       @evaluate(1, 1) #sets the @hasError flag if there is a problem
 

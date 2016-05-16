@@ -8,6 +8,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.INCREASES"
     formulaFrag: "1 *"
     magnitude: 1
+    isCustomRelationship: false
     func: (scalarFunc) ->
       return (scope) ->
         scalarFunc(scope)
@@ -18,6 +19,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.DECREASES"
     formulaFrag: "maxIn -"
     magnitude: -1
+    isCustomRelationship: false
     func: (scalarFunc) ->
       return (scope) ->
         scope.maxIn - scalarFunc(scope)
@@ -28,6 +30,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.VARIES"
     formulaFrag: "0"
     magnitude: 1
+    isCustomRelationship: true
     func: (scalarFunc) ->
       return (scope) ->
         scalarFunc(scope)
@@ -105,7 +108,7 @@ module.exports = class RelationFactory
   ]
 
   @fromSelections: (vector,scalar,existingData) ->
-    if @isCustomRelationship vector
+    if vector? and vector.isCustomRelationship
       scalar = @custom
     else if scalar == @custom
       # user switched back from custom relationship to defined
@@ -123,10 +126,10 @@ module.exports = class RelationFactory
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
     if vector?
-      if @isCustomRelationship vector
+      if vector.isCustomRelationship
         scalar = @custom
       else if scalar == @custom
-        scalar = @aboutTheSame
+        scalar = undefined
     magnitude = 0
     gradual = 0
     if vector && scalar
@@ -134,8 +137,8 @@ module.exports = class RelationFactory
       gradual = scalar.gradual
     {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
     
-  @isCustomRelationship: (vector) ->
-    customRelationship = false
-    if vector? and vector.id == @vary.id
-      customRelationship = true
-    customRelationship
+  # @isCustomRelationship: (vector) ->
+  #  customRelationship = false
+  #  if vector? and vector.id == @vary.id
+  #    customRelationship = true
+  #  customRelationship
