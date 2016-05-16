@@ -61,7 +61,9 @@ module.exports = class DiagramToolkit
       dropOptions:
         activeClass: "dragActive"
       anchor: "Center"
+      connectorStyle : { strokeStyle:"#666" }
       endpoint: @_endpointOptions("Rectangle", 19, 'node-link-button')
+      connectorOverlays: [["Arrow", {location:1.0, width:10, length:10}]]
       maxConnections: -1
     )
 
@@ -82,7 +84,7 @@ module.exports = class DiagramToolkit
       isTarget: true
       isSource: false
       anchor: "Center"
-      endpoint: @_endpointOptions("Rectangle", size, 'node-link-target')
+      endpoint: @_endpointOptions("Rectangle", size, 'node-link-target' )
       maxConnections: -1
       dropOptions:
         activeClass: "dragActive"
