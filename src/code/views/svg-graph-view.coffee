@@ -216,6 +216,8 @@ module.exports = SvgGraphView = React.createClass
     @props.graphStore.changeLink(link, {relation: link.relation})
   
   render: ->
+    drawClass = 'draw-graph'
+    if @state.canDraw then drawClass += ' drawing'
     (div {className: 'svgGraphView' },
       (svg {width: @props.width, height: @props.height },
         @renderAxisLines()
@@ -223,14 +225,12 @@ module.exports = SvgGraphView = React.createClass
         @renderXLabel()
         @renderYLabel()
       )
-      if not (@state.definedRelationship or @state.newCustomData)
-        (div {className: 'unknown-graph', onMouseDown: @startDrawCurve},
-          "?"
-        )
-      else
-        drawClass = 'draw-graph'
-        if @state.canDraw then drawClass += ' drawing'
-        (div {className: drawClass, onMouseDown: @startDrawCurve, onMouseMove: @drawCurve, onMouseUp: @endDrawCurve, onMouseOut: @endDrawCurve})
+      (div {className: drawClass, onMouseDown: @startDrawCurve, onMouseMove: @drawCurve, onMouseUp: @endDrawCurve, onMouseOut: @endDrawCurve},
+        if @state.newCustomData or not @state.definedRelationship
+          (div {className: 'unknown-graph'},
+            "?"
+          )
+      )
     )
     
 # TO DEBUG THIS VIEW:
