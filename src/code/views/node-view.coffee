@@ -189,7 +189,7 @@ module.exports = NodeView = React.createClass
   topClasses: ->
     classes = ['top']
     unless @props.selected
-      classes.push "link-target"
+      classes.push "link-top"
     classes.join " "
 
   linkTargetClasses: ->

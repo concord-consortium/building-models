@@ -78,19 +78,19 @@ module.exports = class DiagramToolkit
     else if endpoints?.length
       _.forEach endpoints, addHoverState
 
-  makeTarget: (div) ->
+  makeTarget: (div, style) ->
     size = 60
     @kit.addEndpoint(div,
       isTarget: true
       isSource: false
       anchor: "Center"
-      endpoint: @_endpointOptions("Rectangle", size, 'node-link-target' )
+      endpoint: @_endpointOptions("Rectangle", size, style )
       paintStyle: { fillStyle: "transparent"}
       maxConnections: -1
       dropOptions:
         activeClass: "dragActive"
         hoverClass: "droppable"
-     )
+    )
 
   clear: ->
     if @kit
@@ -245,7 +245,7 @@ module.exports = class DiagramToolkit
       @_clean_borked_endpoints()
     @kit.setSuspendDrawing shouldwestop, not shouldwestop
 
-  supspendDrawing: ->
+  suspendDrawing: ->
     @setSuspendDrawing true
 
   resumeDrawing: ->

@@ -157,7 +157,7 @@ module.exports = React.createClass
   _updateToolkit: ->
     if @.diagramToolkit
       @ignoringEvents = true
-      @diagramToolkit.supspendDrawing()
+      @diagramToolkit.suspendDrawing()
       @_redrawLinks()
       @_redrawTargets()
       @diagramToolkit.resumeDrawing()
@@ -165,7 +165,14 @@ module.exports = React.createClass
 
   _redrawTargets: ->
     @diagramToolkit.makeSource $(@refs.linkView).find '.connection-source'
-    @diagramToolkit.makeTarget $(@refs.linkView).find @props.linkTarget
+    target = $(@refs.linkView).find @props.linkTarget
+    targetStyle = 'node-link-target'
+    
+    if @state.simulationPanelExpanded
+      targetStyle += ' simulating'
+
+    @diagramToolkit.makeTarget target, targetStyle
+
 
   _redrawLinks: ->
     for link in @state.links
@@ -213,23 +220,27 @@ module.exports = React.createClass
   onDrop: (e) ->
     @setState canDrop: false
     e.preventDefault()
+    try #not sure any of the code inside this block is used?
+      # figure out where to drop files
+      offset = $(@refs.linkView).offset()
+      dropPos =
+        x: e.clientX - offset.left
+        y: e.clientY - offset.top
 
-    # figure out where to drop files
-    offset = $(@refs.linkView).offset()
-    dropPos =
-      x: e.clientX - offset.left
-      y: e.clientY - offset.top
-
-    # get the files
-    dropImageHandler e, (file) =>
-      @props.graphStore.setImageMetadata file.image, file.metadata
-      node = @props.graphStore.importNode
-        data:
-          x: dropPos.x
-          y: dropPos.y
-          title: tr "~NODE.UNTITLED"
-          image: file.image
-      @props.graphStore.editNode(node.key)
+      # get the files
+      dropImageHandler e, (file) =>
+        #@props.graphStore.setImageMetadata file.image, file.metadata   #there is no setImageMetadata?
+        node = @props.graphStore.importNode
+          data:
+            x: dropPos.x
+            y: dropPos.y
+            title: tr "~NODE.UNTITLED"
+            image: file.image
+        @props.graphStore.editNode(node.key)
+    catch ex
+      # user could have selected elements on the page and dragged those instead
+      # of valid application items like connections or images
+      console.log("Invalid drag/drop operation", ex)
 
   onContainerClicked: (e) ->
     if e.target is @refs.container
