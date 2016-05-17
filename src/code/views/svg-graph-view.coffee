@@ -59,7 +59,7 @@ module.exports = SvgGraphView = React.createClass
         canDraw = true
         if not isDefined
           newCustomData = true
-          formula = "1 * min(exp(in/21.7)-1, maxOut)"
+          formula = "1 * 1"
         else
           formula = null
 
@@ -172,7 +172,7 @@ module.exports = SvgGraphView = React.createClass
     (path {className: 'axisLines', d: @pointsToPath(data)})
 
   renderLineData: ->
-    if @state.definedRelationship or @state.newCustomData
+    if @state.definedRelationship
       data = @pointsToPath(@state.pointPathData)
       if @state.newCustomData
         (path {className: 'data', d:data, strokeWidth:@props.strokeWidth, strokeDasharray:@props.strokeDasharray})
@@ -183,16 +183,18 @@ module.exports = SvgGraphView = React.createClass
     # can only draw on custom relationships
     if @state.canDraw
       @drawing = true
-      newCustomData = false
-      @setState {newCustomData: newCustomData}
+      if @state.newCustomData
+        scaledCoords = @pointToScaledCoords(evt)
+        starterFunction = '1 * ' + scaledCoords.y
+        @updatePointData starterFunction, null
+        newCustomData = false
+        @setState {newCustomData: newCustomData}
       @drawCurve(evt)
     
   drawCurve: (evt) ->
-    if @drawing
+    if @drawing and not @state.newCustomData
       evt.preventDefault()
-      rect = evt.target.getBoundingClientRect()
-      coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
-      scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
+      scaledCoords = @pointToScaledCoords(evt)
       
       if scaledCoords.x >= 0 && scaledCoords.x <= 100 && scaledCoords.y >= 0 && scaledCoords.y <= 100
         newData = _.map @state.currentData, (d) ->
@@ -208,6 +210,12 @@ module.exports = SvgGraphView = React.createClass
       @drawing = false
       #update relation with custom data
       @updateRelationCustomData(@state.currentData)
+    
+  pointToScaledCoords: (evt) ->
+    rect = evt.target.getBoundingClientRect()
+    coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
+    scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
+    scaledCoords
     
   updateRelationCustomData: (customData) ->
     link = @props.link
