@@ -40970,6 +40970,7 @@ module.exports = RelationFactory = (function() {
     text: tr("~NODE-RELATION-EDIT.INCREASES"),
     formulaFrag: "1 *",
     magnitude: 1,
+    isCustomRelationship: false,
     func: function(scalarFunc) {
       return function(scope) {
         return scalarFunc(scope);
@@ -40983,6 +40984,7 @@ module.exports = RelationFactory = (function() {
     text: tr("~NODE-RELATION-EDIT.DECREASES"),
     formulaFrag: "maxIn -",
     magnitude: -1,
+    isCustomRelationship: false,
     func: function(scalarFunc) {
       return function(scope) {
         return scope.maxIn - scalarFunc(scope);
@@ -40996,6 +40998,7 @@ module.exports = RelationFactory = (function() {
     text: tr("~NODE-RELATION-EDIT.VARIES"),
     formulaFrag: "0",
     magnitude: 1,
+    isCustomRelationship: true,
     func: function(scalarFunc) {
       return function(scope) {
         return scalarFunc(scope);
@@ -41083,7 +41086,7 @@ module.exports = RelationFactory = (function() {
 
   RelationFactory.fromSelections = function(vector, scalar, existingData) {
     var formula, func, magnitude, name;
-    if (this.isCustomRelationship(vector)) {
+    if ((vector != null) && vector.isCustomRelationship) {
       scalar = this.custom;
     } else if (scalar === this.custom) {
       scalar = this.aboutTheSame;
@@ -41112,10 +41115,10 @@ module.exports = RelationFactory = (function() {
       return _.endsWith(relation.formula, s.formulaFrag);
     });
     if (vector != null) {
-      if (this.isCustomRelationship(vector)) {
+      if (vector.isCustomRelationship) {
         scalar = this.custom;
       } else if (scalar === this.custom) {
-        scalar = this.aboutTheSame;
+        scalar = void 0;
       }
     }
     magnitude = 0;
@@ -41130,15 +41133,6 @@ module.exports = RelationFactory = (function() {
       magnitude: magnitude,
       gradual: gradual
     };
-  };
-
-  RelationFactory.isCustomRelationship = function(vector) {
-    var customRelationship;
-    customRelationship = false;
-    if ((vector != null) && vector.id === this.vary.id) {
-      customRelationship = true;
-    }
-    return customRelationship;
   };
 
   return RelationFactory;
@@ -41179,6 +41173,7 @@ module.exports = Relationship = (function() {
     this.setFormula(formula);
     this.dataPoints;
     this.customData = this.opts.customData;
+    this.isCustomRelationship = false;
   }
 
   Relationship.prototype.setFormula = function(newf) {
@@ -41187,7 +41182,6 @@ module.exports = Relationship = (function() {
   };
 
   Relationship.prototype.checkFormula = function() {
-    this.isDefined = (this.opts.formula != null) || (this.opts.func != null);
     if (this.isDefined) {
       return this.evaluate(1, 1);
     }
@@ -44066,7 +44060,19 @@ module.exports = DiagramToolkit = (function() {
         activeClass: "dragActive"
       },
       anchor: "Center",
+      connectorStyle: {
+        strokeStyle: "#666"
+      },
       endpoint: this._endpointOptions("Rectangle", 19, 'node-link-button'),
+      connectorOverlays: [
+        [
+          "Arrow", {
+            location: 1.0,
+            width: 10,
+            length: 10
+          }
+        ]
+      ],
       maxConnections: -1
     });
     addHoverState = function(endpoint) {
@@ -44084,17 +44090,21 @@ module.exports = DiagramToolkit = (function() {
     }
   };
 
-  DiagramToolkit.prototype.makeTarget = function(div) {
+  DiagramToolkit.prototype.makeTarget = function(div, style) {
     var size;
     size = 60;
     return this.kit.addEndpoint(div, {
       isTarget: true,
       isSource: false,
       anchor: "Center",
-      endpoint: this._endpointOptions("Rectangle", size, 'node-link-target'),
+      endpoint: this._endpointOptions("Rectangle", size, style),
+      paintStyle: {
+        fillStyle: "transparent"
+      },
       maxConnections: -1,
       dropOptions: {
-        activeClass: "dragActive"
+        activeClass: "dragActive",
+        hoverClass: "droppable"
       }
     });
   };
@@ -44233,7 +44243,7 @@ module.exports = DiagramToolkit = (function() {
     if (opts.magnitude < 0) {
       fixedColor = LinkColors.decrease;
       fadedColor = LinkColors.decreaseFaded;
-      changeIndicator = '-';
+      changeIndicator = '\u2013';
     }
     if (opts.magnitude > 0) {
       fixedColor = LinkColors.increase;
@@ -44305,7 +44315,7 @@ module.exports = DiagramToolkit = (function() {
     return this.kit.setSuspendDrawing(shouldwestop, !shouldwestop);
   };
 
-  DiagramToolkit.prototype.supspendDrawing = function() {
+  DiagramToolkit.prototype.suspendDrawing = function() {
     return this.setSuspendDrawing(true);
   };
 
@@ -45889,7 +45899,7 @@ module.exports = React.createClass({
   _updateToolkit: function() {
     if (this.diagramToolkit) {
       this.ignoringEvents = true;
-      this.diagramToolkit.supspendDrawing();
+      this.diagramToolkit.suspendDrawing();
       this._redrawLinks();
       this._redrawTargets();
       this.diagramToolkit.resumeDrawing();
@@ -45897,8 +45907,14 @@ module.exports = React.createClass({
     }
   },
   _redrawTargets: function() {
+    var target, targetStyle;
     this.diagramToolkit.makeSource($(this.refs.linkView).find('.connection-source'));
-    return this.diagramToolkit.makeTarget($(this.refs.linkView).find(this.props.linkTarget));
+    target = $(this.refs.linkView).find(this.props.linkTarget);
+    targetStyle = 'node-link-target';
+    if (this.state.simulationPanelExpanded) {
+      targetStyle += ' simulating';
+    }
+    return this.diagramToolkit.makeTarget(target, targetStyle);
   },
   _redrawLinks: function() {
     var gradual, i, isDashed, isEditing, isSelected, len, link, magnitude, opts, ref, relationDetails, results, source, target, useGradient, useVariableThickness;
@@ -45912,7 +45928,7 @@ module.exports = React.createClass({
       isEditing = link === this.state.editingLink;
       isDashed = !link.relation.isDefined && this.state.simulationPanelExpanded;
       relationDetails = RelationFactory.selectionsFromRelation(link.relation);
-      if (RelationFactory.isCustomRelationship(relationDetails.vector)) {
+      if ((relationDetails.vector != null) && relationDetails.vector.isCustomRelationship && (link.relation.customData != null)) {
         link.color = LinkColors.customRelationship;
       } else {
         link.color = LinkColors["default"];
@@ -45959,31 +45975,35 @@ module.exports = React.createClass({
     return e.preventDefault();
   },
   onDrop: function(e) {
-    var dropPos, offset;
+    var dropPos, error, ex, offset;
     this.setState({
       canDrop: false
     });
     e.preventDefault();
-    offset = $(this.refs.linkView).offset();
-    dropPos = {
-      x: e.clientX - offset.left,
-      y: e.clientY - offset.top
-    };
-    return dropImageHandler(e, (function(_this) {
-      return function(file) {
-        var node;
-        _this.props.graphStore.setImageMetadata(file.image, file.metadata);
-        node = _this.props.graphStore.importNode({
-          data: {
-            x: dropPos.x,
-            y: dropPos.y,
-            title: tr("~NODE.UNTITLED"),
-            image: file.image
-          }
-        });
-        return _this.props.graphStore.editNode(node.key);
+    try {
+      offset = $(this.refs.linkView).offset();
+      dropPos = {
+        x: e.clientX - offset.left,
+        y: e.clientY - offset.top
       };
-    })(this));
+      return dropImageHandler(e, (function(_this) {
+        return function(file) {
+          var node;
+          node = _this.props.graphStore.importNode({
+            data: {
+              x: dropPos.x,
+              y: dropPos.y,
+              title: tr("~NODE.UNTITLED"),
+              image: file.image
+            }
+          });
+          return _this.props.graphStore.editNode(node.key);
+        };
+      })(this));
+    } catch (error) {
+      ex = error;
+      return console.log("Invalid drag/drop operation", ex);
+    }
   },
   onContainerClicked: function(e) {
     if (e.target === this.refs.container) {
@@ -46935,11 +46955,8 @@ Graph = React.createFactory(React.createClass({
       height: 130,
       yLabel: this.props.yAxis,
       xLabel: this.props.xAxis,
-      formula: this.props.formula,
-      customData: this.props.customData,
       link: this.props.link,
-      graphStore: this.props.graphStore,
-      isDefined: this.props.isDefined
+      graphStore: this.props.graphStore
     });
   }
 }));
@@ -46978,15 +46995,9 @@ module.exports = LinkRelationView = React.createClass({
     };
   },
   componentWillMount: function() {
-    var ref1, scalar, selectedScalar, selectedVector, vector;
+    var selectedScalar, selectedVector;
     if (this.state.selectedVector == null) {
-      ref1 = RelationFactory.selectionsFromRelation(this.props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
-      selectedVector = vector;
-      selectedScalar = scalar;
-      return this.setState({
-        selectedVector: selectedVector,
-        selectedScalar: selectedScalar
-      });
+      return this.updateState(this.props);
     } else if (this.props.link.relation.customData != null) {
       selectedVector = RelationFactory.vary;
       selectedScalar = RelationFactory.custom;
@@ -46997,24 +47008,27 @@ module.exports = LinkRelationView = React.createClass({
     }
   },
   componentWillReceiveProps: function(newProps) {
-    var ref1, scalar, vector;
     if (this.props.link !== newProps.link) {
-      ref1 = RelationFactory.selectionsFromRelation(newProps.link.relation), vector = ref1.vector, scalar = ref1.scalar;
-      if (newProps.link.relation.customData != null) {
-        vector = RelationFactory.vary;
-        scalar = RelationFactory.custom;
-      }
-      return this.setState({
-        selectedVector: vector,
-        selectedScalar: scalar
-      });
+      return this.updateState(newProps);
     }
   },
+  updateState: function(props) {
+    var ref1, scalar, vector;
+    ref1 = RelationFactory.selectionsFromRelation(props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
+    if (props.link.relation.customData != null) {
+      vector = RelationFactory.vary;
+      scalar = RelationFactory.custom;
+    }
+    return this.setState({
+      selectedVector: vector,
+      selectedScalar: scalar
+    });
+  },
   updateRelation: function() {
-    var existingData, link, relation, relationshipIsDefined, selectedScalar, selectedVector;
+    var existingData, link, relation, selectedScalar, selectedVector;
     selectedVector = this.getVector();
     selectedScalar = this.getScalar();
-    if ((selectedVector != null) && RelationFactory.isCustomRelationship(selectedVector)) {
+    if ((selectedVector != null) && selectedVector.isCustomRelationship) {
       selectedScalar = RelationFactory.custom;
     }
     this.setState({
@@ -47025,13 +47039,15 @@ module.exports = LinkRelationView = React.createClass({
       link = this.props.link;
       existingData = link.relation.customData;
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData);
-      relationshipIsDefined = (selectedVector != null) && (selectedScalar != null);
-      if (!RelationFactory.isCustomRelationship(selectedVector)) {
+      relation.isDefined = (selectedVector != null) && (selectedScalar != null);
+      if (!selectedVector.isCustomRelationship) {
         relation.customData = null;
+      } else {
+        relation.isDefined = link.relation.customData != null;
+        relation.isCustomRelationship = true;
       }
       return this.props.graphStore.changeLink(link, {
-        relation: relation,
-        isDefined: relationshipIsDefined
+        relation: relation
       });
     }
   },
@@ -47106,7 +47122,7 @@ module.exports = LinkRelationView = React.createClass({
       disabled = "disabled";
     }
     if (this.state.selectedVector) {
-      if (RelationFactory.isCustomRelationship(this.state.selectedVector)) {
+      if (this.state.selectedVector.isCustomRelationship) {
         return div({
           className: "bb-select"
         }, span({}, "" + (tr("~NODE-RELATION-EDIT.CUSTOM"))));
@@ -47124,22 +47140,10 @@ module.exports = LinkRelationView = React.createClass({
     }
   },
   render: function() {
-    var customData, formula, relationshipIsDefined, source, target;
+    var formula, source, target;
     source = this.props.link.sourceNode.title;
     target = this.props.link.targetNode.title;
     formula = this.props.link.relation.formula;
-    if (!this.state.selectedScalar) {
-      formula = null;
-    }
-    customData = null;
-    if (RelationFactory.isCustomRelationship(this.state.selectedVector)) {
-      formula = null;
-      customData = this.props.link.relation.customData;
-      if (customData == null) {
-        customData = true;
-      }
-    }
-    relationshipIsDefined = (this.state.selectedVector != null) && ((this.state.selectedScalar != null) || (customData != null));
     return div({
       className: 'link-relation-view'
     }, div({
@@ -47157,13 +47161,10 @@ module.exports = LinkRelationView = React.createClass({
       className: 'graph',
       id: 'relation-graph'
     }, Graph({
-      formula: formula,
       xAxis: source,
       yAxis: target,
       link: this.props.link,
-      customData: customData,
-      graphStore: this.props.graphStore,
-      isDefined: relationshipIsDefined
+      graphStore: this.props.graphStore
     }))));
   }
 });
@@ -48004,7 +48005,7 @@ module.exports = NodeView = React.createClass({
     var classes;
     classes = ['top'];
     if (!this.props.selected) {
-      classes.push("link-target");
+      classes.push("link-top");
     }
     return classes.join(" ");
   },
@@ -48536,9 +48537,11 @@ module.exports = React.createClass({
 
 
 },{"../stores/image-dialog-store":423,"../stores/palette-store":426,"../utils/translate":440,"./image-metadata-view":453}],478:[function(require,module,exports){
-var LinkRelationView, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
+var LinkRelationView, RelationFactory, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
+
+RelationFactory = require("../models/relation-factory");
 
 TabbedPanel = React.createFactory(require('./tabbed-panel-view'));
 
@@ -48554,16 +48557,18 @@ module.exports = RelationInspectorView = React.createClass({
   displayName: 'RelationInspectorView',
   mixins: [graphStore.mixin],
   renderTabforLink: function(link) {
-    var relationView;
+    var isFullyDefined, ref1, relationView, scalar, vector;
     relationView = LinkRelationView({
       link: link,
       graphStore: this.props.graphStore
     });
     label = link.sourceNode.title;
+    ref1 = RelationFactory.selectionsFromRelation(link.relation), vector = ref1.vector, scalar = ref1.scalar;
+    isFullyDefined = (link.relation.isDefined && (vector != null) && (scalar != null)) || (link.relation.customData != null);
     return Tabber.Tab({
       label: label,
       component: relationView,
-      defined: link.relation.isDefined
+      defined: isFullyDefined
     });
   },
   renderNodeRelationInspector: function() {
@@ -48597,7 +48602,7 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 
-},{"../stores/graph-store":422,"../utils/translate":440,"./link-relation-view":459,"./tabbed-panel-view":483}],479:[function(require,module,exports){
+},{"../models/relation-factory":415,"../stores/graph-store":422,"../utils/translate":440,"./link-relation-view":459,"./tabbed-panel-view":483}],479:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -48863,9 +48868,7 @@ module.exports = SvgGraphView = React.createClass({
       fontSize: 16,
       xLabel: "x axis",
       yLabel: "y axis",
-      link: null,
-      customData: null,
-      isDefined: false
+      link: null
     };
   },
   drawing: false,
@@ -48879,59 +48882,69 @@ module.exports = SvgGraphView = React.createClass({
     };
   },
   componentWillMount: function() {
-    var canDraw, definedRelationship;
-    definedRelationship = this.props.isDefined;
-    canDraw = this.props.formula == null;
+    var canDraw, currentData, formula, isDefined, newCustomData;
+    canDraw = false;
+    currentData = this.props.link.relation.customData;
+    isDefined = this.props.link.relation.isDefined;
+    formula = this.props.link.relation.formula;
+    newCustomData = false;
+    if (this.props.link.relation.isCustomRelationship || ((currentData != null) && isDefined)) {
+      canDraw = true;
+      formula = null;
+      newCustomData = currentData == null;
+    }
     this.setState({
-      definedRelationship: definedRelationship,
-      canDraw: canDraw
+      currentData: currentData,
+      canDraw: canDraw,
+      newCustomData: newCustomData,
+      definedRelationship: isDefined
     });
-    if ((this.state.pointPathData == null) && definedRelationship) {
-      if (this.props.link.relation.customData != null) {
-        return this.updatePointData(null, this.props.link.relation.customData);
-      } else {
-        return this.updatePointData(this.props.formula, this.props.link.relation.customData);
+    if ((this.state.pointPathData == null) && isDefined) {
+      if (currentData != null) {
+        return this.updatePointData(null, currentData);
+      } else if (formula != null) {
+        return this.updatePointData(formula, null);
       }
     }
   },
   componentWillReceiveProps: function(newProps) {
-    var canDraw, currentData, definedRelationship, newCustomData;
+    var canDraw, currentData, formula, isDefined, newCustomData;
     if (newProps) {
-      canDraw = newProps.formula == null;
+      canDraw = false;
       currentData = newProps.link.relation.customData;
-      definedRelationship = newProps.isDefined;
+      isDefined = newProps.link.relation.isDefined;
+      formula = newProps.link.relation.formula;
+      if (newProps.link.relation.isCustomRelationship || ((currentData != null) && isDefined)) {
+        canDraw = true;
+        if (!isDefined) {
+          newCustomData = true;
+          formula = "1 * min(exp(in/21.7)-1, maxOut)";
+        } else {
+          formula = null;
+        }
+      } else if (formula != null) {
+        canDraw = false;
+        newCustomData = false;
+        currentData = null;
+      }
       this.setState({
         currentData: currentData,
         pointPathData: null,
         canDraw: canDraw,
-        newCustomData: false,
-        definedRelationship: definedRelationship
+        newCustomData: newCustomData,
+        definedRelationship: isDefined
       });
-      if (newProps.formula != null) {
-        ({
-          canDraw: false,
-          newCustomData: false
-        });
-        this.setState({
-          canDraw: canDraw,
-          newCustomData: newCustomData
-        });
-        return this.updatePointData(newProps.formula, null);
-      } else if (currentData) {
-        return this.updatePointData(null, currentData);
-      } else {
-        newCustomData = true;
-        this.setState({
-          newCustomData: newCustomData
-        });
-        return this.updatePointData("1 * min(exp(in/21.7)-1, maxOut)", currentData);
-      }
+      return this.updatePointData(formula, currentData);
     }
   },
   updatePointData: function(formula, currentData) {
     var pointPathData;
-    if (currentData == null) {
+    if ((currentData == null) && (formula != null)) {
       currentData = this.loadCustomDataFromFormula(formula);
+    } else if (currentData != null) {
+      this.setState({
+        definedRelationship: true
+      });
     }
     pointPathData = this.getPathPoints(currentData);
     return this.setState({
@@ -49098,7 +49111,7 @@ module.exports = SvgGraphView = React.createClass({
   },
   renderLineData: function() {
     var data;
-    if (this.state.definedRelationship) {
+    if (this.state.definedRelationship || this.state.newCustomData) {
       data = this.pointsToPath(this.state.pointPathData);
       if (this.state.newCustomData) {
         return path({
@@ -49118,7 +49131,7 @@ module.exports = SvgGraphView = React.createClass({
   },
   startDrawCurve: function(evt) {
     var newCustomData;
-    if (this.state.definedRelationship && this.state.canDraw) {
+    if (this.state.canDraw) {
       this.drawing = true;
       newCustomData = false;
       this.setState({
@@ -49161,12 +49174,12 @@ module.exports = SvgGraphView = React.createClass({
     }
   },
   updateRelationCustomData: function(customData) {
-    var link, relation;
+    var link;
     link = this.props.link;
-    relation = link.relation;
-    relation.updateCustomData(customData);
+    link.relation.customData = customData;
+    link.relation.isDefined = customData != null;
     return this.props.graphStore.changeLink(link, {
-      relation: relation
+      relation: link.relation
     });
   },
   render: function() {
@@ -49176,7 +49189,7 @@ module.exports = SvgGraphView = React.createClass({
     }, svg({
       width: this.props.width,
       height: this.props.height
-    }, this.renderAxisLines(), this.state.pointPathData && this.state.definedRelationship ? this.renderLineData() : void 0, this.renderXLabel(), this.renderYLabel()), !this.state.definedRelationship ? div({
+    }, this.renderAxisLines(), this.renderLineData(), this.renderXLabel(), this.renderYLabel()), !(this.state.definedRelationship || this.state.newCustomData) ? div({
       className: 'unknown-graph',
       onMouseDown: this.startDrawCurve
     }, "?") : (drawClass = 'draw-graph', this.state.canDraw ? drawClass += ' drawing' : void 0, div({
