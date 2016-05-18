@@ -46,6 +46,7 @@ module.exports = class SelectionManager
 
   _clearSelection: (context=null) ->
     @_deselect({context:context})
+    @_notifySelectionChange()
 
   clearSelection: (context=null) ->
     @_clearSelection(context)
