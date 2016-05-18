@@ -41333,9 +41333,10 @@ module.exports = SelectionManager = (function() {
     if (context == null) {
       context = null;
     }
-    return this._deselect({
+    this._deselect({
       context: context
     });
+    return this._notifySelectionChange();
   };
 
   SelectionManager.prototype.clearSelection = function(context) {
@@ -44377,6 +44378,7 @@ module.exports = {
   "~NODE-RELATION-EDIT.MORE_AND_MORE": "more and more",
   "~NODE-RELATION-EDIT.LESS_AND_LESS": "less and less",
   "~NODE-RELATION-EDIT.CUSTOM": "as described below:",
+  "~NODE-RELATION-EDIT.CUSTOM_HINT": "Draw the relationship above",
   "~LINK-EDIT.DELETE": "✖ Delete Link",
   "~LINK-EDIT.TITLE": "Title",
   "~LINK-EDIT.COLOR": "Color",
@@ -47165,7 +47167,9 @@ module.exports = LinkRelationView = React.createClass({
       yAxis: target,
       link: this.props.link,
       graphStore: this.props.graphStore
-    }))));
+    }))), this.props.link.relation.isCustomRelationship ? div({
+      className: 'graph-hint'
+    }, span({}, (tr("~NODE-RELATION-EDIT.CUSTOM_HINT")) + " ")) : void 0);
   }
 });
 
@@ -48918,7 +48922,7 @@ module.exports = SvgGraphView = React.createClass({
         canDraw = true;
         if (!isDefined) {
           newCustomData = true;
-          formula = "1 * min(exp(in/21.7)-1, maxOut)";
+          formula = "1 * 1";
         } else {
           formula = null;
         }
@@ -49111,7 +49115,7 @@ module.exports = SvgGraphView = React.createClass({
   },
   renderLineData: function() {
     var data;
-    if (this.state.definedRelationship || this.state.newCustomData) {
+    if (this.state.definedRelationship) {
       data = this.pointsToPath(this.state.pointPathData);
       if (this.state.newCustomData) {
         return path({
@@ -49130,29 +49134,26 @@ module.exports = SvgGraphView = React.createClass({
     }
   },
   startDrawCurve: function(evt) {
-    var newCustomData;
+    var newCustomData, scaledCoords, starterFunction;
     if (this.state.canDraw) {
       this.drawing = true;
-      newCustomData = false;
-      this.setState({
-        newCustomData: newCustomData
-      });
+      if (this.state.newCustomData) {
+        scaledCoords = this.pointToScaledCoords(evt);
+        starterFunction = '1 * ' + scaledCoords.y;
+        this.updatePointData(starterFunction, null);
+        newCustomData = false;
+        this.setState({
+          newCustomData: newCustomData
+        });
+      }
       return this.drawCurve(evt);
     }
   },
   drawCurve: function(evt) {
-    var coords, newData, rect, scaledCoords;
-    if (this.drawing) {
+    var newData, scaledCoords;
+    if (this.drawing && !this.state.newCustomData) {
       evt.preventDefault();
-      rect = evt.target.getBoundingClientRect();
-      coords = {
-        x: rect.width - (rect.right - evt.clientX),
-        y: rect.bottom - evt.clientY
-      };
-      scaledCoords = {
-        x: Math.round(coords.x / rect.width * 100),
-        y: Math.round(coords.y / rect.height * 100)
-      };
+      scaledCoords = this.pointToScaledCoords(evt);
       if (scaledCoords.x >= 0 && scaledCoords.x <= 100 && scaledCoords.y >= 0 && scaledCoords.y <= 100) {
         newData = _.map(this.state.currentData, function(d) {
           var x, y;
@@ -49173,6 +49174,19 @@ module.exports = SvgGraphView = React.createClass({
       return this.updateRelationCustomData(this.state.currentData);
     }
   },
+  pointToScaledCoords: function(evt) {
+    var coords, rect, scaledCoords;
+    rect = evt.target.getBoundingClientRect();
+    coords = {
+      x: rect.width - (rect.right - evt.clientX),
+      y: rect.bottom - evt.clientY
+    };
+    scaledCoords = {
+      x: Math.round(coords.x / rect.width * 100),
+      y: Math.round(coords.y / rect.height * 100)
+    };
+    return scaledCoords;
+  },
   updateRelationCustomData: function(customData) {
     var link;
     link = this.props.link;
@@ -49184,21 +49198,24 @@ module.exports = SvgGraphView = React.createClass({
   },
   render: function() {
     var drawClass;
+    drawClass = 'draw-graph';
+    if (this.state.canDraw) {
+      drawClass += ' drawing';
+    }
     return div({
       className: 'svgGraphView'
     }, svg({
       width: this.props.width,
       height: this.props.height
-    }, this.renderAxisLines(), this.renderLineData(), this.renderXLabel(), this.renderYLabel()), !(this.state.definedRelationship || this.state.newCustomData) ? div({
-      className: 'unknown-graph',
-      onMouseDown: this.startDrawCurve
-    }, "?") : (drawClass = 'draw-graph', this.state.canDraw ? drawClass += ' drawing' : void 0, div({
+    }, this.renderAxisLines(), this.renderLineData(), this.renderXLabel(), this.renderYLabel()), div({
       className: drawClass,
       onMouseDown: this.startDrawCurve,
       onMouseMove: this.drawCurve,
       onMouseUp: this.endDrawCurve,
       onMouseOut: this.endDrawCurve
-    })));
+    }, this.state.newCustomData || !this.state.definedRelationship ? div({
+      className: 'unknown-graph'
+    }, "?") : void 0));
   }
 });
 
