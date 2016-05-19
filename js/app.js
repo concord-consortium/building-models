@@ -44093,7 +44093,7 @@ module.exports = DiagramToolkit = (function() {
 
   DiagramToolkit.prototype.makeTarget = function(div, style) {
     var size;
-    size = 60;
+    size = 55;
     return this.kit.addEndpoint(div, {
       isTarget: true,
       isSource: false,
