@@ -79,7 +79,7 @@ module.exports = class DiagramToolkit
       _.forEach endpoints, addHoverState
 
   makeTarget: (div, style) ->
-    size = 60
+    size = 55
     @kit.addEndpoint(div,
       isTarget: true
       isSource: false
