@@ -79,11 +79,11 @@ module.exports = class RelationFactory
     id: 4
     text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
-    formulaFrag: "21.7 * log(in+1)"
+    formulaFrag: "21.7 * log(max(1,in))"
     magnitude: 2
     gradual: -1
     func: (scope) ->
-      return 21.7 * Math.log(scope.in+1)
+      return 21.7 * Math.log(Math.max(1,scope.in))
 
   @custom:
     id: 5
