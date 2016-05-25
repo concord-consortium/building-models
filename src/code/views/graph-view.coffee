@@ -21,7 +21,7 @@ module.exports = React.createClass
   mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin ]
 
   getDefaultProps: ->
-    linkTarget: '.link-target'
+    linkTarget: '.link-top'
 
   componentDidMount: ->
     $container = $(@refs.container)
@@ -167,9 +167,6 @@ module.exports = React.createClass
     @diagramToolkit.makeSource $(@refs.linkView).find '.connection-source'
     target = $(@refs.linkView).find @props.linkTarget
     targetStyle = 'node-link-target'
-    
-    if @state.simulationPanelExpanded
-      targetStyle += ' simulating'
 
     @diagramToolkit.makeTarget target, targetStyle
 
