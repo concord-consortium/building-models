@@ -22,6 +22,7 @@ module.exports = React.createClass
 
   getDefaultProps: ->
     linkTarget: '.link-top'
+    connectionTarget: '.link-target'
 
   componentDidMount: ->
     $container = $(@refs.container)
@@ -173,8 +174,8 @@ module.exports = React.createClass
 
   _redrawLinks: ->
     for link in @state.links
-      source = $(ReactDOM.findDOMNode this.refs[link.sourceNode.key]).find(@props.linkTarget)
-      target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.linkTarget)
+      source = $(ReactDOM.findDOMNode this.refs[link.sourceNode.key]).find(@props.connectionTarget)
+      target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.connectionTarget)
       isSelected = @props.selectionManager.isSelected(link)
       isEditing = link is @state.editingLink
       isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
