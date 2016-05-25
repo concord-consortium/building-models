@@ -15,17 +15,6 @@ Graph = React.createFactory React.createClass
       graphStore: @props.graphStore
     })
 
-QuantStart = React.createFactory React.createClass
-  render: ->
-    start = tr "~NODE-RELATION-EDIT.SEMI_QUANT_START"
-    (div {},
-      (span {}, "#{tr "~NODE-RELATION-EDIT.AN_INCREASE_IN"} ")
-      (span {className: "source"}, @props.source)
-      (br {})
-      (span {}, " #{tr "~NODE-RELATION-EDIT.CAUSES"} ")
-      (span {className: "target"}, @props.target)
-    )
-
 module.exports = LinkRelationView = React.createClass
 
   displayName: 'LinkRelationView'
@@ -38,6 +27,7 @@ module.exports = LinkRelationView = React.createClass
         title: "default source node"
 
   getInitialState: ->
+    selectedDescriptor: null
     selectedVector: null
     selectedScalar: null
     selectedVectorHasChanged: false
@@ -46,9 +36,10 @@ module.exports = LinkRelationView = React.createClass
     if not @state.selectedVector?
       @updateState(@props)
     else if @props.link.relation.customData?
+      selectedDescriptor = RelationFactory.descriptorIncrease
       selectedVector = RelationFactory.vary
       selectedScalar = RelationFactory.custom
-      @setState {selectedVector, selectedScalar}
+      @setState {selectedDescriptor, selectedVector, selectedScalar}
       
   componentWillReceiveProps: (newProps) ->
     if @props.link isnt newProps.link
@@ -56,12 +47,21 @@ module.exports = LinkRelationView = React.createClass
 
   updateState: (props) ->
     {vector, scalar} = RelationFactory.selectionsFromRelation props.link.relation
+    descriptor = @state.selectedDescriptor
     if props.link.relation.customData?
+      descriptor = RelationFactory.descriptorIncrease
       vector = RelationFactory.vary
       scalar = RelationFactory.custom
     @setState
+      selectedDescriptor: descriptor
       selectedVector: vector
       selectedScalar: scalar
+
+  updateDescriptor: ->
+    id = parseInt @refs.descriptor.value
+    newDescriptor = RelationFactory.descriptors[id]
+    @setState
+      selectedDescriptor: newDescriptor
 
   updateRelation: ->
     selectedVector = @getVector()
@@ -101,6 +101,15 @@ module.exports = LinkRelationView = React.createClass
     else
       undefined
 
+  renderDescriptorPulldown: (descriptorSelection) ->
+    options = _.map RelationFactory.descriptors, (opt, i) ->
+      (option {value: opt.id, key: i}, opt.text)
+    descriptor = descriptorSelection
+    if not descriptorSelection?
+      descriptor = RelationFactory.descriptorIncrease
+    (select {value: descriptor.id, className: "descriptor", ref: "descriptor", onChange: @updateDescriptor},
+      options)
+    
   renderVectorPulldown: (vectorSelection)->
     options = _.map RelationFactory.vectors, (opt, i) ->
       (option {value: opt.id, key: i}, opt.text)
@@ -147,10 +156,16 @@ module.exports = LinkRelationView = React.createClass
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
     formula = @props.link.relation.formula
-
+    
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
-        (QuantStart {source: source, target: target})
+        (div {},
+          @renderDescriptorPulldown(@state.selectedDescriptor)
+          (span {className: "source"}, source)
+          (br {})
+          (span {}, " #{tr "~NODE-RELATION-EDIT.CAUSES"} ")
+          (span {className: "target"}, target)
+        )
         (div {className: 'full'},
           @renderVectorPulldown(@state.selectedVector)
         )

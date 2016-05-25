@@ -106,6 +106,18 @@ module.exports = class RelationFactory
     @moreAndMore
     @lessAndLess
   ]
+  
+  @descriptorIncrease:
+    id: 0
+    text: tr "~NODE-RELATION-EDIT.AN_INCREASE_IN"
+  @descriptorDecrease:
+    id: 1
+    text: tr "~NODE-RELATION-EDIT.A_DECREASE_IN"
+    
+  @descriptors: [
+    @descriptorIncrease
+    @descriptorDecrease
+  ]
 
   @fromSelections: (vector,scalar,existingData) ->
     if vector? and vector.isCustomRelationship
