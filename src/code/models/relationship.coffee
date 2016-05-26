@@ -23,6 +23,7 @@ module.exports = class Relationship
     @setFormula(formula)
     @dataPoints
     @customData  = @opts.customData
+    @descriptor  = @opts.descriptor
     @isCustomRelationship = false
 
   setFormula: (newf) ->
@@ -70,3 +71,4 @@ module.exports = class Relationship
     text        : @text
     formula     : @formula
     customData  : @customData
+    descriptor  : @descriptor

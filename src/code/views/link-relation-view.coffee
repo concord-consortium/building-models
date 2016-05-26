@@ -47,9 +47,8 @@ module.exports = LinkRelationView = React.createClass
 
   updateState: (props) ->
     {vector, scalar} = RelationFactory.selectionsFromRelation props.link.relation
-    descriptor = @state.selectedDescriptor
+    descriptor = props.link.relation.descriptor
     if props.link.relation.customData?
-      descriptor = RelationFactory.descriptorIncrease
       vector = RelationFactory.vary
       scalar = RelationFactory.custom
     @setState
@@ -57,24 +56,21 @@ module.exports = LinkRelationView = React.createClass
       selectedVector: vector
       selectedScalar: scalar
 
-  updateDescriptor: ->
-    id = parseInt @refs.descriptor.value
-    newDescriptor = RelationFactory.descriptors[id]
-    @setState
-      selectedDescriptor: newDescriptor
-
   updateRelation: ->
     selectedVector = @getVector()
     selectedScalar = @getScalar()
+    selectedDescriptor = @getDescriptor()
     if selectedVector? and selectedVector.isCustomRelationship
       selectedScalar = RelationFactory.custom
-    @setState {selectedVector, selectedScalar}
+    @setState {selectedDescriptor, selectedVector, selectedScalar}
 
     if selectedVector?
       link = @props.link
       existingData = link.relation.customData
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData)
       relation.isDefined = selectedVector? and selectedScalar?
+      relation.descriptor = selectedDescriptor
+      
       if not selectedVector.isCustomRelationship
         relation.customData = null
       else
@@ -82,6 +78,11 @@ module.exports = LinkRelationView = React.createClass
         relation.isCustomRelationship = true
 
       @props.graphStore.changeLink(link, {relation: relation})
+
+  getDescriptor: ->
+    id = parseInt @refs.descriptor.value
+    newDescriptor = RelationFactory.descriptors[id]
+    newDescriptor
 
   getVector: ->
     id = parseInt @refs.vector.value
@@ -107,7 +108,7 @@ module.exports = LinkRelationView = React.createClass
     descriptor = descriptorSelection
     if not descriptorSelection?
       descriptor = RelationFactory.descriptorIncrease
-    (select {value: descriptor.id, className: "descriptor", ref: "descriptor", onChange: @updateDescriptor},
+    (select {value: descriptor.id, className: "descriptor", ref: "descriptor", onChange: @updateRelation},
       options)
     
   renderVectorPulldown: (vectorSelection)->
