@@ -50,7 +50,6 @@ module.exports = SvgGraphView = React.createClass
     
   componentWillReceiveProps: (newProps) ->
     if newProps
-      console.log(newProps)
       canDraw = false
       currentData = newProps.link.relation.customData
       isDefined = newProps.link.relation.isDefined

@@ -99,12 +99,39 @@ module.exports = class RelationFactory
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
   @vectors: [@increase, @decrease, @vary]
+  
+  @inverseIncrease:
+    id: 0
+    text: tr "~NODE-RELATION-EDIT.DECREASES"
+  @inverseDecrease:
+    id: 1
+    text: tr "~NODE-RELATION-EDIT.INCREASES"
+  @inverseDisplayVectors: [
+    @inverseIncrease
+    @inverseDecrease
+    @vary
+  ]
+  
   @scalars: [
     @aboutTheSame
     @aLot
     @aLittle
     @moreAndMore
     @lessAndLess
+  ]
+  
+  @inverseMoreAndMore:
+    id: 3
+    text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
+  @inverseLessAndLess:
+    id: 4
+    text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
+  @inverseDisplayScalars: [
+    @aboutTheSame
+    @aLot
+    @aLittle
+    @inverseMoreAndMore
+    @inverseLessAndLess
   ]
   
   @descriptorIncrease:

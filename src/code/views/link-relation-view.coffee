@@ -22,7 +22,11 @@ module.exports = LinkRelationView = React.createClass
     (option {value: opt.id, key: i}, opt.text)
   vectorOptions: _.map RelationFactory.vectors, (opt, i) ->
     (option {value: opt.id, key: i}, opt.text)
+  inverseVectorOptions: _.map RelationFactory.inverseDisplayVectors, (opt, i) ->
+    (option {value: opt.id, key: i}, opt.text)
   scalarOptions: _.map RelationFactory.scalars, (opt, i) ->
+    (option {value: opt.id, key: i}, opt.text)
+  inverseScalarOptions: _.map RelationFactory.inverseDisplayScalars, (opt, i) ->
     (option {value: opt.id, key: i}, opt.text)
     
   getDefaultProps: ->
@@ -74,12 +78,17 @@ module.exports = LinkRelationView = React.createClass
       link = @props.link
       existingData = link.relation.customData
       if newDescriptor
-        #flip vector
+        # flip vector formula
         if selectedVector == RelationFactory.increase
           selectedVector = RelationFactory.decrease
         else if selectedVector == RelationFactory.decrease
           selectedVector = RelationFactory.increase
-          
+        # flip scalar formula, if a scalar has been selected
+        if selectedScalar? and selectedScalar == RelationFactory.moreAndMore
+          selectedScalar = RelationFactory.lessAndLess
+        else if selectedScalar? and selectedScalar == RelationFactory.lessAndLess
+          selectedScalar = RelationFactory.moreAndMore
+        
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData)
       relation.isDefined = selectedVector? and selectedScalar?
       relation.descriptor = selectedDescriptor
@@ -119,6 +128,8 @@ module.exports = LinkRelationView = React.createClass
     
   renderVectorPulldown: (vectorSelection)->
     options = @vectorOptions
+    if (@state.selectedDescriptor == RelationFactory.descriptorDecrease)
+      options = @inverseVectorOptions
 
     if not vectorSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -135,6 +146,8 @@ module.exports = LinkRelationView = React.createClass
       
   renderScalarPulldown:(scalarSelection) ->
     options = @scalarOptions
+    if (@state.selectedDescriptor == RelationFactory.descriptorDecrease)
+      options = @inverseScalarOptions
       
     if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
