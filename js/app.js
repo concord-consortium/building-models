@@ -41234,6 +41234,9 @@ module.exports = Relationship = (function() {
     };
     if (this.customData) {
       roundedInV = Math.round(inV);
+      if (roundedInV > (maxIn - 1)) {
+        roundedInV = maxIn - 1;
+      }
       if (!this.dataPoints) {
         this.updateCustomData(this.customdata);
       }
