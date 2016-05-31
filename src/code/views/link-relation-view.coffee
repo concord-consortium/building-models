@@ -18,7 +18,13 @@ Graph = React.createFactory React.createClass
 module.exports = LinkRelationView = React.createClass
 
   displayName: 'LinkRelationView'
-
+  descriptorOptions: _.map RelationFactory.descriptors, (opt, i) ->
+    (option {value: opt.id, key: i}, opt.text)
+  vectorOptions: _.map RelationFactory.vectors, (opt, i) ->
+    (option {value: opt.id, key: i}, opt.text)
+  scalarOptions: _.map RelationFactory.scalars, (opt, i) ->
+    (option {value: opt.id, key: i}, opt.text)
+    
   getDefaultProps: ->
     link:
       targetNode:
@@ -30,7 +36,6 @@ module.exports = LinkRelationView = React.createClass
     selectedDescriptor: null
     selectedVector: null
     selectedScalar: null
-    selectedVectorHasChanged: false
 
   componentWillMount: ->
     if not @state.selectedVector?
@@ -60,13 +65,21 @@ module.exports = LinkRelationView = React.createClass
     selectedVector = @getVector()
     selectedScalar = @getScalar()
     selectedDescriptor = @getDescriptor()
+    newDescriptor = @state.selectedDescriptor != selectedDescriptor
+    
     if selectedVector? and selectedVector.isCustomRelationship
       selectedScalar = RelationFactory.custom
-    @setState {selectedDescriptor, selectedVector, selectedScalar}
-
+    
     if selectedVector?
       link = @props.link
       existingData = link.relation.customData
+      if newDescriptor
+        #flip vector
+        if selectedVector == RelationFactory.increase
+          selectedVector = RelationFactory.decrease
+        else if selectedVector == RelationFactory.decrease
+          selectedVector = RelationFactory.increase
+          
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData)
       relation.isDefined = selectedVector? and selectedScalar?
       relation.descriptor = selectedDescriptor
@@ -76,7 +89,8 @@ module.exports = LinkRelationView = React.createClass
       else
         relation.isDefined = link.relation.customData?
         relation.isCustomRelationship = true
-
+        
+      @setState {selectedDescriptor, selectedVector, selectedScalar}
       @props.graphStore.changeLink(link, {relation: relation})
 
   getDescriptor: ->
@@ -87,13 +101,7 @@ module.exports = LinkRelationView = React.createClass
   getVector: ->
     id = parseInt @refs.vector.value
     newVector = RelationFactory.vectors[id]
-    
-    selectedVectorHasChanged = false
-    if @state.selectedVector and id != @state.selectedVector.id
-      selectedVectorHasChanged = true
-          
-    @setState { selectedVectorHasChanged }
-    RelationFactory.vectors[id]
+    newVector
 
   getScalar: ->
     if @refs.scalar
@@ -103,17 +111,14 @@ module.exports = LinkRelationView = React.createClass
       undefined
 
   renderDescriptorPulldown: (descriptorSelection) ->
-    options = _.map RelationFactory.descriptors, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.text)
     descriptor = descriptorSelection
     if not descriptorSelection?
       descriptor = RelationFactory.descriptorIncrease
     (select {value: descriptor.id, className: "descriptor", ref: "descriptor", onChange: @updateRelation},
-      options)
+      @descriptorOptions)
     
   renderVectorPulldown: (vectorSelection)->
-    options = _.map RelationFactory.vectors, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.text)
+    options = @vectorOptions
 
     if not vectorSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -129,8 +134,7 @@ module.exports = LinkRelationView = React.createClass
     )
       
   renderScalarPulldown:(scalarSelection) ->
-    options = _.map RelationFactory.scalars, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.text)
+    options = @scalarOptions
       
     if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -157,7 +161,7 @@ module.exports = LinkRelationView = React.createClass
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
     formula = @props.link.relation.formula
-    
+    console.log(@state)
     (div {className: 'link-relation-view'},
       (div {className: 'top'},
         (div {},
