@@ -42,6 +42,8 @@ module.exports = class Relationship
       maxOut: maxOut
     if @customData
       roundedInV = Math.round(inV)
+      if roundedInV > (maxIn-1)
+        roundedInV = (maxIn-1)
       if not @dataPoints then @updateCustomData @customdata
       if @dataPoints[roundedInV]?
         result = @dataPoints[roundedInV].y
