@@ -28,7 +28,7 @@ GraphStore  = Reflux.createStore
     SimulationStore.actions.setDuration.listen             @resetSimulation.bind(@)
     SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)
 
-    @codapStandaloneMode = false
+    @codapStandaloneMode = true
 
   resetSimulation: ->
     for node in @getNodes()
