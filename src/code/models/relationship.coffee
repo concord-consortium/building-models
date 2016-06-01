@@ -32,6 +32,8 @@ module.exports = class Relationship
   checkFormula: ->
     if @isDefined
       @evaluate(1, 1) #sets the @hasError flag if there is a problem
+      if not @hasError and not @func?
+        @func = (math.compile @formula).eval
 
   evaluate: (inV,outV, maxIn=100, maxOut=100)->
     result = Relationship.errValue
