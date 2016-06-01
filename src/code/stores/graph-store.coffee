@@ -24,6 +24,7 @@ GraphStore  = Reflux.createStore
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 
+    SimulationStore.actions.runSimulation.listen           @resetSimulation.bind(@)
     SimulationStore.actions.resetSimulation.listen         @resetSimulation.bind(@)
     SimulationStore.actions.setDuration.listen             @resetSimulation.bind(@)
     SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)

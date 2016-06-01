@@ -88,6 +88,9 @@ SimulationStore   = Reflux.createStore
 
   onRunSimulation: ->
     if @settings.modelIsRunnable and @settings.modelReadyToRun
+      # graph-store listens and will reset the simulation when
+      # it is run to clear pre-saved data after first load
+      @notifyChange()
       @currentSimulation = new Simulation
         nodes: @nodes
         duration: @settings.duration
