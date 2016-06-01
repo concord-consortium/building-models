@@ -41213,7 +41213,10 @@ module.exports = Relationship = (function() {
 
   Relationship.prototype.checkFormula = function() {
     if (this.isDefined) {
-      return this.evaluate(1, 1);
+      this.evaluate(1, 1);
+      if (!this.hasError && (this.func == null)) {
+        return this.func = (math.compile(this.formula))["eval"];
+      }
     }
   };
 
@@ -42181,6 +42184,7 @@ GraphStore = Reflux.createStore({
     });
     this.selectionManager = new SelectionManager();
     PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
+    SimulationStore.actions.runSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.resetSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
@@ -43441,6 +43445,7 @@ SimulationStore = Reflux.createStore({
   onRunSimulation: function() {
     var error;
     if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
+      this.notifyChange();
       this.currentSimulation = new Simulation({
         nodes: this.nodes,
         duration: this.settings.duration,
