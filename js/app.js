@@ -42188,7 +42188,7 @@ GraphStore = Reflux.createStore({
     SimulationStore.actions.resetSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
-    return this.codapStandaloneMode = true;
+    return this.codapStandaloneMode = false;
   },
   resetSimulation: function() {
     var j, len, node, ref;
