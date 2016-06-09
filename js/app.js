@@ -41112,7 +41112,43 @@ module.exports = RelationFactory = (function() {
 
   RelationFactory.vectors = [RelationFactory.increase, RelationFactory.decrease, RelationFactory.vary];
 
+  RelationFactory.inverseIncrease = {
+    id: 0,
+    text: tr("~NODE-RELATION-EDIT.DECREASES")
+  };
+
+  RelationFactory.inverseDecrease = {
+    id: 1,
+    text: tr("~NODE-RELATION-EDIT.INCREASES")
+  };
+
+  RelationFactory.inverseDisplayVectors = [RelationFactory.inverseIncrease, RelationFactory.inverseDecrease, RelationFactory.vary];
+
   RelationFactory.scalars = [RelationFactory.aboutTheSame, RelationFactory.aLot, RelationFactory.aLittle, RelationFactory.moreAndMore, RelationFactory.lessAndLess];
+
+  RelationFactory.inverseMoreAndMore = {
+    id: 3,
+    text: tr("~NODE-RELATION-EDIT.LESS_AND_LESS")
+  };
+
+  RelationFactory.inverseLessAndLess = {
+    id: 4,
+    text: tr("~NODE-RELATION-EDIT.MORE_AND_MORE")
+  };
+
+  RelationFactory.inverseDisplayScalars = [RelationFactory.aboutTheSame, RelationFactory.aLot, RelationFactory.aLittle, RelationFactory.inverseMoreAndMore, RelationFactory.inverseLessAndLess];
+
+  RelationFactory.descriptorIncrease = {
+    id: 0,
+    text: tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")
+  };
+
+  RelationFactory.descriptorDecrease = {
+    id: 1,
+    text: tr("~NODE-RELATION-EDIT.A_DECREASE_IN")
+  };
+
+  RelationFactory.descriptors = [RelationFactory.descriptorIncrease, RelationFactory.descriptorDecrease];
 
   RelationFactory.fromSelections = function(vector, scalar, existingData) {
     var formula, func, magnitude, name;
@@ -41203,6 +41239,7 @@ module.exports = Relationship = (function() {
     this.setFormula(formula);
     this.dataPoints;
     this.customData = this.opts.customData;
+    this.descriptor = this.opts.descriptor;
     this.isCustomRelationship = false;
   }
 
@@ -41213,10 +41250,7 @@ module.exports = Relationship = (function() {
 
   Relationship.prototype.checkFormula = function() {
     if (this.isDefined) {
-      this.evaluate(1, 1);
-      if (!this.hasError && (this.func == null)) {
-        return this.func = (math.compile(this.formula))["eval"];
-      }
+      return this.evaluate(1, 1);
     }
   };
 
@@ -41237,9 +41271,6 @@ module.exports = Relationship = (function() {
     };
     if (this.customData) {
       roundedInV = Math.round(inV);
-      if (roundedInV > (maxIn - 1)) {
-        roundedInV = maxIn - 1;
-      }
       if (!this.dataPoints) {
         this.updateCustomData(this.customdata);
       }
@@ -41283,7 +41314,8 @@ module.exports = Relationship = (function() {
     return {
       text: this.text,
       formula: this.formula,
-      customData: this.customData
+      customData: this.customData,
+      descriptor: this.descriptor
     };
   };
 
@@ -42184,7 +42216,6 @@ GraphStore = Reflux.createStore({
     });
     this.selectionManager = new SelectionManager();
     PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
-    SimulationStore.actions.runSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.resetSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
@@ -43445,7 +43476,6 @@ SimulationStore = Reflux.createStore({
   onRunSimulation: function() {
     var error;
     if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
-      this.notifyChange();
       this.currentSimulation = new Simulation({
         nodes: this.nodes,
         duration: this.settings.duration,
@@ -44404,6 +44434,7 @@ module.exports = {
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations.",
   "~NODE-RELATION-EDIT.UNSELECTED": "Select an option...",
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in",
+  "~NODE-RELATION-EDIT.A_DECREASE_IN": "A decrease in",
   "~NODE-RELATION-EDIT.CAUSES": "causes",
   "~NODE-RELATION-EDIT.TO": "to",
   "~NODE-RELATION-EDIT.INCREASES": "increase",
@@ -46976,7 +47007,7 @@ module.exports = React.createClass({
 
 
 },{"../utils/translate":441}],460:[function(require,module,exports){
-var Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
+var Graph, LinkRelationView, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, br = ref.br, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
 
@@ -46999,20 +47030,38 @@ Graph = React.createFactory(React.createClass({
   }
 }));
 
-QuantStart = React.createFactory(React.createClass({
-  render: function() {
-    var start;
-    start = tr("~NODE-RELATION-EDIT.SEMI_QUANT_START");
-    return div({}, span({}, (tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")) + " "), span({
-      className: "source"
-    }, this.props.source), br({}), span({}, " " + (tr("~NODE-RELATION-EDIT.CAUSES")) + " "), span({
-      className: "target"
-    }, this.props.target));
-  }
-}));
-
 module.exports = LinkRelationView = React.createClass({
   displayName: 'LinkRelationView',
+  descriptorOptions: _.map(RelationFactory.descriptors, function(opt, i) {
+    return option({
+      value: opt.id,
+      key: i
+    }, opt.text);
+  }),
+  vectorOptions: _.map(RelationFactory.vectors, function(opt, i) {
+    return option({
+      value: opt.id,
+      key: i
+    }, opt.text);
+  }),
+  inverseVectorOptions: _.map(RelationFactory.inverseDisplayVectors, function(opt, i) {
+    return option({
+      value: opt.id,
+      key: i
+    }, opt.text);
+  }),
+  scalarOptions: _.map(RelationFactory.scalars, function(opt, i) {
+    return option({
+      value: opt.id,
+      key: i
+    }, opt.text);
+  }),
+  inverseScalarOptions: _.map(RelationFactory.inverseDisplayScalars, function(opt, i) {
+    return option({
+      value: opt.id,
+      key: i
+    }, opt.text);
+  }),
   getDefaultProps: function() {
     return {
       link: {
@@ -47027,19 +47076,21 @@ module.exports = LinkRelationView = React.createClass({
   },
   getInitialState: function() {
     return {
+      selectedDescriptor: null,
       selectedVector: null,
-      selectedScalar: null,
-      selectedVectorHasChanged: false
+      selectedScalar: null
     };
   },
   componentWillMount: function() {
-    var selectedScalar, selectedVector;
+    var selectedDescriptor, selectedScalar, selectedVector;
     if (this.state.selectedVector == null) {
       return this.updateState(this.props);
     } else if (this.props.link.relation.customData != null) {
+      selectedDescriptor = RelationFactory.descriptorIncrease;
       selectedVector = RelationFactory.vary;
       selectedScalar = RelationFactory.custom;
       return this.setState({
+        selectedDescriptor: selectedDescriptor,
         selectedVector: selectedVector,
         selectedScalar: selectedScalar
       });
@@ -47051,56 +47102,73 @@ module.exports = LinkRelationView = React.createClass({
     }
   },
   updateState: function(props) {
-    var ref1, scalar, vector;
+    var descriptor, ref1, scalar, vector;
     ref1 = RelationFactory.selectionsFromRelation(props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
+    descriptor = props.link.relation.descriptor;
     if (props.link.relation.customData != null) {
       vector = RelationFactory.vary;
       scalar = RelationFactory.custom;
     }
     return this.setState({
+      selectedDescriptor: descriptor,
       selectedVector: vector,
       selectedScalar: scalar
     });
   },
   updateRelation: function() {
-    var existingData, link, relation, selectedScalar, selectedVector;
+    var existingData, link, newDescriptor, relation, selectedDescriptor, selectedScalar, selectedVector;
     selectedVector = this.getVector();
     selectedScalar = this.getScalar();
+    selectedDescriptor = this.getDescriptor();
+    newDescriptor = this.state.selectedDescriptor !== selectedDescriptor;
     if ((selectedVector != null) && selectedVector.isCustomRelationship) {
       selectedScalar = RelationFactory.custom;
     }
-    this.setState({
-      selectedVector: selectedVector,
-      selectedScalar: selectedScalar
-    });
     if (selectedVector != null) {
       link = this.props.link;
       existingData = link.relation.customData;
+      if (newDescriptor) {
+        if (selectedVector === RelationFactory.increase) {
+          selectedVector = RelationFactory.decrease;
+        } else if (selectedVector === RelationFactory.decrease) {
+          selectedVector = RelationFactory.increase;
+        }
+        if ((selectedScalar != null) && selectedScalar === RelationFactory.moreAndMore) {
+          selectedScalar = RelationFactory.lessAndLess;
+        } else if ((selectedScalar != null) && selectedScalar === RelationFactory.lessAndLess) {
+          selectedScalar = RelationFactory.moreAndMore;
+        }
+      }
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData);
       relation.isDefined = (selectedVector != null) && (selectedScalar != null);
+      relation.descriptor = selectedDescriptor;
       if (!selectedVector.isCustomRelationship) {
         relation.customData = null;
       } else {
         relation.isDefined = link.relation.customData != null;
         relation.isCustomRelationship = true;
       }
+      this.setState({
+        selectedDescriptor: selectedDescriptor,
+        selectedVector: selectedVector,
+        selectedScalar: selectedScalar
+      });
       return this.props.graphStore.changeLink(link, {
         relation: relation
       });
     }
   },
+  getDescriptor: function() {
+    var id, newDescriptor;
+    id = parseInt(this.refs.descriptor.value);
+    newDescriptor = RelationFactory.descriptors[id];
+    return newDescriptor;
+  },
   getVector: function() {
-    var id, newVector, selectedVectorHasChanged;
+    var id, newVector;
     id = parseInt(this.refs.vector.value);
     newVector = RelationFactory.vectors[id];
-    selectedVectorHasChanged = false;
-    if (this.state.selectedVector && id !== this.state.selectedVector.id) {
-      selectedVectorHasChanged = true;
-    }
-    this.setState({
-      selectedVectorHasChanged: selectedVectorHasChanged
-    });
-    return RelationFactory.vectors[id];
+    return newVector;
   },
   getScalar: function() {
     var id;
@@ -47111,14 +47179,25 @@ module.exports = LinkRelationView = React.createClass({
       return void 0;
     }
   },
+  renderDescriptorPulldown: function(descriptorSelection) {
+    var descriptor;
+    descriptor = descriptorSelection;
+    if (descriptorSelection == null) {
+      descriptor = RelationFactory.descriptorIncrease;
+    }
+    return select({
+      value: descriptor.id,
+      className: "descriptor",
+      ref: "descriptor",
+      onChange: this.updateRelation
+    }, this.descriptorOptions);
+  },
   renderVectorPulldown: function(vectorSelection) {
     var currentOption, options;
-    options = _.map(RelationFactory.vectors, function(opt, i) {
-      return option({
-        value: opt.id,
-        key: i
-      }, opt.text);
-    });
+    options = this.vectorOptions;
+    if (this.state.selectedDescriptor === RelationFactory.descriptorDecrease) {
+      options = this.inverseVectorOptions;
+    }
     if (vectorSelection == null) {
       options.unshift(option({
         key: "placeholder",
@@ -47140,12 +47219,10 @@ module.exports = LinkRelationView = React.createClass({
   },
   renderScalarPulldown: function(scalarSelection) {
     var currentOption, disabled, options;
-    options = _.map(RelationFactory.scalars, function(opt, i) {
-      return option({
-        value: opt.id,
-        key: i
-      }, opt.text);
-    });
+    options = this.scalarOptions;
+    if (this.state.selectedDescriptor === RelationFactory.descriptorDecrease) {
+      options = this.inverseScalarOptions;
+    }
     if (scalarSelection == null) {
       options.unshift(option({
         key: "placeholder",
@@ -47182,14 +47259,16 @@ module.exports = LinkRelationView = React.createClass({
     source = this.props.link.sourceNode.title;
     target = this.props.link.targetNode.title;
     formula = this.props.link.relation.formula;
+    console.log(this.state);
     return div({
       className: 'link-relation-view'
     }, div({
       className: 'top'
-    }, QuantStart({
-      source: source,
-      target: target
-    }), div({
+    }, div({}, this.renderDescriptorPulldown(this.state.selectedDescriptor), span({
+      className: "source"
+    }, source), br({}), span({}, " " + (tr("~NODE-RELATION-EDIT.CAUSES")) + " "), span({
+      className: "target"
+    }, target)), div({
       className: 'full'
     }, this.renderVectorPulldown(this.state.selectedVector)), div({
       className: 'full'
