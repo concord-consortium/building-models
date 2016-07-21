@@ -50,7 +50,7 @@ window.Sage = {
 
 
 
-},{"./stores/graph-store":423,"./stores/palette-store":427,"./utils/hash-parameters":433,"./views/app-view":444,"./views/value-slider-view":485}],2:[function(require,module,exports){
+},{"./stores/graph-store":424,"./stores/palette-store":428,"./utils/hash-parameters":434,"./views/app-view":445,"./views/value-slider-view":486}],2:[function(require,module,exports){
 /*! decimal.js v4.0.4 https://github.com/MikeMcl/decimal.js/LICENCE */
 ;(function (global) {
     'use strict';
@@ -4120,24 +4120,12 @@ window.Sage = {
 },{}],3:[function(require,module,exports){
 'use strict';
 
-var has = Object.prototype.hasOwnProperty;
-
-//
-// We store our EE objects in a plain object whose properties are event names.
-// If `Object.create(null)` is not supported we prefix the event names with a
-// `~` to make sure that the built-in object properties are not overridden or
-// used as an attack vector.
-// We also assume that `Object.create(null)` is available when the event name
-// is an ES6 Symbol.
-//
-var prefix = typeof Object.create !== 'function' ? '~' : false;
-
 /**
  * Representation of a single EventEmitter function.
  *
  * @param {Function} fn Event handler to be called.
  * @param {Mixed} context Context for function execution.
- * @param {Boolean} [once=false] Only emit once
+ * @param {Boolean} once Only emit once
  * @api private
  */
 function EE(fn, context, once) {
@@ -4156,7 +4144,7 @@ function EE(fn, context, once) {
 function EventEmitter() { /* Nothing to set */ }
 
 /**
- * Hold the assigned EventEmitters by name.
+ * Holds the assigned EventEmitters by name.
  *
  * @type {Object}
  * @private
@@ -4164,48 +4152,18 @@ function EventEmitter() { /* Nothing to set */ }
 EventEmitter.prototype._events = undefined;
 
 /**
- * Return an array listing the events for which the emitter has registered
- * listeners.
- *
- * @returns {Array}
- * @api public
- */
-EventEmitter.prototype.eventNames = function eventNames() {
-  var events = this._events
-    , names = []
-    , name;
-
-  if (!events) return names;
-
-  for (name in events) {
-    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
-  }
-
-  if (Object.getOwnPropertySymbols) {
-    return names.concat(Object.getOwnPropertySymbols(events));
-  }
-
-  return names;
-};
-
-/**
  * Return a list of assigned event listeners.
  *
  * @param {String} event The events that should be listed.
- * @param {Boolean} exists We only need to know if there are listeners.
- * @returns {Array|Boolean}
+ * @returns {Array}
  * @api public
  */
-EventEmitter.prototype.listeners = function listeners(event, exists) {
-  var evt = prefix ? prefix + event : event
-    , available = this._events && this._events[evt];
+EventEmitter.prototype.listeners = function listeners(event) {
+  if (!this._events || !this._events[event]) return [];
+  if (this._events[event].fn) return [this._events[event].fn];
 
-  if (exists) return !!available;
-  if (!available) return [];
-  if (available.fn) return [available.fn];
-
-  for (var i = 0, l = available.length, ee = new Array(l); i < l; i++) {
-    ee[i] = available[i].fn;
+  for (var i = 0, l = this._events[event].length, ee = new Array(l); i < l; i++) {
+    ee[i] = this._events[event][i].fn;
   }
 
   return ee;
@@ -4219,17 +4177,15 @@ EventEmitter.prototype.listeners = function listeners(event, exists) {
  * @api public
  */
 EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-  var evt = prefix ? prefix + event : event;
+  if (!this._events || !this._events[event]) return false;
 
-  if (!this._events || !this._events[evt]) return false;
-
-  var listeners = this._events[evt]
+  var listeners = this._events[event]
     , len = arguments.length
     , args
     , i;
 
   if ('function' === typeof listeners.fn) {
-    if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+    if (listeners.once) this.removeListener(event, listeners.fn, true);
 
     switch (len) {
       case 1: return listeners.fn.call(listeners.context), true;
@@ -4250,7 +4206,7 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
       , j;
 
     for (i = 0; i < length; i++) {
-      if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
+      if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
 
       switch (len) {
         case 1: listeners[i].fn.call(listeners[i].context); break;
@@ -4273,20 +4229,19 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
  * Register a new EventListener for the given event.
  *
  * @param {String} event Name of the event.
- * @param {Function} fn Callback function.
- * @param {Mixed} [context=this] The context of the function.
+ * @param {Functon} fn Callback function.
+ * @param {Mixed} context The context of the function.
  * @api public
  */
 EventEmitter.prototype.on = function on(event, fn, context) {
-  var listener = new EE(fn, context || this)
-    , evt = prefix ? prefix + event : event;
+  var listener = new EE(fn, context || this);
 
-  if (!this._events) this._events = prefix ? {} : Object.create(null);
-  if (!this._events[evt]) this._events[evt] = listener;
+  if (!this._events) this._events = {};
+  if (!this._events[event]) this._events[event] = listener;
   else {
-    if (!this._events[evt].fn) this._events[evt].push(listener);
-    else this._events[evt] = [
-      this._events[evt], listener
+    if (!this._events[event].fn) this._events[event].push(listener);
+    else this._events[event] = [
+      this._events[event], listener
     ];
   }
 
@@ -4298,19 +4253,18 @@ EventEmitter.prototype.on = function on(event, fn, context) {
  *
  * @param {String} event Name of the event.
  * @param {Function} fn Callback function.
- * @param {Mixed} [context=this] The context of the function.
+ * @param {Mixed} context The context of the function.
  * @api public
  */
 EventEmitter.prototype.once = function once(event, fn, context) {
-  var listener = new EE(fn, context || this, true)
-    , evt = prefix ? prefix + event : event;
+  var listener = new EE(fn, context || this, true);
 
-  if (!this._events) this._events = prefix ? {} : Object.create(null);
-  if (!this._events[evt]) this._events[evt] = listener;
+  if (!this._events) this._events = {};
+  if (!this._events[event]) this._events[event] = listener;
   else {
-    if (!this._events[evt].fn) this._events[evt].push(listener);
-    else this._events[evt] = [
-      this._events[evt], listener
+    if (!this._events[event].fn) this._events[event].push(listener);
+    else this._events[event] = [
+      this._events[event], listener
     ];
   }
 
@@ -4322,36 +4276,22 @@ EventEmitter.prototype.once = function once(event, fn, context) {
  *
  * @param {String} event The event we want to remove.
  * @param {Function} fn The listener that we need to find.
- * @param {Mixed} context Only remove listeners matching this context.
  * @param {Boolean} once Only remove once listeners.
  * @api public
  */
-EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
-  var evt = prefix ? prefix + event : event;
+EventEmitter.prototype.removeListener = function removeListener(event, fn, once) {
+  if (!this._events || !this._events[event]) return this;
 
-  if (!this._events || !this._events[evt]) return this;
-
-  var listeners = this._events[evt]
+  var listeners = this._events[event]
     , events = [];
 
   if (fn) {
-    if (listeners.fn) {
-      if (
-           listeners.fn !== fn
-        || (once && !listeners.once)
-        || (context && listeners.context !== context)
-      ) {
-        events.push(listeners);
-      }
-    } else {
-      for (var i = 0, length = listeners.length; i < length; i++) {
-        if (
-             listeners[i].fn !== fn
-          || (once && !listeners[i].once)
-          || (context && listeners[i].context !== context)
-        ) {
-          events.push(listeners[i]);
-        }
+    if (listeners.fn && (listeners.fn !== fn || (once && !listeners.once))) {
+      events.push(listeners);
+    }
+    if (!listeners.fn) for (var i = 0, length = listeners.length; i < length; i++) {
+      if (listeners[i].fn !== fn || (once && !listeners[i].once)) {
+        events.push(listeners[i]);
       }
     }
   }
@@ -4360,9 +4300,9 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
   // Reset the array, or remove it completely if we have no more listeners.
   //
   if (events.length) {
-    this._events[evt] = events.length === 1 ? events[0] : events;
+    this._events[event] = events.length === 1 ? events[0] : events;
   } else {
-    delete this._events[evt];
+    delete this._events[event];
   }
 
   return this;
@@ -4377,8 +4317,8 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn, conte
 EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
   if (!this._events) return this;
 
-  if (event) delete this._events[prefix ? prefix + event : event];
-  else this._events = prefix ? {} : Object.create(null);
+  if (event) delete this._events[event];
+  else this._events = {};
 
   return this;
 };
@@ -4397,16 +4337,16 @@ EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
 };
 
 //
-// Expose the prefix.
+// Expose the module.
 //
-EventEmitter.prefixed = prefix;
+EventEmitter.EventEmitter = EventEmitter;
+EventEmitter.EventEmitter2 = EventEmitter;
+EventEmitter.EventEmitter3 = EventEmitter;
 
 //
 // Expose the module.
 //
-if ('undefined' !== typeof module) {
-  module.exports = EventEmitter;
-}
+module.exports = EventEmitter;
 
 },{}],4:[function(require,module,exports){
 var structuredClone = require('./structured-clone');
@@ -9234,7 +9174,7 @@ FunctionAssignmentNode.prototype._compile = function (defs) {
       '    };' +
       '    fn.syntax = "' + this.name + '(' + this.params.join(', ') + ')";' +
       '    return fn;' +
-      '  })()';
+      '  })();';
 };
 
 /**
@@ -15025,21 +14965,16 @@ module.exports = function (math) {
       return inv ? 0 : a;
     }
 
+    var epsilon = 1e-16;
     var x = 1; // Initial guess
-    var xPrev = 1;
     var i = 0;
-    var iMax = 10000;
+    var iMax = 100;
     do {
       var delta = (a / Math.pow(x, _root - 1) - x) / _root;
-      xPrev = x;
       x = x + delta;
       i++;
     }
-    while (xPrev !== x && i < iMax);
-
-    if (xPrev !== x) {
-      throw new Error('Function nthRoot failed to converge');
-    }
+    while (Math.abs(delta) > epsilon && i < iMax);
 
     return inv ? 1 / x : x;
   }
@@ -15070,7 +15005,7 @@ module.exports = function (math) {
 
     var x = one; // Initial guess
     var i = 0;
-    var iMax = 10000;
+    var iMax = 100;
     do {
       var xPrev = x;
       var delta = a.div(x.pow(_root.minus(1))).minus(x).div(_root);
@@ -15078,10 +15013,6 @@ module.exports = function (math) {
       i++;
     }
     while (!x.equals(xPrev) && i < iMax);
-
-    if (!x.equals(xPrev)) {
-      throw new Error('Function nthRoot failed to converge');
-    }
 
     return inv ? one.div(x) : x;
   }
@@ -36591,11 +36522,20 @@ exports.type = function(x) {
 };
 
 },{}],362:[function(require,module,exports){
-module.exports = '1.7.1';
+module.exports = '1.7.0';
 // Note: This file is automatically generated when building math.js.
 // Changes made in this file will be overwritten.
 
 },{}],363:[function(require,module,exports){
+(function (global){
+/*! Native Promise Only
+    v0.7.6-a (c) Kyle Simpson
+    MIT License: http://getify.mit-license.org
+*/
+!function(t,n,e){n[t]=n[t]||e(),"undefined"!=typeof module&&module.exports?module.exports=n[t]:"function"==typeof define&&define.amd&&define(function(){return n[t]})}("Promise","undefined"!=typeof global?global:this,function(){"use strict";function t(t,n){l.add(t,n),h||(h=y(l.drain))}function n(t){var n,e=typeof t;return null==t||"object"!=e&&"function"!=e||(n=t.then),"function"==typeof n?n:!1}function e(){for(var t=0;t<this.chain.length;t++)o(this,1===this.state?this.chain[t].success:this.chain[t].failure,this.chain[t]);this.chain.length=0}function o(t,e,o){var r,i;try{e===!1?o.reject(t.msg):(r=e===!0?t.msg:e.call(void 0,t.msg),r===o.promise?o.reject(TypeError("Promise-chain cycle")):(i=n(r))?i.call(r,o.resolve,o.reject):o.resolve(r))}catch(c){o.reject(c)}}function r(o){var c,u,a=this;if(!a.triggered){a.triggered=!0,a.def&&(a=a.def);try{(c=n(o))?(u=new f(a),c.call(o,function(){r.apply(u,arguments)},function(){i.apply(u,arguments)})):(a.msg=o,a.state=1,a.chain.length>0&&t(e,a))}catch(s){i.call(u||new f(a),s)}}}function i(n){var o=this;o.triggered||(o.triggered=!0,o.def&&(o=o.def),o.msg=n,o.state=2,o.chain.length>0&&t(e,o))}function c(t,n,e,o){for(var r=0;r<n.length;r++)!function(r){t.resolve(n[r]).then(function(t){e(r,t)},o)}(r)}function f(t){this.def=t,this.triggered=!1}function u(t){this.promise=t,this.state=0,this.triggered=!1,this.chain=[],this.msg=void 0}function a(n){if("function"!=typeof n)throw TypeError("Not a function");if(0!==this.__NPO__)throw TypeError("Not a promise");this.__NPO__=1;var o=new u(this);this.then=function(n,r){var i={success:"function"==typeof n?n:!0,failure:"function"==typeof r?r:!1};return i.promise=new this.constructor(function(t,n){if("function"!=typeof t||"function"!=typeof n)throw TypeError("Not a function");i.resolve=t,i.reject=n}),o.chain.push(i),0!==o.state&&t(e,o),i.promise},this["catch"]=function(t){return this.then(void 0,t)};try{n.call(void 0,function(t){r.call(o,t)},function(t){i.call(o,t)})}catch(c){i.call(o,c)}}var s,h,l,p=Object.prototype.toString,y="undefined"!=typeof setImmediate?function(t){return setImmediate(t)}:setTimeout;try{Object.defineProperty({},"x",{}),s=function(t,n,e,o){return Object.defineProperty(t,n,{value:e,writable:!0,configurable:o!==!1})}}catch(d){s=function(t,n,e){return t[n]=e,t}}l=function(){function t(t,n){this.fn=t,this.self=n,this.next=void 0}var n,e,o;return{add:function(r,i){o=new t(r,i),e?e.next=o:n=o,e=o,o=void 0},drain:function(){var t=n;for(n=e=h=void 0;t;)t.fn.call(t.self),t=t.next}}}();var g=s({},"constructor",a,!1);return s(a,"prototype",g,!1),s(g,"__NPO__",0,!1),s(a,"resolve",function(t){var n=this;return t&&"object"==typeof t&&1===t.__NPO__?t:new n(function(n,e){if("function"!=typeof n||"function"!=typeof e)throw TypeError("Not a function");n(t)})}),s(a,"reject",function(t){return new this(function(n,e){if("function"!=typeof n||"function"!=typeof e)throw TypeError("Not a function");e(t)})}),s(a,"all",function(t){var n=this;return"[object Array]"!=p.call(t)?n.reject(TypeError("Not an array")):0===t.length?n.resolve([]):new n(function(e,o){if("function"!=typeof e||"function"!=typeof o)throw TypeError("Not a function");var r=t.length,i=Array(r),f=0;c(n,t,function(t,n){i[t]=n,++f===r&&e(i)},o)})}),s(a,"race",function(t){var n=this;return"[object Array]"!=p.call(t)?n.reject(TypeError("Not an array")):new n(function(e,o){if("function"!=typeof e||"function"!=typeof o)throw TypeError("Not a function");c(n,t,function(t,n){e(n)},o)})}),a});
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],364:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -36655,34 +36595,34 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],364:[function(require,module,exports){
+},{}],365:[function(require,module,exports){
+module.exports = require('./src');
+
+},{"./src":377}],366:[function(require,module,exports){
 /**
  * A module of methods that you want to include in all actions.
  * This module is consumed by `createAction`.
  */
-"use strict";
+module.exports = {
+};
 
-module.exports = {};
-},{}],365:[function(require,module,exports){
-"use strict";
-
+},{}],367:[function(require,module,exports){
 exports.createdStores = [];
 
 exports.createdActions = [];
 
-exports.reset = function () {
-    while (exports.createdStores.length) {
+exports.reset = function() {
+    while(exports.createdStores.length) {
         exports.createdStores.pop();
     }
-    while (exports.createdActions.length) {
+    while(exports.createdActions.length) {
         exports.createdActions.pop();
     }
 };
-},{}],366:[function(require,module,exports){
-"use strict";
 
-var _ = require("./utils"),
-    maker = require("./joins").instanceJoinCreator;
+},{}],368:[function(require,module,exports){
+var _ = require('./utils'),
+    maker = require('./joins').instanceJoinCreator;
 
 /**
  * Extract child listenables from a parent from their
@@ -36690,13 +36630,11 @@ var _ = require("./utils"),
  *
  * @param {Object} listenable The parent listenable
  */
-var mapChildListenables = function mapChildListenables(listenable) {
-    var i = 0,
-        children = {},
-        childName;
-    for (; i < (listenable.children || []).length; ++i) {
+var mapChildListenables = function(listenable) {
+    var i = 0, children = {}, childName;
+    for (;i < (listenable.children||[]).length; ++i) {
         childName = listenable.children[i];
-        if (listenable[childName]) {
+        if(listenable[childName]){
             children[childName] = listenable[childName];
         }
     }
@@ -36709,9 +36647,9 @@ var mapChildListenables = function mapChildListenables(listenable) {
  *
  * @param {Object} listenables The top-level listenables
  */
-var flattenListenables = function flattenListenables(listenables) {
+var flattenListenables = function(listenables) {
     var flattened = {};
-    for (var key in listenables) {
+    for(var key in listenables){
         var listenable = listenables[key];
         var childMap = mapChildListenables(listenable);
 
@@ -36720,7 +36658,7 @@ var flattenListenables = function flattenListenables(listenables) {
 
         // add the primary listenable and chilren
         flattened[key] = listenable;
-        for (var childKey in children) {
+        for(var childKey in children){
             var childListenable = children[childKey];
             flattened[key + _.capitalize(childKey)] = childListenable;
         }
@@ -36740,14 +36678,11 @@ module.exports = {
      * @param {Action|Store} listenable The listenable we want to search for
      * @returns {Boolean} The result of a recursive search among `this.subscriptions`
      */
-    hasListener: function hasListener(listenable) {
-        var i = 0,
-            j,
-            listener,
-            listenables;
-        for (; i < (this.subscriptions || []).length; ++i) {
+    hasListener: function(listenable) {
+        var i = 0, j, listener, listenables;
+        for (;i < (this.subscriptions||[]).length; ++i) {
             listenables = [].concat(this.subscriptions[i].listenable);
-            for (j = 0; j < listenables.length; j++) {
+            for (j = 0; j < listenables.length; j++){
                 listener = listenables[j];
                 if (listener === listenable || listener.hasListener && listener.hasListener(listenable)) {
                     return true;
@@ -36762,13 +36697,13 @@ module.exports = {
      *
      * @param {Object} listenables An object of listenables. Keys will be used as callback method names.
      */
-    listenToMany: function listenToMany(listenables) {
+    listenToMany: function(listenables){
         var allListenables = flattenListenables(listenables);
-        for (var key in allListenables) {
+        for(var key in allListenables){
             var cbname = _.callbackName(key),
                 localname = this[cbname] ? cbname : this[key] ? key : undefined;
-            if (localname) {
-                this.listenTo(allListenables[key], localname, this[cbname + "Default"] || this[localname + "Default"] || localname);
+            if (localname){
+                this.listenTo(allListenables[key],localname,this[cbname+"Default"]||this[localname+"Default"]||localname);
             }
         }
     },
@@ -36780,7 +36715,7 @@ module.exports = {
      *  listened to.
      * @returns {String|Undefined} An error message, or undefined if there was no problem.
      */
-    validateListening: function validateListening(listenable) {
+    validateListening: function(listenable){
         if (listenable === this) {
             return "Listener is not able to listen to itself";
         }
@@ -36801,17 +36736,14 @@ module.exports = {
      * @param {Function|String} defaultCallback The callback to register as default handler
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
-    listenTo: function listenTo(listenable, callback, defaultCallback) {
-        var desub,
-            unsubscriber,
-            subscriptionobj,
-            subs = this.subscriptions = this.subscriptions || [];
+    listenTo: function(listenable, callback, defaultCallback) {
+        var desub, unsubscriber, subscriptionobj, subs = this.subscriptions = this.subscriptions || [];
         _.throwIf(this.validateListening(listenable));
         this.fetchInitialState(listenable, defaultCallback);
-        desub = listenable.listen(this[callback] || callback, this);
-        unsubscriber = function () {
+        desub = listenable.listen(this[callback]||callback, this);
+        unsubscriber = function() {
             var index = subs.indexOf(subscriptionobj);
-            _.throwIf(index === -1, "Tried to remove listen already gone from subscriptions list!");
+            _.throwIf(index === -1,'Tried to remove listen already gone from subscriptions list!');
             subs.splice(index, 1);
             desub();
         };
@@ -36829,15 +36761,13 @@ module.exports = {
      * @param {Action|Store} listenable The action or store we no longer want to listen to
      * @returns {Boolean} True if a subscription was found and removed, otherwise false.
      */
-    stopListeningTo: function stopListeningTo(listenable) {
-        var sub,
-            i = 0,
-            subs = this.subscriptions || [];
-        for (; i < subs.length; i++) {
+    stopListeningTo: function(listenable){
+        var sub, i = 0, subs = this.subscriptions || [];
+        for(;i < subs.length; i++){
             sub = subs[i];
-            if (sub.listenable === listenable) {
+            if (sub.listenable === listenable){
                 sub.stop();
-                _.throwIf(subs.indexOf(sub) !== -1, "Failed to remove listen from subscriptions list!");
+                _.throwIf(subs.indexOf(sub)!==-1,'Failed to remove listen from subscriptions list!');
                 return true;
             }
         }
@@ -36847,12 +36777,11 @@ module.exports = {
     /**
      * Stops all subscriptions and empties subscriptions array
      */
-    stopListeningToAll: function stopListeningToAll() {
-        var remaining,
-            subs = this.subscriptions || [];
-        while (remaining = subs.length) {
+    stopListeningToAll: function(){
+        var remaining, subs = this.subscriptions || [];
+        while((remaining=subs.length)){
             subs[0].stop();
-            _.throwIf(subs.length !== remaining - 1, "Failed to remove listen from subscriptions list!");
+            _.throwIf(subs.length!==remaining-1,'Failed to remove listen from subscriptions list!');
         }
     },
 
@@ -36861,13 +36790,13 @@ module.exports = {
      * @param {Action|Store} listenable The publisher we want to get initial state from
      * @param {Function|String} defaultCallback The method to receive the data
      */
-    fetchInitialState: function fetchInitialState(listenable, defaultCallback) {
-        defaultCallback = defaultCallback && this[defaultCallback] || defaultCallback;
+    fetchInitialState: function (listenable, defaultCallback) {
+        defaultCallback = (defaultCallback && this[defaultCallback]) || defaultCallback;
         var me = this;
         if (_.isFunction(defaultCallback) && _.isFunction(listenable.getInitialState)) {
             var data = listenable.getInitialState();
             if (data && _.isFunction(data.then)) {
-                data.then(function () {
+                data.then(function() {
                     defaultCallback.apply(me, arguments);
                 });
             } else {
@@ -36912,10 +36841,28 @@ module.exports = {
      */
     joinStrict: maker("strict")
 };
-},{"./joins":373,"./utils":375}],367:[function(require,module,exports){
-"use strict";
 
-var _ = require("./utils");
+},{"./joins":378,"./utils":382}],369:[function(require,module,exports){
+var _ = require('./utils'),
+    ListenerMethods = require('./ListenerMethods');
+
+/**
+ * A module meant to be consumed as a mixin by a React component. Supplies the methods from
+ * `ListenerMethods` mixin and takes care of teardown of subscriptions.
+ * Note that if you're using the `connect` mixin you don't need this mixin, as connect will
+ * import everything this mixin contains!
+ */
+module.exports = _.extend({
+
+    /**
+     * Cleans up all listener previously registered.
+     */
+    componentWillUnmount: ListenerMethods.stopListeningToAll
+
+}, ListenerMethods);
+
+},{"./ListenerMethods":368,"./utils":382}],370:[function(require,module,exports){
+var _ = require('./utils');
 
 /**
  * A module of methods for object that you want to be able to listen to.
@@ -36930,7 +36877,7 @@ module.exports = {
      * undefined, that will be passed on as arguments for shouldEmit and
      * emission.
      */
-    preEmit: function preEmit() {},
+    preEmit: function() {},
 
     /**
      * Hook used by the publisher after `preEmit` to determine if the
@@ -36939,9 +36886,7 @@ module.exports = {
      *
      * @returns {Boolean} true if event should be emitted
      */
-    shouldEmit: function shouldEmit() {
-        return true;
-    },
+    shouldEmit: function() { return true; },
 
     /**
      * Subscribes the given callback for action triggered
@@ -36950,18 +36895,16 @@ module.exports = {
      * @param {Mixed} [optional] bindContext The context to bind the callback with
      * @returns {Function} Callback that unsubscribes the registered event handler
      */
-    listen: function listen(callback, bindContext) {
+    listen: function(callback, bindContext) {
         bindContext = bindContext || this;
-        var eventHandler = function eventHandler(args) {
-            if (aborted) {
+        var eventHandler = function(args) {
+            if (aborted){
                 return;
             }
             callback.apply(bindContext, args);
-        },
-            me = this,
-            aborted = false;
+        }, me = this, aborted = false;
         this.emitter.addListener(this.eventLabel, eventHandler);
-        return function () {
+        return function() {
             aborted = true;
             me.emitter.removeListener(me.eventLabel, eventHandler);
         };
@@ -36973,18 +36916,20 @@ module.exports = {
      *
      * @param {Object} The promise to attach to
      */
-    promise: function promise(_promise) {
+    promise: function(promise) {
         var me = this;
 
-        var canHandlePromise = this.children.indexOf("completed") >= 0 && this.children.indexOf("failed") >= 0;
+        var canHandlePromise =
+            this.children.indexOf('completed') >= 0 &&
+            this.children.indexOf('failed') >= 0;
 
-        if (!canHandlePromise) {
-            throw new Error("Publisher must have \"completed\" and \"failed\" child publishers");
+        if (!canHandlePromise){
+            throw new Error('Publisher must have "completed" and "failed" child publishers');
         }
 
-        _promise.then(function (response) {
+        promise.then(function(response) {
             return me.completed(response);
-        }, function (error) {
+        }, function(error) {
             return me.failed(error);
         });
     },
@@ -36995,15 +36940,15 @@ module.exports = {
      *
      * @param {Function} callback The callback to register as event handler
      */
-    listenAndPromise: function listenAndPromise(callback, bindContext) {
+    listenAndPromise: function(callback, bindContext) {
         var me = this;
         bindContext = bindContext || this;
         this.willCallPromise = (this.willCallPromise || 0) + 1;
 
-        var removeListen = this.listen(function () {
+        var removeListen = this.listen(function() {
 
             if (!callback) {
-                throw new Error("Expected a function returning a promise but got " + callback);
+                throw new Error('Expected a function returning a promise but got ' + callback);
             }
 
             var args = arguments,
@@ -37012,15 +36957,16 @@ module.exports = {
         }, bindContext);
 
         return function () {
-            me.willCallPromise--;
-            removeListen.call(me);
+          me.willCallPromise--;
+          removeListen.call(me);
         };
+
     },
 
     /**
      * Publishes an event using `this.emitter` (if `shouldEmit` agrees)
      */
-    trigger: function trigger() {
+    trigger: function() {
         var args = arguments,
             pre = this.preEmit.apply(this, args);
         args = pre === undefined ? args : _.isArguments(pre) ? pre : [].concat(pre);
@@ -37032,10 +36978,9 @@ module.exports = {
     /**
      * Tries to publish the event on the next tick
      */
-    triggerAsync: function triggerAsync() {
-        var args = arguments,
-            me = this;
-        _.nextTick(function () {
+    triggerAsync: function(){
+        var args = arguments,me = this;
+        _.nextTick(function() {
             me.trigger.apply(me, args);
         });
     },
@@ -37049,22 +36994,24 @@ module.exports = {
      *   If listenAndPromise'd, then promise associated to this trigger.
      *   Otherwise, the promise is for next child action completion.
      */
-    triggerPromise: function triggerPromise() {
+    triggerPromise: function(){
         var me = this;
         var args = arguments;
 
-        var canHandlePromise = this.children.indexOf("completed") >= 0 && this.children.indexOf("failed") >= 0;
+        var canHandlePromise =
+            this.children.indexOf('completed') >= 0 &&
+            this.children.indexOf('failed') >= 0;
 
-        var promise = _.createPromise(function (resolve, reject) {
+        var promise = _.createPromise(function(resolve, reject) {
             // If `listenAndPromise` is listening
             // patch `promise` w/ context-loaded resolve/reject
             if (me.willCallPromise) {
-                _.nextTick(function () {
-                    var previousPromise = me.promise;
-                    me.promise = function (inputPromise) {
-                        inputPromise.then(resolve, reject);
+                _.nextTick(function() {
+                    var old_promise_method = me.promise;
+                    me.promise = function (promise) {
+                        promise.then(resolve, reject);
                         // Back to your regularly schedule programming.
-                        me.promise = previousPromise;
+                        me.promise = old_promise_method;
                         return me.promise.apply(me, arguments);
                     };
                     me.trigger.apply(me, args);
@@ -37073,16 +37020,16 @@ module.exports = {
             }
 
             if (canHandlePromise) {
-                var removeSuccess = me.completed.listen(function (argsArr) {
+                var removeSuccess = me.completed.listen(function(args) {
                     removeSuccess();
                     removeFailed();
-                    resolve(argsArr);
+                    resolve(args);
                 });
 
-                var removeFailed = me.failed.listen(function (argsArr) {
+                var removeFailed = me.failed.listen(function(args) {
                     removeSuccess();
                     removeFailed();
-                    reject(argsArr);
+                    reject(args);
                 });
             }
 
@@ -37096,49 +37043,110 @@ module.exports = {
         return promise;
     }
 };
-},{"./utils":375}],368:[function(require,module,exports){
+
+},{"./utils":382}],371:[function(require,module,exports){
 /**
  * A module of methods that you want to include in all stores.
  * This module is consumed by `createStore`.
  */
-"use strict";
-
-module.exports = {};
-},{}],369:[function(require,module,exports){
-"use strict";
-
-module.exports = function (store, definition) {
-    for (var name in definition) {
-        if (Object.getOwnPropertyDescriptor && Object.defineProperty) {
-            var propertyDescriptor = Object.getOwnPropertyDescriptor(definition, name);
-
-            if (!propertyDescriptor.value || typeof propertyDescriptor.value !== "function" || !definition.hasOwnProperty(name)) {
-                continue;
-            }
-
-            store[name] = definition[name].bind(store);
-        } else {
-            var property = definition[name];
-
-            if (typeof property !== "function" || !definition.hasOwnProperty(name)) {
-                continue;
-            }
-
-            store[name] = property.bind(store);
-        }
-    }
-
-    return store;
+module.exports = {
 };
-},{}],370:[function(require,module,exports){
-"use strict";
 
-var _ = require("./utils"),
-    ActionMethods = require("./ActionMethods"),
-    PublisherMethods = require("./PublisherMethods"),
-    Keep = require("./Keep");
+},{}],372:[function(require,module,exports){
+module.exports = function(store, definition) {
+  for (var name in definition) {
+    if (Object.getOwnPropertyDescriptor && Object.defineProperty) {
+        var propertyDescriptor = Object.getOwnPropertyDescriptor(definition, name);
 
-var allowed = { preEmit: 1, shouldEmit: 1 };
+        if (!propertyDescriptor.value || typeof propertyDescriptor.value !== 'function' || !definition.hasOwnProperty(name)) {
+            continue;
+        }
+
+        store[name] = definition[name].bind(store);
+    } else {
+        var property = definition[name];
+
+        if (typeof property !== 'function' || !definition.hasOwnProperty(name)) {
+            continue;
+        }
+
+        store[name] = property.bind(store);
+    }
+  }
+
+  return store;
+};
+
+},{}],373:[function(require,module,exports){
+var Reflux = require('./index'),
+    _ = require('./utils');
+
+module.exports = function(listenable,key){
+    return {
+        getInitialState: function(){
+            if (!_.isFunction(listenable.getInitialState)) {
+                return {};
+            } else if (key === undefined) {
+                return listenable.getInitialState();
+            } else {
+                return _.object([key],[listenable.getInitialState()]);
+            }
+        },
+        componentDidMount: function(){
+            _.extend(this,Reflux.ListenerMethods);
+            var me = this, cb = (key === undefined ? this.setState : function(v){me.setState(_.object([key],[v]));});
+            this.listenTo(listenable,cb);
+        },
+        componentWillUnmount: Reflux.ListenerMixin.componentWillUnmount
+    };
+};
+
+},{"./index":377,"./utils":382}],374:[function(require,module,exports){
+var Reflux = require('./index'),
+  _ = require('./utils');
+
+module.exports = function(listenable, key, filterFunc) {
+    filterFunc = _.isFunction(key) ? key : filterFunc;
+    return {
+        getInitialState: function() {
+            if (!_.isFunction(listenable.getInitialState)) {
+                return {};
+            } else if (_.isFunction(key)) {
+                return filterFunc.call(this, listenable.getInitialState());
+            } else {
+                // Filter initial payload from store.
+                var result = filterFunc.call(this, listenable.getInitialState());
+                if (result) {
+                  return _.object([key], [result]);
+                } else {
+                  return {};
+                }
+            }
+        },
+        componentDidMount: function() {
+            _.extend(this, Reflux.ListenerMethods);
+            var me = this;
+            var cb = function(value) {
+                if (_.isFunction(key)) {
+                    me.setState(filterFunc.call(me, value));
+                } else {
+                    var result = filterFunc.call(me, value);
+                    me.setState(_.object([key], [result]));
+                }
+            };
+
+            this.listenTo(listenable, cb);
+        },
+        componentWillUnmount: Reflux.ListenerMixin.componentWillUnmount
+    };
+};
+
+
+},{"./index":377,"./utils":382}],375:[function(require,module,exports){
+var _ = require('./utils'),
+    Reflux = require('./index'),
+    Keep = require('./Keep'),
+    allowed = {preEmit:1,shouldEmit:1};
 
 /**
  * Creates an action functor object. It is mixed in with functions
@@ -37147,32 +37155,35 @@ var allowed = { preEmit: 1, shouldEmit: 1 };
  *
  * @param {Object} definition The action object definition
  */
-var createAction = function createAction(definition) {
+var createAction = function(definition) {
 
     definition = definition || {};
-    if (!_.isObject(definition)) {
-        definition = { actionName: definition };
+    if (!_.isObject(definition)){
+        definition = {actionName: definition};
     }
 
-    for (var a in ActionMethods) {
-        if (!allowed[a] && PublisherMethods[a]) {
-            throw new Error("Cannot override API method " + a + " in Reflux.ActionMethods. Use another method name or override it on Reflux.PublisherMethods instead.");
+    for(var a in Reflux.ActionMethods){
+        if (!allowed[a] && Reflux.PublisherMethods[a]) {
+            throw new Error("Cannot override API method " + a +
+                " in Reflux.ActionMethods. Use another method name or override it on Reflux.PublisherMethods instead."
+            );
         }
     }
 
-    for (var d in definition) {
-        if (!allowed[d] && PublisherMethods[d]) {
-            throw new Error("Cannot override API method " + d + " in action creation. Use another method name or override it on Reflux.PublisherMethods instead.");
+    for(var d in definition){
+        if (!allowed[d] && Reflux.PublisherMethods[d]) {
+            throw new Error("Cannot override API method " + d +
+                " in action creation. Use another method name or override it on Reflux.PublisherMethods instead."
+            );
         }
     }
 
     definition.children = definition.children || [];
-    if (definition.asyncResult) {
-        definition.children = definition.children.concat(["completed", "failed"]);
+    if (definition.asyncResult){
+        definition.children = definition.children.concat(["completed","failed"]);
     }
 
-    var i = 0,
-        childActions = {};
+    var i = 0, childActions = {};
     for (; i < definition.children.length; i++) {
         var name = definition.children[i];
         childActions[name] = createAction(name);
@@ -37182,30 +37193,29 @@ var createAction = function createAction(definition) {
         eventLabel: "action",
         emitter: new _.EventEmitter(),
         _isAction: true
-    }, PublisherMethods, ActionMethods, definition);
+    }, Reflux.PublisherMethods, Reflux.ActionMethods, definition);
 
-    var functor = function functor() {
-        var triggerType = functor.sync ? "trigger" : _.environment.hasPromise ? "triggerPromise" : "triggerAsync";
-        return functor[triggerType].apply(functor, arguments);
+    var functor = function() {
+        return functor[functor.sync?"trigger":"triggerPromise"].apply(functor, arguments);
     };
 
-    _.extend(functor, childActions, context);
+    _.extend(functor,childActions,context);
 
     Keep.createdActions.push(functor);
 
     return functor;
+
 };
 
 module.exports = createAction;
-},{"./ActionMethods":364,"./Keep":365,"./PublisherMethods":367,"./utils":375}],371:[function(require,module,exports){
-"use strict";
 
-var _ = require("./utils"),
-    Keep = require("./Keep"),
-    mixer = require("./mixer"),
-    bindMethods = require("./bindMethods");
-
-var allowed = { preEmit: 1, shouldEmit: 1 };
+},{"./Keep":367,"./index":377,"./utils":382}],376:[function(require,module,exports){
+var _ = require('./utils'),
+    Reflux = require('./index'),
+    Keep = require('./Keep'),
+    mixer = require('./mixer'),
+    allowed = {preEmit:1,shouldEmit:1},
+    bindMethods = require('./bindMethods');
 
 /**
  * Creates an event emitting Data Store. It is mixed in with functions
@@ -37215,31 +37225,30 @@ var allowed = { preEmit: 1, shouldEmit: 1 };
  * @param {Object} definition The data store object definition
  * @returns {Store} A data store instance
  */
-module.exports = function (definition) {
-
-    var StoreMethods = require("./StoreMethods"),
-        PublisherMethods = require("./PublisherMethods"),
-        ListenerMethods = require("./ListenerMethods");
+module.exports = function(definition) {
 
     definition = definition || {};
 
-    for (var a in StoreMethods) {
-        if (!allowed[a] && (PublisherMethods[a] || ListenerMethods[a])) {
-            throw new Error("Cannot override API method " + a + " in Reflux.StoreMethods. Use another method name or override it on Reflux.PublisherMethods / Reflux.ListenerMethods instead.");
+    for(var a in Reflux.StoreMethods){
+        if (!allowed[a] && (Reflux.PublisherMethods[a] || Reflux.ListenerMethods[a])){
+            throw new Error("Cannot override API method " + a +
+                " in Reflux.StoreMethods. Use another method name or override it on Reflux.PublisherMethods / Reflux.ListenerMethods instead."
+            );
         }
     }
 
-    for (var d in definition) {
-        if (!allowed[d] && (PublisherMethods[d] || ListenerMethods[d])) {
-            throw new Error("Cannot override API method " + d + " in store creation. Use another method name or override it on Reflux.PublisherMethods / Reflux.ListenerMethods instead.");
+    for(var d in definition){
+        if (!allowed[d] && (Reflux.PublisherMethods[d] || Reflux.ListenerMethods[d])){
+            throw new Error("Cannot override API method " + d +
+                " in store creation. Use another method name or override it on Reflux.PublisherMethods / Reflux.ListenerMethods instead."
+            );
         }
     }
 
     definition = mixer(definition);
 
     function Store() {
-        var i = 0,
-            arr;
+        var i=0, arr;
         this.subscriptions = [];
         this.emitter = new _.EventEmitter();
         this.eventLabel = "change";
@@ -37247,60 +37256,61 @@ module.exports = function (definition) {
         if (this.init && _.isFunction(this.init)) {
             this.init();
         }
-        if (this.listenables) {
+        if (this.listenables){
             arr = [].concat(this.listenables);
-            for (; i < arr.length; i++) {
+            for(;i < arr.length;i++){
                 this.listenToMany(arr[i]);
             }
         }
     }
 
-    _.extend(Store.prototype, ListenerMethods, PublisherMethods, StoreMethods, definition);
+    _.extend(Store.prototype, Reflux.ListenerMethods, Reflux.PublisherMethods, Reflux.StoreMethods, definition);
 
     var store = new Store();
     Keep.createdStores.push(store);
 
     return store;
 };
-},{"./Keep":365,"./ListenerMethods":366,"./PublisherMethods":367,"./StoreMethods":368,"./bindMethods":369,"./mixer":374,"./utils":375}],372:[function(require,module,exports){
-"use strict";
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var Reflux = {
-    version: {
-        "reflux-core": "0.2.1"
-    }
-};
+},{"./Keep":367,"./bindMethods":372,"./index":377,"./mixer":381,"./utils":382}],377:[function(require,module,exports){
+exports.ActionMethods = require('./ActionMethods');
 
-Reflux.ActionMethods = require("./ActionMethods");
+exports.ListenerMethods = require('./ListenerMethods');
 
-Reflux.ListenerMethods = require("./ListenerMethods");
+exports.PublisherMethods = require('./PublisherMethods');
 
-Reflux.PublisherMethods = require("./PublisherMethods");
+exports.StoreMethods = require('./StoreMethods');
 
-Reflux.StoreMethods = require("./StoreMethods");
+exports.createAction = require('./createAction');
 
-Reflux.createAction = require("./createAction");
+exports.createStore = require('./createStore');
 
-Reflux.createStore = require("./createStore");
+exports.connect = require('./connect');
 
-var maker = require("./joins").staticJoinCreator;
+exports.connectFilter = require('./connectFilter');
 
-Reflux.joinTrailing = Reflux.all = maker("last"); // Reflux.all alias for backward compatibility
+exports.ListenerMixin = require('./ListenerMixin');
 
-Reflux.joinLeading = maker("first");
+exports.listenTo = require('./listenTo');
 
-Reflux.joinStrict = maker("strict");
+exports.listenToMany = require('./listenToMany');
 
-Reflux.joinConcat = maker("all");
 
-var _ = Reflux.utils = require("./utils");
+var maker = require('./joins').staticJoinCreator;
 
-Reflux.EventEmitter = _.EventEmitter;
+exports.joinTrailing = exports.all = maker("last"); // Reflux.all alias for backward compatibility
 
-Reflux.Promise = _.Promise;
+exports.joinLeading = maker("first");
+
+exports.joinStrict = maker("strict");
+
+exports.joinConcat = maker("all");
+
+var _ = require('./utils');
+
+exports.EventEmitter = _.EventEmitter;
+
+exports.Promise = _.Promise;
 
 /**
  * Convenience function for creating a set of actions
@@ -37308,109 +37318,97 @@ Reflux.Promise = _.Promise;
  * @param definitions the definitions for the actions to be created
  * @returns an object with actions of corresponding action names
  */
-Reflux.createActions = (function () {
-    var reducer = function reducer(definitions, actions) {
-        Object.keys(definitions).forEach(function (actionName) {
-            var val = definitions[actionName];
-            actions[actionName] = Reflux.createAction(val);
-        });
-    };
+exports.createActions = function(definitions) {
+    var actions = {};
+    for (var k in definitions){
+        if (definitions.hasOwnProperty(k)) {
+            var val = definitions[k],
+                actionName = _.isObject(val) ? k : val;
 
-    return function (definitions) {
-        var actions = {};
-        if (definitions instanceof Array) {
-            definitions.forEach(function (val) {
-                if (_.isObject(val)) {
-                    reducer(val, actions);
-                } else {
-                    actions[val] = Reflux.createAction(val);
-                }
-            });
-        } else {
-            reducer(definitions, actions);
+            actions[actionName] = exports.createAction(val);
         }
-        return actions;
-    };
-})();
+    }
+    return actions;
+};
 
 /**
  * Sets the eventmitter that Reflux uses
  */
-Reflux.setEventEmitter = function (ctx) {
-    Reflux.EventEmitter = _.EventEmitter = ctx;
+exports.setEventEmitter = function(ctx) {
+    var _ = require('./utils');
+    exports.EventEmitter = _.EventEmitter = ctx;
 };
+
 
 /**
  * Sets the Promise library that Reflux uses
  */
-Reflux.setPromise = function (ctx) {
-    Reflux.Promise = _.Promise = ctx;
+exports.setPromise = function(ctx) {
+    var _ = require('./utils');
+    exports.Promise = _.Promise = ctx;
 };
+
 
 /**
  * Sets the Promise factory that creates new promises
  * @param {Function} factory has the signature `function(resolver) { return [new Promise]; }`
  */
-Reflux.setPromiseFactory = function (factory) {
+exports.setPromiseFactory = function(factory) {
+    var _ = require('./utils');
     _.createPromise = factory;
 };
+
 
 /**
  * Sets the method used for deferring actions and stores
  */
-Reflux.nextTick = function (nextTick) {
+exports.nextTick = function(nextTick) {
+    var _ = require('./utils');
     _.nextTick = nextTick;
-};
-
-Reflux.use = function (pluginCb) {
-    pluginCb(Reflux);
 };
 
 /**
  * Provides the set of created actions and stores for introspection
  */
-/*eslint-disable no-underscore-dangle*/
-Reflux.__keep = require("./Keep");
-/*eslint-enable no-underscore-dangle*/
+exports.__keep = require('./Keep');
 
 /**
  * Warn if Function.prototype.bind not available
  */
 if (!Function.prototype.bind) {
-    console.error("Function.prototype.bind not available. " + "ES5 shim required. " + "https://github.com/spoike/refluxjs#es5");
+  console.error(
+    'Function.prototype.bind not available. ' +
+    'ES5 shim required. ' +
+    'https://github.com/spoike/refluxjs#es5'
+  );
 }
 
-exports["default"] = Reflux;
-module.exports = exports["default"];
-},{"./ActionMethods":364,"./Keep":365,"./ListenerMethods":366,"./PublisherMethods":367,"./StoreMethods":368,"./createAction":370,"./createStore":371,"./joins":373,"./utils":375}],373:[function(require,module,exports){
+},{"./ActionMethods":366,"./Keep":367,"./ListenerMethods":368,"./ListenerMixin":369,"./PublisherMethods":370,"./StoreMethods":371,"./connect":373,"./connectFilter":374,"./createAction":375,"./createStore":376,"./joins":378,"./listenTo":379,"./listenToMany":380,"./utils":382}],378:[function(require,module,exports){
 /**
  * Internal module used to create static and instance join methods
  */
 
-"use strict";
-
-var createStore = require("./createStore"),
-    _ = require("./utils");
-
 var slice = Array.prototype.slice,
+    _ = require("./utils"),
+    createStore = require("./createStore"),
     strategyMethodNames = {
-    strict: "joinStrict",
-    first: "joinLeading",
-    last: "joinTrailing",
-    all: "joinConcat"
-};
+        strict: "joinStrict",
+        first: "joinLeading",
+        last: "joinTrailing",
+        all: "joinConcat"
+    };
 
 /**
  * Used in `index.js` to create the static join methods
  * @param {String} strategy Which strategy to use when tracking listenable trigger arguments
  * @returns {Function} A static function which returns a store with a join listen on the given listenables using the given strategy
  */
-exports.staticJoinCreator = function (strategy) {
-    return function () /* listenables... */{
+exports.staticJoinCreator = function(strategy){
+    return function(/* listenables... */) {
         var listenables = slice.call(arguments);
         return createStore({
-            init: function init() {
-                this[strategyMethodNames[strategy]].apply(this, listenables.concat("triggerAsync"));
+            init: function(){
+                this[strategyMethodNames[strategy]].apply(this,listenables.concat("triggerAsync"));
             }
         });
     };
@@ -37421,30 +37419,27 @@ exports.staticJoinCreator = function (strategy) {
  * @param {String} strategy Which strategy to use when tracking listenable trigger arguments
  * @returns {Function} An instance method which sets up a join listen on the given listenables using the given strategy
  */
-exports.instanceJoinCreator = function (strategy) {
-    return function () /* listenables..., callback*/{
-        _.throwIf(arguments.length < 2, "Cannot create a join with less than 2 listenables!");
+exports.instanceJoinCreator = function(strategy){
+    return function(/* listenables..., callback*/){
+        _.throwIf(arguments.length < 3,'Cannot create a join with less than 2 listenables!');
         var listenables = slice.call(arguments),
             callback = listenables.pop(),
             numberOfListenables = listenables.length,
             join = {
-            numberOfListenables: numberOfListenables,
-            callback: this[callback] || callback,
-            listener: this,
-            strategy: strategy
-        },
-            i,
-            cancels = [],
-            subobj;
+                numberOfListenables: numberOfListenables,
+                callback: this[callback]||callback,
+                listener: this,
+                strategy: strategy
+            }, i, cancels = [], subobj;
         for (i = 0; i < numberOfListenables; i++) {
             _.throwIf(this.validateListening(listenables[i]));
         }
         for (i = 0; i < numberOfListenables; i++) {
-            cancels.push(listenables[i].listen(newListener(i, join), this));
+            cancels.push(listenables[i].listen(newListener(i,join),this));
         }
         reset(join);
-        subobj = { listenable: listenables };
-        subobj.stop = makeStopper(subobj, cancels, this);
+        subobj = {listenable: listenables};
+        subobj.stop = makeStopper(subobj,cancels,this);
         this.subscriptions = (this.subscriptions || []).concat(subobj);
         return subobj;
     };
@@ -37452,13 +37447,12 @@ exports.instanceJoinCreator = function (strategy) {
 
 // ---- internal join functions ----
 
-function makeStopper(subobj, cancels, context) {
-    return function () {
-        var i,
-            subs = context.subscriptions,
-            index = subs ? subs.indexOf(subobj) : -1;
-        _.throwIf(index === -1, "Tried to remove join already gone from subscriptions list!");
-        for (i = 0; i < cancels.length; i++) {
+function makeStopper(subobj,cancels,context){
+    return function() {
+        var i, subs = context.subscriptions,
+            index = (subs ? subs.indexOf(subobj) : -1);
+        _.throwIf(index === -1,'Tried to remove join already gone from subscriptions list!');
+        for(i=0;i < cancels.length; i++){
             cancels[i]();
         }
         subs.splice(index, 1);
@@ -37470,21 +37464,18 @@ function reset(join) {
     join.args = new Array(join.numberOfListenables);
 }
 
-function newListener(i, join) {
-    return function () {
+function newListener(i,join) {
+    return function() {
         var callargs = slice.call(arguments);
-        if (join.listenablesEmitted[i]) {
-            switch (join.strategy) {
-                case "strict":
-                    throw new Error("Strict join failed because listener triggered twice.");
-                case "last":
-                    join.args[i] = callargs;break;
-                case "all":
-                    join.args[i].push(callargs);
+        if (join.listenablesEmitted[i]){
+            switch(join.strategy){
+                case "strict": throw new Error("Strict join failed because listener triggered twice.");
+                case "last": join.args[i] = callargs; break;
+                case "all": join.args[i].push(callargs);
             }
         } else {
             join.listenablesEmitted[i] = true;
-            join.args[i] = join.strategy === "all" ? [callargs] : callargs;
+            join.args[i] = (join.strategy==="all"?[callargs]:callargs);
         }
         emitIfAllListenablesEmitted(join);
     };
@@ -37496,13 +37487,85 @@ function emitIfAllListenablesEmitted(join) {
             return;
         }
     }
-    join.callback.apply(join.listener, join.args);
+    join.callback.apply(join.listener,join.args);
     reset(join);
 }
-},{"./createStore":371,"./utils":375}],374:[function(require,module,exports){
-"use strict";
 
-var _ = require("./utils");
+},{"./createStore":376,"./utils":382}],379:[function(require,module,exports){
+var Reflux = require('./index');
+
+
+/**
+ * A mixin factory for a React component. Meant as a more convenient way of using the `ListenerMixin`,
+ * without having to manually set listeners in the `componentDidMount` method.
+ *
+ * @param {Action|Store} listenable An Action or Store that should be
+ *  listened to.
+ * @param {Function|String} callback The callback to register as event handler
+ * @param {Function|String} defaultCallback The callback to register as default handler
+ * @returns {Object} An object to be used as a mixin, which sets up the listener for the given listenable.
+ */
+module.exports = function(listenable,callback,initial){
+    return {
+        /**
+         * Set up the mixin before the initial rendering occurs. Import methods from `ListenerMethods`
+         * and then make the call to `listenTo` with the arguments provided to the factory function
+         */
+        componentDidMount: function() {
+            for(var m in Reflux.ListenerMethods){
+                if (this[m] !== Reflux.ListenerMethods[m]){
+                    if (this[m]){
+                        throw "Can't have other property '"+m+"' when using Reflux.listenTo!";
+                    }
+                    this[m] = Reflux.ListenerMethods[m];
+                }
+            }
+            this.listenTo(listenable,callback,initial);
+        },
+        /**
+         * Cleans up all listener previously registered.
+         */
+        componentWillUnmount: Reflux.ListenerMethods.stopListeningToAll
+    };
+};
+
+},{"./index":377}],380:[function(require,module,exports){
+var Reflux = require('./index');
+
+/**
+ * A mixin factory for a React component. Meant as a more convenient way of using the `listenerMixin`,
+ * without having to manually set listeners in the `componentDidMount` method. This version is used
+ * to automatically set up a `listenToMany` call.
+ *
+ * @param {Object} listenables An object of listenables
+ * @returns {Object} An object to be used as a mixin, which sets up the listeners for the given listenables.
+ */
+module.exports = function(listenables){
+    return {
+        /**
+         * Set up the mixin before the initial rendering occurs. Import methods from `ListenerMethods`
+         * and then make the call to `listenTo` with the arguments provided to the factory function
+         */
+        componentDidMount: function() {
+            for(var m in Reflux.ListenerMethods){
+                if (this[m] !== Reflux.ListenerMethods[m]){
+                    if (this[m]){
+                        throw "Can't have other property '"+m+"' when using Reflux.listenToMany!";
+                    }
+                    this[m] = Reflux.ListenerMethods[m];
+                }
+            }
+            this.listenToMany(listenables);
+        },
+        /**
+         * Cleans up all listener previously registered.
+         */
+        componentWillUnmount: Reflux.ListenerMethods.stopListeningToAll
+    };
+};
+
+},{"./index":377}],381:[function(require,module,exports){
+var _ = require('./utils');
 
 module.exports = function mix(def) {
     var composed = {
@@ -37525,7 +37588,7 @@ module.exports = function mix(def) {
             }
         });
         return mixed;
-    })(def);
+    }(def));
 
     if (composed.init.length > 1) {
         updated.init = function () {
@@ -37537,10 +37600,10 @@ module.exports = function mix(def) {
     }
     if (composed.preEmit.length > 1) {
         updated.preEmit = function () {
-            return composed.preEmit.reduce((function (args, preEmit) {
+            return composed.preEmit.reduce(function (args, preEmit) {
                 var newValue = preEmit.apply(this, args);
                 return newValue === undefined ? args : [newValue];
-            }).bind(this), arguments);
+            }.bind(this), arguments);
         };
     }
     if (composed.shouldEmit.length > 1) {
@@ -37559,60 +37622,18 @@ module.exports = function mix(def) {
 
     return updated;
 };
-},{"./utils":375}],375:[function(require,module,exports){
-"use strict";
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.capitalize = capitalize;
-exports.callbackName = callbackName;
-exports.isObject = isObject;
-exports.extend = extend;
-exports.isFunction = isFunction;
-exports.object = object;
-exports.isArguments = isArguments;
-exports.throwIf = throwIf;
-
-function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function callbackName(string, prefix) {
-    prefix = prefix || "on";
-    return prefix + exports.capitalize(string);
-}
-
-var environment = {};
-
-exports.environment = environment;
-function checkEnv(target) {
-    var flag = undefined;
-    try {
-        /*eslint-disable no-eval */
-        if (eval(target)) {
-            flag = true;
-        }
-        /*eslint-enable no-eval */
-    } catch (e) {
-        flag = false;
-    }
-    environment[callbackName(target, "has")] = flag;
-}
-checkEnv("setImmediate");
-checkEnv("Promise");
-
+},{"./utils":382}],382:[function(require,module,exports){
 /*
  * isObject, extend, isFunction, isArguments are taken from undescore/lodash in
  * order to remove the dependency
  */
-
-function isObject(obj) {
+var isObject = exports.isObject = function(obj) {
     var type = typeof obj;
-    return type === "function" || type === "object" && !!obj;
-}
+    return type === 'function' || type === 'object' && !!obj;
+};
 
-function extend(obj) {
+exports.extend = function(obj) {
     if (!isObject(obj)) {
         return obj;
     }
@@ -37629,230 +37650,51 @@ function extend(obj) {
         }
     }
     return obj;
-}
+};
 
-function isFunction(value) {
-    return typeof value === "function";
-}
+exports.isFunction = function(value) {
+    return typeof value === 'function';
+};
 
-exports.EventEmitter = require("eventemitter3");
+exports.EventEmitter = require('eventemitter3');
 
-if (environment.hasSetImmediate) {
-    exports.nextTick = function (callback) {
-        setImmediate(callback);
-    };
-} else {
-    exports.nextTick = function (callback) {
-        setTimeout(callback, 0);
-    };
-}
+exports.nextTick = function(callback) {
+    setTimeout(callback, 0);
+};
 
-function object(keys, vals) {
-    var o = {},
-        i = 0;
-    for (; i < keys.length; i++) {
+exports.capitalize = function(string){
+    return string.charAt(0).toUpperCase()+string.slice(1);
+};
+
+exports.callbackName = function(string){
+    return "on"+exports.capitalize(string);
+};
+
+exports.object = function(keys,vals){
+    var o={}, i=0;
+    for(;i<keys.length;i++){
         o[keys[i]] = vals[i];
     }
     return o;
-}
+};
 
-if (environment.hasPromise) {
-    exports.Promise = Promise;
-    exports.createPromise = function (resolver) {
-        return new exports.Promise(resolver);
-    };
-} else {
-    exports.Promise = null;
-    exports.createPromise = function () {};
-}
+exports.Promise = require("native-promise-only");
 
-function isArguments(value) {
-    return typeof value === "object" && "callee" in value && typeof value.length === "number";
-}
+exports.createPromise = function(resolver) {
+    return new exports.Promise(resolver);
+};
 
-function throwIf(val, msg) {
-    if (val) {
-        throw Error(msg || val);
+exports.isArguments = function(value) {
+    return typeof value === 'object' && ('callee' in value) && typeof value.length === 'number';
+};
+
+exports.throwIf = function(val,msg){
+    if (val){
+        throw Error(msg||val);
     }
-}
-},{"eventemitter3":3}],376:[function(require,module,exports){
-var _ = require('reflux-core/lib/utils'),
-    ListenerMethods = require('reflux-core/lib/ListenerMethods');
-
-/**
- * A module meant to be consumed as a mixin by a React component. Supplies the methods from
- * `ListenerMethods` mixin and takes care of teardown of subscriptions.
- * Note that if you're using the `connect` mixin you don't need this mixin, as connect will
- * import everything this mixin contains!
- */
-module.exports = _.extend({
-
-    /**
-     * Cleans up all listener previously registered.
-     */
-    componentWillUnmount: ListenerMethods.stopListeningToAll
-
-}, ListenerMethods);
-
-},{"reflux-core/lib/ListenerMethods":366,"reflux-core/lib/utils":375}],377:[function(require,module,exports){
-var ListenerMethods = require('reflux-core/lib/ListenerMethods'),
-    ListenerMixin = require('./ListenerMixin'),
-    _ = require('reflux-core/lib/utils');
-
-module.exports = function(listenable,key){
-    return {
-        getInitialState: function(){
-            if (!_.isFunction(listenable.getInitialState)) {
-                return {};
-            } else if (key === undefined) {
-                return listenable.getInitialState();
-            } else {
-                return _.object([key],[listenable.getInitialState()]);
-            }
-        },
-        componentDidMount: function(){
-            _.extend(this,ListenerMethods);
-            var me = this, cb = (key === undefined ? this.setState : function(v){
-                if (typeof me.isMounted === "undefined" || me.isMounted() === true) {
-                    me.setState(_.object([key],[v]));
-                }
-            });
-            this.listenTo(listenable,cb);
-        },
-        componentWillUnmount: ListenerMixin.componentWillUnmount
-    };
 };
 
-},{"./ListenerMixin":376,"reflux-core/lib/ListenerMethods":366,"reflux-core/lib/utils":375}],378:[function(require,module,exports){
-var ListenerMethods = require('reflux-core/lib/ListenerMethods'),
-    ListenerMixin = require('./ListenerMixin'),
-    _ = require('reflux-core/lib/utils');
-
-module.exports = function(listenable, key, filterFunc) {
-    filterFunc = _.isFunction(key) ? key : filterFunc;
-    return {
-        getInitialState: function() {
-            if (!_.isFunction(listenable.getInitialState)) {
-                return {};
-            } else if (_.isFunction(key)) {
-                return filterFunc.call(this, listenable.getInitialState());
-            } else {
-                // Filter initial payload from store.
-                var result = filterFunc.call(this, listenable.getInitialState());
-                if (typeof(result) !== "undefined") {
-                    return _.object([key], [result]);
-                } else {
-                    return {};
-                }
-            }
-        },
-        componentDidMount: function() {
-            _.extend(this, ListenerMethods);
-            var me = this;
-            var cb = function(value) {
-                if (_.isFunction(key)) {
-                    me.setState(filterFunc.call(me, value));
-                } else {
-                    var result = filterFunc.call(me, value);
-                    me.setState(_.object([key], [result]));
-                }
-            };
-
-            this.listenTo(listenable, cb);
-        },
-        componentWillUnmount: ListenerMixin.componentWillUnmount
-    };
-};
-
-
-},{"./ListenerMixin":376,"reflux-core/lib/ListenerMethods":366,"reflux-core/lib/utils":375}],379:[function(require,module,exports){
-var Reflux = require('reflux-core');
-
-Reflux.connect = require('./connect');
-
-Reflux.connectFilter = require('./connectFilter');
-
-Reflux.ListenerMixin = require('./ListenerMixin');
-
-Reflux.listenTo = require('./listenTo');
-
-Reflux.listenToMany = require('./listenToMany');
-
-module.exports = Reflux;
-
-},{"./ListenerMixin":376,"./connect":377,"./connectFilter":378,"./listenTo":380,"./listenToMany":381,"reflux-core":372}],380:[function(require,module,exports){
-var ListenerMethods = require('reflux-core/lib/ListenerMethods');
-
-/**
- * A mixin factory for a React component. Meant as a more convenient way of using the `ListenerMixin`,
- * without having to manually set listeners in the `componentDidMount` method.
- *
- * @param {Action|Store} listenable An Action or Store that should be
- *  listened to.
- * @param {Function|String} callback The callback to register as event handler
- * @param {Function|String} defaultCallback The callback to register as default handler
- * @returns {Object} An object to be used as a mixin, which sets up the listener for the given listenable.
- */
-module.exports = function(listenable,callback,initial){
-    return {
-        /**
-         * Set up the mixin before the initial rendering occurs. Import methods from `ListenerMethods`
-         * and then make the call to `listenTo` with the arguments provided to the factory function
-         */
-        componentDidMount: function() {
-            for(var m in ListenerMethods){
-                if (this[m] !== ListenerMethods[m]){
-                    if (this[m]){
-                        throw "Can't have other property '"+m+"' when using Reflux.listenTo!";
-                    }
-                    this[m] = ListenerMethods[m];
-                }
-            }
-            this.listenTo(listenable,callback,initial);
-        },
-        /**
-         * Cleans up all listener previously registered.
-         */
-        componentWillUnmount: ListenerMethods.stopListeningToAll
-    };
-};
-
-},{"reflux-core/lib/ListenerMethods":366}],381:[function(require,module,exports){
-var ListenerMethods = require('reflux-core/lib/ListenerMethods');
-
-/**
- * A mixin factory for a React component. Meant as a more convenient way of using the `listenerMixin`,
- * without having to manually set listeners in the `componentDidMount` method. This version is used
- * to automatically set up a `listenToMany` call.
- *
- * @param {Object} listenables An object of listenables
- * @returns {Object} An object to be used as a mixin, which sets up the listeners for the given listenables.
- */
-module.exports = function(listenables){
-    return {
-        /**
-         * Set up the mixin before the initial rendering occurs. Import methods from `ListenerMethods`
-         * and then make the call to `listenTo` with the arguments provided to the factory function
-         */
-        componentDidMount: function() {
-            for(var m in ListenerMethods){
-                if (this[m] !== ListenerMethods[m]){
-                    if (this[m]){
-                        throw "Can't have other property '"+m+"' when using Reflux.listenToMany!";
-                    }
-                    this[m] = ListenerMethods[m];
-                }
-            }
-            this.listenToMany(listenables);
-        },
-        /**
-         * Cleans up all listener previously registered.
-         */
-        componentWillUnmount: ListenerMethods.stopListeningToAll
-    };
-};
-
-},{"reflux-core/lib/ListenerMethods":366}],382:[function(require,module,exports){
+},{"eventemitter3":3,"native-promise-only":363}],383:[function(require,module,exports){
 (function (process){
 exports = module.exports = SemVer;
 
@@ -38170,9 +38012,9 @@ function SemVer(version, loose) {
   else
     this.prerelease = m[4].split('.').map(function(id) {
       if (/^[0-9]+$/.test(id)) {
-        var num = +id
+        var num = +id;
         if (num >= 0 && num < MAX_SAFE_INTEGER)
-          return num
+          return num;
       }
       return id;
     });
@@ -38692,7 +38534,7 @@ function replaceTilde(comp, loose) {
     else if (isX(m))
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
     else if (isX(p))
-      // ~1.2 == >=1.2.0- <1.3.0-
+      // ~1.2 == >=1.2.0 <1.3.0
       ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
     else if (pr) {
       debug('replaceTilde pr', pr);
@@ -38822,11 +38664,11 @@ function replaceXRange(comp, loose) {
       } else if (gtlt === '<=') {
         // <=0.7.x is actually <0.8.0, since any 0.7.x should
         // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<'
+        gtlt = '<';
         if (xm)
-          M = +M + 1
+          M = +M + 1;
         else
-          m = +m + 1
+          m = +m + 1;
       }
 
       ret = gtlt + M + '.' + m + '.' + p;
@@ -38950,6 +38792,15 @@ function maxSatisfying(versions, range, loose) {
   })[0] || null;
 }
 
+exports.minSatisfying = minSatisfying;
+function minSatisfying(versions, range, loose) {
+  return versions.filter(function(version) {
+    return satisfies(version, range, loose);
+  }).sort(function(a, b) {
+    return compare(a, b, loose);
+  })[0] || null;
+}
+
 exports.validRange = validRange;
 function validRange(range, loose) {
   try {
@@ -39043,8 +38894,14 @@ function outside(version, range, hilo, loose) {
   return true;
 }
 
+exports.prerelease = prerelease;
+function prerelease(version, loose) {
+  var parsed = parse(version, loose);
+  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
+}
+
 }).call(this,require('_process'))
-},{"_process":363}],383:[function(require,module,exports){
+},{"_process":364}],384:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -39079,7 +38936,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],384:[function(require,module,exports){
+},{}],385:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -39264,22 +39121,22 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":383}],385:[function(require,module,exports){
+},{"./rng":384}],386:[function(require,module,exports){
 module.exports = Reflux.createActions(["codapLoaded", "hideUndoRedo", "sendUndoToCODAP", "sendRedoToCODAP"]);
 
 
 
-},{}],386:[function(require,module,exports){
+},{}],387:[function(require,module,exports){
 module.exports = Reflux.createActions(["graphChanged"]);
 
 
 
-},{}],387:[function(require,module,exports){
+},{}],388:[function(require,module,exports){
 module.exports = Reflux.createActions(["import"]);
 
 
 
-},{}],388:[function(require,module,exports){
+},{}],389:[function(require,module,exports){
 module.exports = [
   {
     "id": "1",
@@ -39296,7 +39153,7 @@ module.exports = [
 
 
 
-},{}],389:[function(require,module,exports){
+},{}],390:[function(require,module,exports){
 module.exports = [
   {
     "id": "2",
@@ -39373,7 +39230,7 @@ module.exports = [
 
 
 
-},{}],390:[function(require,module,exports){
+},{}],391:[function(require,module,exports){
 var optgroup, option, ref;
 
 ref = React.DOM, option = ref.option, optgroup = ref.optgroup;
@@ -39453,7 +39310,7 @@ module.exports = {
 
 
 
-},{}],391:[function(require,module,exports){
+},{}],392:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39519,7 +39376,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],392:[function(require,module,exports){
+},{"./migration-mixin":407}],393:[function(require,module,exports){
 var Relationship, migration;
 
 Relationship = require('../../models/relationship');
@@ -39564,7 +39421,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../models/relationship":417,"./migration-mixin":406}],393:[function(require,module,exports){
+},{"../../models/relationship":418,"./migration-mixin":407}],394:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39591,7 +39448,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],394:[function(require,module,exports){
+},{"./migration-mixin":407}],395:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39619,7 +39476,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],395:[function(require,module,exports){
+},{"./migration-mixin":407}],396:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39639,7 +39496,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],396:[function(require,module,exports){
+},{"./migration-mixin":407}],397:[function(require,module,exports){
 var imageToUUIDMap, migration, uuid;
 
 uuid = require('uuid');
@@ -39680,7 +39537,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406,"uuid":384}],397:[function(require,module,exports){
+},{"./migration-mixin":407,"uuid":385}],398:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39700,7 +39557,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],398:[function(require,module,exports){
+},{"./migration-mixin":407}],399:[function(require,module,exports){
 var TimeUnits, migration;
 
 TimeUnits = require('../../utils/time-units');
@@ -39732,7 +39589,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"../../utils/time-units":440,"./migration-mixin":406}],399:[function(require,module,exports){
+},{"../../utils/time-units":441,"./migration-mixin":407}],400:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39765,7 +39622,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],400:[function(require,module,exports){
+},{"./migration-mixin":407}],401:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39798,7 +39655,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],401:[function(require,module,exports){
+},{"./migration-mixin":407}],402:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39821,7 +39678,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],402:[function(require,module,exports){
+},{"./migration-mixin":407}],403:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39841,7 +39698,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],403:[function(require,module,exports){
+},{"./migration-mixin":407}],404:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39867,7 +39724,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],404:[function(require,module,exports){
+},{"./migration-mixin":407}],405:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39884,7 +39741,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],405:[function(require,module,exports){
+},{"./migration-mixin":407}],406:[function(require,module,exports){
 var migration;
 
 migration = {
@@ -39914,7 +39771,7 @@ module.exports = _.mixin(migration, require('./migration-mixin'));
 
 
 
-},{"./migration-mixin":406}],406:[function(require,module,exports){
+},{"./migration-mixin":407}],407:[function(require,module,exports){
 var semver;
 
 semver = require("semver");
@@ -39952,7 +39809,7 @@ module.exports = {
 
 
 
-},{"semver":382}],407:[function(require,module,exports){
+},{"semver":383}],408:[function(require,module,exports){
 var migrations;
 
 migrations = [require("./01_base"), require("./02_add_relations"), require("./03_add_semi_quant_editing"), require("./04_add_min_max"), require("./05_add_settings_and_cap"), require("./06_add_palette_references"), require("./07_add_diagram_only_setting"), require("./08_add_simulation_settings"), require("./09_update_duration_settings"), require("./10_add_speed_and_cap"), require("./11_simulation_engine_settings"), require("./12_add_minigraphs_visibility"), require("./13_add_frames_to_nodes"), require("./14_remove_new_integration"), require("./15_update_less_relationship_formula")];
@@ -39979,7 +39836,7 @@ module.exports = {
 
 
 
-},{"./01_base":391,"./02_add_relations":392,"./03_add_semi_quant_editing":393,"./04_add_min_max":394,"./05_add_settings_and_cap":395,"./06_add_palette_references":396,"./07_add_diagram_only_setting":397,"./08_add_simulation_settings":398,"./09_update_duration_settings":399,"./10_add_speed_and_cap":400,"./11_simulation_engine_settings":401,"./12_add_minigraphs_visibility":402,"./13_add_frames_to_nodes":403,"./14_remove_new_integration":404,"./15_update_less_relationship_formula":405}],408:[function(require,module,exports){
+},{"./01_base":392,"./02_add_relations":393,"./03_add_semi_quant_editing":394,"./04_add_min_max":395,"./05_add_settings_and_cap":396,"./06_add_palette_references":397,"./07_add_diagram_only_setting":398,"./08_add_simulation_settings":399,"./09_update_duration_settings":400,"./10_add_speed_and_cap":401,"./11_simulation_engine_settings":402,"./12_add_minigraphs_visibility":403,"./13_add_frames_to_nodes":404,"./14_remove_new_integration":405,"./15_update_less_relationship_formula":406}],409:[function(require,module,exports){
 var CodapStore, GoogleFileStore, HashParams, PaletteStore, tr;
 
 PaletteStore = require("../stores/palette-store");
@@ -40135,7 +39992,7 @@ module.exports = {
 
 
 
-},{"../stores/codap-store":421,"../stores/google-file-store":422,"../stores/palette-store":427,"../utils/hash-parameters":433,"../utils/translate":441}],409:[function(require,module,exports){
+},{"../stores/codap-store":422,"../stores/google-file-store":423,"../stores/palette-store":428,"../utils/hash-parameters":434,"../utils/translate":442}],410:[function(require,module,exports){
 module.exports = {
   componentDidMount: function() {
     var addClasses, doMove, domRef, reactSafeClone, removeClasses;
@@ -40174,7 +40031,7 @@ module.exports = {
 
 
 
-},{}],410:[function(require,module,exports){
+},{}],411:[function(require,module,exports){
 var ImageDialogStore, PreviewImage, hasValidImageExtension;
 
 PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
@@ -40205,7 +40062,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":424,"../utils/has-valid-image-extension":432,"../views/preview-image-dialog-view":478}],411:[function(require,module,exports){
+},{"../stores/image-dialog-store":425,"../utils/has-valid-image-extension":433,"../views/preview-image-dialog-view":479}],412:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -40238,7 +40095,7 @@ module.exports = {
 
 
 
-},{"../utils/translate":441}],412:[function(require,module,exports){
+},{"../utils/translate":442}],413:[function(require,module,exports){
 var CodapActions, CodapConnect, IframePhoneRpcEndpoint, SimulationStore, TimeUnits, tr,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -40305,6 +40162,7 @@ module.exports = CodapConnect = (function() {
               }, {
                 name: tr('~CODAP.SIMULATION.STEPS'),
                 type: 'numeric',
+                formula: 'count(Steps)',
                 description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
                 precision: 0
               }
@@ -40323,7 +40181,7 @@ module.exports = CodapConnect = (function() {
       action: 'openCase',
       args: {
         collection: 'Simulation',
-        values: [null, 0]
+        values: [null, null]
       }
     }, (function(_this) {
       return function(result) {
@@ -40395,23 +40253,16 @@ module.exports = CodapConnect = (function() {
       });
       return sample;
     });
-    this.codapPhone.call({
-      action: 'createCases',
-      args: {
-        collection: 'Samples',
-        parent: this.currentCaseID,
-        values: sampleData
-      }
-    });
-    this.stepsInCurrentCase += sampleData.length;
-    return this.codapPhone.call({
-      action: 'updateCase',
-      args: {
-        collection: 'Simulation',
-        caseID: this.currentCaseID,
-        values: [null, this.stepsInCurrentCase]
-      }
-    });
+    if (sampleData.length > 0) {
+      return this.codapPhone.call({
+        action: 'createCases',
+        args: {
+          collection: 'Samples',
+          parent: this.currentCaseID,
+          values: sampleData
+        }
+      });
+    }
   };
 
   CodapConnect.prototype._sendUndoToCODAP = function() {
@@ -40593,7 +40444,7 @@ module.exports = CodapConnect = (function() {
 
 
 
-},{"../actions/codap-actions":385,"../stores/graph-store":423,"../stores/palette-store":427,"../stores/simulation-store":428,"../utils/time-units":440,"../utils/translate":441,"iframe-phone":8}],413:[function(require,module,exports){
+},{"../actions/codap-actions":386,"../stores/graph-store":424,"../stores/palette-store":428,"../stores/simulation-store":429,"../utils/time-units":441,"../utils/translate":442,"iframe-phone":8}],414:[function(require,module,exports){
 var GraphPrimitive;
 
 module.exports = GraphPrimitive = (function() {
@@ -40624,7 +40475,7 @@ module.exports = GraphPrimitive = (function() {
 
 
 
-},{}],414:[function(require,module,exports){
+},{}],415:[function(require,module,exports){
 var GraphPrimitive, Link, LinkColors, Relation,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -40704,7 +40555,7 @@ module.exports = Link = (function(superClass) {
 
 
 
-},{"../utils/link-colors":437,"./graph-primitive":413,"./relationship":417}],415:[function(require,module,exports){
+},{"../utils/link-colors":438,"./graph-primitive":414,"./relationship":418}],416:[function(require,module,exports){
 var Colors, GraphPrimitive, Node, SEMIQUANT_MAX, SEMIQUANT_MIN, tr,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -40984,7 +40835,7 @@ module.exports = Node = (function(superClass) {
 
 
 
-},{"../utils/colors":429,"../utils/translate":441,"./graph-primitive":413}],416:[function(require,module,exports){
+},{"../utils/colors":430,"../utils/translate":442,"./graph-primitive":414}],417:[function(require,module,exports){
 var RelationFactory, Relationship, tr;
 
 tr = require("../utils/translate");
@@ -41112,43 +40963,7 @@ module.exports = RelationFactory = (function() {
 
   RelationFactory.vectors = [RelationFactory.increase, RelationFactory.decrease, RelationFactory.vary];
 
-  RelationFactory.inverseIncrease = {
-    id: 0,
-    text: tr("~NODE-RELATION-EDIT.DECREASES")
-  };
-
-  RelationFactory.inverseDecrease = {
-    id: 1,
-    text: tr("~NODE-RELATION-EDIT.INCREASES")
-  };
-
-  RelationFactory.inverseDisplayVectors = [RelationFactory.inverseIncrease, RelationFactory.inverseDecrease, RelationFactory.vary];
-
   RelationFactory.scalars = [RelationFactory.aboutTheSame, RelationFactory.aLot, RelationFactory.aLittle, RelationFactory.moreAndMore, RelationFactory.lessAndLess];
-
-  RelationFactory.inverseMoreAndMore = {
-    id: 3,
-    text: tr("~NODE-RELATION-EDIT.LESS_AND_LESS")
-  };
-
-  RelationFactory.inverseLessAndLess = {
-    id: 4,
-    text: tr("~NODE-RELATION-EDIT.MORE_AND_MORE")
-  };
-
-  RelationFactory.inverseDisplayScalars = [RelationFactory.aboutTheSame, RelationFactory.aLot, RelationFactory.aLittle, RelationFactory.inverseMoreAndMore, RelationFactory.inverseLessAndLess];
-
-  RelationFactory.descriptorIncrease = {
-    id: 0,
-    text: tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")
-  };
-
-  RelationFactory.descriptorDecrease = {
-    id: 1,
-    text: tr("~NODE-RELATION-EDIT.A_DECREASE_IN")
-  };
-
-  RelationFactory.descriptors = [RelationFactory.descriptorIncrease, RelationFactory.descriptorDecrease];
 
   RelationFactory.fromSelections = function(vector, scalar, existingData) {
     var formula, func, magnitude, name;
@@ -41207,7 +41022,7 @@ module.exports = RelationFactory = (function() {
 
 
 
-},{"../utils/translate":441,"./relationship":417}],417:[function(require,module,exports){
+},{"../utils/translate":442,"./relationship":418}],418:[function(require,module,exports){
 var Relationship, math, tr;
 
 math = require('mathjs');
@@ -41239,7 +41054,6 @@ module.exports = Relationship = (function() {
     this.setFormula(formula);
     this.dataPoints;
     this.customData = this.opts.customData;
-    this.descriptor = this.opts.descriptor;
     this.isCustomRelationship = false;
   }
 
@@ -41250,7 +41064,10 @@ module.exports = Relationship = (function() {
 
   Relationship.prototype.checkFormula = function() {
     if (this.isDefined) {
-      return this.evaluate(1, 1);
+      this.evaluate(1, 1);
+      if (!this.hasError && (this.func == null)) {
+        return this.func = (math.compile(this.formula))["eval"];
+      }
     }
   };
 
@@ -41271,6 +41088,9 @@ module.exports = Relationship = (function() {
     };
     if (this.customData) {
       roundedInV = Math.round(inV);
+      if (roundedInV > (maxIn - 1)) {
+        roundedInV = maxIn - 1;
+      }
       if (!this.dataPoints) {
         this.updateCustomData(this.customdata);
       }
@@ -41314,8 +41134,7 @@ module.exports = Relationship = (function() {
     return {
       text: this.text,
       formula: this.formula,
-      customData: this.customData,
-      descriptor: this.descriptor
+      customData: this.customData
     };
   };
 
@@ -41325,7 +41144,7 @@ module.exports = Relationship = (function() {
 
 
 
-},{"../utils/translate":441,"mathjs":9}],418:[function(require,module,exports){
+},{"../utils/translate":442,"mathjs":9}],419:[function(require,module,exports){
 var DiagramNode, Importer, Link, SelectionManager, tr;
 
 Importer = require('../utils/importer');
@@ -41537,7 +41356,7 @@ module.exports = SelectionManager = (function() {
 
 
 
-},{"../utils/importer":434,"../utils/translate":441,"./link":414,"./node":415}],419:[function(require,module,exports){
+},{"../utils/importer":435,"../utils/translate":442,"./link":415,"./node":416}],420:[function(require,module,exports){
 var IntegrationFunction, Simulation, scaleInput;
 
 scaleInput = function(val, nodeIn, nodeOut) {
@@ -41812,7 +41631,7 @@ module.exports = Simulation = (function() {
 
 
 
-},{}],420:[function(require,module,exports){
+},{}],421:[function(require,module,exports){
 var AppSettingsActions, AppSettingsStore, HashParams, ImportActions, mixin;
 
 HashParams = require('../utils/hash-parameters');
@@ -41890,7 +41709,7 @@ module.exports = {
 
 
 
-},{"../actions/import-actions":387,"../utils/hash-parameters":433}],421:[function(require,module,exports){
+},{"../actions/import-actions":388,"../utils/hash-parameters":434}],422:[function(require,module,exports){
 var CodapActions, CodapConnect, codapStore, mixin;
 
 CodapConnect = require('../models/codap-connect');
@@ -41952,7 +41771,7 @@ module.exports = {
 
 
 
-},{"../actions/codap-actions":385,"../models/codap-connect":412}],422:[function(require,module,exports){
+},{"../actions/codap-actions":386,"../models/codap-connect":413}],423:[function(require,module,exports){
 var GoogleDrive, GoogleDriveIO, GoogleFileActions, GoogleFileStore, GraphStore, HashParams, PaletteStore, mixin, tr, waitForAuthCheck;
 
 GoogleDriveIO = require('../utils/google-drive-io');
@@ -42174,7 +41993,7 @@ module.exports = {
 
 
 
-},{"../utils/google-drive-io":431,"../utils/hash-parameters":433,"../utils/translate":441,"./graph-store":423,"./palette-store":427}],423:[function(require,module,exports){
+},{"../utils/google-drive-io":432,"../utils/hash-parameters":434,"../utils/translate":442,"./graph-store":424,"./palette-store":428}],424:[function(require,module,exports){
 var AppSettingsStore, CodapActions, GraphActions, GraphStore, Importer, Link, Migrations, NodeModel, PaletteDeleteStore, PaletteStore, SelectionManager, SimulationStore, UndoRedo, mixin, tr;
 
 Importer = require('../utils/importer');
@@ -42216,6 +42035,7 @@ GraphStore = Reflux.createStore({
     });
     this.selectionManager = new SelectionManager();
     PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
+    SimulationStore.actions.runSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.resetSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
@@ -42799,7 +42619,7 @@ module.exports = {
 
 
 
-},{"../actions/codap-actions":385,"../actions/graph-actions":386,"../data/migrations/migrations":407,"../models/link":414,"../models/node":415,"../models/selection-manager":418,"../stores/app-settings-store":420,"../stores/palette-delete-dialog-store":426,"../stores/palette-store":427,"../stores/simulation-store":428,"../utils/importer":434,"../utils/translate":441,"../utils/undo-redo":442}],424:[function(require,module,exports){
+},{"../actions/codap-actions":386,"../actions/graph-actions":387,"../data/migrations/migrations":408,"../models/link":415,"../models/node":416,"../models/selection-manager":419,"../stores/app-settings-store":421,"../stores/palette-delete-dialog-store":427,"../stores/palette-store":428,"../stores/simulation-store":429,"../utils/importer":435,"../utils/translate":442,"../utils/undo-redo":443}],425:[function(require,module,exports){
 var PaletteStore, imageDialogActions, listenerMixin, store;
 
 PaletteStore = require('./palette-store');
@@ -42927,7 +42747,7 @@ module.exports = {
 
 
 
-},{"./palette-store":427}],425:[function(require,module,exports){
+},{"./palette-store":428}],426:[function(require,module,exports){
 var GraphActions, PaletteStore, mixin, nodeActions, nodeStore;
 
 PaletteStore = require('./palette-store');
@@ -43009,7 +42829,7 @@ module.exports = {
 
 
 
-},{"../actions/graph-actions":386,"./palette-store":427}],426:[function(require,module,exports){
+},{"../actions/graph-actions":387,"./palette-store":428}],427:[function(require,module,exports){
 var PaletteStore, UndoRedo, listenerMixin, paletteDialogActions, store;
 
 PaletteStore = require('./palette-store');
@@ -43133,7 +42953,7 @@ module.exports = {
 
 
 
-},{"../utils/undo-redo":442,"./nodes-store":425,"./palette-store":427}],427:[function(require,module,exports){
+},{"../utils/undo-redo":443,"./nodes-store":426,"./palette-store":428}],428:[function(require,module,exports){
 var ImportActions, UndoRedo, initialLibrary, initialPalette, mixin, paletteActions, paletteStore, resizeImage, uuid;
 
 resizeImage = require('../utils/resize-image');
@@ -43382,7 +43202,7 @@ window.PaletteStore = module.exports;
 
 
 
-},{"../actions/import-actions":387,"../data/initial-palette":388,"../data/internal-library":389,"../utils/resize-image":439,"../utils/undo-redo":442,"uuid":384}],428:[function(require,module,exports){
+},{"../actions/import-actions":388,"../data/initial-palette":389,"../data/internal-library":390,"../utils/resize-image":440,"../utils/undo-redo":443,"uuid":385}],429:[function(require,module,exports){
 var AppSettingsActions, GraphActions, ImportActions, Simulation, SimulationActions, SimulationStore, TimeUnits, mixin, tr;
 
 AppSettingsActions = require('./app-settings-store').actions;
@@ -43476,6 +43296,7 @@ SimulationStore = Reflux.createStore({
   onRunSimulation: function() {
     var error;
     if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
+      this.notifyChange();
       this.currentSimulation = new Simulation({
         nodes: this.nodes,
         duration: this.settings.duration,
@@ -43572,7 +43393,7 @@ module.exports = {
 
 
 
-},{"../actions/graph-actions":386,"../actions/import-actions":387,"../models/simulation":419,"../utils/time-units":440,"../utils/translate":441,"./app-settings-store":420}],429:[function(require,module,exports){
+},{"../actions/graph-actions":387,"../actions/import-actions":388,"../models/simulation":420,"../utils/time-units":441,"../utils/translate":442,"./app-settings-store":421}],430:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -43592,7 +43413,7 @@ module.exports = [
 
 
 
-},{"./translate":441}],430:[function(require,module,exports){
+},{"./translate":442}],431:[function(require,module,exports){
 var hasValidImageExtension, resizeImage;
 
 resizeImage = require('./resize-image');
@@ -43645,7 +43466,7 @@ module.exports = function(e, callback) {
 
 
 
-},{"../utils/has-valid-image-extension":432,"./resize-image":439}],431:[function(require,module,exports){
+},{"../utils/has-valid-image-extension":433,"./resize-image":440}],432:[function(require,module,exports){
 var GoogleDriveIO;
 
 module.exports = GoogleDriveIO = (function() {
@@ -43853,7 +43674,7 @@ module.exports = GoogleDriveIO = (function() {
 
 
 
-},{}],432:[function(require,module,exports){
+},{}],433:[function(require,module,exports){
 var tr;
 
 tr = require('./translate');
@@ -43872,7 +43693,7 @@ module.exports = function(imageName) {
 
 
 
-},{"./translate":441}],433:[function(require,module,exports){
+},{"./translate":442}],434:[function(require,module,exports){
 var HashParameters, PARAM_TOKEN, VALUE_TOKEN;
 
 PARAM_TOKEN = /[?|&]/g;
@@ -43963,7 +43784,7 @@ module.exports = new HashParameters();
 
 
 
-},{}],434:[function(require,module,exports){
+},{}],435:[function(require,module,exports){
 var DiagramNode, ImportActions, Migrations, MySystemImporter;
 
 Migrations = require('../data/migrations/migrations');
@@ -44026,7 +43847,7 @@ module.exports = MySystemImporter = (function() {
 
 
 
-},{"../actions/import-actions":387,"../data/migrations/migrations":407,"../models/node":415}],435:[function(require,module,exports){
+},{"../actions/import-actions":388,"../data/migrations/migrations":408,"../models/node":416}],436:[function(require,module,exports){
 var DiagramToolkit, LinkColors;
 
 LinkColors = require("../utils/link-colors");
@@ -44398,7 +44219,7 @@ module.exports = DiagramToolkit = (function() {
 
 
 
-},{"../utils/link-colors":437}],436:[function(require,module,exports){
+},{"../utils/link-colors":438}],437:[function(require,module,exports){
 module.exports = {
   "~MENU.SAVE": "Save …",
   "~MENU.OPEN": "Open …",
@@ -44434,7 +44255,6 @@ module.exports = {
   "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations.",
   "~NODE-RELATION-EDIT.UNSELECTED": "Select an option...",
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in",
-  "~NODE-RELATION-EDIT.A_DECREASE_IN": "A decrease in",
   "~NODE-RELATION-EDIT.CAUSES": "causes",
   "~NODE-RELATION-EDIT.TO": "to",
   "~NODE-RELATION-EDIT.INCREASES": "increase",
@@ -44541,7 +44361,7 @@ module.exports = {
 
 
 
-},{}],437:[function(require,module,exports){
+},{}],438:[function(require,module,exports){
 module.exports = {
   "default": '#777',
   defaultFaded: "rgba(120,120,120,0)",
@@ -44557,7 +44377,7 @@ module.exports = {
 
 
 
-},{}],438:[function(require,module,exports){
+},{}],439:[function(require,module,exports){
 var OpenClipArt, initialResultSize;
 
 initialResultSize = 12;
@@ -44594,7 +44414,7 @@ module.exports = OpenClipArt = {
 
 
 
-},{}],439:[function(require,module,exports){
+},{}],440:[function(require,module,exports){
 module.exports = function(src, callback) {
   var fail, img, maxHeight, maxWidth;
   fail = function() {
@@ -44636,7 +44456,7 @@ module.exports = function(src, callback) {
 
 
 
-},{}],440:[function(require,module,exports){
+},{}],441:[function(require,module,exports){
 var toSeconds, tr, units;
 
 tr = require('./translate');
@@ -44681,7 +44501,7 @@ module.exports = {
 
 
 
-},{"./translate":441}],441:[function(require,module,exports){
+},{"./translate":442}],442:[function(require,module,exports){
 var defaultLang, translate, translations, varRegExp;
 
 translations = {};
@@ -44714,7 +44534,7 @@ module.exports = translate;
 
 
 
-},{"./lang/us-en":436}],442:[function(require,module,exports){
+},{"./lang/us-en":437}],443:[function(require,module,exports){
 var CodapConnect, Command, CommandBatch, DEFAULT_CONTEXT_NAME, Manager, instance, instances;
 
 CodapConnect = require('../models/codap-connect');
@@ -45021,7 +44841,7 @@ module.exports = {
 
 
 
-},{"../models/codap-connect":412}],443:[function(require,module,exports){
+},{"../models/codap-connect":413}],444:[function(require,module,exports){
 var AboutView, a, br, div, h2, i, p, ref;
 
 ref = React.DOM, div = ref.div, a = ref.a, i = ref.i, h2 = ref.h2, p = ref.p, br = ref.br;
@@ -45095,7 +44915,7 @@ module.exports = AboutView = React.createClass({
 
 
 
-},{}],444:[function(require,module,exports){
+},{}],445:[function(require,module,exports){
 var AppSettingsStore, BuildInfoView, DocumentActions, GlobalNav, GraphView, ImageBrowser, ImageDialogStore, InspectorPanel, ModalPaletteDelete, NodeWell, Placeholder, Reflux, a, div, ref, tr;
 
 Reflux = require('reflux');
@@ -45197,7 +45017,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":408,"../stores/app-settings-store":420,"../stores/image-dialog-store":424,"../utils/hash-parameters":433,"../utils/translate":441,"./build-info-view":445,"./document-actions-view":447,"./global-nav-view":450,"./graph-view":451,"./image-browser-view":452,"./inspector-panel-view":458,"./modal-palette-delete-view":464,"./node-well-view":471,"./placeholder-view":477,"reflux":379}],445:[function(require,module,exports){
+},{"../mixins/app-view":409,"../stores/app-settings-store":421,"../stores/image-dialog-store":425,"../utils/hash-parameters":434,"../utils/translate":442,"./build-info-view":446,"./document-actions-view":448,"./global-nav-view":451,"./graph-view":452,"./image-browser-view":453,"./inspector-panel-view":459,"./modal-palette-delete-view":465,"./node-well-view":472,"./placeholder-view":478,"reflux":365}],446:[function(require,module,exports){
 var BuildInfoView, Migration, a, div, i, ref, table, td, tr;
 
 ref = React.DOM, div = ref.div, a = ref.a, table = ref.table, tr = ref.tr, td = ref.td, i = ref.i;
@@ -45307,7 +45127,7 @@ module.exports = BuildInfoView = React.createClass({
 
 
 
-},{"../data/migrations/migrations":407}],446:[function(require,module,exports){
+},{"../data/migrations/migrations":408}],447:[function(require,module,exports){
 var ColorChoice, Colors, div, tr;
 
 div = React.DOM.div;
@@ -45389,7 +45209,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/colors":429,"../utils/translate":441}],447:[function(require,module,exports){
+},{"../utils/colors":430,"../utils/translate":442}],448:[function(require,module,exports){
 var AboutView, AppSettingsStore, CodapStore, SimulationRunPanel, br, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, br = ref.br;
@@ -45462,7 +45282,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":420,"../stores/codap-store":421,"../utils/translate":441,"./about-view":443,"./simulation-run-panel-view":481}],448:[function(require,module,exports){
+},{"../stores/app-settings-store":421,"../stores/codap-store":422,"../utils/translate":442,"./about-view":444,"./simulation-run-panel-view":482}],449:[function(require,module,exports){
 var Demo, DemoDropDown, DropDown, DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -45621,7 +45441,7 @@ Demo = React.createClass({
 
 
 
-},{}],449:[function(require,module,exports){
+},{}],450:[function(require,module,exports){
 var div, dropImageHandler, p, ref, tr;
 
 dropImageHandler = require('../utils/drop-image-handler');
@@ -45676,7 +45496,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/drop-image-handler":430,"../utils/translate":441}],450:[function(require,module,exports){
+},{"../utils/drop-image-handler":431,"../utils/translate":442}],451:[function(require,module,exports){
 var AppSettingsActions, BuildInfoView, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -45770,7 +45590,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":420,"../stores/google-file-store":422,"../utils/translate":441,"./build-info-view":445,"./dropdown-view":448,"./modal-google-save-view":463,"./open-in-codap-view":472}],451:[function(require,module,exports){
+},{"../stores/app-settings-store":421,"../stores/google-file-store":423,"../utils/translate":442,"./build-info-view":446,"./dropdown-view":449,"./modal-google-save-view":464,"./open-in-codap-view":473}],452:[function(require,module,exports){
 var AppSettingsStore, DiagramToolkit, GraphStore, ImageDialogStore, Importer, LinkColors, Node, NodeModel, PaletteStore, RelationFactory, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -46128,7 +45948,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/node":415,"../models/relation-factory":416,"../stores/app-settings-store":420,"../stores/graph-store":423,"../stores/image-dialog-store":424,"../stores/palette-store":427,"../stores/simulation-store":428,"../utils/drop-image-handler":430,"../utils/importer":434,"../utils/js-plumb-diagram-toolkit":435,"../utils/link-colors":437,"../utils/translate":441,"./node-view":470}],452:[function(require,module,exports){
+},{"../models/node":416,"../models/relation-factory":417,"../stores/app-settings-store":421,"../stores/graph-store":424,"../stores/image-dialog-store":425,"../stores/palette-store":428,"../stores/simulation-store":429,"../utils/drop-image-handler":431,"../utils/importer":435,"../utils/js-plumb-diagram-toolkit":436,"../utils/link-colors":438,"../utils/translate":442,"./node-view":471}],453:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -46187,7 +46007,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":424,"../stores/palette-store":427,"../utils/translate":441,"./image-link-dialog-view":453,"./image-metadata-view":454,"./image-my-computer-dialog-view":455,"./image-search-dialog-view":457,"./modal-tabbed-dialog-view":465,"./tabbed-panel-view":484}],453:[function(require,module,exports){
+},{"../stores/image-dialog-store":425,"../stores/palette-store":428,"../utils/translate":442,"./image-link-dialog-view":454,"./image-metadata-view":455,"./image-my-computer-dialog-view":456,"./image-search-dialog-view":458,"./modal-tabbed-dialog-view":466,"./tabbed-panel-view":485}],454:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -46236,7 +46056,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":410,"../stores/image-dialog-store":424,"../utils/translate":441,"./dropzone-view":449}],454:[function(require,module,exports){
+},{"../mixins/image-dialog-view":411,"../stores/image-dialog-store":425,"../utils/translate":442,"./dropzone-view":450}],455:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -46324,7 +46144,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":390,"../stores/image-dialog-store":424,"../utils/translate":441}],455:[function(require,module,exports){
+},{"../data/licenses":391,"../stores/image-dialog-store":425,"../utils/translate":442}],456:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -46378,7 +46198,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":410,"../stores/image-dialog-store":424,"../utils/translate":441,"./dropzone-view":449}],456:[function(require,module,exports){
+},{"../mixins/image-dialog-view":411,"../stores/image-dialog-store":425,"../utils/translate":442,"./dropzone-view":450}],457:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -46466,7 +46286,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":427,"../utils/translate":441,"./palette-add-view":473}],457:[function(require,module,exports){
+},{"../stores/palette-store":428,"../utils/translate":442,"./palette-add-view":474}],458:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -46708,7 +46528,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":410,"../stores/image-dialog-store":424,"../utils/open-clipart":438,"../utils/translate":441}],458:[function(require,module,exports){
+},{"../mixins/image-dialog-view":411,"../stores/image-dialog-store":425,"../utils/open-clipart":439,"../utils/translate":442}],459:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, SimulationInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -46950,7 +46770,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":459,"./link-value-inspector-view":461,"./node-inspector-view":467,"./node-value-inspector-view":469,"./relation-inspector-view":479,"./simulation-inspector-view":480}],459:[function(require,module,exports){
+},{"./link-inspector-view":460,"./link-value-inspector-view":462,"./node-inspector-view":468,"./node-value-inspector-view":470,"./relation-inspector-view":480,"./simulation-inspector-view":481}],460:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -47006,8 +46826,8 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":441}],460:[function(require,module,exports){
-var Graph, LinkRelationView, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
+},{"../utils/translate":442}],461:[function(require,module,exports){
+var Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, br, div, h2, i, input, label, option, p, ref, select, span, tr;
 
 ref = React.DOM, br = ref.br, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option;
 
@@ -47030,38 +46850,20 @@ Graph = React.createFactory(React.createClass({
   }
 }));
 
+QuantStart = React.createFactory(React.createClass({
+  render: function() {
+    var start;
+    start = tr("~NODE-RELATION-EDIT.SEMI_QUANT_START");
+    return div({}, span({}, (tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")) + " "), span({
+      className: "source"
+    }, this.props.source), br({}), span({}, " " + (tr("~NODE-RELATION-EDIT.CAUSES")) + " "), span({
+      className: "target"
+    }, this.props.target));
+  }
+}));
+
 module.exports = LinkRelationView = React.createClass({
   displayName: 'LinkRelationView',
-  descriptorOptions: _.map(RelationFactory.descriptors, function(opt, i) {
-    return option({
-      value: opt.id,
-      key: i
-    }, opt.text);
-  }),
-  vectorOptions: _.map(RelationFactory.vectors, function(opt, i) {
-    return option({
-      value: opt.id,
-      key: i
-    }, opt.text);
-  }),
-  inverseVectorOptions: _.map(RelationFactory.inverseDisplayVectors, function(opt, i) {
-    return option({
-      value: opt.id,
-      key: i
-    }, opt.text);
-  }),
-  scalarOptions: _.map(RelationFactory.scalars, function(opt, i) {
-    return option({
-      value: opt.id,
-      key: i
-    }, opt.text);
-  }),
-  inverseScalarOptions: _.map(RelationFactory.inverseDisplayScalars, function(opt, i) {
-    return option({
-      value: opt.id,
-      key: i
-    }, opt.text);
-  }),
   getDefaultProps: function() {
     return {
       link: {
@@ -47076,21 +46878,19 @@ module.exports = LinkRelationView = React.createClass({
   },
   getInitialState: function() {
     return {
-      selectedDescriptor: null,
       selectedVector: null,
-      selectedScalar: null
+      selectedScalar: null,
+      selectedVectorHasChanged: false
     };
   },
   componentWillMount: function() {
-    var selectedDescriptor, selectedScalar, selectedVector;
+    var selectedScalar, selectedVector;
     if (this.state.selectedVector == null) {
       return this.updateState(this.props);
     } else if (this.props.link.relation.customData != null) {
-      selectedDescriptor = RelationFactory.descriptorIncrease;
       selectedVector = RelationFactory.vary;
       selectedScalar = RelationFactory.custom;
       return this.setState({
-        selectedDescriptor: selectedDescriptor,
         selectedVector: selectedVector,
         selectedScalar: selectedScalar
       });
@@ -47102,73 +46902,56 @@ module.exports = LinkRelationView = React.createClass({
     }
   },
   updateState: function(props) {
-    var descriptor, ref1, scalar, vector;
+    var ref1, scalar, vector;
     ref1 = RelationFactory.selectionsFromRelation(props.link.relation), vector = ref1.vector, scalar = ref1.scalar;
-    descriptor = props.link.relation.descriptor;
     if (props.link.relation.customData != null) {
       vector = RelationFactory.vary;
       scalar = RelationFactory.custom;
     }
     return this.setState({
-      selectedDescriptor: descriptor,
       selectedVector: vector,
       selectedScalar: scalar
     });
   },
   updateRelation: function() {
-    var existingData, link, newDescriptor, relation, selectedDescriptor, selectedScalar, selectedVector;
+    var existingData, link, relation, selectedScalar, selectedVector;
     selectedVector = this.getVector();
     selectedScalar = this.getScalar();
-    selectedDescriptor = this.getDescriptor();
-    newDescriptor = this.state.selectedDescriptor !== selectedDescriptor;
     if ((selectedVector != null) && selectedVector.isCustomRelationship) {
       selectedScalar = RelationFactory.custom;
     }
+    this.setState({
+      selectedVector: selectedVector,
+      selectedScalar: selectedScalar
+    });
     if (selectedVector != null) {
       link = this.props.link;
       existingData = link.relation.customData;
-      if (newDescriptor) {
-        if (selectedVector === RelationFactory.increase) {
-          selectedVector = RelationFactory.decrease;
-        } else if (selectedVector === RelationFactory.decrease) {
-          selectedVector = RelationFactory.increase;
-        }
-        if ((selectedScalar != null) && selectedScalar === RelationFactory.moreAndMore) {
-          selectedScalar = RelationFactory.lessAndLess;
-        } else if ((selectedScalar != null) && selectedScalar === RelationFactory.lessAndLess) {
-          selectedScalar = RelationFactory.moreAndMore;
-        }
-      }
       relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData);
       relation.isDefined = (selectedVector != null) && (selectedScalar != null);
-      relation.descriptor = selectedDescriptor;
       if (!selectedVector.isCustomRelationship) {
         relation.customData = null;
       } else {
         relation.isDefined = link.relation.customData != null;
         relation.isCustomRelationship = true;
       }
-      this.setState({
-        selectedDescriptor: selectedDescriptor,
-        selectedVector: selectedVector,
-        selectedScalar: selectedScalar
-      });
       return this.props.graphStore.changeLink(link, {
         relation: relation
       });
     }
   },
-  getDescriptor: function() {
-    var id, newDescriptor;
-    id = parseInt(this.refs.descriptor.value);
-    newDescriptor = RelationFactory.descriptors[id];
-    return newDescriptor;
-  },
   getVector: function() {
-    var id, newVector;
+    var id, newVector, selectedVectorHasChanged;
     id = parseInt(this.refs.vector.value);
     newVector = RelationFactory.vectors[id];
-    return newVector;
+    selectedVectorHasChanged = false;
+    if (this.state.selectedVector && id !== this.state.selectedVector.id) {
+      selectedVectorHasChanged = true;
+    }
+    this.setState({
+      selectedVectorHasChanged: selectedVectorHasChanged
+    });
+    return RelationFactory.vectors[id];
   },
   getScalar: function() {
     var id;
@@ -47179,25 +46962,14 @@ module.exports = LinkRelationView = React.createClass({
       return void 0;
     }
   },
-  renderDescriptorPulldown: function(descriptorSelection) {
-    var descriptor;
-    descriptor = descriptorSelection;
-    if (descriptorSelection == null) {
-      descriptor = RelationFactory.descriptorIncrease;
-    }
-    return select({
-      value: descriptor.id,
-      className: "descriptor",
-      ref: "descriptor",
-      onChange: this.updateRelation
-    }, this.descriptorOptions);
-  },
   renderVectorPulldown: function(vectorSelection) {
     var currentOption, options;
-    options = this.vectorOptions;
-    if (this.state.selectedDescriptor === RelationFactory.descriptorDecrease) {
-      options = this.inverseVectorOptions;
-    }
+    options = _.map(RelationFactory.vectors, function(opt, i) {
+      return option({
+        value: opt.id,
+        key: i
+      }, opt.text);
+    });
     if (vectorSelection == null) {
       options.unshift(option({
         key: "placeholder",
@@ -47219,10 +46991,12 @@ module.exports = LinkRelationView = React.createClass({
   },
   renderScalarPulldown: function(scalarSelection) {
     var currentOption, disabled, options;
-    options = this.scalarOptions;
-    if (this.state.selectedDescriptor === RelationFactory.descriptorDecrease) {
-      options = this.inverseScalarOptions;
-    }
+    options = _.map(RelationFactory.scalars, function(opt, i) {
+      return option({
+        value: opt.id,
+        key: i
+      }, opt.text);
+    });
     if (scalarSelection == null) {
       options.unshift(option({
         key: "placeholder",
@@ -47259,16 +47033,14 @@ module.exports = LinkRelationView = React.createClass({
     source = this.props.link.sourceNode.title;
     target = this.props.link.targetNode.title;
     formula = this.props.link.relation.formula;
-    console.log(this.state);
     return div({
       className: 'link-relation-view'
     }, div({
       className: 'top'
-    }, div({}, this.renderDescriptorPulldown(this.state.selectedDescriptor), span({
-      className: "source"
-    }, source), br({}), span({}, " " + (tr("~NODE-RELATION-EDIT.CAUSES")) + " "), span({
-      className: "target"
-    }, target)), div({
+    }, QuantStart({
+      source: source,
+      target: target
+    }), div({
       className: 'full'
     }, this.renderVectorPulldown(this.state.selectedVector)), div({
       className: 'full'
@@ -47290,7 +47062,7 @@ module.exports = LinkRelationView = React.createClass({
 
 
 
-},{"../models/relation-factory":416,"../utils/translate":441,"./svg-graph-view":483}],461:[function(require,module,exports){
+},{"../models/relation-factory":417,"../utils/translate":442,"./svg-graph-view":484}],462:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -47308,7 +47080,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":441}],462:[function(require,module,exports){
+},{"../utils/translate":442}],463:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -47341,7 +47113,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":466}],463:[function(require,module,exports){
+},{"./modal-view":467}],464:[function(require,module,exports){
 var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47420,7 +47192,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":441,"./modal-dialog-view":462}],464:[function(require,module,exports){
+},{"../utils/translate":442,"./modal-dialog-view":463}],465:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47462,7 +47234,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":425,"../stores/palette-delete-dialog-store":426,"../utils/translate":441,"./modal-dialog-view":462,"./palette-delete-view":474}],465:[function(require,module,exports){
+},{"../stores/nodes-store":426,"../stores/palette-delete-dialog-store":427,"../utils/translate":442,"./modal-dialog-view":463,"./palette-delete-view":475}],466:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47483,7 +47255,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":462,"./tabbed-panel-view":484}],466:[function(require,module,exports){
+},{"./modal-dialog-view":463,"./tabbed-panel-view":485}],467:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -47515,7 +47287,7 @@ module.exports = React.createClass({
 
 
 
-},{}],467:[function(require,module,exports){
+},{}],468:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -47602,7 +47374,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":411,"../utils/translate":441,"./color-picker-view":446,"./image-picker-view":456}],468:[function(require,module,exports){
+},{"../mixins/node-title":412,"../utils/translate":442,"./color-picker-view":447,"./image-picker-view":457}],469:[function(require,module,exports){
 var NodeSvgGraphView, SimulationStore, div, line, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -47700,7 +47472,7 @@ module.exports = NodeSvgGraphView = React.createClass({
 
 
 
-},{"../stores/simulation-store":428}],469:[function(require,module,exports){
+},{"../stores/simulation-store":429}],470:[function(require,module,exports){
 var SimulationStore, div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -47876,7 +47648,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":428,"../utils/translate":441}],470:[function(require,module,exports){
+},{"../stores/simulation-store":429,"../utils/translate":442}],471:[function(require,module,exports){
 var CodapConnect, DEFAULT_CONTEXT_NAME, GraphView, NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
@@ -48245,7 +48017,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":411,"../models/codap-connect":412,"../utils/translate":441,"./node-svg-graph-view":468,"./square-image-view":482,"./value-slider-view":485}],471:[function(require,module,exports){
+},{"../mixins/node-title":412,"../models/codap-connect":413,"../utils/translate":442,"./node-svg-graph-view":469,"./square-image-view":483,"./value-slider-view":486}],472:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -48306,7 +48078,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":427,"./palette-inspector-view":475}],472:[function(require,module,exports){
+},{"../stores/palette-store":428,"./palette-inspector-view":476}],473:[function(require,module,exports){
 var Dropdown, a, ref, span, tr;
 
 ref = React.DOM, a = ref.a, span = ref.span;
@@ -48355,7 +48127,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":441,"./dropdown-view":448}],473:[function(require,module,exports){
+},{"../utils/translate":442,"./dropdown-view":449}],474:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -48392,7 +48164,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":409,"../stores/image-dialog-store":424,"../utils/translate":441}],474:[function(require,module,exports){
+},{"../mixins/draggable":410,"../stores/image-dialog-store":425,"../utils/translate":442}],475:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -48471,7 +48243,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":426,"../utils/translate":441,"./image-picker-view":456}],475:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":427,"../utils/translate":442,"./image-picker-view":457}],476:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -48544,7 +48316,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":425,"../stores/palette-delete-dialog-store":426,"../stores/palette-store":427,"../utils/translate":441,"./image-metadata-view":454,"./palette-add-view":473,"./palette-item-view":476}],476:[function(require,module,exports){
+},{"../stores/nodes-store":426,"../stores/palette-delete-dialog-store":427,"../stores/palette-store":428,"../utils/translate":442,"./image-metadata-view":455,"./palette-add-view":474,"./palette-item-view":477}],477:[function(require,module,exports){
 var Draggable, SquareImage, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -48584,7 +48356,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":409,"./square-image-view":482}],477:[function(require,module,exports){
+},{"../mixins/draggable":410,"./square-image-view":483}],478:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -48602,7 +48374,7 @@ module.exports = React.createClass({
 
 
 
-},{}],478:[function(require,module,exports){
+},{}],479:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -48653,7 +48425,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":424,"../stores/palette-store":427,"../utils/translate":441,"./image-metadata-view":454}],479:[function(require,module,exports){
+},{"../stores/image-dialog-store":425,"../stores/palette-store":428,"../utils/translate":442,"./image-metadata-view":455}],480:[function(require,module,exports){
 var LinkRelationView, RelationFactory, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -48719,7 +48491,7 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 
-},{"../models/relation-factory":416,"../stores/graph-store":423,"../utils/translate":441,"./link-relation-view":460,"./tabbed-panel-view":484}],480:[function(require,module,exports){
+},{"../models/relation-factory":417,"../stores/graph-store":424,"../utils/translate":442,"./link-relation-view":461,"./tabbed-panel-view":485}],481:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -48847,7 +48619,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":420,"../stores/simulation-store":428,"../utils/translate":441,"./dropdown-view":448,"./value-slider-view":485}],481:[function(require,module,exports){
+},{"../stores/app-settings-store":421,"../stores/simulation-store":429,"../utils/translate":442,"./dropdown-view":449,"./value-slider-view":486}],482:[function(require,module,exports){
 var SimulationStore, div, i, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
@@ -48926,7 +48698,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":428,"../utils/translate":441}],482:[function(require,module,exports){
+},{"../stores/simulation-store":429,"../utils/translate":442}],483:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -48967,7 +48739,7 @@ module.exports = React.createClass({
 
 
 
-},{}],483:[function(require,module,exports){
+},{}],484:[function(require,module,exports){
 var RelationFactory, SvgGraphView, div, line, math, myView, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -49347,7 +49119,7 @@ window.testComponent = function(domID) {
 
 
 
-},{"../models/relation-factory":416,"mathjs":9}],484:[function(require,module,exports){
+},{"../models/relation-factory":417,"mathjs":9}],485:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -49454,7 +49226,7 @@ module.exports = React.createClass({
 
 
 
-},{}],485:[function(require,module,exports){
+},{}],486:[function(require,module,exports){
 var Demo, Slider, ValueSlider, circle, div, i, input, label, path, rect, ref, span, svg, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect;
@@ -49776,4 +49548,4 @@ Demo = React.createClass({
 
 
 
-},{"../utils/translate":441}]},{},[1]);
+},{"../utils/translate":442}]},{},[1]);
