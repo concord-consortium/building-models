@@ -57,6 +57,7 @@ module.exports = class CodapConnect
               {
                 name: tr '~CODAP.SIMULATION.STEPS'
                 type: 'numeric'
+                formula: 'count(Steps)'
                 description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
                 precision: 0
               }
@@ -75,7 +76,7 @@ module.exports = class CodapConnect
       action: 'openCase'
       args: {
         collection: 'Simulation',
-        values: [null, 0]
+        values: [null, null]
       }
     }, (result) =>
       if result?.success
@@ -132,24 +133,25 @@ module.exports = class CodapConnect
       _.each frame.nodes, (n) -> sample.push n.value
       sample
 
-    # Send the data
-    @codapPhone.call
-      action: 'createCases'
-      args: {
-        collection: 'Samples',
-        parent: @currentCaseID,
-        values: sampleData
-      }
+    # Send the data, if any
+    if sampleData.length > 0
+      @codapPhone.call
+        action: 'createCases'
+        args: {
+          collection: 'Samples',
+          parent: @currentCaseID,
+          values: sampleData
+        }
 
     # Update the parent case with the current number of steps
-    @stepsInCurrentCase += sampleData.length
-    @codapPhone.call
-      action: 'updateCase'
-      args: {
-        collection: 'Simulation',
-        caseID: @currentCaseID
-        values: [null, @stepsInCurrentCase]
-      }
+#    @stepsInCurrentCase += sampleData.length
+#    @codapPhone.call
+#      action: 'updateCase'
+#      args: {
+#        collection: 'Simulation',
+#        caseID: @currentCaseID
+#        values: [null, @stepsInCurrentCase]
+#      }
 
   _sendUndoToCODAP: ->
     @codapPhone.call
