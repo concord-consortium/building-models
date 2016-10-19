@@ -67342,8 +67342,6 @@ module.exports = LinkRelationView = React.createClass({
     }, this.renderVectorPulldown(this.state.selectedVector)), div({
       className: 'full'
     }, this.renderScalarPulldown(this.state.selectedScalar))), div({
-      className: 'bottom'
-    }, div({
       className: 'graph',
       id: 'relation-graph'
     }, Graph({
@@ -67351,7 +67349,7 @@ module.exports = LinkRelationView = React.createClass({
       yAxis: target,
       link: this.props.link,
       graphStore: this.props.graphStore
-    }))), this.props.link.relation.isCustomRelationship && (this.props.link.relation.customData == null) ? div({
+    })), this.props.link.relation.isCustomRelationship && (this.props.link.relation.customData == null) ? div({
       className: 'graph-hint'
     }, span({}, (tr("~NODE-RELATION-EDIT.CUSTOM_HINT")) + " ")) : void 0, div({
       className: 'fixed-bottom'
