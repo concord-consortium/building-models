@@ -1,4 +1,4 @@
-{br, div, h2, label, span, input, p, i, select, option} = React.DOM
+{br, div, h2, label, span, input, p, i, select, option, textarea} = React.DOM
 
 RelationFactory = require "../models/relation-factory"
 SvgGraph        = React.createFactory require "./svg-graph-view"
@@ -49,7 +49,7 @@ module.exports = LinkRelationView = React.createClass
       selectedVector = RelationFactory.vary
       selectedScalar = RelationFactory.custom
       @setState {selectedVector, selectedScalar}
-      
+
   componentWillReceiveProps: (newProps) ->
     if @props.link isnt newProps.link
       @updateState(newProps)
@@ -86,11 +86,11 @@ module.exports = LinkRelationView = React.createClass
   getVector: ->
     id = parseInt @refs.vector.value
     newVector = RelationFactory.vectors[id]
-    
+
     selectedVectorHasChanged = false
     if @state.selectedVector and id != @state.selectedVector.id
       selectedVectorHasChanged = true
-          
+
     @setState { selectedVectorHasChanged }
     RelationFactory.vectors[id]
 
@@ -111,17 +111,17 @@ module.exports = LinkRelationView = React.createClass
       currentOption = "unselected"
     else
       currentOption = vectorSelection.id
-    
+
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
       (select {value: currentOption, className:"", ref: "vector", onChange: @updateRelation},
       options)
     )
-      
+
   renderScalarPulldown:(scalarSelection) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
       (option {value: opt.id, key: i}, opt.text)
-      
+
     if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
         tr "~NODE-RELATION-EDIT.UNSELECTED")
@@ -167,6 +167,12 @@ module.exports = LinkRelationView = React.createClass
         (div {className: 'graph-hint'},
           (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM_HINT"} ")
         )
+      (div {className: 'fixed-bottom'},
+        (div {},
+          (span {}, "#{tr "~NODE-RELATION-EDIT.BECAUSE"} ")
+        )
+        (textarea {className: 'full', rows: 3, style: { overflowY: "scroll", resize: "none"}})
+      )
     )
-    
+
 
