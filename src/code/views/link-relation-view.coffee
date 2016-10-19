@@ -172,7 +172,7 @@ module.exports = LinkRelationView = React.createClass
           (Graph {xAxis: source, yAxis: target, link: @props.link, graphStore: @props.graphStore})
         )
       )
-      if @props.link.relation.isCustomRelationship
+      if @props.link.relation.isCustomRelationship and not @props.link.relation.customData?
         (div {className: 'graph-hint'},
           (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM_HINT"} ")
         )
