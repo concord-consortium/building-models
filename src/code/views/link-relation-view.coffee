@@ -54,6 +54,12 @@ module.exports = LinkRelationView = React.createClass
     if @props.link isnt newProps.link
       @updateState(newProps)
 
+      # ensure reasoning value has been set, as onblur not triggered
+      @props.link.reasoning = @refs.reasoning.value
+
+    # a hack to update uncontrolled textarea when viewing new links
+    @refs.reasoning.value = newProps.link.reasoning
+
   updateState: (props) ->
     {vector, scalar} = RelationFactory.selectionsFromRelation props.link.relation
     if props.link.relation.customData?
@@ -82,6 +88,9 @@ module.exports = LinkRelationView = React.createClass
         relation.isCustomRelationship = true
 
       @props.graphStore.changeLink(link, {relation: relation})
+
+  updateReasoning: ->
+    @props.graphStore.changeLink(@props.link, {reasoning: @refs.reasoning.value})
 
   getVector: ->
     id = parseInt @refs.vector.value
@@ -171,7 +180,10 @@ module.exports = LinkRelationView = React.createClass
         (div {},
           (span {}, "#{tr "~NODE-RELATION-EDIT.BECAUSE"} ")
         )
-        (textarea {className: 'full', rows: 3, style: { overflowY: "scroll", resize: "none"}})
+        (textarea {
+          defaultValue: @props.link.reasoning, onBlur: @updateReasoning, ref: 'reasoning',
+          className: 'full', rows: 3, style: { overflowY: "scroll", resize: "none"}
+        })
       )
     )
 

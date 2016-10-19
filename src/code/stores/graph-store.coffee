@@ -284,6 +284,7 @@ GraphStore  = Reflux.createStore
         title: link.title
         color: link.color
         relation: link.relation
+        reasoning: link.reasoning
       @undoRedoManager.createAndExecuteCommand 'changeLink',
         execute: => @_changeLink link,  changes
         undo: => @_changeLink link, originalData
@@ -295,7 +296,7 @@ GraphStore  = Reflux.createStore
 
   _changeLink: (link, changes) ->
     log.info "Change  for #{link.title}"
-    for key in ['title','color', 'relation']
+    for key in ['title','color', 'relation', 'reasoning']
       if changes[key]?
         log.info "Change #{key} for #{link.title}"
         link[key] = changes[key]

@@ -17,6 +17,7 @@ module.exports = class Link extends GraphPrimitive
       @color, @title
     } = @options
     @relation = @_makeRelation @options.relation
+    @reasoning = @options.reasoning or ""
     super()
 
   type: 'Link'
@@ -48,3 +49,4 @@ module.exports = class Link extends GraphPrimitive
     "targetNode": @targetNode.key
     "targetTerminal": @targetTerminal
     "relation": @relation.toExport()
+    "reasoning": @reasoning
