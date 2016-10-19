@@ -16,6 +16,7 @@ migrations = [
   require "./13_add_frames_to_nodes"
   require "./14_remove_new_integration"
   require "./15_update_less_relationship_formula"
+  require "./16_add_link_reasoning"
 ]
 
 module.exports =

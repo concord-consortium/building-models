@@ -10,8 +10,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.14.0", ->
-        @result.version.should.equal "1.14.0"
+      it "should be 1.15.0", ->
+        @result.version.should.equal "1.15.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -109,4 +109,9 @@ describe "Migrations",  ->
       it "should have frames array", ->
         for node in @result.nodes
           node.data.frames.should.exist
+
+    describe "v-1.15.0 changes", ->
+      it "should have link reasoning", ->
+        for link in @result.links
+          link.reasoning.should.exist
 
