@@ -167,10 +167,8 @@ module.exports = LinkRelationView = React.createClass
           @renderScalarPulldown(@state.selectedScalar)
         )
       )
-      (div {className: 'bottom'},
-        (div {className: 'graph', id:'relation-graph'},
-          (Graph {xAxis: source, yAxis: target, link: @props.link, graphStore: @props.graphStore})
-        )
+      (div {className: 'graph', id:'relation-graph'},
+        (Graph {xAxis: source, yAxis: target, link: @props.link, graphStore: @props.graphStore})
       )
       if @props.link.relation.isCustomRelationship and not @props.link.relation.customData?
         (div {className: 'graph-hint'},
