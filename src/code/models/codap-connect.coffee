@@ -57,48 +57,56 @@ module.exports = class CodapConnect
       }
     ]
 
-    # create collections, then kick-off init
+    # check if we already have a datacontext (if we're opening a saved model).
+    # if we don't create one with our collections. Then kick off init
     @codapPhone.call
-      action: 'create',
-      resource: 'dataContext',
-      values: {
-        name: 'Sage Simulation',
-        title: 'Sage Simulation'
-        collections: [ {
-          name: 'Simulation',
-          title: 'Sage Simulation',
-          labels: {
-            singleCase: 'run',
-            pluralCase: 'runs'
-          },
-          attrs: [
+      action: 'get',
+      resource: 'dataContext[Sage Simulation]'
+    , (ret) =>
+      if ret?.success
+        @initGameHandler
+      else
+        @codapPhone.call
+          action: 'create',
+          resource: 'dataContext',
+          values: {
+            name: 'Sage Simulation',
+            title: 'Sage Simulation'
+            collections: [ {
+              name: 'Simulation',
+              title: 'Sage Simulation',
+              labels: {
+                singleCase: 'run',
+                pluralCase: 'runs'
+              },
+              attrs: [
+                  {
+                    name: tr '~CODAP.SIMULATION.RUN'
+                    formula: 'caseIndex'
+                    type: 'nominal'
+                  }
+                  {
+                    name: tr '~CODAP.SIMULATION.STEPS'
+                    type: 'numeric'
+                    formula: 'count(Steps)'
+                    description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
+                    precision: 0
+                  }
+                ]
+              },
               {
-                name: tr '~CODAP.SIMULATION.RUN'
-                formula: 'caseIndex'
-                type: 'nominal'
-              }
-              {
-                name: tr '~CODAP.SIMULATION.STEPS'
-                type: 'numeric'
-                formula: 'count(Steps)'
-                description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
-                precision: 0
+                parent: "Simulation",
+                name: 'Samples',
+                title: 'Samples',
+                labels: {
+                  singleCase: 'sample',
+                  pluralCase: 'samples'
+                }
+                attrs: sampleDataAttrs
               }
             ]
-          },
-          {
-            parent: "Simulation",
-            name: 'Samples',
-            title: 'Samples',
-            labels: {
-              singleCase: 'sample',
-              pluralCase: 'samples'
-            }
-            attrs: sampleDataAttrs
           }
-        ]
-      }
-    , @initGameHandler
+        , @initGameHandler
 
   _openNewCase: (nodeNames) ->
     @currentCaseID = null
