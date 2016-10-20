@@ -38,18 +38,6 @@ module.exports = class CodapConnect
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'data-interactive', window.parent )
 
-    # set frame size
-    @codapPhone.call
-      action: 'update',
-      resource: 'interactiveFrame',
-      values: {
-        title: @name,
-        dimensions: {
-          width: 800,
-          height: 600
-        }
-      }
-
     # load any previous data
     @codapPhone.call
       action: 'get',
