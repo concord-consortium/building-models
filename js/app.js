@@ -60405,17 +60405,6 @@ module.exports = CodapConnect = (function() {
     CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
     this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'data-interactive', window.parent);
     this.codapPhone.call({
-      action: 'update',
-      resource: 'interactiveFrame',
-      values: {
-        title: this.name,
-        dimensions: {
-          width: 800,
-          height: 600
-        }
-      }
-    });
-    this.codapPhone.call({
       action: 'get',
       resource: 'interactiveFrame'
     }, (function(_this) {
@@ -60436,45 +60425,56 @@ module.exports = CodapConnect = (function() {
       }
     ];
     this.codapPhone.call({
-      action: 'create',
-      resource: 'dataContext',
-      values: {
-        name: 'Sage Simulation',
-        title: 'Sage Simulation',
-        collections: [
-          {
-            name: 'Simulation',
-            title: 'Sage Simulation',
-            labels: {
-              singleCase: 'run',
-              pluralCase: 'runs'
-            },
-            attrs: [
-              {
-                name: tr('~CODAP.SIMULATION.RUN'),
-                formula: 'caseIndex',
-                type: 'nominal'
-              }, {
-                name: tr('~CODAP.SIMULATION.STEPS'),
-                type: 'numeric',
-                formula: 'count(Steps)',
-                description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
-                precision: 0
-              }
-            ]
-          }, {
-            parent: "Simulation",
-            name: 'Samples',
-            title: 'Samples',
-            labels: {
-              singleCase: 'sample',
-              pluralCase: 'samples'
-            },
-            attrs: sampleDataAttrs
-          }
-        ]
-      }
-    }, this.initGameHandler);
+      action: 'get',
+      resource: 'dataContext[Sage Simulation]'
+    }, (function(_this) {
+      return function(ret) {
+        if (ret != null ? ret.success : void 0) {
+          return _this.initGameHandler;
+        } else {
+          return _this.codapPhone.call({
+            action: 'create',
+            resource: 'dataContext',
+            values: {
+              name: 'Sage Simulation',
+              title: 'Sage Simulation',
+              collections: [
+                {
+                  name: 'Simulation',
+                  title: 'Sage Simulation',
+                  labels: {
+                    singleCase: 'run',
+                    pluralCase: 'runs'
+                  },
+                  attrs: [
+                    {
+                      name: tr('~CODAP.SIMULATION.RUN'),
+                      formula: 'caseIndex',
+                      type: 'nominal'
+                    }, {
+                      name: tr('~CODAP.SIMULATION.STEPS'),
+                      type: 'numeric',
+                      formula: 'count(Steps)',
+                      description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
+                      precision: 0
+                    }
+                  ]
+                }, {
+                  parent: "Simulation",
+                  name: 'Samples',
+                  title: 'Samples',
+                  labels: {
+                    singleCase: 'sample',
+                    pluralCase: 'samples'
+                  },
+                  attrs: sampleDataAttrs
+                }
+              ]
+            }
+          }, _this.initGameHandler);
+        }
+      };
+    })(this));
   }
 
   CodapConnect.prototype._openNewCase = function(nodeNames) {
