@@ -25,26 +25,38 @@ module.exports = React.createClass
     wrapperClasses = "buttons flow"
     if @state.simulationPanelExpanded then wrapperClasses += " expanded"
 
-    runButtonClasses = "button"
-    if not @state.modelIsRunnable then runButtonClasses += " disabled error"
-    if not @state.modelReadyToRun then runButtonClasses += " disabled"
+    recordButtonClasses = "button"
+    if not @state.modelIsRunnable then recordButtonClasses += " disabled error"
+    if not @state.modelReadyToRun then recordButtonClasses += " disabled"
 
     resetButtonClasses = "button"
     if @state.modelReadyToRun then resetButtonClasses += " disabled"
 
     (div {className: wrapperClasses},
-      (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
-        tr "~DOCUMENT.ACTIONS.RUN"
-        (i {className: "icon-codap-play"})
+      (div {className: recordButtonClasses, onClick: SimulationStore.actions.runSimulation},
+        (div {className: "horizontal"},
+          (span {}, tr "Record 1")
+          (i className: "icon-codap-camera")
+        )
+        (div {className: "horizontal"},
+          (span {}, tr "Data Point")
+        )
       )
-      (div {className: resetButtonClasses, onClick: SimulationStore.actions.resetSimulation},
-        (i {className: "icon-codap-controlsReset"})
-      )
-      (div {className: "button disabled"},
-        (i {className: "icon-codap-controlsForward"})
-      )
-      (div {className: "button disabled"},
-        (i {className: "icon-codap-graph"})
+      (div {className: recordButtonClasses, onClick: SimulationStore.actions.runSimulation},
+        (div {className: 'horizontal'},
+          (div {className: 'vertical', style: {'padding-right':'0.5em'}},
+            (div {className: 'horizontal'},
+              (span {}, tr "Record")
+              (i {className: "icon-codap-video-camera"})
+            )
+            (div {className: 'horizontal'},
+              (span {}, tr "Data Stream")
+            )
+          )
+          (div {className: 'recording-box vertical'},
+            (div {className: 'recording-light recording'})
+          )
+        )
       )
     )
 

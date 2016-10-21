@@ -123,6 +123,8 @@ module.exports =
 
   "~DOCUMENT.ACTIONS.SIMULATE": "Simulate"
   "~DOCUMENT.ACTIONS.RUN": "Run"
+  "~DOCUMENT.ACTIONS.DATA.RECORD-1": "Record 1 Data Point"
+  "~DOCUMENT.ACTIONS.DATA.RECORD-STREAM": "Record Data Stream"
   "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Save to graphs"
   "~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS": "Show mini-graphs"
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode"
