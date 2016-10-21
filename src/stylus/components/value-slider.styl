@@ -11,6 +11,7 @@
   .svg-background
     position relative
   .value-slider-handle
+    z-index 2
     cursor pointer
     position absolute
     box-sizing border-box
@@ -62,6 +63,13 @@
       box-shadow 1px 1px 3px -2px rgba(0,0,0,0.75)
     input
       width 100px
+
+  &.vertical
+    .legend
+      top -4%
+      height 110%
+      display flex
+      flex-direction column
 
   &.disabled
     .slider-line
