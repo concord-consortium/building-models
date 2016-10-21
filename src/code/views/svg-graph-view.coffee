@@ -13,7 +13,7 @@ module.exports = SvgGraphView = React.createClass
     link: null
 
   drawing: false
-  
+
   getInitialState: ->
     currentData: null
     pointPathData: null
@@ -29,7 +29,7 @@ module.exports = SvgGraphView = React.createClass
     isDefined = @props.link.relation.isDefined
     formula = @props.link.relation.formula
     newCustomData = false
-    
+
     if @props.link.relation.isCustomRelationship or (currentData? and isDefined)
       canDraw = true
       formula = null
@@ -47,14 +47,14 @@ module.exports = SvgGraphView = React.createClass
         @updatePointData null, currentData
       else if formula?
         @updatePointData formula, null
-    
+
   componentWillReceiveProps: (newProps) ->
     if newProps
       canDraw = false
       currentData = newProps.link.relation.customData
       isDefined = newProps.link.relation.isDefined
       formula = newProps.link.relation.formula
-      
+
       if newProps.link.relation.isCustomRelationship or (currentData? and isDefined)
         canDraw = true
         if not isDefined
@@ -67,7 +67,7 @@ module.exports = SvgGraphView = React.createClass
         canDraw = false
         newCustomData = false
         currentData = null
-      
+
       @setState {
         currentData: currentData,
         pointPathData: null,
@@ -77,7 +77,7 @@ module.exports = SvgGraphView = React.createClass
       }
 
       @updatePointData formula, currentData
-        
+
   updatePointData: (formula, currentData) ->
     if not currentData? and formula?
       currentData = @loadCustomDataFromFormula formula
@@ -103,14 +103,14 @@ module.exports = SvgGraphView = React.createClass
     x = point.x * width + xOffset
     y = point.y * height + yOffset
     @invertPoint x:x, y:y
-    
+
   findClosestPoint:(path, pointX, pointY) ->
     graphOrigin = @graphMapPoint {x:0, y:0}
     x = pointX - $(path).offset().left
     y = pointX - $(path).offset().top
     p = {x: x, y: y}
     p
-    
+
   pointsToPath: (points)->
     data = _.map points, (p) => @graphMapPoint(p)
     data = _.map data,   (p) -> "#{p.x} #{p.y}"
@@ -178,7 +178,7 @@ module.exports = SvgGraphView = React.createClass
         (path {className: 'data', d:data, strokeWidth:@props.strokeWidth, strokeDasharray:@props.strokeDasharray})
       else
         (path {className: 'data', d:data, strokeWidth:@props.strokeWidth})
-    
+
   startDrawCurve: (evt) ->
     # can only draw on custom relationships
     if @state.canDraw
@@ -190,12 +190,12 @@ module.exports = SvgGraphView = React.createClass
         newCustomData = false
         @setState {newCustomData: newCustomData}
       @drawCurve(evt)
-    
+
   drawCurve: (evt) ->
     if @drawing and not @state.newCustomData
       evt.preventDefault()
       scaledCoords = @pointToScaledCoords(evt)
-      
+
       if scaledCoords.x >= 0 && scaledCoords.x <= 100 && scaledCoords.y >= 0 && scaledCoords.y <= 100
         newData = _.map @state.currentData, (d) ->
           x = d[0]
@@ -210,19 +210,19 @@ module.exports = SvgGraphView = React.createClass
       @drawing = false
       #update relation with custom data
       @updateRelationCustomData(@state.currentData)
-    
+
   pointToScaledCoords: (evt) ->
     rect = evt.target.getBoundingClientRect()
     coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
     scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
     scaledCoords
-    
+
   updateRelationCustomData: (customData) ->
     link = @props.link
     link.relation.customData = customData
     link.relation.isDefined = customData?
     @props.graphStore.changeLink(link, {relation: link.relation})
-  
+
   render: ->
     drawClass = 'draw-graph'
     if @state.canDraw then drawClass += ' drawing'
@@ -240,14 +240,14 @@ module.exports = SvgGraphView = React.createClass
           )
       )
     )
-    
+
 # TO DEBUG THIS VIEW:
-RelationFactory = require "../models/relation-factory"
-myView = React.createFactory SvgGraphView
-window.testComponent = (domID) ->
-  ReactDOM.render myView({
-    width: 200
-    height: 200
-    yLabel: "this node"
-    xLabel: "input a"
-  }), domID
+# RelationFactory = require "../models/relation-factory"
+# myView = React.createFactory SvgGraphView
+# window.testComponent = (domID) ->
+#   ReactDOM.render myView({
+#     width: 200
+#     height: 200
+#     yLabel: "this node"
+#     xLabel: "input a"
+#   }), domID
