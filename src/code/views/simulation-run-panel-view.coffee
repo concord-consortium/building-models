@@ -1,5 +1,7 @@
 SimulationStore = require '../stores/simulation-store'
 tr              = require '../utils/translate'
+RecordButton    = React.createFactory require './record-button-view'
+
 {div, span, i}  = React.DOM
 
 module.exports = React.createClass
@@ -24,16 +26,15 @@ module.exports = React.createClass
   renderControls: ->
     wrapperClasses = "buttons flow"
     if @state.simulationPanelExpanded then wrapperClasses += " expanded"
-
-    recordButtonClasses = "button"
-    if not @state.modelIsRunnable then recordButtonClasses += " disabled error"
-    if not @state.modelReadyToRun then recordButtonClasses += " disabled"
-
-    resetButtonClasses = "button"
-    if @state.modelReadyToRun then resetButtonClasses += " disabled"
+    recordStreamAction = SimulationStore.actions.recordStream
+    if @state.isRecording
+      recordStreamAction = SimulationStore.actions.stopRecording
 
     (div {className: wrapperClasses},
-      (div {className: recordButtonClasses, onClick: SimulationStore.actions.runSimulation},
+      (RecordButton
+        onClick: SimulationStore.actions.recordOne
+        disabled: @state.isRecording
+        ,
         (div {className: "horizontal"},
           (span {}, tr "Record 1")
           (i className: "icon-codap-camera")
@@ -42,20 +43,18 @@ module.exports = React.createClass
           (span {}, tr "Data Point")
         )
       )
-      (div {className: recordButtonClasses, onClick: SimulationStore.actions.runSimulation},
+
+      (RecordButton
+        onClick: recordStreamAction
+        includeLight: true
+        recording: @state.isRecording
+        ,
         (div {className: 'horizontal'},
-          (div {className: 'vertical', style: {'padding-right':'0.5em'}},
-            (div {className: 'horizontal'},
-              (span {}, tr "Record")
-              (i {className: "icon-codap-video-camera"})
-            )
-            (div {className: 'horizontal'},
-              (span {}, tr "Data Stream")
-            )
-          )
-          (div {className: 'recording-box vertical'},
-            (div {className: 'recording-light recording'})
-          )
+          (span {}, tr "Record")
+          (i {className: "icon-codap-video-camera"})
+        )
+        (div {className: 'horizontal'},
+          (span {}, tr "Data Stream")
         )
       )
     )

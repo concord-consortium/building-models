@@ -18,6 +18,9 @@ SimulationActions = Reflux.createActions(
     "simulationFramesCreated"
     "simulationEnded"
     "capNodeValues"
+    "recordStream"
+    "recordOne"
+    "stopRecording"
   ]
 )
 
@@ -45,6 +48,7 @@ SimulationStore   = Reflux.createStore
       modelIsRunning: false         # currently running?
       modelReadyToRun: true         # has been reset?
       modelIsRunnable: true         # is the model valid?
+      isRecording: false            # sending data to codap?
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -127,6 +131,24 @@ SimulationStore   = Reflux.createStore
     if @settings.modelIsRunning and @currentSimulation
       @currentSimulation.stop()
     @settings.modelReadyToRun = true
+    @notifyChange()
+
+  onStopRecording: ->
+    console.log("stop recording")
+    @settings.isRecording = false
+    @notifyChange()
+
+  onRecordOne: ->
+    console.log("record one")
+    @settings.isRecording = true
+    stopRecording = ->
+      SimulationActions.stopRecording()
+    @timeout = setTimeout(stopRecording,0.5)
+    @notifyChange()
+
+  onRecordStream: ->
+    console.log("recording stream")
+    @settings.isRecording = true
     @notifyChange()
 
   _checkModelIsRunnable: ->

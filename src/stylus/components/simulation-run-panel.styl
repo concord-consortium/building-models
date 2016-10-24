@@ -80,17 +80,19 @@
           animation-name blink
           animation-iteration-count infinite
           animation-direction alternate
-
+    &.recording:not(.disabled)
+      background-color dark-blue
     span
       line-height 1.2
       letter-spacing 0.2
       word-spacing 1.2
 
     &.disabled
-      background-color light-blue
+      background-color disabled-gray
       cursor default
       i
         cursor default
+
     &.error
       background-color light-red
     &:hover:not(.disabled)
