@@ -134,12 +134,10 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onStopRecording: ->
-    console.log("stop recording")
     @settings.isRecording = false
     @notifyChange()
 
   onRecordOne: ->
-    console.log("record one")
     @settings.isRecording = true
     stopRecording = ->
       SimulationActions.stopRecording()
@@ -147,7 +145,6 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onRecordStream: ->
-    console.log("recording stream")
     @settings.isRecording = true
     @notifyChange()
 
