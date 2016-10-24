@@ -33,7 +33,7 @@ module.exports = React.createClass
     (div {className: wrapperClasses},
       (RecordButton
         onClick: SimulationStore.actions.recordOne
-        disabled: @state.isRecording
+        disabled: @state.isRecording || !@state.modelIsRunnable
         ,
         (div {className: "horizontal"},
           (span {}, tr "Record 1")
@@ -48,6 +48,7 @@ module.exports = React.createClass
         onClick: recordStreamAction
         includeLight: true
         recording: @state.isRecording
+        disabled: !@state.modelIsRunnable
         ,
         (div {className: 'horizontal'},
           (span {}, tr "Record")

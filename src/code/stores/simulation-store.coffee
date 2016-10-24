@@ -47,7 +47,7 @@ SimulationStore   = Reflux.createStore
       capNodeValues: false
       modelIsRunning: false         # currently running?
       modelReadyToRun: true         # has been reset?
-      modelIsRunnable: true         # is the model valid?
+      modelIsRunnable: false        # is the model valid?
       isRecording: false            # sending data to codap?
 
   # From AppSettingsStore actions
