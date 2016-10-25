@@ -1,14 +1,19 @@
 SimulationStore = require '../stores/simulation-store'
 tr              = require '../utils/translate'
 RecordButton    = React.createFactory require './record-button-view'
+Dropdown        = React.createFactory require './dropdown-view'
 
-{div, span, i}  = React.DOM
+{div, span, i, input}  = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'SimulationRunPanel'
 
   mixins: [ SimulationStore.mixin ]
+
+
+  setDuration: (e) ->
+    SimulationStore.actions.setDuration parseInt e.target.value
 
   toggle: ->
     if @state.simulationPanelExpanded
@@ -27,30 +32,69 @@ module.exports = React.createClass
     wrapperClasses = "buttons flow"
     if @state.simulationPanelExpanded then wrapperClasses += " expanded"
 
-    (div {className: wrapperClasses},
-      (RecordButton
-        onClick: SimulationStore.actions.recordOne
-        disabled: @state.isRecording || !@state.modelIsRunnable
-        ,
-        (div {className: "horizontal"},
-          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
-          (i className: "icon-codap-camera")
-        )
-        (div {className: "horizontal"},
-          (span {}, tr "~DOCUMENT.ACTIONS.DATA.POINT")
-        )
+    if @state.graphHasCollector
+      (div {className: wrapperClasses},
+        @renderRecordForCollectors()
       )
-      @renderRecordStreamButton()
-    )
+    else
+      (div {className: wrapperClasses},
+        (RecordButton
+          onClick: SimulationStore.actions.recordOne
+          disabled: @state.isRecording || !@state.modelIsRunnable
+          ,
+          (div {className: "horizontal"},
+            (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
+            (i className: "icon-codap-camera")
+          )
+          (div {className: "horizontal"},
+            (span {}, tr "~DOCUMENT.ACTIONS.DATA.POINT")
+          )
+        )
+        @renderRecordStreamButton()
+      )
 
-  renderRecordStreamButton: ->
-    recordStreamAction = SimulationStore.actions.recordStream
-
+  renderRecordForCollectors: ->
+    recordAction = SimulationStore.actions.recordPeriod
     if @state.isRecording
-      recordStreamAction = SimulationStore.actions.stopRecording
+      recordAction = ->
 
     props =
-      onClick: recordStreamAction
+      onClick: recordAction
+      includeLight: false
+      recording: @state.isRecording
+      disabled: !@state.modelIsRunnable
+    (div {className:'horizontal'},
+      (RecordButton props,
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD")
+          (i {className: "icon-codap-video-camera"})
+        )
+      )
+      (input {
+        type: "number"
+        min: 1
+        max: 1000
+        style:
+          width: "#{Math.max 3, (@state.duration.toString().length+1)}em"
+        value: @state.duration
+        onChange: @setDuration
+      })
+      (Dropdown
+        isActionMenu: false
+        onSelect: SimulationStore.actions.setStepUnits
+        anchor: @state.stepUnitsName + "s"
+        items: @state.timeUnitOptions
+      )
+    )
+
+
+  renderRecordStreamButton: ->
+    recordAction = SimulationStore.actions.recordStream
+    if @state.isRecording
+      recordAction = SimulationStore.actions.stopRecording
+
+    props =
+      onClick: recordAction
       includeLight: true
       recording: @state.isRecording
       disabled: !@state.modelIsRunnable

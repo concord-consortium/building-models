@@ -14,6 +14,8 @@
 .simulation-run-panel, .simulation-run-panel>.flow
   display flex
   justify-content flex-end
+  input[type="number"]
+    margin-left 0.5em
   .toggle-title
     position: relative
     left: 34px
@@ -33,6 +35,16 @@
     transition: width 0.4s
     &.expanded
       width: 205px
+  .horizontal
+    display flex
+    flex-direction row
+    justify-content space-between
+    align-items center
+  .vertical
+    display flex
+    flex-direction column
+    justify-content center
+    align-items stretch
   .button
     height 25px
     cursor pointer
@@ -56,16 +68,6 @@
       font-size 12px
       &:hover
         color white
-    .horizontal
-      display flex
-      flex-direction row
-      justify-content space-between
-      align-items flex-start
-    .vertical
-      display flex
-      flex-direction column
-      justify-content center
-      align-items stretch
     .recording-box
       border-left 0.5px solid white
       height: 100%
@@ -92,7 +94,6 @@
       cursor default
       i
         cursor default
-
     &.error
       background-color light-red
     &:hover:not(.disabled)
