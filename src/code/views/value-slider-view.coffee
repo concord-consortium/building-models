@@ -1,6 +1,8 @@
 {div, i, label, span, input, svg, circle, path, rect, g} = React.DOM
 tr = require "../utils/translate"
 
+circleRadius = 2
+
 ValueSlider = React.createClass
   displayName: 'SVGSlider'
 
@@ -15,6 +17,8 @@ ValueSlider = React.createClass
     maxEditable: false
     stepSize: 1
     showTicks: false
+    showLabels: true
+    showHandle: true
     snapToSteps: false
     displayPrecision: 0
     renderValueTooltip: true
@@ -23,6 +27,7 @@ ValueSlider = React.createClass
     displaySemiQuant: false
     enabled: true
     horizontal: true
+    filled: false
     onValueChange: (v) ->
       log.info "new value #{v}"
     onRangeChange: (r) ->
@@ -56,7 +61,9 @@ ValueSlider = React.createClass
     @props.onRangeChange range
 
   componentDidMount: ->
-    handle   = @refs.handle or @
+    handle   = @refs.handle
+    return unless handle
+
     loc = (ui) =>
       if @props.horizontal then ui.position.left else ui.position.top
     opts =
@@ -83,7 +90,9 @@ ValueSlider = React.createClass
       $(handle).draggable( "disable" )
 
   componentDidUpdate: ->
-    handle = @refs.handle or @
+    handle = @refs.handle
+    return unless handle
+
     if @props.enabled
       $(handle).draggable( "enable" )
     else
@@ -198,9 +207,10 @@ ValueSlider = React.createClass
         max, min
       )
 
-  renderTicks: (center, circleRadius) ->
+  renderTicks: () ->
     return unless @props.showTicks
 
+    center = @thickness() / 2
     numTicks = ((@props.max - @props.min) / @props.stepSize)
     tickDistance = @length() / numTicks
     tickHeight = circleRadius * 1.5
@@ -212,40 +222,67 @@ ValueSlider = React.createClass
         ticks.push (path {key: j, d:"M#{center-tickHeight} #{j*tickDistance} l #{tickHeight * 2} 0", className:"slider-line"})
     ticks
 
-  renderLine: (center, circleRadius) ->
+  renderLine: () ->
+    center = @thickness() / 2
+    inset = circleRadius
+    if @props.filled then inset += 1
     if @props.horizontal
       (g {},
-        (path {d:"M#{circleRadius} #{center} l #{@props.width - circleRadius} 0", className:"slider-line", stroke:"blue"})
-        (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"blue"})
-        (circle {cx:@props.width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
-        @renderTicks(center, circleRadius)
+        (path {d:"M#{inset} #{center} l #{@props.width - (inset*2)} 0", className:"slider-line", stroke:"blue"})
+        if not @props.filled
+          (g {},
+            (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"blue"})
+            (circle {cx:@props.width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
+          )
+        @renderTicks()
       )
     else
       (g {},
-        (path {d:"M#{center} #{circleRadius} l 0 #{@props.height - circleRadius}", className:"slider-line", stroke:"blue"})
-        (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"blue"})
-        (circle {cx:center, cy:@props.height - circleRadius, r:circleRadius, className:"slider-shape"})
-        @renderTicks(center, circleRadius)
+        (path {d:"M#{center} #{inset} l 0 #{@props.height - (inset*2)}", className:"slider-line", stroke:"blue"})
+        if not @props.filled
+          (g {},
+            (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"blue"})
+            (circle {cx:center, cy:@props.height - circleRadius, r:circleRadius, className:"slider-shape"})
+          )
+        @renderTicks()
       )
 
-  render: ->
+  renderFill: () ->
     center = @thickness() / 2
+    inset = circleRadius + 1
+    if @props.horizontal
+      (path {d:"M#{inset} #{center} l #{@props.width - (inset*2)} 0", className:"slider-line fill-line"})
+    else
+      totalHeight = @props.height - (inset * 2)
+      top = inset + (totalHeight * (1 - @sliderLocation()))
+      height = totalHeight-top
+      if height > 0
+        (g {},
+          (path {d:"M#{center} #{top} l 0 #{height}", className:"slider-line fill-line"}) # flat top
+          (path {d:"M#{center} #{totalHeight} l 0 1", className:"slider-line fill-line cap"})      # rounded bottom
+        )
+
+  render: ->
     lengendHeight = 9 + 4.5
     style =
       padding: "0px"
       border: "0px"
       width: @props.width + (if not @props.horizontal then lengendHeight else 0)
       height: @props.height + (if @props.horizontal then lengendHeight else 0)
-    circleRadius = 2
     classNames = "value-slider"
     if not @props.horizontal then classNames += " vertical"
     if not @props.enabled then classNames += " disabled"
+    if @props.filled then classNames += " filled"
     (div {className: classNames, style: style},
       (svg {className: "svg-background", width: "#{@props.width}px", height:"#{@props.height}px", viewBox: "0 0 #{@props.width} #{@props.height}"},
-        @renderLine(center, circleRadius)
+        @renderLine()
+        if @props.filled
+          @renderFill()
       )
-      @renderHandle()
-      @renderLegend()
+      if @props.showHandle
+        @renderHandle()
+      if @props.showLabels
+        @renderLegend()
     )
 
 module.exports = ValueSlider
@@ -262,33 +299,70 @@ Demo = React.createClass
       min: range.min
       max: range.max
   render: ->
-    (div {},
-      Slider
-        value: @state.value
-        min: @state.min
-        max: @state.max
-        stepSize: 25
-        showTicks: true
-        snapToSteps: true
-        minEditable: true
-        maxEditable: true
-        onValueChange: @onValueChange
-        onRangeChange: @onRangeChange
+    (div {style: {display: "flex"}},
+      (div {},
+        Slider
+          value: @state.value
+          min: @state.min
+          max: @state.max
+          stepSize: 25
+          showTicks: true
+          snapToSteps: true
+          minEditable: true
+          maxEditable: true
+          onValueChange: @onValueChange
+          onRangeChange: @onRangeChange
 
-      Slider
-        horizontal: false
-        height:  72
-        width: 20
-        value: @state.value
-        min: @state.min
-        max: @state.max
-        stepSize: 25
-        showTicks: true
-        snapToSteps: true
-        minEditable: true
-        maxEditable: true
-        onValueChange: @onValueChange
-        onRangeChange: @onRangeChange
+        Slider
+          horizontal: false
+          height:  72
+          width: 20
+          value: @state.value
+          min: @state.min
+          max: @state.max
+          stepSize: 25
+          showTicks: true
+          snapToSteps: true
+          minEditable: true
+          maxEditable: true
+          onValueChange: @onValueChange
+          onRangeChange: @onRangeChange
+      )
+      (div {},
+        Slider
+          horizontal: false
+          filled: true
+          showLabels: false
+          showHandle: true
+          renderValueTooltip: false
+          height:  72
+          width: 20
+          value: @state.value
+          min: @state.min
+          max: @state.max
+          stepSize: 1
+          minEditable: true
+          maxEditable: true
+          onValueChange: @onValueChange
+          onRangeChange: @onRangeChange
+      )
+      (div {},
+        Slider
+          horizontal: false
+          filled: true
+          showLabels: false
+          showHandle: false
+          height:  72
+          width: 20
+          value: @state.value
+          min: @state.min
+          max: @state.max
+          stepSize: 1
+          minEditable: true
+          maxEditable: true
+          onValueChange: @onValueChange
+          onRangeChange: @onRangeChange
+      )
     )
 
 window.testComponent = (domID) -> ReactDOM.render React.createElement(Demo,{}), domID

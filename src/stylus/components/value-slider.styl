@@ -1,3 +1,6 @@
+gray-fill   = #dbdbea
+orange-fill = #e99373
+
 .value-slider
   position relative
   margin 1em
@@ -82,3 +85,21 @@
       background-color #DDD
     .legend
       color rgba(1, 136, 158, 0.42)
+
+  &.filled
+    .value-slider-handle
+      background-color orange-fill
+      orange-fill
+
+    .slider-line
+      stroke gray-fill
+      fill none
+      stroke-width 8
+      stroke-linecap round
+
+      &.fill-line
+        stroke orange-fill
+        stroke-linecap butt
+
+        &.cap
+          stroke-linecap round
