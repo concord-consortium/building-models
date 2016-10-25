@@ -26,9 +26,6 @@ module.exports = React.createClass
   renderControls: ->
     wrapperClasses = "buttons flow"
     if @state.simulationPanelExpanded then wrapperClasses += " expanded"
-    recordStreamAction = SimulationStore.actions.recordStream
-    if @state.isRecording
-      recordStreamAction = SimulationStore.actions.stopRecording
 
     (div {className: wrapperClasses},
       (RecordButton
@@ -36,29 +33,48 @@ module.exports = React.createClass
         disabled: @state.isRecording || !@state.modelIsRunnable
         ,
         (div {className: "horizontal"},
-          (span {}, tr "Record 1")
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
           (i className: "icon-codap-camera")
         )
         (div {className: "horizontal"},
-          (span {}, tr "Data Point")
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.POINT")
         )
       )
+      @renderRecordStreamButton()
+    )
 
-      (RecordButton
-        onClick: recordStreamAction
-        includeLight: true
-        recording: @state.isRecording
-        disabled: !@state.modelIsRunnable
-        ,
+  renderRecordStreamButton: ->
+    recordStreamAction = SimulationStore.actions.recordStream
+
+    if @state.isRecording
+      recordStreamAction = SimulationStore.actions.stopRecording
+
+    props =
+      onClick: recordStreamAction
+      includeLight: true
+      recording: @state.isRecording
+      disabled: !@state.modelIsRunnable
+
+    if @state.isRecording
+      (RecordButton props,
         (div {className: 'horizontal'},
-          (span {}, tr "Record")
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.STOP")
           (i {className: "icon-codap-video-camera"})
         )
         (div {className: 'horizontal'},
-          (span {}, tr "Data Stream")
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORDING")
         )
       )
-    )
+    else
+      (RecordButton props,
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD")
+          (i {className: "icon-codap-video-camera"})
+        )
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.STREAM")
+        )
+      )
 
   render: ->
     (div {className: "simulation-run-panel"},
