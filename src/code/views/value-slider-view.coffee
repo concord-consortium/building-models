@@ -142,8 +142,12 @@ ValueSlider = React.createClass
     if not @props.displaySemiQuant
       label = @renderNumber()
     else label = null
+
+    classNames = "icon-codap-smallSliderLines"
+    if not @props.horizontal then classNames += " rotated"
+
     (div {className: "value-slider-handle", style: style, ref: "handle"},
-      (i {className: "icon-codap-smallSliderLines"})
+      (i {className: classNames})
       ( label )
     )
 
