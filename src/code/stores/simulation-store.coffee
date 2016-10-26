@@ -18,6 +18,10 @@ SimulationActions = Reflux.createActions(
     "simulationFramesCreated"
     "simulationEnded"
     "capNodeValues"
+    "recordStream"
+    "recordOne"
+    "recordPeriod"
+    "stopRecording"
   ]
 )
 
@@ -36,7 +40,7 @@ SimulationStore   = Reflux.createStore
 
     @settings =
       simulationPanelExpanded: false
-      duration: 10
+      duration: 50
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: options
@@ -44,7 +48,10 @@ SimulationStore   = Reflux.createStore
       capNodeValues: false
       modelIsRunning: false         # currently running?
       modelReadyToRun: true         # has been reset?
-      modelIsRunnable: true         # is the model valid?
+      # is the model valid?
+      modelIsRunnable: @_checkModelIsRunnable()
+      graphHasCollector: @_checkForCollectors()
+      isRecording: false            # sending data to codap?
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -61,6 +68,7 @@ SimulationStore   = Reflux.createStore
   onGraphChanged: (data)->
     @nodes = data.nodes
     @settings.modelIsRunnable = @_checkModelIsRunnable()
+    @settings.graphHasCollector = @_checkForCollectors()
     @notifyChange()
 
   onSetDuration: (n) ->
@@ -129,10 +137,37 @@ SimulationStore   = Reflux.createStore
     @settings.modelReadyToRun = true
     @notifyChange()
 
+  onStopRecording: ->
+    @settings.isRecording = false
+    @notifyChange()
+
+  onRecordOne: ->
+    @settings.isRecording = true
+    stopRecording = ->
+      SimulationActions.stopRecording()
+    @timeout = setTimeout(stopRecording, 500)
+    @notifyChange()
+
+  onRecordStream: ->
+    @settings.isRecording = true
+    @notifyChange()
+
+  onRecordPeriod: ->
+    @settings.isRecording = true
+    stopRecording = ->
+      SimulationActions.stopRecording()
+    @timeout = setTimeout(stopRecording, 500)
+    @notifyChange()
+
   _checkModelIsRunnable: ->
     for node in @nodes
       for link in node.links
         if link.relation.isDefined then return true
+    false
+
+  _checkForCollectors: ->
+    for node in @nodes
+      if node.isAccumulator then return true
     false
 
   _getErrorMessage: ->

@@ -1,9 +1,21 @@
 @require 'mixins/fonts'
 @require 'mixins/blender-box-colors'
+@keyframes blink {
+  from {
+    background-color hsl(0, 100%,80%)
+    box-shadow: 0 0 0em hsla(0,0%,100%,0)
+  }
 
+  to {
+    background-color hsl(0, 100%, 70%)
+    box-shadow: 0 0 0.5em hsla(0,0%,100%,1)
+  }
+}
 .simulation-run-panel, .simulation-run-panel>.flow
   display flex
   justify-content flex-end
+  input[type="number"]
+    margin-left 0.5em
   .toggle-title
     position: relative
     left: 34px
@@ -23,7 +35,18 @@
     transition: width 0.4s
     &.expanded
       width: 205px
+  .horizontal
+    display flex
+    flex-direction row
+    justify-content flex-end
+    align-items center
+  .vertical
+    display flex
+    flex-direction column
+    justify-content center
+    align-items stretch
   .button
+    height 25px
     cursor pointer
     display inline-block
     label-font()
@@ -33,15 +56,42 @@
     padding 3px 6px 3px 6px
     margin 3px
     display flex
-    align-items center
+    flex-wrap wrap
+    flex-direction column
     justify-content center
+    align-items stretch
+    font-size 10px
     i
-      padding 5px
-      font-size 17px
+      padding-left 4px
+      padding-right 0px
+      font-size 12px
       &:hover
         color white
+    .recording-box
+      border-left 0.5px solid white
+      height: 100%
+      .recording-light
+        width 10px
+        height 10px
+        margin-left: 5px
+        border-radius 50%
+        background-color: white;
+        &.recording
+          animation-duration 0.4s
+          animation-name blink
+          animation-iteration-count infinite
+          animation-direction alternate
+    &.bigger
+      flex-grow 2
+    &.recording:not(.disabled)
+      background-color dark-blue
+    span
+      line-height 1.2
+      letter-spacing 0.2
+      word-spacing 1.2
+
     &.disabled
-      background-color light-blue
+      background-color disabled-gray
       cursor default
       i
         cursor default
