@@ -60,7 +60,7 @@ module.exports = class DiagramToolkit
       isSource: true
       dropOptions:
         activeClass: "dragActive"
-      anchor: "Center"
+      anchor: "Bottom"
       connectorStyle : { strokeStyle:"#666" }
       endpoint: @_endpointOptions("Rectangle", 19, 'node-link-button')
       connectorOverlays: [["Arrow", {location:1.0, width:10, length:10}]]
@@ -168,17 +168,17 @@ module.exports = class DiagramToolkit
     paintStyle = @_paintStyle LinkColors.default
     paintStyle.outlineColor = "none"
     paintStyle.outlineWidth = 4
-    
+
     startColor = LinkColors.default
     finalColor = LinkColors.default
     fixedColor = LinkColors.default
     fadedColor = LinkColors.defaultFaded
     changeIndicator = ''
-    
+
     thickness = Math.abs(opts.magnitude)
     if (!thickness)
       thickness = 1
-    
+
     if opts.isDashed
       paintStyle.dashstyle = "4 2"
       fixedColor = fixedColor = LinkColors.dashed
@@ -200,7 +200,7 @@ module.exports = class DiagramToolkit
 
     paintStyle.lineWidth = thickness
     startColor = finalColor
-    
+
     if (opts.useGradient)
       startColor = finalColor = fixedColor
       if opts.gradual < 0
@@ -208,13 +208,13 @@ module.exports = class DiagramToolkit
       if opts.gradual > 0
         startColor = fadedColor
       paintStyle.gradient = @_gradient startColor, finalColor
-      
+
     paintStyle.strokeStyle = fixedColor
     paintStyle.vertical = true
-    
+
     variableWidthMagnitude = 0
     arrowFoldback = 0.6
-    
+
     if (opts.gradual && opts.useVariableThickness)
       variableWidthMagnitude = @lineWidthVariation * opts.gradual
       arrowFoldback = 0.8
@@ -236,7 +236,7 @@ module.exports = class DiagramToolkit
     connection.bind 'click', @handleClick.bind @
     connection.bind 'dblclick', @handleDoubleClick.bind @
     connection.linkModel = opts.linkModel
-    
+
     @kit.importDefaults
       Connector: ["Bezier", {curviness: 60, variableWidth: null}]
 
