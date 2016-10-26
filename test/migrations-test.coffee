@@ -1,4 +1,5 @@
 Migrations     = require "../src/code/data/migrations/migrations"
+TimeUnits      = require "../src/code/utils/time-units"
 originalData   = require "./serialized-test-data/v-0.1"
 
 chai   = require('chai')
@@ -90,7 +91,7 @@ describe "Migrations",  ->
     describe "v-1.8 changes", ->
       it "should have settings for the simulation", ->
         @result.settings.simulation.duration.should.equal 10
-        @result.settings.simulation.stepUnits.should.equal "STEP"
+        @result.settings.simulation.stepUnits.should.equal TimeUnits.defaultUnit
 
     describe "v-1.9 changes", ->
       it "should have speed setting", ->
