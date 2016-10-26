@@ -66,7 +66,7 @@
       padding-right 0px
       font-size 12px
       &:hover
-        color white
+        color inherit
     .recording-box
       border-left 0.5px solid white
       height: 100%
@@ -91,11 +91,16 @@
       word-spacing 1.2
 
     &.disabled
-      background-color disabled-gray
+      background-color button-disabled
+      color button-disabled-text
       cursor default
+      .recording-box
+        border-color button-disabled-text
+      .recording-light
+        background-color button-disabled-text
       i
         cursor default
     &.error
       background-color light-red
     &:hover:not(.disabled)
-      background-color dark-gray
+      background-color button-hover
