@@ -23,10 +23,6 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.rotated {
-	writing-mode: vertical-rl;
-}
-
 .icon-codap-table2:before {
 	content: "\31";
 }
