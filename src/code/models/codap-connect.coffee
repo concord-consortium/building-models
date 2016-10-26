@@ -216,6 +216,7 @@ module.exports = class CodapConnect
 
   createGraph: (yAttributeName)->
     @_createCollection()
+    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
 
     @codapPhone.call
       action: 'create',
