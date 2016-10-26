@@ -27,11 +27,12 @@ module.exports = React.createClass
       classes.push("error")
     if @props.recording
       classes.push("recording")
+    if @props.includeLight
+      classes.push("bigger")
     classes.join(" ")
 
   render: ->
     verticalStyle = {}
-    classNames = []
     if @props.includeLight
       verticalStyle = {'padding-right':'0.5em'}
     if @props.disabled

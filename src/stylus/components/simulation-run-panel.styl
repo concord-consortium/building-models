@@ -38,7 +38,7 @@
   .horizontal
     display flex
     flex-direction row
-    justify-content space-between
+    justify-content flex-end
     align-items center
   .vertical
     display flex
@@ -60,7 +60,6 @@
     flex-direction column
     justify-content center
     align-items stretch
-    max-width 150px
     font-size 10px
     i
       padding-left 4px
@@ -82,6 +81,8 @@
           animation-name blink
           animation-iteration-count infinite
           animation-direction alternate
+    &.bigger
+      flex-grow 2
     &.recording:not(.disabled)
       background-color dark-blue
     span
