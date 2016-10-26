@@ -268,7 +268,9 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
             showMinigraph: @state.showingMinigraphs
-            showGraphButton: @props.graphStore.codapStandaloneMode and not @state.diagramOnly
+            # showGraphButton: @props.graphStore.codapStandaloneMode and not @state.diagramOnly
+            # for now, show graph button whenever we are in simulation mode
+            showGraphButton: not @state.diagramOnly
           })
       )
     )

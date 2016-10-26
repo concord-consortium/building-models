@@ -231,7 +231,7 @@ module.exports = NodeView = React.createClass
         (div {},
           (div {className: "actions"},
             (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
-            if @props.selected and @props.showGraphButton
+            if @props.showGraphButton
               (div {
                 className: "graph-source action-circle icon-codap-graph",
                 onClick: (=> @handleGraphClick @props.data.title)
