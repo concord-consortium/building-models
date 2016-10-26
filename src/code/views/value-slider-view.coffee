@@ -39,9 +39,7 @@ ValueSlider = React.createClass
     "editing-max": false
 
   updateValue: (locValue,dragging) ->
-    console.log("locValue = "+locValue)
     value = @valueFromSliderUI(locValue)
-    console.log("  value = "+value)
     @props.onValueChange value
 
   updateRange: (property, value) ->
