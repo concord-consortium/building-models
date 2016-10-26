@@ -267,7 +267,7 @@ ValueSlider = React.createClass
     style =
       padding: "0px"
       border: "0px"
-      width: @props.width + (if not @props.horizontal then lengendHeight else 0)
+      width: @props.width + (if not @props.horizontal and not @props.filled then lengendHeight else 0)
       height: @props.height + (if @props.horizontal then lengendHeight else 0)
     classNames = "value-slider"
     if not @props.horizontal then classNames += " vertical"

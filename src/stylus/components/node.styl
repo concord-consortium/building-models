@@ -11,10 +11,10 @@ $node-design-height = 94px
 .elm
   box-sizing border-box
   border-top 6px solid transparent
-  background-color transparent  
+  background-color transparent
   height auto
-  
-  
+
+
   .top
     height auto
     margin-top 6px
@@ -26,7 +26,7 @@ $node-design-height = 94px
     width $big-elm-width
   .debugging
     opacity 0.5
-    
+
   input
     -moz-user-select text
     -webkit-user-select text
@@ -110,7 +110,7 @@ $node-design-height = 94px
   &.selected
     box-shadow 0px 0px 3px hsla(0,0,0,0.3)
     background-color white
-    
+
     .bottom
       border-radius 0px 0px 5px 5px
       box-sizing content-box
@@ -163,6 +163,8 @@ $node-design-height = 94px
 
   .value-slider
     margin 0px
+    margin-left: -16px
+    margin-top: 13px
 
   .delete-box
     margin 2px
@@ -193,11 +195,12 @@ $node-design-height = 94px
     -webkit-box-shadow 0px 0px 30px 0px rgba(255,179,0,1)
     -moz-box-shadow 0px 0px 30px 0px rgba(255,179,0,1)
     box-shadow 0px 0px 30px 0px rgba(255,179,0,1)
-    
+
 .link-target
   margin-top 6px
   margin-bottom 6px
   height $node-design-height
+  display: flex
   &.simulate
     height auto
 

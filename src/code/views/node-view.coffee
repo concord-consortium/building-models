@@ -167,7 +167,11 @@ module.exports = NodeView = React.createClass
     if not @props.data.canEditInitialValue() then return null
     enabled = not @props.running or @props.data.canEditValueWhileRunning()
     (SliderView
-      width: 70
+      horizontal: false
+      filled: true
+      height: 44
+      width: 15
+      showLabels: false
       onValueChange: @changeValue
       value: @props.data.initialValue
       displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
@@ -198,10 +202,9 @@ module.exports = NodeView = React.createClass
     classes.join " "
 
   nodeSliderClasses: ->
-    classes = ['bottom','centered-block']
     if @props.simulating and @props.data.canEditInitialValue()
-      classes.push 'slider'
-    classes.join " "
+      "slider"
+    else ""
 
   renderNodeInternal: ->
     if @props.showMinigraph
@@ -225,36 +228,38 @@ module.exports = NodeView = React.createClass
 
     (div { className: @nodeClasses(), ref: "node", style: style},
       (div {className: @linkTargetClasses(), "data-node-key": @props.nodeKey},
-        (div {className: "actions"},
-          (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
-          if @props.selected and @props.showGraphButton
-            (div {
-              className: "graph-source action-circle icon-codap-graph",
-              onClick: (=> @handleGraphClick @props.data.title)
-            })
-        )
-
-        (div {className: @topClasses(), "data-node-key": @props.nodeKey},
-          (div {
-            className: "img-background"
-            onClick: (=> @handleSelected true)
-            onTouchend: (=> @handleSelected true)
-            },
-            @renderNodeInternal()
+        (div {},
+          (div {className: "actions"},
+            (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
+            if @props.selected and @props.showGraphButton
+              (div {
+                className: "graph-source action-circle icon-codap-graph",
+                onClick: (=> @handleGraphClick @props.data.title)
+              })
           )
-          (NodeTitle {
-            isEditing: @props.editTitle
-            title: @props.data.title
-            onChange: @changeTitle
-            onStopEditing: @stopEditing
-            onStartEditing: @startEditing
-          })
+
+          (div {className: @topClasses(), "data-node-key": @props.nodeKey},
+            (div {
+              className: "img-background"
+              onClick: (=> @handleSelected true)
+              onTouchend: (=> @handleSelected true)
+              },
+              @renderNodeInternal()
+            )
+            (NodeTitle {
+              isEditing: @props.editTitle
+              title: @props.data.title
+              onChange: @changeTitle
+              onStopEditing: @stopEditing
+              onStartEditing: @startEditing
+            })
+          )
         )
         (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},
           if @props.simulating
-            (div {className: 'centered-block'},
-              if not @props.data.valueDefinedSemiQuantitatively
-                @renderValue()
+            (div {},
+              # if not @props.data.valueDefinedSemiQuantitatively
+              #   @renderValue()     # not sure if we plan to render value
               @renderSliderView()
             )
         )
