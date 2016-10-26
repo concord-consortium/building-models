@@ -187,7 +187,7 @@ module.exports = class CodapConnect
   _sendUndoToCODAP: ->
     @codapPhone.call
       action: 'notify',
-      resource: 'UndoChangeNotice'
+      resource: 'undoChangeNotice'
       values: {
         operation: 'undoAction'
       }
@@ -195,7 +195,7 @@ module.exports = class CodapConnect
   _sendRedoToCODAP: ->
     @codapPhone.call
       action: 'notify',
-      resource: 'UndoChangeNotice'
+      resource: 'undoChangeNotice'
       values: {
         operation: 'redoAction'
       }
@@ -208,7 +208,7 @@ module.exports = class CodapConnect
   sendUndoableActionPerformed: (logMessage) ->
     @codapPhone.call
       action: 'notify',
-      resource: 'UndoChangeNotice'
+      resource: 'undoChangeNotice'
       values: {
         operation: 'undoableActionPerformed',
         logMessage: logMessage
@@ -248,7 +248,7 @@ module.exports = class CodapConnect
           callback
             success: true
             state: @graphStore.serialize paletteManager.store.palette
-      when 'UndoChangeNotice'
+      when 'undoChangeNotice'
         if operation is 'undoAction'
           log.info 'Received undoAction request from CODAP.'
           successes = @graphStore.undo(true)
