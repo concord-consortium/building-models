@@ -28,13 +28,14 @@
       margin-left: -2px
       transform: scale(1,1.4)
       -webkit-transform: scale(1,1.4)
+      padding-right: 0px
   .buttons
     overflow: hidden
-    width: 0px
-    webkit-transition: width 0.4s
-    transition: width 0.4s
-    &.expanded
-      width: 205px
+    transition: max-width 0.4s
+    max-width 400px
+    &.closed
+      max-width: 0px
+      transition: max-width 0.4s
   .horizontal
     display flex
     flex-direction row
@@ -60,7 +61,7 @@
     flex-direction column
     justify-content center
     align-items stretch
-    font-size 10px
+    font-size 11px
     i
       padding-left 4px
       padding-right 0px
@@ -82,7 +83,7 @@
           animation-iteration-count infinite
           animation-direction alternate
     &.bigger
-      flex-grow 2
+      width 100px
     &.recording:not(.disabled)
       background-color dark-blue
     span

@@ -30,7 +30,7 @@ module.exports = React.createClass
 
   renderControls: ->
     wrapperClasses = "buttons flow"
-    if @state.simulationPanelExpanded then wrapperClasses += " expanded"
+    if !@state.simulationPanelExpanded then wrapperClasses += " closed"
     disabled = (@state.isRecording && !@state.isRecordingOne) || !@state.modelIsRunnable
     if @state.graphHasCollector
       (div {className: wrapperClasses},
