@@ -60395,7 +60395,7 @@ module.exports = CodapConnect = (function() {
 
   function CodapConnect(context) {
     this.codapRequestHandler = bind(this.codapRequestHandler, this);
-    var GraphStore;
+    var GraphStore, sampleDataAttrs, timeUnit;
     log.info('CodapConnect: initializing');
     GraphStore = require('../stores/graph-store');
     this.graphStore = GraphStore.store;
@@ -60403,51 +60403,91 @@ module.exports = CodapConnect = (function() {
     SimulationStore.actions.simulationFramesCreated.listen(this._sendSimulationData.bind(this));
     CodapActions.sendUndoToCODAP.listen(this._sendUndoToCODAP.bind(this));
     CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
-    this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'codap-game', window.parent);
+    this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'data-interactive', window.parent);
     this.codapPhone.call({
-      action: 'initGame',
-      args: {
-        name: this.name,
-        dimensions: {
-          width: 800,
-          height: 600
-        },
-        collections: [
-          {
-            name: 'Simulation',
-            attrs: [
-              {
-                name: tr('~CODAP.SIMULATION.RUN'),
-                formula: 'caseIndex',
-                type: 'nominal'
-              }, {
-                name: tr('~CODAP.SIMULATION.STEPS'),
-                type: 'numeric',
-                formula: 'count(Steps)',
-                description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
-                precision: 0
-              }
-            ]
-          }
-        ],
-        contextType: 'DG.DataContext'
+      action: 'get',
+      resource: 'interactiveFrame'
+    }, (function(_this) {
+      return function(ret) {
+        var state;
+        state = ret.values.savedState;
+        if (state != null) {
+          _this.graphStore.deleteAll();
+          return _this.graphStore.loadData(state);
+        }
+      };
+    })(this));
+    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
+    sampleDataAttrs = [
+      {
+        name: timeUnit,
+        type: "numeric"
       }
-    }, this.initGameHandler);
+    ];
+    this.codapPhone.call({
+      action: 'get',
+      resource: 'dataContext[Sage Simulation]'
+    }, (function(_this) {
+      return function(ret) {
+        if (ret != null ? ret.success : void 0) {
+          return _this.initGameHandler;
+        } else {
+          return _this.codapPhone.call({
+            action: 'create',
+            resource: 'dataContext',
+            values: {
+              name: 'Sage Simulation',
+              title: 'Sage Simulation',
+              collections: [
+                {
+                  name: 'Simulation',
+                  title: 'Sage Simulation',
+                  labels: {
+                    singleCase: 'run',
+                    pluralCase: 'runs'
+                  },
+                  attrs: [
+                    {
+                      name: tr('~CODAP.SIMULATION.RUN'),
+                      formula: 'caseIndex',
+                      type: 'nominal'
+                    }, {
+                      name: tr('~CODAP.SIMULATION.STEPS'),
+                      type: 'numeric',
+                      formula: 'count(Steps)',
+                      description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
+                      precision: 0
+                    }
+                  ]
+                }, {
+                  parent: "Simulation",
+                  name: 'Samples',
+                  title: 'Samples',
+                  labels: {
+                    singleCase: 'sample',
+                    pluralCase: 'samples'
+                  },
+                  attrs: sampleDataAttrs
+                }
+              ]
+            }
+          }, _this.initGameHandler);
+        }
+      };
+    })(this));
   }
 
   CodapConnect.prototype._openNewCase = function(nodeNames) {
     this.currentCaseID = null;
     this._createCollection(nodeNames);
     return this.codapPhone.call({
-      action: 'openCase',
-      args: {
-        collection: 'Simulation',
-        values: [null, null]
-      }
+      action: 'create',
+      resource: 'collection[Simulation].case',
+      values: [{}]
     }, (function(_this) {
       return function(result) {
         if (result != null ? result.success : void 0) {
-          _this.currentCaseID = result.caseID;
+          _this.currentCaseID = result.values[0].id;
           _this.stepsInCurrentCase = 0;
           _this._flushQueue();
           if (!_this.standaloneMode) {
@@ -60492,49 +60532,59 @@ module.exports = CodapConnect = (function() {
       });
     }
     return this.codapPhone.call({
-      action: 'createCollection',
-      args: {
-        name: 'Samples',
-        attrs: sampleDataAttrs
-      }
+      action: 'create',
+      resource: 'collection[Samples].attribute',
+      values: sampleDataAttrs
     });
   };
 
   CodapConnect.prototype._sendSimulationData = function(data) {
-    var sampleData;
+    var sampleData, timeUnit;
     if (!this.currentCaseID) {
       this.queue.push(data);
       return;
     }
-    sampleData = _.map(data, function(frame) {
-      var sample;
-      sample = [frame.time];
-      _.each(frame.nodes, function(n) {
-        return sample.push(n.value);
-      });
-      return sample;
-    });
+    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
+    sampleData = _.map(data, (function(_this) {
+      return function(frame) {
+        var sample;
+        sample = {
+          parent: _this.currentCaseID,
+          values: {}
+        };
+        sample.values[timeUnit] = frame.time;
+        _.each(frame.nodes, function(n) {
+          return sample.values[n.title] = n.value;
+        });
+        return sample;
+      };
+    })(this));
     if (sampleData.length > 0) {
       return this.codapPhone.call({
-        action: 'createCases',
-        args: {
-          collection: 'Samples',
-          parent: this.currentCaseID,
-          values: sampleData
-        }
+        action: 'create',
+        resource: "collection[Samples].case",
+        values: sampleData
       });
     }
   };
 
   CodapConnect.prototype._sendUndoToCODAP = function() {
     return this.codapPhone.call({
-      action: 'undo'
+      action: 'notify',
+      resource: 'undoChangeNotice',
+      values: {
+        operation: 'undoAction'
+      }
     });
   };
 
   CodapConnect.prototype._sendRedoToCODAP = function() {
     return this.codapPhone.call({
-      action: 'redo'
+      action: 'notify',
+      resource: 'undoChangeNotice',
+      values: {
+        operation: 'redoAction'
+      }
     });
   };
 
@@ -60550,110 +60600,87 @@ module.exports = CodapConnect = (function() {
 
   CodapConnect.prototype.sendUndoableActionPerformed = function(logMessage) {
     return this.codapPhone.call({
-      action: 'undoableActionPerformed',
-      args: {
+      action: 'notify',
+      resource: 'undoChangeNotice',
+      values: {
+        operation: 'undoableActionPerformed',
         logMessage: logMessage
       }
     });
   };
 
   CodapConnect.prototype.createGraph = function(yAttributeName) {
-    var nodes, sampleDataAttrs, timeUnit;
+    var timeUnit;
+    this._createCollection();
     timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
-    nodes = this.graphStore.getNodes();
-    sampleDataAttrs = [
-      {
-        name: timeUnit,
-        type: "numeric"
-      }
-    ];
-    _.each(nodes, function(node) {
-      var type;
-      type = node.valueDefinedSemiQuantitatively ? 'qualitative' : 'numeric';
-      return sampleDataAttrs.push({
-        name: node.title,
-        type: type
-      });
-    });
-    this.codapPhone.call({
-      action: 'createCollection',
-      args: {
-        name: 'Samples',
-        attrs: sampleDataAttrs
-      }
-    });
     return this.codapPhone.call({
-      action: 'createComponent',
-      args: {
-        type: 'DG.GraphView',
+      action: 'create',
+      resource: 'component',
+      values: {
+        type: 'graph',
         xAttributeName: timeUnit,
         yAttributeName: yAttributeName,
         size: {
           width: 242,
           height: 221
         },
-        position: 'bottom',
-        log: false
+        position: 'bottom'
       }
     });
   };
 
   CodapConnect.prototype.createTable = function(yAttributeName) {
     return this.codapPhone.call({
-      action: 'createComponent',
-      args: {
-        type: 'DG.TableView',
-        log: false
+      action: 'create',
+      resource: 'component',
+      values: {
+        type: 'caseTable'
       }
     });
   };
 
   CodapConnect.prototype.codapRequestHandler = function(cmd, callback) {
-    var args, operation, paletteManager, successes;
-    operation = cmd.operation;
-    args = cmd.args;
+    var action, operation, paletteManager, ref, resource, successes;
+    resource = cmd.resource;
+    action = cmd.action;
+    operation = (ref = cmd.values) != null ? ref.operation : void 0;
     paletteManager = require('../stores/palette-store');
-    switch (operation) {
-      case 'saveState':
-        log.info('Received saveState request from CODAP.');
-        return callback({
-          success: true,
-          state: this.graphStore.serialize(paletteManager.store.palette)
-        });
-      case 'restoreState':
-        log.info('Received restoreState request from CODAP.');
-        this.graphStore.deleteAll();
-        this.graphStore.loadData(args.state);
-        return callback({
-          success: true
-        });
-      case 'externalUndoAvailable':
-        log.info('Received externalUndoAvailable request from CODAP.');
-        return CodapActions.hideUndoRedo();
-      case 'standaloneUndoModeAvailable':
-        log.info('Received standaloneUndoModeAvailable request from CODAP.');
-        this.standaloneMode = true;
-        return this.graphStore.setCodapStandaloneMode(true);
-      case 'undoAction':
-        log.info('Received undoAction request from CODAP.');
-        successes = this.graphStore.undo(true);
-        return callback({
-          success: this.reduceSuccesses(successes) !== false
-        });
-      case 'redoAction':
-        log.info('Received redoAction request from CODAP.');
-        successes = this.graphStore.redo(true);
-        return callback({
-          success: this.reduceSuccesses(successes) !== false
-        });
-      case 'clearUndo':
-        log.info('Received clearUndo request from CODAP.');
-        return this.graphStore.undoRedoManager.clearHistory();
-      case 'clearRedo':
-        log.info('Received clearRedo request from CODAP.');
-        return this.graphStore.undoRedoManager.clearRedo();
+    switch (resource) {
+      case 'interactiveState':
+        if (action === 'get') {
+          log.info('Received saveState request from CODAP.');
+          return callback({
+            success: true,
+            state: this.graphStore.serialize(paletteManager.store.palette)
+          });
+        }
+        break;
+      case 'undoChangeNotice':
+        if (operation === 'undoAction') {
+          log.info('Received undoAction request from CODAP.');
+          successes = this.graphStore.undo(true);
+          callback({
+            success: this.reduceSuccesses(successes) !== false
+          });
+        }
+        if (operation === 'redoAction') {
+          log.info('Received redoAction request from CODAP.');
+          successes = this.graphStore.redo(true);
+          callback({
+            success: this.reduceSuccesses(successes) !== false
+          });
+        }
+        if (operation === 'clearUndo') {
+          log.info('Received clearUndo request from CODAP.');
+          this.graphStore.undoRedoManager.clearHistory();
+        }
+        if (operation === 'clearRedo') {
+          log.info('Received clearRedo request from CODAP.');
+          return this.graphStore.undoRedoManager.clearRedo();
+        }
+        break;
       default:
-        return log.info('Unknown request received from CODAP: ' + operation);
+        return log.info('Unknown request received from CODAP: ' + JSON.stringify(cmd));
     }
   };
 
