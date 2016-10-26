@@ -7,8 +7,8 @@ module.exports = NodeSvgGraphView = React.createClass
   mixins: [ SimulationStore.mixin ]
 
   getDefaultProps: ->
-    width: 46
-    height: 46
+    width: 48
+    height: 48
     strokeWidth: 3
     min: 0
     max: 100
@@ -50,7 +50,7 @@ module.exports = NodeSvgGraphView = React.createClass
 
   renderLineData: ->
     data = @pointsToPath(@getPathPoints())
-    (path {d: data, strokeWidth: @props.strokeWidth, stroke: "#a1d083", fill: "none"})
+    (path {d: data, strokeWidth: @props.strokeWidth, stroke: "#e99373", fill: "none"})
 
   render: ->
     (div {},
