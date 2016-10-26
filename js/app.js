@@ -50,7 +50,7 @@ window.Sage = {
 
 
 
-},{"./stores/graph-store":553,"./stores/palette-store":557,"./utils/hash-parameters":563,"./views/app-view":574,"./views/value-slider-view":615}],2:[function(require,module,exports){
+},{"./stores/graph-store":553,"./stores/palette-store":557,"./utils/hash-parameters":563,"./views/app-view":574,"./views/value-slider-view":616}],2:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');
@@ -60395,7 +60395,7 @@ module.exports = CodapConnect = (function() {
 
   function CodapConnect(context) {
     this.codapRequestHandler = bind(this.codapRequestHandler, this);
-    var GraphStore, sampleDataAttrs, timeUnit;
+    var GraphStore;
     log.info('CodapConnect: initializing');
     GraphStore = require('../stores/graph-store');
     this.graphStore = GraphStore.store;
@@ -60403,91 +60403,51 @@ module.exports = CodapConnect = (function() {
     SimulationStore.actions.simulationFramesCreated.listen(this._sendSimulationData.bind(this));
     CodapActions.sendUndoToCODAP.listen(this._sendUndoToCODAP.bind(this));
     CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
-    this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'data-interactive', window.parent);
+    this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'codap-game', window.parent);
     this.codapPhone.call({
-      action: 'get',
-      resource: 'interactiveFrame'
-    }, (function(_this) {
-      return function(ret) {
-        var state;
-        state = ret.values.savedState;
-        if (state != null) {
-          _this.graphStore.deleteAll();
-          return _this.graphStore.loadData(state);
-        }
-      };
-    })(this));
-    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
-    sampleDataAttrs = [
-      {
-        name: timeUnit,
-        type: "numeric"
+      action: 'initGame',
+      args: {
+        name: this.name,
+        dimensions: {
+          width: 800,
+          height: 600
+        },
+        collections: [
+          {
+            name: 'Simulation',
+            attrs: [
+              {
+                name: tr('~CODAP.SIMULATION.RUN'),
+                formula: 'caseIndex',
+                type: 'nominal'
+              }, {
+                name: tr('~CODAP.SIMULATION.STEPS'),
+                type: 'numeric',
+                formula: 'count(Steps)',
+                description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
+                precision: 0
+              }
+            ]
+          }
+        ],
+        contextType: 'DG.DataContext'
       }
-    ];
-    this.codapPhone.call({
-      action: 'get',
-      resource: 'dataContext[Sage Simulation]'
-    }, (function(_this) {
-      return function(ret) {
-        if (ret != null ? ret.success : void 0) {
-          return _this.initGameHandler;
-        } else {
-          return _this.codapPhone.call({
-            action: 'create',
-            resource: 'dataContext',
-            values: {
-              name: 'Sage Simulation',
-              title: 'Sage Simulation',
-              collections: [
-                {
-                  name: 'Simulation',
-                  title: 'Sage Simulation',
-                  labels: {
-                    singleCase: 'run',
-                    pluralCase: 'runs'
-                  },
-                  attrs: [
-                    {
-                      name: tr('~CODAP.SIMULATION.RUN'),
-                      formula: 'caseIndex',
-                      type: 'nominal'
-                    }, {
-                      name: tr('~CODAP.SIMULATION.STEPS'),
-                      type: 'numeric',
-                      formula: 'count(Steps)',
-                      description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
-                      precision: 0
-                    }
-                  ]
-                }, {
-                  parent: "Simulation",
-                  name: 'Samples',
-                  title: 'Samples',
-                  labels: {
-                    singleCase: 'sample',
-                    pluralCase: 'samples'
-                  },
-                  attrs: sampleDataAttrs
-                }
-              ]
-            }
-          }, _this.initGameHandler);
-        }
-      };
-    })(this));
+    }, this.initGameHandler);
   }
 
   CodapConnect.prototype._openNewCase = function(nodeNames) {
     this.currentCaseID = null;
     this._createCollection(nodeNames);
     return this.codapPhone.call({
-      action: 'create',
-      resource: 'collection[Simulation].case',
-      values: [{}]
+      action: 'openCase',
+      args: {
+        collection: 'Simulation',
+        values: [null, null]
+      }
     }, (function(_this) {
       return function(result) {
         if (result != null ? result.success : void 0) {
-          _this.currentCaseID = result.values[0].id;
+          _this.currentCaseID = result.caseID;
           _this.stepsInCurrentCase = 0;
           _this._flushQueue();
           if (!_this.standaloneMode) {
@@ -60532,59 +60492,49 @@ module.exports = CodapConnect = (function() {
       });
     }
     return this.codapPhone.call({
-      action: 'create',
-      resource: 'collection[Samples].attribute',
-      values: sampleDataAttrs
+      action: 'createCollection',
+      args: {
+        name: 'Samples',
+        attrs: sampleDataAttrs
+      }
     });
   };
 
   CodapConnect.prototype._sendSimulationData = function(data) {
-    var sampleData, timeUnit;
+    var sampleData;
     if (!this.currentCaseID) {
       this.queue.push(data);
       return;
     }
-    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
-    sampleData = _.map(data, (function(_this) {
-      return function(frame) {
-        var sample;
-        sample = {
-          parent: _this.currentCaseID,
-          values: {}
-        };
-        sample.values[timeUnit] = frame.time;
-        _.each(frame.nodes, function(n) {
-          return sample.values[n.title] = n.value;
-        });
-        return sample;
-      };
-    })(this));
+    sampleData = _.map(data, function(frame) {
+      var sample;
+      sample = [frame.time];
+      _.each(frame.nodes, function(n) {
+        return sample.push(n.value);
+      });
+      return sample;
+    });
     if (sampleData.length > 0) {
       return this.codapPhone.call({
-        action: 'create',
-        resource: "collection[Samples].case",
-        values: sampleData
+        action: 'createCases',
+        args: {
+          collection: 'Samples',
+          parent: this.currentCaseID,
+          values: sampleData
+        }
       });
     }
   };
 
   CodapConnect.prototype._sendUndoToCODAP = function() {
     return this.codapPhone.call({
-      action: 'notify',
-      resource: 'UndoChangeNotice',
-      values: {
-        operation: 'undoAction'
-      }
+      action: 'undo'
     });
   };
 
   CodapConnect.prototype._sendRedoToCODAP = function() {
     return this.codapPhone.call({
-      action: 'notify',
-      resource: 'UndoChangeNotice',
-      values: {
-        operation: 'redoAction'
-      }
+      action: 'redo'
     });
   };
 
@@ -60600,85 +60550,110 @@ module.exports = CodapConnect = (function() {
 
   CodapConnect.prototype.sendUndoableActionPerformed = function(logMessage) {
     return this.codapPhone.call({
-      action: 'notify',
-      resource: 'UndoChangeNotice',
-      values: {
-        operation: 'undoableActionPerformed',
+      action: 'undoableActionPerformed',
+      args: {
         logMessage: logMessage
       }
     });
   };
 
   CodapConnect.prototype.createGraph = function(yAttributeName) {
-    this._createCollection();
+    var nodes, sampleDataAttrs, timeUnit;
+    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
+    nodes = this.graphStore.getNodes();
+    sampleDataAttrs = [
+      {
+        name: timeUnit,
+        type: "numeric"
+      }
+    ];
+    _.each(nodes, function(node) {
+      var type;
+      type = node.valueDefinedSemiQuantitatively ? 'qualitative' : 'numeric';
+      return sampleDataAttrs.push({
+        name: node.title,
+        type: type
+      });
+    });
+    this.codapPhone.call({
+      action: 'createCollection',
+      args: {
+        name: 'Samples',
+        attrs: sampleDataAttrs
+      }
+    });
     return this.codapPhone.call({
-      action: 'create',
-      resource: 'component',
-      values: {
-        type: 'graph',
+      action: 'createComponent',
+      args: {
+        type: 'DG.GraphView',
         xAttributeName: timeUnit,
         yAttributeName: yAttributeName,
         size: {
           width: 242,
           height: 221
         },
-        position: 'bottom'
+        position: 'bottom',
+        log: false
       }
     });
   };
 
   CodapConnect.prototype.createTable = function(yAttributeName) {
     return this.codapPhone.call({
-      action: 'create',
-      resource: 'component',
-      values: {
-        type: 'caseTable'
+      action: 'createComponent',
+      args: {
+        type: 'DG.TableView',
+        log: false
       }
     });
   };
 
   CodapConnect.prototype.codapRequestHandler = function(cmd, callback) {
-    var action, operation, paletteManager, ref, resource, successes;
-    resource = cmd.resource;
-    action = cmd.action;
-    operation = (ref = cmd.values) != null ? ref.operation : void 0;
+    var args, operation, paletteManager, successes;
+    operation = cmd.operation;
+    args = cmd.args;
     paletteManager = require('../stores/palette-store');
-    switch (resource) {
-      case 'interactiveState':
-        if (action === 'get') {
-          log.info('Received saveState request from CODAP.');
-          return callback({
-            success: true,
-            state: this.graphStore.serialize(paletteManager.store.palette)
-          });
-        }
-        break;
-      case 'UndoChangeNotice':
-        if (operation === 'undoAction') {
-          log.info('Received undoAction request from CODAP.');
-          successes = this.graphStore.undo(true);
-          callback({
-            success: this.reduceSuccesses(successes) !== false
-          });
-        }
-        if (operation === 'redoAction') {
-          log.info('Received redoAction request from CODAP.');
-          successes = this.graphStore.redo(true);
-          callback({
-            success: this.reduceSuccesses(successes) !== false
-          });
-        }
-        if (operation === 'clearUndo') {
-          log.info('Received clearUndo request from CODAP.');
-          this.graphStore.undoRedoManager.clearHistory();
-        }
-        if (operation === 'clearRedo') {
-          log.info('Received clearRedo request from CODAP.');
-          return this.graphStore.undoRedoManager.clearRedo();
-        }
-        break;
+    switch (operation) {
+      case 'saveState':
+        log.info('Received saveState request from CODAP.');
+        return callback({
+          success: true,
+          state: this.graphStore.serialize(paletteManager.store.palette)
+        });
+      case 'restoreState':
+        log.info('Received restoreState request from CODAP.');
+        this.graphStore.deleteAll();
+        this.graphStore.loadData(args.state);
+        return callback({
+          success: true
+        });
+      case 'externalUndoAvailable':
+        log.info('Received externalUndoAvailable request from CODAP.');
+        return CodapActions.hideUndoRedo();
+      case 'standaloneUndoModeAvailable':
+        log.info('Received standaloneUndoModeAvailable request from CODAP.');
+        this.standaloneMode = true;
+        return this.graphStore.setCodapStandaloneMode(true);
+      case 'undoAction':
+        log.info('Received undoAction request from CODAP.');
+        successes = this.graphStore.undo(true);
+        return callback({
+          success: this.reduceSuccesses(successes) !== false
+        });
+      case 'redoAction':
+        log.info('Received redoAction request from CODAP.');
+        successes = this.graphStore.redo(true);
+        return callback({
+          success: this.reduceSuccesses(successes) !== false
+        });
+      case 'clearUndo':
+        log.info('Received clearUndo request from CODAP.');
+        return this.graphStore.undoRedoManager.clearHistory();
+      case 'clearRedo':
+        log.info('Received clearRedo request from CODAP.');
+        return this.graphStore.undoRedoManager.clearRedo();
       default:
-        return log.info('Unknown request received from CODAP: ' + JSON.stringify(cmd));
+        return log.info('Unknown request received from CODAP: ' + operation);
     }
   };
 
@@ -63506,7 +63481,7 @@ TimeUnits = require('../utils/time-units');
 
 tr = require('../utils/translate');
 
-SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "setSpeed", "simulationStarted", "simulationFramesCreated", "simulationEnded", "capNodeValues"]);
+SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "setSpeed", "simulationStarted", "simulationFramesCreated", "simulationEnded", "capNodeValues", "recordStream", "recordOne", "recordPeriod", "stopRecording"]);
 
 SimulationStore = Reflux.createStore({
   listenables: [SimulationActions, AppSettingsActions, ImportActions, GraphActions],
@@ -63531,7 +63506,7 @@ SimulationStore = Reflux.createStore({
     this.currentSimulation = null;
     return this.settings = {
       simulationPanelExpanded: false,
-      duration: 10,
+      duration: 50,
       stepUnits: defaultUnit,
       stepUnitsName: unitName,
       timeUnitOptions: options,
@@ -63539,7 +63514,9 @@ SimulationStore = Reflux.createStore({
       capNodeValues: false,
       modelIsRunning: false,
       modelReadyToRun: true,
-      modelIsRunnable: true
+      modelIsRunnable: this._checkModelIsRunnable(),
+      graphHasCollector: this._checkForCollectors(),
+      isRecording: false
     };
   },
   onDiagramOnly: function() {
@@ -63556,6 +63533,7 @@ SimulationStore = Reflux.createStore({
   onGraphChanged: function(data) {
     this.nodes = data.nodes;
     this.settings.modelIsRunnable = this._checkModelIsRunnable();
+    this.settings.graphHasCollector = this._checkForCollectors();
     return this.notifyChange();
   },
   onSetDuration: function(n) {
@@ -63624,6 +63602,32 @@ SimulationStore = Reflux.createStore({
     this.settings.modelReadyToRun = true;
     return this.notifyChange();
   },
+  onStopRecording: function() {
+    this.settings.isRecording = false;
+    return this.notifyChange();
+  },
+  onRecordOne: function() {
+    var stopRecording;
+    this.settings.isRecording = true;
+    stopRecording = function() {
+      return SimulationActions.stopRecording();
+    };
+    this.timeout = setTimeout(stopRecording, 500);
+    return this.notifyChange();
+  },
+  onRecordStream: function() {
+    this.settings.isRecording = true;
+    return this.notifyChange();
+  },
+  onRecordPeriod: function() {
+    var stopRecording;
+    this.settings.isRecording = true;
+    stopRecording = function() {
+      return SimulationActions.stopRecording();
+    };
+    this.timeout = setTimeout(stopRecording, 500);
+    return this.notifyChange();
+  },
   _checkModelIsRunnable: function() {
     var i, j, len, len1, link, node, ref, ref1;
     ref = this.nodes;
@@ -63635,6 +63639,17 @@ SimulationStore = Reflux.createStore({
         if (link.relation.isDefined) {
           return true;
         }
+      }
+    }
+    return false;
+  },
+  _checkForCollectors: function() {
+    var i, len, node, ref;
+    ref = this.nodes;
+    for (i = 0, len = ref.length; i < len; i++) {
+      node = ref[i];
+      if (node.isAccumulator) {
+        return true;
       }
     }
     return false;
@@ -64238,7 +64253,7 @@ module.exports = DiagramToolkit = (function() {
       dropOptions: {
         activeClass: "dragActive"
       },
-      anchor: "Center",
+      anchor: "Bottom",
       connectorStyle: {
         strokeStyle: "#666"
       },
@@ -64611,6 +64626,12 @@ module.exports = {
   "~FILE.CONFIRM_LAST_SAVE_REVERT": "Are you sure you want to revert to the last save?",
   "~DOCUMENT.ACTIONS.SIMULATE": "Simulate",
   "~DOCUMENT.ACTIONS.RUN": "Run",
+  "~DOCUMENT.ACTIONS.DATA.RECORD-1": "Record 1",
+  "~DOCUMENT.ACTIONS.DATA.POINT": "Data Point",
+  "~DOCUMENT.ACTIONS.DATA.RECORD": "Record",
+  "~DOCUMENT.ACTIONS.DATA.STREAM": "Data Stream",
+  "~DOCUMENT.ACTIONS.DATA.STOP": "Stop",
+  "~DOCUMENT.ACTIONS.DATA.RECORDING": "Recording",
   "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Save to graphs",
   "~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS": "Show mini-graphs",
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode",
@@ -64775,7 +64796,7 @@ toSeconds = function(n, unit) {
 
 module.exports = {
   units: _.keys(units),
-  defaultUnit: "STEP",
+  defaultUnit: "DAY",
   toString: function(unit, plural) {
     var number;
     number = plural ? ".PLURAL" : "";
@@ -65572,7 +65593,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":550,"../stores/codap-store":551,"../utils/translate":571,"./about-view":573,"./simulation-run-panel-view":611}],578:[function(require,module,exports){
+},{"../stores/app-settings-store":550,"../stores/codap-store":551,"../utils/translate":571,"./about-view":573,"./simulation-run-panel-view":612}],578:[function(require,module,exports){
 var Demo, DemoDropDown, DropDown, DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -66228,7 +66249,7 @@ module.exports = React.createClass({
           graphStore: this.props.graphStore,
           selectionManager: this.props.selectionManager,
           showMinigraph: this.state.showingMinigraphs,
-          showGraphButton: this.props.graphStore.codapStandaloneMode && !this.state.diagramOnly
+          showGraphButton: !this.state.diagramOnly
         }));
       }
       return results;
@@ -66297,7 +66318,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":554,"../stores/palette-store":557,"../utils/translate":571,"./image-link-dialog-view":583,"./image-metadata-view":584,"./image-my-computer-dialog-view":585,"./image-search-dialog-view":587,"./modal-tabbed-dialog-view":595,"./tabbed-panel-view":614}],583:[function(require,module,exports){
+},{"../stores/image-dialog-store":554,"../stores/palette-store":557,"../utils/translate":571,"./image-link-dialog-view":583,"./image-metadata-view":584,"./image-my-computer-dialog-view":585,"./image-search-dialog-view":587,"./modal-tabbed-dialog-view":595,"./tabbed-panel-view":615}],583:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -67060,7 +67081,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":589,"./link-value-inspector-view":591,"./node-inspector-view":597,"./node-value-inspector-view":599,"./relation-inspector-view":609,"./simulation-inspector-view":610}],589:[function(require,module,exports){
+},{"./link-inspector-view":589,"./link-value-inspector-view":591,"./node-inspector-view":597,"./node-value-inspector-view":599,"./relation-inspector-view":610,"./simulation-inspector-view":611}],589:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -67369,7 +67390,7 @@ module.exports = LinkRelationView = React.createClass({
 
 
 
-},{"../models/relation-factory":546,"../utils/translate":571,"./svg-graph-view":613}],591:[function(require,module,exports){
+},{"../models/relation-factory":546,"../utils/translate":571,"./svg-graph-view":614}],591:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -67562,7 +67583,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":592,"./tabbed-panel-view":614}],596:[function(require,module,exports){
+},{"./modal-dialog-view":592,"./tabbed-panel-view":615}],596:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -67693,8 +67714,8 @@ module.exports = NodeSvgGraphView = React.createClass({
   mixins: [SimulationStore.mixin],
   getDefaultProps: function() {
     return {
-      width: 46,
-      height: 46,
+      width: 48,
+      height: 48,
       strokeWidth: 3,
       min: 0,
       max: 100,
@@ -67765,7 +67786,7 @@ module.exports = NodeSvgGraphView = React.createClass({
     return path({
       d: data,
       strokeWidth: this.props.strokeWidth,
-      stroke: "#a1d083",
+      stroke: "#e99373",
       fill: "none"
     });
   },
@@ -68172,12 +68193,14 @@ module.exports = NodeView = React.createClass({
   },
   renderSliderView: function() {
     var enabled;
-    if (!this.props.data.canEditInitialValue()) {
-      return null;
-    }
     enabled = !this.props.running || this.props.data.canEditValueWhileRunning();
     return SliderView({
-      width: 70,
+      horizontal: false,
+      filled: true,
+      height: 44,
+      width: 15,
+      showHandle: this.props.data.canEditInitialValue(),
+      showLabels: false,
       onValueChange: this.changeValue,
       value: this.props.data.initialValue,
       displaySemiQuant: this.props.data.valueDefinedSemiQuantitatively,
@@ -68214,12 +68237,11 @@ module.exports = NodeView = React.createClass({
     return classes.join(" ");
   },
   nodeSliderClasses: function() {
-    var classes;
-    classes = ['bottom', 'centered-block'];
     if (this.props.simulating && this.props.data.canEditInitialValue()) {
-      classes.push('slider');
+      return "slider";
+    } else {
+      return "";
     }
-    return classes.join(" ");
   },
   renderNodeInternal: function() {
     if (this.props.showMinigraph) {
@@ -68249,12 +68271,12 @@ module.exports = NodeView = React.createClass({
     }, div({
       className: this.linkTargetClasses(),
       "data-node-key": this.props.nodeKey
-    }, div({
+    }, div({}, div({
       className: "actions"
     }, div({
       className: "connection-source action-circle icon-codap-link",
       "data-node-key": this.props.nodeKey
-    }), this.props.selected && this.props.showGraphButton ? div({
+    }), this.props.showGraphButton ? div({
       className: "graph-source action-circle icon-codap-graph",
       onClick: ((function(_this) {
         return function() {
@@ -68282,12 +68304,10 @@ module.exports = NodeView = React.createClass({
       onChange: this.changeTitle,
       onStopEditing: this.stopEditing,
       onStartEditing: this.startEditing
-    })), div({
+    }))), div({
       className: this.nodeSliderClasses(),
       "data-node-key": this.props.nodeKey
-    }, this.props.simulating ? div({
-      className: 'centered-block'
-    }, !this.props.data.valueDefinedSemiQuantitatively ? this.renderValue() : void 0, this.renderSliderView()) : void 0)));
+    }, this.props.simulating ? div({}, this.renderSliderView()) : void 0)));
   }
 });
 
@@ -68324,7 +68344,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":541,"../models/codap-connect":542,"../utils/translate":571,"./node-svg-graph-view":598,"./square-image-view":612,"./value-slider-view":615}],601:[function(require,module,exports){
+},{"../mixins/node-title":541,"../models/codap-connect":542,"../utils/translate":571,"./node-svg-graph-view":598,"./square-image-view":613,"./value-slider-view":616}],601:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -68663,7 +68683,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":539,"./square-image-view":612}],607:[function(require,module,exports){
+},{"../mixins/draggable":539,"./square-image-view":613}],607:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -68733,6 +68753,83 @@ module.exports = React.createClass({
 
 
 },{"../stores/image-dialog-store":554,"../stores/palette-store":557,"../utils/translate":571,"./image-metadata-view":584}],609:[function(require,module,exports){
+var div, i, ref, span, tr;
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, span = ref.span, i = ref.i;
+
+module.exports = React.createClass({
+  displayName: 'RecordButton',
+  getDefaultProps: function() {
+    return {
+      recording: false,
+      includeLight: false,
+      enabled: true,
+      icon: "icon-codap-video-camera"
+    };
+  },
+  renderRecordingLight: function() {
+    var classNames;
+    if (this.props.includeLight) {
+      classNames = ['recording-light'];
+      if (this.props.recording) {
+        classNames.push('recording');
+      }
+      return div({
+        className: 'recording-box vertical'
+      }, div({
+        className: classNames.join(" ")
+      }));
+    }
+  },
+  classNames: function() {
+    var classes;
+    classes = ["button"];
+    if (this.props.disabled) {
+      classes.push("disabled");
+    }
+    if (this.props.cantRecord) {
+      classes.push("error");
+    }
+    if (this.props.recording) {
+      classes.push("recording");
+    }
+    if (this.props.includeLight) {
+      classes.push("bigger");
+    }
+    return classes.join(" ");
+  },
+  render: function() {
+    var onClick, verticalStyle;
+    verticalStyle = {};
+    if (this.props.includeLight) {
+      verticalStyle = {
+        'padding-right': '0.5em'
+      };
+    }
+    if (this.props.disabled) {
+      onClick = function() {
+        return null;
+      };
+    } else {
+      onClick = this.props.onClick;
+    }
+    return div({
+      className: this.classNames(),
+      onClick: onClick
+    }, div({
+      className: 'horizontal'
+    }, div({
+      className: 'vertical',
+      style: verticalStyle
+    }, this.props.children), this.renderRecordingLight()));
+  }
+});
+
+
+
+},{"../utils/translate":571}],610:[function(require,module,exports){
 var LinkRelationView, RelationFactory, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -68798,7 +68895,7 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 
-},{"../models/relation-factory":546,"../stores/graph-store":553,"../utils/translate":571,"./link-relation-view":590,"./tabbed-panel-view":614}],610:[function(require,module,exports){
+},{"../models/relation-factory":546,"../stores/graph-store":553,"../utils/translate":571,"./link-relation-view":590,"./tabbed-panel-view":615}],611:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -68848,48 +68945,6 @@ module.exports = React.createClass({
     }, div({
       className: "title"
     }, tr("~SIMULATION.SIMULATION_SETTINGS")), div({
-      className: "row tall"
-    }, tr("~SIMULATION.STEP_UNIT"), Dropdown({
-      isActionMenu: false,
-      onSelect: SimulationStore.actions.setStepUnits,
-      anchor: this.state.stepUnitsName,
-      items: this.state.timeUnitOptions
-    })), div({
-      className: "row tall"
-    }, tr("~SIMULATION.DURATION"), input({
-      type: "number",
-      style: {
-        width: (Math.max(4, this.state.duration.toString().length + 1)) + "em"
-      },
-      value: this.state.duration,
-      onChange: this.setDuration
-    })), div({
-      className: "row"
-    }, span({}, "Speed"), div({}, ValueSlider({
-      min: 0,
-      max: 4,
-      value: this.state.speed,
-      width: 100,
-      stepSize: 1,
-      showTicks: true,
-      snapToSteps: true,
-      minLabel: i({
-        className: "icon-codap-speedSlow",
-        style: {
-          fontSize: 15,
-          marginLeft: -5
-        }
-      }),
-      maxLabel: i({
-        className: "icon-codap-speedFast",
-        style: {
-          fontSize: 15,
-          marginRight: -10
-        }
-      }),
-      renderValueTooltip: false,
-      onValueChange: SimulationStore.actions.setSpeed
-    }))), div({
       className: "row"
     }, input({
       type: 'checkbox',
@@ -68926,18 +68981,25 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":550,"../stores/simulation-store":558,"../utils/translate":571,"./dropdown-view":578,"./value-slider-view":615}],611:[function(require,module,exports){
-var SimulationStore, div, i, ref, span, tr;
+},{"../stores/app-settings-store":550,"../stores/simulation-store":558,"../utils/translate":571,"./dropdown-view":578,"./value-slider-view":616}],612:[function(require,module,exports){
+var Dropdown, RecordButton, SimulationStore, div, i, input, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
 
 tr = require('../utils/translate');
 
-ref = React.DOM, div = ref.div, span = ref.span, i = ref.i;
+RecordButton = React.createFactory(require('./record-button-view'));
+
+Dropdown = React.createFactory(require('./dropdown-view'));
+
+ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, input = ref.input;
 
 module.exports = React.createClass({
   displayName: 'SimulationRunPanel',
   mixins: [SimulationStore.mixin],
+  setDuration: function(e) {
+    return SimulationStore.actions.setDuration(parseInt(e.target.value));
+  },
   toggle: function() {
     if (this.state.simulationPanelExpanded) {
       return SimulationStore.actions.collapseSimulationPanel();
@@ -68958,43 +69020,93 @@ module.exports = React.createClass({
     }));
   },
   renderControls: function() {
-    var resetButtonClasses, runButtonClasses, wrapperClasses;
+    var wrapperClasses;
     wrapperClasses = "buttons flow";
     if (this.state.simulationPanelExpanded) {
       wrapperClasses += " expanded";
     }
-    runButtonClasses = "button";
-    if (!this.state.modelIsRunnable) {
-      runButtonClasses += " disabled error";
+    if (this.state.graphHasCollector) {
+      return div({
+        className: wrapperClasses
+      }, this.renderRecordForCollectors());
+    } else {
+      return div({
+        className: wrapperClasses
+      }, RecordButton({
+        onClick: SimulationStore.actions.recordOne,
+        disabled: this.state.isRecording || !this.state.modelIsRunnable
+      }, div({
+        className: "horizontal"
+      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD-1")), i({
+        className: "icon-codap-camera"
+      })), div({
+        className: "horizontal"
+      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.POINT")))), this.renderRecordStreamButton());
     }
-    if (!this.state.modelReadyToRun) {
-      runButtonClasses += " disabled";
+  },
+  renderRecordForCollectors: function() {
+    var props, recordAction;
+    recordAction = SimulationStore.actions.recordPeriod;
+    if (this.state.isRecording) {
+      recordAction = function() {};
     }
-    resetButtonClasses = "button";
-    if (this.state.modelReadyToRun) {
-      resetButtonClasses += " disabled";
-    }
+    props = {
+      onClick: recordAction,
+      includeLight: false,
+      recording: this.state.isRecording,
+      disabled: !this.state.modelIsRunnable
+    };
     return div({
-      className: wrapperClasses
-    }, div({
-      className: runButtonClasses,
-      onClick: SimulationStore.actions.runSimulation
-    }, tr("~DOCUMENT.ACTIONS.RUN"), i({
-      className: "icon-codap-play"
-    })), div({
-      className: resetButtonClasses,
-      onClick: SimulationStore.actions.resetSimulation
-    }, i({
-      className: "icon-codap-controlsReset"
-    })), div({
-      className: "button disabled"
-    }, i({
-      className: "icon-codap-controlsForward"
-    })), div({
-      className: "button disabled"
-    }, i({
-      className: "icon-codap-graph"
-    })));
+      className: 'horizontal'
+    }, RecordButton(props, div({
+      className: 'horizontal'
+    }, span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD")), i({
+      className: "icon-codap-video-camera"
+    }))), input({
+      type: "number",
+      min: 1,
+      max: 1000,
+      style: {
+        width: (Math.max(3, this.state.duration.toString().length + 1)) + "em"
+      },
+      value: this.state.duration,
+      onChange: this.setDuration
+    }), Dropdown({
+      isActionMenu: false,
+      onSelect: SimulationStore.actions.setStepUnits,
+      anchor: this.state.stepUnitsName + "s",
+      items: this.state.timeUnitOptions
+    }));
+  },
+  renderRecordStreamButton: function() {
+    var props, recordAction;
+    recordAction = SimulationStore.actions.recordStream;
+    if (this.state.isRecording) {
+      recordAction = SimulationStore.actions.stopRecording;
+    }
+    props = {
+      onClick: recordAction,
+      includeLight: true,
+      recording: this.state.isRecording,
+      disabled: !this.state.modelIsRunnable
+    };
+    if (this.state.isRecording) {
+      return RecordButton(props, div({
+        className: 'horizontal'
+      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.STOP")), i({
+        className: "icon-codap-video-camera"
+      })), div({
+        className: 'horizontal'
+      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORDING"))));
+    } else {
+      return RecordButton(props, div({
+        className: 'horizontal'
+      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD")), i({
+        className: "icon-codap-video-camera"
+      })), div({
+        className: 'horizontal'
+      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.STREAM"))));
+    }
   },
   render: function() {
     return div({
@@ -69005,7 +69117,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":558,"../utils/translate":571}],612:[function(require,module,exports){
+},{"../stores/simulation-store":558,"../utils/translate":571,"./dropdown-view":578,"./record-button-view":609}],613:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -69046,8 +69158,8 @@ module.exports = React.createClass({
 
 
 
-},{}],613:[function(require,module,exports){
-var RelationFactory, SvgGraphView, div, line, math, myView, path, ref, svg, text, tspan;
+},{}],614:[function(require,module,exports){
+var SvgGraphView, div, line, math, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
 
@@ -69411,22 +69523,9 @@ module.exports = SvgGraphView = React.createClass({
   }
 });
 
-RelationFactory = require("../models/relation-factory");
-
-myView = React.createFactory(SvgGraphView);
-
-window.testComponent = function(domID) {
-  return ReactDOM.render(myView({
-    width: 200,
-    height: 200,
-    yLabel: "this node",
-    xLabel: "input a"
-  }), domID);
-};
 
 
-
-},{"../models/relation-factory":546,"mathjs":102}],614:[function(require,module,exports){
+},{"mathjs":102}],615:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -69533,12 +69632,14 @@ module.exports = React.createClass({
 
 
 
-},{}],615:[function(require,module,exports){
-var Demo, Slider, ValueSlider, circle, div, i, input, label, path, rect, ref, span, svg, tr;
+},{}],616:[function(require,module,exports){
+var Demo, Slider, ValueSlider, circle, circleRadius, div, g, i, input, label, path, rect, ref, span, svg, tr;
 
-ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect;
+ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect, g = ref.g;
 
 tr = require("../utils/translate");
+
+circleRadius = 2;
 
 ValueSlider = React.createClass({
   displayName: 'SVGSlider',
@@ -69554,6 +69655,8 @@ ValueSlider = React.createClass({
       maxEditable: false,
       stepSize: 1,
       showTicks: false,
+      showLabels: true,
+      showHandle: true,
       snapToSteps: false,
       displayPrecision: 0,
       renderValueTooltip: true,
@@ -69561,6 +69664,8 @@ ValueSlider = React.createClass({
       maxLabel: null,
       displaySemiQuant: false,
       enabled: true,
+      horizontal: true,
+      filled: false,
       onValueChange: function(v) {
         return log.info("new value " + v);
       },
@@ -69576,9 +69681,9 @@ ValueSlider = React.createClass({
       "editing-max": false
     };
   },
-  updateValue: function(xValue, dragging) {
+  updateValue: function(locValue, dragging) {
     var value;
-    value = this.valueFromSliderUI(xValue);
+    value = this.valueFromSliderUI(locValue);
     return this.props.onValueChange(value);
   },
   updateRange: function(property, value) {
@@ -69600,22 +69705,34 @@ ValueSlider = React.createClass({
     return this.props.onRangeChange(range);
   },
   componentDidMount: function() {
-    var handle, numTicks, opts, tickDistance;
-    handle = this.refs.handle || this;
+    var handle, loc, numTicks, opts, tickDistance;
+    handle = this.refs.handle;
+    if (!handle) {
+      return;
+    }
+    loc = (function(_this) {
+      return function(ui) {
+        if (_this.props.horizontal) {
+          return ui.position.left;
+        } else {
+          return ui.position.top;
+        }
+      };
+    })(this);
     opts = {
-      axis: "x",
+      axis: this.props.horizontal ? "x" : "y",
       containment: "parent",
       start: (function(_this) {
         return function(event, ui) {
           _this.setState({
             'dragging': true
           });
-          return _this.updateValue(ui.position.left, true);
+          return _this.updateValue(loc(ui), true);
         };
       })(this),
       drag: (function(_this) {
         return function(event, ui) {
-          return _this.updateValue(ui.position.left, true);
+          return _this.updateValue(loc(ui), true);
         };
       })(this),
       stop: (function(_this) {
@@ -69623,14 +69740,14 @@ ValueSlider = React.createClass({
           _this.setState({
             'dragging': false
           });
-          return _this.updateValue(ui.position.left, false);
+          return _this.updateValue(loc(ui), false);
         };
       })(this)
     };
     if (this.props.snapToSteps) {
       numTicks = (this.props.max - this.props.min) / this.props.stepSize;
-      tickDistance = this.props.width / numTicks;
-      opts.grid = [tickDistance, 0];
+      tickDistance = this.length() / numTicks;
+      opts.grid = this.props.horizontal ? [tickDistance, 0] : [0, tickDistance];
     }
     $(handle).draggable(opts);
     if (!this.props.enabled) {
@@ -69639,16 +69756,20 @@ ValueSlider = React.createClass({
   },
   componentDidUpdate: function() {
     var handle;
-    handle = this.refs.handle || this;
+    handle = this.refs.handle;
+    if (!handle) {
+      return;
+    }
     if (this.props.enabled) {
       return $(handle).draggable("enable");
     } else {
       return $(handle).draggable("disable");
     }
   },
-  valueFromSliderUI: function(displayX) {
-    var newV;
-    newV = (displayX / this.props.width * (this.props.max - this.props.min)) + this.props.min;
+  valueFromSliderUI: function(displayPos) {
+    var distance, newV;
+    distance = this.props.horizontal ? displayPos : this.length() - displayPos;
+    newV = (distance / this.length() * (this.props.max - this.props.min)) + this.props.min;
     newV = newV > this.props.max ? this.props.max : newV;
     newV = newV < this.props.min ? this.props.min : newV;
     return Math.round(newV / this.props.stepSize) * this.props.stepSize;
@@ -69657,7 +69778,27 @@ ValueSlider = React.createClass({
     return (this.props.value - this.props.min) / (this.props.max - this.props.min);
   },
   sliderPercent: function() {
-    return this.sliderLocation() * 100;
+    var p;
+    p = this.sliderLocation() * 100;
+    if (this.props.horizontal) {
+      return p;
+    } else {
+      return 100 - p;
+    }
+  },
+  thickness: function() {
+    if (this.props.horizontal) {
+      return this.props.height;
+    } else {
+      return this.props.width;
+    }
+  },
+  length: function() {
+    if (this.props.horizontal) {
+      return this.props.width;
+    } else {
+      return this.props.height;
+    }
   },
   renderNumber: function() {
     var style;
@@ -69673,31 +69814,42 @@ ValueSlider = React.createClass({
     }, this.props.value.toFixed(this.props.displayPrecision));
   },
   renderHandle: function() {
-    var centerOfDiv, height, style, top, width;
+    var centerOfDiv, classNames, height, outerEdge, style, width;
     width = height = this.props.handleSize + "px";
     centerOfDiv = (this.sliderPercent()) + "%";
-    top = Math.round((this.props.height - this.props.handleSize) / 2.0);
+    outerEdge = Math.round((this.thickness() - this.props.handleSize) / 2.0);
     style = {
       "width": width,
       "height": height,
-      "marginLeft": "-" + (this.props.handleSize / 2) + "px",
-      "marginRight": "-" + (this.props.handleSize / 2) + "px",
-      "fontSize": (this.props.handleSize / 2) + "px",
-      "top": top + "px",
-      "left": centerOfDiv
+      "fontSize": (this.props.handleSize / 2) + "px"
     };
+    if (this.props.horizontal) {
+      style.top = outerEdge + "px";
+      style.left = centerOfDiv;
+      style.marginLeft = "-" + (this.props.handleSize / 2) + "px";
+      style.marginRight = "-" + (this.props.handleSize / 2) + "px";
+    } else {
+      style.left = outerEdge + "px";
+      style.top = centerOfDiv;
+      style.marginTop = "-" + (this.props.handleSize / 2) + "px";
+      style.marginBottom = "-" + (this.props.handleSize / 2) + "px";
+    }
     if (!this.props.displaySemiQuant) {
       label = this.renderNumber();
     } else {
       label = null;
     }
-    return div({}, div({
+    classNames = "icon-codap-smallSliderLines";
+    if (!this.props.horizontal) {
+      classNames += " rotated";
+    }
+    return div({
       className: "value-slider-handle",
       style: style,
       ref: "handle"
     }, i({
-      className: "icon-codap-smallSliderLines"
-    }), label));
+      className: classNames
+    }), label);
   },
   renderEditableProperty: function(property) {
     var classNames, isEditable, keyDown, swapState;
@@ -69750,42 +69902,134 @@ ValueSlider = React.createClass({
     }
   },
   renderLegend: function() {
-    return div({
-      className: "legend"
-    }, this.props.minLabel || (this.props.displaySemiQuant ? tr("~NODE-VALUE-EDIT.LOW") : this.renderEditableProperty("min")), this.props.maxLabel || (this.props.displaySemiQuant ? tr("~NODE-VALUE-EDIT.HIGH") : this.renderEditableProperty("max")));
+    var max, min;
+    min = this.props.minLabel || (this.props.displaySemiQuant ? tr("~NODE-VALUE-EDIT.LOW") : this.renderEditableProperty("min"));
+    max = this.props.maxLabel || (this.props.displaySemiQuant ? tr("~NODE-VALUE-EDIT.HIGH") : this.renderEditableProperty("max"));
+    if (this.props.horizontal) {
+      return div({
+        className: "legend"
+      }, min, max);
+    } else {
+      return div({
+        className: "legend",
+        style: {
+          left: this.props.width / 1.7
+        }
+      }, max, min);
+    }
   },
-  renderTicks: function(center, circleRadius) {
-    var j, k, numTicks, ref1, tickDistance, tickHeight, ticks;
+  renderTicks: function() {
+    var center, j, k, numTicks, ref1, tickDistance, tickHeight, ticks;
     if (!this.props.showTicks) {
       return;
     }
+    center = this.thickness() / 2;
     numTicks = (this.props.max - this.props.min) / this.props.stepSize;
-    tickDistance = this.props.width / numTicks;
+    tickDistance = this.length() / numTicks;
     tickHeight = circleRadius * 1.5;
     ticks = [];
     for (j = k = 1, ref1 = numTicks; 1 <= ref1 ? k < ref1 : k > ref1; j = 1 <= ref1 ? ++k : --k) {
-      ticks.push(path({
-        key: j,
-        d: "M" + (j * tickDistance) + " " + (center - tickHeight) + " l 0 " + (tickHeight * 2),
-        className: "slider-line"
-      }));
+      if (this.props.horizontal) {
+        ticks.push(path({
+          key: j,
+          d: "M" + (j * tickDistance) + " " + (center - tickHeight) + " l 0 " + (tickHeight * 2),
+          className: "slider-line"
+        }));
+      } else {
+        ticks.push(path({
+          key: j,
+          d: "M" + (center - tickHeight) + " " + (j * tickDistance) + " l " + (tickHeight * 2) + " 0",
+          className: "slider-line"
+        }));
+      }
     }
     return ticks;
   },
+  renderLine: function() {
+    var center, inset;
+    center = this.thickness() / 2;
+    inset = circleRadius;
+    if (this.props.filled) {
+      inset += 1;
+    }
+    if (this.props.horizontal) {
+      return g({}, path({
+        d: "M" + inset + " " + center + " l " + (this.props.width - (inset * 2)) + " 0",
+        className: "slider-line",
+        stroke: "blue"
+      }), !this.props.filled ? g({}, circle({
+        cx: circleRadius,
+        cy: center,
+        r: circleRadius,
+        className: "slider-shape",
+        stroke: "blue"
+      }), circle({
+        cx: this.props.width - circleRadius,
+        cy: center,
+        r: circleRadius,
+        className: "slider-shape"
+      })) : void 0, this.renderTicks());
+    } else {
+      return g({}, path({
+        d: "M" + center + " " + inset + " l 0 " + (this.props.height - (inset * 2)),
+        className: "slider-line",
+        stroke: "blue"
+      }), !this.props.filled ? g({}, circle({
+        cx: center,
+        cy: circleRadius,
+        r: circleRadius,
+        className: "slider-shape",
+        stroke: "blue"
+      }), circle({
+        cx: center,
+        cy: this.props.height - circleRadius,
+        r: circleRadius,
+        className: "slider-shape"
+      })) : void 0, this.renderTicks());
+    }
+  },
+  renderFill: function() {
+    var center, height, inset, top, totalHeight;
+    center = this.thickness() / 2;
+    inset = circleRadius + 1;
+    if (this.props.horizontal) {
+      return path({
+        d: "M" + inset + " " + center + " l " + (this.props.width - (inset * 2)) + " 0",
+        className: "slider-line fill-line"
+      });
+    } else {
+      totalHeight = this.props.height - (inset * 2);
+      top = inset + (totalHeight * (1 - this.sliderLocation()));
+      height = totalHeight - top;
+      if (height > 0) {
+        return g({}, path({
+          d: "M" + center + " " + top + " l 0 " + height,
+          className: "slider-line fill-line"
+        }), path({
+          d: "M" + center + " " + totalHeight + " l 0 1",
+          className: "slider-line fill-line cap"
+        }));
+      }
+    }
+  },
   render: function() {
-    var center, circleRadius, classNames, lengendHeight, style;
-    center = this.props.height / 2;
+    var classNames, lengendHeight, style;
     lengendHeight = 9 + 4.5;
     style = {
       padding: "0px",
       border: "0px",
-      width: this.props.width + "px",
-      minHeight: (this.props.height + lengendHeight) + "px"
+      width: this.props.width + (!this.props.horizontal && !this.props.filled ? lengendHeight : 0),
+      height: this.props.height + (this.props.horizontal ? lengendHeight : 0)
     };
-    circleRadius = 2;
     classNames = "value-slider";
+    if (!this.props.horizontal) {
+      classNames += " vertical";
+    }
     if (!this.props.enabled) {
       classNames += " disabled";
+    }
+    if (this.props.filled) {
+      classNames += " filled";
     }
     return div({
       className: classNames,
@@ -69795,22 +70039,7 @@ ValueSlider = React.createClass({
       width: this.props.width + "px",
       height: this.props.height + "px",
       viewBox: "0 0 " + this.props.width + " " + this.props.height
-    }, path({
-      d: "M" + circleRadius + " " + center + " l " + (this.props.width - circleRadius) + " 0",
-      className: "slider-line",
-      stroke: "blue"
-    }), circle({
-      cx: circleRadius,
-      cy: center,
-      r: circleRadius,
-      className: "slider-shape",
-      stroke: "blue"
-    }), circle({
-      cx: this.props.width - circleRadius,
-      cy: center,
-      r: circleRadius,
-      className: "slider-shape"
-    }), this.renderTicks(center, circleRadius)), this.renderHandle(), this.renderLegend());
+    }, this.renderLine(), this.props.filled ? this.renderFill() : void 0), this.props.showHandle ? this.renderHandle() : void 0, this.props.showLabels ? this.renderLegend() : void 0);
   }
 });
 
@@ -69838,7 +70067,11 @@ Demo = React.createClass({
     });
   },
   render: function() {
-    return div({}, Slider({
+    return div({
+      style: {
+        display: "flex"
+      }
+    }, div({}, Slider({
       value: this.state.value,
       min: this.state.min,
       max: this.state.max,
@@ -69849,9 +70082,58 @@ Demo = React.createClass({
       maxEditable: true,
       onValueChange: this.onValueChange,
       onRangeChange: this.onRangeChange
-    }));
+    }), Slider({
+      horizontal: false,
+      height: 72,
+      width: 20,
+      value: this.state.value,
+      min: this.state.min,
+      max: this.state.max,
+      stepSize: 25,
+      showTicks: true,
+      snapToSteps: true,
+      minEditable: true,
+      maxEditable: true,
+      onValueChange: this.onValueChange,
+      onRangeChange: this.onRangeChange
+    })), div({}, Slider({
+      horizontal: false,
+      filled: true,
+      showLabels: false,
+      showHandle: true,
+      renderValueTooltip: false,
+      height: 72,
+      width: 20,
+      value: this.state.value,
+      min: this.state.min,
+      max: this.state.max,
+      stepSize: 1,
+      minEditable: true,
+      maxEditable: true,
+      onValueChange: this.onValueChange,
+      onRangeChange: this.onRangeChange
+    })), div({}, Slider({
+      horizontal: false,
+      filled: true,
+      showLabels: false,
+      showHandle: false,
+      height: 72,
+      width: 20,
+      value: this.state.value,
+      min: this.state.min,
+      max: this.state.max,
+      stepSize: 1,
+      minEditable: true,
+      maxEditable: true,
+      onValueChange: this.onValueChange,
+      onRangeChange: this.onRangeChange
+    })));
   }
 });
+
+window.testComponent = function(domID) {
+  return ReactDOM.render(React.createElement(Demo, {}), domID);
+};
 
 
 
