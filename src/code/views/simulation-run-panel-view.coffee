@@ -31,7 +31,7 @@ module.exports = React.createClass
   renderControls: ->
     wrapperClasses = "buttons flow"
     if @state.simulationPanelExpanded then wrapperClasses += " expanded"
-
+    disabled = (@state.isRecording && !@state.isRecordingOne) || !@state.modelIsRunnable
     if @state.graphHasCollector
       (div {className: wrapperClasses},
         @renderRecordForCollectors()
@@ -40,7 +40,7 @@ module.exports = React.createClass
       (div {className: wrapperClasses},
         (RecordButton
           onClick: SimulationStore.actions.recordOne
-          disabled: @state.isRecording || !@state.modelIsRunnable
+          disabled: disabled
           ,
           (div {className: "horizontal"},
             (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
@@ -96,8 +96,8 @@ module.exports = React.createClass
     props =
       onClick: recordAction
       includeLight: true
-      recording: @state.isRecording
-      disabled: !@state.modelIsRunnable
+      recording: @state.isRecordingStream
+      disabled: !@state.modelIsRunnable || @state.isRecordingOne
 
     if @state.isRecording
       (RecordButton props,

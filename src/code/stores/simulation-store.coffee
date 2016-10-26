@@ -52,6 +52,9 @@ SimulationStore   = Reflux.createStore
       modelIsRunnable: @_checkModelIsRunnable()
       graphHasCollector: @_checkForCollectors()
       isRecording: false            # sending data to codap?
+      isRecordingOne: false         # record-1 pressed?
+      isRecordingStream: false      # record stream pressed?
+      isRecordingPeriod: false      # record n units' pressed?
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -139,10 +142,14 @@ SimulationStore   = Reflux.createStore
 
   onStopRecording: ->
     @settings.isRecording = false
+    @settings.isRecordingOne = false
+    @settings.isRecordingStream = false
+    @settings.isRecordingPeriod = false
     @notifyChange()
 
   onRecordOne: ->
     @settings.isRecording = true
+    @settings.isRecordingOne = true
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)
@@ -150,10 +157,12 @@ SimulationStore   = Reflux.createStore
 
   onRecordStream: ->
     @settings.isRecording = true
+    @settings.isRecordingStream = true
     @notifyChange()
 
   onRecordPeriod: ->
     @settings.isRecording = true
+    @settings.isRecordingPeriod = true
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)
