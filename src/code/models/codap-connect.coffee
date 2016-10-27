@@ -38,11 +38,18 @@ module.exports = class CodapConnect
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
       'data-interactive', window.parent )
 
-    # load any previous data
+    # load any previous data; also check if CODAP's undo is available,
+    # or if we are in standalone mode
     @codapPhone.call
       action: 'get',
       resource: 'interactiveFrame'
     , (ret) =>
+      if ret.values.externalUndoAvailable
+        CodapActions.hideUndoRedo()
+      else if ret.values.standaloneUndoModeAvailable
+        @standaloneMode = true
+        @graphStore.setCodapStandaloneMode true
+
       state = ret.values.savedState
       if state?
         @graphStore.deleteAll()
@@ -267,18 +274,6 @@ module.exports = class CodapConnect
           @graphStore.undoRedoManager.clearRedo()
       else
         log.info 'Unknown request received from CODAP: ' + JSON.stringify cmd
-
-
-    # switch operation
-
-    #   when 'externalUndoAvailable'
-    #     log.info 'Received externalUndoAvailable request from CODAP.'
-    #     CodapActions.hideUndoRedo()
-
-    #   when 'standaloneUndoModeAvailable'
-    #     log.info 'Received standaloneUndoModeAvailable request from CODAP.'
-    #     @standaloneMode = true
-    #     @graphStore.setCodapStandaloneMode true
 
 
 
