@@ -28,13 +28,14 @@
       margin-left: -2px
       transform: scale(1,1.4)
       -webkit-transform: scale(1,1.4)
+      padding-right: 0px
   .buttons
     overflow: hidden
-    width: 0px
-    webkit-transition: width 0.4s
-    transition: width 0.4s
-    &.expanded
-      width: 205px
+    transition: max-width 0.4s
+    max-width 400px
+    &.closed
+      max-width: 0px
+      transition: max-width 0.4s
   .horizontal
     display flex
     flex-direction row
@@ -60,13 +61,13 @@
     flex-direction column
     justify-content center
     align-items stretch
-    font-size 10px
+    font-size 11px
     i
       padding-left 4px
       padding-right 0px
       font-size 12px
       &:hover
-        color white
+        color inherit
     .recording-box
       border-left 0.5px solid white
       height: 100%
@@ -82,7 +83,7 @@
           animation-iteration-count infinite
           animation-direction alternate
     &.bigger
-      flex-grow 2
+      width 100px
     &.recording:not(.disabled)
       background-color dark-blue
     span
@@ -91,11 +92,16 @@
       word-spacing 1.2
 
     &.disabled
-      background-color disabled-gray
+      background-color button-disabled
+      color button-disabled-text
       cursor default
+      .recording-box
+        border-color button-disabled-text
+      .recording-light
+        background-color button-disabled-text
       i
         cursor default
     &.error
       background-color light-red
     &:hover:not(.disabled)
-      background-color dark-gray
+      background-color button-hover
