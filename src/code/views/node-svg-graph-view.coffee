@@ -15,7 +15,7 @@ module.exports = NodeSvgGraphView = React.createClass
     data: []
 
   invertPoint: (point) ->
-    {x: point.x, y: @props.height - point.y}
+    {x: @props.width - point.x, y: @props.height - point.y}
 
   graphMapPoint: (point) ->
     x = point.x * @props.width
@@ -30,16 +30,16 @@ module.exports = NodeSvgGraphView = React.createClass
     "M #{data}"
 
   getPathPoints: ->
-    max = @props.max
-    min = @props.min
-
+    max  = @props.max
+    min  = @props.min
     data = @props.data
+
+    rangex = @state.duration - 1
+    data = _.takeRight(data, rangex).reverse()
 
     for point in data
       if point > max then max = point
       if point < min then min = point
-
-    rangex = @state.duration - 1
     rangey = max - min
 
     data = _.map data, (d, i) ->

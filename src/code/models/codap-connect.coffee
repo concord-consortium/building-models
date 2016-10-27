@@ -29,8 +29,8 @@ module.exports = class CodapConnect
     GraphStore = require '../stores/graph-store'
     @graphStore = GraphStore.store
 
-    SimulationStore.actions.simulationStarted.listen       @_openNewCase.bind(@)
-    SimulationStore.actions.simulationFramesCreated.listen @_sendSimulationData.bind(@)
+    SimulationStore.actions.recordingDidStart.listen       @_openNewCase.bind(@)
+    SimulationStore.actions.recordingDidEnd.listen @_sendSimulationData.bind(@)
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
     CodapActions.sendRedoToCODAP.listen @_sendRedoToCODAP.bind(@)
 

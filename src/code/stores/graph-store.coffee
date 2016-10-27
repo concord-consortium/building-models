@@ -42,10 +42,6 @@ GraphStore  = Reflux.createStore
       for node, i in frame.nodes
         nodes[i].frames.push node.value
 
-    if AppSettingsStore.store.settings.showingMinigraphs
-      @updateListeners()
-
-
   paletteDelete: (status) ->
     {deleted,paletteItem,replacement} = status
     if deleted and paletteItem and replacement

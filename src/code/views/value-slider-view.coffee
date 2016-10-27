@@ -59,9 +59,11 @@ ValueSlider = React.createClass
     @props.onRangeChange range
 
   componentDidMount: ->
+    @enableDragging()
+
+  enableDragging: ->
     handle   = @refs.handle
     return unless handle
-
     loc = (ui) =>
       if @props.horizontal then ui.position.left else ui.position.top
     opts =
@@ -84,17 +86,14 @@ ValueSlider = React.createClass
       opts.grid = if @props.horizontal then [tickDistance, 0] else [0, tickDistance]
 
     $(handle).draggable opts
+
     if not @props.enabled
       $(handle).draggable( "disable" )
+    else
+      $(handle).draggable( "enable" )
 
   componentDidUpdate: ->
-    handle = @refs.handle
-    return unless handle
-
-    if @props.enabled
-      $(handle).draggable( "enable" )
-    else
-      $(handle).draggable( "disable" )
+    @enableDragging()
 
   valueFromSliderUI: (displayPos) ->
     distance = if @props.horizontal then displayPos else @length() - displayPos

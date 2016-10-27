@@ -20,6 +20,7 @@ module.exports = React.createClass
       SimulationStore.actions.collapseSimulationPanel()
     else
       SimulationStore.actions.expandSimulationPanel()
+      SimulationStore.actions.runSimulation()
 
   renderToggleButton: ->
     iconClass = if @state.simulationPanelExpanded then "inspectorArrow-collapse" else "inspectorArrow-expand"

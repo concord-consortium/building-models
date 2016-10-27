@@ -22,6 +22,8 @@ SimulationActions = Reflux.createActions(
     "recordOne"
     "recordPeriod"
     "stopRecording"
+    "recordingDidStart"
+    "recordingDidEnd"
   ]
 )
 
@@ -66,12 +68,15 @@ SimulationStore   = Reflux.createStore
 
   onCollapseSimulationPanel: ->
     @settings.simulationPanelExpanded = false
+    SimulationActions.simulationEnded()
     @notifyChange()
 
   onGraphChanged: (data)->
     @nodes = data.nodes
     @settings.modelIsRunnable = @_checkModelIsRunnable()
     @settings.graphHasCollector = @_checkForCollectors()
+    if @settings.modelIsRunning
+      @_runSimulation()
     @notifyChange()
 
   onSetDuration: (n) ->
@@ -98,23 +103,29 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onRunSimulation: ->
+    @_runSimulation()
+
+  _runSimulation: ->
     if @settings.modelIsRunnable and @settings.modelReadyToRun
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
+      duration = 1
+      if @settings.graphHasCollector
+        duration = @settings.duration
       @notifyChange()
       @currentSimulation = new Simulation
         nodes: @nodes
-        duration: @settings.duration
+        duration: duration
         speed: @settings.speed
         capNodeValues: @settings.capNodeValues
 
-
         # Simulation events get triggered as Actions here, and are
         # available to anyone who listens to this store
-        onStart: (nodeNames) ->
-          SimulationActions.simulationStarted(nodeNames)
         onFrames: (frames) ->
           SimulationActions.simulationFramesCreated(frames)
+
+        onStart: (nodeNames) ->
+          SimulationActions.simulationStarted(nodeNames)
         onEnd: ->
           SimulationActions.simulationEnded()
 
@@ -126,11 +137,10 @@ SimulationStore   = Reflux.createStore
 
   onSimulationStarted: ->
     @settings.modelIsRunning = true
-    @settings.modelReadyToRun = false
+    @settings.modelReadyToRun = true
     @notifyChange()
 
   onSimulationEnded: ->
-    @settings.modelIsRunning = false
     @currentSimulation = null
     @notifyChange()
 
