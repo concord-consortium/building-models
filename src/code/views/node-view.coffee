@@ -165,15 +165,18 @@ module.exports = NodeView = React.createClass
 
   renderSliderView: ->
     enabled = not @props.running or @props.data.canEditValueWhileRunning()
+    showHandle = @props.data.canEditInitialValue()
+    value = @props.data.currentValue or @props.data.initialValue
+
     (SliderView
       horizontal: false
       filled: true
       height: 44
       width: 15
-      showHandle: @props.data.canEditInitialValue()
+      showHandle: showHandle
       showLabels: false
       onValueChange: @changeValue
-      value: @props.data.initialValue
+      value: value
       displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
       max: @props.data.max
       min: @props.data.min
