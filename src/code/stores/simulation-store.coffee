@@ -64,20 +64,21 @@ SimulationStore   = Reflux.createStore
 
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
+    @settings.modelReadyToRun = true
+    @settings.modelIsRunning = true
     @notifyChange()
 
   onCollapseSimulationPanel: ->
     @settings.simulationPanelExpanded = false
-    SimulationActions.simulationEnded()
+    @settings.modelReadyToRun = false
+    @settings.modelIsRunning = false
     @notifyChange()
 
   onGraphChanged: (data)->
     @nodes = data.nodes
     @settings.modelIsRunnable = @_checkModelIsRunnable()
     @settings.graphHasCollector = @_checkForCollectors()
-    if @settings.modelIsRunning
-      @_runSimulation()
-    @notifyChange()
+    @_runSimulation()
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
@@ -109,6 +110,7 @@ SimulationStore   = Reflux.createStore
     if @settings.modelIsRunnable and @settings.modelReadyToRun
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
+      @settings.modelIsRunning = true
       duration = 1
       if @settings.graphHasCollector
         duration = @settings.duration
@@ -131,22 +133,12 @@ SimulationStore   = Reflux.createStore
 
       @currentSimulation.run()
 
-    else if not @settings.modelIsRunnable
-      error = @_getErrorMessage()
-      alert error
 
   onSimulationStarted: ->
-    @settings.modelIsRunning = true
-    @settings.modelReadyToRun = true
     @notifyChange()
 
   onSimulationEnded: ->
-    @currentSimulation = null
-    @notifyChange()
-
-  onResetSimulation: ->
-    if @settings.modelIsRunning and @currentSimulation
-      @currentSimulation.stop()
+    @settings.modelIsRunning = false
     @settings.modelReadyToRun = true
     @notifyChange()
 

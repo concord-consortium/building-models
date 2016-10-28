@@ -27,7 +27,7 @@ paletteStore   = Reflux.createStore
       link: ''
       license: ''
     @imageMetadata = _.clone @blankMetadata, true
-    @undoManger = UndoRedo.instance debug:true
+    @undoManger = UndoRedo.instance debug:false
 
   initializeLibrary: ->
     @library = {}

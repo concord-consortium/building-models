@@ -44,17 +44,19 @@ module.exports = class CodapConnect
       action: 'get',
       resource: 'interactiveFrame'
     , (ret) =>
-      if ret.values.externalUndoAvailable
-        CodapActions.hideUndoRedo()
-      else if ret.values.standaloneUndoModeAvailable
-        @standaloneMode = true
-        @graphStore.setCodapStandaloneMode true
+      if ret
+        if ret.values.externalUndoAvailable
+          CodapActions.hideUndoRedo()
+        else if ret.values.standaloneUndoModeAvailable
+          @standaloneMode = true
+          @graphStore.setCodapStandaloneMode true
 
-      state = ret.values.savedState
-      if state?
-        @graphStore.deleteAll()
-        @graphStore.loadData state
-
+        state = ret.values.savedState
+        if state?
+          @graphStore.deleteAll()
+          @graphStore.loadData state
+      else
+        log.info "null response in codap-connect codapPhone.call"
 
     timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
     sampleDataAttrs = [

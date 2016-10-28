@@ -20,7 +20,7 @@ GraphStore  = Reflux.createStore
     @filename           = null
     @filenameListeners  = []
 
-    @undoRedoManager    = UndoRedo.instance debug:true, context:context
+    @undoRedoManager    = UndoRedo.instance debug:false, context:context
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 

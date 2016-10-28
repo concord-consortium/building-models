@@ -11,7 +11,7 @@ store = Reflux.createStore
 
   init: ->
     @initValues()
-    @undoManger = UndoRedo.instance debug:true
+    @undoManger = UndoRedo.instance debug:false
 
   initValues: ->
     @showing         = false
