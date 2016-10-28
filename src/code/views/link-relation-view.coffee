@@ -169,21 +169,28 @@ module.exports = LinkRelationView = React.createClass
       )
       (div {className: 'bottom'},
         (div {className: 'graph', id:'relation-graph'},
-          (Graph {xAxis: source, yAxis: target, link: @props.link, graphStore: @props.graphStore})
+          (Graph
+            xAxis: source
+            yAxis: target
+            link: @props.link
+            graphStore: @props.graphStore
+          )
         )
       )
-      if @props.link.relation.isCustomRelationship and not @props.link.relation.customData?
-        (div {className: 'graph-hint'},
-          (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM_HINT"} ")
-        )
-      (div {className: 'fixed-bottom'},
+
+      (div {className: 'bottom'},
         (div {},
           (span {}, "#{tr "~NODE-RELATION-EDIT.BECAUSE"} ")
         )
-        (textarea {
-          defaultValue: @props.link.reasoning, onBlur: @updateReasoning, ref: 'reasoning',
-          className: 'full', rows: 3, style: { overflowY: "scroll", resize: "none"}
-        })
+        (textarea
+          defaultValue: @props.link.reasoning
+          placeholder: tr "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER"
+          onBlur: @updateReasoning
+          ref: 'reasoning'
+          className: 'full'
+          rows: 3
+          style: { overflowY: "scroll", resize: "none"}
+        )
       )
     )
 
