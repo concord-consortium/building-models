@@ -54,6 +54,7 @@ module.exports =
   "~NODE-RELATION-EDIT.CUSTOM": "as described below:"
   "~NODE-RELATION-EDIT.CUSTOM_HINT": "Draw relationship here"
   "~NODE-RELATION-EDIT.BECAUSE": "because"
+  "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER": "Write your explanation here."
 
   "~LINK-EDIT.DELETE": "✖ Delete Link"
   "~LINK-EDIT.TITLE": "Title"

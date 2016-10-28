@@ -19,8 +19,12 @@ colored-span(color)
 
   .link-relation-view
     box-sizing border-box
-    line-height 1.5em
+    line-height 1.3em
     margin-left 12px
+    height 300px
+    width 100%;
+    overflow-y auto
+    overflow-x hidden
     .source
       colored-span(green-blue)
 
@@ -60,33 +64,18 @@ colored-span(color)
   .left
     text-align left
 
+  .bottom
+    width 100%
+    margin-top 8px
+
   .graph
-    position absolute
-    bottom 290px
     color #02889d
     width 100%
     margin 0px
     padding 0px
-    margin-top 20px
+    margin-top 10px
     font-size 14px
 
-  .graph-hint
-    position absolute
-    top 120px
-    width 100px
-    text-align center
-    line-height 1em
-    right 121px
-    color #AAA
-    -webkit-user-select none
-    -moz-user-select none
-    -ms-user-select none
-
-  .fixed-bottom
-    position absolute
-    bottom 84px
-    width 210px
-    font-size 0.9em
 
     ::-webkit-scrollbar {
         -webkit-appearance: none;
