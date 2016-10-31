@@ -13,9 +13,9 @@ SimulationActions = Reflux.createActions(
     "resetSimulation"
     "setDuration"
     "setStepUnits"
-    "setSpeed"
     "simulationStarted"
     "simulationFramesCreated"
+    "recordingFramesCreated"
     "simulationEnded"
     "capNodeValues"
     "recordStream"
@@ -78,7 +78,9 @@ SimulationStore   = Reflux.createStore
     @nodes = data.nodes
     @settings.modelIsRunnable = @_checkModelIsRunnable()
     @settings.graphHasCollector = @_checkForCollectors()
-    @_runSimulation()
+    # TODO:  This can't go here: We want this for 'real time' simulations
+    # But we need something with better granularity.
+    # @_runSimulation()
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
@@ -93,11 +95,6 @@ SimulationStore   = Reflux.createStore
     _.merge @settings, data.settings.simulation
     @notifyChange()
 
-  onSetSpeed: (s) ->
-    @settings.speed = s
-    if @currentSimulation
-      @currentSimulation.setSpeed s
-    @notifyChange()
 
   onCapNodeValues: (cap) ->
     @settings.capNodeValues = cap
@@ -106,12 +103,11 @@ SimulationStore   = Reflux.createStore
   onRunSimulation: ->
     @_runSimulation()
 
-  _runSimulation: ->
+  _runSimulation: (duration=1)->
     if @settings.modelIsRunnable and @settings.modelReadyToRun
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
       @settings.modelIsRunning = true
-      duration = 1
       if @settings.graphHasCollector
         duration = @settings.duration
       @notifyChange()
@@ -120,14 +116,17 @@ SimulationStore   = Reflux.createStore
         duration: duration
         speed: @settings.speed
         capNodeValues: @settings.capNodeValues
-
-        # Simulation events get triggered as Actions here, and are
-        # available to anyone who listens to this store
-        onFrames: (frames) ->
+        # TODO: I am not sure if we care about these events anymore
+        # now that recording is decoupled from simulation...
+        onFrames: (frames) =>
           SimulationActions.simulationFramesCreated(frames)
+          if @settings.isRecording
+            SimulationActions.recordingFramesCreated(frames)
 
-        onStart: (nodeNames) ->
+        onStart: (nodeNames) =>
           SimulationActions.simulationStarted(nodeNames)
+          if @settings.isRecording
+            SimulationActions.recordingDidStart(nodeNames)
         onEnd: ->
           SimulationActions.simulationEnded()
 
@@ -142,15 +141,22 @@ SimulationStore   = Reflux.createStore
     @settings.modelReadyToRun = true
     @notifyChange()
 
-  onStopRecording: ->
+  _startRecording: ->
+    @settings.isRecording = true
+
+  _stopRecording: ->
     @settings.isRecording = false
     @settings.isRecordingOne = false
     @settings.isRecordingStream = false
     @settings.isRecordingPeriod = false
+    SimulationActions.recordingDidEnd()
+
+  onStopRecording: ->
+    @_stopRecording()
     @notifyChange()
 
   onRecordOne: ->
-    @settings.isRecording = true
+    @_startRecording()
     @settings.isRecordingOne = true
     stopRecording = ->
       SimulationActions.stopRecording()
@@ -158,13 +164,14 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   onRecordStream: ->
-    @settings.isRecording = true
+    @_startRecording()
     @settings.isRecordingStream = true
     @notifyChange()
 
   onRecordPeriod: ->
-    @settings.isRecording = true
+    @_startRecording()
     @settings.isRecordingPeriod = true
+    @_runSimulation(@settings.duration)
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)
