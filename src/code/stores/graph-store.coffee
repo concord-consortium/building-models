@@ -20,7 +20,7 @@ GraphStore  = Reflux.createStore
     @filename           = null
     @filenameListeners  = []
 
-    @undoRedoManager    = UndoRedo.instance debug:true, context:context
+    @undoRedoManager    = UndoRedo.instance debug:false, context:context
     @selectionManager   = new SelectionManager()
     PaletteDeleteStore.store.listen @paletteDelete.bind(@)
 
@@ -41,10 +41,6 @@ GraphStore  = Reflux.createStore
     for frame in data
       for node, i in frame.nodes
         nodes[i].frames.push node.value
-
-    if AppSettingsStore.store.settings.showingMinigraphs
-      @updateListeners()
-
 
   paletteDelete: (status) ->
     {deleted,paletteItem,replacement} = status

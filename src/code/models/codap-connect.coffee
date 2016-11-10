@@ -29,8 +29,8 @@ module.exports = class CodapConnect
     GraphStore = require '../stores/graph-store'
     @graphStore = GraphStore.store
 
-    SimulationStore.actions.simulationStarted.listen       @_openNewCase.bind(@)
-    SimulationStore.actions.simulationFramesCreated.listen @_sendSimulationData.bind(@)
+    SimulationStore.actions.recordingDidStart.listen       @_openNewCase.bind(@)
+    SimulationStore.actions.recordingDidEnd.listen @_sendSimulationData.bind(@)
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
     CodapActions.sendRedoToCODAP.listen @_sendRedoToCODAP.bind(@)
 
@@ -44,17 +44,19 @@ module.exports = class CodapConnect
       action: 'get',
       resource: 'interactiveFrame'
     , (ret) =>
-      if ret.values.externalUndoAvailable
-        CodapActions.hideUndoRedo()
-      else if ret.values.standaloneUndoModeAvailable
-        @standaloneMode = true
-        @graphStore.setCodapStandaloneMode true
+      if ret
+        if ret.values.externalUndoAvailable
+          CodapActions.hideUndoRedo()
+        else if ret.values.standaloneUndoModeAvailable
+          @standaloneMode = true
+          @graphStore.setCodapStandaloneMode true
 
-      state = ret.values.savedState
-      if state?
-        @graphStore.deleteAll()
-        @graphStore.loadData state
-
+        state = ret.values.savedState
+        if state?
+          @graphStore.deleteAll()
+          @graphStore.loadData state
+      else
+        log.info "null response in codap-connect codapPhone.call"
 
     timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
     sampleDataAttrs = [

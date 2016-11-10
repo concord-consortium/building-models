@@ -1,4 +1,6 @@
-{svg, path, line, text, div, tspan} = React.DOM
+{svg, path, line, text, div, tspan, span} = React.DOM
+
+tr   = require "../utils/translate"
 math = require 'mathjs'  # For formula parsing...
 module.exports = SvgGraphView = React.createClass
   displayName: 'SvgGraphView'
@@ -233,8 +235,18 @@ module.exports = SvgGraphView = React.createClass
         @renderXLabel()
         @renderYLabel()
       )
-      (div {className: drawClass, onMouseDown: @startDrawCurve, onMouseMove: @drawCurve, onMouseUp: @endDrawCurve, onMouseOut: @endDrawCurve},
-        if @state.newCustomData or not @state.definedRelationship
+      (div
+        className: drawClass
+        onMouseDown: @startDrawCurve
+        onMouseMove: @drawCurve
+        onMouseUp: @endDrawCurve
+        onMouseOut: @endDrawCurve
+        ,
+        if @state.newCustomData
+          (div {className: 'graph-hint'},
+            (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM_HINT"} ")
+          )
+        else unless @state.definedRelationship
           (div {className: 'unknown-graph'},
             "?"
           )

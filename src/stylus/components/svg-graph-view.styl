@@ -1,6 +1,8 @@
 .SvgGraphView
-  position absolute
+  position relative
+  height 135px
   svg
+    position absolute
     path
       stroke-linecap round
       stroke light-blue
@@ -40,12 +42,25 @@
 
   .draw-graph
     position absolute
-    height 110
-    width 110
-    top 0
-    left 20
+    height 110px
+    width 110px
+    top -5px
+    left 25px
     z-index 2
+
+  .graph-hint
+    position absolute
+    width 100px
+    right 0px
+    text-align center
+    line-height 1em
+    color #AAA
+    -webkit-user-select none
+    -moz-user-select none
+    -ms-user-select none
+
   .draw-graph.drawing:hover
     background-color rgba(255,255,255,0.4)
     cursor url('../img/bb-chrome/brush.cur'), pointer
+
 
