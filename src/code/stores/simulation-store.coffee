@@ -66,6 +66,7 @@ SimulationStore   = Reflux.createStore
     @settings.simulationPanelExpanded = true
     @settings.modelReadyToRun = true
     @settings.modelIsRunning = true
+    SimulationActions.resetSimulation.trigger()
     @notifyChange()
 
   onCollapseSimulationPanel: ->
@@ -78,9 +79,6 @@ SimulationStore   = Reflux.createStore
     @nodes = data.nodes
     @settings.modelIsRunnable = @_checkModelIsRunnable()
     @settings.graphHasCollector = @_checkForCollectors()
-    # TODO:  This can't go here: We want this for 'real time' simulations
-    # But we need something with better granularity.
-    # @_runSimulation()
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
@@ -116,8 +114,7 @@ SimulationStore   = Reflux.createStore
         duration: duration
         speed: @settings.speed
         capNodeValues: @settings.capNodeValues
-        # TODO: I am not sure if we care about these events anymore
-        # now that recording is decoupled from simulation...
+
         onFrames: (frames) =>
           SimulationActions.simulationFramesCreated(frames)
           if @settings.isRecording
@@ -127,6 +124,7 @@ SimulationStore   = Reflux.createStore
           SimulationActions.simulationStarted(nodeNames)
           if @settings.isRecording
             SimulationActions.recordingDidStart(nodeNames)
+
         onEnd: ->
           SimulationActions.simulationEnded()
 

@@ -28,11 +28,11 @@ module.exports = class CodapConnect
     log.info 'CodapConnect: initializing'
     GraphStore = require '../stores/graph-store'
     @graphStore = GraphStore.store
+    @lastTimeSent = @_timeStamp()
+    @sendThrottleMs = 300
+    SimulationStore.actions.resetSimulation.listen         @_openNewCase.bind(@)
+    SimulationStore.actions.recordingFramesCreated.listen  @_sendSimulationData.bind(@)
 
-    SimulationStore.actions.recordingDidEnd.listen SimulationStore.actions.recordingDidStart.listen
-    SimulationStore.actions.simulationFramesCreated.listen
-    @_openNewCase.bind(@)
-    @_sendSimulationData.bind(@)
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
     CodapActions.sendRedoToCODAP.listen @_sendRedoToCODAP.bind(@)
 
@@ -184,16 +184,23 @@ module.exports = class CodapConnect
       resource: 'collection[Samples].attribute',
       values: sampleDataAttrs
 
+  _timeStamp: () ->
+    new Date().getTime()
+
+  _should_send: ->
+    return false unless @currentCaseID
+    currentTime = @_timeStamp()
+    elapsedTime = currentTime - @lastTimeSent
+    return elapsedTime > @sendThrottleMs
+
   _sendSimulationData: (data) ->
-    if not @currentCaseID
-      # openNewCase may not have completed yet, so we queue these up
-      @queue.push data
-      return
+    @queue = @queue.concat data
+    return unless @_should_send()
 
     timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
 
     # Create the sample data values (node values array)
-    sampleData = _.map data, (frame) =>
+    sampleData = _.map @queue, (frame) =>
       sample = {
         parent: @currentCaseID
         values: {}
@@ -208,6 +215,9 @@ module.exports = class CodapConnect
         action: 'create',
         resource: "collection[Samples].case",
         values: sampleData
+    @lastTimeSent = @_timeStamp()
+    @queue = []
+
 
   _sendUndoToCODAP: ->
     @codapPhone.call
