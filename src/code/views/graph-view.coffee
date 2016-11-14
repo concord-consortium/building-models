@@ -100,8 +100,8 @@ module.exports = React.createClass
     @props.graphStore.editNode newNode.key
 
   getInitialState: ->
-    nodes: []
-    links: []
+    # nodes: covered by GraphStore mixin
+    # links: covered by GraphStore mixin
     selectedNode: null
     editingNode: null
     selectedLink: null
