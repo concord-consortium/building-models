@@ -39,24 +39,38 @@ module.exports = class CodapConnect
       'data-interactive', window.parent )
 
     # load any previous data; also check if CODAP's undo is available,
-    # or if we are in standalone mode
-    @codapPhone.call
-      action: 'get',
-      resource: 'interactiveFrame'
-    , (ret) =>
+    # or if we are in standalone mode.
+    @codapPhone.call([
+      {
+        action: 'get',
+        resource: 'interactiveFrame'
+      },
+      {
+        action: 'get',
+        resource: 'dataContext'
+      }
+    ], (ret) =>
       if ret
-        if ret.values.externalUndoAvailable
+        frame   = ret[0]
+        context = ret[1]
+
+        if frame?.values.externalUndoAvailable
           CodapActions.hideUndoRedo()
-        else if ret.values.standaloneUndoModeAvailable
+        else if frame?.values.standaloneUndoModeAvailable
           @standaloneMode = true
           @graphStore.setCodapStandaloneMode true
 
-        state = ret.values.savedState
+        # We check for game state in either the frame (CODAP API 2.0) or the dataContext
+        # (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
+        state = frame?.values.savedState or
+                context?.values.contextStorage.gameState
+
         if state?
           @graphStore.deleteAll()
           @graphStore.loadData state
       else
         log.info "null response in codap-connect codapPhone.call"
+    )
 
     timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
     sampleDataAttrs = [
