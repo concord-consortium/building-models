@@ -390,8 +390,8 @@ GraphStore  = Reflux.createStore
 
 mixin =
   getInitialState: ->
-    nodes: GraphStore.nodes
-    links: GraphStore.links
+    nodes: GraphStore.getNodes()
+    links: GraphStore.getLinks()
 
   componentDidMount: ->
     @unsubscribe = GraphActions.graphChanged.listen @onGraphChanged
