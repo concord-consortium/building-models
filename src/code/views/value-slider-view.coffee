@@ -2,6 +2,20 @@
 tr = require "../utils/translate"
 
 circleRadius = 2
+constants = {
+  orientation: {
+    horizontal: {
+      dimension: 'width',
+      direction: 'left',
+      coordinate: 'x'
+    },
+    vertical: {
+      dimension: 'height',
+      direction: 'top',
+      coordinate: 'y'
+    }
+  }
+}
 
 ValueSlider = React.createClass
   displayName: 'SVGSlider'
@@ -26,7 +40,7 @@ ValueSlider = React.createClass
     maxLabel: null
     displaySemiQuant: false
     enabled: true
-    horizontal: true
+    orientation: "horizontal"
     filled: false
     onValueChange: (v) ->
       log.info "new value #{v}"
@@ -34,13 +48,11 @@ ValueSlider = React.createClass
       log.info "new range #{r.min}, #{r.max}"
 
   getInitialState: ->
+    limit: 0
+    grab: 0
     dragging: false
     "editing-min": false
     "editing-max": false
-
-  updateValue: (locValue,dragging) ->
-    value = @valueFromSliderUI(locValue)
-    @props.onValueChange value
 
   updateRange: (property, value) ->
     range =
@@ -59,63 +71,37 @@ ValueSlider = React.createClass
     @props.onRangeChange range
 
   componentDidMount: ->
-    @enableDragging()
+    window.addEventListener 'resize', @handleUpdate
+    @handleUpdate()
 
-  enableDragging: ->
-    handle   = @refs.handle
-    return unless handle
-    loc = (ui) =>
-      if @props.horizontal then ui.position.left else ui.position.top
-    opts =
-      axis: if @props.horizontal then "x" else "y"
-      containment: "parent"
-      start: (event, ui) =>
-        @setState 'dragging': true
-        @updateValue loc(ui), true
+  componentWillUnmount: ->
+    window.removeEventListener 'resize', @handleUpdate
 
-      drag: (event, ui) =>
-        @updateValue loc(ui), true
+  handleUpdate: ->
+    { orientation } = this.props
+    dimension = constants.orientation[orientation].dimension
+    dimension = dimension.charAt(0).toUpperCase() + dimension.substr(1)
+    sliderPos = this.slider["offset#{dimension}"]
+    handlePos = this.handle?["offset#{dimension}"] or 0
 
-      stop: (event, ui) =>
-        @setState 'dragging': false
-        @updateValue loc(ui), false
-
-    if (@props.snapToSteps)
-      numTicks = ((@props.max - @props.min) / @props.stepSize)
-      tickDistance = @length() / numTicks
-      opts.grid = if @props.horizontal then [tickDistance, 0] else [0, tickDistance]
-
-    $(handle).draggable opts
-
-    if not @props.enabled
-      $(handle).draggable( "disable" )
-    else
-      $(handle).draggable( "enable" )
-
-  componentDidUpdate: ->
-    @enableDragging()
-
-  valueFromSliderUI: (displayPos) ->
-    distance = if @props.horizontal then displayPos else @length() - displayPos
-    newV = (distance / @length() * (@props.max - @props.min)) + @props.min
-    newV = if newV > @props.max then @props.max else newV
-    newV = if newV < @props.min then @props.min else newV
-    return Math.round(newV / @props.stepSize) * @props.stepSize
+    @setState
+      limit: sliderPos - handlePos
+      grab: handlePos / 2
 
   sliderLocation: ->
     (@props.value - @props.min) / (@props.max - @props.min)
 
   sliderPercent: ->
     p = @sliderLocation() * 100
-    if @props.horizontal
+    if @props.orientation is 'horizontal'
       p
     else
       100 - p
 
   thickness: ->
-    if @props.horizontal then @props.height else @props.width
+    if @props.orientation is 'horizontal' then @props.height else @props.width
   length: ->
-    if @props.horizontal then @props.width else @props.height
+    if @props.orientation is 'horizontal' then @props.width else @props.height
 
   renderNumber: ->
     style =
@@ -125,34 +111,95 @@ ValueSlider = React.createClass
       style.display = "block"
     (div {className: "number", style: style}, @props.value.toFixed(@props.displayPrecision))
 
+  handleNoop: (e) ->
+    e.stopPropagation()
+    e.preventDefault()
+
+  handleStart: (e) ->
+    @handleNoop(e)
+    document.addEventListener 'mousemove', @handleDrag
+    document.addEventListener 'mouseup',   @handleEnd
+
+  handleEnd: ->
+    document.removeEventListener 'mousemove', this.handleDrag
+    document.removeEventListener 'mouseup',   this.handleEnd
+
+  handleDrag: (e) ->
+    @handleNoop(e)
+    { onValueChange } = @props
+    return unless onValueChange?
+
+    value = @position(e)
+    onValueChange(value)
+
+  clamp: (value, min, max) ->
+    Math.min(Math.max(value, min), max)
+
+  getValueFromPosition: (pos) ->
+    { limit } = this.state
+    { orientation, min, max, stepSize } = this.props
+    percentage = (@clamp(pos, 0, limit) / (limit || 1))
+    baseVal = stepSize * Math.round(percentage * (max - min) / stepSize)
+
+    if orientation is 'horizontal'
+      value = baseVal + min
+    else
+      value = max - baseVal
+
+    @clamp value, min, max
+
+  position: (e) ->
+    { grab } = @state
+    { orientation } = @props
+    node = @slider
+    coordinateStyle = constants.orientation[orientation].coordinate
+    directionStyle = constants.orientation[orientation].direction
+    clientCoordinateStyle = "client#{coordinateStyle.toUpperCase()}"
+    coordinate = unless e.touches then e[clientCoordinateStyle] else e.touches[0][clientCoordinateStyle]
+    direction = node.getBoundingClientRect()[directionStyle]
+
+    pos = coordinate - direction - grab
+    value = this.getValueFromPosition(pos)
+
+    return value
+
   renderHandle: ->
-    width = height = "#{@props.handleSize}px"
+    { orientation, handleSize, displaySemiQuant } = @props
+    width = height = "#{handleSize}px"
     centerOfDiv = "#{@sliderPercent()}%"
-    outerEdge = Math.round((@thickness() - @props.handleSize)/ 2.0 )
+    outerEdge = Math.round((@thickness() - handleSize)/ 2.0 )
     style =
       "width": width
       "height": height
-      "fontSize": "#{@props.handleSize / 2}px"
+      "fontSize": "#{handleSize / 2}px"
 
-    if @props.horizontal
+    if orientation is 'horizontal'
       style.top  = "#{outerEdge}px"
       style.left = centerOfDiv # margin will take care of the rest?
-      style.marginLeft = "-#{@props.handleSize/2}px"
-      style.marginRight = "-#{@props.handleSize/2}px"
+      style.marginLeft = "-#{handleSize/2}px"
+      style.marginRight = "-#{handleSize/2}px"
     else
       style.left  = "#{outerEdge}px"
       style.top = centerOfDiv
-      style.marginTop = "-#{@props.handleSize/2}px"
-      style.marginBottom = "-#{@props.handleSize/2}px"
+      style.marginTop = "-#{handleSize/2}px"
+      style.marginBottom = "-#{handleSize/2}px"
 
-    if not @props.displaySemiQuant
+    if not displaySemiQuant
       label = @renderNumber()
     else label = null
 
     classNames = "icon-codap-smallSliderLines"
-    if not @props.horizontal then classNames += " rotated"
+    if orientation isnt 'horizontal' then classNames += " rotated"
 
-    (div {className: "value-slider-handle", style: style, ref: "handle"},
+    (div {
+      className: "value-slider-handle"
+      style: style
+      ref: (s) => @handle = s
+      onMouseDown: @handleStart
+      onTouchEnd: @handleNoop
+      onTouchMove: @handleDrag
+      },
+
       (i {className: classNames})
       ( label )
     )
@@ -190,67 +237,72 @@ ValueSlider = React.createClass
       )
 
   renderLegend: ->
-    min = @props.minLabel or
-      if @props.displaySemiQuant then tr "~NODE-VALUE-EDIT.LOW" else @renderEditableProperty "min"
-    max = @props.maxLabel or
-      if @props.displaySemiQuant then tr "~NODE-VALUE-EDIT.HIGH" else @renderEditableProperty "max"
+    { minLabel, maxLabel, displaySemiQuant, orientation, width } = @props
 
-    if @props.horizontal
+    min = minLabel or
+      if displaySemiQuant then tr "~NODE-VALUE-EDIT.LOW" else @renderEditableProperty "min"
+    max = maxLabel or
+      if displaySemiQuant then tr "~NODE-VALUE-EDIT.HIGH" else @renderEditableProperty "max"
+
+    if orientation is 'horizontal'
       (div {className:"legend"},
         min, max
       )
     else
-      (div {className:"legend", style: {left: @props.width/1.7}},
+      (div {className:"legend", style: {left: width/1.7}},
         max, min
       )
 
-  renderTicks: () ->
-    return unless @props.showTicks
+  renderTicks: ->
+    { showTicks, max, min, stepSize, orientation } = @props
+    return unless showTicks
 
     center = @thickness() / 2
-    numTicks = ((@props.max - @props.min) / @props.stepSize)
+    numTicks = ((max - min) / stepSize)
     tickDistance = @length() / numTicks
     tickHeight = circleRadius * 1.5
     ticks = []
     for j in [1...numTicks]
-      if @props.horizontal
+      if orientation is 'horizontal'
         ticks.push (path {key: j, d:"M#{j*tickDistance} #{center-tickHeight} l 0 #{tickHeight * 2}", className:"slider-line"})
       else
         ticks.push (path {key: j, d:"M#{center-tickHeight} #{j*tickDistance} l #{tickHeight * 2} 0", className:"slider-line"})
     ticks
 
-  renderLine: () ->
+  renderLine: ->
+    { filled, orientation, width, height, filled } = @props
     center = @thickness() / 2
     inset = circleRadius
-    if @props.filled then inset += 1
-    if @props.horizontal
+    if filled then inset += 1
+    if orientation is 'horizontal'
       (g {},
-        (path {d:"M#{inset} #{center} l #{@props.width - (inset*2)} 0", className:"slider-line", stroke:"blue"})
-        if not @props.filled
+        (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line", stroke:"blue"})
+        if not filled
           (g {},
             (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"blue"})
-            (circle {cx:@props.width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
+            (circle {cx:width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
     else
       (g {},
-        (path {d:"M#{center} #{inset} l 0 #{@props.height - (inset*2)}", className:"slider-line", stroke:"blue"})
-        if not @props.filled
+        (path {d:"M#{center} #{inset} l 0 #{height - (inset*2)}", className:"slider-line", stroke:"blue"})
+        if not filled
           (g {},
             (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"blue"})
-            (circle {cx:center, cy:@props.height - circleRadius, r:circleRadius, className:"slider-shape"})
+            (circle {cx:center, cy:height - circleRadius, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
 
-  renderFill: () ->
+  renderFill: ->
+    { orientation, width, height } = @props
     center = @thickness() / 2
     inset = circleRadius + 1
-    if @props.horizontal
-      (path {d:"M#{inset} #{center} l #{@props.width - (inset*2)} 0", className:"slider-line fill-line"})
+    if orientation is 'horizontal'
+      (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line fill-line"})
     else
-      totalHeight = @props.height - (inset * 2)
+      totalHeight = height - (inset * 2)
       top = inset + (totalHeight * (1 - @sliderLocation()))
       height = totalHeight-top
       if height > 0
@@ -260,25 +312,34 @@ ValueSlider = React.createClass
         )
 
   render: ->
+    { orientation, width, height, enabled, filled, showHandle, showLabels } = @props
+    horizontal = orientation is 'horizontal'
     lengendHeight = 9 + 4.5
     style =
       padding: "0px"
       border: "0px"
-      width: @props.width + (if not @props.horizontal and not @props.filled then lengendHeight else 0)
-      height: @props.height + (if @props.horizontal then lengendHeight else 0)
+      width: width + (if not horizontal and not filled then lengendHeight else 0)
+      height: height + (if horizontal then lengendHeight else 0)
     classNames = "value-slider"
-    if not @props.horizontal then classNames += " vertical"
-    if not @props.enabled then classNames += " disabled"
-    if @props.filled then classNames += " filled"
-    (div {className: classNames, style: style},
-      (svg {className: "svg-background", width: "#{@props.width}px", height:"#{@props.height}px", viewBox: "0 0 #{@props.width} #{@props.height}"},
+    if not horizontal then classNames += " vertical"
+    if not enabled then classNames += " disabled"
+    if filled then classNames += " filled"
+    (div {
+      className: classNames
+      style: style
+      ref: (s) => @slider = s
+      onMouseDown: @handleDrag
+      onTouchStart: @handleDrag
+      onTouchEnd: @handleNoop
+      },
+      (svg {className: "svg-background", width: "#{width}px", height:"#{height}px", viewBox: "0 0 #{width} #{height}"},
         @renderLine()
-        if @props.filled
+        if filled
           @renderFill()
       )
-      if @props.showHandle
+      if showHandle
         @renderHandle()
-      if @props.showLabels
+      if showLabels
         @renderLegend()
     )
 
@@ -311,7 +372,7 @@ Demo = React.createClass
           onRangeChange: @onRangeChange
 
         Slider
-          horizontal: false
+          orientation: "vertical"
           height:  72
           width: 20
           value: @state.value
@@ -327,7 +388,7 @@ Demo = React.createClass
       )
       (div {},
         Slider
-          horizontal: false
+          orientation: "vertical"
           filled: true
           showLabels: false
           showHandle: true
@@ -345,7 +406,7 @@ Demo = React.createClass
       )
       (div {},
         Slider
-          horizontal: false
+          orientation: "vertical"
           filled: true
           showLabels: false
           showHandle: false

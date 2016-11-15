@@ -169,7 +169,7 @@ module.exports = NodeView = React.createClass
     value = @props.data.currentValue or @props.data.initialValue
 
     (SliderView
-      horizontal: false
+      orientation: "vertical"
       filled: true
       height: 44
       width: 15

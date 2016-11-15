@@ -1,5 +1,4 @@
 Dropdown        = React.createFactory require './dropdown-view'
-ValueSlider     = React.createFactory require './value-slider-view'
 SimulationStore = require '../stores/simulation-store'
 AppSettingsStore = require '../stores/app-settings-store'
 tr              = require '../utils/translate'
@@ -22,7 +21,7 @@ module.exports = React.createClass
 
   setShowingMinigraphs: (e) ->
     AppSettingsStore.actions.showMinigraphs e.target.checked
-    
+
   setRelationshipSymbols: (e) ->
     AppSettingsStore.actions.relationshipSymbols e.target.checked
 
@@ -35,7 +34,7 @@ module.exports = React.createClass
     (div {className: "simulation-panel"},
       (div {className: runPanelClasses},
         (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
-       
+
         (div {className: "row"},
           (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
           (label {}, tr '~SIMULATION.CAP_VALUES')
