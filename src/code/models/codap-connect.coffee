@@ -14,8 +14,6 @@ module.exports = class CodapConnect
 
   standaloneMode: false
 
-  stepsInCurrentCase: 0
-
   queue: []
 
   @instances: {} # map of context -> instance
@@ -30,8 +28,13 @@ module.exports = class CodapConnect
     @graphStore = GraphStore.store
     @lastTimeSent = @_timeStamp()
     @sendThrottleMs = 300
+
+    # Create a new case in these instances:
     SimulationStore.actions.resetSimulation.listen         @_openNewCase.bind(@)
-    SimulationStore.actions.recordingFramesCreated.listen  @_sendSimulationData.bind(@)
+    SimulationStore.actions.recordStream.listen            @_openNewCase.bind(@)
+    SimulationStore.actions.recordPeriod.listen            @_openNewCase.bind(@)
+
+    SimulationStore.actions.recordingFramesCreated.listen  @_addData.bind(@)
 
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
     CodapActions.sendRedoToCODAP.listen @_sendRedoToCODAP.bind(@)
@@ -74,7 +77,7 @@ module.exports = class CodapConnect
         log.info "null response in codap-connect codapPhone.call"
     )
 
-    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
     sampleDataAttrs = [
       {
         name: timeUnit
@@ -110,13 +113,13 @@ module.exports = class CodapConnect
                     formula: 'caseIndex'
                     type: 'nominal'
                   }
-                  {
-                    name: tr '~CODAP.SIMULATION.STEPS'
-                    type: 'numeric'
-                    formula: 'count(Steps)'
-                    description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
-                    precision: 0
-                  }
+#                  {
+#                    name: tr '~CODAP.SIMULATION.STEPS'
+#                    type: 'numeric'
+#                    formula: 'count()'
+#                    description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
+#                    precision: 0
+#                  }
                 ]
               },
               {
@@ -133,10 +136,10 @@ module.exports = class CodapConnect
           }
         , @initGameHandler
 
-  _openNewCase: (nodeNames) ->
+  _openNewCase: () ->
     @currentCaseID = null
 
-    @_createCollection(nodeNames)
+    @_createCollection()
 
     @codapPhone.call
       action: 'create',
@@ -145,18 +148,17 @@ module.exports = class CodapConnect
     , (result) =>
       if result?.success
         @currentCaseID = result.values[0].id
-        @stepsInCurrentCase = 0
         @_flushQueue()
         if not @standaloneMode
           @createTable()
       else
         log.info "CODAP returned an error on 'openCase'"
 
-  _createCollection: (nodeNames) ->
+  _createCollection: () ->
     nodes = @graphStore.getNodes()
 
     # First column definition is the time index
-    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
     sampleDataAttrs = [
       {
         name: timeUnit
@@ -170,14 +172,8 @@ module.exports = class CodapConnect
         name: node.title
         type: type
 
-    # Append node names to column descriptions.
-    if (nodeNames)
-      _.each nodeNames, (name) ->
-        node = (nodes.filter (n) -> n.title is name)[0]
-        addSampleDataAttr(node)
-    else
-      _.each nodes, (node) ->
-        addSampleDataAttr(node)
+    _.each nodes, (node) ->
+      addSampleDataAttr(node)
 
     @codapPhone.call
       action: 'create',
@@ -187,17 +183,24 @@ module.exports = class CodapConnect
   _timeStamp: () ->
     new Date().getTime()
 
-  _should_send: ->
+  _shouldSend: ->
     return false unless @currentCaseID
     currentTime = @_timeStamp()
     elapsedTime = currentTime - @lastTimeSent
     return elapsedTime > @sendThrottleMs
 
-  _sendSimulationData: (data) ->
+  _addData: (data) ->
     @queue = @queue.concat data
-    return unless @_should_send()
+    if @_shouldSend()
+      @_sendSimulationData()
+    else
+      setTimeout(
+        () => @_sendSimulationData(),
+        @sendThrottleMs
+      )
 
-    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
+  _sendSimulationData: ->
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
     # Create the sample data values (node values array)
     sampleData = _.map @queue, (frame) =>
@@ -251,7 +254,7 @@ module.exports = class CodapConnect
 
   createGraph: (yAttributeName)->
     @_createCollection()
-    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
     @codapPhone.call
       action: 'create',

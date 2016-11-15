@@ -101,6 +101,12 @@ SimulationStore   = Reflux.createStore
   onRunSimulation: ->
     @_runSimulation()
 
+  stepUnits: () ->
+    if @isRecordingPeriod
+      @settings.stepUnits
+    else
+      TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
+
   _runSimulation: (duration=1)->
     if @settings.modelIsRunnable and @settings.modelReadyToRun
       # graph-store listens and will reset the simulation when
@@ -115,10 +121,19 @@ SimulationStore   = Reflux.createStore
         speed: @settings.speed
         capNodeValues: @settings.capNodeValues
 
+        # Simulation events get triggered as Actions here, and are
+        # available to anyone who listens to this store
         onFrames: (frames) =>
           SimulationActions.simulationFramesCreated(frames)
           if @settings.isRecording
-            SimulationActions.recordingFramesCreated(frames)
+            if @settings.isRecordingPeriod
+              SimulationActions.recordingFramesCreated(frames)
+            else
+              # Strip out the time information if we are simulating without time...
+              framesNoTime = _.map frames, (f) ->
+                # time: (removed)
+                nodes: f.nodes
+              SimulationActions.recordingFramesCreated(framesNoTime)
 
         onStart: (nodeNames) =>
           SimulationActions.simulationStarted(nodeNames)
@@ -156,6 +171,7 @@ SimulationStore   = Reflux.createStore
   onRecordOne: ->
     @_startRecording()
     @settings.isRecordingOne = true
+    @_runSimulation(1)
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)

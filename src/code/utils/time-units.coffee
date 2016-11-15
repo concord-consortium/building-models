@@ -17,7 +17,7 @@ module.exports =
 
   units: _.keys(units)
 
-  defaultUnit: "DAY"
+  defaultUnit: "STEP"
 
   toString: (unit, plural) ->
     number = if plural then ".PLURAL" else ""
