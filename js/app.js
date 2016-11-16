@@ -1,9 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var AppView, GraphStore, HashParams, PaletteStore, ValueSlider, appView;
+var AppView, GraphStore, HashParams, PaletteStore, appView;
 
 AppView = React.createFactory(require('./views/app-view'));
-
-ValueSlider = require('./views/value-slider-view');
 
 GraphStore = require('./stores/graph-store');
 
@@ -50,7 +48,7 @@ window.Sage = {
 
 
 
-},{"./stores/graph-store":425,"./stores/palette-store":429,"./utils/hash-parameters":435,"./views/app-view":446,"./views/value-slider-view":488}],2:[function(require,module,exports){
+},{"./stores/graph-store":425,"./stores/palette-store":429,"./utils/hash-parameters":435,"./views/app-view":446}],2:[function(require,module,exports){
 /*! decimal.js v4.0.4 https://github.com/MikeMcl/decimal.js/LICENCE */
 ;(function (global) {
     'use strict';
@@ -38012,9 +38010,9 @@ function SemVer(version, loose) {
   else
     this.prerelease = m[4].split('.').map(function(id) {
       if (/^[0-9]+$/.test(id)) {
-        var num = +id;
+        var num = +id
         if (num >= 0 && num < MAX_SAFE_INTEGER)
-          return num;
+          return num
       }
       return id;
     });
@@ -38534,7 +38532,7 @@ function replaceTilde(comp, loose) {
     else if (isX(m))
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
     else if (isX(p))
-      // ~1.2 == >=1.2.0 <1.3.0
+      // ~1.2 == >=1.2.0- <1.3.0-
       ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
     else if (pr) {
       debug('replaceTilde pr', pr);
@@ -38664,11 +38662,11 @@ function replaceXRange(comp, loose) {
       } else if (gtlt === '<=') {
         // <=0.7.x is actually <0.8.0, since any 0.7.x should
         // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<';
+        gtlt = '<'
         if (xm)
-          M = +M + 1;
+          M = +M + 1
         else
-          m = +m + 1;
+          m = +m + 1
       }
 
       ret = gtlt + M + '.' + m + '.' + p;
@@ -38792,15 +38790,6 @@ function maxSatisfying(versions, range, loose) {
   })[0] || null;
 }
 
-exports.minSatisfying = minSatisfying;
-function minSatisfying(versions, range, loose) {
-  return versions.filter(function(version) {
-    return satisfies(version, range, loose);
-  }).sort(function(a, b) {
-    return compare(a, b, loose);
-  })[0] || null;
-}
-
 exports.validRange = validRange;
 function validRange(range, loose) {
   try {
@@ -38892,12 +38881,6 @@ function outside(version, range, hilo, loose) {
     }
   }
   return true;
-}
-
-exports.prerelease = prerelease;
-function prerelease(version, loose) {
-  var parsed = parse(version, loose);
-  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
 }
 
 }).call(this,require('_process'))
@@ -40141,8 +40124,6 @@ module.exports = CodapConnect = (function() {
 
   CodapConnect.prototype.standaloneMode = false;
 
-  CodapConnect.prototype.stepsInCurrentCase = 0;
-
   CodapConnect.prototype.queue = [];
 
   CodapConnect.instances = {};
@@ -40161,25 +40142,36 @@ module.exports = CodapConnect = (function() {
     log.info('CodapConnect: initializing');
     GraphStore = require('../stores/graph-store');
     this.graphStore = GraphStore.store;
-    SimulationStore.actions.recordingDidStart.listen(this._openNewCase.bind(this));
-    SimulationStore.actions.recordingDidEnd.listen(this._sendSimulationData.bind(this));
+    this.lastTimeSent = this._timeStamp();
+    this.sendThrottleMs = 300;
+    SimulationStore.actions.resetSimulation.listen(this._openNewCase.bind(this));
+    SimulationStore.actions.recordStream.listen(this._openNewCase.bind(this));
+    SimulationStore.actions.recordPeriod.listen(this._openNewCase.bind(this));
+    SimulationStore.actions.recordingFramesCreated.listen(this._addData.bind(this));
     CodapActions.sendUndoToCODAP.listen(this._sendUndoToCODAP.bind(this));
     CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
     this.codapPhone = new IframePhoneRpcEndpoint(this.codapRequestHandler, 'data-interactive', window.parent);
-    this.codapPhone.call({
-      action: 'get',
-      resource: 'interactiveFrame'
-    }, (function(_this) {
+    this.codapPhone.call([
+      {
+        action: 'get',
+        resource: 'interactiveFrame'
+      }, {
+        action: 'get',
+        resource: 'dataContext'
+      }
+    ], (function(_this) {
       return function(ret) {
-        var state;
+        var frame, state;
         if (ret) {
-          if (ret.values.externalUndoAvailable) {
+          frame = ret[0];
+          context = ret[1];
+          if (frame != null ? frame.values.externalUndoAvailable : void 0) {
             CodapActions.hideUndoRedo();
-          } else if (ret.values.standaloneUndoModeAvailable) {
+          } else if (frame != null ? frame.values.standaloneUndoModeAvailable : void 0) {
             _this.standaloneMode = true;
             _this.graphStore.setCodapStandaloneMode(true);
           }
-          state = ret.values.savedState;
+          state = (frame != null ? frame.values.savedState : void 0) || (context != null ? context.values.contextStorage.gameState : void 0);
           if (state != null) {
             _this.graphStore.deleteAll();
             return _this.graphStore.loadData(state);
@@ -40189,7 +40181,7 @@ module.exports = CodapConnect = (function() {
         }
       };
     })(this));
-    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
+    timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
     sampleDataAttrs = [
       {
         name: timeUnit,
@@ -40223,12 +40215,6 @@ module.exports = CodapConnect = (function() {
                       name: tr('~CODAP.SIMULATION.RUN'),
                       formula: 'caseIndex',
                       type: 'nominal'
-                    }, {
-                      name: tr('~CODAP.SIMULATION.STEPS'),
-                      type: 'numeric',
-                      formula: 'count(Steps)',
-                      description: tr('~CODAP.SIMULATION.STEPS.DESCRIPTION'),
-                      precision: 0
                     }
                   ]
                 }, {
@@ -40249,9 +40235,9 @@ module.exports = CodapConnect = (function() {
     })(this));
   }
 
-  CodapConnect.prototype._openNewCase = function(nodeNames) {
+  CodapConnect.prototype._openNewCase = function() {
     this.currentCaseID = null;
-    this._createCollection(nodeNames);
+    this._createCollection();
     return this.codapPhone.call({
       action: 'create',
       resource: 'collection[Simulation].case',
@@ -40260,7 +40246,6 @@ module.exports = CodapConnect = (function() {
       return function(result) {
         if (result != null ? result.success : void 0) {
           _this.currentCaseID = result.values[0].id;
-          _this.stepsInCurrentCase = 0;
           _this._flushQueue();
           if (!_this.standaloneMode) {
             return _this.createTable();
@@ -40272,10 +40257,10 @@ module.exports = CodapConnect = (function() {
     })(this));
   };
 
-  CodapConnect.prototype._createCollection = function(nodeNames) {
+  CodapConnect.prototype._createCollection = function() {
     var addSampleDataAttr, nodes, sampleDataAttrs, timeUnit;
     nodes = this.graphStore.getNodes();
-    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
+    timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
     sampleDataAttrs = [
       {
         name: timeUnit,
@@ -40290,19 +40275,9 @@ module.exports = CodapConnect = (function() {
         type: type
       });
     };
-    if (nodeNames) {
-      _.each(nodeNames, function(name) {
-        var node;
-        node = (nodes.filter(function(n) {
-          return n.title === name;
-        }))[0];
-        return addSampleDataAttr(node);
-      });
-    } else {
-      _.each(nodes, function(node) {
-        return addSampleDataAttr(node);
-      });
-    }
+    _.each(nodes, function(node) {
+      return addSampleDataAttr(node);
+    });
     return this.codapPhone.call({
       action: 'create',
       resource: 'collection[Samples].attribute',
@@ -40310,14 +40285,37 @@ module.exports = CodapConnect = (function() {
     });
   };
 
-  CodapConnect.prototype._sendSimulationData = function(data) {
-    var sampleData, timeUnit;
+  CodapConnect.prototype._timeStamp = function() {
+    return new Date().getTime();
+  };
+
+  CodapConnect.prototype._shouldSend = function() {
+    var currentTime, elapsedTime;
     if (!this.currentCaseID) {
-      this.queue.push(data);
-      return;
+      return false;
     }
-    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
-    sampleData = _.map(data, (function(_this) {
+    currentTime = this._timeStamp();
+    elapsedTime = currentTime - this.lastTimeSent;
+    return elapsedTime > this.sendThrottleMs;
+  };
+
+  CodapConnect.prototype._addData = function(data) {
+    this.queue = this.queue.concat(data);
+    if (this._shouldSend()) {
+      return this._sendSimulationData();
+    } else {
+      return setTimeout((function(_this) {
+        return function() {
+          return _this._sendSimulationData();
+        };
+      })(this), this.sendThrottleMs);
+    }
+  };
+
+  CodapConnect.prototype._sendSimulationData = function() {
+    var sampleData, timeUnit;
+    timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
+    sampleData = _.map(this.queue, (function(_this) {
       return function(frame) {
         var sample;
         sample = {
@@ -40332,12 +40330,14 @@ module.exports = CodapConnect = (function() {
       };
     })(this));
     if (sampleData.length > 0) {
-      return this.codapPhone.call({
+      this.codapPhone.call({
         action: 'create',
         resource: "collection[Samples].case",
         values: sampleData
       });
     }
+    this.lastTimeSent = this._timeStamp();
+    return this.queue = [];
   };
 
   CodapConnect.prototype._sendUndoToCODAP = function() {
@@ -40384,7 +40384,7 @@ module.exports = CodapConnect = (function() {
   CodapConnect.prototype.createGraph = function(yAttributeName) {
     var timeUnit;
     this._createCollection();
-    timeUnit = TimeUnits.toString(SimulationStore.store.settings.stepUnits, true);
+    timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
     return this.codapPhone.call({
       action: 'create',
       resource: 'component',
@@ -41134,7 +41134,7 @@ module.exports = Relationship = (function() {
   };
 
   Relationship.prototype.evaluate = function(inV, outV, maxIn, maxOut) {
-    var error, result, roundedInV, scope;
+    var error, error1, result, roundedInV, scope;
     if (maxIn == null) {
       maxIn = 100;
     }
@@ -42097,7 +42097,6 @@ GraphStore = Reflux.createStore({
     });
     this.selectionManager = new SelectionManager();
     PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
-    SimulationStore.actions.runSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.resetSimulation.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
@@ -42659,8 +42658,8 @@ GraphStore = Reflux.createStore({
 mixin = {
   getInitialState: function() {
     return {
-      nodes: GraphStore.nodes,
-      links: GraphStore.links
+      nodes: GraphStore.getNodes(),
+      links: GraphStore.getLinks()
     };
   },
   componentDidMount: function() {
@@ -43284,7 +43283,7 @@ TimeUnits = require('../utils/time-units');
 
 tr = require('../utils/translate');
 
-SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "setSpeed", "simulationStarted", "simulationFramesCreated", "simulationEnded", "capNodeValues", "recordStream", "recordOne", "recordPeriod", "stopRecording", "recordingDidStart", "recordingDidEnd"]);
+SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "simulationStarted", "simulationFramesCreated", "recordingFramesCreated", "simulationEnded", "capNodeValues", "recordStream", "recordOne", "recordPeriod", "stopRecording", "recordingDidStart", "recordingDidEnd"]);
 
 SimulationStore = Reflux.createStore({
   listenables: [SimulationActions, AppSettingsActions, ImportActions, GraphActions],
@@ -43332,6 +43331,7 @@ SimulationStore = Reflux.createStore({
     this.settings.simulationPanelExpanded = true;
     this.settings.modelReadyToRun = true;
     this.settings.modelIsRunning = true;
+    SimulationActions.resetSimulation.trigger();
     return this.notifyChange();
   },
   onCollapseSimulationPanel: function() {
@@ -43343,8 +43343,7 @@ SimulationStore = Reflux.createStore({
   onGraphChanged: function(data) {
     this.nodes = data.nodes;
     this.settings.modelIsRunnable = this._checkModelIsRunnable();
-    this.settings.graphHasCollector = this._checkForCollectors();
-    return this._runSimulation();
+    return this.settings.graphHasCollector = this._checkForCollectors();
   },
   onSetDuration: function(n) {
     this.settings.duration = Math.max(1, Math.min(n, 5000));
@@ -43359,13 +43358,6 @@ SimulationStore = Reflux.createStore({
     _.merge(this.settings, data.settings.simulation);
     return this.notifyChange();
   },
-  onSetSpeed: function(s) {
-    this.settings.speed = s;
-    if (this.currentSimulation) {
-      this.currentSimulation.setSpeed(s);
-    }
-    return this.notifyChange();
-  },
   onCapNodeValues: function(cap) {
     this.settings.capNodeValues = cap;
     return this.notifyChange();
@@ -43373,11 +43365,19 @@ SimulationStore = Reflux.createStore({
   onRunSimulation: function() {
     return this._runSimulation();
   },
-  _runSimulation: function() {
-    var duration;
+  stepUnits: function() {
+    if (this.isRecordingPeriod) {
+      return this.settings.stepUnits;
+    } else {
+      return TimeUnits.defaultUnit;
+    }
+  },
+  _runSimulation: function(duration) {
+    if (duration == null) {
+      duration = 1;
+    }
     if (this.settings.modelIsRunnable && this.settings.modelReadyToRun) {
       this.settings.modelIsRunning = true;
-      duration = 1;
       if (this.settings.graphHasCollector) {
         duration = this.settings.duration;
       }
@@ -43387,12 +43387,32 @@ SimulationStore = Reflux.createStore({
         duration: duration,
         speed: this.settings.speed,
         capNodeValues: this.settings.capNodeValues,
-        onFrames: function(frames) {
-          return SimulationActions.simulationFramesCreated(frames);
-        },
-        onStart: function(nodeNames) {
-          return SimulationActions.simulationStarted(nodeNames);
-        },
+        onFrames: (function(_this) {
+          return function(frames) {
+            var framesNoTime;
+            SimulationActions.simulationFramesCreated(frames);
+            if (_this.settings.isRecording) {
+              if (_this.settings.isRecordingPeriod) {
+                return SimulationActions.recordingFramesCreated(frames);
+              } else {
+                framesNoTime = _.map(frames, function(f) {
+                  return {
+                    nodes: f.nodes
+                  };
+                });
+                return SimulationActions.recordingFramesCreated(framesNoTime);
+              }
+            }
+          };
+        })(this),
+        onStart: (function(_this) {
+          return function(nodeNames) {
+            SimulationActions.simulationStarted(nodeNames);
+            if (_this.settings.isRecording) {
+              return SimulationActions.recordingDidStart(nodeNames);
+            }
+          };
+        })(this),
         onEnd: function() {
           return SimulationActions.simulationEnded();
         }
@@ -43408,17 +43428,25 @@ SimulationStore = Reflux.createStore({
     this.settings.modelReadyToRun = true;
     return this.notifyChange();
   },
-  onStopRecording: function() {
+  _startRecording: function() {
+    return this.settings.isRecording = true;
+  },
+  _stopRecording: function() {
     this.settings.isRecording = false;
     this.settings.isRecordingOne = false;
     this.settings.isRecordingStream = false;
     this.settings.isRecordingPeriod = false;
+    return SimulationActions.recordingDidEnd();
+  },
+  onStopRecording: function() {
+    this._stopRecording();
     return this.notifyChange();
   },
   onRecordOne: function() {
     var stopRecording;
-    this.settings.isRecording = true;
+    this._startRecording();
     this.settings.isRecordingOne = true;
+    this._runSimulation(1);
     stopRecording = function() {
       return SimulationActions.stopRecording();
     };
@@ -43426,14 +43454,15 @@ SimulationStore = Reflux.createStore({
     return this.notifyChange();
   },
   onRecordStream: function() {
-    this.settings.isRecording = true;
+    this._startRecording();
     this.settings.isRecordingStream = true;
     return this.notifyChange();
   },
   onRecordPeriod: function() {
     var stopRecording;
-    this.settings.isRecording = true;
+    this._startRecording();
     this.settings.isRecordingPeriod = true;
+    this._runSimulation(this.settings.duration);
     stopRecording = function() {
       return SimulationActions.stopRecording();
     };
@@ -43749,7 +43778,7 @@ module.exports = GoogleDriveIO = (function() {
       xhr.setRequestHeader('Authorization', "Bearer " + token.access_token);
     }
     xhr.onload = function() {
-      var e, json;
+      var e, error, json;
       try {
         json = JSON.parse(xhr.responseText);
       } catch (error) {
@@ -44609,7 +44638,7 @@ toSeconds = function(n, unit) {
 
 module.exports = {
   units: _.keys(units),
-  defaultUnit: "DAY",
+  defaultUnit: "STEP",
   toString: function(unit, plural) {
     var number;
     number = plural ? ".PLURAL" : "";
@@ -45076,7 +45105,7 @@ module.exports = React.createClass({
   displayName: 'WirefameApp',
   mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require('../mixins/app-view')],
   getInitialState: function() {
-    var iframed;
+    var error, iframed;
     try {
       iframed = window.self !== window.top;
     } catch (error) {
@@ -45839,8 +45868,6 @@ module.exports = React.createClass({
   },
   getInitialState: function() {
     return {
-      nodes: [],
-      links: [],
       selectedNode: null,
       editingNode: null,
       selectedLink: null,
@@ -45988,7 +46015,7 @@ module.exports = React.createClass({
     return e.preventDefault();
   },
   onDrop: function(e) {
-    var dropPos, ex, offset;
+    var dropPos, error, ex, offset;
     this.setState({
       canDrop: false
     });
@@ -47792,11 +47819,13 @@ module.exports = React.createClass({
 
 
 },{"../stores/simulation-store":430,"../utils/translate":443}],472:[function(require,module,exports){
-var CodapConnect, DEFAULT_CONTEXT_NAME, GraphView, NodeTitle, NodeView, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
+var CodapConnect, DEFAULT_CONTEXT_NAME, GraphView, NodeTitle, NodeView, SimulationActions, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
 
 tr = require("../utils/translate");
+
+SimulationActions = require("../stores/simulation-store").actions;
 
 SquareImage = React.createFactory(require("./square-image-view"));
 
@@ -47973,9 +48002,10 @@ module.exports = NodeView = React.createClass({
     });
   },
   changeValue: function(newValue) {
-    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {
+    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {
       initialValue: newValue
     });
+    return SimulationActions.runSimulation();
   },
   changeTitle: function(newTitle) {
     this.props.graphStore.startNodeEdit();
@@ -48012,7 +48042,7 @@ module.exports = NodeView = React.createClass({
     showHandle = this.props.data.canEditInitialValue();
     value = this.props.data.currentValue || this.props.data.initialValue;
     return SliderView({
-      horizontal: false,
+      orientation: "vertical",
       filled: true,
       height: 44,
       width: 15,
@@ -48161,7 +48191,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":413,"../models/codap-connect":414,"../utils/translate":443,"./node-svg-graph-view":470,"./square-image-view":485,"./value-slider-view":488}],473:[function(require,module,exports){
+},{"../mixins/node-title":413,"../models/codap-connect":414,"../stores/simulation-store":430,"../utils/translate":443,"./node-svg-graph-view":470,"./square-image-view":485,"./value-slider-view":488}],473:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -48713,11 +48743,9 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 },{"../models/relation-factory":418,"../stores/graph-store":425,"../utils/translate":443,"./link-relation-view":462,"./tabbed-panel-view":487}],483:[function(require,module,exports){
-var AppSettingsStore, Dropdown, SimulationStore, ValueSlider, div, i, input, label, ref, span, tr;
+var AppSettingsStore, Dropdown, SimulationStore, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
-
-ValueSlider = React.createFactory(require('./value-slider-view'));
 
 SimulationStore = require('../stores/simulation-store');
 
@@ -48798,7 +48826,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":422,"../stores/simulation-store":430,"../utils/translate":443,"./dropdown-view":450,"./value-slider-view":488}],484:[function(require,module,exports){
+},{"../stores/app-settings-store":422,"../stores/simulation-store":430,"../utils/translate":443,"./dropdown-view":450}],484:[function(require,module,exports){
 var Dropdown, RecordButton, SimulationStore, div, i, input, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
@@ -49136,10 +49164,10 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = 2e308;
-    maxy = -2e308;
+    miny = Infinity;
+    maxy = -Infinity;
     return data = _.map(data, function(x) {
-      var error, scope, y;
+      var error, error1, scope, y;
       scope = {
         "in": x,
         out: 0,
@@ -49165,8 +49193,8 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = 2e308;
-    maxy = -2e308;
+    miny = Infinity;
+    maxy = -Infinity;
     if (currentData != null) {
       data = _.map(currentData, function(point) {
         var x, y;
@@ -49455,13 +49483,28 @@ module.exports = React.createClass({
 
 
 },{}],488:[function(require,module,exports){
-var Demo, Slider, ValueSlider, circle, circleRadius, div, g, i, input, label, path, rect, ref, span, svg, tr;
+var Demo, Slider, ValueSlider, circle, circleRadius, constants, div, g, i, input, label, path, rect, ref, span, svg, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect, g = ref.g;
 
 tr = require("../utils/translate");
 
 circleRadius = 2;
+
+constants = {
+  orientation: {
+    horizontal: {
+      dimension: 'width',
+      direction: 'left',
+      coordinate: 'x'
+    },
+    vertical: {
+      dimension: 'height',
+      direction: 'top',
+      coordinate: 'y'
+    }
+  }
+};
 
 ValueSlider = React.createClass({
   displayName: 'SVGSlider',
@@ -49486,7 +49529,7 @@ ValueSlider = React.createClass({
       maxLabel: null,
       displaySemiQuant: false,
       enabled: true,
-      horizontal: true,
+      orientation: "horizontal",
       filled: false,
       onValueChange: function(v) {
         return log.info("new value " + v);
@@ -49498,15 +49541,12 @@ ValueSlider = React.createClass({
   },
   getInitialState: function() {
     return {
+      limit: 0,
+      grab: 0,
       dragging: false,
       "editing-min": false,
       "editing-max": false
     };
-  },
-  updateValue: function(locValue, dragging) {
-    var value;
-    value = this.valueFromSliderUI(locValue);
-    return this.props.onValueChange(value);
   },
   updateRange: function(property, value) {
     var range;
@@ -49527,70 +49567,23 @@ ValueSlider = React.createClass({
     return this.props.onRangeChange(range);
   },
   componentDidMount: function() {
-    return this.enableDragging();
+    window.addEventListener('resize', this.handleUpdate);
+    return this.handleUpdate();
   },
-  enableDragging: function() {
-    var handle, loc, numTicks, opts, tickDistance;
-    handle = this.refs.handle;
-    if (!handle) {
-      return;
-    }
-    loc = (function(_this) {
-      return function(ui) {
-        if (_this.props.horizontal) {
-          return ui.position.left;
-        } else {
-          return ui.position.top;
-        }
-      };
-    })(this);
-    opts = {
-      axis: this.props.horizontal ? "x" : "y",
-      containment: "parent",
-      start: (function(_this) {
-        return function(event, ui) {
-          _this.setState({
-            'dragging': true
-          });
-          return _this.updateValue(loc(ui), true);
-        };
-      })(this),
-      drag: (function(_this) {
-        return function(event, ui) {
-          return _this.updateValue(loc(ui), true);
-        };
-      })(this),
-      stop: (function(_this) {
-        return function(event, ui) {
-          _this.setState({
-            'dragging': false
-          });
-          return _this.updateValue(loc(ui), false);
-        };
-      })(this)
-    };
-    if (this.props.snapToSteps) {
-      numTicks = (this.props.max - this.props.min) / this.props.stepSize;
-      tickDistance = this.length() / numTicks;
-      opts.grid = this.props.horizontal ? [tickDistance, 0] : [0, tickDistance];
-    }
-    $(handle).draggable(opts);
-    if (!this.props.enabled) {
-      return $(handle).draggable("disable");
-    } else {
-      return $(handle).draggable("enable");
-    }
+  componentWillUnmount: function() {
+    return window.removeEventListener('resize', this.handleUpdate);
   },
-  componentDidUpdate: function() {
-    return this.enableDragging();
-  },
-  valueFromSliderUI: function(displayPos) {
-    var distance, newV;
-    distance = this.props.horizontal ? displayPos : this.length() - displayPos;
-    newV = (distance / this.length() * (this.props.max - this.props.min)) + this.props.min;
-    newV = newV > this.props.max ? this.props.max : newV;
-    newV = newV < this.props.min ? this.props.min : newV;
-    return Math.round(newV / this.props.stepSize) * this.props.stepSize;
+  handleUpdate: function() {
+    var dimension, handlePos, orientation, ref1, sliderPos;
+    orientation = this.props.orientation;
+    dimension = constants.orientation[orientation].dimension;
+    dimension = dimension.charAt(0).toUpperCase() + dimension.substr(1);
+    sliderPos = this.slider["offset" + dimension];
+    handlePos = ((ref1 = this.handle) != null ? ref1["offset" + dimension] : void 0) || 0;
+    return this.setState({
+      limit: sliderPos - handlePos,
+      grab: handlePos / 2
+    });
   },
   sliderLocation: function() {
     return (this.props.value - this.props.min) / (this.props.max - this.props.min);
@@ -49598,21 +49591,21 @@ ValueSlider = React.createClass({
   sliderPercent: function() {
     var p;
     p = this.sliderLocation() * 100;
-    if (this.props.horizontal) {
+    if (this.props.orientation === 'horizontal') {
       return p;
     } else {
       return 100 - p;
     }
   },
   thickness: function() {
-    if (this.props.horizontal) {
+    if (this.props.orientation === 'horizontal') {
       return this.props.height;
     } else {
       return this.props.width;
     }
   },
   length: function() {
-    if (this.props.horizontal) {
+    if (this.props.orientation === 'horizontal') {
       return this.props.width;
     } else {
       return this.props.height;
@@ -49631,40 +49624,101 @@ ValueSlider = React.createClass({
       style: style
     }, this.props.value.toFixed(this.props.displayPrecision));
   },
+  handleNoop: function(e) {
+    e.stopPropagation();
+    return e.preventDefault();
+  },
+  handleStart: function(e) {
+    this.handleNoop(e);
+    document.addEventListener('mousemove', this.handleDrag);
+    return document.addEventListener('mouseup', this.handleEnd);
+  },
+  handleEnd: function() {
+    document.removeEventListener('mousemove', this.handleDrag);
+    return document.removeEventListener('mouseup', this.handleEnd);
+  },
+  handleDrag: function(e) {
+    var onValueChange, value;
+    this.handleNoop(e);
+    onValueChange = this.props.onValueChange;
+    if (onValueChange == null) {
+      return;
+    }
+    value = this.position(e);
+    return onValueChange(value);
+  },
+  clamp: function(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  },
+  getValueFromPosition: function(pos) {
+    var baseVal, limit, max, min, orientation, percentage, ref1, stepSize, value;
+    limit = this.state.limit;
+    ref1 = this.props, orientation = ref1.orientation, min = ref1.min, max = ref1.max, stepSize = ref1.stepSize;
+    percentage = this.clamp(pos, 0, limit) / (limit || 1);
+    baseVal = stepSize * Math.round(percentage * (max - min) / stepSize);
+    if (orientation === 'horizontal') {
+      value = baseVal + min;
+    } else {
+      value = max - baseVal;
+    }
+    return this.clamp(value, min, max);
+  },
+  position: function(e) {
+    var clientCoordinateStyle, coordinate, coordinateStyle, direction, directionStyle, grab, node, orientation, pos, value;
+    grab = this.state.grab;
+    orientation = this.props.orientation;
+    node = this.slider;
+    coordinateStyle = constants.orientation[orientation].coordinate;
+    directionStyle = constants.orientation[orientation].direction;
+    clientCoordinateStyle = "client" + (coordinateStyle.toUpperCase());
+    coordinate = !e.touches ? e[clientCoordinateStyle] : e.touches[0][clientCoordinateStyle];
+    direction = node.getBoundingClientRect()[directionStyle];
+    pos = coordinate - direction - grab;
+    value = this.getValueFromPosition(pos);
+    return value;
+  },
   renderHandle: function() {
-    var centerOfDiv, classNames, height, outerEdge, style, width;
-    width = height = this.props.handleSize + "px";
+    var centerOfDiv, classNames, displaySemiQuant, handleSize, height, orientation, outerEdge, ref1, style, width;
+    ref1 = this.props, orientation = ref1.orientation, handleSize = ref1.handleSize, displaySemiQuant = ref1.displaySemiQuant;
+    width = height = handleSize + "px";
     centerOfDiv = (this.sliderPercent()) + "%";
-    outerEdge = Math.round((this.thickness() - this.props.handleSize) / 2.0);
+    outerEdge = Math.round((this.thickness() - handleSize) / 2.0);
     style = {
       "width": width,
       "height": height,
-      "fontSize": (this.props.handleSize / 2) + "px"
+      "fontSize": (handleSize / 2) + "px"
     };
-    if (this.props.horizontal) {
+    if (orientation === 'horizontal') {
       style.top = outerEdge + "px";
       style.left = centerOfDiv;
-      style.marginLeft = "-" + (this.props.handleSize / 2) + "px";
-      style.marginRight = "-" + (this.props.handleSize / 2) + "px";
+      style.marginLeft = "-" + (handleSize / 2) + "px";
+      style.marginRight = "-" + (handleSize / 2) + "px";
     } else {
       style.left = outerEdge + "px";
       style.top = centerOfDiv;
-      style.marginTop = "-" + (this.props.handleSize / 2) + "px";
-      style.marginBottom = "-" + (this.props.handleSize / 2) + "px";
+      style.marginTop = "-" + (handleSize / 2) + "px";
+      style.marginBottom = "-" + (handleSize / 2) + "px";
     }
-    if (!this.props.displaySemiQuant) {
+    if (!displaySemiQuant) {
       label = this.renderNumber();
     } else {
       label = null;
     }
     classNames = "icon-codap-smallSliderLines";
-    if (!this.props.horizontal) {
+    if (orientation !== 'horizontal') {
       classNames += " rotated";
     }
     return div({
       className: "value-slider-handle",
       style: style,
-      ref: "handle"
+      ref: (function(_this) {
+        return function(s) {
+          return _this.handle = s;
+        };
+      })(this),
+      onMouseDown: this.handleStart,
+      onTouchEnd: this.handleNoop,
+      onTouchMove: this.handleDrag
     }, i({
       className: classNames
     }), label);
@@ -49720,10 +49774,11 @@ ValueSlider = React.createClass({
     }
   },
   renderLegend: function() {
-    var max, min;
-    min = this.props.minLabel || (this.props.displaySemiQuant ? tr("~NODE-VALUE-EDIT.LOW") : this.renderEditableProperty("min"));
-    max = this.props.maxLabel || (this.props.displaySemiQuant ? tr("~NODE-VALUE-EDIT.HIGH") : this.renderEditableProperty("max"));
-    if (this.props.horizontal) {
+    var displaySemiQuant, max, maxLabel, min, minLabel, orientation, ref1, width;
+    ref1 = this.props, minLabel = ref1.minLabel, maxLabel = ref1.maxLabel, displaySemiQuant = ref1.displaySemiQuant, orientation = ref1.orientation, width = ref1.width;
+    min = minLabel || (displaySemiQuant ? tr("~NODE-VALUE-EDIT.LOW") : this.renderEditableProperty("min"));
+    max = maxLabel || (displaySemiQuant ? tr("~NODE-VALUE-EDIT.HIGH") : this.renderEditableProperty("max"));
+    if (orientation === 'horizontal') {
       return div({
         className: "legend"
       }, min, max);
@@ -49731,23 +49786,24 @@ ValueSlider = React.createClass({
       return div({
         className: "legend",
         style: {
-          left: this.props.width / 1.7
+          left: width / 1.7
         }
       }, max, min);
     }
   },
   renderTicks: function() {
-    var center, j, k, numTicks, ref1, tickDistance, tickHeight, ticks;
-    if (!this.props.showTicks) {
+    var center, j, k, max, min, numTicks, orientation, ref1, ref2, showTicks, stepSize, tickDistance, tickHeight, ticks;
+    ref1 = this.props, showTicks = ref1.showTicks, max = ref1.max, min = ref1.min, stepSize = ref1.stepSize, orientation = ref1.orientation;
+    if (!showTicks) {
       return;
     }
     center = this.thickness() / 2;
-    numTicks = (this.props.max - this.props.min) / this.props.stepSize;
+    numTicks = (max - min) / stepSize;
     tickDistance = this.length() / numTicks;
     tickHeight = circleRadius * 1.5;
     ticks = [];
-    for (j = k = 1, ref1 = numTicks; 1 <= ref1 ? k < ref1 : k > ref1; j = 1 <= ref1 ? ++k : --k) {
-      if (this.props.horizontal) {
+    for (j = k = 1, ref2 = numTicks; 1 <= ref2 ? k < ref2 : k > ref2; j = 1 <= ref2 ? ++k : --k) {
+      if (orientation === 'horizontal') {
         ticks.push(path({
           key: j,
           d: "M" + (j * tickDistance) + " " + (center - tickHeight) + " l 0 " + (tickHeight * 2),
@@ -49764,35 +49820,36 @@ ValueSlider = React.createClass({
     return ticks;
   },
   renderLine: function() {
-    var center, inset;
+    var center, filled, height, inset, orientation, ref1, width;
+    ref1 = this.props, filled = ref1.filled, orientation = ref1.orientation, width = ref1.width, height = ref1.height, filled = ref1.filled;
     center = this.thickness() / 2;
     inset = circleRadius;
-    if (this.props.filled) {
+    if (filled) {
       inset += 1;
     }
-    if (this.props.horizontal) {
+    if (orientation === 'horizontal') {
       return g({}, path({
-        d: "M" + inset + " " + center + " l " + (this.props.width - (inset * 2)) + " 0",
+        d: "M" + inset + " " + center + " l " + (width - (inset * 2)) + " 0",
         className: "slider-line",
         stroke: "blue"
-      }), !this.props.filled ? g({}, circle({
+      }), !filled ? g({}, circle({
         cx: circleRadius,
         cy: center,
         r: circleRadius,
         className: "slider-shape",
         stroke: "blue"
       }), circle({
-        cx: this.props.width - circleRadius,
+        cx: width - circleRadius,
         cy: center,
         r: circleRadius,
         className: "slider-shape"
       })) : void 0, this.renderTicks());
     } else {
       return g({}, path({
-        d: "M" + center + " " + inset + " l 0 " + (this.props.height - (inset * 2)),
+        d: "M" + center + " " + inset + " l 0 " + (height - (inset * 2)),
         className: "slider-line",
         stroke: "blue"
-      }), !this.props.filled ? g({}, circle({
+      }), !filled ? g({}, circle({
         cx: center,
         cy: circleRadius,
         r: circleRadius,
@@ -49800,23 +49857,24 @@ ValueSlider = React.createClass({
         stroke: "blue"
       }), circle({
         cx: center,
-        cy: this.props.height - circleRadius,
+        cy: height - circleRadius,
         r: circleRadius,
         className: "slider-shape"
       })) : void 0, this.renderTicks());
     }
   },
   renderFill: function() {
-    var center, height, inset, top, totalHeight;
+    var center, height, inset, orientation, ref1, top, totalHeight, width;
+    ref1 = this.props, orientation = ref1.orientation, width = ref1.width, height = ref1.height;
     center = this.thickness() / 2;
     inset = circleRadius + 1;
-    if (this.props.horizontal) {
+    if (orientation === 'horizontal') {
       return path({
-        d: "M" + inset + " " + center + " l " + (this.props.width - (inset * 2)) + " 0",
+        d: "M" + inset + " " + center + " l " + (width - (inset * 2)) + " 0",
         className: "slider-line fill-line"
       });
     } else {
-      totalHeight = this.props.height - (inset * 2);
+      totalHeight = height - (inset * 2);
       top = inset + (totalHeight * (1 - this.sliderLocation()));
       height = totalHeight - top;
       if (height > 0) {
@@ -49831,33 +49889,43 @@ ValueSlider = React.createClass({
     }
   },
   render: function() {
-    var classNames, lengendHeight, style;
+    var classNames, enabled, filled, height, horizontal, lengendHeight, orientation, ref1, showHandle, showLabels, style, width;
+    ref1 = this.props, orientation = ref1.orientation, width = ref1.width, height = ref1.height, enabled = ref1.enabled, filled = ref1.filled, showHandle = ref1.showHandle, showLabels = ref1.showLabels;
+    horizontal = orientation === 'horizontal';
     lengendHeight = 9 + 4.5;
     style = {
       padding: "0px",
       border: "0px",
-      width: this.props.width + (!this.props.horizontal && !this.props.filled ? lengendHeight : 0),
-      height: this.props.height + (this.props.horizontal ? lengendHeight : 0)
+      width: width + (!horizontal && !filled ? lengendHeight : 0),
+      height: height + (horizontal ? lengendHeight : 0)
     };
     classNames = "value-slider";
-    if (!this.props.horizontal) {
+    if (!horizontal) {
       classNames += " vertical";
     }
-    if (!this.props.enabled) {
+    if (!enabled) {
       classNames += " disabled";
     }
-    if (this.props.filled) {
+    if (filled) {
       classNames += " filled";
     }
     return div({
       className: classNames,
-      style: style
+      style: style,
+      ref: (function(_this) {
+        return function(s) {
+          return _this.slider = s;
+        };
+      })(this),
+      onMouseDown: this.handleDrag,
+      onTouchStart: this.handleDrag,
+      onTouchEnd: this.handleNoop
     }, svg({
       className: "svg-background",
-      width: this.props.width + "px",
-      height: this.props.height + "px",
-      viewBox: "0 0 " + this.props.width + " " + this.props.height
-    }, this.renderLine(), this.props.filled ? this.renderFill() : void 0), this.props.showHandle ? this.renderHandle() : void 0, this.props.showLabels ? this.renderLegend() : void 0);
+      width: width + "px",
+      height: height + "px",
+      viewBox: "0 0 " + width + " " + height
+    }, this.renderLine(), filled ? this.renderFill() : void 0), showHandle ? this.renderHandle() : void 0, showLabels ? this.renderLegend() : void 0);
   }
 });
 
@@ -49901,7 +49969,7 @@ Demo = React.createClass({
       onValueChange: this.onValueChange,
       onRangeChange: this.onRangeChange
     }), Slider({
-      horizontal: false,
+      orientation: "vertical",
       height: 72,
       width: 20,
       value: this.state.value,
@@ -49915,7 +49983,7 @@ Demo = React.createClass({
       onValueChange: this.onValueChange,
       onRangeChange: this.onRangeChange
     })), div({}, Slider({
-      horizontal: false,
+      orientation: "vertical",
       filled: true,
       showLabels: false,
       showHandle: true,
@@ -49931,7 +49999,7 @@ Demo = React.createClass({
       onValueChange: this.onValueChange,
       onRangeChange: this.onRangeChange
     })), div({}, Slider({
-      horizontal: false,
+      orientation: "vertical",
       filled: true,
       showLabels: false,
       showHandle: false,
