@@ -47,9 +47,7 @@ SimulationStore   = Reflux.createStore
       stepUnitsName: unitName
       timeUnitOptions: options
       capNodeValues: false
-      modelIsRunning: false         # currently running?
-      modelReadyToRun: true         # has been reset?
-      # is the model valid?
+      modelIsRunning: false
       modelIsRunnable: @_checkModelIsRunnable()
       graphHasCollector: @_checkForCollectors()
       isRecording: false            # sending data to codap?
@@ -63,15 +61,14 @@ SimulationStore   = Reflux.createStore
 
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
-    @settings.modelReadyToRun = true
     @settings.modelIsRunning = true
     SimulationActions.resetSimulation.trigger()
     @notifyChange()
 
   onCollapseSimulationPanel: ->
     @settings.simulationPanelExpanded = false
-    @settings.modelReadyToRun = false
     @settings.modelIsRunning = false
+    @_stopRecording()
     @notifyChange()
 
   onGraphChanged: (data)->
@@ -108,7 +105,7 @@ SimulationStore   = Reflux.createStore
       TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
 
   _runSimulation: (duration=1)->
-    if @settings.modelIsRunnable and @settings.modelReadyToRun
+    if @settings.modelIsRunnable
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
       @settings.modelIsRunning = true
@@ -150,7 +147,6 @@ SimulationStore   = Reflux.createStore
 
   onSimulationEnded: ->
     @settings.modelIsRunning = false
-    @settings.modelReadyToRun = true
     @notifyChange()
 
   _startRecording: ->
