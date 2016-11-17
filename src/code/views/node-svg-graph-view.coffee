@@ -13,6 +13,7 @@ module.exports = NodeSvgGraphView = React.createClass
     min: 0
     max: 100
     data: []
+    color: '#aaa'
 
   invertPoint: (point) ->
     {x: @props.width - point.x, y: @props.height - point.y}
@@ -50,7 +51,7 @@ module.exports = NodeSvgGraphView = React.createClass
 
   renderLineData: ->
     data = @pointsToPath(@getPathPoints())
-    (path {d: data, strokeWidth: @props.strokeWidth, stroke: "#e99373", fill: "none"})
+    (path {d: data, strokeWidth: @props.strokeWidth, stroke: @props.color, fill: "none"})
 
   render: ->
     (div {},

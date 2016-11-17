@@ -41,6 +41,7 @@ ValueSlider = React.createClass
     displaySemiQuant: false
     enabled: true
     orientation: "horizontal"
+    color: "gray"
     filled: false
     onValueChange: (v) ->
       log.info "new value #{v}"
@@ -282,21 +283,21 @@ ValueSlider = React.createClass
     if filled then inset += 1
     if orientation is 'horizontal'
       (g {},
-        (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line", stroke:"blue"})
-        if not filled
+        (path {d:"M#{inset} #{center} l #{@props.width - (inset*2)} 0", className:"slider-line", stroke:"#ccc"})
+        if not @props.filled
           (g {},
-            (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"blue"})
-            (circle {cx:width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
+            (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"#ccc"})
+            (circle {cx:@props.width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
     else
       (g {},
-        (path {d:"M#{center} #{inset} l 0 #{height - (inset*2)}", className:"slider-line", stroke:"blue"})
-        if not filled
+        (path {d:"M#{center} #{inset} l 0 #{@props.height - (inset*2)}", className:"slider-line", stroke:"#ccc"})
+        if not @props.filled
           (g {},
-            (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"blue"})
-            (circle {cx:center, cy:height - circleRadius, r:circleRadius, className:"slider-shape"})
+            (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"#ccc"})
+            (circle {cx:center, cy:@props.height - circleRadius, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
@@ -305,16 +306,28 @@ ValueSlider = React.createClass
     { orientation, width, height } = @props
     center = @thickness() / 2
     inset = circleRadius + 1
-    if orientation is 'horizontal'
-      (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line fill-line"})
+    if @props.horizontal
+      (path
+        d: "M#{inset} #{center} l #{@props.width - (inset*2)} 0"
+        className: "slider-line fill-line"
+        stroke: @props.color
+      )
     else
       totalHeight = height - (inset * 2)
       top = inset + (totalHeight * (1 - @sliderLocation()))
       height = totalHeight-top
       if height > 0
         (g {},
-          (path {d:"M#{center} #{top} l 0 #{height}", className:"slider-line fill-line"}) # flat top
-          (path {d:"M#{center} #{totalHeight} l 0 1", className:"slider-line fill-line cap"})      # rounded bottom
+          (path # flat top
+            d: "M#{center} #{top} l 0 #{height}"
+            className: "slider-line fill-line"
+            stroke: @props.color
+          )
+          (path # rounded bottom
+            d: "M#{center} #{totalHeight} l 0 1"
+            className: "slider-line fill-line cap"
+            stroke: @props.color
+          )
         )
 
   render: ->

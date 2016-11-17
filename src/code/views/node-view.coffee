@@ -110,6 +110,7 @@ module.exports = NodeView = React.createClass
     selected: false
     simulating: false
     value: null
+    dataColor: "#aaa"
     data:
       title: "foo"
       x: 10
@@ -196,6 +197,7 @@ module.exports = NodeView = React.createClass
       enabled: enabled
       onSliderDragStart: @handleSliderDragStart
       onSliderDragEnd: @handleSliderDragEnd
+      color: @props.dataColor
     )
 
   handleGraphClick: (attributeName) ->
@@ -230,6 +232,7 @@ module.exports = NodeView = React.createClass
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
+        color: @props.dataColor
       })
     else
       (SquareImage {
