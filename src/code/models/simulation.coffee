@@ -79,38 +79,8 @@ module.exports = class Simulation
     @onEnd       = @opts.onEnd or ->
       log.info "simulation end"
 
-    speed            = if @opts.speed? then @opts.speed else 4
-    @bundleAllFrames = speed is 4               # bundle all frames when at max speed
-    @stepInterval = @_calculateInterval speed   # otherwise calc step interval
-
     @recalculateDesiredSteps = false
     @stopRun = false
-
-  _calculateInterval: (speed) ->
-    switch speed
-      when 0 then 1000  # Speed 0: 1 step/second
-      when 1            # Speed 1: 3 steps/second, at least 5 seconds and at most 100 seconds
-        switch
-          when @duration <= 15  then Math.min 900, 5000 / @duration
-          when @duration <= 300 then 330
-          else 1e5 / @duration
-      when 2            # Speed 2: 10 steps/second, at least 2.5 seconds and at most 50 seconds
-        switch
-          when @duration <= 25  then Math.min 700, 2500 / @duration
-          when @duration <= 500 then 100
-          else 5e4 / @duration
-      when 3            # Speed 3: 20 steps/second, at least 1 second and at most 10 seconds
-        switch
-          when @duration <= 20  then Math.min 500, 1000 / @duration
-          when @duration <= 200 then 50
-          else 1e4 / @duration
-      when 4            #
-        0.1
-
-  setSpeed: (speed) ->
-    # @bundleAllFrames = speed is 4
-    @stepInterval = @_calculateInterval speed
-    @recalculateDesiredSteps = true
 
   decorateNodes: ->
     _.each @nodes, (node) =>
@@ -189,39 +159,9 @@ module.exports = class Simulation
       time++
       @generateFrame(time)
 
-    if @bundleAllFrames
-      while time < @duration
-        step()
-      @onFrames(@framesBundle)    # send all at once
-      @onEnd()
-    else
-      # use animationFrame and calculate how much time has passed since the last step, and
-      # generate and send the appropriate number of frames. This is better when we send
-      # intermediate values to CODAP, as this can take > 100ms and would tie up setInterval.
-      startTime = window.performance.now()
-      steps = 0
-      subtract = 0
-      animationFrameLoop = =>
-        if time < @duration and not @stopRun
-          requestAnimationFrame animationFrameLoop
-        else if time is @duration then return
 
-        if @recalculateDesiredSteps
-          startTime = window.performance.now()
-          steps = 0
-          subtract = time
-          @recalculateDesiredSteps = false
+    while time < @duration
+      step()
+    @onFrames(@framesBundle)    # send all at once
+    @onEnd()
 
-        elapsedTime = window.performance.now() - startTime
-        desiredStepsTilNow = Math.floor elapsedTime / @stepInterval
-        desiredStepsTilNow = Math.min desiredStepsTilNow, (@duration - subtract)
-
-        while steps < desiredStepsTilNow
-          steps++
-          step()
-
-        @onFrames(@framesBundle)  # send steps til now
-        @framesBundle = []
-
-        if time is @duration or @stopRun then @onEnd()
-      animationFrameLoop()

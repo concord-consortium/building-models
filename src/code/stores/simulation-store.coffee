@@ -46,7 +46,6 @@ SimulationStore   = Reflux.createStore
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: options
-      speed: 4
       capNodeValues: false
       modelIsRunning: false         # currently running?
       modelReadyToRun: true         # has been reset?
@@ -118,7 +117,6 @@ SimulationStore   = Reflux.createStore
       @currentSimulation = new Simulation
         nodes: @nodes
         duration: duration
-        speed: @settings.speed
         capNodeValues: @settings.capNodeValues
 
         # Simulation events get triggered as Actions here, and are
@@ -216,7 +214,6 @@ SimulationStore   = Reflux.createStore
   serialize: ->
     duration:       @settings.duration
     stepUnits:      @settings.stepUnits
-    speed:          @settings.speed
     capNodeValues:  @settings.capNodeValues
 
 mixin =
