@@ -78,6 +78,7 @@ SimulationStore   = Reflux.createStore
     @nodes = data.nodes
     @settings.modelIsRunnable = @_checkModelIsRunnable()
     @settings.graphHasCollector = @_checkForCollectors()
+    @notifyChange()
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
