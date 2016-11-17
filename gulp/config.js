@@ -12,21 +12,23 @@ var argv = require('yargs').argv,
       tag: gitTags.split('-')[0],
       commiter: gitLog.split(" ")[2],
       commit: gitLog.split(" ")[1]
-    };
+    },
     buildInfoString = (buildInfo.date + " " +
       buildInfo.tag + " " +
       buildInfo.commit + " " +
-      buildInfo.commiter).replace(/\n|\r/g,"");
+      buildInfo.commiter).replace(/\n|\r/g,""),
+    commitString = buildInfo.commit,
+
     src = './src';
 
 var dest  = production ? './dist' : './dev';
-
 
 module.exports = {
   production: production,
   environment: environment,
   buildInfo: buildInfo,
   buildInfoString: buildInfoString,
+  commitString: commitString,
   css: {
     watch: src + '/stylus/**/*.styl',
     src: src + '/stylus/**/app.styl',
