@@ -100,7 +100,7 @@ SimulationStore   = Reflux.createStore
   onRunSimulation: ->
     @_runSimulation()
 
-  stepUnits: () ->
+  stepUnits: ->
     if @settings.isRecordingPeriod
       @settings.stepUnits
     else

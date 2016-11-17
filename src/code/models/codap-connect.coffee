@@ -136,7 +136,7 @@ module.exports = class CodapConnect
           }
         , @initGameHandler
 
-  _openNewCase: () ->
+  _openNewCase: ->
     @currentCaseID = null
 
     @_createCollection()
@@ -154,7 +154,7 @@ module.exports = class CodapConnect
       else
         log.info "CODAP returned an error on 'openCase'"
 
-  _createCollection: () ->
+  _createCollection: ->
     nodes = @graphStore.getNodes()
 
     # First column definition is the time index
@@ -180,7 +180,7 @@ module.exports = class CodapConnect
       resource: 'collection[Samples].attribute',
       values: sampleDataAttrs
 
-  _timeStamp: () ->
+  _timeStamp: ->
     new Date().getTime()
 
   _shouldSend: ->
@@ -195,7 +195,7 @@ module.exports = class CodapConnect
       @_sendSimulationData()
     else
       setTimeout(
-        () => @_sendSimulationData(),
+        => @_sendSimulationData(),
         @sendThrottleMs
       )
 
