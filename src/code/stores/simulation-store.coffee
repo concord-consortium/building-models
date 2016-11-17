@@ -48,12 +48,15 @@ SimulationStore   = Reflux.createStore
       timeUnitOptions: options
       capNodeValues: false
       modelIsRunning: false
-      modelIsRunnable: @_checkModelIsRunnable()
-      graphHasCollector: @_checkForCollectors()
+      modelIsRunnable: false
+      graphHasCollector: false
       isRecording: false            # sending data to codap?
       isRecordingOne: false         # record-1 pressed?
       isRecordingStream: false      # record stream pressed?
       isRecordingPeriod: false      # record n units' pressed?
+
+    @_updateModelIsRunnable()
+    @_updateGraphHasCollector()
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -73,8 +76,8 @@ SimulationStore   = Reflux.createStore
 
   onGraphChanged: (data)->
     @nodes = data.nodes
-    @settings.modelIsRunnable = @_checkModelIsRunnable()
-    @settings.graphHasCollector = @_checkForCollectors()
+    @_updateModelIsRunnable()
+    @settings.graphHasCollector = @_updateGraphHasCollector()
     @notifyChange()
 
   onSetDuration: (n) ->
@@ -186,16 +189,24 @@ SimulationStore   = Reflux.createStore
     @timeout = setTimeout(stopRecording, 500)
     @notifyChange()
 
-  _checkModelIsRunnable: ->
+  _isModelRunnable: ->
     for node in @nodes
       for link in node.links
-        if link.relation.isDefined then return true
-    false
+        return true if link.relation.isDefined
+    return false
 
-  _checkForCollectors: ->
+  _updateModelIsRunnable: ->
+    @settings.modelIsRunnable = @_isModelRunnable()
+
+  _findCollectors: ->
     for node in @nodes
       if node.isAccumulator then return true
-    false
+    return false
+
+  _updateGraphHasCollector: ->
+    hasCollectors = @_findCollectors()
+    @_stopRecording() if hasCollectors isnt @settings.graphHasCollector
+    @settings.graphHasCollector = hasCollectors
 
   _getErrorMessage: ->
     # we just have the one error state right now
