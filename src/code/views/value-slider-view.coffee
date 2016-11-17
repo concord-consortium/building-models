@@ -78,11 +78,11 @@ ValueSlider = React.createClass
     window.removeEventListener 'resize', @handleUpdate
 
   handleUpdate: ->
-    { orientation } = this.props
+    { orientation } = @props
     dimension = constants.orientation[orientation].dimension
     dimension = dimension.charAt(0).toUpperCase() + dimension.substr(1)
-    sliderPos = this.slider["offset#{dimension}"]
-    handlePos = this.handle?["offset#{dimension}"] or 0
+    sliderPos = @slider["offset#{dimension}"]
+    handlePos = @handle?["offset#{dimension}"] or 0
 
     @setState
       limit: sliderPos - handlePos
@@ -121,8 +121,8 @@ ValueSlider = React.createClass
     document.addEventListener 'mouseup',   @handleEnd
 
   handleEnd: ->
-    document.removeEventListener 'mousemove', this.handleDrag
-    document.removeEventListener 'mouseup',   this.handleEnd
+    document.removeEventListener 'mousemove', @handleDrag
+    document.removeEventListener 'mouseup',   @handleEnd
 
   handleDrag: (e) ->
     @handleNoop(e)
@@ -136,8 +136,8 @@ ValueSlider = React.createClass
     Math.min(Math.max(value, min), max)
 
   getValueFromPosition: (pos) ->
-    { limit } = this.state
-    { orientation, min, max, stepSize } = this.props
+    { limit } = @state
+    { orientation, min, max, stepSize } = @props
     percentage = (@clamp(pos, 0, limit) / (limit || 1))
     baseVal = stepSize * Math.round(percentage * (max - min) / stepSize)
 
@@ -159,7 +159,7 @@ ValueSlider = React.createClass
     direction = node.getBoundingClientRect()[directionStyle]
 
     pos = coordinate - direction - grab
-    value = this.getValueFromPosition(pos)
+    value = @getValueFromPosition(pos)
 
     return value
 
@@ -212,10 +212,10 @@ ValueSlider = React.createClass
       return if not isEditable
       # first copy state value to model if we were editing
       if @state["editing-#{property}"]
-        newValue = parseInt ReactDOM.findDOMNode(this.refs.focusable)?.value
+        newValue = parseInt ReactDOM.findDOMNode(@refs.focusable)?.value
         if newValue? then @updateRange property, newValue
       @setState "editing-#{property}": not @state["editing-#{property}"], ->
-        this.refs.focusable?.focus()
+        @refs.focusable?.focus()
 
     keyDown = (evt) ->
       if evt.key is 'Enter'
