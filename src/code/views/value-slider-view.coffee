@@ -89,7 +89,7 @@ ValueSlider = React.createClass
       grab: handlePos / 2
 
   sliderLocation: ->
-    (@props.value - @props.min) / (@props.max - @props.min)
+    @clamp (@props.value - @props.min) / (@props.max - @props.min), 0, 1
 
   sliderPercent: ->
     p = @sliderLocation() * 100
