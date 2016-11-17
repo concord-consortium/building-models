@@ -111,6 +111,9 @@ module.exports =
   "~COLOR.DARK_BLUE": "Dark Blue"
   "~COLOR.LIGHT_BLUE": "Light Blue"
   "~COLOR.MED_BLUE": "Blue"
+  "~COLOR.DARK_GRAY": "Dark Gray"
+  "~COLOR.LIGHT_GRAY": "Light Gray"
+  "~COLOR.DATA": "Codap Orange"
 
   # google-file-interface
   "~FILE.CHECKING_AUTH": "Checking authorization..."
