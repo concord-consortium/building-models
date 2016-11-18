@@ -13,9 +13,9 @@ SimulationActions = Reflux.createActions(
     "resetSimulation"
     "setDuration"
     "setStepUnits"
-    "setSpeed"
     "simulationStarted"
     "simulationFramesCreated"
+    "recordingFramesCreated"
     "simulationEnded"
     "capNodeValues"
     "recordStream"
@@ -66,6 +66,7 @@ SimulationStore   = Reflux.createStore
     @settings.simulationPanelExpanded = true
     @settings.modelReadyToRun = true
     @settings.modelIsRunning = true
+    SimulationActions.resetSimulation.trigger()
     @notifyChange()
 
   onCollapseSimulationPanel: ->
@@ -78,7 +79,6 @@ SimulationStore   = Reflux.createStore
     @nodes = data.nodes
     @settings.modelIsRunnable = @_checkModelIsRunnable()
     @settings.graphHasCollector = @_checkForCollectors()
-    @_runSimulation()
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
@@ -93,11 +93,6 @@ SimulationStore   = Reflux.createStore
     _.merge @settings, data.settings.simulation
     @notifyChange()
 
-  onSetSpeed: (s) ->
-    @settings.speed = s
-    if @currentSimulation
-      @currentSimulation.setSpeed s
-    @notifyChange()
 
   onCapNodeValues: (cap) ->
     @settings.capNodeValues = cap
@@ -106,12 +101,17 @@ SimulationStore   = Reflux.createStore
   onRunSimulation: ->
     @_runSimulation()
 
-  _runSimulation: ->
+  stepUnits: () ->
+    if @settings.isRecordingPeriod
+      @settings.stepUnits
+    else
+      TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
+
+  _runSimulation: (duration=1)->
     if @settings.modelIsRunnable and @settings.modelReadyToRun
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
       @settings.modelIsRunning = true
-      duration = 1
       if @settings.graphHasCollector
         duration = @settings.duration
       @notifyChange()
@@ -123,11 +123,23 @@ SimulationStore   = Reflux.createStore
 
         # Simulation events get triggered as Actions here, and are
         # available to anyone who listens to this store
-        onFrames: (frames) ->
+        onFrames: (frames) =>
           SimulationActions.simulationFramesCreated(frames)
+          if @settings.isRecording
+            if @settings.isRecordingPeriod
+              SimulationActions.recordingFramesCreated(frames)
+            else
+              # Strip out the time information if we are simulating without time...
+              framesNoTime = _.map frames, (f) ->
+                # time: (removed)
+                nodes: f.nodes
+              SimulationActions.recordingFramesCreated(framesNoTime)
 
-        onStart: (nodeNames) ->
+        onStart: (nodeNames) =>
           SimulationActions.simulationStarted(nodeNames)
+          if @settings.isRecording
+            SimulationActions.recordingDidStart(nodeNames)
+
         onEnd: ->
           SimulationActions.simulationEnded()
 
@@ -142,29 +154,38 @@ SimulationStore   = Reflux.createStore
     @settings.modelReadyToRun = true
     @notifyChange()
 
-  onStopRecording: ->
+  _startRecording: ->
+    @settings.isRecording = true
+
+  _stopRecording: ->
     @settings.isRecording = false
     @settings.isRecordingOne = false
     @settings.isRecordingStream = false
     @settings.isRecordingPeriod = false
+    SimulationActions.recordingDidEnd()
+
+  onStopRecording: ->
+    @_stopRecording()
     @notifyChange()
 
   onRecordOne: ->
-    @settings.isRecording = true
+    @_startRecording()
     @settings.isRecordingOne = true
+    @_runSimulation(1)
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)
     @notifyChange()
 
   onRecordStream: ->
-    @settings.isRecording = true
+    @_startRecording()
     @settings.isRecordingStream = true
     @notifyChange()
 
   onRecordPeriod: ->
-    @settings.isRecording = true
+    @_startRecording()
     @settings.isRecordingPeriod = true
+    @_runSimulation(@settings.duration)
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)

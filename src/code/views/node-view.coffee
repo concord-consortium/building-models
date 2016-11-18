@@ -1,6 +1,7 @@
 {input, div, i, img, span, label} = React.DOM
 tr = require "../utils/translate"
 
+SimulationActions = require("../stores/simulation-store").actions
 SquareImage = React.createFactory require "./square-image-view"
 SliderView  = React.createFactory require "./value-slider-view"
 GraphView   = React.createFactory require "./node-svg-graph-view"
@@ -139,6 +140,7 @@ module.exports = NodeView = React.createClass
 
   changeValue: (newValue) ->
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
+    SimulationActions.runSimulation()
 
   changeTitle: (newTitle) ->
     @props.graphStore.startNodeEdit()

@@ -62,7 +62,7 @@ describe "Serialization and Loading", ->
       @graphStore = GraphStore.store
       @graphStore.init()
 
-      @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo"}, 'a')
+      @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo", frames:[] }, 'a')
       @nodeB = new Node({title: "b", x:20, y:25, paletteItem:"uuid-bee", frames: [50]}, 'b')
       @linkA = new Link({
         sourceNode: @nodeA
