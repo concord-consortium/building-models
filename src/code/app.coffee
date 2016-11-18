@@ -1,6 +1,5 @@
 AppView     = React.createFactory require './views/app-view'
 
-ValueSlider  =require './views/value-slider-view'
 GraphStore   = require './stores/graph-store'
 PaletteStore = require './stores/palette-store'
 HashParams   = require './utils/hash-parameters'

@@ -89,6 +89,7 @@ module.exports = NodeView = React.createClass
 
   getInitialState: ->
     editingNodeTitle: false
+    ignoreDrag: false
 
   handleSelected: (actually_select) ->
     if @props.selectionManager
@@ -122,6 +123,9 @@ module.exports = NodeView = React.createClass
       domElement: @refs.node
       syntheticEvent: evt
       extra: extra
+
+    # returning false will cancel the drag
+    return !@state.ignoreDrag
 
   doStop: (evt, extra) ->
     @props.onMoveComplete
@@ -165,13 +169,20 @@ module.exports = NodeView = React.createClass
       (input  {type: "text", className: "value", value: value})
     )
 
+  handleSliderDragStart: ->
+    @setState ignoreDrag: true
+
+
+  handleSliderDragEnd: ->
+    @setState ignoreDrag: false
+
   renderSliderView: ->
     enabled = not @props.running or @props.data.canEditValueWhileRunning()
     showHandle = @props.data.canEditInitialValue()
     value = @props.data.currentValue or @props.data.initialValue
 
     (SliderView
-      horizontal: false
+      orientation: "vertical"
       filled: true
       height: 44
       width: 15
@@ -183,6 +194,8 @@ module.exports = NodeView = React.createClass
       max: @props.data.max
       min: @props.data.min
       enabled: enabled
+      onSliderDragStart: @handleSliderDragStart
+      onSliderDragEnd: @handleSliderDragEnd
     )
 
   handleGraphClick: (attributeName) ->
