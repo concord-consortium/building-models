@@ -39,6 +39,7 @@ SimulationStore   = Reflux.createStore
 
     @nodes = []
     @currentSimulation = null
+    @experimentFrameIndex = 0
 
     @settings =
       simulationPanelExpanded: false
@@ -125,14 +126,11 @@ SimulationStore   = Reflux.createStore
         onFrames: (frames) =>
           SimulationActions.simulationFramesCreated(frames)
           if @settings.isRecording
-            if @settings.isRecordingPeriod
-              SimulationActions.recordingFramesCreated(frames)
-            else
-              # Strip out the time information if we are simulating without time...
-              framesNoTime = _.map frames, (f) ->
-                # time: (removed)
-                nodes: f.nodes
-              SimulationActions.recordingFramesCreated(framesNoTime)
+            framesNoTime = _.map frames, (frame) =>
+              @experimentFrameIndex++
+              frame.time = @experimentFrameIndex
+              return frame
+            SimulationActions.recordingFramesCreated(framesNoTime)
 
         onStart: (nodeNames) =>
           SimulationActions.simulationStarted(nodeNames)
