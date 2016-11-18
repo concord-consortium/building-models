@@ -117,10 +117,12 @@ ValueSlider = React.createClass
 
   handleStart: (e) ->
     @handleNoop(e)
+    @props.onSliderDragStart?()
     document.addEventListener 'mousemove', @handleDrag
     document.addEventListener 'mouseup',   @handleEnd
 
   handleEnd: ->
+    @props.onSliderDragEnd?()
     document.removeEventListener 'mousemove', @handleDrag
     document.removeEventListener 'mouseup',   @handleEnd
 
@@ -131,6 +133,10 @@ ValueSlider = React.createClass
 
     value = @position(e)
     onValueChange(value)
+
+  handleJumpAndDrag: (e) ->
+    @handleDrag(e)
+    @handleStart(e)
 
   clamp: (value, min, max) ->
     Math.min(Math.max(value, min), max)
@@ -328,8 +334,8 @@ ValueSlider = React.createClass
       className: classNames
       style: style
       ref: (s) => @slider = s
-      onMouseDown: @handleDrag
-      onTouchStart: @handleDrag
+      onMouseDown: @handleJumpAndDrag
+      onTouchStart: @handleJumpAndDrag
       onTouchEnd: @handleNoop
       },
       (svg {className: "svg-background", width: "#{width}px", height:"#{height}px", viewBox: "0 0 #{width} #{height}"},
