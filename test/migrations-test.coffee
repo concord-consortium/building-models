@@ -3,7 +3,9 @@ TimeUnits      = require "../src/code/utils/time-units"
 originalData   = require "./serialized-test-data/v-0.1"
 
 chai   = require('chai')
+should = require('chai').should();
 expect = chai.expect
+
 
 describe "Migrations",  ->
   describe "update", ->
@@ -11,8 +13,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.15.0", ->
-        @result.version.should.equal "1.15.0"
+      it "should be 1.16.0", ->
+        @result.version.should.equal "1.16.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -93,9 +95,9 @@ describe "Migrations",  ->
         @result.settings.simulation.duration.should.equal 10
         @result.settings.simulation.stepUnits.should.equal TimeUnits.defaultUnit
 
-    describe "v-1.9 changes", ->
-      it "should have speed setting", ->
-        @result.settings.simulation.speed.should.equal 4
+#    describe "v-1.9 changes", ->
+#      it "should have speed setting", ->
+#        @result.settings.simulation.speed.should.equal 4
 
     # Removed in 1.13
     # describe "v-1.10 changes", ->
@@ -116,3 +118,7 @@ describe "Migrations",  ->
         for link in @result.links
           link.reasoning.should.exist
 
+    describe "v-1.16.0 changes", ->
+      it "should not have simulation speed settings", ->
+        speed = @result.settings.simulation.speed
+        should.equal(speed, undefined)
