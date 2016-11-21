@@ -283,34 +283,34 @@ ValueSlider = React.createClass
     if filled then inset += 1
     if orientation is 'horizontal'
       (g {},
-        (path {d:"M#{inset} #{center} l #{@props.width - (inset*2)} 0", className:"slider-line", stroke:"#ccc"})
-        if not @props.filled
+        (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line", stroke:"#ccc"})
+        if not filled
           (g {},
             (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"#ccc"})
-            (circle {cx:@props.width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
+            (circle {cx:width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
     else
       (g {},
-        (path {d:"M#{center} #{inset} l 0 #{@props.height - (inset*2)}", className:"slider-line", stroke:"#ccc"})
-        if not @props.filled
+        (path {d:"M#{center} #{inset} l 0 #{height - (inset*2)}", className:"slider-line", stroke:"#ccc"})
+        if not filled
           (g {},
             (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"#ccc"})
-            (circle {cx:center, cy:@props.height - circleRadius, r:circleRadius, className:"slider-shape"})
+            (circle {cx:center, cy:height - circleRadius, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
 
   renderFill: ->
-    { orientation, width, height } = @props
+    { orientation, color, width, height } = @props
     center = @thickness() / 2
     inset = circleRadius + 1
-    if @props.horizontal
+    if orientation is 'horizontal'
       (path
-        d: "M#{inset} #{center} l #{@props.width - (inset*2)} 0"
+        d: "M#{inset} #{center} l #{width - (inset*2)} 0"
         className: "slider-line fill-line"
-        stroke: @props.color
+        stroke: color
       )
     else
       totalHeight = height - (inset * 2)
@@ -321,12 +321,12 @@ ValueSlider = React.createClass
           (path # flat top
             d: "M#{center} #{top} l 0 #{height}"
             className: "slider-line fill-line"
-            stroke: @props.color
+            stroke: color
           )
           (path # rounded bottom
             d: "M#{center} #{totalHeight} l 0 1"
             className: "slider-line fill-line cap"
-            stroke: @props.color
+            stroke: color
           )
         )
 
