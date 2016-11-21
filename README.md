@@ -66,7 +66,7 @@ we are using.
 * Install the s3_website gem using `bundle install`
 * Copy `./.env.sample` to `./.env`
 * Edit your AWS credentials in `./.env` -- this file should never go into version control.
-* Run `./build.sh pro` which will run `s3_website push` and deploy the code from `dist` to http://building-models-app.concord.org/ and http://ivy.concord.org/
+* Run `./build.sh pro` which will build the current code into `dist` and run `s3_website push` to deploy to http://sage.concord.org
 
 
 ## Updating the shared fonts.
