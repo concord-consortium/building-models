@@ -47,15 +47,16 @@ SimulationStore   = Reflux.createStore
       stepUnitsName: unitName
       timeUnitOptions: options
       capNodeValues: false
-      modelIsRunning: false         # currently running?
-      modelReadyToRun: true         # has been reset?
-      # is the model valid?
-      modelIsRunnable: @_checkModelIsRunnable()
-      graphHasCollector: @_checkForCollectors()
+      modelIsRunning: false
+      modelIsRunnable: false
+      graphHasCollector: false
       isRecording: false            # sending data to codap?
       isRecordingOne: false         # record-1 pressed?
       isRecordingStream: false      # record stream pressed?
       isRecordingPeriod: false      # record n units' pressed?
+
+    @_updateModelIsRunnable()
+    @_updateGraphHasCollector()
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -63,21 +64,21 @@ SimulationStore   = Reflux.createStore
 
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
-    @settings.modelReadyToRun = true
     @settings.modelIsRunning = true
     SimulationActions.resetSimulation.trigger()
     @notifyChange()
 
   onCollapseSimulationPanel: ->
     @settings.simulationPanelExpanded = false
-    @settings.modelReadyToRun = false
     @settings.modelIsRunning = false
+    @_stopRecording()
     @notifyChange()
 
   onGraphChanged: (data)->
     @nodes = data.nodes
-    @settings.modelIsRunnable = @_checkModelIsRunnable()
-    @settings.graphHasCollector = @_checkForCollectors()
+    @_updateModelIsRunnable()
+    @settings.graphHasCollector = @_updateGraphHasCollector()
+    @notifyChange()
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
@@ -107,7 +108,7 @@ SimulationStore   = Reflux.createStore
       TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
 
   _runSimulation: (duration=1)->
-    if @settings.modelIsRunnable and @settings.modelReadyToRun
+    if @settings.modelIsRunnable
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
       @settings.modelIsRunning = true
@@ -149,7 +150,6 @@ SimulationStore   = Reflux.createStore
 
   onSimulationEnded: ->
     @settings.modelIsRunning = false
-    @settings.modelReadyToRun = true
     @notifyChange()
 
   _startRecording: ->
@@ -189,16 +189,24 @@ SimulationStore   = Reflux.createStore
     @timeout = setTimeout(stopRecording, 500)
     @notifyChange()
 
-  _checkModelIsRunnable: ->
+  _isModelRunnable: ->
     for node in @nodes
       for link in node.links
-        if link.relation.isDefined then return true
-    false
+        return true if link.relation.isDefined
+    return false
 
-  _checkForCollectors: ->
+  _updateModelIsRunnable: ->
+    @settings.modelIsRunnable = @_isModelRunnable()
+
+  _findCollectors: ->
     for node in @nodes
       if node.isAccumulator then return true
-    false
+    return false
+
+  _updateGraphHasCollector: ->
+    hasCollectors = @_findCollectors()
+    @_stopRecording() if hasCollectors isnt @settings.graphHasCollector
+    @settings.graphHasCollector = hasCollectors
 
   _getErrorMessage: ->
     # we just have the one error state right now
