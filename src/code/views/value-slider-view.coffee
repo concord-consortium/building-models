@@ -39,7 +39,6 @@ ValueSlider = React.createClass
     minLabel: null
     maxLabel: null
     displaySemiQuant: false
-    enabled: true
     orientation: "horizontal"
     color: "gray"
     filled: false
@@ -331,7 +330,7 @@ ValueSlider = React.createClass
         )
 
   render: ->
-    { orientation, width, height, enabled, filled, showHandle, showLabels } = @props
+    { orientation, width, height, filled, showHandle, showLabels } = @props
     horizontal = orientation is 'horizontal'
     lengendHeight = 9 + 4.5
     style =
@@ -341,7 +340,6 @@ ValueSlider = React.createClass
       height: height + (if horizontal then lengendHeight else 0)
     classNames = "value-slider"
     if not horizontal then classNames += " vertical"
-    if not enabled then classNames += " disabled"
     if filled then classNames += " filled"
     (div {
       className: classNames
