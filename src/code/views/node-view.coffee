@@ -110,6 +110,7 @@ module.exports = NodeView = React.createClass
     selected: false
     simulating: false
     value: null
+    dataColor: "#aaa"
     data:
       title: "foo"
       x: 10
@@ -177,9 +178,8 @@ module.exports = NodeView = React.createClass
     @setState ignoreDrag: false
 
   renderSliderView: ->
-    enabled = not @props.running or @props.data.canEditValueWhileRunning()
     showHandle = @props.data.canEditInitialValue()
-    value = @props.data.currentValue or @props.data.initialValue
+    value = @props.data.currentValue ? @props.data.initialValue
 
     (SliderView
       orientation: "vertical"
@@ -193,9 +193,9 @@ module.exports = NodeView = React.createClass
       displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
       max: @props.data.max
       min: @props.data.min
-      enabled: enabled
       onSliderDragStart: @handleSliderDragStart
       onSliderDragEnd: @handleSliderDragEnd
+      color: @props.dataColor
     )
 
   handleGraphClick: (attributeName) ->
@@ -230,6 +230,7 @@ module.exports = NodeView = React.createClass
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
+        color: @props.dataColor
       })
     else
       (SquareImage {

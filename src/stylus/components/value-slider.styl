@@ -5,7 +5,6 @@ orange-fill = #e99373
   position relative
   margin 1em
   .slider-line
-    stroke black
     fill none
 
   .slider-shape
@@ -74,12 +73,6 @@ orange-fill = #e99373
       display flex
       flex-direction column
 
-  &.disabled
-    .slider-line
-      stroke #CCC
-    .slider-shape
-      fill #CCC
-
     .value-slider-handle
       cursor not-allowed
       background-color #DDD
@@ -103,13 +96,11 @@ orange-fill = #e99373
       border-bottom 3px solid transparent
 
     .slider-line
-      stroke gray-fill
       fill none
       stroke-width 8
       stroke-linecap round
 
       &.fill-line
-        stroke orange-fill
         stroke-linecap butt
 
         &.cap

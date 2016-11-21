@@ -42,7 +42,7 @@ module.exports = class Node extends GraphPrimitive
     @_max = nodeSpec.max ? SEMIQUANT_MAX
     @_initialValue = nodeSpec.initialValue ? 50
 
-    @color ?= Colors[0].value
+    @color ?= Colors.choices[0].value
 
     @isInCycle = false      # we always initalize with no links, so we can't be in cycle
 

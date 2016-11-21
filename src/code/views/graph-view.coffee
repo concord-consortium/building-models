@@ -1,6 +1,7 @@
 Node             = React.createFactory require './node-view'
 NodeModel        = require '../models/node'
 Importer         = require '../utils/importer'
+Color            = require '../utils/colors'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
@@ -250,12 +251,17 @@ module.exports = React.createClass
     @props.selectionManager.clearSelection()
 
   render: ->
+    dataColor = Color.colors.lightGray.value
+    if @state.isRecording
+      dataColor = Color.colors.data.value
+
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container', onClick: @onContainerClicked},
         for node in @state.nodes
           (Node {
             key: node.key
             data: node
+            dataColor: dataColor
             selected: @state.selectedNode is node
             simulating: @state.simulationPanelExpanded
             running: @state.modelIsRunning

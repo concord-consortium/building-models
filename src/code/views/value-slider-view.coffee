@@ -39,8 +39,8 @@ ValueSlider = React.createClass
     minLabel: null
     maxLabel: null
     displaySemiQuant: false
-    enabled: true
     orientation: "horizontal"
+    color: "gray"
     filled: false
     onValueChange: (v) ->
       log.info "new value #{v}"
@@ -282,43 +282,55 @@ ValueSlider = React.createClass
     if filled then inset += 1
     if orientation is 'horizontal'
       (g {},
-        (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line", stroke:"blue"})
+        (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line", stroke:"#ccc"})
         if not filled
           (g {},
-            (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"blue"})
+            (circle {cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"#ccc"})
             (circle {cx:width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
     else
       (g {},
-        (path {d:"M#{center} #{inset} l 0 #{height - (inset*2)}", className:"slider-line", stroke:"blue"})
+        (path {d:"M#{center} #{inset} l 0 #{height - (inset*2)}", className:"slider-line", stroke:"#ccc"})
         if not filled
           (g {},
-            (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"blue"})
+            (circle {cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"#ccc"})
             (circle {cx:center, cy:height - circleRadius, r:circleRadius, className:"slider-shape"})
           )
         @renderTicks()
       )
 
   renderFill: ->
-    { orientation, width, height } = @props
+    { orientation, color, width, height } = @props
     center = @thickness() / 2
     inset = circleRadius + 1
     if orientation is 'horizontal'
-      (path {d:"M#{inset} #{center} l #{width - (inset*2)} 0", className:"slider-line fill-line"})
+      (path
+        d: "M#{inset} #{center} l #{width - (inset*2)} 0"
+        className: "slider-line fill-line"
+        stroke: color
+      )
     else
       totalHeight = height - (inset * 2)
       top = inset + (totalHeight * (1 - @sliderLocation()))
       height = totalHeight-top
       if height > 0
         (g {},
-          (path {d:"M#{center} #{top} l 0 #{height}", className:"slider-line fill-line"}) # flat top
-          (path {d:"M#{center} #{totalHeight} l 0 1", className:"slider-line fill-line cap"})      # rounded bottom
+          (path # flat top
+            d: "M#{center} #{top} l 0 #{height}"
+            className: "slider-line fill-line"
+            stroke: color
+          )
+          (path # rounded bottom
+            d: "M#{center} #{totalHeight} l 0 1"
+            className: "slider-line fill-line cap"
+            stroke: color
+          )
         )
 
   render: ->
-    { orientation, width, height, enabled, filled, showHandle, showLabels } = @props
+    { orientation, width, height, filled, showHandle, showLabels } = @props
     horizontal = orientation is 'horizontal'
     lengendHeight = 9 + 4.5
     style =
@@ -328,7 +340,6 @@ ValueSlider = React.createClass
       height: height + (if horizontal then lengendHeight else 0)
     classNames = "value-slider"
     if not horizontal then classNames += " vertical"
-    if not enabled then classNames += " disabled"
     if filled then classNames += " filled"
     (div {
       className: classNames
