@@ -160,6 +160,9 @@ SimulationStore   = Reflux.createStore
     @settings.isRecordingPeriod = false
     SimulationActions.recordingDidEnd()
 
+  onResetSimulation: ->
+    @experimentFrameIndex = 0
+
   onStopRecording: ->
     @_stopRecording()
     @notifyChange()
