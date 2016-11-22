@@ -19,28 +19,18 @@ module.exports = RelationInspectorView = React.createClass
     label = link.sourceNode.title
     {vector, scalar} = RelationFactory.selectionsFromRelation link.relation
     isFullyDefined = (link.relation.isDefined and vector? and scalar?) or link.relation.customData?
-    #if vector? and vector.isCustomRelationship
-    #  isFullyDefined = link.relation.customData?
-    # console.log(link.relation)
+
     (Tabber.Tab {label: label, component: relationView, defined: isFullyDefined})
 
   renderNodeRelationInspector: ->
     tabs = _.map @props.node.inLinks(), (link) => @renderTabforLink(link)
     (div {className:'relation-inspector'},
       (TabbedPanel {tabs: tabs})
-      (div {className: "bottom-pane"},
-        (p {}, tr "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS")
-      )
     )
 
   renderLinkRelationInspector: ->
     (div {className:'relation-inspector'})
-    # TODO: build this later.
-    #   (div {className: 'link-relation-inspector'}, "TBD: No link relation panel")
-    #   (div {className: "bottom-pane"},
-    #     (p {}, tr "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS")
-    #   )
-    # )
+
   render: ->
     if @props.node
       @renderNodeRelationInspector()
