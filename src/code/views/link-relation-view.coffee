@@ -3,6 +3,7 @@
 RelationFactory = require "../models/relation-factory"
 SvgGraph        = React.createFactory require "./svg-graph-view"
 tr              = require "../utils/translate"
+autosize        = require "autosize"
 
 Graph = React.createFactory React.createClass
   render: ->
@@ -48,6 +49,9 @@ module.exports = LinkRelationView = React.createClass
       selectedVector = RelationFactory.vary
       selectedScalar = RelationFactory.custom
       @setState {selectedVector, selectedScalar}
+
+  componentDidMount: ->
+    autosize(@refs.reasoning)
 
   componentWillReceiveProps: (newProps) ->
     if @props.link isnt newProps.link
