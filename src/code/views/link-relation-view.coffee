@@ -18,10 +18,9 @@ Graph = React.createFactory React.createClass
 QuantStart = React.createFactory React.createClass
   render: ->
     start = tr "~NODE-RELATION-EDIT.SEMI_QUANT_START"
-    (div {},
+    (div {style: {width: "95%"}},
       (span {}, "#{tr "~NODE-RELATION-EDIT.AN_INCREASE_IN"} ")
       (span {className: "source"}, @props.source)
-      (br {})
       (span {}, " #{tr "~NODE-RELATION-EDIT.CAUSES"} ")
       (span {className: "target"}, @props.target)
     )
