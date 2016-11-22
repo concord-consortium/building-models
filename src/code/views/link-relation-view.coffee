@@ -155,7 +155,6 @@ module.exports = LinkRelationView = React.createClass
   render: ->
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
-    formula = @props.link.relation.formula
 
     (div {className: 'link-relation-view'},
       (div {className: 'top'},

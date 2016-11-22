@@ -59,11 +59,11 @@ module.exports = class RelationFactory
     id: 2
     text: tr "~NODE-RELATION-EDIT.A_LITTLE"
     postfixIco: "a-little"
-    formulaFrag: "in / 2"
+    formulaFrag: "(in+(maxOut/2)) / 2"
     magnitude: 1
     gradual: false
     func: (scope) ->
-      return scope.in / 2
+      return (scope.in + (scope.maxOut/2)) / 2
 
   @moreAndMore:
     id: 3
@@ -94,7 +94,7 @@ module.exports = class RelationFactory
     gradual: 0
     func: (scope) ->
       return
-   
+
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
@@ -136,7 +136,7 @@ module.exports = class RelationFactory
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
     {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
-    
+
   # @isCustomRelationship: (vector) ->
   #  customRelationship = false
   #  if vector? and vector.id == @vary.id
