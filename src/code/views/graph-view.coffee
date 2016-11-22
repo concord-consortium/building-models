@@ -11,7 +11,8 @@ ImageDialogStore = require '../stores/image-dialog-store'
 RelationFactory  = require "../models/relation-factory"
 
 SimulationStore  = require "../stores/simulation-store"
-AppSettingsStore  = require "../stores/app-settings-store"
+AppSettingsStore = require "../stores/app-settings-store"
+CodapStore       = require "../stores/codap-store"
 LinkColors       = require "../utils/link-colors"
 
 {div} = React.DOM
@@ -19,7 +20,7 @@ LinkColors       = require "../utils/link-colors"
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin ]
 
   getDefaultProps: ->
     linkTarget: '.link-top'
@@ -274,9 +275,7 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
             showMinigraph: @state.showingMinigraphs
-            # showGraphButton: @props.graphStore.codapStandaloneMode and not @state.diagramOnly
-            # for now, show graph button whenever we are in simulation mode
-            showGraphButton: not @state.diagramOnly
+            showGraphButton: @state.codapHasLoaded and not @state.diagramOnly
           })
       )
     )

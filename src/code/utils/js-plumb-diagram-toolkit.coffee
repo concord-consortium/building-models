@@ -69,9 +69,9 @@ module.exports = class DiagramToolkit
 
     addHoverState = (endpoint) ->
       endpoint.bind "mouseover", ->
-        $(endpoint.element).addClass("show-hover")
+        $(endpoint.element).parent().addClass("show-hover")
       endpoint.bind "mouseout", ->
-        $(endpoint.element).removeClass("show-hover")
+        $(endpoint.element).parent().removeClass("show-hover")
 
     if endpoints?.element
       addHoverState endpoints
