@@ -283,6 +283,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
     beforeEach ->
       SimulationActions.setDuration.trigger(10)
+      SimulationActions.expandSimulationPanel.trigger()
 
     it "should call recordingDidStart with the node names", (done) ->
       asyncListenTest done, SimulationActions.recordingDidStart, (nodeNames) ->
@@ -311,13 +312,13 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
     beforeEach ->
       SimulationActions.setDuration.trigger(3)
-
+      SimulationActions.expandSimulationPanel.trigger()
     it "should call simulationFramesCreated with 3 frames", (done) ->
-      testF = (data) ->
+      testFunction = (data) ->
         size = data.length
         size.should.eql(3)
 
-      asyncListenTest done, SimulationActions.recordingFramesCreated, testF
+      asyncListenTest done, SimulationActions.recordingFramesCreated, testFunction
       SimulationActions.recordPeriod()
 
 

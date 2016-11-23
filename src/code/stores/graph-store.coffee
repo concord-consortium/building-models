@@ -119,6 +119,7 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.createAndExecuteCommand 'addLink',
       execute: => @_addLink link
       undo: => @_removeLink link
+    SimulationStore.actions.runSimulation()
 
   _addLink: (link) ->
     unless link.sourceNode is link.targetNode or @hasLink link
@@ -134,6 +135,7 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.createAndExecuteCommand 'removeLink',
       execute: => @_removeLink link
       undo: => @_addLink link
+    SimulationStore.actions.runSimulation()
 
   _removeLink: (link) ->
     delete @linkKeys[link.terminalKey()]
@@ -237,6 +239,9 @@ GraphStore  = Reflux.createStore
           execute: => @_changeNode node, data
           undo: => @_changeNode node, originalData
 
+      if data.isAccumulator? and nodeChanged
+        SimulationStore.actions.runSimulation()
+
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
     for key in NodeModel.fields
@@ -283,6 +288,7 @@ GraphStore  = Reflux.createStore
       @undoRedoManager.createAndExecuteCommand 'changeLink',
         execute: => @_changeLink link,  changes
         undo: => @_changeLink link, originalData
+    SimulationStore.actions.runSimulation()
 
   _maybeChangeSelectedItem: (item) ->
     # TODO: This is kind of hacky:
