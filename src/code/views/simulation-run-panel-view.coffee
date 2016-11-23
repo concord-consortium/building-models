@@ -82,7 +82,7 @@ module.exports = React.createClass
       (Dropdown
         isActionMenu: false
         onSelect: SimulationStore.actions.setStepUnits
-        anchor: @state.stepUnitsName + "s"
+        anchor: @state.stepUnitsName
         items: @state.timeUnitOptions
       )
     )
