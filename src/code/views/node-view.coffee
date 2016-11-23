@@ -180,6 +180,8 @@ module.exports = NodeView = React.createClass
   renderSliderView: ->
     showHandle = @props.data.canEditInitialValue()
     value = @props.data.currentValue ? @props.data.initialValue
+    if showHandle
+      value = @props.data.initialValue
 
     (SliderView
       orientation: "vertical"
