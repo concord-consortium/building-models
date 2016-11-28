@@ -37,7 +37,6 @@ module.exports =
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable"
 
   # views/relation-inspector-view.coffee
-  "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations."
   "~NODE-RELATION-EDIT.UNSELECTED": "Select an option..."
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in"
   "~NODE-RELATION-EDIT.CAUSES": "causes"
