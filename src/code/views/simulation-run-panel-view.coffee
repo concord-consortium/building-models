@@ -2,6 +2,7 @@ SimulationStore = require '../stores/simulation-store'
 tr              = require '../utils/translate'
 RecordButton    = React.createFactory require './record-button-view'
 Dropdown        = React.createFactory require './dropdown-view'
+ExperimentPanel = React.createFactory require './experiment-view'
 
 {div, span, i, input}  = React.DOM
 
@@ -32,26 +33,30 @@ module.exports = React.createClass
     wrapperClasses = "buttons flow"
     if !@state.simulationPanelExpanded then wrapperClasses += " closed"
     disabled = (@state.isRecording && !@state.isRecordingOne) || !@state.modelIsRunnable
-    if @state.graphHasCollector
-      (div {className: wrapperClasses},
-        @renderRecordForCollectors()
-      )
-    else
-      (div {className: wrapperClasses},
-        (RecordButton
-          onClick: SimulationStore.actions.recordOne
-          disabled: disabled
-          ,
+    (div {className: wrapperClasses},
+      (div {className: "vertical" },
+        (ExperimentPanel {})
+        if @state.graphHasCollector
+          @renderRecordForCollectors()
+        else
           (div {className: "horizontal"},
-            (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
-            (i className: "icon-codap-camera")
+            (RecordButton
+              onClick: SimulationStore.actions.recordOne
+              disabled: disabled
+              ,
+              (div {className: "horizontal"},
+                (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
+                (i className: "icon-codap-camera")
+              )
+              (div {className: "horizontal"},
+                (span {}, tr "~DOCUMENT.ACTIONS.DATA.POINT")
+              )
+            )
+            @renderRecordStreamButton()
           )
-          (div {className: "horizontal"},
-            (span {}, tr "~DOCUMENT.ACTIONS.DATA.POINT")
-          )
-        )
-        @renderRecordStreamButton()
       )
+    )
+
 
   renderRecordForCollectors: ->
     recordAction = SimulationStore.actions.recordPeriod
