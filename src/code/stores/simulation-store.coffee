@@ -83,12 +83,10 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   _updateUnitNames: ->
-    if @settings.duration is 1
-      @settings.timeUnitOptions = ({name: TimeUnits.toString(unit, false), unit: unit} for unit in TimeUnits.units)
-      @settings.stepUnitsName = TimeUnits.toString(@settings.stepUnits, false)
-    else
-      @settings.timeUnitOptions = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
-      @settings.stepUnitsName = TimeUnits.toString(@settings.stepUnits, true)
+    pluralize = @settings.duration isnt 1
+    @settings.timeUnitOptions = ({name: TimeUnits.toString(unit, pluralize), unit: unit} for unit in TimeUnits.units)
+    @settings.stepUnitsName = TimeUnits.toString(@settings.stepUnits, pluralize)
+
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
