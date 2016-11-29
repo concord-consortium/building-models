@@ -34,8 +34,9 @@ SimulationStore   = Reflux.createStore
 
   init: ->
     defaultUnit = TimeUnits.defaultUnit
-    unitName    = TimeUnits.toString defaultUnit
-    options = ({name: TimeUnits.toString(unit, false), unit: unit} for unit in TimeUnits.units)
+    unitName    = TimeUnits.toString(defaultUnit,true)
+    defaultDuration = 50
+    timeUnitOptions = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
 
     @nodes = []
     @currentSimulation = null
@@ -43,10 +44,10 @@ SimulationStore   = Reflux.createStore
 
     @settings =
       simulationPanelExpanded: false
-      duration: 50
+      duration: defaultDuration
       stepUnits: defaultUnit
       stepUnitsName: unitName
-      timeUnitOptions: options
+      timeUnitOptions: timeUnitOptions
       capNodeValues: false
       modelIsRunning: false
       modelIsRunnable: false
@@ -81,13 +82,20 @@ SimulationStore   = Reflux.createStore
     @settings.graphHasCollector = @_updateGraphHasCollector()
     @notifyChange()
 
+  _updateUnitNames: ->
+    pluralize = @settings.duration isnt 1
+    @settings.timeUnitOptions = ({name: TimeUnits.toString(unit, pluralize), unit: unit} for unit in TimeUnits.units)
+    @settings.stepUnitsName = TimeUnits.toString(@settings.stepUnits, pluralize)
+
+
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
+    @_updateUnitNames()
     @notifyChange()
 
   onSetStepUnits: (unit) ->
     @settings.stepUnits = unit.unit
-    @settings.stepUnitsName = TimeUnits.toString @settings.stepUnits, false
+    @_updateUnitNames()
     @notifyChange()
 
   onImport: (data) ->
