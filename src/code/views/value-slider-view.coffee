@@ -132,7 +132,8 @@ ValueSlider = React.createClass
     return unless onValueChange?
 
     value = @position(e)
-    onValueChange(value)
+    unless value is @props.value
+      onValueChange(value)
 
   handleJumpAndDrag: (e) ->
     @handleDrag(e)
