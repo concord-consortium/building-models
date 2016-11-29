@@ -118,7 +118,6 @@ module.exports = React.createClass
 
           (div {className: 'image-search-main-results'},[
             (div {className: 'image-search-section', style: height: @state.topHeight + '%'},[
-              (div {className: 'header'}, tr '~IMAGE-BROWSER.LIBRARY_HEADER'),
               (div {className: 'image-search-dialog-results'},
                 if @state.internalResults.length is 0 and (@state.searching or @state.externalResults.length > 0)
                   tr '~IMAGE-BROWSER.NO_INTERNAL_FOUND', query: @state.query

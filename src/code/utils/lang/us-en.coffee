@@ -89,7 +89,6 @@ module.exports =
   "~IMAGE-BROWSER.SEARCH_HEADER": "Search for more images"
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found."
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below."
-  "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images"
   "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for \"%{query}.\""
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}\"%{query}\""
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for \"%{query}.\""
