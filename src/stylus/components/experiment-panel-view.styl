@@ -4,17 +4,21 @@
   padding 0px
   line-height 1em
   font-size 10pt
-  color #222
+  color #444
   align-self center
+  user-select none
   &.disabled
     color button-disabled
+    .experiment-counter
+      cursor default
+      &:hover
+        background white
+
     .count
       border 1px solid button-disabled
     .increment
       border 1px solid button-disabled
-      cursor default
-      &:hover
-        background white
+
 
   div, span
     display inline-block
@@ -22,12 +26,20 @@
   span
     margin-right 0.5em
 
+  .experiment-counter
+    cursor pointer
+    div
+      background #fafafa
+    &:hover
+      div
+        background white
+        border-color #666
+
   .count 
     padding 2px
     border 1px solid #aaa
     width 2em
     text-align right
-    background white
     border-radius 2px 0px 0px 2px
     font-weight normal
 
@@ -38,8 +50,4 @@
     font-weight bold
     width 1.5em
     text-align center
-    cursor pointer
-    background white
     border-radius 0px 2px 2px 0px
-    &:hover
-          background #ddd

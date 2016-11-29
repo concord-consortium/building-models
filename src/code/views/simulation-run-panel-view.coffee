@@ -35,7 +35,7 @@ module.exports = React.createClass
     disabled = (@state.isRecording && !@state.isRecordingOne) || !@state.modelIsRunnable
     (div {className: wrapperClasses},
       (div {className: "vertical" },
-        (ExperimentPanel {})
+        (ExperimentPanel {disabled: disabled})
         if @state.graphHasCollector
           @renderRecordForCollectors()
         else

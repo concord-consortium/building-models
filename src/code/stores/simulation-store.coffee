@@ -23,6 +23,7 @@ SimulationActions = Reflux.createActions(
     "stopRecording"
     "recordingDidStart"
     "recordingDidEnd"
+    "createExperiment"
   ]
 )
 SimulationActions.runSimulation = Reflux.createAction({sync: true})
@@ -45,6 +46,7 @@ SimulationStore   = Reflux.createStore
     @settings =
       simulationPanelExpanded: false
       duration: defaultDuration
+      experimentNumber: 1
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: timeUnitOptions
@@ -171,6 +173,11 @@ SimulationStore   = Reflux.createStore
 
   onResetSimulation: ->
     @experimentFrameIndex = 0
+
+  onCreateExperiment: ->
+    @experimentFrameIndex = 0
+    @settings.experimentNumber++
+    @notifyChange()
 
   onStopRecording: ->
     @_stopRecording()

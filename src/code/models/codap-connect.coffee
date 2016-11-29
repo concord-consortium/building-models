@@ -30,9 +30,8 @@ module.exports = class CodapConnect
     @sendThrottleMs = 300
 
     # Create a new case in these instances:
-    SimulationStore.actions.resetSimulation.listen         @_openNewCase.bind(@)
-    SimulationStore.actions.recordStream.listen            @_openNewCase.bind(@)
-    SimulationStore.actions.recordPeriod.listen            @_openNewCase.bind(@)
+    SimulationStore.actions.resetSimulation.listen    @_openNewCase.bind(@)
+    SimulationStore.actions.createExperiment.listen   @_openNewCase.bind(@)
 
     SimulationStore.actions.recordingFramesCreated.listen  @_addData.bind(@)
 
@@ -109,7 +108,7 @@ module.exports = class CodapConnect
               },
               attrs: [
                   {
-                    name: tr '~CODAP.SIMULATION.RUN'
+                    name: tr '~CODAP.SIMULATION.EXPERIMENT'
                     formula: 'caseIndex'
                     type: 'nominal'
                   }

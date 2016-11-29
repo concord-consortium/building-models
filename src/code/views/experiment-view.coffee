@@ -11,25 +11,23 @@ module.exports = React.createClass
 
 
   increment: ->
-    lastCount = @state.count || 1
-    @setState
-      count: lastCount + 1
+    SimulationStore.actions.createExperiment()
 
   renderLabel: ->
     experimentLabel = "Experiment #"
     (span {className: "experiment-label"}, experimentLabel)
 
   renderCounter: ->
-    count = @state.count || 211
-    (div {className: "experiment-counter"},
+    count = @state.experimentNumber || 211
+    (div {className: "experiment-counter", onClick: @increment },
       (div {className: "count"}, count)
-      (div {className: "increment", onClick: @increment }, "+")
+      (div {className: "increment"}, "+")
     )
 
   render: ->
-    classes = ["experiment-panel","disabled"]
+    classes = ["experiment-panel"]
     if @props.disabled
-      classes.append('disabled')
+      classes.push('disabled')
     (div {className: classes.join(" ") },
       @renderLabel()
       @renderCounter()
