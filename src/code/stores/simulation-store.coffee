@@ -116,12 +116,13 @@ SimulationStore   = Reflux.createStore
     else
       TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
 
-  _runSimulation: (duration=1)->
+  _runSimulation: ()->
     if @settings.modelIsRunnable
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
       @settings.modelIsRunning = true
-      if @settings.graphHasCollector
+      duration = 1
+      if @settings.graphHasCollector || @settings.isRecordingPeriod
         duration = @settings.duration
       @notifyChange()
       @currentSimulation = new Simulation
@@ -178,7 +179,7 @@ SimulationStore   = Reflux.createStore
   onRecordOne: ->
     @_startRecording()
     @settings.isRecordingOne = true
-    @_runSimulation(1)
+    @_runSimulation()
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)
@@ -192,13 +193,14 @@ SimulationStore   = Reflux.createStore
   onRecordPeriod: ->
     @_startRecording()
     @settings.isRecordingPeriod = true
-    @_runSimulation(@settings.duration)
+    @_runSimulation()
     stopRecording = ->
       SimulationActions.stopRecording()
     @timeout = setTimeout(stopRecording, 500)
     @notifyChange()
 
   _isModelRunnable: ->
+    return false unless @settings.simulationPanelExpanded
     for node in @nodes
       for link in node.links
         return true if link.relation.isDefined
