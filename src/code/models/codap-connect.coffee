@@ -29,8 +29,7 @@ module.exports = class CodapConnect
     @lastTimeSent = @_timeStamp()
     @sendThrottleMs = 300
 
-    # Create a new case in these instances:
-    SimulationStore.actions.resetSimulation.listen    @_openNewCase.bind(@)
+    # Create a new case for each experiment:
     SimulationStore.actions.createExperiment.listen   @_openNewCase.bind(@)
 
     SimulationStore.actions.recordingFramesCreated.listen  @_addData.bind(@)
@@ -131,21 +130,29 @@ module.exports = class CodapConnect
     caseData = {}
     caseData[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
     @currentCaseID = null
-    @_createCollection()
-    @codapPhone.call
-      action: 'create',
-      resource: 'collection[Simulation].case',
-      values: {
-        values: caseData
+    collectionAction = @_createCollection()
+
+    @codapPhone.call([
+      collectionAction,
+      {
+        action: 'create'
+        resource: 'collection[Simulation].case',
+        values: { values: caseData }
       }
+    ]
     , (result) =>
-      if result?.success
-        @currentCaseID = result.values[0].id
-        @_flushQueue()
-        if not @standaloneMode
-          @createTable()
-      else
-        log.info "CODAP returned an error on 'openCase'"
+      if result?
+        [collectionResponse, caseResponse] = result
+
+        if caseResponse.success
+          @caseOpened = true
+          @currentCaseID = caseResponse.values[0].id
+          @_flushQueue()
+          if not @standaloneMode
+            @createTable()
+        else
+          log.info "CODAP returned an error on 'openCase'"
+    )
 
   _createCollection: ->
     nodes = @graphStore.getNodes()
@@ -168,15 +175,17 @@ module.exports = class CodapConnect
     _.each nodes, (node) ->
       addSampleDataAttr(node)
 
-    @codapPhone.call
+    return {
       action: 'create',
       resource: 'collection[Samples].attribute',
       values: sampleDataAttrs
+    }
 
   _timeStamp: ->
     new Date().getTime()
 
   _shouldSend: ->
+    @_openNewCase() unless @caseOpened?
     return false unless @currentCaseID
     currentTime = @_timeStamp()
     elapsedTime = currentTime - @lastTimeSent
