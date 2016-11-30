@@ -9,7 +9,6 @@ SimulationActions = Reflux.createActions(
   [
     "expandSimulationPanel"
     "collapseSimulationPanel"
-    "runSimulation"
     "resetSimulation"
     "setDuration"
     "setStepUnits"
@@ -26,6 +25,7 @@ SimulationActions = Reflux.createActions(
     "recordingDidEnd"
   ]
 )
+SimulationActions.runSimulation = Reflux.createAction({sync: true})
 
 SimulationStore   = Reflux.createStore
   listenables: [
