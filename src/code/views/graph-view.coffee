@@ -110,9 +110,10 @@ module.exports = React.createClass
     editingLink: null
     canDrop: false
 
-  componentDidUpdate: ->
-    @diagramToolkit?.clear?()
-    @_updateToolkit()
+  componentDidUpdate: (prevProps, prevState) ->
+    if (prevState.description.links != @state.description.links) or (prevState.simulationPanelExpanded != @state.simulationPanelExpanded)
+      @diagramToolkit?.clear?()
+      @_updateToolkit()
 
   handleEvent: (handler) ->
     if @ignoringEvents

@@ -349,6 +349,28 @@ GraphStore  = Reflux.createStore
   removeLinksForNode: (node) ->
     @removeLink(link) for link in node.links
 
+  # getDescription returns one or more easily-comparable descriptions of the graph's
+  # state, customized for different applications (e.g. deciding whether to redraw links),
+  # while only looping through the nodes and links once.
+  #
+  # links: link terminal locations, and link formula (for stroke style), plus number of nodes
+  #         e.g. "10,20;1 * in;50,60|" for each link
+  #
+  # We pass nodes and links so as not to calculate @getNodes and @getLinks redundantly.
+  getDescription: (nodes, links) ->
+    linkDescription = ""
+    _.each links, (link) ->
+      return unless (source = link.sourceNode) and (target = link.targetNode)
+      linkDescription += "#{source.x},#{source.y};"
+      linkDescription += link.relation.formula + ";"
+      linkDescription += "#{target.x},#{target.y}|"
+
+    linkDescription += nodes.length     # we need to redraw targets when new node is added
+
+    return {
+      links: linkDescription
+    }
+
   loadData: (data) ->
     log.info "json success"
     importer = new Importer(@, AppSettingsStore.store, PaletteStore)
@@ -389,10 +411,12 @@ GraphStore  = Reflux.createStore
   getGraphState: ->
     nodes = @getNodes()
     links = @getLinks()
+    description = @getDescription(nodes, links)
 
     {
       nodes
       links
+      description
     }
 
   updateListeners: ->

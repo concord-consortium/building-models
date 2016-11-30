@@ -21,15 +21,19 @@ GraphStore    = require "#{__dirname}/../src/code/stores/graph-store"
 CodapConnect   = requireModel 'codap-connect'
 Relationship   = requireModel 'relationship'
 
-LinkNodes = (sourceNode, targetNode, formula) ->
-  link = new Link
+makeLink = (sourceNode, targetNode, formula) ->
+  new Link
     title: "function"
     sourceNode: sourceNode
     targetNode: targetNode
     relation: new Relationship
       formula: formula
+
+LinkNodes = (sourceNode, targetNode, formula) ->
+  link = makeLink(sourceNode, targetNode, formula)
   sourceNode.addLink(link)
   targetNode.addLink(link)
+
 
 describe 'GraphPrimitive', ->
   it 'GraphPrimitive should exists', ->
@@ -355,3 +359,41 @@ describe "Graph Topology", ->
       @nodeA.canEditValueWhileRunning().should.equal true
       @nodeB.canEditValueWhileRunning().should.equal true
       @nodeC.canEditValueWhileRunning().should.equal false
+
+describe "Graph Descriptions", ->
+
+  beforeEach ->
+    sandbox = Sinon.sandbox.create()
+    sandbox.stub(CodapConnect, "instance", ->
+      return {
+        sendUndoableActionPerformed: -> return ''
+      }
+    )
+
+    # A -> B+ -> C -x-> D
+    nodeA    = new Node({x: 10, y: 15})
+    nodeB    = new Node({x: 20, y: 25, isAccumulator: true})
+    nodeC    = new Node({x: 30, y: 35})
+    nodeD    = new Node({x: 40, y: 45})
+    formula  = "1 * in"
+    linkA = makeLink(nodeA, nodeB, formula)
+    linkB = makeLink(nodeB, nodeC, formula)
+    linkC = makeLink(nodeC, nodeD)
+    graphStore = GraphStore.store
+    graphStore.init()
+    graphStore.addNode nodeA
+    graphStore.addNode nodeB
+    graphStore.addNode nodeC
+    graphStore.addNode nodeD
+    graphStore.addLink linkA
+    graphStore.addLink linkB
+    graphStore.addLink linkC
+
+  afterEach ->
+    CodapConnect.instance.restore()
+
+
+  it "should describe the visual links correctly", ->
+    graphStore = GraphStore.store
+    desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks())
+    desc.links.should.equal "10,15;1 * in;20,25|20,25;1 * in;30,35|30,35;undefined;40,45|4"
