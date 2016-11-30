@@ -2,7 +2,7 @@ SimulationStore = require '../stores/simulation-store'
 tr              = require '../utils/translate'
 RecordButton    = React.createFactory require './record-button-view'
 Dropdown        = React.createFactory require './dropdown-view'
-ExperimentPanel = React.createFactory require './experiment-view'
+ExperimentPanel = React.createFactory require './experiment-panel-view'
 
 {div, span, i, input}  = React.DOM
 
@@ -33,9 +33,10 @@ module.exports = React.createClass
     wrapperClasses = "buttons flow"
     if !@state.simulationPanelExpanded then wrapperClasses += " closed"
     disabled = (@state.isRecording && !@state.isRecordingOne) || !@state.modelIsRunnable
+    experimentDisabled = !@state.modelIsRunnable || @state.isRecordingPeriod
     (div {className: wrapperClasses},
       (div {className: "vertical" },
-        (ExperimentPanel {disabled: disabled})
+        (ExperimentPanel {disabled: experimentDisabled})
         if @state.graphHasCollector
           @renderRecordForCollectors()
         else

@@ -11,7 +11,8 @@ module.exports = React.createClass
 
 
   increment: ->
-    SimulationStore.actions.createExperiment()
+    unless @props.disabled
+      SimulationStore.actions.createExperiment()
 
   renderLabel: ->
     experimentLabel = "Experiment #"

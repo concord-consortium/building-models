@@ -109,16 +109,8 @@ module.exports = class CodapConnect
               attrs: [
                   {
                     name: tr '~CODAP.SIMULATION.EXPERIMENT'
-                    formula: 'caseIndex'
-                    type: 'nominal'
+                    type: 'numeric'
                   }
-#                  {
-#                    name: tr '~CODAP.SIMULATION.STEPS'
-#                    type: 'numeric'
-#                    formula: 'count()'
-#                    description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
-#                    precision: 0
-#                  }
                 ]
               },
               {
@@ -136,14 +128,16 @@ module.exports = class CodapConnect
         , @initGameHandler
 
   _openNewCase: ->
+    caseData = {}
+    caseData[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
     @currentCaseID = null
-
     @_createCollection()
-
     @codapPhone.call
       action: 'create',
       resource: 'collection[Simulation].case',
-      values: [ {} ]
+      values: {
+        values: caseData
+      }
     , (result) =>
       if result?.success
         @currentCaseID = result.values[0].id
