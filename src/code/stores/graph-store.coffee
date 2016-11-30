@@ -386,17 +386,22 @@ GraphStore  = Reflux.createStore
   toJsonString: (palette) ->
     JSON.stringify @serialize palette
 
+  getGraphState: ->
+    nodes = @getNodes()
+    links = @getLinks()
+
+    {
+      nodes
+      links
+    }
+
   updateListeners: ->
-    data =
-      nodes: @getNodes()
-      links: @getLinks()
-    GraphActions.graphChanged.trigger(data)
+    GraphActions.graphChanged.trigger(@getGraphState())
 
 
 mixin =
   getInitialState: ->
-    nodes: GraphStore.getNodes()
-    links: GraphStore.getLinks()
+    GraphStore.getGraphState()
 
   componentDidMount: ->
     @unsubscribe = GraphActions.graphChanged.listen @onGraphChanged
@@ -404,10 +409,9 @@ mixin =
   componentWillUnmount: ->
     @unsubscribe()
 
-  onGraphChanged: (status) ->
-    @setState
-      nodes: status.nodes
-      links: status.links
+  onGraphChanged: (state) ->
+    @setState state
+
     # TODO: not this:
     @diagramToolkit?.repaint()
 
