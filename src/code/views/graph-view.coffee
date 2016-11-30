@@ -110,10 +110,8 @@ module.exports = React.createClass
     editingLink: null
     canDrop: false
 
-  componentWillUpdate: ->
-    @diagramToolkit?.clear?()
-
   componentDidUpdate: ->
+    @diagramToolkit?.clear?()
     @_updateToolkit()
 
   handleEvent: (handler) ->
