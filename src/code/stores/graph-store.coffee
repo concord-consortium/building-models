@@ -30,6 +30,8 @@ GraphStore  = Reflux.createStore
 
     @codapStandaloneMode = false
 
+    @lastRunModel = ""   # string description of the model last time we ran simulation
+
   resetSimulation: ->
     for node in @getNodes()
       node.frames = []
@@ -119,7 +121,6 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.createAndExecuteCommand 'addLink',
       execute: => @_addLink link
       undo: => @_removeLink link
-    SimulationStore.actions.runSimulation()
 
   _addLink: (link) ->
     unless link.sourceNode is link.targetNode or @hasLink link
@@ -135,7 +136,6 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.createAndExecuteCommand 'removeLink',
       execute: => @_removeLink link
       undo: => @_addLink link
-    SimulationStore.actions.runSimulation()
 
   _removeLink: (link) ->
     delete @linkKeys[link.terminalKey()]
@@ -239,9 +239,6 @@ GraphStore  = Reflux.createStore
           execute: => @_changeNode node, data
           undo: => @_changeNode node, originalData
 
-      if data.isAccumulator? and nodeChanged
-        SimulationStore.actions.runSimulation()
-
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
     for key in NodeModel.fields
@@ -288,7 +285,6 @@ GraphStore  = Reflux.createStore
       @undoRedoManager.createAndExecuteCommand 'changeLink',
         execute: => @_changeLink link,  changes
         undo: => @_changeLink link, originalData
-    SimulationStore.actions.runSimulation()
 
   _maybeChangeSelectedItem: (item) ->
     # TODO: This is kind of hacky:
@@ -355,20 +351,30 @@ GraphStore  = Reflux.createStore
   #
   # links: link terminal locations, and link formula (for stroke style), plus number of nodes
   #         e.g. "10,20;1 * in;50,60|" for each link
+  # model: description of each link relationship and the values of its terminal nodes
+  #         e.g. "node-0:50;1 * in;node-1:50|" for each link
   #
   # We pass nodes and links so as not to calculate @getNodes and @getLinks redundantly.
   getDescription: (nodes, links) ->
     linkDescription = ""
+    modelDescription = ""
+
     _.each links, (link) ->
       return unless (source = link.sourceNode) and (target = link.targetNode)
       linkDescription += "#{source.x},#{source.y};"
       linkDescription += link.relation.formula + ";"
       linkDescription += "#{target.x},#{target.y}|"
 
+      if link.relation.isDefined
+        modelDescription += "#{source.key}:#{source.initialValue};"
+        modelDescription += link.relation.formula + ";"
+        modelDescription += "#{target.key}#{if target.isAccumulator then ':'+(target.value ? target.initialValue) else ''}|"
+
     linkDescription += nodes.length     # we need to redraw targets when new node is added
 
     return {
       links: linkDescription
+      model: modelDescription
     }
 
   loadData: (data) ->
@@ -420,7 +426,12 @@ GraphStore  = Reflux.createStore
     }
 
   updateListeners: ->
-    GraphActions.graphChanged.trigger(@getGraphState())
+    graphState = @getGraphState()
+    GraphActions.graphChanged.trigger(graphState)
+
+    if @lastRunModel != graphState.description.model
+      SimulationStore.actions.runSimulation()
+      @lastRunModel = graphState.description.model
 
 
 mixin =

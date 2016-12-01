@@ -371,10 +371,10 @@ describe "Graph Descriptions", ->
     )
 
     # A -> B+ -> C -x-> D
-    nodeA    = new Node({x: 10, y: 15})
-    nodeB    = new Node({x: 20, y: 25, isAccumulator: true})
-    nodeC    = new Node({x: 30, y: 35})
-    nodeD    = new Node({x: 40, y: 45})
+    nodeA    = new Node({x: 10, y: 15, initialValue: 10})
+    nodeB    = new Node({x: 20, y: 25, initialValue: 20, isAccumulator: true})
+    nodeC    = new Node({x: 30, y: 35, initialValue: 30})
+    nodeD    = new Node({x: 40, y: 45, initialValue: 40})
     formula  = "1 * in"
     linkA = makeLink(nodeA, nodeB, formula)
     linkB = makeLink(nodeB, nodeC, formula)
@@ -397,3 +397,8 @@ describe "Graph Descriptions", ->
     graphStore = GraphStore.store
     desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks())
     desc.links.should.equal "10,15;1 * in;20,25|20,25;1 * in;30,35|30,35;undefined;40,45|4"
+
+  it "should describe the model graph correctly", ->
+    graphStore = GraphStore.store
+    desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks())
+    desc.model.should.equal "Node-71:10;1 * in;Node-72:20|Node-72:20;1 * in;Node-73|"
