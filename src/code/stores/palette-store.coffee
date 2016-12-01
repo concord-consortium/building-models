@@ -148,7 +148,8 @@ paletteStore   = Reflux.createStore
     @palette.splice(0, 0, @palette.splice(index, 1)[0])
 
   inPalette: (node) ->
-    _.find @palette, {key: node.key}
+    # node in Pallete is standardized, arg node not always
+    _.find @palette, {key: node.key || @makeNodeSignature(node)}
 
   findByUUID: (uuid) ->
     _.find @palette, {uuid: uuid}
