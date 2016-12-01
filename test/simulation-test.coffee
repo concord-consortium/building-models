@@ -289,6 +289,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
       asyncListenTest done, SimulationActions.recordingDidStart, (nodeNames) ->
         nodeNames.should.eql ["A", "B"]
 
+      SimulationActions.createExperiment()
       SimulationActions.recordPeriod()
 
     it "should call simulationFramesCreated with all the step values", (done) ->
@@ -305,7 +306,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
           frame9.time.should.equal 10
           frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
-      SimulationActions.resetSimulation()
+      SimulationActions.createExperiment()
       SimulationActions.recordPeriod()
 
   describe "for a slow simulation for 3 iterations", ->
