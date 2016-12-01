@@ -145,7 +145,6 @@ module.exports = NodeView = React.createClass
 
   changeValue: (newValue) ->
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
-    SimulationActions.runSimulation()
 
   changeTitle: (newTitle) ->
     @props.graphStore.startNodeEdit()

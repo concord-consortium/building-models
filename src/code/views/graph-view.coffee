@@ -110,11 +110,13 @@ module.exports = React.createClass
     editingLink: null
     canDrop: false
 
-  componentWillUpdate: ->
-    @diagramToolkit?.clear?()
-
-  componentDidUpdate: ->
-    @_updateToolkit()
+  componentDidUpdate: (prevProps, prevState) ->
+    if (prevState.description.links != @state.description.links) or
+        (prevState.simulationPanelExpanded != @state.simulationPanelExpanded) or
+        @forceRedrawLinks
+      @diagramToolkit?.clear?()
+      @_updateToolkit()
+      @forceRedrawLinks = false
 
   handleEvent: (handler) ->
     if @ignoringEvents
@@ -137,7 +139,8 @@ module.exports = React.createClass
       GraphStore.store.removeNode node_event.nodeKey
 
   handleConnect: (info, evnt) ->
-    @handleEvent ->
+    @handleEvent =>
+      @forceRedrawLinks = true
       GraphStore.store.newLinkFromEvent info, evnt
 
   handleLinkClick: (connection, evnt) ->
