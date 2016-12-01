@@ -75,8 +75,8 @@ module.exports = React.createClass
 
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and @state.externalResults.length is 0
-    topHeight = 30
-    bottomHeight = 70
+    topHeight = if @state.searchable and not showNoResultsAlert then 30 else 100
+    bottomHeight = if @state.searchable and not showNoResultsAlert then 70 else 0
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
