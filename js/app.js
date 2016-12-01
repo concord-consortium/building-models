@@ -50,7 +50,7 @@ window.Sage = {
 
 },{"./stores/graph-store":427,"./stores/palette-store":431,"./utils/hash-parameters":437,"./views/app-view":448}],2:[function(require,module,exports){
 /*!
-	Autosize 3.0.19
+	Autosize 3.0.18
 	license: MIT
 	http://www.jacklmoore.com/autosize
 */
@@ -69,7 +69,7 @@ window.Sage = {
 })(this, function (exports, module) {
 	'use strict';
 
-	var map = typeof Map === "function" ? new Map() : (function () {
+	var map = typeof Map === 'function' ? new Map() : (function () {
 		var keys = [];
 		var values = [];
 
@@ -92,12 +92,11 @@ window.Sage = {
 					keys.splice(index, 1);
 					values.splice(index, 1);
 				}
-			}
-		};
+			} };
 	})();
 
 	var createEvent = function createEvent(name) {
-		return new Event(name, { bubbles: true });
+		return new Event(name);
 	};
 	try {
 		new Event('test');
@@ -165,8 +164,7 @@ window.Sage = {
 				if (el.parentNode.scrollTop) {
 					arr.push({
 						node: el.parentNode,
-						scrollTop: el.parentNode.scrollTop
-					});
+						scrollTop: el.parentNode.scrollTop });
 				}
 				el = el.parentNode;
 			}
@@ -229,10 +227,7 @@ window.Sage = {
 				var evt = createEvent('autosize:resized');
 				try {
 					ta.dispatchEvent(evt);
-				} catch (err) {
-					// Firefox will throw an error on dispatchEvent for a detached element
-					// https://bugzilla.mozilla.org/show_bug.cgi?id=889376
-				}
+				} catch (err) {}
 			}
 		}
 
@@ -259,8 +254,7 @@ window.Sage = {
 			resize: ta.style.resize,
 			overflowY: ta.style.overflowY,
 			overflowX: ta.style.overflowX,
-			wordWrap: ta.style.wordWrap
-		});
+			wordWrap: ta.style.wordWrap });
 
 		ta.addEventListener('autosize:destroy', destroy, false);
 
@@ -279,8 +273,7 @@ window.Sage = {
 
 		map.set(ta, {
 			destroy: destroy,
-			update: update
-		});
+			update: update });
 
 		init();
 	}
@@ -337,6 +330,9 @@ window.Sage = {
 
 	module.exports = autosize;
 });
+
+// Firefox will throw an error on dispatchEvent for a detached element
+// https://bugzilla.mozilla.org/show_bug.cgi?id=889376
 },{}],3:[function(require,module,exports){
 /*! decimal.js v4.0.4 https://github.com/MikeMcl/decimal.js/LICENCE */
 ;(function (global) {
@@ -38299,9 +38295,9 @@ function SemVer(version, loose) {
   else
     this.prerelease = m[4].split('.').map(function(id) {
       if (/^[0-9]+$/.test(id)) {
-        var num = +id;
+        var num = +id
         if (num >= 0 && num < MAX_SAFE_INTEGER)
-          return num;
+          return num
       }
       return id;
     });
@@ -38821,7 +38817,7 @@ function replaceTilde(comp, loose) {
     else if (isX(m))
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
     else if (isX(p))
-      // ~1.2 == >=1.2.0 <1.3.0
+      // ~1.2 == >=1.2.0- <1.3.0-
       ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
     else if (pr) {
       debug('replaceTilde pr', pr);
@@ -38951,11 +38947,11 @@ function replaceXRange(comp, loose) {
       } else if (gtlt === '<=') {
         // <=0.7.x is actually <0.8.0, since any 0.7.x should
         // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<';
+        gtlt = '<'
         if (xm)
-          M = +M + 1;
+          M = +M + 1
         else
-          m = +m + 1;
+          m = +m + 1
       }
 
       ret = gtlt + M + '.' + m + '.' + p;
@@ -39079,15 +39075,6 @@ function maxSatisfying(versions, range, loose) {
   })[0] || null;
 }
 
-exports.minSatisfying = minSatisfying;
-function minSatisfying(versions, range, loose) {
-  return versions.filter(function(version) {
-    return satisfies(version, range, loose);
-  }).sort(function(a, b) {
-    return compare(a, b, loose);
-  })[0] || null;
-}
-
 exports.validRange = validRange;
 function validRange(range, loose) {
   try {
@@ -39179,12 +39166,6 @@ function outside(version, range, hilo, loose) {
     }
   }
   return true;
-}
-
-exports.prerelease = prerelease;
-function prerelease(version, loose) {
-  var parsed = parse(version, loose);
-  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
 }
 
 }).call(this,require('_process'))
@@ -40481,6 +40462,8 @@ module.exports = CodapConnect = (function() {
     ], (function(_this) {
       return function(ret) {
         var frame, state;
+        console.log("!!!!!");
+        console.log(ret);
         if (ret) {
           frame = ret[0];
           context = ret[1];
@@ -40513,7 +40496,7 @@ module.exports = CodapConnect = (function() {
     }, (function(_this) {
       return function(ret) {
         if (ret != null ? ret.success : void 0) {
-          return _this.initGameHandler;
+          return _this.initGameHandler(ret);
         } else {
           return _this.codapPhone.call({
             action: 'create',
@@ -41467,7 +41450,7 @@ module.exports = Relationship = (function() {
   };
 
   Relationship.prototype.evaluate = function(inV, outV, maxIn, maxOut) {
-    var error, result, roundedInV, scope;
+    var error, error1, result, roundedInV, scope;
     if (maxIn == null) {
       maxIn = 100;
     }
@@ -44116,7 +44099,7 @@ module.exports = GoogleDriveIO = (function() {
       xhr.setRequestHeader('Authorization', "Bearer " + token.access_token);
     }
     xhr.onload = function() {
-      var e, json;
+      var e, error, json;
       try {
         json = JSON.parse(xhr.responseText);
       } catch (error) {
@@ -45446,7 +45429,7 @@ module.exports = React.createClass({
   displayName: 'WirefameApp',
   mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require('../mixins/app-view')],
   getInitialState: function() {
-    var iframed;
+    var error, iframed;
     try {
       iframed = window.self !== window.top;
     } catch (error) {
@@ -46419,7 +46402,7 @@ module.exports = React.createClass({
     return e.preventDefault();
   },
   onDrop: function(e) {
-    var dropPos, ex, offset;
+    var dropPos, error, ex, offset;
     this.setState({
       canDrop: false
     });
@@ -49599,10 +49582,10 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = 2e308;
-    maxy = -2e308;
+    miny = Infinity;
+    maxy = -Infinity;
     return data = _.map(data, function(x) {
-      var error, scope, y;
+      var error, error1, scope, y;
       scope = {
         "in": x,
         out: 0,
@@ -49628,8 +49611,8 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = 2e308;
-    maxy = -2e308;
+    miny = Infinity;
+    maxy = -Infinity;
     if (currentData != null) {
       data = _.map(currentData, function(point) {
         var x, y;
