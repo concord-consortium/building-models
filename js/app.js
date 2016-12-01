@@ -50,7 +50,7 @@ window.Sage = {
 
 },{"./stores/graph-store":427,"./stores/palette-store":431,"./utils/hash-parameters":437,"./views/app-view":448}],2:[function(require,module,exports){
 /*!
-	Autosize 3.0.18
+	Autosize 3.0.19
 	license: MIT
 	http://www.jacklmoore.com/autosize
 */
@@ -69,7 +69,7 @@ window.Sage = {
 })(this, function (exports, module) {
 	'use strict';
 
-	var map = typeof Map === 'function' ? new Map() : (function () {
+	var map = typeof Map === "function" ? new Map() : (function () {
 		var keys = [];
 		var values = [];
 
@@ -92,11 +92,12 @@ window.Sage = {
 					keys.splice(index, 1);
 					values.splice(index, 1);
 				}
-			} };
+			}
+		};
 	})();
 
 	var createEvent = function createEvent(name) {
-		return new Event(name);
+		return new Event(name, { bubbles: true });
 	};
 	try {
 		new Event('test');
@@ -164,7 +165,8 @@ window.Sage = {
 				if (el.parentNode.scrollTop) {
 					arr.push({
 						node: el.parentNode,
-						scrollTop: el.parentNode.scrollTop });
+						scrollTop: el.parentNode.scrollTop
+					});
 				}
 				el = el.parentNode;
 			}
@@ -227,7 +229,10 @@ window.Sage = {
 				var evt = createEvent('autosize:resized');
 				try {
 					ta.dispatchEvent(evt);
-				} catch (err) {}
+				} catch (err) {
+					// Firefox will throw an error on dispatchEvent for a detached element
+					// https://bugzilla.mozilla.org/show_bug.cgi?id=889376
+				}
 			}
 		}
 
@@ -254,7 +259,8 @@ window.Sage = {
 			resize: ta.style.resize,
 			overflowY: ta.style.overflowY,
 			overflowX: ta.style.overflowX,
-			wordWrap: ta.style.wordWrap });
+			wordWrap: ta.style.wordWrap
+		});
 
 		ta.addEventListener('autosize:destroy', destroy, false);
 
@@ -273,7 +279,8 @@ window.Sage = {
 
 		map.set(ta, {
 			destroy: destroy,
-			update: update });
+			update: update
+		});
 
 		init();
 	}
@@ -330,9 +337,6 @@ window.Sage = {
 
 	module.exports = autosize;
 });
-
-// Firefox will throw an error on dispatchEvent for a detached element
-// https://bugzilla.mozilla.org/show_bug.cgi?id=889376
 },{}],3:[function(require,module,exports){
 /*! decimal.js v4.0.4 https://github.com/MikeMcl/decimal.js/LICENCE */
 ;(function (global) {
@@ -38295,9 +38299,9 @@ function SemVer(version, loose) {
   else
     this.prerelease = m[4].split('.').map(function(id) {
       if (/^[0-9]+$/.test(id)) {
-        var num = +id
+        var num = +id;
         if (num >= 0 && num < MAX_SAFE_INTEGER)
-          return num
+          return num;
       }
       return id;
     });
@@ -38817,7 +38821,7 @@ function replaceTilde(comp, loose) {
     else if (isX(m))
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
     else if (isX(p))
-      // ~1.2 == >=1.2.0- <1.3.0-
+      // ~1.2 == >=1.2.0 <1.3.0
       ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
     else if (pr) {
       debug('replaceTilde pr', pr);
@@ -38947,11 +38951,11 @@ function replaceXRange(comp, loose) {
       } else if (gtlt === '<=') {
         // <=0.7.x is actually <0.8.0, since any 0.7.x should
         // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<'
+        gtlt = '<';
         if (xm)
-          M = +M + 1
+          M = +M + 1;
         else
-          m = +m + 1
+          m = +m + 1;
       }
 
       ret = gtlt + M + '.' + m + '.' + p;
@@ -39075,6 +39079,15 @@ function maxSatisfying(versions, range, loose) {
   })[0] || null;
 }
 
+exports.minSatisfying = minSatisfying;
+function minSatisfying(versions, range, loose) {
+  return versions.filter(function(version) {
+    return satisfies(version, range, loose);
+  }).sort(function(a, b) {
+    return compare(a, b, loose);
+  })[0] || null;
+}
+
 exports.validRange = validRange;
 function validRange(range, loose) {
   try {
@@ -39166,6 +39179,12 @@ function outside(version, range, hilo, loose) {
     }
   }
   return true;
+}
+
+exports.prerelease = prerelease;
+function prerelease(version, loose) {
+  var parsed = parse(version, loose);
+  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
 }
 
 }).call(this,require('_process'))
@@ -40370,7 +40389,7 @@ module.exports = {
 
 
 
-},{"../stores/image-dialog-store":428,"../utils/has-valid-image-extension":436,"../views/preview-image-dialog-view":482}],415:[function(require,module,exports){
+},{"../stores/image-dialog-store":428,"../utils/has-valid-image-extension":436,"../views/preview-image-dialog-view":483}],415:[function(require,module,exports){
 var tr;
 
 tr = require("../utils/translate");
@@ -40446,9 +40465,7 @@ module.exports = CodapConnect = (function() {
     this.graphStore = GraphStore.store;
     this.lastTimeSent = this._timeStamp();
     this.sendThrottleMs = 300;
-    SimulationStore.actions.resetSimulation.listen(this._openNewCase.bind(this));
-    SimulationStore.actions.recordStream.listen(this._openNewCase.bind(this));
-    SimulationStore.actions.recordPeriod.listen(this._openNewCase.bind(this));
+    SimulationStore.actions.createExperiment.listen(this._openNewCase.bind(this));
     SimulationStore.actions.recordingFramesCreated.listen(this._addData.bind(this));
     CodapActions.sendUndoToCODAP.listen(this._sendUndoToCODAP.bind(this));
     CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
@@ -40514,9 +40531,8 @@ module.exports = CodapConnect = (function() {
                   },
                   attrs: [
                     {
-                      name: tr('~CODAP.SIMULATION.RUN'),
-                      formula: 'caseIndex',
-                      type: 'nominal'
+                      name: tr('~CODAP.SIMULATION.EXPERIMENT'),
+                      type: 'numeric'
                     }
                   ]
                 }, {
@@ -40538,22 +40554,34 @@ module.exports = CodapConnect = (function() {
   }
 
   CodapConnect.prototype._openNewCase = function() {
+    var caseData, collectionAction;
+    this.caseOpened = true;
+    caseData = {};
+    caseData[tr('~CODAP.SIMULATION.EXPERIMENT')] = SimulationStore.store.settings.experimentNumber;
     this.currentCaseID = null;
-    this._createCollection();
-    return this.codapPhone.call({
-      action: 'create',
-      resource: 'collection[Simulation].case',
-      values: [{}]
-    }, (function(_this) {
+    collectionAction = this._createCollection();
+    return this.codapPhone.call([
+      collectionAction, {
+        action: 'create',
+        resource: 'collection[Simulation].case',
+        values: {
+          values: caseData
+        }
+      }
+    ], (function(_this) {
       return function(result) {
-        if (result != null ? result.success : void 0) {
-          _this.currentCaseID = result.values[0].id;
-          _this._flushQueue();
-          if (!_this.standaloneMode) {
-            return _this.createTable();
+        var caseResponse, collectionResponse;
+        if (result != null) {
+          collectionResponse = result[0], caseResponse = result[1];
+          if (caseResponse.success) {
+            _this.currentCaseID = caseResponse.values[0].id;
+            _this._flushQueue();
+            if (!_this.standaloneMode) {
+              return _this.createTable();
+            }
+          } else {
+            return log.info("CODAP returned an error on 'openCase'");
           }
-        } else {
-          return log.info("CODAP returned an error on 'openCase'");
         }
       };
     })(this));
@@ -40580,11 +40608,11 @@ module.exports = CodapConnect = (function() {
     _.each(nodes, function(node) {
       return addSampleDataAttr(node);
     });
-    return this.codapPhone.call({
+    return {
       action: 'create',
       resource: 'collection[Samples].attribute',
       values: sampleDataAttrs
-    });
+    };
   };
 
   CodapConnect.prototype._timeStamp = function() {
@@ -40593,6 +40621,9 @@ module.exports = CodapConnect = (function() {
 
   CodapConnect.prototype._shouldSend = function() {
     var currentTime, elapsedTime;
+    if (this.caseOpened == null) {
+      this._openNewCase();
+    }
     if (!this.currentCaseID) {
       return false;
     }
@@ -41436,7 +41467,7 @@ module.exports = Relationship = (function() {
   };
 
   Relationship.prototype.evaluate = function(inV, outV, maxIn, maxOut) {
-    var error, error1, result, roundedInV, scope;
+    var error, result, roundedInV, scope;
     if (maxIn == null) {
       maxIn = 100;
     }
@@ -42316,10 +42347,12 @@ GraphStore = Reflux.createStore({
     });
     this.selectionManager = new SelectionManager();
     PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
-    SimulationStore.actions.resetSimulation.listen(this.resetSimulation.bind(this));
+    SimulationStore.actions.createExperiment.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
+    SimulationStore.actions.createExperiment.listen(this.resetSimulation.bind(this));
     SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
-    return this.codapStandaloneMode = false;
+    this.codapStandaloneMode = false;
+    return this.lastRunModel = "";
   },
   resetSimulation: function() {
     var j, len, node, ref;
@@ -42804,6 +42837,30 @@ GraphStore = Reflux.createStore({
     }
     return results;
   },
+  getDescription: function(nodes, links) {
+    var linkDescription, modelDescription;
+    linkDescription = "";
+    modelDescription = "";
+    _.each(links, function(link) {
+      var ref, source, target;
+      if (!((source = link.sourceNode) && (target = link.targetNode))) {
+        return;
+      }
+      linkDescription += source.x + "," + source.y + ";";
+      linkDescription += link.relation.formula + ";";
+      linkDescription += target.x + "," + target.y + "|";
+      if (link.relation.isDefined) {
+        modelDescription += source.key + ":" + source.initialValue + ";";
+        modelDescription += link.relation.formula + ";";
+        return modelDescription += "" + target.key + (target.isAccumulator ? ':' + ((ref = target.value) != null ? ref : target.initialValue) : '') + "|";
+      }
+    });
+    linkDescription += nodes.length;
+    return {
+      links: linkDescription,
+      model: modelDescription
+    };
+  },
   loadData: function(data) {
     var importer;
     log.info("json success");
@@ -42864,22 +42921,31 @@ GraphStore = Reflux.createStore({
   toJsonString: function(palette) {
     return JSON.stringify(this.serialize(palette));
   },
-  updateListeners: function() {
-    var data;
-    data = {
-      nodes: this.getNodes(),
-      links: this.getLinks()
+  getGraphState: function() {
+    var description, links, nodes;
+    nodes = this.getNodes();
+    links = this.getLinks();
+    description = this.getDescription(nodes, links);
+    return {
+      nodes: nodes,
+      links: links,
+      description: description
     };
-    return GraphActions.graphChanged.trigger(data);
+  },
+  updateListeners: function() {
+    var graphState;
+    graphState = this.getGraphState();
+    GraphActions.graphChanged.trigger(graphState);
+    if (this.lastRunModel !== graphState.description.model) {
+      SimulationStore.actions.runSimulation();
+      return this.lastRunModel = graphState.description.model;
+    }
   }
 });
 
 mixin = {
   getInitialState: function() {
-    return {
-      nodes: GraphStore.getNodes(),
-      links: GraphStore.getLinks()
-    };
+    return GraphStore.getGraphState();
   },
   componentDidMount: function() {
     return this.unsubscribe = GraphActions.graphChanged.listen(this.onGraphChanged);
@@ -42887,12 +42953,9 @@ mixin = {
   componentWillUnmount: function() {
     return this.unsubscribe();
   },
-  onGraphChanged: function(status) {
+  onGraphChanged: function(state) {
     var ref;
-    this.setState({
-      nodes: status.nodes,
-      links: status.links
-    });
+    this.setState(state);
     return (ref = this.diagramToolkit) != null ? ref.repaint() : void 0;
   }
 };
@@ -43502,22 +43565,27 @@ TimeUnits = require('../utils/time-units');
 
 tr = require('../utils/translate');
 
-SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "resetSimulation", "setDuration", "setStepUnits", "simulationStarted", "simulationFramesCreated", "recordingFramesCreated", "simulationEnded", "capNodeValues", "recordStream", "recordOne", "recordPeriod", "stopRecording", "recordingDidStart", "recordingDidEnd"]);
+SimulationActions = Reflux.createActions(["expandSimulationPanel", "collapseSimulationPanel", "runSimulation", "setDuration", "setStepUnits", "simulationStarted", "simulationFramesCreated", "recordingFramesCreated", "simulationEnded", "capNodeValues", "recordStream", "recordOne", "recordPeriod", "stopRecording", "recordingDidStart", "recordingDidEnd", "createExperiment"]);
+
+SimulationActions.runSimulation = Reflux.createAction({
+  sync: true
+});
 
 SimulationStore = Reflux.createStore({
   listenables: [SimulationActions, AppSettingsActions, ImportActions, GraphActions],
   init: function() {
-    var defaultUnit, options, unit, unitName;
+    var defaultDuration, defaultUnit, timeUnitOptions, unit, unitName;
     defaultUnit = TimeUnits.defaultUnit;
-    unitName = TimeUnits.toString(defaultUnit);
-    options = (function() {
+    unitName = TimeUnits.toString(defaultUnit, true);
+    defaultDuration = 50;
+    timeUnitOptions = (function() {
       var i, len, ref, results;
       ref = TimeUnits.units;
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         unit = ref[i];
         results.push({
-          name: TimeUnits.toString(unit, false),
+          name: TimeUnits.toString(unit, true),
           unit: unit
         });
       }
@@ -43528,10 +43596,11 @@ SimulationStore = Reflux.createStore({
     this.experimentFrameIndex = 0;
     this.settings = {
       simulationPanelExpanded: false,
-      duration: 50,
+      duration: defaultDuration,
+      experimentNumber: 1,
       stepUnits: defaultUnit,
       stepUnitsName: unitName,
-      timeUnitOptions: options,
+      timeUnitOptions: timeUnitOptions,
       capNodeValues: false,
       modelIsRunning: false,
       modelIsRunnable: false,
@@ -43550,7 +43619,7 @@ SimulationStore = Reflux.createStore({
   onExpandSimulationPanel: function() {
     this.settings.simulationPanelExpanded = true;
     this.settings.modelIsRunning = true;
-    SimulationActions.resetSimulation.trigger();
+    this._updateModelIsRunnable();
     return this.notifyChange();
   },
   onCollapseSimulationPanel: function() {
@@ -43565,13 +43634,32 @@ SimulationStore = Reflux.createStore({
     this.settings.graphHasCollector = this._updateGraphHasCollector();
     return this.notifyChange();
   },
+  _updateUnitNames: function() {
+    var pluralize, unit;
+    pluralize = this.settings.duration !== 1;
+    this.settings.timeUnitOptions = (function() {
+      var i, len, ref, results;
+      ref = TimeUnits.units;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        unit = ref[i];
+        results.push({
+          name: TimeUnits.toString(unit, pluralize),
+          unit: unit
+        });
+      }
+      return results;
+    })();
+    return this.settings.stepUnitsName = TimeUnits.toString(this.settings.stepUnits, pluralize);
+  },
   onSetDuration: function(n) {
     this.settings.duration = Math.max(1, Math.min(n, 5000));
+    this._updateUnitNames();
     return this.notifyChange();
   },
   onSetStepUnits: function(unit) {
     this.settings.stepUnits = unit.unit;
-    this.settings.stepUnitsName = TimeUnits.toString(this.settings.stepUnits, false);
+    this._updateUnitNames();
     return this.notifyChange();
   },
   onImport: function(data) {
@@ -43592,13 +43680,12 @@ SimulationStore = Reflux.createStore({
       return TimeUnits.defaultUnit;
     }
   },
-  _runSimulation: function(duration) {
-    if (duration == null) {
-      duration = 1;
-    }
+  _runSimulation: function() {
+    var duration;
     if (this.settings.modelIsRunnable) {
       this.settings.modelIsRunning = true;
-      if (this.settings.graphHasCollector) {
+      duration = 1;
+      if (this.settings.graphHasCollector || this.settings.isRecordingPeriod) {
         duration = this.settings.duration;
       }
       this.notifyChange();
@@ -43652,8 +43739,10 @@ SimulationStore = Reflux.createStore({
     this.settings.isRecordingPeriod = false;
     return SimulationActions.recordingDidEnd();
   },
-  onResetSimulation: function() {
-    return this.experimentFrameIndex = 0;
+  onCreateExperiment: function() {
+    this.experimentFrameIndex = 0;
+    this.settings.experimentNumber++;
+    return this.notifyChange();
   },
   onStopRecording: function() {
     this._stopRecording();
@@ -43663,7 +43752,7 @@ SimulationStore = Reflux.createStore({
     var stopRecording;
     this._startRecording();
     this.settings.isRecordingOne = true;
-    this._runSimulation(1);
+    this._runSimulation();
     stopRecording = function() {
       return SimulationActions.stopRecording();
     };
@@ -43679,7 +43768,7 @@ SimulationStore = Reflux.createStore({
     var stopRecording;
     this._startRecording();
     this.settings.isRecordingPeriod = true;
-    this._runSimulation(this.settings.duration);
+    this._runSimulation();
     stopRecording = function() {
       return SimulationActions.stopRecording();
     };
@@ -43688,6 +43777,9 @@ SimulationStore = Reflux.createStore({
   },
   _isModelRunnable: function() {
     var i, j, len, len1, link, node, ref, ref1;
+    if (!this.settings.simulationPanelExpanded) {
+      return false;
+    }
     ref = this.nodes;
     for (i = 0, len = ref.length; i < len; i++) {
       node = ref[i];
@@ -44024,7 +44116,7 @@ module.exports = GoogleDriveIO = (function() {
       xhr.setRequestHeader('Authorization', "Bearer " + token.access_token);
     }
     xhr.onload = function() {
-      var e, error, json;
+      var e, json;
       try {
         json = JSON.parse(xhr.responseText);
       } catch (error) {
@@ -44740,6 +44832,7 @@ module.exports = {
   "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)",
   "~RELATIONSHIP.NO_RELATION": "No relation defined",
   "~CODAP.SIMULATION.RUN": "run",
+  "~CODAP.SIMULATION.EXPERIMENT": "Exp.#",
   "~CODAP.SIMULATION.STEPS": "steps",
   "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation.",
   "~TIME.STEP": "Step",
@@ -45353,7 +45446,7 @@ module.exports = React.createClass({
   displayName: 'WirefameApp',
   mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require('../mixins/app-view')],
   getInitialState: function() {
-    var error, iframed;
+    var iframed;
     try {
       iframed = window.self !== window.top;
     } catch (error) {
@@ -45418,7 +45511,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/app-view":412,"../stores/app-settings-store":424,"../stores/image-dialog-store":428,"../utils/hash-parameters":437,"../utils/translate":445,"./build-info-view":449,"./document-actions-view":451,"./global-nav-view":454,"./graph-view":455,"./image-browser-view":456,"./inspector-panel-view":462,"./modal-palette-delete-view":468,"./node-well-view":475,"./placeholder-view":481,"reflux":366}],449:[function(require,module,exports){
+},{"../mixins/app-view":412,"../stores/app-settings-store":424,"../stores/image-dialog-store":428,"../utils/hash-parameters":437,"../utils/translate":445,"./build-info-view":449,"./document-actions-view":451,"./global-nav-view":455,"./graph-view":456,"./image-browser-view":457,"./inspector-panel-view":463,"./modal-palette-delete-view":469,"./node-well-view":476,"./placeholder-view":482,"reflux":366}],449:[function(require,module,exports){
 var BuildInfoView, Migration, a, div, i, ref, table, td, tr;
 
 ref = React.DOM, div = ref.div, a = ref.a, table = ref.table, tr = ref.tr, td = ref.td, i = ref.i;
@@ -45684,7 +45777,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":424,"../stores/codap-store":425,"../utils/translate":445,"./about-view":447,"./simulation-run-panel-view":486}],452:[function(require,module,exports){
+},{"../stores/app-settings-store":424,"../stores/codap-store":425,"../utils/translate":445,"./about-view":447,"./simulation-run-panel-view":487}],452:[function(require,module,exports){
 var Demo, DemoDropDown, DropDown, DropdownItem, div, i, li, ref, span, ul;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span, ul = ref.ul, li = ref.li;
@@ -45899,6 +45992,56 @@ module.exports = React.createClass({
 
 
 },{"../utils/drop-image-handler":434,"../utils/translate":445}],454:[function(require,module,exports){
+var SimulationStore, div, i, input, ref, span, tr;
+
+SimulationStore = require('../stores/simulation-store');
+
+tr = require('../utils/translate');
+
+ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, input = ref.input;
+
+module.exports = React.createClass({
+  displayName: 'ExperimentView',
+  mixins: [SimulationStore.mixin],
+  increment: function() {
+    if (!this.props.disabled) {
+      return SimulationStore.actions.createExperiment();
+    }
+  },
+  renderLabel: function() {
+    var experimentLabel;
+    experimentLabel = "Experiment #";
+    return span({
+      className: "experiment-label"
+    }, experimentLabel);
+  },
+  renderCounter: function() {
+    var count;
+    count = this.state.experimentNumber || 211;
+    return div({
+      className: "experiment-counter",
+      onClick: this.increment
+    }, div({
+      className: "count"
+    }, count), div({
+      className: "increment"
+    }, "+"));
+  },
+  render: function() {
+    var classes;
+    classes = ["experiment-panel"];
+    if (this.props.disabled) {
+      classes.push('disabled');
+    }
+    return div({
+      className: classes.join(" ")
+    }, this.renderLabel(), this.renderCounter());
+  }
+});
+
+
+
+},{"../stores/simulation-store":432,"../utils/translate":445}],455:[function(require,module,exports){
 var AppSettingsActions, BuildInfoView, Dropdown, GoogleFileStore, ModalGoogleSave, OpenInCodap, div, i, ref, span, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, span = ref.span;
@@ -45992,7 +46135,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":424,"../stores/google-file-store":426,"../utils/translate":445,"./build-info-view":449,"./dropdown-view":452,"./modal-google-save-view":467,"./open-in-codap-view":476}],455:[function(require,module,exports){
+},{"../stores/app-settings-store":424,"../stores/google-file-store":426,"../utils/translate":445,"./build-info-view":449,"./dropdown-view":452,"./modal-google-save-view":468,"./open-in-codap-view":477}],456:[function(require,module,exports){
 var AppSettingsStore, CodapStore, Color, DiagramToolkit, GraphStore, ImageDialogStore, Importer, LinkColors, Node, NodeModel, PaletteStore, RelationFactory, SimulationStore, div, dropImageHandler, tr;
 
 Node = React.createFactory(require('./node-view'));
@@ -46128,12 +46271,17 @@ module.exports = React.createClass({
       canDrop: false
     };
   },
-  componentWillUpdate: function() {
+  componentDidUpdate: function(prevProps, prevState) {
     var ref;
-    return (ref = this.diagramToolkit) != null ? typeof ref.clear === "function" ? ref.clear() : void 0 : void 0;
-  },
-  componentDidUpdate: function() {
-    return this._updateToolkit();
+    if ((prevState.description.links !== this.state.description.links) || (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) || this.forceRedrawLinks) {
+      if ((ref = this.diagramToolkit) != null) {
+        if (typeof ref.clear === "function") {
+          ref.clear();
+        }
+      }
+      this._updateToolkit();
+      return this.forceRedrawLinks = false;
+    }
   },
   handleEvent: function(handler) {
     if (this.ignoringEvents) {
@@ -46161,9 +46309,12 @@ module.exports = React.createClass({
     });
   },
   handleConnect: function(info, evnt) {
-    return this.handleEvent(function() {
-      return GraphStore.store.newLinkFromEvent(info, evnt);
-    });
+    return this.handleEvent((function(_this) {
+      return function() {
+        _this.forceRedrawLinks = true;
+        return GraphStore.store.newLinkFromEvent(info, evnt);
+      };
+    })(this));
   },
   handleLinkClick: function(connection, evnt) {
     return this.handleEvent(function() {
@@ -46268,7 +46419,7 @@ module.exports = React.createClass({
     return e.preventDefault();
   },
   onDrop: function(e) {
-    var dropPos, error, ex, offset;
+    var dropPos, ex, offset;
     this.setState({
       canDrop: false
     });
@@ -46357,7 +46508,7 @@ module.exports = React.createClass({
 
 
 
-},{"../models/node":419,"../models/relation-factory":420,"../stores/app-settings-store":424,"../stores/codap-store":425,"../stores/graph-store":427,"../stores/image-dialog-store":428,"../stores/palette-store":431,"../stores/simulation-store":432,"../utils/colors":433,"../utils/drop-image-handler":434,"../utils/importer":438,"../utils/js-plumb-diagram-toolkit":439,"../utils/link-colors":441,"../utils/translate":445,"./node-view":474}],456:[function(require,module,exports){
+},{"../models/node":419,"../models/relation-factory":420,"../stores/app-settings-store":424,"../stores/codap-store":425,"../stores/graph-store":427,"../stores/image-dialog-store":428,"../stores/palette-store":431,"../stores/simulation-store":432,"../utils/colors":433,"../utils/drop-image-handler":434,"../utils/importer":438,"../utils/js-plumb-diagram-toolkit":439,"../utils/link-colors":441,"../utils/translate":445,"./node-view":475}],457:[function(require,module,exports){
 var ImageDialogStore, ImageMetadata, ImageSearchDialog, LinkDialog, ModalTabbedDialog, ModalTabbedDialogFactory, MyComputerDialog, PaletteStore, TabbedPanel, div, i, img, ref, span, tr;
 
 ModalTabbedDialog = require('./modal-tabbed-dialog-view');
@@ -46416,7 +46567,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":428,"../stores/palette-store":431,"../utils/translate":445,"./image-link-dialog-view":457,"./image-metadata-view":458,"./image-my-computer-dialog-view":459,"./image-search-dialog-view":461,"./modal-tabbed-dialog-view":469,"./tabbed-panel-view":489}],457:[function(require,module,exports){
+},{"../stores/image-dialog-store":428,"../stores/palette-store":431,"../utils/translate":445,"./image-link-dialog-view":458,"./image-metadata-view":459,"./image-my-computer-dialog-view":460,"./image-search-dialog-view":462,"./modal-tabbed-dialog-view":470,"./tabbed-panel-view":490}],458:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -46465,7 +46616,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":414,"../stores/image-dialog-store":428,"../utils/translate":445,"./dropzone-view":453}],458:[function(require,module,exports){
+},{"../mixins/image-dialog-view":414,"../stores/image-dialog-store":428,"../utils/translate":445,"./dropzone-view":453}],459:[function(require,module,exports){
 var ImageDialogStore, a, div, input, licenses, p, radio, ref, select, table, td, tr, xlat;
 
 xlat = require('../utils/translate');
@@ -46553,7 +46704,7 @@ module.exports = React.createClass({
 
 
 
-},{"../data/licenses":392,"../stores/image-dialog-store":428,"../utils/translate":445}],459:[function(require,module,exports){
+},{"../data/licenses":392,"../stores/image-dialog-store":428,"../utils/translate":445}],460:[function(require,module,exports){
 var DropZone, ImageDialogStore, div, input, p, ref, tr;
 
 DropZone = React.createFactory(require('./dropzone-view'));
@@ -46607,7 +46758,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":414,"../stores/image-dialog-store":428,"../utils/translate":445,"./dropzone-view":453}],460:[function(require,module,exports){
+},{"../mixins/image-dialog-view":414,"../stores/image-dialog-store":428,"../utils/translate":445,"./dropzone-view":453}],461:[function(require,module,exports){
 var ImgChoice, PaletteAddView, PaletteStore, div, img, ref, tr;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -46695,7 +46846,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":431,"../utils/translate":445,"./palette-add-view":477}],461:[function(require,module,exports){
+},{"../stores/palette-store":431,"../utils/translate":445,"./palette-add-view":478}],462:[function(require,module,exports){
 var ImageDialogStore, ImageSearchResult, OpenClipart, a, br, button, div, form, i, img, input, ref, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -46937,7 +47088,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/image-dialog-view":414,"../stores/image-dialog-store":428,"../utils/open-clipart":442,"../utils/translate":445}],462:[function(require,module,exports){
+},{"../mixins/image-dialog-view":414,"../stores/image-dialog-store":428,"../utils/open-clipart":442,"../utils/translate":445}],463:[function(require,module,exports){
 var LinkInspectorView, LinkRelationInspectorView, LinkValueInspectorView, NodeInspectorView, NodeRelationInspectorView, NodeValueInspectorView, SimulationInspectorView, ToolButton, ToolPanel, div, i, ref, span;
 
 NodeInspectorView = React.createFactory(require('./node-inspector-view'));
@@ -47179,7 +47330,7 @@ module.exports = React.createClass({
 
 
 
-},{"./link-inspector-view":463,"./link-value-inspector-view":465,"./node-inspector-view":471,"./node-value-inspector-view":473,"./relation-inspector-view":484,"./simulation-inspector-view":485}],463:[function(require,module,exports){
+},{"./link-inspector-view":464,"./link-value-inspector-view":466,"./node-inspector-view":472,"./node-value-inspector-view":474,"./relation-inspector-view":485,"./simulation-inspector-view":486}],464:[function(require,module,exports){
 var button, div, h2, input, label, palette, palettes, ref, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, button = ref.button, label = ref.label, input = ref.input;
@@ -47235,7 +47386,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":445}],464:[function(require,module,exports){
+},{"../utils/translate":445}],465:[function(require,module,exports){
 var Graph, LinkRelationView, QuantStart, RelationFactory, SvgGraph, autosize, br, div, h2, i, input, label, option, p, ref, select, span, textarea, tr;
 
 ref = React.DOM, br = ref.br, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i, select = ref.select, option = ref.option, textarea = ref.textarea;
@@ -47496,7 +47647,7 @@ module.exports = LinkRelationView = React.createClass({
 
 
 
-},{"../models/relation-factory":420,"../utils/translate":445,"./svg-graph-view":488,"autosize":2}],465:[function(require,module,exports){
+},{"../models/relation-factory":420,"../utils/translate":445,"./svg-graph-view":489,"autosize":2}],466:[function(require,module,exports){
 var button, div, h2, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button;
@@ -47514,7 +47665,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":445}],466:[function(require,module,exports){
+},{"../utils/translate":445}],467:[function(require,module,exports){
 var Modal, div, i, ref;
 
 Modal = React.createFactory(require('./modal-view'));
@@ -47547,7 +47698,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-view":470}],467:[function(require,module,exports){
+},{"./modal-view":471}],468:[function(require,module,exports){
 var ModalDialog, a, button, div, input, label, li, ref, span, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47626,7 +47777,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":445,"./modal-dialog-view":466}],468:[function(require,module,exports){
+},{"../utils/translate":445,"./modal-dialog-view":467}],469:[function(require,module,exports){
 var ModalDialog, NodesStore, PaletteDeleteView, PaletteDialogStore, a, div, li, ref, tr, ul;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47668,7 +47819,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":429,"../stores/palette-delete-dialog-store":430,"../utils/translate":445,"./modal-dialog-view":466,"./palette-delete-view":478}],469:[function(require,module,exports){
+},{"../stores/nodes-store":429,"../stores/palette-delete-dialog-store":430,"../utils/translate":445,"./modal-dialog-view":467,"./palette-delete-view":479}],470:[function(require,module,exports){
 var ModalDialog, TabbedPanel;
 
 ModalDialog = React.createFactory(require('./modal-dialog-view'));
@@ -47689,7 +47840,7 @@ module.exports = React.createClass({
 
 
 
-},{"./modal-dialog-view":466,"./tabbed-panel-view":489}],470:[function(require,module,exports){
+},{"./modal-dialog-view":467,"./tabbed-panel-view":490}],471:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -47721,7 +47872,7 @@ module.exports = React.createClass({
 
 
 
-},{}],471:[function(require,module,exports){
+},{}],472:[function(require,module,exports){
 var ColorPicker, ImagePickerView, button, div, h2, i, input, label, optgroup, option, ref, select, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, input = ref.input, select = ref.select, option = ref.option, optgroup = ref.optgroup, button = ref.button, i = ref.i;
@@ -47808,7 +47959,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/node-title":415,"../utils/translate":445,"./color-picker-view":450,"./image-picker-view":460}],472:[function(require,module,exports){
+},{"../mixins/node-title":415,"../utils/translate":445,"./color-picker-view":450,"./image-picker-view":461}],473:[function(require,module,exports){
 var NodeSvgGraphView, SimulationStore, div, line, path, ref, svg, text, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan;
@@ -47908,7 +48059,7 @@ module.exports = NodeSvgGraphView = React.createClass({
 
 
 
-},{"../stores/simulation-store":432}],473:[function(require,module,exports){
+},{"../stores/simulation-store":432}],474:[function(require,module,exports){
 var SimulationStore, div, h2, i, input, label, p, ref, span, tr;
 
 ref = React.DOM, div = ref.div, h2 = ref.h2, label = ref.label, span = ref.span, input = ref.input, p = ref.p, i = ref.i;
@@ -48084,7 +48235,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":432,"../utils/translate":445}],474:[function(require,module,exports){
+},{"../stores/simulation-store":432,"../utils/translate":445}],475:[function(require,module,exports){
 var CodapConnect, DEFAULT_CONTEXT_NAME, GraphView, NodeTitle, NodeView, SimulationActions, SliderView, SquareImage, div, groupView, i, img, input, label, myView, ref, span, tr;
 
 ref = React.DOM, input = ref.input, div = ref.div, i = ref.i, img = ref.img, span = ref.span, label = ref.label;
@@ -48271,10 +48422,9 @@ module.exports = NodeView = React.createClass({
     });
   },
   changeValue: function(newValue) {
-    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {
+    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {
       initialValue: newValue
     });
-    return SimulationActions.runSimulation();
   },
   changeTitle: function(newTitle) {
     this.props.graphStore.startNodeEdit();
@@ -48319,6 +48469,9 @@ module.exports = NodeView = React.createClass({
     var ref1, showHandle, value;
     showHandle = this.props.data.canEditInitialValue();
     value = (ref1 = this.props.data.currentValue) != null ? ref1 : this.props.data.initialValue;
+    if (showHandle) {
+      value = this.props.data.initialValue;
+    }
     return SliderView({
       orientation: "vertical",
       filled: true,
@@ -48472,7 +48625,7 @@ groupView = React.createFactory(React.createClass({
 
 
 
-},{"../mixins/node-title":415,"../models/codap-connect":416,"../stores/simulation-store":432,"../utils/translate":445,"./node-svg-graph-view":472,"./square-image-view":487,"./value-slider-view":490}],475:[function(require,module,exports){
+},{"../mixins/node-title":415,"../models/codap-connect":416,"../stores/simulation-store":432,"../utils/translate":445,"./node-svg-graph-view":473,"./square-image-view":488,"./value-slider-view":491}],476:[function(require,module,exports){
 var PaletteInspectorView, PaletteStore, div;
 
 PaletteInspectorView = React.createFactory(require('./palette-inspector-view'));
@@ -48533,7 +48686,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-store":431,"./palette-inspector-view":479}],476:[function(require,module,exports){
+},{"../stores/palette-store":431,"./palette-inspector-view":480}],477:[function(require,module,exports){
 var Dropdown, a, ref, span, tr;
 
 ref = React.DOM, a = ref.a, span = ref.span;
@@ -48582,7 +48735,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":445,"./dropdown-view":452}],477:[function(require,module,exports){
+},{"../utils/translate":445,"./dropdown-view":452}],478:[function(require,module,exports){
 var Draggable, ImageDialogStore, div, tr;
 
 ImageDialogStore = require("../stores/image-dialog-store");
@@ -48619,7 +48772,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":413,"../stores/image-dialog-store":428,"../utils/translate":445}],478:[function(require,module,exports){
+},{"../mixins/draggable":413,"../stores/image-dialog-store":428,"../utils/translate":445}],479:[function(require,module,exports){
 var ImagePickerView, PaletteDialogStore, a, button, div, i, img, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -48698,7 +48851,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/palette-delete-dialog-store":430,"../utils/translate":445,"./image-picker-view":460}],479:[function(require,module,exports){
+},{"../stores/palette-delete-dialog-store":430,"../utils/translate":445,"./image-picker-view":461}],480:[function(require,module,exports){
 var ImageMetadata, NodesStore, PaletteAddView, PaletteDialogStore, PaletteItemView, PaletteStore, div, i, img, label, ref, span, tr;
 
 PaletteItemView = React.createFactory(require('./palette-item-view'));
@@ -48771,7 +48924,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/nodes-store":429,"../stores/palette-delete-dialog-store":430,"../stores/palette-store":431,"../utils/translate":445,"./image-metadata-view":458,"./palette-add-view":477,"./palette-item-view":480}],480:[function(require,module,exports){
+},{"../stores/nodes-store":429,"../stores/palette-delete-dialog-store":430,"../stores/palette-store":431,"../utils/translate":445,"./image-metadata-view":459,"./palette-add-view":478,"./palette-item-view":481}],481:[function(require,module,exports){
 var Draggable, SquareImage, div, img, ref;
 
 ref = React.DOM, div = ref.div, img = ref.img;
@@ -48811,7 +48964,7 @@ module.exports = React.createClass({
 
 
 
-},{"../mixins/draggable":413,"./square-image-view":487}],481:[function(require,module,exports){
+},{"../mixins/draggable":413,"./square-image-view":488}],482:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -48829,7 +48982,7 @@ module.exports = React.createClass({
 
 
 
-},{}],482:[function(require,module,exports){
+},{}],483:[function(require,module,exports){
 var ImageManger, ImageMetadata, PaletteStore, a, button, div, i, img, ref, tr;
 
 ImageMetadata = React.createFactory(require('./image-metadata-view'));
@@ -48880,7 +49033,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/image-dialog-store":428,"../stores/palette-store":431,"../utils/translate":445,"./image-metadata-view":458}],483:[function(require,module,exports){
+},{"../stores/image-dialog-store":428,"../stores/palette-store":431,"../utils/translate":445,"./image-metadata-view":459}],484:[function(require,module,exports){
 var div, i, ref, span, tr;
 
 tr = require('../utils/translate');
@@ -48957,7 +49110,7 @@ module.exports = React.createClass({
 
 
 
-},{"../utils/translate":445}],484:[function(require,module,exports){
+},{"../utils/translate":445}],485:[function(require,module,exports){
 var LinkRelationView, RelationFactory, RelationInspectorView, TabbedPanel, Tabber, div, graphStore, h2, i, input, label, option, p, ref, select, span, tr;
 
 LinkRelationView = React.createFactory(require("./link-relation-view"));
@@ -49021,7 +49174,7 @@ module.exports = RelationInspectorView = React.createClass({
 
 
 
-},{"../models/relation-factory":420,"../stores/graph-store":427,"../utils/translate":445,"./link-relation-view":464,"./tabbed-panel-view":489}],485:[function(require,module,exports){
+},{"../models/relation-factory":420,"../stores/graph-store":427,"../utils/translate":445,"./link-relation-view":465,"./tabbed-panel-view":490}],486:[function(require,module,exports){
 var AppSettingsStore, Dropdown, SimulationStore, div, i, input, label, ref, span, tr;
 
 Dropdown = React.createFactory(require('./dropdown-view'));
@@ -49105,8 +49258,8 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/app-settings-store":424,"../stores/simulation-store":432,"../utils/translate":445,"./dropdown-view":452}],486:[function(require,module,exports){
-var Dropdown, RecordButton, SimulationStore, div, i, input, ref, span, tr;
+},{"../stores/app-settings-store":424,"../stores/simulation-store":432,"../utils/translate":445,"./dropdown-view":452}],487:[function(require,module,exports){
+var Dropdown, ExperimentPanel, RecordButton, SimulationStore, div, i, input, ref, span, tr;
 
 SimulationStore = require('../stores/simulation-store');
 
@@ -49115,6 +49268,8 @@ tr = require('../utils/translate');
 RecordButton = React.createFactory(require('./record-button-view'));
 
 Dropdown = React.createFactory(require('./dropdown-view'));
+
+ExperimentPanel = React.createFactory(require('./experiment-panel-view'));
 
 ref = React.DOM, div = ref.div, span = ref.span, i = ref.i, input = ref.input;
 
@@ -49144,30 +49299,31 @@ module.exports = React.createClass({
     }));
   },
   renderControls: function() {
-    var disabled, wrapperClasses;
+    var disabled, experimentDisabled, wrapperClasses;
     wrapperClasses = "buttons flow";
     if (!this.state.simulationPanelExpanded) {
       wrapperClasses += " closed";
     }
     disabled = (this.state.isRecording && !this.state.isRecordingOne) || !this.state.modelIsRunnable;
-    if (this.state.graphHasCollector) {
-      return div({
-        className: wrapperClasses
-      }, this.renderRecordForCollectors());
-    } else {
-      return div({
-        className: wrapperClasses
-      }, RecordButton({
-        onClick: SimulationStore.actions.recordOne,
-        disabled: disabled
-      }, div({
-        className: "horizontal"
-      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD-1")), i({
-        className: "icon-codap-camera"
-      })), div({
-        className: "horizontal"
-      }, span({}, tr("~DOCUMENT.ACTIONS.DATA.POINT")))), this.renderRecordStreamButton());
-    }
+    experimentDisabled = !this.state.modelIsRunnable || this.state.isRecordingPeriod;
+    return div({
+      className: wrapperClasses
+    }, div({
+      className: "vertical"
+    }, ExperimentPanel({
+      disabled: experimentDisabled
+    }), this.state.graphHasCollector ? this.renderRecordForCollectors() : div({
+      className: "horizontal"
+    }, RecordButton({
+      onClick: SimulationStore.actions.recordOne,
+      disabled: disabled
+    }, div({
+      className: "horizontal"
+    }, span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD-1")), i({
+      className: "icon-codap-camera"
+    })), div({
+      className: "horizontal"
+    }, span({}, tr("~DOCUMENT.ACTIONS.DATA.POINT")))), this.renderRecordStreamButton())));
   },
   renderRecordForCollectors: function() {
     var props, recordAction;
@@ -49199,7 +49355,7 @@ module.exports = React.createClass({
     }), Dropdown({
       isActionMenu: false,
       onSelect: SimulationStore.actions.setStepUnits,
-      anchor: this.state.stepUnitsName + "s",
+      anchor: this.state.stepUnitsName,
       items: this.state.timeUnitOptions
     }));
   },
@@ -49242,7 +49398,7 @@ module.exports = React.createClass({
 
 
 
-},{"../stores/simulation-store":432,"../utils/translate":445,"./dropdown-view":452,"./record-button-view":483}],487:[function(require,module,exports){
+},{"../stores/simulation-store":432,"../utils/translate":445,"./dropdown-view":452,"./experiment-panel-view":454,"./record-button-view":484}],488:[function(require,module,exports){
 var div;
 
 div = React.DOM.div;
@@ -49283,7 +49439,7 @@ module.exports = React.createClass({
 
 
 
-},{}],488:[function(require,module,exports){
+},{}],489:[function(require,module,exports){
 var SvgGraphView, div, line, math, path, ref, span, svg, text, tr, tspan;
 
 ref = React.DOM, svg = ref.svg, path = ref.path, line = ref.line, text = ref.text, div = ref.div, tspan = ref.tspan, span = ref.span;
@@ -49443,10 +49599,10 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = Infinity;
-    maxy = -Infinity;
+    miny = 2e308;
+    maxy = -2e308;
     return data = _.map(data, function(x) {
-      var error, error1, scope, y;
+      var error, scope, y;
       scope = {
         "in": x,
         out: 0,
@@ -49472,8 +49628,8 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = Infinity;
-    maxy = -Infinity;
+    miny = 2e308;
+    maxy = -2e308;
     if (currentData != null) {
       data = _.map(currentData, function(point) {
         var x, y;
@@ -49654,7 +49810,7 @@ module.exports = SvgGraphView = React.createClass({
 
 
 
-},{"../utils/translate":445,"mathjs":10}],489:[function(require,module,exports){
+},{"../utils/translate":445,"mathjs":10}],490:[function(require,module,exports){
 var Tab, TabInfo, a, div, li, ref, ul;
 
 ref = React.DOM, div = ref.div, ul = ref.ul, li = ref.li, a = ref.a;
@@ -49761,7 +49917,7 @@ module.exports = React.createClass({
 
 
 
-},{}],490:[function(require,module,exports){
+},{}],491:[function(require,module,exports){
 var Demo, Slider, ValueSlider, circle, circleRadius, constants, div, g, i, input, label, path, rect, ref, span, svg, tr;
 
 ref = React.DOM, div = ref.div, i = ref.i, label = ref.label, span = ref.span, input = ref.input, svg = ref.svg, circle = ref.circle, path = ref.path, rect = ref.rect, g = ref.g;
@@ -49932,7 +50088,9 @@ ValueSlider = React.createClass({
       return;
     }
     value = this.position(e);
-    return onValueChange(value);
+    if (value !== this.props.value) {
+      return onValueChange(value);
+    }
   },
   handleJumpAndDrag: function(e) {
     this.handleDrag(e);
