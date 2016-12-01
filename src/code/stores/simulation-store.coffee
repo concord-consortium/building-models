@@ -69,6 +69,7 @@ SimulationStore   = Reflux.createStore
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
     @settings.modelIsRunning = true
+    @_updateModelIsRunnable()
     @notifyChange()
 
   onCollapseSimulationPanel: ->

@@ -127,6 +127,7 @@ module.exports = class CodapConnect
         , @initGameHandler
 
   _openNewCase: ->
+    @caseOpened = true
     caseData = {}
     caseData[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
     @currentCaseID = null
@@ -145,7 +146,6 @@ module.exports = class CodapConnect
         [collectionResponse, caseResponse] = result
 
         if caseResponse.success
-          @caseOpened = true
           @currentCaseID = caseResponse.values[0].id
           @_flushQueue()
           if not @standaloneMode
