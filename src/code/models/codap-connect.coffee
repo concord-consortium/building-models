@@ -90,7 +90,7 @@ module.exports = class CodapConnect
       resource: 'dataContext[Sage Simulation]'
     , (ret) =>
       if ret?.success
-        @initGameHandler
+        @initGameHandler ret
       else
         @codapPhone.call
           action: 'create',
