@@ -5,7 +5,7 @@
 A [System Dynamics](https://en.wikipedia.org/wiki/System_dynamics) modeling tool, under development
 by the [Building Models Project](https://concord.org/projects/building-models) of [Concord Consortium](http://concord.org/).
 
-See the application running here: http://concord-consortium.github.io/building-models/
+See the application running here: http://sage.concord.org/branch/master
 
 
 ### Other useful links:
@@ -49,24 +49,24 @@ we are using.
     * For more in-depth testing, build your own copy of CODAP from [GitHub](https://github.com/concord-consortium/codap)
 
 
-## Deployment
-
-### Staging (GitHub Pages)
-* `./build.sh`. This should:
-  * Check out new clone of this repo into dest, checking out the gh-pages branch by default
-  * Run `gulp build-all` on your **current** codebase to generate all assets into ./dist/
-  * Push changes up to gh-pages on github.
+### Manual Github Pages deployment:
+* Read `./build.sh` before running it.
+* run `./build.sh`. This should:
+    * Check out new clone of this repo into dest, checking out the gh-pages branch by default
+    * Run `gulp build-all` on your **current** codebase to generate all assets into ./dist/
+    * Push changes up to gh-pages on github.
 * See the model at http://concord-consortium.github.io/building-models/sage.html
 
-### Production (sage.concord.org)
+### Automatic CI branch deployment
+* Named branches or pushed tags get deployed to S3 automatically by [travis](https://travis-ci.org/concord-consortium/building-models).
+* The URL for branch deploys is `https://sage.concord.org/branch/<branchname>/sage.html`
+* The `production` branch is deployed to `https://sage.concord.org/`
+* Read `.travis.yml` and `s3_deploy.sh` for more information.
 
-* First tag the commit you are planning to deploy:
-    * `git tag -a 1.x.y -m 'deploy version 1.x.y'` where `x` is the data migration version, and `y` is the next deployment number
-    * `git push origin --tags`
-* Install the s3_website gem using `bundle install`
-* Copy `./.env.sample` to `./.env`
-* Edit your AWS credentials in `./.env` -- this file should never go into version control.
-* Run `./build.sh pro` which will build the current code into `dist` and run `s3_website push` to deploy to http://sage.concord.org
+### Production Deployment
+1. Checkout the `production` branch.
+1. Make changes …
+1. `git push`
 
 
 ## Updating the shared fonts.
