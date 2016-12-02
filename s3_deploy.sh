@@ -12,7 +12,8 @@ SHA=`git rev-parse --short=8 HEAD`
 
 echo "Rebuilding app"
 BUILD_INFO="$SHA built on $DATE"
-ENVIRONMENT=$DEPLOY_ENV gulp build-all --production --buildInfo "$SHA | $DATE"
+ENVIRONMENT=$DEPLOY_ENV
+gulp build-all --production --buildInfo "$SHA | $DATE"
 
 rm -rf _site
 
@@ -33,3 +34,14 @@ else
   export DEPLOY_DIR
 fi
 s3_website push
+
+# Let rollbars know of our new deployment:
+# https://rollbar.com/knowuh/Sage deployment tracking
+ACCESS_TOKEN=daa3852e6c4f46008fc4043793a0ff38
+ENVIRONMENT=$TRAVIS_BRANCH
+REVISION=`git log -n 1 --pretty=format:"%H"`
+curl https://api.rollbar.com/api/1/deploy/ \
+  -F access_token=$ACCESS_TOKEN \
+  -F environment=$ENVIRONMENT \
+  -F revision=$REVISION \
+  -F local_username=Travis
