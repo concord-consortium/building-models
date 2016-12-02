@@ -42,6 +42,7 @@ ENVIRONMENT=$TRAVIS_BRANCH
 REVISION=`git log -n 1 --pretty=format:"%H"`
 curl https://api.rollbar.com/api/1/deploy/ \
   -F access_token=$ACCESS_TOKEN \
-  -F environment=$ENVIRONMENT \
+  -F environment=$TRAVIS_BRANCH\
   -F revision=$REVISION \
-  -F local_username=Travis
+  -F local_username=Travis\
+  -F comment='available at https://sage.concord.org/branch/$TRAVIS_BRANCH/'
