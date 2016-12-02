@@ -7,8 +7,9 @@ s3_endpoint: ap-northeast-1
 
 # Below are examples of all the available configurations.
 # See README for more detailed info on each of them.
-
-site: dist
+gzip: true
+ignore_on_server: _DELETE_NOTHING_ON_THE_S3_BUCKET_
+site: _site
 
 # max_age:
 #   "assets/*": 6000
@@ -44,7 +45,7 @@ cloudfront_distribution_config:
       CNAME2: sage.concord.org
 
 
-# cloudfront_invalidate_root: true
+cloudfront_invalidate_root: true
 
 # concurrency_level: 5
 
