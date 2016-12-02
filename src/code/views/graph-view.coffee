@@ -113,6 +113,7 @@ module.exports = React.createClass
   componentDidUpdate: (prevProps, prevState) ->
     if (prevState.description.links != @state.description.links) or
         (prevState.simulationPanelExpanded != @state.simulationPanelExpanded) or
+        (prevState.selectedLink != @state.selectedLink) or
         @forceRedrawLinks
       @diagramToolkit?.clear?()
       @_updateToolkit()
