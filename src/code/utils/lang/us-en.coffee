@@ -86,11 +86,9 @@ module.exports =
   # views/image-browser-view.coffee
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image"
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image"
-  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images"
+  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for more images"
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found."
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below."
-  "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images"
-  "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for \"%{query}.\""
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}\"%{query}\""
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for \"%{query}.\""
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for \"%{query}.\" "

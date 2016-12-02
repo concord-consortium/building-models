@@ -36,15 +36,10 @@ module.exports = React.createClass
     @getInitialImageDialogViewState
       searching: false
       searched: false
-      topHeight: 100
-      bottomHeight: 70
-      internalResults: []
       externalResults: []
 
   searchClicked: (e) ->
     e.preventDefault()
-    if @state.topHeight = 100
-      @state.topHeight = 30
     @search limitResults: true
 
   showAllMatches: ->
@@ -53,18 +48,12 @@ module.exports = React.createClass
   search: (options) ->
     query = $.trim @refs.search.value
     validQuery = query.length > 0
-
-    queryRegEx = new RegExp query, 'i'
-    internalResults = _.filter @props.internalLibrary, (node) ->
-      queryRegEx.test node.title
-
     @setState
       query: query
       searchable: validQuery
       searching: validQuery
       searchingAll: validQuery and not options.limitResults
       searched: false
-      internalResults: internalResults
       externalResults: []
       numExternalMatches: 0
 
@@ -84,18 +73,10 @@ module.exports = React.createClass
   isDisabledInExternalSearch: (node) ->
     (@props.inPalette node) or (@props.inLibrary node)
 
-  internalListSource: ->
-    if @state.internalResults.length is 0
-      _.map @props.internalLibrary
-    else @state.internalResults
-
   render: ->
-    resultsCount = @state.internalResults.length + @state.externalResults.length
-    showNoResultsAlert = @state.searchable and @state.searched and resultsCount is 0
-    
-    if resultsCount > 0
-      @state.topHeight = 30
-      @state.bottomHeight = 70
+    showNoResultsAlert = @state.searchable and @state.searched and @state.externalResults.length is 0
+    topHeight = if @state.searchable and not showNoResultsAlert then 30 else 100
+    bottomHeight = if @state.searchable and not showNoResultsAlert then 70 else 0
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
@@ -117,20 +98,16 @@ module.exports = React.createClass
             )
 
           (div {className: 'image-search-main-results'},[
-            (div {className: 'image-search-section', style: height: @state.topHeight + '%'},[
-              (div {className: 'header'}, tr '~IMAGE-BROWSER.LIBRARY_HEADER'),
+            (div {className: 'image-search-section', style: height: topHeight + '%'},[
               (div {className: 'image-search-dialog-results'},
-                if @state.internalResults.length is 0 and (@state.searching or @state.externalResults.length > 0)
-                  tr '~IMAGE-BROWSER.NO_INTERNAL_FOUND', query: @state.query
-                else
-                  for node, index in @internalListSource()
-                    if node.image
-                      (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
+                for node, index in _.map @props.internalLibrary
+                  if node.image
+                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
               )
             ])
 
             if @state.searchable and not showNoResultsAlert
-              (div {className: 'image-search-section', style: height: @state.bottomHeight + '%'},[
+              (div {className: 'image-search-section', style: height: bottomHeight + '%'},[
                 (div {className: 'header'}, tr 'Openclipart.org Images'),
                 (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
                   if @state.searching
