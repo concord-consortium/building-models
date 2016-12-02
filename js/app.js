@@ -50,7 +50,7 @@ window.Sage = {
 
 },{"./stores/graph-store":427,"./stores/palette-store":431,"./utils/hash-parameters":437,"./views/app-view":448}],2:[function(require,module,exports){
 /*!
-	Autosize 3.0.18
+	Autosize 3.0.19
 	license: MIT
 	http://www.jacklmoore.com/autosize
 */
@@ -69,7 +69,7 @@ window.Sage = {
 })(this, function (exports, module) {
 	'use strict';
 
-	var map = typeof Map === 'function' ? new Map() : (function () {
+	var map = typeof Map === "function" ? new Map() : (function () {
 		var keys = [];
 		var values = [];
 
@@ -92,11 +92,12 @@ window.Sage = {
 					keys.splice(index, 1);
 					values.splice(index, 1);
 				}
-			} };
+			}
+		};
 	})();
 
 	var createEvent = function createEvent(name) {
-		return new Event(name);
+		return new Event(name, { bubbles: true });
 	};
 	try {
 		new Event('test');
@@ -164,7 +165,8 @@ window.Sage = {
 				if (el.parentNode.scrollTop) {
 					arr.push({
 						node: el.parentNode,
-						scrollTop: el.parentNode.scrollTop });
+						scrollTop: el.parentNode.scrollTop
+					});
 				}
 				el = el.parentNode;
 			}
@@ -227,7 +229,10 @@ window.Sage = {
 				var evt = createEvent('autosize:resized');
 				try {
 					ta.dispatchEvent(evt);
-				} catch (err) {}
+				} catch (err) {
+					// Firefox will throw an error on dispatchEvent for a detached element
+					// https://bugzilla.mozilla.org/show_bug.cgi?id=889376
+				}
 			}
 		}
 
@@ -254,7 +259,8 @@ window.Sage = {
 			resize: ta.style.resize,
 			overflowY: ta.style.overflowY,
 			overflowX: ta.style.overflowX,
-			wordWrap: ta.style.wordWrap });
+			wordWrap: ta.style.wordWrap
+		});
 
 		ta.addEventListener('autosize:destroy', destroy, false);
 
@@ -273,7 +279,8 @@ window.Sage = {
 
 		map.set(ta, {
 			destroy: destroy,
-			update: update });
+			update: update
+		});
 
 		init();
 	}
@@ -330,9 +337,6 @@ window.Sage = {
 
 	module.exports = autosize;
 });
-
-// Firefox will throw an error on dispatchEvent for a detached element
-// https://bugzilla.mozilla.org/show_bug.cgi?id=889376
 },{}],3:[function(require,module,exports){
 /*! decimal.js v4.0.4 https://github.com/MikeMcl/decimal.js/LICENCE */
 ;(function (global) {
@@ -38295,9 +38299,9 @@ function SemVer(version, loose) {
   else
     this.prerelease = m[4].split('.').map(function(id) {
       if (/^[0-9]+$/.test(id)) {
-        var num = +id
+        var num = +id;
         if (num >= 0 && num < MAX_SAFE_INTEGER)
-          return num
+          return num;
       }
       return id;
     });
@@ -38817,7 +38821,7 @@ function replaceTilde(comp, loose) {
     else if (isX(m))
       ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
     else if (isX(p))
-      // ~1.2 == >=1.2.0- <1.3.0-
+      // ~1.2 == >=1.2.0 <1.3.0
       ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
     else if (pr) {
       debug('replaceTilde pr', pr);
@@ -38947,11 +38951,11 @@ function replaceXRange(comp, loose) {
       } else if (gtlt === '<=') {
         // <=0.7.x is actually <0.8.0, since any 0.7.x should
         // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<'
+        gtlt = '<';
         if (xm)
-          M = +M + 1
+          M = +M + 1;
         else
-          m = +m + 1
+          m = +m + 1;
       }
 
       ret = gtlt + M + '.' + m + '.' + p;
@@ -39075,6 +39079,15 @@ function maxSatisfying(versions, range, loose) {
   })[0] || null;
 }
 
+exports.minSatisfying = minSatisfying;
+function minSatisfying(versions, range, loose) {
+  return versions.filter(function(version) {
+    return satisfies(version, range, loose);
+  }).sort(function(a, b) {
+    return compare(a, b, loose);
+  })[0] || null;
+}
+
 exports.validRange = validRange;
 function validRange(range, loose) {
   try {
@@ -39166,6 +39179,12 @@ function outside(version, range, hilo, loose) {
     }
   }
   return true;
+}
+
+exports.prerelease = prerelease;
+function prerelease(version, loose) {
+  var parsed = parse(version, loose);
+  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
 }
 
 }).call(this,require('_process'))
@@ -39491,6 +39510,166 @@ module.exports = [
       "source": "internal",
       "title": "Hill",
       "link": "https://openclipart.org/detail/9437/RPG%20map%20symbols%3A%20hill",
+      "license": "public domain"
+    }
+  }, {
+    "id": "9",
+    "title": "Axe",
+    "image": "img/nodes/axe.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Axe",
+      "link": "https://openclipart.org/detail/2591/axe",
+      "license": "public domain"
+    }
+  }, {
+    "id": "10",
+    "title": "Frog",
+    "image": "img/nodes/frog.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Frog",
+      "link": "https://openclipart.org/detail/2112/green-sitting-frog",
+      "license": "public domain"
+    }
+  }, {
+    "id": "12",
+    "title": "Maple-Tree",
+    "image": "img/nodes/maple-tree.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Maple-Tree",
+      "link": "https://openclipart.org/detail/21735/tree",
+      "license": "public domain"
+    }
+  }, {
+    "id": "13",
+    "title": "Molecule",
+    "image": "img/nodes/molecule.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Molecule",
+      "link": "https://openclipart.org/detail/192917/molecule",
+      "license": "public domain"
+    }
+  }, {
+    "id": "14",
+    "title": "Penguin",
+    "image": "img/nodes/penguin.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Penguin",
+      "link": "https://openclipart.org/detail/159679/pinguino-%7C-penguin",
+      "license": "public domain"
+    }
+  }, {
+    "id": "15",
+    "title": "Woodpecker",
+    "image": "img/nodes/woodpecker.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Woodpecker",
+      "link": "https://openclipart.org/detail/25756/woodpecker",
+      "license": "public domain"
+    }
+  }, {
+    "id": "16",
+    "title": "Reed",
+    "image": "img/nodes/reed.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Reed",
+      "link": "https://openclipart.org/detail/13141/reed",
+      "license": "public domain"
+    }
+  }, {
+    "id": "17",
+    "title": "Car-Pollute",
+    "image": "img/nodes/car-pollute.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Car-Pollute",
+      "link": "https://openclipart.org/detail/173174/the-car-pollute-the-air-with-co2",
+      "license": "public domain"
+    }
+  }, {
+    "id": "18",
+    "title": "Ladybug",
+    "image": "img/nodes/ladybug.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Ladybug",
+      "link": "https://openclipart.org/detail/17678/ladybug",
+      "license": "public domain"
+    }
+  }, {
+    "id": "19",
+    "title": "Earth",
+    "image": "img/nodes/earth.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Earth",
+      "link": "https://openclipart.org/detail/3320/earth",
+      "license": "public domain"
+    }
+  }, {
+    "id": "20",
+    "title": "Lobster",
+    "image": "img/nodes/lobster.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Lobster",
+      "link": "https://openclipart.org/detail/223269/lobster-stylised",
+      "license": "public domain"
+    }
+  }, {
+    "id": "21",
+    "title": "Water-Pollution",
+    "image": "img/nodes/water-pollution.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Water-Pollution",
+      "link": "https://openclipart.org/detail/169806/water-pollution",
+      "license": "public domain"
+    }
+  }, {
+    "id": "22",
+    "title": "Lemon",
+    "image": "img/nodes/lemon.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Lemon",
+      "link": "https://openclipart.org/detail/26149/lemon",
+      "license": "public domain"
+    }
+  }, {
+    "id": "23",
+    "title": "Fish",
+    "image": "img/nodes/fish.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Fish",
+      "link": "https://openclipart.org/detail/2707/happy-fish",
+      "license": "public domain"
+    }
+  }, {
+    "id": "24",
+    "title": "Iceberg",
+    "image": "img/nodes/iceberg.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Iceberg",
+      "link": "https://openclipart.org/detail/194157/climate-change",
+      "license": "public domain"
+    }
+  }, {
+    "id": "25",
+    "title": "Carbon-Dioxide",
+    "image": "img/nodes/carbon-dioxide.png",
+    "metadata": {
+      "source": "internal",
+      "title": "Carbon-Dioxide",
+      "link": "https://openclipart.org/detail/232272/famous-and-infamous-molecules-4",
       "license": "public domain"
     }
   }
@@ -40462,8 +40641,6 @@ module.exports = CodapConnect = (function() {
     ], (function(_this) {
       return function(ret) {
         var frame, state;
-        console.log("!!!!!");
-        console.log(ret);
         if (ret) {
           frame = ret[0];
           context = ret[1];
@@ -41450,7 +41627,7 @@ module.exports = Relationship = (function() {
   };
 
   Relationship.prototype.evaluate = function(inV, outV, maxIn, maxOut) {
-    var error, error1, result, roundedInV, scope;
+    var error, result, roundedInV, scope;
     if (maxIn == null) {
       maxIn = 100;
     }
@@ -43468,7 +43645,7 @@ paletteStore = Reflux.createStore({
   },
   inPalette: function(node) {
     return _.find(this.palette, {
-      key: node.key
+      key: node.key || this.makeNodeSignature(node)
     });
   },
   findByUUID: function(uuid) {
@@ -44099,7 +44276,7 @@ module.exports = GoogleDriveIO = (function() {
       xhr.setRequestHeader('Authorization', "Bearer " + token.access_token);
     }
     xhr.onload = function() {
-      var e, error, json;
+      var e, json;
       try {
         json = JSON.parse(xhr.responseText);
       } catch (error) {
@@ -44757,11 +44934,9 @@ module.exports = {
   "~METADATA.CREDIT": "Credit",
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
-  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
+  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for more images",
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.",
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below.",
-  "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images",
-  "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for \"%{query}.\"",
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}\"%{query}\"",
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for \"%{query}.\"",
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for \"%{query}.\" ",
@@ -45429,7 +45604,7 @@ module.exports = React.createClass({
   displayName: 'WirefameApp',
   mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require('../mixins/app-view')],
   getInitialState: function() {
-    var error, iframed;
+    var iframed;
     try {
       iframed = window.self !== window.top;
     } catch (error) {
@@ -46256,7 +46431,7 @@ module.exports = React.createClass({
   },
   componentDidUpdate: function(prevProps, prevState) {
     var ref;
-    if ((prevState.description.links !== this.state.description.links) || (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) || this.forceRedrawLinks) {
+    if ((prevState.description.links !== this.state.description.links) || (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) || (prevState.selectedLink !== this.state.selectedLink) || this.forceRedrawLinks) {
       if ((ref = this.diagramToolkit) != null) {
         if (typeof ref.clear === "function") {
           ref.clear();
@@ -46402,7 +46577,7 @@ module.exports = React.createClass({
     return e.preventDefault();
   },
   onDrop: function(e) {
-    var dropPos, error, ex, offset;
+    var dropPos, ex, offset;
     this.setState({
       canDrop: false
     });
@@ -46888,17 +47063,11 @@ module.exports = React.createClass({
     return this.getInitialImageDialogViewState({
       searching: false,
       searched: false,
-      topHeight: 100,
-      bottomHeight: 70,
-      internalResults: [],
       externalResults: []
     });
   },
   searchClicked: function(e) {
     e.preventDefault();
-    if (this.state.topHeight = 100) {
-      this.state.topHeight = 30;
-    }
     return this.search({
       limitResults: true
     });
@@ -46909,20 +47078,15 @@ module.exports = React.createClass({
     });
   },
   search: function(options) {
-    var internalResults, query, queryRegEx, validQuery;
+    var query, validQuery;
     query = $.trim(this.refs.search.value);
     validQuery = query.length > 0;
-    queryRegEx = new RegExp(query, 'i');
-    internalResults = _.filter(this.props.internalLibrary, function(node) {
-      return queryRegEx.test(node.title);
-    });
     this.setState({
       query: query,
       searchable: validQuery,
       searching: validQuery,
       searchingAll: validQuery && !options.limitResults,
       searched: false,
-      internalResults: internalResults,
       externalResults: [],
       numExternalMatches: 0
     });
@@ -46946,21 +47110,11 @@ module.exports = React.createClass({
   isDisabledInExternalSearch: function(node) {
     return (this.props.inPalette(node)) || (this.props.inLibrary(node));
   },
-  internalListSource: function() {
-    if (this.state.internalResults.length === 0) {
-      return _.map(this.props.internalLibrary);
-    } else {
-      return this.state.internalResults;
-    }
-  },
   render: function() {
-    var index, node, ref1, resultsCount, showNoResultsAlert;
-    resultsCount = this.state.internalResults.length + this.state.externalResults.length;
-    showNoResultsAlert = this.state.searchable && this.state.searched && resultsCount === 0;
-    if (resultsCount > 0) {
-      this.state.topHeight = 30;
-      this.state.bottomHeight = 70;
-    }
+    var bottomHeight, index, node, ref1, showNoResultsAlert, topHeight;
+    showNoResultsAlert = this.state.searchable && this.state.searched && this.state.externalResults.length === 0;
+    topHeight = this.state.searchable && !showNoResultsAlert ? 30 : 100;
+    bottomHeight = this.state.searchable && !showNoResultsAlert ? 70 : 0;
     return div({
       className: 'image-search-dialog'
     }, ((ref1 = this.props.selectedImage) != null ? ref1.image : void 0) ? this.renderPreviewImage() : div({}, div({
@@ -46981,46 +47135,38 @@ module.exports = React.createClass({
       div({
         className: 'image-search-section',
         style: {
-          height: this.state.topHeight + '%'
+          height: topHeight + '%'
         }
       }, [
         div({
-          className: 'header'
-        }, tr('~IMAGE-BROWSER.LIBRARY_HEADER')), div({
           className: 'image-search-dialog-results'
         }, (function() {
           var j, len, ref2, results1;
-          if (this.state.internalResults.length === 0 && (this.state.searching || this.state.externalResults.length > 0)) {
-            return tr('~IMAGE-BROWSER.NO_INTERNAL_FOUND', {
-              query: this.state.query
-            });
-          } else {
-            ref2 = this.internalListSource();
-            results1 = [];
-            for (index = j = 0, len = ref2.length; j < len; index = ++j) {
-              node = ref2[index];
+          ref2 = _.map(this.props.internalLibrary);
+          results1 = [];
+          for (index = j = 0, len = ref2.length; j < len; index = ++j) {
+            node = ref2[index];
+            if (node.image) {
               if (node.image) {
-                if (node.image) {
-                  results1.push(ImageSearchResult({
-                    key: index,
-                    imageInfo: node,
-                    clicked: this.imageSelected,
-                    isDisabled: this.isDisabledInInternalLibrary
-                  }));
-                } else {
-                  results1.push(void 0);
-                }
+                results1.push(ImageSearchResult({
+                  key: index,
+                  imageInfo: node,
+                  clicked: this.imageSelected,
+                  isDisabled: this.isDisabledInInternalLibrary
+                }));
               } else {
                 results1.push(void 0);
               }
+            } else {
+              results1.push(void 0);
             }
-            return results1;
           }
+          return results1;
         }).call(this))
       ]), this.state.searchable && !showNoResultsAlert ? div({
         className: 'image-search-section',
         style: {
-          height: this.state.bottomHeight + '%'
+          height: bottomHeight + '%'
         }
       }, [
         div({
@@ -49582,10 +49728,10 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = Infinity;
-    maxy = -Infinity;
+    miny = 2e308;
+    maxy = -2e308;
     return data = _.map(data, function(x) {
-      var error, error1, scope, y;
+      var error, scope, y;
       scope = {
         "in": x,
         out: 0,
@@ -49611,8 +49757,8 @@ module.exports = SvgGraphView = React.createClass({
     var data, maxy, miny, rangex;
     rangex = 100;
     data = _.range(0, rangex);
-    miny = Infinity;
-    maxy = -Infinity;
+    miny = 2e308;
+    maxy = -2e308;
     if (currentData != null) {
       data = _.map(currentData, function(point) {
         var x, y;
