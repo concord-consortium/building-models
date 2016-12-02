@@ -45,4 +45,4 @@ curl https://api.rollbar.com/api/1/deploy/ \
   -F environment=$TRAVIS_BRANCH\
   -F revision=$REVISION \
   -F local_username=Travis\
-  -F comment='available at https://sage.concord.org/branch/$TRAVIS_BRANCH/'
+  -F comment="available at https://sage.concord.org/branch/$TRAVIS_BRANCH/"
