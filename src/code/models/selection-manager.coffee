@@ -29,11 +29,10 @@ module.exports = class SelectionManager
     unless @isSelected(graphprimitive,context)
       @selections.push entry
 
-
-  selectOnly: (graphprimitive, context) ->
+  selectOnly: (graphprimitive, context, multipleSelectionsAllowed) ->
     unless @isSelected(graphprimitive, context)
-      @_clearSelection(context)
-      @addToSelection(graphprimitive,context)
+      @_clearSelection(context) unless multipleSelectionsAllowed
+      @addToSelection(graphprimitive, context)
 
   selection: (context) ->
     where = {}
@@ -97,8 +96,10 @@ module.exports = class SelectionManager
   getNodeTitleEditing: ->
     @selection(SelectionManager.NodeTitleEditing)
 
-  selectNodeForInspection: (graphprimitive) ->
-    @selectOnly(graphprimitive, SelectionManager.NodeInspection)
+  selectNodeForInspection: (graphprimitive, multipleSelectionsAllowed) ->
+    # when clicking with eg. ctrl key, multipleSelectionsAllowed is true, so we dont unselect other nodes.
+    console.log "Selecting for inspection:", graphprimitive
+    @selectOnly(graphprimitive, SelectionManager.NodeInspection, multipleSelectionsAllowed)
     @clearLinkInspection()
 
     # unselect the title selection, unless its this same graphprimitive.

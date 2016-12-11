@@ -38,13 +38,13 @@ module.exports = React.createClass
 
     @props.selectionManager.addSelectionListener (manager) =>
       lastLinkSelection = @state.selectedLink
-      selectedNode      = manager.getNodeInspection()[0] or null
+      selectedNodes     = manager.getNodeInspection() or []
       editingNode       = manager.getNodeTitleEditing()[0] or null
       selectedLink      = manager.getLinkInspection()[0] or null
       editingLink       = manager.getLinkTitleEditing()[0] or null
 
       @setState
-        selectedNode: selectedNode
+        selectedNodes: selectedNodes
         editingNode:  editingNode
         selectedLink: selectedLink
         editingLink: editingLink
@@ -104,7 +104,7 @@ module.exports = React.createClass
   getInitialState: ->
     # nodes: covered by GraphStore mixin
     # links: covered by GraphStore mixin
-    selectedNode: null
+    selectedNodes: []
     editingNode: null
     selectedLink: null
     editingLink: null
@@ -127,13 +127,34 @@ module.exports = React.createClass
       true
 
   onNodeMoved: (node_event) ->
-    @handleEvent ->
-      GraphStore.store.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+    {left, top} = node_event.extra.position
+    theNode = GraphStore.store.nodeKeys[node_event.nodeKey]
+    leftDiff = left - theNode.x
+    topDiff = top - theNode.y
+    selectedNodes = @state.selectedNodes
+    if (selectedNodes.length > 0)
+      @handleEvent ->
+        for node in selectedNodes
+          GraphStore.store.moveNode node.key, leftDiff, topDiff
+        # when node is unselected, but we drag it, it should be treated as selected
+        (GraphStore.store.moveNode theNode.key, leftDiff, topDiff) unless theNode in selectedNodes
+    else
+      # alert "leftDiff 2" + leftDiff
+      @handleEvent ->
+        GraphStore.store.moveNode node_event.nodeKey, leftDiff, topDiff
 
   onNodeMoveComplete: (node_event) ->
-    @handleEvent ->
-      {left, top} = node_event.extra.position
-      GraphStore.store.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+    {left, top} = node_event.extra.position
+    leftDiff = left - node_event.extra.originalPosition.left
+    topDiff = top - node_event.extra.originalPosition.top
+    selectedNodes = @state.selectedNodes
+    if (selectedNodes.length > 0)
+      @handleEvent ->
+        for node in selectedNodes
+          GraphStore.store.moveNodeCompleted node.key, leftDiff, topDiff
+    else
+      @handleEvent ->
+        GraphStore.store.moveNodeCompleted node_event.nodeKey, leftDiff, topDiff
 
   onNodeDeleted: (node_event) ->
     @handleEvent ->
@@ -267,7 +288,7 @@ module.exports = React.createClass
             key: node.key
             data: node
             dataColor: dataColor
-            selected: @state.selectedNode is node
+            selected: node in @state.selectedNodes
             simulating: @state.simulationPanelExpanded
             running: @state.modelIsRunning
             editTitle: @state.editingNode is node

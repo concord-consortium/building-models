@@ -181,19 +181,19 @@ GraphStore  = Reflux.createStore
   _graphUpdated: ->
     node.checkIsInIndependentCycle() for key, node of @nodeKeys
 
-  moveNodeCompleted: (nodeKey, pos, originalPos) ->
+  moveNodeCompleted: (nodeKey, leftDiff, topDiff) ->
     @endNodeEdit()
-    node = @nodeKeys[nodeKey]
-    return unless node
     @undoRedoManager.createAndExecuteCommand 'moveNode',
-      execute: => @moveNode node.key, pos, originalPos
-      undo: => @moveNode node.key, originalPos, pos
+      execute: => @moveNode nodeKey, 0,0 # FIXME leftDiff, topDiff
+      undo: => @moveNode nodeKey, -leftDiff, -topDiff
 
-  moveNode: (nodeKey, pos, originalPos) ->
+  moveNode: (nodeKey, leftDiff, topDiff) ->
     node = @nodeKeys[nodeKey]
     return unless node
-    node.x = pos.left
-    node.y = pos.top
+    # alert "moveNode:" + nodeKey + " " + node.x + " "
+    # console.log "moveNode:", node, leftDiff,  topDiff
+    node.x = node.x + leftDiff
+    node.y = node.y + topDiff
     @updateListeners()
 
   selectedNode: ->
