@@ -37,10 +37,10 @@ module.exports = React.createClass
       handleLabelEdit:      @handleLabelEdit
 
     @props.selectionManager.addSelectionListener (manager) =>
-      lastLinkSelection = @state.selectedLink
+      [..., lastLinkSelection] = @state.selectedLink
       selectedNodes     = manager.getNodeInspection() or []
       editingNode       = manager.getNodeTitleEditing()[0] or null
-      selectedLink      = manager.getLinkInspection()[0] or null
+      selectedLink      = manager.getLinkInspection() or []
       editingLink       = manager.getLinkTitleEditing()[0] or null
 
       @setState
@@ -106,7 +106,7 @@ module.exports = React.createClass
     # links: covered by GraphStore mixin
     selectedNodes: []
     editingNode: null
-    selectedLink: null
+    selectedLink: []
     editingLink: null
     canDrop: false
 
@@ -167,7 +167,7 @@ module.exports = React.createClass
 
   handleLinkClick: (connection, evnt) ->
     @handleEvent ->
-      GraphStore.store.clickLink connection.linkModel
+      GraphStore.store.clickLink connection.linkModel, evnt.ctrlKey
 
   handleLinkEditClick: (connection, evnt) ->
     @handleEvent ->

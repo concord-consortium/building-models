@@ -26,7 +26,7 @@ module.exports = class SelectionManager
 
   addToSelection: (graphprimitive, context) ->
     entry = {graphprimitive: graphprimitive, context: context, key: graphprimitive.key}
-    unless @isSelected(graphprimitive,context)
+    unless @isSelected(graphprimitive, context)
       @selections.push entry
 
   selectOnly: (graphprimitive, context, multipleSelectionsAllowed) ->
@@ -124,8 +124,8 @@ module.exports = class SelectionManager
   getLinkTitleEditing: ->
     @selection(SelectionManager.LinkTitleEditing)
 
-  selectLinkForInspection: (graphprimitive)->
-    @selectOnly(graphprimitive, SelectionManager.LinkInspection)
+  selectLinkForInspection: (graphprimitive, multipleSelectionsAllowed)->
+    @selectOnly(graphprimitive, SelectionManager.LinkInspection, multipleSelectionsAllowed)
     @clearNodeInspection()
 
     # unselect the title selection, unless its this same graphprimitive.
