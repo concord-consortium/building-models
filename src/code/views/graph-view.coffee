@@ -109,6 +109,12 @@ module.exports = React.createClass
     selectedLink: []
     editingLink: null
     canDrop: false
+    drawingMarquee: false
+    selectBox:
+      startX: 0
+      startY: 0
+      x: 0
+      y: 0
 
   componentDidUpdate: (prevProps, prevState) ->
     if (prevState.description.links != @state.description.links) or
@@ -267,10 +273,62 @@ module.exports = React.createClass
       # of valid application items like connections or images
       console.log("Invalid drag/drop operation", ex)
 
-  onContainerClicked: (e) ->
+  onMouseDown: (e) ->
     if e.target is @refs.container
       # deselect links when background is clicked
       @props.selectionManager.clearSelection()
+      selectBox = $.extend({}, @state.selectBox)
+      offset = $(@refs.linkView).offset()
+      selectBox.startX = e.pageX - offset.left
+      selectBox.startY = e.pageY - offset.top
+      selectBox.x = selectBox.startX
+      selectBox.y = selectBox.startY
+      @setState drawingMarquee: true, selectBox: selectBox
+
+  onMouseUp: (e) ->
+    if e.target is @refs.container
+    # deselect links when background is clicked
+      @props.selectionManager.clearSelection()
+      if @state.drawingMarquee
+     # end of drawing Marquee, check what is selected
+        @checkSelectBoxCollisions()
+        @setState drawingMarquee: false
+    if e.target is @refs.selectionBox
+      if @state.drawingMarquee
+    # end of drawing Marquee, check what is selected
+        @checkSelectBoxCollisions()
+        @setState drawingMarquee: false
+
+  onMouseMove: (e) ->
+    if e.target is @refs.container and @state.drawingMarquee
+      # draw square when in drawingMarquee mode.
+      offset = $(@refs.linkView).offset()
+      selectBox = $.extend({}, @state.selectBox)
+      selectBox.x = e.pageX - offset.left
+      selectBox.y = e.pageY - offset.top
+      @setState selectBox: selectBox
+
+  checkSelectBoxCollisions: ->
+    for node in @state.nodes
+      if this.checkSelectBoxCollision(node)
+        @props.selectionManager.selectNodeForInspection(node, true)
+
+  checkSelectBoxCollision: (node) ->
+    nodeWidth = 45 # Width of node in px
+    nodeHeight = 45 # Height of node in px
+    selectBox = @state.selectBox
+    sX = Math.min(selectBox.startX, selectBox.x)
+    sY = Math.min(selectBox.startY, selectBox.y)
+    x = Math.max(selectBox.startX, selectBox.x)
+    y = Math.max(selectBox.startY, selectBox.y)
+
+    a = (node.x < x)
+    b = (node.x + nodeWidth > sX)
+    c = (node.y < y)
+    d = (nodeHeight + node.y > sY)
+    result = (a and b and c and d)
+    # console.log "Node: ", node, selectBox, "→", result, a,b,c,d
+    result
 
   handleLabelEdit: (title) ->
     @props.graphStore.changeLink @state.editingLink, {title: title}
@@ -282,7 +340,11 @@ module.exports = React.createClass
       dataColor = Color.colors.data.value
 
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
-      (div {className: 'container', ref: 'container', onClick: @onContainerClicked},
+      (div {className: 'container', ref: 'container', onMouseDown: @onMouseDown, onMouseUp: @onMouseUp, onMouseMove: @onMouseMove},
+        if @state.drawingMarquee
+          left = Math.min(@state.selectBox.startX, @state.selectBox.x)
+          top = Math.min(@state.selectBox.startY, @state.selectBox.y)
+          (div {className: 'selectionBox', ref: 'selectionBox', style: {width: Math.abs(@state.selectBox.x-@state.selectBox.startX), height: Math.abs(@state.selectBox.y-@state.selectBox.startY), left: left, top: top, border: '1px dotted #CCC', position: 'absolute', backgroundColor: '#FFFFFF'}})
         for node in @state.nodes
           (Node {
             key: node.key
