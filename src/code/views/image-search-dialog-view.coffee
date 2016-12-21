@@ -75,8 +75,6 @@ module.exports = React.createClass
 
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and @state.externalResults.length is 0
-    topHeight = if @state.searchable and not showNoResultsAlert then 30 else 100
-    bottomHeight = if @state.searchable and not showNoResultsAlert then 70 else 0
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
@@ -98,16 +96,16 @@ module.exports = React.createClass
             )
 
           (div {className: 'image-search-main-results'},[
-            (div {className: 'image-search-section', style: height: topHeight + '%'},[
-              (div {className: 'image-search-dialog-results'},
-                for node, index in _.map @props.internalLibrary
-                  if node.image
-                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
-              )
-            ])
-
-            if @state.searchable and not showNoResultsAlert
-              (div {className: 'image-search-section', style: height: bottomHeight + '%'},[
+            if not @state.searchable or showNoResultsAlert
+              (div {className: 'image-search-section', style: height: '100%'},[
+                (div {className: 'image-search-dialog-results'},
+                  for node, index in _.map @props.internalLibrary
+                    if node.image
+                      (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
+                )
+              ])
+            else
+              (div {className: 'image-search-section', style: height: '100%'},[
                 (div {className: 'header'}, tr 'Openclipart.org Images'),
                 (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
                   if @state.searching
