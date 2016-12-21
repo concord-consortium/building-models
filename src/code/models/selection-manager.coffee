@@ -39,7 +39,7 @@ module.exports = class SelectionManager
     where.context = context if context
     _.chain @selections
     .where where
-    .map (obj,i) ->
+    .map (obj) ->
       obj.graphprimitive
     .value()
 
@@ -98,9 +98,8 @@ module.exports = class SelectionManager
 
   selectNodeForInspection: (graphprimitive, multipleSelectionsAllowed) ->
     # when clicking with eg. ctrl key, multipleSelectionsAllowed is true, so we dont unselect other nodes.
-    console.log "Selecting for inspection:", graphprimitive
     @selectOnly(graphprimitive, SelectionManager.NodeInspection, multipleSelectionsAllowed)
-    @clearLinkInspection()
+    @clearLinkInspection() unless multipleSelectionsAllowed
 
     # unselect the title selection, unless its this same graphprimitive.
     unless @isSelectedForTitleEditing(graphprimitive)
@@ -126,7 +125,7 @@ module.exports = class SelectionManager
 
   selectLinkForInspection: (graphprimitive, multipleSelectionsAllowed)->
     @selectOnly(graphprimitive, SelectionManager.LinkInspection, multipleSelectionsAllowed)
-    @clearNodeInspection()
+    @clearNodeInspection() unless multipleSelectionsAllowed
 
     # unselect the title selection, unless its this same graphprimitive.
     unless @isSelectedForTitleEditing(graphprimitive)
