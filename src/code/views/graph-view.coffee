@@ -297,6 +297,7 @@ module.exports = React.createClass
       if @state.drawingMarquee
     # end of drawing Marquee, check what is selected
         @checkSelectBoxCollisions()
+        @checkSelectBoxLinkCollisions()
         @setState drawingMarquee: false
 
   onMouseMove: (e) ->
@@ -308,10 +309,52 @@ module.exports = React.createClass
       selectBox.y = e.pageY - offset.top
       @setState selectBox: selectBox
 
+  checkSelectBoxLinkCollisions: ->
+    for link in @state.links
+      if this.checkBoxLinkCollision(link)
+        @props.selectionManager.selectLinkForInspection(link, true)
+
   checkSelectBoxCollisions: ->
     for node in @state.nodes
       if this.checkSelectBoxCollision(node)
         @props.selectionManager.selectNodeForInspection(node, true)
+
+  # Detecting collision between drawn selectBox and existing link
+  # Start of the link is (x0,y0), upper left corner of the most left node
+  # End of the link is (x1,y1), lower right corner of the most right node
+  # Function uses Liang-Barsky algorithm described at https://gist.github.com/ChickenProp/3194723
+  checkBoxLinkCollision: (link) ->
+    selectBox = @state.selectBox
+    nodeWidth = 45 # Width of node in px
+    nodeHeight = 45 # Height of node in px
+    sX = Math.min(selectBox.startX, selectBox.x)
+    sY = Math.min(selectBox.startY, selectBox.y)
+    x = Math.max(selectBox.startX, selectBox.x)
+    y = Math.max(selectBox.startY, selectBox.y)
+
+    x0 = Math.min(link.sourceNode.x, link.targetNode.x)
+    y0 = Math.min(link.sourceNode.y, link.targetNode.y)
+    x1 = Math.max(link.sourceNode.x, link.targetNode.x) + nodeWidth
+    y1 = Math.max(link.sourceNode.y, link.targetNode.y) + nodeHeight
+
+    p = [x0-x1, x1-x0,  y0-y1, y1-y0]
+    q = [x0-sX, x-x0, y0 - sY, y-y0]
+    u1 = Number.MIN_VALUE
+    u2 = Number.MAX_VALUE
+
+    for i in [0..3]
+      if (p[i] == 0) and (q[i] < 0)
+        return false
+      else
+        t = q[i] / p[i]
+        if (p[i] < 0 and u1 < t)
+          u1 = t
+        else if (p[i] > 0 && u2 > t)
+          u2 = t
+
+    if (u1 > u2 or u1 > 1 or u1 < 0)
+      return false
+    true
 
   checkSelectBoxCollision: (node) ->
     nodeWidth = 45 # Width of node in px
@@ -327,7 +370,6 @@ module.exports = React.createClass
     c = (node.y < y)
     d = (nodeHeight + node.y > sY)
     result = (a and b and c and d)
-    # console.log "Node: ", node, selectBox, "→", result, a,b,c,d
     result
 
   handleLabelEdit: (title) ->
