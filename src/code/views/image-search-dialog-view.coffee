@@ -22,10 +22,11 @@ ImageSearchResult = React.createFactory React.createClass
 
   render: ->
     src = if @state.loaded then @props.imageInfo.image else 'img/bb-chrome/spin.svg'
-    if @props.isDisabled(@props.imageInfo)
-      (img {src: src, className: 'in-palette', title: (tr '~IMAGE-BROWSER.ALREADY-IN-PALETTE')})
-    else
+    if not @props.isDisabled(@props.imageInfo)
       (img {src: src, onClick: @clicked, title: @props.imageInfo.title})
+    else
+      null
+
 
 module.exports = React.createClass
   displayName: 'ImageSearch'
@@ -105,6 +106,7 @@ module.exports = React.createClass
                 )
               ])
             else
+              filteredExternalResults = (@state.externalResults.filter (x) => not @isDisabledInExternalSearch x)[..23]
               (div {className: 'image-search-section', style: height: '100%'},[
                 (div {className: 'header'}, tr 'Openclipart.org Images'),
                 (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
@@ -116,17 +118,17 @@ module.exports = React.createClass
                         scope: if @state.searchingAll then 'all matches for ' else ''
                         query: @state.query
                     )
-                  else if @state.externalResults.length is 0
+                  else if filteredExternalResults.length is 0
                     tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
                   else
-                    for node, index in @state.externalResults
+                    for node, index in filteredExternalResults
                       (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
                 )
 
               if @state.externalResults.length < @state.numExternalMatches
                 (div {className: "image-search-dialog-results-text"},
                   tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
-                  numResults: @state.externalResults.length
+                  numResults: filteredExternalResults.length
                   numTotalResults: @state.numExternalMatches
                   query: @state.query
                   (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')

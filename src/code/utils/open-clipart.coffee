@@ -1,4 +1,4 @@
-initialResultSize = 24
+initialResultSize = 40
 
 module.exports = OpenClipArt =
 
