@@ -95,7 +95,7 @@ module.exports = NodeView = React.createClass
     # console.log 'selected ' + actually_select, evt.ctrlKey, @props.selectionManager.selections
     if @props.selectionManager
       selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-      multipleSelections = evt.ctrlKey || (evt.metaKey && evt.shiftKey)
+      multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
       @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
 
   propTypes:

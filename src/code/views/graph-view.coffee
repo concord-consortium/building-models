@@ -173,7 +173,7 @@ module.exports = React.createClass
 
   handleLinkClick: (connection, evt) ->
     @handleEvent ->
-      multipleSelections = evt.ctrlKey || (evt.metaKey && evt.shiftKey)
+      multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
       GraphStore.store.clickLink connection.linkModel, multipleSelections
 
   handleLinkEditClick: (connection, evnt) ->
