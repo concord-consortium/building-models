@@ -95,7 +95,8 @@ module.exports = NodeView = React.createClass
     # console.log 'selected ' + actually_select, evt.ctrlKey, @props.selectionManager.selections
     if @props.selectionManager
       selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-      @props.selectionManager.selectNodeForInspection(@props.data, evt.ctrlKey)
+      multipleSelections = evt.ctrlKey || (evt.metaKey && evt.shiftKey)
+      @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
 
   propTypes:
     onDelete: React.PropTypes.func
