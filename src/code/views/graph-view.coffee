@@ -145,11 +145,13 @@ module.exports = React.createClass
       GraphStore.store.newLinkFromEvent info, evnt
 
   handleLinkClick: (connection, evnt) ->
-    @handleEvent ->
+    @handleEvent =>
+      @forceRedrawLinks = true
       GraphStore.store.clickLink connection.linkModel
 
   handleLinkEditClick: (connection, evnt) ->
-    @handleEvent ->
+    @handleEvent =>
+      @forceRedrawLinks = true
       GraphStore.store.editLink connection.linkModel
 
   _updateNodeValue: (name, key, value) ->
@@ -249,6 +251,7 @@ module.exports = React.createClass
   onContainerClicked: (e) ->
     if e.target is @refs.container
       # deselect links when background is clicked
+      @forceRedrawLinks = true
       @props.selectionManager.clearSelection()
 
   handleLabelEdit: (title) ->
