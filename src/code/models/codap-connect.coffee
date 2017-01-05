@@ -14,8 +14,6 @@ module.exports = class CodapConnect
 
   standaloneMode: false
 
-  stepsInCurrentCase: 0
-
   queue: []
 
   @instances: {} # map of context -> instance
@@ -28,71 +26,139 @@ module.exports = class CodapConnect
     log.info 'CodapConnect: initializing'
     GraphStore = require '../stores/graph-store'
     @graphStore = GraphStore.store
+    @lastTimeSent = @_timeStamp()
+    @sendThrottleMs = 300
 
-    SimulationStore.actions.simulationStarted.listen       @_openNewCase.bind(@)
-    SimulationStore.actions.simulationFramesCreated.listen @_sendSimulationData.bind(@)
+    # Create a new case for each experiment:
+    SimulationStore.actions.createExperiment.listen   @_openNewCase.bind(@)
+
+    SimulationStore.actions.recordingFramesCreated.listen  @_addData.bind(@)
+
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
     CodapActions.sendRedoToCODAP.listen @_sendRedoToCODAP.bind(@)
 
 
     @codapPhone = new IframePhoneRpcEndpoint( @codapRequestHandler,
-      'codap-game', window.parent )
+      'data-interactive', window.parent )
 
-    @codapPhone.call( {
-      action: 'initGame'
-      args:
-        name: @name
-        dimensions:
-          width: 800
-          height: 600
-        collections: [
-          {
-            name: 'Simulation'
-            attrs: [
+    # load any previous data; also check if CODAP's undo is available,
+    # or if we are in standalone mode.
+    @codapPhone.call([
+      {
+        action: 'get',
+        resource: 'interactiveFrame'
+      },
+      {
+        action: 'get',
+        resource: 'dataContext'
+      }
+    ], (ret) =>
+      if ret
+        frame   = ret[0]
+        context = ret[1]
+
+        if frame?.values.externalUndoAvailable
+          CodapActions.hideUndoRedo()
+        else if frame?.values.standaloneUndoModeAvailable
+          @standaloneMode = true
+          @graphStore.setCodapStandaloneMode true
+
+        # We check for game state in either the frame (CODAP API 2.0) or the dataContext
+        # (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
+        state = frame?.values.savedState or
+                context?.values.contextStorage.gameState
+
+        if state?
+          @graphStore.deleteAll()
+          @graphStore.loadData state
+      else
+        log.info "null response in codap-connect codapPhone.call"
+    )
+
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
+    sampleDataAttrs = [
+      {
+        name: timeUnit
+        type: "numeric"
+      }
+    ]
+
+    # check if we already have a datacontext (if we're opening a saved model).
+    # if we don't create one with our collections. Then kick off init
+    @codapPhone.call
+      action: 'get',
+      resource: 'dataContext[Sage Simulation]'
+    , (ret) =>
+      if ret?.success
+        @initGameHandler ret
+      else
+        @codapPhone.call
+          action: 'create',
+          resource: 'dataContext',
+          values: {
+            name: 'Sage Simulation',
+            title: 'Sage Simulation'
+            collections: [ {
+              name: 'Simulation',
+              title: 'Sage Simulation',
+              labels: {
+                singleCase: 'run',
+                pluralCase: 'runs'
+              },
+              attrs: [
+                  {
+                    name: tr '~CODAP.SIMULATION.EXPERIMENT'
+                    type: 'numeric'
+                  }
+                ]
+              },
               {
-                name: tr '~CODAP.SIMULATION.RUN'
-                formula: 'caseIndex'
-                type: 'nominal'
-              }
-              {
-                name: tr '~CODAP.SIMULATION.STEPS'
-                type: 'numeric'
-                formula: 'count(Steps)'
-                description: tr '~CODAP.SIMULATION.STEPS.DESCRIPTION'
-                precision: 0
+                parent: "Simulation",
+                name: 'Samples',
+                title: 'Samples',
+                labels: {
+                  singleCase: 'sample',
+                  pluralCase: 'samples'
+                }
+                attrs: sampleDataAttrs
               }
             ]
           }
-        ]
-        contextType: 'DG.DataContext'
-    }, @initGameHandler)
+        , @initGameHandler
 
-  _openNewCase: (nodeNames) ->
+  _openNewCase: ->
+    @caseOpened = true
+    caseData = {}
+    caseData[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
     @currentCaseID = null
+    collectionAction = @_createCollection()
 
-    @_createCollection(nodeNames)
-
-    @codapPhone.call {
-      action: 'openCase'
-      args: {
-        collection: 'Simulation',
-        values: [null, null]
+    @codapPhone.call([
+      collectionAction,
+      {
+        action: 'create'
+        resource: 'collection[Simulation].case',
+        values: { values: caseData }
       }
-    }, (result) =>
-      if result?.success
-        @currentCaseID = result.caseID
-        @stepsInCurrentCase = 0
-        @_flushQueue()
-        if not @standaloneMode
-          @createTable()
-      else
-        log.info "CODAP returned an error on 'openCase'"
+    ]
+    , (result) =>
+      if result?
+        [collectionResponse, caseResponse] = result
 
-  _createCollection: (nodeNames) ->
+        if caseResponse.success
+          @currentCaseID = caseResponse.values[0].id
+          @_flushQueue()
+          if not @standaloneMode
+            @createTable()
+        else
+          log.info "CODAP returned an error on 'openCase'"
+    )
+
+  _createCollection: ->
     nodes = @graphStore.getNodes()
 
     # First column definition is the time index
-    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
     sampleDataAttrs = [
       {
         name: timeUnit
@@ -106,60 +172,73 @@ module.exports = class CodapConnect
         name: node.title
         type: type
 
-    # Append node names to column descriptions.
-    if (nodeNames)
-      _.each nodeNames, (name) ->
-        node = (nodes.filter (n) -> n.title is name)[0]
-        addSampleDataAttr(node)
+    _.each nodes, (node) ->
+      addSampleDataAttr(node)
+
+    return {
+      action: 'create',
+      resource: 'collection[Samples].attribute',
+      values: sampleDataAttrs
+    }
+
+  _timeStamp: ->
+    new Date().getTime()
+
+  _shouldSend: ->
+    @_openNewCase() unless @caseOpened?
+    return false unless @currentCaseID
+    currentTime = @_timeStamp()
+    elapsedTime = currentTime - @lastTimeSent
+    return elapsedTime > @sendThrottleMs
+
+  _addData: (data) ->
+    @queue = @queue.concat data
+    if @_shouldSend()
+      @_sendSimulationData()
     else
-      _.each nodes, (node) ->
-        addSampleDataAttr(node)
+      setTimeout(
+        => @_sendSimulationData(),
+        @sendThrottleMs
+      )
 
-    @codapPhone.call
-      action: 'createCollection'
-      args:
-        name: 'Samples'
-        attrs: sampleDataAttrs
-
-  _sendSimulationData: (data) ->
-    if not @currentCaseID
-      # openNewCase may not have completed yet, so we queue these up
-      @queue.push data
-      return
+  _sendSimulationData: ->
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
     # Create the sample data values (node values array)
-    sampleData = _.map data, (frame) ->
-      sample     = [frame.time]
-      _.each frame.nodes, (n) -> sample.push n.value
+    sampleData = _.map @queue, (frame) =>
+      sample = {
+        parent: @currentCaseID
+        values: {}
+      }
+      sample.values[timeUnit] = frame.time
+      _.each frame.nodes, (n) -> sample.values[n.title] = n.value
       sample
 
     # Send the data, if any
     if sampleData.length > 0
       @codapPhone.call
-        action: 'createCases'
-        args: {
-          collection: 'Samples',
-          parent: @currentCaseID,
-          values: sampleData
-        }
+        action: 'create',
+        resource: "collection[Samples].case",
+        values: sampleData
+    @lastTimeSent = @_timeStamp()
+    @queue = []
 
-    # Update the parent case with the current number of steps
-#    @stepsInCurrentCase += sampleData.length
-#    @codapPhone.call
-#      action: 'updateCase'
-#      args: {
-#        collection: 'Simulation',
-#        caseID: @currentCaseID
-#        values: [null, @stepsInCurrentCase]
-#      }
 
   _sendUndoToCODAP: ->
     @codapPhone.call
-      action: 'undo'
+      action: 'notify',
+      resource: 'undoChangeNotice'
+      values: {
+        operation: 'undoAction'
+      }
 
   _sendRedoToCODAP: ->
     @codapPhone.call
-      action: 'redo'
+      action: 'notify',
+      resource: 'undoChangeNotice'
+      values: {
+        operation: 'redoAction'
+      }
 
   _flushQueue: ->
     for data in @queue
@@ -168,102 +247,68 @@ module.exports = class CodapConnect
 
   sendUndoableActionPerformed: (logMessage) ->
     @codapPhone.call
-      action: 'undoableActionPerformed'
-      args: {
+      action: 'notify',
+      resource: 'undoChangeNotice'
+      values: {
+        operation: 'undoableActionPerformed',
         logMessage: logMessage
       }
 
   createGraph: (yAttributeName)->
-    timeUnit = TimeUnits.toString SimulationStore.store.settings.stepUnits, true
-    nodes = @graphStore.getNodes()
-
-    # First column definition is the time index
-    sampleDataAttrs = [
-      {
-        name: timeUnit
-        type: "numeric"
-      }
-    ]
-
-    # Append node names to column descriptions.
-    _.each nodes, (node) ->
-      type = if node.valueDefinedSemiQuantitatively then 'qualitative' else 'numeric'
-      sampleDataAttrs.push
-        name: node.title
-        type: type
+    @_createCollection()
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
     @codapPhone.call
-      action: 'createCollection'
-      args:
-        name: 'Samples'
-        attrs: sampleDataAttrs
-
-    @codapPhone.call
-      action: 'createComponent'
-      args: {
-        type: 'DG.GraphView',
+      action: 'create',
+      resource: 'component',
+      values:
+        type: 'graph'
         xAttributeName: timeUnit,
         yAttributeName: yAttributeName,
         size: { width: 242, height: 221 },
         position: 'bottom'
-        log: false
-      }
 
   createTable: (yAttributeName)->
     @codapPhone.call
-      action: 'createComponent'
-      args: {
-        type: 'DG.TableView',
-        log: false
-      }
+      action: 'create',
+      resource: 'component',
+      values:
+        type: 'caseTable'
 
   codapRequestHandler: (cmd, callback) =>
-    operation = cmd.operation
-    args = cmd.args
+    resource = cmd.resource
+    action = cmd.action
+    operation = cmd.values?.operation
     paletteManager = require '../stores/palette-store'
-    switch operation
-      when 'saveState'
-        log.info 'Received saveState request from CODAP.'
-        callback
-          success: true
-          state: @graphStore.serialize paletteManager.store.palette
 
-      when 'restoreState'
-        log.info 'Received restoreState request from CODAP.'
-        @graphStore.deleteAll()
-        @graphStore.loadData args.state
-        callback
-          success: true
-
-      when 'externalUndoAvailable'
-        log.info 'Received externalUndoAvailable request from CODAP.'
-        CodapActions.hideUndoRedo()
-
-      when 'standaloneUndoModeAvailable'
-        log.info 'Received standaloneUndoModeAvailable request from CODAP.'
-        @standaloneMode = true
-        @graphStore.setCodapStandaloneMode true
-
-      when 'undoAction'
-        log.info 'Received undoAction request from CODAP.'
-        successes = @graphStore.undo(true)
-        callback {success: @reduceSuccesses(successes) isnt false}
-
-      when 'redoAction'
-        log.info 'Received redoAction request from CODAP.'
-        successes = @graphStore.redo(true)
-        callback {success: @reduceSuccesses(successes) isnt false}
-
-      when 'clearUndo'
-        log.info 'Received clearUndo request from CODAP.'
-        @graphStore.undoRedoManager.clearHistory()
-
-      when 'clearRedo'
-        log.info 'Received clearRedo request from CODAP.'
-        @graphStore.undoRedoManager.clearRedo()
-
+    switch resource
+      when 'interactiveState'
+        if action is 'get'
+          log.info 'Received saveState request from CODAP.'
+          callback
+            success: true
+            state: @graphStore.serialize paletteManager.store.palette
+      when 'undoChangeNotice'
+        if operation is 'undoAction'
+          log.info 'Received undoAction request from CODAP.'
+          successes = @graphStore.undo(true)
+          callback
+            success: @reduceSuccesses(successes) isnt false
+        if operation is 'redoAction'
+          log.info 'Received redoAction request from CODAP.'
+          successes = @graphStore.redo(true)
+          callback
+            success: @reduceSuccesses(successes) isnt false
+        if operation is 'clearUndo'
+          log.info 'Received clearUndo request from CODAP.'
+          @graphStore.undoRedoManager.clearHistory()
+        if operation is 'clearRedo'
+          log.info 'Received clearRedo request from CODAP.'
+          @graphStore.undoRedoManager.clearRedo()
       else
-        log.info 'Unknown request received from CODAP: ' + operation
+        log.info 'Unknown request received from CODAP: ' + JSON.stringify cmd
+
+
 
   # undo/redo events can return an array of successes
   # this reduces that array to true iff every element is not explicitly false

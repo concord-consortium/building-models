@@ -26,6 +26,7 @@ Relationship   = requireModel 'relationship'
 requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
 
 GraphStore        = requireStore('graph-store').store
+SimulationStore   = requireStore('simulation-store').store
 SimulationActions = requireStore('simulation-store').actions
 
 CodapConnect   = requireModel 'codap-connect'
@@ -40,6 +41,16 @@ LinkNodes = (sourceNode, targetNode, formula) ->
       formula: formula
   sourceNode.addLink(link)
   targetNode.addLink(link)
+
+
+asyncListenTest = (done, action, func) ->
+  stopListening = action.listen (args) ->
+    try
+      func.apply(null, arguments)
+      done()
+    catch ex
+      done(ex)
+    stopListening()
 
 describe "Simulation", ->
   beforeEach ->
@@ -247,8 +258,8 @@ describe "Simulation", ->
 
 describe "The SimulationStore, with a network in the GraphStore", ->
   beforeEach ->
-    sandbox = Sinon.sandbox.create()
-    sandbox.stub(CodapConnect, "instance", ->
+    @sandbox = Sinon.sandbox.create()
+    @sandbox.stub(CodapConnect, "instance", ->
       return {
         sendUndoableActionPerformed: -> return ''
       }
@@ -271,28 +282,20 @@ describe "The SimulationStore, with a network in the GraphStore", ->
   describe "for a fast simulation for 10 iterations", ->
 
     beforeEach ->
-      SimulationActions.resetSimulation.trigger()
-      SimulationActions.setSpeed.trigger(4)
       SimulationActions.setDuration.trigger(10)
+      SimulationActions.expandSimulationPanel.trigger()
 
+    it "should call recordingDidStart with the node names", (done) ->
+      asyncListenTest done, SimulationActions.recordingDidStart, (nodeNames) ->
+        nodeNames.should.eql ["A", "B"]
 
-    it "should call simulationStarted with the node names", (done) ->
-      # calledback is an annoyance to prevent later tests from triggering this
-      # listener again, and raising multiple-done() Mocha error
-      calledback = false
-
-      SimulationActions.simulationStarted.listen (nodeNames) ->
-        if not calledback
-          nodeNames.should.eql ["A", "B"]
-          done()
-        calledback = true
-
-      SimulationActions.runSimulation()
+      SimulationActions.createExperiment()
+      SimulationActions.recordPeriod()
 
     it "should call simulationFramesCreated with all the step values", (done) ->
-      calledback = false
-      SimulationActions.simulationFramesCreated.listen (data) ->
-        if not calledback
+
+      asyncListenTest done, SimulationActions.recordingFramesCreated, (data) ->
+
           data.length.should.equal 10
 
           frame0 = data[0]
@@ -303,29 +306,21 @@ describe "The SimulationStore, with a network in the GraphStore", ->
           frame9.time.should.equal 10
           frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
-          done()
-
-        calledback = true
-
-      SimulationActions.runSimulation()
+      SimulationActions.createExperiment()
+      SimulationActions.recordPeriod()
 
   describe "for a slow simulation for 3 iterations", ->
 
     beforeEach ->
-      SimulationActions.resetSimulation()
       SimulationActions.setDuration.trigger(3)
-      SimulationActions.setSpeed.trigger(3)
+      SimulationActions.expandSimulationPanel.trigger()
+    it "should call simulationFramesCreated with 3 frames", (done) ->
+      testFunction = (data) ->
+        size = data.length
+        size.should.eql(3)
 
-    it "should call simulationFramesCreated several times, with 3 frames total", (done) ->
-      totalCallbacks = 0
-      totalFrames = 0
-      SimulationActions.simulationFramesCreated.listen (data) ->
-        totalCallbacks++
-        totalFrames += data.length
+      asyncListenTest done, SimulationActions.recordingFramesCreated, testFunction
+      SimulationActions.recordPeriod()
 
-      SimulationActions.simulationEnded.listen ->
-        expect(totalFrames).to.equal 3
-        expect(totalCallbacks).to.be.above 1
-        done()
 
-      SimulationActions.runSimulation()
+

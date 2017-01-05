@@ -1,6 +1,7 @@
 {input, div, i, img, span, label} = React.DOM
 tr = require "../utils/translate"
 
+SimulationActions = require("../stores/simulation-store").actions
 SquareImage = React.createFactory require "./square-image-view"
 SliderView  = React.createFactory require "./value-slider-view"
 GraphView   = React.createFactory require "./node-svg-graph-view"
@@ -88,6 +89,7 @@ module.exports = NodeView = React.createClass
 
   getInitialState: ->
     editingNodeTitle: false
+    ignoreDrag: false
 
   handleSelected: (actually_select) ->
     if @props.selectionManager
@@ -108,6 +110,7 @@ module.exports = NodeView = React.createClass
     selected: false
     simulating: false
     value: null
+    dataColor: "#aaa"
     data:
       title: "foo"
       x: 10
@@ -121,6 +124,9 @@ module.exports = NodeView = React.createClass
       domElement: @refs.node
       syntheticEvent: evt
       extra: extra
+
+    # returning false will cancel the drag
+    return !@state.ignoreDrag
 
   doStop: (evt, extra) ->
     @props.onMoveComplete
@@ -163,17 +169,34 @@ module.exports = NodeView = React.createClass
       (input  {type: "text", className: "value", value: value})
     )
 
+  handleSliderDragStart: ->
+    @setState ignoreDrag: true
+
+
+  handleSliderDragEnd: ->
+    @setState ignoreDrag: false
+
   renderSliderView: ->
-    if not @props.data.canEditInitialValue() then return null
-    enabled = not @props.running or @props.data.canEditValueWhileRunning()
+    showHandle = @props.data.canEditInitialValue()
+    value = @props.data.currentValue ? @props.data.initialValue
+    if showHandle
+      value = @props.data.initialValue
+
     (SliderView
-      width: 70
+      orientation: "vertical"
+      filled: true
+      height: 44
+      width: 15
+      showHandle: showHandle
+      showLabels: false
       onValueChange: @changeValue
-      value: @props.data.initialValue
+      value: value
       displaySemiQuant: @props.data.valueDefinedSemiQuantitatively
       max: @props.data.max
       min: @props.data.min
-      enabled: enabled
+      onSliderDragStart: @handleSliderDragStart
+      onSliderDragEnd: @handleSliderDragEnd
+      color: @props.dataColor
     )
 
   handleGraphClick: (attributeName) ->
@@ -198,10 +221,9 @@ module.exports = NodeView = React.createClass
     classes.join " "
 
   nodeSliderClasses: ->
-    classes = ['bottom','centered-block']
     if @props.simulating and @props.data.canEditInitialValue()
-      classes.push 'slider'
-    classes.join " "
+      "slider"
+    else ""
 
   renderNodeInternal: ->
     if @props.showMinigraph
@@ -209,6 +231,7 @@ module.exports = NodeView = React.createClass
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
+        color: @props.dataColor
       })
     else
       (SquareImage {
@@ -225,36 +248,38 @@ module.exports = NodeView = React.createClass
 
     (div { className: @nodeClasses(), ref: "node", style: style},
       (div {className: @linkTargetClasses(), "data-node-key": @props.nodeKey},
-        (div {className: "actions"},
-          (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
-          if @props.selected and @props.showGraphButton
-            (div {
-              className: "graph-source action-circle icon-codap-graph",
-              onClick: (=> @handleGraphClick @props.data.title)
-            })
-        )
-
-        (div {className: @topClasses(), "data-node-key": @props.nodeKey},
-          (div {
-            className: "img-background"
-            onClick: (=> @handleSelected true)
-            onTouchend: (=> @handleSelected true)
-            },
-            @renderNodeInternal()
+        (div {},
+          (div {className: "actions"},
+            (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
+            if @props.showGraphButton
+              (div {
+                className: "graph-source action-circle icon-codap-graph",
+                onClick: (=> @handleGraphClick @props.data.title)
+              })
           )
-          (NodeTitle {
-            isEditing: @props.editTitle
-            title: @props.data.title
-            onChange: @changeTitle
-            onStopEditing: @stopEditing
-            onStartEditing: @startEditing
-          })
+
+          (div {className: @topClasses(), "data-node-key": @props.nodeKey},
+            (div {
+              className: "img-background"
+              onClick: (=> @handleSelected true)
+              onTouchend: (=> @handleSelected true)
+              },
+              @renderNodeInternal()
+            )
+            (NodeTitle {
+              isEditing: @props.editTitle
+              title: @props.data.title
+              onChange: @changeTitle
+              onStopEditing: @stopEditing
+              onStartEditing: @startEditing
+            })
+          )
         )
         (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},
           if @props.simulating
-            (div {className: 'centered-block'},
-              if not @props.data.valueDefinedSemiQuantitatively
-                @renderValue()
+            (div {},
+              # if not @props.data.valueDefinedSemiQuantitatively
+              #   @renderValue()     # not sure if we plan to render value
               @renderSliderView()
             )
         )

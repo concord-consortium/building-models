@@ -1,6 +1,7 @@
 Node             = React.createFactory require './node-view'
 NodeModel        = require '../models/node'
 Importer         = require '../utils/importer'
+Color            = require '../utils/colors'
 DiagramToolkit   = require '../utils/js-plumb-diagram-toolkit'
 dropImageHandler = require '../utils/drop-image-handler'
 tr               = require '../utils/translate'
@@ -10,7 +11,8 @@ ImageDialogStore = require '../stores/image-dialog-store'
 RelationFactory  = require "../models/relation-factory"
 
 SimulationStore  = require "../stores/simulation-store"
-AppSettingsStore  = require "../stores/app-settings-store"
+AppSettingsStore = require "../stores/app-settings-store"
+CodapStore       = require "../stores/codap-store"
 LinkColors       = require "../utils/link-colors"
 
 {div} = React.DOM
@@ -18,7 +20,7 @@ LinkColors       = require "../utils/link-colors"
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin ]
 
   getDefaultProps: ->
     linkTarget: '.link-top'
@@ -108,11 +110,14 @@ module.exports = React.createClass
     editingLink: null
     canDrop: false
 
-  componentWillUpdate: ->
-    @diagramToolkit?.clear?()
-
-  componentDidUpdate: ->
-    @_updateToolkit()
+  componentDidUpdate: (prevProps, prevState) ->
+    if (prevState.description.links != @state.description.links) or
+        (prevState.simulationPanelExpanded != @state.simulationPanelExpanded) or
+        (prevState.selectedLink != @state.selectedLink) or
+        @forceRedrawLinks
+      @diagramToolkit?.clear?()
+      @_updateToolkit()
+      @forceRedrawLinks = false
 
   handleEvent: (handler) ->
     if @ignoringEvents
@@ -135,7 +140,8 @@ module.exports = React.createClass
       GraphStore.store.removeNode node_event.nodeKey
 
   handleConnect: (info, evnt) ->
-    @handleEvent ->
+    @handleEvent =>
+      @forceRedrawLinks = true
       GraphStore.store.newLinkFromEvent info, evnt
 
   handleLinkClick: (connection, evnt) ->
@@ -250,12 +256,17 @@ module.exports = React.createClass
     @props.selectionManager.clearSelection()
 
   render: ->
+    dataColor = Color.colors.lightGray.value
+    if @state.isRecording
+      dataColor = Color.colors.data.value
+
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container', onClick: @onContainerClicked},
         for node in @state.nodes
           (Node {
             key: node.key
             data: node
+            dataColor: dataColor
             selected: @state.selectedNode is node
             simulating: @state.simulationPanelExpanded
             running: @state.modelIsRunning
@@ -268,7 +279,7 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
             showMinigraph: @state.showingMinigraphs
-            showGraphButton: @props.graphStore.codapStandaloneMode and not @state.diagramOnly
+            showGraphButton: @state.codapHasLoaded and not @state.diagramOnly
           })
       )
     )

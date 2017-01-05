@@ -1,6 +1,6 @@
 {div} = React.DOM
 tr = require '../utils/translate'
-Colors = require '../utils/colors'
+Color = require '../utils/colors'
 
 ColorChoice = React.createFactory React.createClass
   displayName: 'ColorChoice'
@@ -42,6 +42,6 @@ module.exports = React.createClass
 
   render: ->
     (div {className: @className(), onClick: @toggleOpen},
-      for color in Colors
+      for color in Color.choices
         (ColorChoice {key: color.name, color: color, selected: @props.selected, onChange: @select})
     )

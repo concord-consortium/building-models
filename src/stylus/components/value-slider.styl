@@ -1,8 +1,9 @@
+gray-fill   = #dbdbea
+
 .value-slider
   position relative
   margin 1em
   .slider-line
-    stroke black
     fill none
 
   .slider-shape
@@ -11,6 +12,7 @@
   .svg-background
     position relative
   .value-slider-handle
+    z-index 2
     cursor pointer
     position absolute
     box-sizing border-box
@@ -63,14 +65,46 @@
     input
       width 100px
 
-  &.disabled
-    .slider-line
-      stroke #CCC
-    .slider-shape
-      fill #CCC
+  &.vertical
+    .legend
+      top -4%
+      height 110%
+      display flex
+      flex-direction column
 
     .value-slider-handle
       cursor not-allowed
       background-color #DDD
     .legend
       color rgba(1, 136, 158, 0.42)
+
+  &.filled
+    .value-slider-handle
+      background-color codap-orange
+
+    .value-slider-handle:before
+      content ""
+      position absolute
+      right 100%
+      top 3px
+      width 0
+      height 2px
+      border-top 3px solid transparent
+      border-right 6px solid codap-orange
+      border-bottom 3px solid transparent
+
+    .slider-line
+      fill none
+      stroke-width 8
+      stroke-linecap round
+
+      &.fill-line
+        stroke-linecap butt
+
+        &.cap
+          stroke-linecap round
+
+// handle icon
+.rotated {
+  writing-mode: vertical-rl;
+}

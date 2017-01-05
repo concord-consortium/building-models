@@ -1,12 +1,20 @@
 SimulationStore = require '../stores/simulation-store'
 tr              = require '../utils/translate'
-{div, span, i}  = React.DOM
+RecordButton    = React.createFactory require './record-button-view'
+Dropdown        = React.createFactory require './dropdown-view'
+ExperimentPanel = React.createFactory require './experiment-panel-view'
+
+{div, span, i, input}  = React.DOM
 
 module.exports = React.createClass
 
   displayName: 'SimulationRunPanel'
 
   mixins: [ SimulationStore.mixin ]
+
+
+  setDuration: (e) ->
+    SimulationStore.actions.setDuration parseInt e.target.value
 
   toggle: ->
     if @state.simulationPanelExpanded
@@ -23,30 +31,100 @@ module.exports = React.createClass
 
   renderControls: ->
     wrapperClasses = "buttons flow"
-    if @state.simulationPanelExpanded then wrapperClasses += " expanded"
-
-    runButtonClasses = "button"
-    if not @state.modelIsRunnable then runButtonClasses += " disabled error"
-    if not @state.modelReadyToRun then runButtonClasses += " disabled"
-
-    resetButtonClasses = "button"
-    if @state.modelReadyToRun then resetButtonClasses += " disabled"
-
+    if !@state.simulationPanelExpanded then wrapperClasses += " closed"
+    disabled = (@state.isRecording && !@state.isRecordingOne) || !@state.modelIsRunnable
+    experimentDisabled = !@state.modelIsRunnable || @state.isRecordingPeriod
     (div {className: wrapperClasses},
-      (div {className: runButtonClasses, onClick: SimulationStore.actions.runSimulation},
-        tr "~DOCUMENT.ACTIONS.RUN"
-        (i {className: "icon-codap-play"})
-      )
-      (div {className: resetButtonClasses, onClick: SimulationStore.actions.resetSimulation},
-        (i {className: "icon-codap-controlsReset"})
-      )
-      (div {className: "button disabled"},
-        (i {className: "icon-codap-controlsForward"})
-      )
-      (div {className: "button disabled"},
-        (i {className: "icon-codap-graph"})
+      (div {className: "vertical" },
+        (ExperimentPanel {disabled: experimentDisabled})
+        if @state.graphHasCollector
+          @renderRecordForCollectors()
+        else
+          (div {className: "horizontal"},
+            (RecordButton
+              onClick: SimulationStore.actions.recordOne
+              disabled: disabled
+              ,
+              (div {className: "horizontal"},
+                (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
+                (i className: "icon-codap-camera")
+              )
+              (div {className: "horizontal"},
+                (span {}, tr "~DOCUMENT.ACTIONS.DATA.POINT")
+              )
+            )
+            @renderRecordStreamButton()
+          )
       )
     )
+
+
+  renderRecordForCollectors: ->
+    recordAction = SimulationStore.actions.recordPeriod
+    if @state.isRecording
+      recordAction = ->
+
+    props =
+      onClick: recordAction
+      includeLight: false
+      recording: @state.isRecording
+      disabled: !@state.modelIsRunnable
+    (div {className:'horizontal'},
+      (RecordButton props,
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD")
+          (i {className: "icon-codap-video-camera"})
+        )
+      )
+      (input {
+        type: "number"
+        min: 1
+        max: 1000
+        style:
+          width: "#{Math.max 3, (@state.duration.toString().length+1)}em"
+        value: @state.duration
+        onChange: @setDuration
+      })
+      (Dropdown
+        isActionMenu: false
+        onSelect: SimulationStore.actions.setStepUnits
+        anchor: @state.stepUnitsName
+        items: @state.timeUnitOptions
+      )
+    )
+
+
+  renderRecordStreamButton: ->
+    recordAction = SimulationStore.actions.recordStream
+    if @state.isRecording
+      recordAction = SimulationStore.actions.stopRecording
+
+    props =
+      onClick: recordAction
+      includeLight: true
+      recording: @state.isRecordingStream
+      disabled: !@state.modelIsRunnable || @state.isRecordingOne
+
+    if @state.isRecording
+      (RecordButton props,
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.STOP")
+          (i {className: "icon-codap-video-camera"})
+        )
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORDING")
+        )
+      )
+    else
+      (RecordButton props,
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD")
+          (i {className: "icon-codap-video-camera"})
+        )
+        (div {className: 'horizontal'},
+          (span {}, tr "~DOCUMENT.ACTIONS.DATA.STREAM")
+        )
+      )
 
   render: ->
     (div {className: "simulation-run-panel"},

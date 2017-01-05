@@ -1,5 +1,22 @@
-language: node_js
+language:
+  - node_js
+  - ruby
+
+rvm:
+  - 2.2.0
+
 node_js:
   - "0.10"
-script: "travis_retry npm test"
+
 sudo: false
+
+install:
+  - travis_retry gem install s3_website -v 2.12.3
+  - travis_retry npm install
+script:
+  - "travis_retry npm test"
+  - ./s3_deploy.sh
+cache:
+  bundler: true
+  directories:
+    - node_modules

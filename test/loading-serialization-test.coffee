@@ -62,7 +62,7 @@ describe "Serialization and Loading", ->
       @graphStore = GraphStore.store
       @graphStore.init()
 
-      @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo"}, 'a')
+      @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo", frames:[] }, 'a')
       @nodeB = new Node({title: "b", x:20, y:25, paletteItem:"uuid-bee", frames: [50]}, 'b')
       @linkA = new Link({
         sourceNode: @nodeA
@@ -93,7 +93,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.15.0"
+        model.version.should.equal "1.16.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 2
 
@@ -154,13 +154,11 @@ describe "Serialization and Loading", ->
       it "should be able to serialize the simulation settings", ->
         SimulationStore.store.settings.duration = 15
         SimulationStore.store.settings.stepUnits = "SECOND"
-        SimulationStore.store.settings.speed = 3
         SimulationStore.store.settings.capNodeValues = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
         model.settings.simulation.duration.should.equal 15
         model.settings.simulation.stepUnits.should.equal "SECOND"
-        model.settings.simulation.speed.should.equal 3
         model.settings.simulation.capNodeValues.should.equal true
 
   describe "loadData", ->

@@ -1,4 +1,4 @@
-inspector-panel-top = 225px
+inspector-panel-top = 70px
 inspector-panel-tab-width = 50px
 inspector-panel-tab-height = 195px
 inspector-panel-inner-width = 275px
@@ -15,6 +15,7 @@ inspector-panel-inner-height = 500px
     transition 0.2s
 
     .tool-panel
+      background-color transparent
       .tool-button
         box-sizing border-box
         padding 5px
@@ -23,26 +24,27 @@ inspector-panel-inner-height = 500px
         text-align center
         overflow hidden
         color white
-        text-shadow: 1px 1px hsla(0,0,50,0.5)
+        text-shadow: 1px 1px 1px hsla(0,0,10,0.7)
+        box-shadow: -2px 0px 2px hsla(0,0,50,0.5)
         border-radius 5px
         &:hover
-          background-color green-blue
+          background-color button-hover
         &.selected
           background-color dark-blue
+          text-shadow: 1px 1px 1px hsla(0,0,0,0.9)
         &.disabled
-          background-color tint(light-blue, 20%)
-          opacity 0.5
+          background-color button-disabled
+          color button-disabled-text
+          text-shadow: 1px 1px 1px hsla(0,0,50,0.5)
           &:hover
             cursor default
 
       position absolute
-      background-color light-blue
       top: inspector-panel-top
       width: inspector-panel-tab-width
       right: 0px
       cursor pointer
       border-radius 5px
-      box-shadow: -2px 0px 2px hsla(0,0,50,0.5)
       z-index 5
 
   .inspector-panel-content
@@ -51,9 +53,9 @@ inspector-panel-inner-height = 500px
       top inspector-panel-top
       right 0
       background-color bbgray
-      border-radius 5px
+      border-radius 0 0 5px 5px
       transition 0.2s
-      box-shadow -1px 0px 2px hsla(0,0,50,0.3)
+      box-shadow -1px 2px 2px hsla(0,0,50,0.3)
       z-index 2
       padding-right 50px
       // overflow hidden

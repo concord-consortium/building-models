@@ -37,7 +37,6 @@ module.exports =
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable"
 
   # views/relation-inspector-view.coffee
-  "~NODE-RELATION-EDIT.DEFINING_WITH_WORDS": "You are defining relationships with graphs. Switch to define with equations."
   "~NODE-RELATION-EDIT.UNSELECTED": "Select an option..."
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in"
   "~NODE-RELATION-EDIT.CAUSES": "causes"
@@ -87,11 +86,9 @@ module.exports =
   # views/image-browser-view.coffee
   "~IMAGE-BROWSER.PREVIEW": "Preview Your Image"
   "~IMAGE-BROWSER.ADD_IMAGE": "Add Image"
-  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images"
+  "~IMAGE-BROWSER.SEARCH_HEADER": "Search for more images"
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found."
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below."
-  "~IMAGE-BROWSER.LIBRARY_HEADER": "Internal Library Images"
-  "~IMAGE-BROWSER.NO_INTERNAL_FOUND": "No internal library results found for \"%{query}.\""
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}\"%{query}\""
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for \"%{query}.\""
   "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for \"%{query}.\" "
@@ -111,6 +108,9 @@ module.exports =
   "~COLOR.DARK_BLUE": "Dark Blue"
   "~COLOR.LIGHT_BLUE": "Light Blue"
   "~COLOR.MED_BLUE": "Blue"
+  "~COLOR.DARK_GRAY": "Dark Gray"
+  "~COLOR.LIGHT_GRAY": "Light Gray"
+  "~COLOR.DATA": "Codap Orange"
 
   # google-file-interface
   "~FILE.CHECKING_AUTH": "Checking authorization..."
@@ -124,6 +124,12 @@ module.exports =
 
   "~DOCUMENT.ACTIONS.SIMULATE": "Simulate"
   "~DOCUMENT.ACTIONS.RUN": "Run"
+  "~DOCUMENT.ACTIONS.DATA.RECORD-1": "Record 1"
+  "~DOCUMENT.ACTIONS.DATA.POINT": "Data Point"
+  "~DOCUMENT.ACTIONS.DATA.RECORD": "Record"
+  "~DOCUMENT.ACTIONS.DATA.STREAM": "Data Stream"
+  "~DOCUMENT.ACTIONS.DATA.STOP": "Stop"
+  "~DOCUMENT.ACTIONS.DATA.RECORDING": "Recording"
   "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Save to graphs"
   "~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS": "Show mini-graphs"
   "~DOCUMENT.ACTIONS.QUICK_TEST": "Quick-test mode"
@@ -147,6 +153,7 @@ module.exports =
   "~RELATIONSHIP.NO_RELATION": "No relation defined"
 
   "~CODAP.SIMULATION.RUN": "run"
+  "~CODAP.SIMULATION.EXPERIMENT": "Exp.#"
   "~CODAP.SIMULATION.STEPS": "steps"
   "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation."
 

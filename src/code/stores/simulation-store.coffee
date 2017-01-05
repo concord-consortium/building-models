@@ -10,16 +10,23 @@ SimulationActions = Reflux.createActions(
     "expandSimulationPanel"
     "collapseSimulationPanel"
     "runSimulation"
-    "resetSimulation"
     "setDuration"
     "setStepUnits"
-    "setSpeed"
     "simulationStarted"
     "simulationFramesCreated"
+    "recordingFramesCreated"
     "simulationEnded"
     "capNodeValues"
+    "recordStream"
+    "recordOne"
+    "recordPeriod"
+    "stopRecording"
+    "recordingDidStart"
+    "recordingDidEnd"
+    "createExperiment"
   ]
 )
+SimulationActions.runSimulation = Reflux.createAction({sync: true})
 
 SimulationStore   = Reflux.createStore
   listenables: [
@@ -28,23 +35,32 @@ SimulationStore   = Reflux.createStore
 
   init: ->
     defaultUnit = TimeUnits.defaultUnit
-    unitName    = TimeUnits.toString defaultUnit
-    options = ({name: TimeUnits.toString(unit, false), unit: unit} for unit in TimeUnits.units)
+    unitName    = TimeUnits.toString(defaultUnit,true)
+    defaultDuration = 50
+    timeUnitOptions = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
 
     @nodes = []
     @currentSimulation = null
+    @experimentFrameIndex = 0
 
     @settings =
       simulationPanelExpanded: false
-      duration: 10
+      duration: defaultDuration
+      experimentNumber: 1
       stepUnits: defaultUnit
       stepUnitsName: unitName
-      timeUnitOptions: options
-      speed: 4
+      timeUnitOptions: timeUnitOptions
       capNodeValues: false
-      modelIsRunning: false         # currently running?
-      modelReadyToRun: true         # has been reset?
-      modelIsRunnable: true         # is the model valid?
+      modelIsRunning: false
+      modelIsRunnable: false
+      graphHasCollector: false
+      isRecording: false            # sending data to codap?
+      isRecordingOne: false         # record-1 pressed?
+      isRecordingStream: false      # record stream pressed?
+      isRecordingPeriod: false      # record n units' pressed?
+
+    @_updateModelIsRunnable()
+    @_updateGraphHasCollector()
 
   # From AppSettingsStore actions
   onDiagramOnly: ->
@@ -52,88 +68,160 @@ SimulationStore   = Reflux.createStore
 
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
+    @settings.modelIsRunning = true
+    @_updateModelIsRunnable()
     @notifyChange()
 
   onCollapseSimulationPanel: ->
     @settings.simulationPanelExpanded = false
+    @settings.modelIsRunning = false
+    @_stopRecording()
     @notifyChange()
 
   onGraphChanged: (data)->
     @nodes = data.nodes
-    @settings.modelIsRunnable = @_checkModelIsRunnable()
+    @_updateModelIsRunnable()
+    @settings.graphHasCollector = @_updateGraphHasCollector()
     @notifyChange()
+
+  _updateUnitNames: ->
+    pluralize = @settings.duration isnt 1
+    @settings.timeUnitOptions = ({name: TimeUnits.toString(unit, pluralize), unit: unit} for unit in TimeUnits.units)
+    @settings.stepUnitsName = TimeUnits.toString(@settings.stepUnits, pluralize)
+
 
   onSetDuration: (n) ->
     @settings.duration = Math.max 1, Math.min n, 5000
+    @_updateUnitNames()
     @notifyChange()
 
   onSetStepUnits: (unit) ->
     @settings.stepUnits = unit.unit
-    @settings.stepUnitsName = TimeUnits.toString @settings.stepUnits, false
+    @_updateUnitNames()
     @notifyChange()
 
   onImport: (data) ->
     _.merge @settings, data.settings.simulation
     @notifyChange()
 
-  onSetSpeed: (s) ->
-    @settings.speed = s
-    if @currentSimulation
-      @currentSimulation.setSpeed s
-    @notifyChange()
 
   onCapNodeValues: (cap) ->
     @settings.capNodeValues = cap
     @notifyChange()
 
   onRunSimulation: ->
-    if @settings.modelIsRunnable and @settings.modelReadyToRun
+    @_runSimulation()
+
+  stepUnits: ->
+    if @settings.graphHasCollector
+      @settings.stepUnits
+    else
+      TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
+
+  _runSimulation: ()->
+    if @settings.modelIsRunnable
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
+      @settings.modelIsRunning = true
+      duration = 1
+      if @settings.graphHasCollector || @settings.isRecordingPeriod
+        duration = @settings.duration
       @notifyChange()
       @currentSimulation = new Simulation
         nodes: @nodes
-        duration: @settings.duration
-        speed: @settings.speed
+        duration: duration
         capNodeValues: @settings.capNodeValues
-
 
         # Simulation events get triggered as Actions here, and are
         # available to anyone who listens to this store
-        onStart: (nodeNames) ->
-          SimulationActions.simulationStarted(nodeNames)
-        onFrames: (frames) ->
+        onFrames: (frames) =>
           SimulationActions.simulationFramesCreated(frames)
+          if @settings.isRecording
+            framesNoTime = _.map frames, (frame) =>
+              @experimentFrameIndex++
+              frame.time = @experimentFrameIndex
+              return frame
+            SimulationActions.recordingFramesCreated(framesNoTime)
+
+        onStart: (nodeNames) =>
+          SimulationActions.simulationStarted(nodeNames)
+          if @settings.isRecording
+            SimulationActions.recordingDidStart(nodeNames)
+
         onEnd: ->
           SimulationActions.simulationEnded()
 
       @currentSimulation.run()
 
-    else if not @settings.modelIsRunnable
-      error = @_getErrorMessage()
-      alert error
 
   onSimulationStarted: ->
-    @settings.modelIsRunning = true
-    @settings.modelReadyToRun = false
     @notifyChange()
 
   onSimulationEnded: ->
     @settings.modelIsRunning = false
-    @currentSimulation = null
     @notifyChange()
 
-  onResetSimulation: ->
-    if @settings.modelIsRunning and @currentSimulation
-      @currentSimulation.stop()
-    @settings.modelReadyToRun = true
+  _startRecording: ->
+    @settings.isRecording = true
+
+  _stopRecording: ->
+    @settings.isRecording = false
+    @settings.isRecordingOne = false
+    @settings.isRecordingStream = false
+    @settings.isRecordingPeriod = false
+    SimulationActions.recordingDidEnd()
+
+  onCreateExperiment: ->
+    @experimentFrameIndex = 0
+    @settings.experimentNumber++
     @notifyChange()
 
-  _checkModelIsRunnable: ->
+  onStopRecording: ->
+    @_stopRecording()
+    @notifyChange()
+
+  onRecordOne: ->
+    @_startRecording()
+    @settings.isRecordingOne = true
+    @_runSimulation()
+    stopRecording = ->
+      SimulationActions.stopRecording()
+    @timeout = setTimeout(stopRecording, 500)
+    @notifyChange()
+
+  onRecordStream: ->
+    @_startRecording()
+    @settings.isRecordingStream = true
+    @notifyChange()
+
+  onRecordPeriod: ->
+    @_startRecording()
+    @settings.isRecordingPeriod = true
+    @_runSimulation()
+    stopRecording = ->
+      SimulationActions.stopRecording()
+    @timeout = setTimeout(stopRecording, 500)
+    @notifyChange()
+
+  _isModelRunnable: ->
+    return false unless @settings.simulationPanelExpanded
     for node in @nodes
       for link in node.links
-        if link.relation.isDefined then return true
-    false
+        return true if link.relation.isDefined
+    return false
+
+  _updateModelIsRunnable: ->
+    @settings.modelIsRunnable = @_isModelRunnable()
+
+  _findCollectors: ->
+    for node in @nodes
+      if node.isAccumulator then return true
+    return false
+
+  _updateGraphHasCollector: ->
+    hasCollectors = @_findCollectors()
+    @_stopRecording() if hasCollectors isnt @settings.graphHasCollector
+    @settings.graphHasCollector = hasCollectors
 
   _getErrorMessage: ->
     # we just have the one error state right now
@@ -149,7 +237,6 @@ SimulationStore   = Reflux.createStore
   serialize: ->
     duration:       @settings.duration
     stepUnits:      @settings.stepUnits
-    speed:          @settings.speed
     capNodeValues:  @settings.capNodeValues
 
 mixin =

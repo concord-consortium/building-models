@@ -7,15 +7,16 @@ module.exports = NodeSvgGraphView = React.createClass
   mixins: [ SimulationStore.mixin ]
 
   getDefaultProps: ->
-    width: 46
-    height: 46
+    width: 48
+    height: 48
     strokeWidth: 3
     min: 0
     max: 100
     data: []
+    color: '#aaa'
 
   invertPoint: (point) ->
-    {x: point.x, y: @props.height - point.y}
+    {x: @props.width - point.x, y: @props.height - point.y}
 
   graphMapPoint: (point) ->
     x = point.x * @props.width
@@ -30,16 +31,16 @@ module.exports = NodeSvgGraphView = React.createClass
     "M #{data}"
 
   getPathPoints: ->
-    max = @props.max
-    min = @props.min
-
+    max  = @props.max
+    min  = @props.min
     data = @props.data
+
+    rangex = @state.duration - 1
+    data = _.takeRight(data, rangex).reverse()
 
     for point in data
       if point > max then max = point
       if point < min then min = point
-
-    rangex = @state.duration - 1
     rangey = max - min
 
     data = _.map data, (d, i) ->
@@ -50,7 +51,7 @@ module.exports = NodeSvgGraphView = React.createClass
 
   renderLineData: ->
     data = @pointsToPath(@getPathPoints())
-    (path {d: data, strokeWidth: @props.strokeWidth, stroke: "#a1d083", fill: "none"})
+    (path {d: data, strokeWidth: @props.strokeWidth, stroke: @props.color, fill: "none"})
 
   render: ->
     (div {},

@@ -3,6 +3,7 @@
 RelationFactory = require "../models/relation-factory"
 SvgGraph        = React.createFactory require "./svg-graph-view"
 tr              = require "../utils/translate"
+autosize        = require "autosize"
 
 Graph = React.createFactory React.createClass
   render: ->
@@ -18,10 +19,9 @@ Graph = React.createFactory React.createClass
 QuantStart = React.createFactory React.createClass
   render: ->
     start = tr "~NODE-RELATION-EDIT.SEMI_QUANT_START"
-    (div {},
+    (div {style: {width: "95%"}},
       (span {}, "#{tr "~NODE-RELATION-EDIT.AN_INCREASE_IN"} ")
       (span {className: "source"}, @props.source)
-      (br {})
       (span {}, " #{tr "~NODE-RELATION-EDIT.CAUSES"} ")
       (span {className: "target"}, @props.target)
     )
@@ -49,6 +49,9 @@ module.exports = LinkRelationView = React.createClass
       selectedVector = RelationFactory.vary
       selectedScalar = RelationFactory.custom
       @setState {selectedVector, selectedScalar}
+
+  componentDidMount: ->
+    autosize(@refs.reasoning)
 
   componentWillReceiveProps: (newProps) ->
     if @props.link isnt newProps.link
@@ -138,24 +141,24 @@ module.exports = LinkRelationView = React.createClass
     else
       currentOption = scalarSelection.id
 
-    disabled = "disabled" unless @state.selectedVector or scalarSelection?
-    if @state.selectedVector
-      if @state.selectedVector.isCustomRelationship
-        (div {className: "bb-select"},
-          (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM"}")
+    # place dropdown but hide it if we haven't selected vector (to keep spacing)
+    style = if @state.selectedVector then {} else {opacity: 0}
+
+    if @state.selectedVector?.isCustomRelationship
+      (div {className: "bb-select", style: style},
+        (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM"}")
+      )
+    else
+      (div {className: "bb-select", style: style},
+        (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
+        (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation},
+          options
         )
-      else
-        (div {className: "bb-select"},
-          (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-          (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation, disabled: disabled},
-            options
-          )
-        )
+      )
 
   render: ->
     source = @props.link.sourceNode.title
     target = @props.link.targetNode.title
-    formula = @props.link.relation.formula
 
     (div {className: 'link-relation-view'},
       (div {className: 'top'},

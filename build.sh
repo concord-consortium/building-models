@@ -62,6 +62,7 @@ ENVIRONMENT=$DEPLOY_ENV gulp build-all --production --buildInfo "$SHA | $DATE" &
 # 5a) Either Deploy Production to S3,
 if [[ $DEPLOY_ENV =~ "pro" ]]
 then
+  mv dist _site
   echo
   echo Deploying to S3
   echo
