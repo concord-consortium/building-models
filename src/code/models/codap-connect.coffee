@@ -137,7 +137,7 @@ module.exports = class CodapConnect
       collectionAction,
       {
         action: 'create'
-        resource: 'collection[Simulation].case',
+        resource: 'dataContext[Sage Simulation].collection[Simulation].case',
         values: { values: caseData }
       }
     ]
@@ -177,7 +177,7 @@ module.exports = class CodapConnect
 
     return {
       action: 'create',
-      resource: 'collection[Samples].attribute',
+      resource: 'dataContext[Sage Simulation].collection[Samples].attribute',
       values: sampleDataAttrs
     }
 
@@ -218,7 +218,7 @@ module.exports = class CodapConnect
     if sampleData.length > 0
       @codapPhone.call
         action: 'create',
-        resource: "collection[Samples].case",
+        resource: "dataContext[Sage Simulation].collection[Samples].case",
         values: sampleData
     @lastTimeSent = @_timeStamp()
     @queue = []
