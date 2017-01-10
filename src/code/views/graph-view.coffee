@@ -172,10 +172,6 @@ module.exports = React.createClass
       GraphStore.store.newLinkFromEvent info, evnt
 
   handleLinkClick: (connection, evt) ->
-    @handleEvent ->
-      GraphStore.store.clickLink connection.linkModel, 
-
-  handleLinkClick: (connection, evt) ->
     @handleEvent =>
       multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
       @forceRedrawLinks = true
