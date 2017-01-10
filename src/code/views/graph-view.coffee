@@ -173,11 +173,17 @@ module.exports = React.createClass
 
   handleLinkClick: (connection, evt) ->
     @handleEvent ->
+      GraphStore.store.clickLink connection.linkModel, 
+
+  handleLinkClick: (connection, evt) ->
+    @handleEvent =>
       multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
+      @forceRedrawLinks = true
       GraphStore.store.clickLink connection.linkModel, multipleSelections
 
   handleLinkEditClick: (connection, evnt) ->
-    @handleEvent ->
+    @handleEvent =>
+      @forceRedrawLinks = true
       GraphStore.store.editLink connection.linkModel
 
   _updateNodeValue: (name, key, value) ->
@@ -277,6 +283,7 @@ module.exports = React.createClass
   onMouseDown: (e) ->
     if e.target is @refs.container
       # deselect links when background is clicked
+      @forceRedrawLinks = true
       @props.selectionManager.clearSelection()
       selectBox = $.extend({}, @state.selectBox)
       offset = $(@refs.linkView).offset()
