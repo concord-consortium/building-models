@@ -294,16 +294,14 @@ module.exports = React.createClass
      # end of drawing Marquee, check what is selected
         @checkSelectBoxCollisions()
         @setState drawingMarquee: false
-    if e.target is @refs.selectionBox
-      if @state.drawingMarquee
+    if @state.drawingMarquee
     # end of drawing Marquee, check what is selected
-        @checkSelectBoxCollisions()
-        @checkSelectBoxLinkCollisions()
-        @setState drawingMarquee: false
+      @checkSelectBoxCollisions()
+      @checkSelectBoxLinkCollisions()
+      @setState drawingMarquee: false
 
   onMouseMove: (e) ->
-    if e.target is @refs.container and @state.drawingMarquee
-      # draw square when in drawingMarquee mode.
+    if @state.drawingMarquee
       offset = $(@refs.linkView).offset()
       selectBox = $.extend({}, @state.selectBox)
       selectBox.x = e.pageX - offset.left
@@ -326,17 +324,22 @@ module.exports = React.createClass
   # Function uses Liang-Barsky algorithm described at https://gist.github.com/ChickenProp/3194723
   checkBoxLinkCollision: (link) ->
     selectBox = @state.selectBox
-    nodeWidth = 45 # Width of node in px
-    nodeHeight = 45 # Height of node in px
+    connection = link.jsPlumbConnection
+
+    # Marquee selectBox
     sX = Math.min(selectBox.startX, selectBox.x)
     sY = Math.min(selectBox.startY, selectBox.y)
     x = Math.max(selectBox.startX, selectBox.x)
     y = Math.max(selectBox.startY, selectBox.y)
 
-    x0 = Math.min(link.sourceNode.x, link.targetNode.x)
-    y0 = Math.min(link.sourceNode.y, link.targetNode.y)
-    x1 = Math.max(link.sourceNode.x, link.targetNode.x) + nodeWidth
-    y1 = Math.max(link.sourceNode.y, link.targetNode.y) + nodeHeight
+    # Link endpoints
+    origin = connection.endpoints[0].endpoint
+    destination = connection.endpoints[1].endpoint
+
+    x0 = origin.x
+    y0 = origin.y
+    x1 = destination.x
+    y1 = destination.y
 
     p = [x0-x1, x1-x0,  y0-y1, y1-y0]
     q = [x0-sX, x-x0, y0 - sY, y-y0]

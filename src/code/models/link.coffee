@@ -18,6 +18,7 @@ module.exports = class Link extends GraphPrimitive
     } = @options
     @relation = @_makeRelation @options.relation
     @reasoning = @options.reasoning or ""
+    @jsPlumbConnection = null # place to keep underlaying connection
     super()
 
   type: 'Link'
