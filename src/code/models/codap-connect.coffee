@@ -6,16 +6,6 @@ TimeUnits       = require '../utils/time-units'
 
 module.exports = class CodapConnect
 
-  name: 'SageModeler'
-
-  codapPhone: null
-
-  currentCaseID: null
-
-  standaloneMode: false
-
-  queue: []
-
   @instances: {} # map of context -> instance
 
   @instance: (context) ->
@@ -25,14 +15,13 @@ module.exports = class CodapConnect
   constructor: (context) ->
     log.info 'CodapConnect: initializing'
     GraphStore = require '../stores/graph-store'
+    @standaloneMode = false
+    @queue = []
     @graphStore = GraphStore.store
     @lastTimeSent = @_timeStamp()
     @sendThrottleMs = 300
 
-    # Create a new case for each experiment:
-    SimulationStore.actions.createExperiment.listen   @_openNewCase.bind(@)
-
-    SimulationStore.actions.recordingFramesCreated.listen  @_addData.bind(@)
+    SimulationStore.actions.recordingFramesCreated.listen  @addData.bind(@)
 
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
     CodapActions.sendRedoToCODAP.listen @_sendRedoToCODAP.bind(@)
@@ -66,7 +55,7 @@ module.exports = class CodapConnect
         # We check for game state in either the frame (CODAP API 2.0) or the dataContext
         # (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
         state = frame?.values.savedState or
-                context?.values.contextStorage.gameState
+                context?.values.contextStorage?.gameState
 
         if state?
           @graphStore.deleteAll()
@@ -75,13 +64,6 @@ module.exports = class CodapConnect
         log.info "null response in codap-connect codapPhone.call"
     )
 
-    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
-    sampleDataAttrs = [
-      {
-        name: timeUnit
-        type: "numeric"
-      }
-    ]
 
     # check if we already have a datacontext (if we're opening a saved model).
     # if we don't create one with our collections. Then kick off init
@@ -92,69 +74,45 @@ module.exports = class CodapConnect
       if ret?.success
         @initGameHandler ret
       else
-        @codapPhone.call
-          action: 'create',
-          resource: 'dataContext',
-          values: {
-            name: 'Sage Simulation',
-            title: 'Sage Simulation'
-            collections: [ {
-              name: 'Simulation',
-              title: 'Sage Simulation',
-              labels: {
-                singleCase: 'run',
-                pluralCase: 'runs'
-              },
-              attrs: [
-                  {
-                    name: tr '~CODAP.SIMULATION.EXPERIMENT'
-                    type: 'numeric'
-                  }
-                ]
-              },
-              {
-                parent: "Simulation",
-                name: 'Samples',
-                title: 'Samples',
-                labels: {
-                  singleCase: 'sample',
-                  pluralCase: 'samples'
-                }
-                attrs: sampleDataAttrs
-              }
-            ]
-          }
-        , @initGameHandler
+        @_createDataContext()
 
-  _openNewCase: ->
-    @caseOpened = true
-    caseData = {}
-    caseData[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
-    @currentCaseID = null
-    collectionAction = @_createCollection()
 
-    @codapPhone.call([
-      collectionAction,
-      {
+  _createDataContext: ->
+    sampleDataAttrs = @_getSampleAttributes()
+    message =
         action: 'create'
-        resource: 'dataContext[Sage Simulation].collection[Simulation].case',
-        values: { values: caseData }
-      }
-    ]
-    , (result) =>
-      if result?
-        [collectionResponse, caseResponse] = result
+        resource: 'dataContext'
+        values:
+          name: 'Sage Simulation'
+          title: 'Sage Simulation'
+          collections:[
+            {
+              name: 'Simulation'
+              title: 'Sage Simulation'
+              labels:
+                singleCase: 'run'
+                pluralCase: 'runs'
+              attrs: [
+                name: tr '~CODAP.SIMULATION.EXPERIMENT'
+                type: 'numeric'
+              ]
+            },
+            {
+              parent: "Simulation"
+              name: 'Samples'
+              title: 'Samples'
+              labels:
+                singleCase: 'sample'
+                pluralCase: 'samples'
+              attrs:  sampleDataAttrs
+            }
+          ]
 
-        if caseResponse.success
-          @currentCaseID = caseResponse.values[0].id
-          @_flushQueue()
-          if not @standaloneMode
-            @createTable()
-        else
-          log.info "CODAP returned an error on 'openCase'"
-    )
+    @codapPhone.call(message, @initGameHandler)
 
-  _createCollection: ->
+
+  # Return the column headings and types for our samples. (steps, NodeA, nodeB, nodeC)
+  _getSampleAttributes: ->
     nodes = @graphStore.getNodes()
 
     # First column definition is the time index
@@ -166,62 +124,92 @@ module.exports = class CodapConnect
       }
     ]
 
-    addSampleDataAttr = (node) ->
+    addNodeAttr = (node) ->
       type = if node.valueDefinedSemiQuantitatively then 'qualitative' else 'numeric'
       sampleDataAttrs.push
         name: node.title
         type: type
 
     _.each nodes, (node) ->
-      addSampleDataAttr(node)
+      addNodeAttr(node)
 
-    return {
-      action: 'create',
-      resource: 'dataContext[Sage Simulation].collection[Samples].attribute',
-      values: sampleDataAttrs
-    }
+    return sampleDataAttrs
+
+
+  # If CODAPs Samples collection doesn't have all our data attributes add the new ones.
+  _createMissingDataAttributes: (callback) ->
+    # TODO: Computing this every time is expensive. Use a flag set from GraphChange event?
+    currentAttributes = _.sortBy(@_getSampleAttributes(), 'name')
+    attributesKey = _.pluck(currentAttributes,'name').join("|")
+    if @attributesKey == attributesKey
+      callback()
+    else
+      doResolve = (listAttributeResponse) =>
+        if listAttributeResponse.success
+          values = listAttributeResponse.values
+          newAttributes = _.select currentAttributes, (a) =>  (! _.includes(values,a.name))
+          message =
+            action: 'create'
+            resource: 'dataContext[Sage Simulation].collection[Samples].attribute'
+            values: newAttributes
+          @codapPhone.call message, (response) =>
+            if response.success
+              @attributesKey = attributesKey
+              callback()
+            else
+              log.info "Unable to update Attributes"
+        else
+          log.info "unable to list attributes"
+
+      getListing =
+        action: 'get'
+        resource: 'dataContext[Sage Simulation].collection[Samples].attributeList'
+      @codapPhone.call(getListing, doResolve)
+      log.info "requested list of attributes"
+
 
   _timeStamp: ->
     new Date().getTime()
 
+
   _shouldSend: ->
-    @_openNewCase() unless @caseOpened?
-    return false unless @currentCaseID
     currentTime = @_timeStamp()
     elapsedTime = currentTime - @lastTimeSent
     return elapsedTime > @sendThrottleMs
 
-  _addData: (data) ->
-    @queue = @queue.concat data
-    if @_shouldSend()
-      @_sendSimulationData()
-    else
-      setTimeout(
-        => @_sendSimulationData(),
-        @sendThrottleMs
-      )
 
   _sendSimulationData: ->
     timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
+    # drain the queue synchronously. Re-add pending data in case of error.
+    pendingData = @queue
+    @queue = []
+
     # Create the sample data values (node values array)
-    sampleData = _.map @queue, (frame) =>
-      sample = {
-        parent: @currentCaseID
-        values: {}
-      }
-      sample.values[timeUnit] = frame.time
-      _.each frame.nodes, (n) -> sample.values[n.title] = n.value
+    sampleData = _.map pendingData, (frame) =>
+      sample = {}
+      sample[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
+      sample[timeUnit] = frame.time
+      _.each frame.nodes, (n) -> sample[n.title] = n.value
       sample
 
-    # Send the data, if any
+    createItemsMessage =
+      action: 'create',
+      resource: "dataContext[Sage Simulation].item",
+      values: sampleData
+
     if sampleData.length > 0
-      @codapPhone.call
-        action: 'create',
-        resource: "dataContext[Sage Simulation].collection[Samples].case",
-        values: sampleData
-    @lastTimeSent = @_timeStamp()
-    @queue = []
+      @createTable()
+      @_createMissingDataAttributes =>
+        # Send the data, if any
+        createItemsCallback = (newSampleResult) =>
+          if newSampleResult.success
+            @lastTimeSent = @_timeStamp()
+          else
+            log.info "CODAP returned an error on 'create item''"
+            # Re-add pending data in case of error.
+            @queue = pendingData.concat @queue
+        @codapPhone.call(createItemsMessage, createItemsCallback)
 
 
   _sendUndoToCODAP: ->
@@ -240,11 +228,6 @@ module.exports = class CodapConnect
         operation: 'redoAction'
       }
 
-  _flushQueue: ->
-    for data in @queue
-      @_sendSimulationData data
-    @queue = []
-
   sendUndoableActionPerformed: (logMessage) ->
     @codapPhone.call
       action: 'notify',
@@ -254,8 +237,15 @@ module.exports = class CodapConnect
         logMessage: logMessage
       }
 
+  addData: (data) ->
+    @queue = @queue.concat data
+    if @_shouldSend()
+      @_sendSimulationData()
+    else
+      setTimeout(@_sendSimulationData, @sendThrottleMs)
+
   createGraph: (yAttributeName)->
-    @_createCollection()
+    @_createMissingDataAttributes()
     timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
     @codapPhone.call
@@ -268,12 +258,14 @@ module.exports = class CodapConnect
         size: { width: 242, height: 221 },
         position: 'bottom'
 
-  createTable: (yAttributeName)->
-    @codapPhone.call
-      action: 'create',
-      resource: 'component',
-      values:
-        type: 'caseTable'
+  createTable: () ->
+    unless @tableCreated
+      @codapPhone.call
+        action: 'create',
+        resource: 'component',
+        values:
+          type: 'caseTable'
+      @tableCreated = true
 
   codapRequestHandler: (cmd, callback) =>
     resource = cmd.resource
