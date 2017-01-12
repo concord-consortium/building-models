@@ -106,7 +106,8 @@ module.exports = React.createClass
                 )
               ])
             else
-              filteredExternalResults = (@state.externalResults.filter (x) => not @isDisabledInExternalSearch x)[..23]
+              filteredExternalResultsAll = (@state.externalResults.filter (x) => not @isDisabledInExternalSearch x)
+              filteredExternalResults = if @state.searchingAll then filteredExternalResultsAll else filteredExternalResultsAll[..23]
               (div {className: 'image-search-section', style: height: '100%'},[
                 (div {className: 'header'}, tr 'Openclipart.org Images'),
                 (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
