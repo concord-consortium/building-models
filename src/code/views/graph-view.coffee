@@ -140,10 +140,11 @@ module.exports = React.createClass
     selectedNodes = @state.selectedNodes
     if (selectedNodes.length > 0)
       @handleEvent ->
-        for node in selectedNodes
-          GraphStore.store.moveNode node.key, leftDiff, topDiff
-        # when node is unselected, but we drag it, it should be treated as selected
-        (GraphStore.store.moveNode theNode.key, leftDiff, topDiff) unless theNode in selectedNodes
+        if theNode in selectedNodes
+          for node in selectedNodes
+            GraphStore.store.moveNode node.key, leftDiff, topDiff
+        else # when node is unselected, but we drag it, only it should be dragged
+          (GraphStore.store.moveNode theNode.key, leftDiff, topDiff)
     else
       # alert "leftDiff 2" + leftDiff
       @handleEvent ->
