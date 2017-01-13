@@ -100,6 +100,56 @@ describe 'SelectionManager', () ->
         it "Should be selected", ->
           selectionMngr.isSelected(toAdd).should.equal true
 
+  describe "Multiple selectOnly", ->
+    a = null
+    b = null
+    c = null
+    context = null
+    beforeEach ->
+      a = new GraphPrimitive()
+      b = new GraphPrimitive()
+      c = new GraphPrimitive()
+
+    describe "without a context", ->
+      beforeEach ->
+        context = null
+
+      describe "When 'a' was previously selected", ->
+        beforeEach ->
+          selectionMngr.addToSelection(a, context)
+
+        describe "When selecting 'b' with ctrlKey pressed", ->
+          beforeEach ->
+            ctrlKey = true
+            selectionMngr.selectOnly(b, context, ctrlKey)
+          it "'a' should be selected", ->
+            selectionMngr.isSelected(a, context).should.equal true
+          it "'b' should be selected", ->
+            selectionMngr.isSelected(b, context).should.equal true
+          it "'c' should not be selected", ->
+            selectionMngr.isSelected(c, context).should.equal false
+
+          describe "When selecting  'c' with ctrlKey still pressed", ->
+            beforeEach ->
+              ctrlKey = true
+              selectionMngr.selectOnly(c, context, ctrlKey)
+            it "'a' should be selected", ->
+              selectionMngr.isSelected(a, context).should.equal true
+            it "'b' should be selected", ->
+              selectionMngr.isSelected(b, context).should.equal true
+            it "'c' should be selected", ->
+              selectionMngr.isSelected(c, context).should.equal true
+
+          describe "When selecting  'c' with ctrlKey not pressed", ->
+            beforeEach ->
+              ctrlKey = false
+              selectionMngr.selectOnly(c, context, ctrlKey)
+            it "'a' should not be selected", ->
+              selectionMngr.isSelected(a, context).should.equal false
+            it "'b' should not be selected", ->
+              selectionMngr.isSelected(b, context).should.equal false
+            it "'c' should be selected", ->
+              selectionMngr.isSelected(c, context).should.equal true
 
   describe "selectOnly", ->
     a = null
@@ -445,7 +495,68 @@ describe 'SelectionManager', () ->
       it "'a' should be selected for inspection", ->
         selectionMngr.isSelectedForInspection(a).should.equal true
 
+  describe "Selecting multiple links for inspection", ->
+    a = null
+    b = null
+    c = null
+    beforeEach ->
+      a = new GraphPrimitive()
+      b = new GraphPrimitive()
+      c = new GraphPrimitive()
 
+    describe "When nothing else is selected", ->
+      it "'a' should be selected for inspection", ->
+        selectionMngr.selectLinkForInspection(a)
+        selectionMngr.isSelectedForInspection(a).should.equal true
+
+    describe "When 'a' is a node already selected for inspection and ctrlKey is pressed", ->
+      beforeEach ->
+        ctrlKey = true
+        selectionMngr.selectNodeForInspection(a)
+        selectionMngr.selectLinkForInspection(b, ctrlKey)
+
+      it "'a' should be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+      it "'b' should be selected for inspection'", ->
+        selectionMngr.isSelectedForInspection(b).should.equal true
+      it "'c' should not be selected for inspection'", ->
+        selectionMngr.isSelectedForInspection(c).should.equal false
+
+      describe "When 'c' is a node selected for inspection and ctrlKey is depressed", ->
+        beforeEach ->
+          ctrlKey = false
+          selectionMngr.selectNodeForInspection(c, ctrlKey)
+        it "'a' should not be selected for inspection", ->
+          selectionMngr.isSelectedForInspection(a).should.equal false
+        it "'b' should not be selected for inspection'", ->
+          selectionMngr.isSelectedForInspection(b).should.equal false
+        it "'c' should be selected for inspection'", ->
+          selectionMngr.isSelectedForInspection(c).should.equal true
+
+
+    describe "When 'a' is a link already selected for inspection and ctrlKey is pressed", ->
+      beforeEach ->
+        ctrlKey = true
+        selectionMngr.selectLinkForInspection(a, ctrlKey)
+        selectionMngr.selectLinkForInspection(b, ctrlKey)
+
+      it "'a' should be selected for inspection", ->
+        selectionMngr.isSelectedForInspection(a).should.equal true
+      it "'b' should be selected for inspection'", ->
+        selectionMngr.isSelectedForInspection(b).should.equal true
+      it "'c' should not be selected for inspection'", ->
+        selectionMngr.isSelectedForInspection(c).should.equal false
+
+      describe "When 'c' is a link selected for inspection and ctrlKey is depressed", ->
+        beforeEach ->
+          ctrlKey = false
+          selectionMngr.selectLinkForInspection(c, ctrlKey)
+        it "'a' should be selected for inspection", ->
+          selectionMngr.isSelectedForInspection(a).should.equal false
+        it "'b' should be selected for inspection'", ->
+          selectionMngr.isSelectedForInspection(b).should.equal false
+        it "'c' should not be selected for inspection'", ->
+          selectionMngr.isSelectedForInspection(c).should.equal true
 
   describe "clearSelectionFor", ->
     a = null

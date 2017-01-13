@@ -118,7 +118,7 @@ SimulationStore   = Reflux.createStore
     else
       TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
 
-  _runSimulation: ()->
+  _runSimulation: ->
     if @settings.modelIsRunnable
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load

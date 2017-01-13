@@ -236,6 +236,7 @@ module.exports = class DiagramToolkit
     connection.bind 'click', @handleClick.bind @
     connection.bind 'dblclick', @handleDoubleClick.bind @
     connection.linkModel = opts.linkModel
+    opts.linkModel.jsPlumbConnection = connection
 
     @kit.importDefaults
       Connector: ["Bezier", {curviness: 60, variableWidth: null}]

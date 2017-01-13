@@ -37,14 +37,14 @@ module.exports = React.createClass
       handleLabelEdit:      @handleLabelEdit
 
     @props.selectionManager.addSelectionListener (manager) =>
-      lastLinkSelection = @state.selectedLink
-      selectedNode      = manager.getNodeInspection()[0] or null
+      [..., lastLinkSelection] = @state.selectedLink
+      selectedNodes     = manager.getNodeInspection() or []
       editingNode       = manager.getNodeTitleEditing()[0] or null
-      selectedLink      = manager.getLinkInspection()[0] or null
+      selectedLink      = manager.getLinkInspection() or []
       editingLink       = manager.getLinkTitleEditing()[0] or null
 
       @setState
-        selectedNode: selectedNode
+        selectedNodes: selectedNodes
         editingNode:  editingNode
         selectedLink: selectedLink
         editingLink: editingLink
@@ -104,11 +104,17 @@ module.exports = React.createClass
   getInitialState: ->
     # nodes: covered by GraphStore mixin
     # links: covered by GraphStore mixin
-    selectedNode: null
+    selectedNodes: []
     editingNode: null
-    selectedLink: null
+    selectedLink: []
     editingLink: null
     canDrop: false
+    drawingMarquee: false
+    selectBox:
+      startX: 0
+      startY: 0
+      x: 0
+      y: 0
 
   componentDidUpdate: (prevProps, prevState) ->
     if (prevState.description.links != @state.description.links) or
@@ -127,13 +133,35 @@ module.exports = React.createClass
       true
 
   onNodeMoved: (node_event) ->
-    @handleEvent ->
-      GraphStore.store.moveNode node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+    {left, top} = node_event.extra.position
+    theNode = GraphStore.store.nodeKeys[node_event.nodeKey]
+    leftDiff = left - theNode.x
+    topDiff = top - theNode.y
+    selectedNodes = @state.selectedNodes
+    if (selectedNodes.length > 0)
+      @handleEvent ->
+        if theNode in selectedNodes
+          for node in selectedNodes
+            GraphStore.store.moveNode node.key, leftDiff, topDiff
+        else # when node is unselected, but we drag it, only it should be dragged
+          (GraphStore.store.moveNode theNode.key, leftDiff, topDiff)
+    else
+      # alert "leftDiff 2" + leftDiff
+      @handleEvent ->
+        GraphStore.store.moveNode node_event.nodeKey, leftDiff, topDiff
 
   onNodeMoveComplete: (node_event) ->
-    @handleEvent ->
-      {left, top} = node_event.extra.position
-      GraphStore.store.moveNodeCompleted node_event.nodeKey, node_event.extra.position, node_event.extra.originalPosition
+    {left, top} = node_event.extra.position
+    leftDiff = left - node_event.extra.originalPosition.left
+    topDiff = top - node_event.extra.originalPosition.top
+    selectedNodes = @state.selectedNodes
+    if (selectedNodes.length > 0)
+      @handleEvent ->
+        for node in selectedNodes
+          GraphStore.store.moveNodeCompleted node.key, leftDiff, topDiff
+    else
+      @handleEvent ->
+        GraphStore.store.moveNodeCompleted node_event.nodeKey, leftDiff, topDiff
 
   onNodeDeleted: (node_event) ->
     @handleEvent ->
@@ -144,10 +172,11 @@ module.exports = React.createClass
       @forceRedrawLinks = true
       GraphStore.store.newLinkFromEvent info, evnt
 
-  handleLinkClick: (connection, evnt) ->
+  handleLinkClick: (connection, evt) ->
     @handleEvent =>
+      multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
       @forceRedrawLinks = true
-      GraphStore.store.clickLink connection.linkModel
+      GraphStore.store.clickLink connection.linkModel, multipleSelections
 
   handleLinkEditClick: (connection, evnt) ->
     @handleEvent =>
@@ -248,11 +277,108 @@ module.exports = React.createClass
       # of valid application items like connections or images
       console.log("Invalid drag/drop operation", ex)
 
-  onContainerClicked: (e) ->
+  onMouseDown: (e) ->
     if e.target is @refs.container
       # deselect links when background is clicked
       @forceRedrawLinks = true
       @props.selectionManager.clearSelection()
+      selectBox = $.extend({}, @state.selectBox)
+      offset = $(@refs.linkView).offset()
+      selectBox.startX = e.pageX - offset.left
+      selectBox.startY = e.pageY - offset.top
+      selectBox.x = selectBox.startX
+      selectBox.y = selectBox.startY
+      @setState drawingMarquee: true, selectBox: selectBox
+
+  onMouseUp: (e) ->
+    if e.target is @refs.container
+    # deselect links when background is clicked
+      @props.selectionManager.clearSelection()
+      if @state.drawingMarquee
+     # end of drawing Marquee, check what is selected
+        @checkSelectBoxCollisions()
+        @setState drawingMarquee: false
+    if @state.drawingMarquee
+    # end of drawing Marquee, check what is selected
+      @checkSelectBoxCollisions()
+      @checkSelectBoxLinkCollisions()
+      @setState drawingMarquee: false
+
+  onMouseMove: (e) ->
+    if @state.drawingMarquee
+      offset = $(@refs.linkView).offset()
+      selectBox = $.extend({}, @state.selectBox)
+      selectBox.x = e.pageX - offset.left
+      selectBox.y = e.pageY - offset.top
+      @setState selectBox: selectBox
+
+  checkSelectBoxLinkCollisions: ->
+    for link in @state.links
+      if this.checkBoxLinkCollision(link)
+        @props.selectionManager.selectLinkForInspection(link, true)
+
+  checkSelectBoxCollisions: ->
+    for node in @state.nodes
+      if this.checkSelectBoxCollision(node)
+        @props.selectionManager.selectNodeForInspection(node, true)
+
+  # Detecting collision between drawn selectBox and existing link
+  # Start of the link is (x0,y0), upper left corner of the most left node
+  # End of the link is (x1,y1), lower right corner of the most right node
+  # Function uses Liang-Barsky algorithm described at https://gist.github.com/ChickenProp/3194723
+  checkBoxLinkCollision: (link) ->
+    selectBox = @state.selectBox
+    connection = link.jsPlumbConnection
+
+    # Marquee selectBox
+    sX = Math.min(selectBox.startX, selectBox.x)
+    sY = Math.min(selectBox.startY, selectBox.y)
+    x = Math.max(selectBox.startX, selectBox.x)
+    y = Math.max(selectBox.startY, selectBox.y)
+
+    # Link endpoints
+    origin = connection.endpoints[0].endpoint
+    destination = connection.endpoints[1].endpoint
+
+    x0 = origin.x
+    y0 = origin.y
+    x1 = destination.x
+    y1 = destination.y
+
+    p = [x0-x1, x1-x0,  y0-y1, y1-y0]
+    q = [x0-sX, x-x0, y0 - sY, y-y0]
+    u1 = Number.MIN_VALUE
+    u2 = Number.MAX_VALUE
+
+    for i in [0..3]
+      if (p[i] == 0) and (q[i] < 0)
+        return false
+      else
+        t = q[i] / p[i]
+        if (p[i] < 0 and u1 < t)
+          u1 = t
+        else if (p[i] > 0 && u2 > t)
+          u2 = t
+
+    if (u1 > u2 or u1 > 1 or u1 < 0)
+      return false
+    true
+
+  checkSelectBoxCollision: (node) ->
+    nodeWidth = 45 # Width of node in px
+    nodeHeight = 45 # Height of node in px
+    selectBox = @state.selectBox
+    sX = Math.min(selectBox.startX, selectBox.x)
+    sY = Math.min(selectBox.startY, selectBox.y)
+    x = Math.max(selectBox.startX, selectBox.x)
+    y = Math.max(selectBox.startY, selectBox.y)
+
+    a = (node.x < x)
+    b = (node.x + nodeWidth > sX)
+    c = (node.y < y)
+    d = (nodeHeight + node.y > sY)
+    result = (a and b and c and d)
+    result
 
   handleLabelEdit: (title) ->
     @props.graphStore.changeLink @state.editingLink, {title: title}
@@ -264,13 +390,17 @@ module.exports = React.createClass
       dataColor = Color.colors.data.value
 
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
-      (div {className: 'container', ref: 'container', onClick: @onContainerClicked},
+      (div {className: 'container', ref: 'container', onMouseDown: @onMouseDown, onMouseUp: @onMouseUp, onMouseMove: @onMouseMove},
+        if @state.drawingMarquee
+          left = Math.min(@state.selectBox.startX, @state.selectBox.x)
+          top = Math.min(@state.selectBox.startY, @state.selectBox.y)
+          (div {className: 'selectionBox', ref: 'selectionBox', style: {width: Math.abs(@state.selectBox.x-@state.selectBox.startX), height: Math.abs(@state.selectBox.y-@state.selectBox.startY), left: left, top: top, border: '1px dotted #CCC', position: 'absolute', backgroundColor: '#FFFFFF'}})
         for node in @state.nodes
           (Node {
             key: node.key
             data: node
             dataColor: dataColor
-            selected: @state.selectedNode is node
+            selected: node in @state.selectedNodes
             simulating: @state.simulationPanelExpanded
             running: @state.modelIsRunning
             editTitle: @state.editingNode is node

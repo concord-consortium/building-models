@@ -34,7 +34,7 @@ module.exports = React.createClass
   render: ->
     verticalStyle = {}
     if @props.includeLight
-      verticalStyle = {'padding-right':'0.5em'}
+      verticalStyle = {'paddingRight':'0.5em'}
     if @props.disabled
       onClick = -> null
     else

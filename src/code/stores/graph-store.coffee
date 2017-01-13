@@ -181,23 +181,26 @@ GraphStore  = Reflux.createStore
   _graphUpdated: ->
     node.checkIsInIndependentCycle() for key, node of @nodeKeys
 
-  moveNodeCompleted: (nodeKey, pos, originalPos) ->
+  moveNodeCompleted: (nodeKey, leftDiff, topDiff) ->
     @endNodeEdit()
-    node = @nodeKeys[nodeKey]
-    return unless node
     @undoRedoManager.createAndExecuteCommand 'moveNode',
-      execute: => @moveNode node.key, pos, originalPos
-      undo: => @moveNode node.key, originalPos, pos
+      execute: => @moveNode nodeKey, 0,0 # FIXME leftDiff, topDiff
+      undo: => @moveNode nodeKey, -leftDiff, -topDiff
 
-  moveNode: (nodeKey, pos, originalPos) ->
+  moveNode: (nodeKey, leftDiff, topDiff) ->
     node = @nodeKeys[nodeKey]
     return unless node
-    node.x = pos.left
-    node.y = pos.top
+    # alert "moveNode:" + nodeKey + " " + node.x + " "
+    # console.log "moveNode:", node, leftDiff,  topDiff
+    node.x = node.x + leftDiff
+    node.y = node.y + topDiff
     @updateListeners()
 
-  selectedNode: ->
-    @selectionManager.selection(SelectionManager.NodeInspection)[0] or null
+  selectedNodes: ->
+    @selectionManager.getNodeInspection() or [] # add or [] into getNodeInspection() ?
+
+  selectedLinks: ->
+    @selectionManager.getLinkInspection() or [] # add or [] into getLinkInspection() ?
 
   editingNode: ->
     @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
@@ -215,7 +218,7 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   changeNode: (data, node) ->
-    node = node or @selectedNode()
+    node = node or @selectedNodes()
     if node
       originalData =
         title: node.title
@@ -265,11 +268,11 @@ GraphStore  = Reflux.createStore
   endNodeEdit: ->
     @undoRedoManager.endCommandBatch()
 
-  clickLink: (link) ->
+  clickLink: (link, multipleSelectionsAllowed) ->
     if @selectionManager.isSelected(link)
       @selectionManager.selectLinkForTitleEditing(link)
     else
-      @selectionManager.selectLinkForInspection(link)
+      @selectionManager.selectLinkForInspection(link, multipleSelectionsAllowed)
 
   editLink: (link) ->
     @selectionManager.selectLinkForTitleEditing(link)
@@ -326,22 +329,20 @@ GraphStore  = Reflux.createStore
     @setFilename 'New Model'
     @undoRedoManager.clearHistory()
 
-  deleteSelected: ->
-    log.info "Deleting selected items"
-    @removeSelectedLink()
-    @removeSelectedNode()
-
   removeSelectedNode: ->
-    nodeKey = @selectedNode()?.key
-    if nodeKey
+    selectedNodeKeys = (node.key for node in @selectedNodes())
+    for nodeKey in selectedNodeKeys
       @removeNode nodeKey
-      @selectionManager.clearSelection()
 
   removeSelectedLink: ->
-    selectedLink = @selectionManager.getLinkInspection()[0] or null
-    if selectedLink
-      @removeLink(selectedLink)
-      @selectionManager.clearSelection()
+    for selectedLink in @selectedLinks()
+      @removeLink selectedLink
+
+  deleteSelected: ->
+    log.info "Deleting selected items"
+    @removeSelectedNode()
+    @removeSelectedLink()
+    @selectionManager.clearSelection()
 
   removeLinksForNode: (node) ->
     @removeLink(link) for link in node.links
