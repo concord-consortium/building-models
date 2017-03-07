@@ -93,7 +93,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.16.0"
+        model.version.should.equal "1.17.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 2
 
@@ -152,14 +152,20 @@ describe "Serialization and Loading", ->
         model.settings.showingMinigraphs.should.equal true
 
       it "should be able to serialize the simulation settings", ->
-        SimulationStore.store.settings.duration = 15
-        SimulationStore.store.settings.stepUnits = "SECOND"
-        SimulationStore.store.settings.capNodeValues = true
+        settings = SimulationStore.store.settings
+        settings.duration = 15
+        settings.stepUnits = "SECOND"
+        settings.capNodeValues = true
+        settings.experimentNumber = 10
+        settings.experimentFrame = 12
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
-        model.settings.simulation.duration.should.equal 15
-        model.settings.simulation.stepUnits.should.equal "SECOND"
-        model.settings.simulation.capNodeValues.should.equal true
+        simulationData = model.settings.simulation
+        simulationData.duration.should.equal 15
+        simulationData.stepUnits.should.equal "SECOND"
+        simulationData.capNodeValues.should.equal true
+        simulationData.experimentNumber.should.equal 10
+        simulationData.experimentFrame.should.equal 12
 
   describe "loadData", ->
     beforeEach ->
