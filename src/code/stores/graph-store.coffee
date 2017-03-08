@@ -218,30 +218,32 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   changeNode: (data, node) ->
-    node = node or @selectedNodes()
-    if node
-      originalData =
-        title: node.title
-        image: node.image
-        paletteItem: node.paletteItem
-        color: node.color
-        initialValue: node.initialValue
-        value: node.value or node.initialValue
-        min: node.min
-        max: node.max
-        isAccumulator: node.isAccumulator
-        valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
+    _node = node or @selectedNodes()
+    nodes = [].concat(_node) # force an array of nodes
+    for node in nodes
+      if node
+        originalData =
+          title: node.title
+          image: node.image
+          paletteItem: node.paletteItem
+          color: node.color
+          initialValue: node.initialValue
+          value: node.value or node.initialValue
+          min: node.min
+          max: node.max
+          isAccumulator: node.isAccumulator
+          valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
 
 
-      nodeChanged = false
-      for key of data
-        if data.hasOwnProperty key
-          if data[key] isnt originalData[key] then nodeChanged = true
+        nodeChanged = false
+        for key of data
+          if data.hasOwnProperty key
+            if data[key] isnt originalData[key] then nodeChanged = true
 
-      if nodeChanged        # don't do anything unless we've actually changed the node
-        @undoRedoManager.createAndExecuteCommand 'changeNode',
-          execute: => @_changeNode node, data
-          undo: => @_changeNode node, originalData
+        if nodeChanged        # don't do anything unless we've actually changed the node
+          @undoRedoManager.createAndExecuteCommand 'changeNode',
+            execute: => @_changeNode node, data
+            undo: => @_changeNode node, originalData
 
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
