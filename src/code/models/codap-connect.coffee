@@ -142,7 +142,7 @@ module.exports = class CodapConnect
     currentAttributes = _.sortBy(@_getSampleAttributes(), 'name')
     attributesKey = _.pluck(currentAttributes,'name').join("|")
     if @attributesKey == attributesKey
-      callback()
+      callback() if callback
     else
       doResolve = (listAttributeResponse) =>
         if listAttributeResponse.success
@@ -155,7 +155,7 @@ module.exports = class CodapConnect
           @codapPhone.call message, (response) =>
             if response.success
               @attributesKey = attributesKey
-              callback()
+              callback() if callback
             else
               log.info "Unable to update Attributes"
         else
