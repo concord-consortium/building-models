@@ -179,19 +179,10 @@ module.exports = class CodapConnect
 
 
   _sendSimulationData: ->
-    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
     # drain the queue synchronously. Re-add pending data in case of error.
-    pendingData = @queue
+    sampleData = @queue
     @queue = []
-
-    # Create the sample data values (node values array)
-    sampleData = _.map pendingData, (frame) =>
-      sample = {}
-      sample[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
-      sample[timeUnit] = frame.time
-      _.each frame.nodes, (n) -> sample[n.title] = n.value
-      sample
 
     createItemsMessage =
       action: 'create',
@@ -208,7 +199,7 @@ module.exports = class CodapConnect
           else
             log.info "CODAP returned an error on 'create item''"
             # Re-add pending data in case of error.
-            @queue = pendingData.concat @queue
+            @queue = sampleData.concat @queue
         @codapPhone.call(createItemsMessage, createItemsCallback)
 
 
@@ -238,7 +229,16 @@ module.exports = class CodapConnect
       }
 
   addData: (data) ->
-    @queue = @queue.concat data
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
+    # Create the sample data values (node values array)
+    sampleData = _.map data, (frame) =>
+      sample = {}
+      sample[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
+      sample[timeUnit] = frame.time
+      _.each frame.nodes, (n) -> sample[n.title] = n.value
+      sample
+    @queue = @queue.concat sampleData
+
     if @_shouldSend()
       @_sendSimulationData()
     else
