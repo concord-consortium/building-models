@@ -385,7 +385,7 @@ module.exports = React.createClass
     @props.selectionManager.clearSelection()
 
   render: ->
-    dataColor = Color.colors.lightGray.value
+    dataColor = Color.colors.mediumGray.value
     if @state.isRecording
       dataColor = Color.colors.data.value
 

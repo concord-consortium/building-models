@@ -13,6 +13,9 @@ colors =
   lightGray:
     name: tr("~COLOR.LIGHT_GRAY")
     value: "#aaa"
+  mediumGray:
+    name: tr("~COLOR.MED_GRAY")
+    value: "#787878"
   darkGray:
     name: tr("~COLOR.DARK_GRAY")
     value: "#444"
