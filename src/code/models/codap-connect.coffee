@@ -55,7 +55,7 @@ module.exports = class CodapConnect
         # We check for game state in either the frame (CODAP API 2.0) or the dataContext
         # (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
         state = frame?.values.savedState or
-                context?.values.contextStorage?.gameState
+                context?.values?.contextStorage?.gameState
 
         if state?
           @graphStore.deleteAll()
