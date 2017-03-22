@@ -179,7 +179,6 @@ module.exports = class CodapConnect
 
 
   _sendSimulationData: ->
-
     # drain the queue synchronously. Re-add pending data in case of error.
     sampleData = @queue
     @queue = []
@@ -242,7 +241,7 @@ module.exports = class CodapConnect
     if @_shouldSend()
       @_sendSimulationData()
     else
-      setTimeout(@_sendSimulationData, @sendThrottleMs)
+      setTimeout(@_sendSimulationData.bind(@), @sendThrottleMs)
 
   createGraph: (yAttributeName)->
     @_createMissingDataAttributes()
