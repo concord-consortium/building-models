@@ -71,7 +71,9 @@ module.exports = class CodapConnect
       action: 'get',
       resource: 'dataContext[Sage Simulation]'
     , (ret) =>
-      if ret?.success
+      # ret==null is indication of timeout, not an indication that the data set
+      # doesn't exist.
+      if !ret or ret.success
         @initGameHandler ret
       else
         @_createDataContext()
