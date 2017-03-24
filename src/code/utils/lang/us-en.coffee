@@ -110,6 +110,7 @@ module.exports =
   "~COLOR.MED_BLUE": "Blue"
   "~COLOR.DARK_GRAY": "Dark Gray"
   "~COLOR.LIGHT_GRAY": "Light Gray"
+  "~COLOR.MEDIUM_GRAY": "Gray"
   "~COLOR.DATA": "Codap Orange"
 
   # google-file-interface

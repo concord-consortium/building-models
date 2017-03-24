@@ -55,7 +55,7 @@ module.exports = class CodapConnect
         # We check for game state in either the frame (CODAP API 2.0) or the dataContext
         # (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
         state = frame?.values.savedState or
-                context?.values.contextStorage?.gameState
+                context?.values?.contextStorage?.gameState
 
         if state?
           @graphStore.deleteAll()
@@ -71,7 +71,9 @@ module.exports = class CodapConnect
       action: 'get',
       resource: 'dataContext[Sage Simulation]'
     , (ret) =>
-      if ret?.success
+      # ret==null is indication of timeout, not an indication that the data set
+      # doesn't exist.
+      if !ret or ret.success
         @initGameHandler ret
       else
         @_createDataContext()
@@ -142,7 +144,7 @@ module.exports = class CodapConnect
     currentAttributes = _.sortBy(@_getSampleAttributes(), 'name')
     attributesKey = _.pluck(currentAttributes,'name').join("|")
     if @attributesKey == attributesKey
-      callback()
+      callback() if callback
     else
       doResolve = (listAttributeResponse) =>
         if listAttributeResponse.success
@@ -155,7 +157,7 @@ module.exports = class CodapConnect
           @codapPhone.call message, (response) =>
             if response.success
               @attributesKey = attributesKey
-              callback()
+              callback() if callback
             else
               log.info "Unable to update Attributes"
         else
@@ -179,19 +181,9 @@ module.exports = class CodapConnect
 
 
   _sendSimulationData: ->
-    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
-
     # drain the queue synchronously. Re-add pending data in case of error.
-    pendingData = @queue
+    sampleData = @queue
     @queue = []
-
-    # Create the sample data values (node values array)
-    sampleData = _.map pendingData, (frame) =>
-      sample = {}
-      sample[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
-      sample[timeUnit] = frame.time
-      _.each frame.nodes, (n) -> sample[n.title] = n.value
-      sample
 
     createItemsMessage =
       action: 'create',
@@ -208,7 +200,7 @@ module.exports = class CodapConnect
           else
             log.info "CODAP returned an error on 'create item''"
             # Re-add pending data in case of error.
-            @queue = pendingData.concat @queue
+            @queue = sampleData.concat @queue
         @codapPhone.call(createItemsMessage, createItemsCallback)
 
 
@@ -238,11 +230,20 @@ module.exports = class CodapConnect
       }
 
   addData: (data) ->
-    @queue = @queue.concat data
+    timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
+    # Create the sample data values (node values array)
+    sampleData = _.map data, (frame) =>
+      sample = {}
+      sample[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
+      sample[timeUnit] = frame.time
+      _.each frame.nodes, (n) -> sample[n.title] = n.value
+      sample
+    @queue = @queue.concat sampleData
+
     if @_shouldSend()
       @_sendSimulationData()
     else
-      setTimeout(@_sendSimulationData, @sendThrottleMs)
+      setTimeout(@_sendSimulationData.bind(@), @sendThrottleMs)
 
   createGraph: (yAttributeName)->
     @_createMissingDataAttributes()
