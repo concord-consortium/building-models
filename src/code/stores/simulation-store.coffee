@@ -41,12 +41,12 @@ SimulationStore   = Reflux.createStore
 
     @nodes = []
     @currentSimulation = null
-    @experimentFrameIndex = 0
 
     @settings =
       simulationPanelExpanded: false
       duration: defaultDuration
       experimentNumber: 1
+      experimentFrame: 0
       stepUnits: defaultUnit
       stepUnitsName: unitName
       timeUnitOptions: timeUnitOptions
@@ -62,7 +62,6 @@ SimulationStore   = Reflux.createStore
     @_updateModelIsRunnable()
     @_updateGraphHasCollector()
 
-  # From AppSettingsStore actions
   onDiagramOnly: ->
     SimulationActions.collapseSimulationPanel()
 
@@ -118,7 +117,7 @@ SimulationStore   = Reflux.createStore
     else
       TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
 
-  _runSimulation: ()->
+  _runSimulation: ->
     if @settings.modelIsRunnable
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
@@ -138,8 +137,8 @@ SimulationStore   = Reflux.createStore
           SimulationActions.simulationFramesCreated(frames)
           if @settings.isRecording
             framesNoTime = _.map frames, (frame) =>
-              @experimentFrameIndex++
-              frame.time = @experimentFrameIndex
+              @settings.experimentFrame++
+              frame.time = @settings.experimentFrame
               return frame
             SimulationActions.recordingFramesCreated(framesNoTime)
 
@@ -172,8 +171,8 @@ SimulationStore   = Reflux.createStore
     SimulationActions.recordingDidEnd()
 
   onCreateExperiment: ->
-    @experimentFrameIndex = 0
     @settings.experimentNumber++
+    @settings.experimentFrame = 0
     @notifyChange()
 
   onStopRecording: ->
@@ -235,9 +234,11 @@ SimulationStore   = Reflux.createStore
     @notifyChange()
 
   serialize: ->
-    duration:       @settings.duration
-    stepUnits:      @settings.stepUnits
-    capNodeValues:  @settings.capNodeValues
+    duration:         @settings.duration
+    stepUnits:        @settings.stepUnits
+    capNodeValues:    @settings.capNodeValues
+    experimentNumber: @settings.experimentNumber
+    experimentFrame:  @settings.experimentFrame
 
 mixin =
   getInitialState: ->

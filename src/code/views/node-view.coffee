@@ -18,7 +18,7 @@ NodeTitle = React.createFactory React.createClass
 
   componentDidUpdate: ->
     if @props.isEditing
-      $elem =@inputElm()
+      $elem = @inputElm()
       $elem.focus()
 
       $elem.off()
@@ -91,10 +91,12 @@ module.exports = NodeView = React.createClass
     editingNodeTitle: false
     ignoreDrag: false
 
-  handleSelected: (actually_select) ->
+  handleSelected: (actually_select, evt) ->
+    # console.log 'selected ' + actually_select, evt.ctrlKey, @props.selectionManager.selections
     if @props.selectionManager
       selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-      @props.selectionManager.selectNodeForInspection(@props.data)
+      multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
+      @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
 
   propTypes:
     onDelete: React.PropTypes.func
@@ -118,6 +120,7 @@ module.exports = NodeView = React.createClass
       color: "dark-blue"
 
   doMove: (evt, extra) ->
+    # console.log "Moving " + @props.nodeKey
     @props.onMove
       nodeKey: @props.nodeKey
       reactComponent: this
@@ -261,7 +264,7 @@ module.exports = NodeView = React.createClass
           (div {className: @topClasses(), "data-node-key": @props.nodeKey},
             (div {
               className: "img-background"
-              onClick: (=> @handleSelected true)
+              onClick: ((evt) => @handleSelected true, evt)
               onTouchend: (=> @handleSelected true)
               },
               @renderNodeInternal()

@@ -181,23 +181,26 @@ GraphStore  = Reflux.createStore
   _graphUpdated: ->
     node.checkIsInIndependentCycle() for key, node of @nodeKeys
 
-  moveNodeCompleted: (nodeKey, pos, originalPos) ->
+  moveNodeCompleted: (nodeKey, leftDiff, topDiff) ->
     @endNodeEdit()
-    node = @nodeKeys[nodeKey]
-    return unless node
     @undoRedoManager.createAndExecuteCommand 'moveNode',
-      execute: => @moveNode node.key, pos, originalPos
-      undo: => @moveNode node.key, originalPos, pos
+      execute: => @moveNode nodeKey, 0,0 # FIXME leftDiff, topDiff
+      undo: => @moveNode nodeKey, -leftDiff, -topDiff
 
-  moveNode: (nodeKey, pos, originalPos) ->
+  moveNode: (nodeKey, leftDiff, topDiff) ->
     node = @nodeKeys[nodeKey]
     return unless node
-    node.x = pos.left
-    node.y = pos.top
+    # alert "moveNode:" + nodeKey + " " + node.x + " "
+    # console.log "moveNode:", node, leftDiff,  topDiff
+    node.x = node.x + leftDiff
+    node.y = node.y + topDiff
     @updateListeners()
 
-  selectedNode: ->
-    @selectionManager.selection(SelectionManager.NodeInspection)[0] or null
+  selectedNodes: ->
+    @selectionManager.getNodeInspection() or [] # add or [] into getNodeInspection() ?
+
+  selectedLinks: ->
+    @selectionManager.getLinkInspection() or [] # add or [] into getLinkInspection() ?
 
   editingNode: ->
     @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
@@ -215,30 +218,32 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   changeNode: (data, node) ->
-    node = node or @selectedNode()
-    if node
-      originalData =
-        title: node.title
-        image: node.image
-        paletteItem: node.paletteItem
-        color: node.color
-        initialValue: node.initialValue
-        value: node.value or node.initialValue
-        min: node.min
-        max: node.max
-        isAccumulator: node.isAccumulator
-        valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
+    _node = node or @selectedNodes()
+    nodes = [].concat(_node) # force an array of nodes
+    for node in nodes
+      if node
+        originalData =
+          title: node.title
+          image: node.image
+          paletteItem: node.paletteItem
+          color: node.color
+          initialValue: node.initialValue
+          value: node.value or node.initialValue
+          min: node.min
+          max: node.max
+          isAccumulator: node.isAccumulator
+          valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
 
 
-      nodeChanged = false
-      for key of data
-        if data.hasOwnProperty key
-          if data[key] isnt originalData[key] then nodeChanged = true
+        nodeChanged = false
+        for key of data
+          if data.hasOwnProperty key
+            if data[key] isnt originalData[key] then nodeChanged = true
 
-      if nodeChanged        # don't do anything unless we've actually changed the node
-        @undoRedoManager.createAndExecuteCommand 'changeNode',
-          execute: => @_changeNode node, data
-          undo: => @_changeNode node, originalData
+        if nodeChanged        # don't do anything unless we've actually changed the node
+          @undoRedoManager.createAndExecuteCommand 'changeNode',
+            execute: => @_changeNode node, data
+            undo: => @_changeNode node, originalData
 
   _changeNode: (node, data) ->
     log.info "Change for #{node.title}"
@@ -265,11 +270,11 @@ GraphStore  = Reflux.createStore
   endNodeEdit: ->
     @undoRedoManager.endCommandBatch()
 
-  clickLink: (link) ->
+  clickLink: (link, multipleSelectionsAllowed) ->
     if @selectionManager.isSelected(link)
       @selectionManager.selectLinkForTitleEditing(link)
     else
-      @selectionManager.selectLinkForInspection(link)
+      @selectionManager.selectLinkForInspection(link, multipleSelectionsAllowed)
 
   editLink: (link) ->
     @selectionManager.selectLinkForTitleEditing(link)
@@ -326,22 +331,20 @@ GraphStore  = Reflux.createStore
     @setFilename 'New Model'
     @undoRedoManager.clearHistory()
 
-  deleteSelected: ->
-    log.info "Deleting selected items"
-    @removeSelectedLink()
-    @removeSelectedNode()
-
   removeSelectedNode: ->
-    nodeKey = @selectedNode()?.key
-    if nodeKey
+    selectedNodeKeys = (node.key for node in @selectedNodes())
+    for nodeKey in selectedNodeKeys
       @removeNode nodeKey
-      @selectionManager.clearSelection()
 
   removeSelectedLink: ->
-    selectedLink = @selectionManager.getLinkInspection()[0] or null
-    if selectedLink
-      @removeLink(selectedLink)
-      @selectionManager.clearSelection()
+    for selectedLink in @selectedLinks()
+      @removeLink selectedLink
+
+  deleteSelected: ->
+    log.info "Deleting selected items"
+    @removeSelectedNode()
+    @removeSelectedLink()
+    @selectionManager.clearSelection()
 
   removeLinksForNode: (node) ->
     @removeLink(link) for link in node.links

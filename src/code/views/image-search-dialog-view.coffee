@@ -22,10 +22,11 @@ ImageSearchResult = React.createFactory React.createClass
 
   render: ->
     src = if @state.loaded then @props.imageInfo.image else 'img/bb-chrome/spin.svg'
-    if @props.isDisabled(@props.imageInfo)
-      (img {src: src, className: 'in-palette', title: (tr '~IMAGE-BROWSER.ALREADY-IN-PALETTE')})
-    else
+    if not @props.isDisabled(@props.imageInfo)
       (img {src: src, onClick: @clicked, title: @props.imageInfo.title})
+    else
+      null
+
 
 module.exports = React.createClass
   displayName: 'ImageSearch'
@@ -75,8 +76,6 @@ module.exports = React.createClass
 
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and @state.externalResults.length is 0
-    topHeight = if @state.searchable and not showNoResultsAlert then 30 else 100
-    bottomHeight = if @state.searchable and not showNoResultsAlert then 70 else 0
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
@@ -98,16 +97,18 @@ module.exports = React.createClass
             )
 
           (div {className: 'image-search-main-results'},[
-            (div {className: 'image-search-section', style: height: topHeight + '%'},[
-              (div {className: 'image-search-dialog-results'},
-                for node, index in _.map @props.internalLibrary
-                  if node.image
-                    (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
-              )
-            ])
-
-            if @state.searchable and not showNoResultsAlert
-              (div {className: 'image-search-section', style: height: bottomHeight + '%'},[
+            if not @state.searchable or showNoResultsAlert
+              (div {className: 'image-search-section', style: height: '100%'},[
+                (div {className: 'image-search-dialog-results'},
+                  for node, index in _.map @props.internalLibrary
+                    if node.image
+                      (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
+                )
+              ])
+            else
+              filteredExternalResultsAll = (@state.externalResults.filter (x) => not @isDisabledInExternalSearch x)
+              filteredExternalResults = if @state.searchingAll then filteredExternalResultsAll else filteredExternalResultsAll[..23]
+              (div {className: 'image-search-section', style: height: '100%'},[
                 (div {className: 'header'}, tr 'Openclipart.org Images'),
                 (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
                   if @state.searching
@@ -118,17 +119,17 @@ module.exports = React.createClass
                         scope: if @state.searchingAll then 'all matches for ' else ''
                         query: @state.query
                     )
-                  else if @state.externalResults.length is 0
+                  else if filteredExternalResults.length is 0
                     tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
                   else
-                    for node, index in @state.externalResults
+                    for node, index in filteredExternalResults
                       (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
                 )
 
               if @state.externalResults.length < @state.numExternalMatches
                 (div {className: "image-search-dialog-results-text"},
                   tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
-                  numResults: @state.externalResults.length
+                  numResults: filteredExternalResults.length
                   numTotalResults: @state.numExternalMatches
                   query: @state.query
                   (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')

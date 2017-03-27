@@ -11,9 +11,11 @@ gzip: true
 ignore_on_server: _DELETE_NOTHING_ON_THE_S3_BUCKET_
 site: _site
 
-# max_age:
-#   "assets/*": 6000
-#   "*": 300
+max_age:
+  "*": <%= 60 * 60 %>
+  # "assets/*": 6000
+  # One hours for all resources:
+
 
 # gzip:
 #   - .html
@@ -46,6 +48,7 @@ cloudfront_distribution_config:
 
 
 cloudfront_invalidate_root: true
+cloudfront_wildcard_invalidation: true
 
 # concurrency_level: 5
 

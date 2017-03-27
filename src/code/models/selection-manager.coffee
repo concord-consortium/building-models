@@ -26,21 +26,20 @@ module.exports = class SelectionManager
 
   addToSelection: (graphprimitive, context) ->
     entry = {graphprimitive: graphprimitive, context: context, key: graphprimitive.key}
-    unless @isSelected(graphprimitive,context)
+    unless @isSelected(graphprimitive, context)
       @selections.push entry
 
-
-  selectOnly: (graphprimitive, context) ->
+  selectOnly: (graphprimitive, context, multipleSelectionsAllowed) ->
     unless @isSelected(graphprimitive, context)
-      @_clearSelection(context)
-      @addToSelection(graphprimitive,context)
+      @_clearSelection(context) unless multipleSelectionsAllowed
+      @addToSelection(graphprimitive, context)
 
   selection: (context) ->
     where = {}
     where.context = context if context
     _.chain @selections
     .where where
-    .map (obj,i) ->
+    .map (obj) ->
       obj.graphprimitive
     .value()
 
@@ -97,9 +96,10 @@ module.exports = class SelectionManager
   getNodeTitleEditing: ->
     @selection(SelectionManager.NodeTitleEditing)
 
-  selectNodeForInspection: (graphprimitive) ->
-    @selectOnly(graphprimitive, SelectionManager.NodeInspection)
-    @clearLinkInspection()
+  selectNodeForInspection: (graphprimitive, multipleSelectionsAllowed) ->
+    # when clicking with eg. ctrl key, multipleSelectionsAllowed is true, so we dont unselect other nodes.
+    @selectOnly(graphprimitive, SelectionManager.NodeInspection, multipleSelectionsAllowed)
+    @clearLinkInspection() unless multipleSelectionsAllowed
 
     # unselect the title selection, unless its this same graphprimitive.
     unless @isSelectedForTitleEditing(graphprimitive)
@@ -123,9 +123,9 @@ module.exports = class SelectionManager
   getLinkTitleEditing: ->
     @selection(SelectionManager.LinkTitleEditing)
 
-  selectLinkForInspection: (graphprimitive)->
-    @selectOnly(graphprimitive, SelectionManager.LinkInspection)
-    @clearNodeInspection()
+  selectLinkForInspection: (graphprimitive, multipleSelectionsAllowed)->
+    @selectOnly(graphprimitive, SelectionManager.LinkInspection, multipleSelectionsAllowed)
+    @clearNodeInspection() unless multipleSelectionsAllowed
 
     # unselect the title selection, unless its this same graphprimitive.
     unless @isSelectedForTitleEditing(graphprimitive)
