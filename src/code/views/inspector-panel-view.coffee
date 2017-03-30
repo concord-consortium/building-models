@@ -6,6 +6,7 @@ LinkRelationInspectorView = React.createFactory require './relation-inspector-vi
 NodeRelationInspectorView = React.createFactory require './relation-inspector-view'
 SimulationInspectorView   = React.createFactory require './simulation-inspector-view'
 
+InspectorPanelStore  = require "../stores/inspector-panel-store"
 
 {div, i, span} = React.DOM
 
@@ -71,17 +72,11 @@ ToolPanel = React.createFactory React.createClass
 
     (div {className: 'tool-panel'}, buttonsView)
 
-
-
 module.exports = React.createClass
 
   displayName: 'InspectorPanelView'
 
-  getInitialState: ->
-    nowShowing: null
-
-  setShowing: (item) ->
-    @setState(nowShowing: item)
+  mixins: [ InspectorPanelStore.mixin ]
 
   renderSimulationInspector: ->
     (SimulationInspectorView {})
@@ -115,8 +110,7 @@ module.exports = React.createClass
   # 2016-03-15 SF: Changed this to a function explicitly called when selection changes
   nodeSelectionChanged: ->
     unless (@props.node or @props.link)
-      @setState
-        nowShowing: null
+      InspectorPanelStore.actions.closeInspectorPanel()
 
   renderInspectorPanel: ->
     view = switch @state.nowShowing
@@ -139,7 +133,7 @@ module.exports = React.createClass
         node: @props.node
         link: @props.link
         nowShowing: @state.nowShowing
-        onNowShowing: @setShowing
+        onNowShowing: InspectorPanelStore.actions.openInspectorPanel
         diagramOnly: @props.diagramOnly
       )
       @renderInspectorPanel()

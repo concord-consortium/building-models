@@ -11,6 +11,7 @@ AppSettingsStore    = require "../stores/app-settings-store"
 SimulationStore     = require "../stores/simulation-store"
 GraphActions        = require "../actions/graph-actions"
 CodapActions        = require '../actions/codap-actions'
+InspectorPanelStore = require "../stores/inspector-panel-store"
 
 GraphStore  = Reflux.createStore
   init: (context) ->
@@ -271,10 +272,23 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.endCommandBatch()
 
   clickLink: (link, multipleSelectionsAllowed) ->
-    if @selectionManager.isSelected(link)
-      @selectionManager.selectLinkForTitleEditing(link)
+    # this is to allow both clicks and double clicks
+    now = (new Date()).getTime()
+    isDoubleClick = now - (@lastClickLinkTime || 0) <= 250
+    @lastClickLinkTime = now
+    clearTimeout @lastClickLinkTimeout
+
+    if isDoubleClick
+      @selectionManager.selectNodeForInspection(link.targetNode)
+      InspectorPanelStore.actions.openInspectorPanel('relations', {link: link})
     else
-      @selectionManager.selectLinkForInspection(link, multipleSelectionsAllowed)
+      # set single click handler to run 250ms from now so we can wait to see if this is a double click
+      singleClickHandler = =>
+        if @selectionManager.isSelected(link)
+          @selectionManager.selectLinkForTitleEditing(link)
+        else
+          @selectionManager.selectLinkForInspection(link, multipleSelectionsAllowed)
+      @lastClickLinkTimeout = setTimeout singleClickHandler, 250
 
   editLink: (link) ->
     @selectionManager.selectLinkForTitleEditing(link)

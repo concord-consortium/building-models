@@ -33,7 +33,6 @@ module.exports = React.createClass
       Container:            $container[0]
       handleConnect:        @handleConnect
       handleClick:          @handleLinkClick
-      handleDoubleClick:    @handleLinkEditClick
       handleLabelEdit:      @handleLabelEdit
 
     # force an initial draw of the connections
@@ -182,11 +181,6 @@ module.exports = React.createClass
       multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
       @forceRedrawLinks = true
       GraphStore.store.clickLink connection.linkModel, multipleSelections
-
-  handleLinkEditClick: (connection, evnt) ->
-    @handleEvent =>
-      @forceRedrawLinks = true
-      GraphStore.store.editLink connection.linkModel
 
   _updateNodeValue: (name, key, value) ->
     changed = 0
