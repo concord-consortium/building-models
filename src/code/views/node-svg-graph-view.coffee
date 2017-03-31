@@ -1,6 +1,7 @@
-{svg, path, line, text, div, tspan} = React.DOM
+{svg, path, line, text, div, tspan, image} = React.DOM
 
 SimulationStore = require '../stores/simulation-store'
+SquareImage = React.createFactory require "./square-image-view"
 
 module.exports = NodeSvgGraphView = React.createClass
   displayName: 'NodeSvgGraphView'
@@ -49,13 +50,34 @@ module.exports = NodeSvgGraphView = React.createClass
       {x: x, y: y}
     data
 
-  renderLineData: ->
-    data = @pointsToPath(@getPathPoints())
-    (path {d: data, strokeWidth: @props.strokeWidth, stroke: @props.color, fill: "none"})
+  renderImage: ->
+    imageOffset = 2
+    imageStyle =
+      position: "absolute"
+      top: imageOffset
+      left: imageOffset
+      opacity: 0.25
+      width: @props.width + imageOffset
+      height: @props.height + imageOffset
+
+    (div {style: imageStyle},
+      (SquareImage {
+        image: @props.image
+      })
+    )
+
+  renderSVG: ->
+    svgOffset = 3
+    svgStyle =
+      position: "absolute"
+      top: svgOffset
+      left: svgOffset
+    (svg {style: svgStyle, width: @props.width, height: @props.height},
+      (path {d: @pointsToPath(@getPathPoints()), strokeWidth: @props.strokeWidth, stroke: @props.color, fill: "none"})
+    )
 
   render: ->
     (div {},
-      (svg {width: @props.width, height: @props.height},
-        @renderLineData()
-      )
+      @renderImage()
+      @renderSVG()
     )

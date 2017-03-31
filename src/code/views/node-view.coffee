@@ -235,13 +235,12 @@ module.exports = NodeView = React.createClass
         max: @props.data.max
         data: @props.data.frames
         color: @props.dataColor
+        image: @props.data.image
       })
     else
       (SquareImage {
         image: @props.data.image,
-        ref: "thumbnail"
       })
-
 
   render: ->
     style =
