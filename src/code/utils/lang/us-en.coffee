@@ -91,8 +91,8 @@ module.exports =
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below."
   "~IMAGE-BROWSER.SEARCHING": "Searching for %{scope}\"%{query}\""
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for \"%{query}.\""
-  "~IMAGE-BROWSER.SHOWING_N_OF_M": "Showing %{numResults} of %{numTotalResults} matches for \"%{query}.\" "
-  "~IMAGE-BROWSER.SHOW_ALL": "Show all matches."
+  "~IMAGE-BROWSER.SHOWING_N_OF_M": "Note: Only showing %{numResults} of %{numTotalResults} matches. "
+  "~IMAGE-BROWSER.SHOW_ALL": "Click here to show all matches."
   "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette"
 
   "~IMAGE-BROWSER.PLEASE_DROP_IMAGE": "Please drop an image or enter an image url"
@@ -103,6 +103,7 @@ module.exports =
   "~IMAGE-BROWSER.PLEASE_DROP_FILE": "Please select or drop a file"
   "~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP": "Drop image from desktop here"
   "~IMAGE-BROWSER.CHOOSE_FILE": "Or choose a file from your desktop:"
+  "~IMAGE-BROWSER.PROVIDER_MESSAGE": "Image search courtesy of openclipart.org"
 
   "~COLOR.YELLOW": "Yellow"
   "~COLOR.DARK_BLUE": "Dark Blue"
