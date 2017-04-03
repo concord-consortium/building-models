@@ -106,7 +106,7 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator) ->
+  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link) ->
     results = [["Arrow", {
       location: 1.0
       length: 10
@@ -128,7 +128,7 @@ module.exports = class DiagramToolkit
       }]
     if editingLabel
       results.push  ["Custom", {
-        create: @_createEditLabel(label)
+        create: @_createEditLabel(link, label)
         location: 0.5
         id:"customOverlay"
       }]
@@ -145,7 +145,7 @@ module.exports = class DiagramToolkit
     result = stops: [[0.0,startColor], [1.0,endColor]]
     result
 
-  _createEditLabel: (label) ->
+  _createEditLabel: (link, label) ->
     width =
       if label.length < 13 then 90
       else if label.length < 19 then 130
@@ -157,7 +157,7 @@ module.exports = class DiagramToolkit
       .show ->
         $(@).focus()
       .change ->
-        _self.options.handleLabelEdit? this.value
+        _self.options.handleLabelEdit? link, this.value
 
 
   _clean_borked_endpoints: ->
@@ -230,7 +230,7 @@ module.exports = class DiagramToolkit
       source: opts.source
       target: opts.target
       paintStyle: paintStyle
-      overlays: @_overlays opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator
+      overlays: @_overlays opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel
       endpoint: @_endpointOptions("Rectangle", thickness, 'node-link-endpoint')
 
     connection.bind 'click', @handleClick.bind @

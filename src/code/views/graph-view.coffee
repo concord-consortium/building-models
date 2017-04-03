@@ -380,8 +380,8 @@ module.exports = React.createClass
     result = (a and b and c and d)
     result
 
-  handleLabelEdit: (title) ->
-    @props.graphStore.changeLink @state.editingLink, {title: title}
+  handleLabelEdit: (link, title) ->
+    @props.graphStore.changeLink link, {title: title}
     @props.selectionManager.clearSelection()
 
   render: ->
