@@ -23,7 +23,8 @@ module.exports =
     if add
       deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
       $(window).on 'keydown', (e) ->
-        if e.which is 8 and not $(e.target).is('input, textarea')
+        # 8 is backspace, 46 is delete
+        if e.which in [8, 46] and not $(e.target).is('input, textarea')
           e.preventDefault()
           deleteFunction()
     else
