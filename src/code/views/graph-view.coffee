@@ -120,6 +120,7 @@ module.exports = React.createClass
     if (prevState.description.links != @state.description.links) or
         (prevState.simulationPanelExpanded != @state.simulationPanelExpanded) or
         (prevState.selectedLink != @state.selectedLink) or
+        (prevState.relationshipSymbols != @state.relationshipSymbols) or
         @forceRedrawLinks
       @diagramToolkit?.clear?()
       @_updateToolkit()
