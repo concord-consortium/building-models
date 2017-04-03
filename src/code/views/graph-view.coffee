@@ -36,6 +36,9 @@ module.exports = React.createClass
       handleDoubleClick:    @handleLinkEditClick
       handleLabelEdit:      @handleLabelEdit
 
+    # force an initial draw of the connections
+    @_updateToolkit()
+
     @props.selectionManager.addSelectionListener (manager) =>
       [..., lastLinkSelection] = @state.selectedLink
       selectedNodes     = manager.getNodeInspection() or []
