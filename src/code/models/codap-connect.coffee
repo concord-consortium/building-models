@@ -96,7 +96,7 @@ module.exports = class CodapConnect
                 pluralCase: 'runs'
               attrs: [
                 name: tr '~CODAP.SIMULATION.EXPERIMENT'
-                type: 'numeric'
+                type: 'categorical'
               ]
             },
             {
