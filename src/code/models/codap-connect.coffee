@@ -46,6 +46,8 @@ module.exports = class CodapConnect
         frame   = ret[0]
         context = ret[1]
 
+        @graphStore.setUsingCODAP true
+
         if frame?.values.externalUndoAvailable
           CodapActions.hideUndoRedo()
         else if frame?.values.standaloneUndoModeAvailable
@@ -209,7 +211,7 @@ module.exports = class CodapConnect
       action: 'notify',
       resource: 'undoChangeNotice'
       values: {
-        operation: 'undoAction'
+        operation: if @standaloneMode then 'undoButtonPress' else 'undoAction'
       }
 
   _sendRedoToCODAP: ->
@@ -217,7 +219,7 @@ module.exports = class CodapConnect
       action: 'notify',
       resource: 'undoChangeNotice'
       values: {
-        operation: 'redoAction'
+        operation: if @standaloneMode then 'redoButtonPress' else 'redoAction'
       }
 
   sendUndoableActionPerformed: (logMessage) ->
