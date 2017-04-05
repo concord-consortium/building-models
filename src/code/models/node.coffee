@@ -27,7 +27,7 @@ module.exports = class Node extends GraphPrimitive
     {
       @x=0
       @y=0
-      @title="untitled"
+      @title= tr "~NODE.UNTITLED"
       @image
       @isAccumulator=false
       @valueDefinedSemiQuantitatively=true,

@@ -14,6 +14,12 @@ NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
   mixins: [require '../mixins/node-title']
 
+  getInitialState: ->
+    isUniqueTitle: @isUniqueTitle @props.node.title
+
+  isUniqueTitle: (title) ->
+    @props.graphStore.isUniqueTitle title, @props.node
+
   componentWillUnmount: ->
     if @props.isEditing
       @inputElm().off()
@@ -47,6 +53,7 @@ NodeTitle = React.createFactory React.createClass
   updateTitle: (e) ->
     @titleUpdated = true
     newTitle = @cleanupTitle(@inputValue())
+    @setState isUniqueTitle: @isUniqueTitle newTitle
     @props.onChange(newTitle)
 
   finishEditing: ->
@@ -62,10 +69,11 @@ NodeTitle = React.createFactory React.createClass
   renderTitleInput: ->
     displayTitle = @displayTitleForInput(@props.title)
     canDeleteWhenEmpty = @props.node.addedThisSession and not @titleUpdated
+    className = "node-title#{if not @state.isUniqueTitle then ' non-unique-title' else ''}"
     (input {
       type: "text"
       ref: "input"
-      className: "node-title"
+      className: className
       onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
       onChange: @updateTitle
       defaultValue: displayTitle
@@ -171,6 +179,7 @@ module.exports = NodeView = React.createClass
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
 
   changeTitle: (newTitle) ->
+    newTitle = @props.graphStore.ensureUniqueTitle @props.data, newTitle
     @props.graphStore.startNodeEdit()
     log.info "Title is changing to #{newTitle}"
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
