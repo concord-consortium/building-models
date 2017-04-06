@@ -43,6 +43,7 @@ module.exports = React.createClass
   updateChecked:  (evt) ->
     value = evt.target.checked
     @props.graphStore.changeNode(isAccumulator:value)
+    SimulationStore.actions.toggledCollectorTo value
 
   updateDefiningType: ->
     @props.graphStore.changeNode(valueDefinedSemiQuantitatively: not @props.node.valueDefinedSemiQuantitatively)
