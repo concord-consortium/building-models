@@ -8,6 +8,8 @@ GraphView   = React.createFactory require "./node-svg-graph-view"
 CodapConnect = require '../models/codap-connect'
 DEFAULT_CONTEXT_NAME = 'building-models'
 
+InspectorPanelStore = require "../stores/inspector-panel-store"
+
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
   mixins: [require '../mixins/node-title']
@@ -104,11 +106,18 @@ module.exports = NodeView = React.createClass
     ignoreDrag: false
 
   handleSelected: (actually_select, evt) ->
-    # console.log 'selected ' + actually_select, evt.ctrlKey, @props.selectionManager.selections
-    if @props.selectionManager
-      selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-      multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
-      @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
+    return if not @props.selectionManager
+
+    selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
+    multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
+    @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
+
+    # open the relationship panel on double click if the node has incombing links
+    if @props.data.inLinks().length > 0
+      now = (new Date()).getTime()
+      if now - (@lastClickLinkTime || 0) <= 250
+        InspectorPanelStore.actions.openInspectorPanel 'relations'
+      @lastClickLinkTime = now
 
   propTypes:
     onDelete: React.PropTypes.func

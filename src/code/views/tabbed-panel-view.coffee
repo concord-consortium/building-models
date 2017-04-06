@@ -22,7 +22,11 @@ module.exports = React.createClass
   displayName: 'TabbedPanelView'
 
   getInitialState: ->
-    selectedTabIndex: 0
+    selectedTabIndex: @props.selectedTabIndex || 0
+
+  componentWillReceiveProps: (nextProps) ->
+    if @props.selectedTabIndex isnt nextProps.selectedTabIndex
+      @selectedTab nextProps.selectedTabIndex
 
   statics:
     Tab: (settings) -> new TabInfo settings

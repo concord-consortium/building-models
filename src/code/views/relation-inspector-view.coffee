@@ -4,7 +4,7 @@ TabbedPanel = React.createFactory require './tabbed-panel-view'
 Tabber = require './tabbed-panel-view'
 tr = require "../utils/translate"
 
-graphStore        = require '../stores/graph-store'
+inspectorPanelStore = require '../stores/inspector-panel-store'
 
 {div, h2, label, span, input, p, i, select, option} = React.DOM
 
@@ -12,7 +12,7 @@ module.exports = RelationInspectorView = React.createClass
 
   displayName: 'RelationInspectorView'
 
-  mixins: [ graphStore.mixin ]
+  mixins: [ inspectorPanelStore.mixin ]
 
   renderTabforLink: (link) ->
     relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
@@ -23,9 +23,12 @@ module.exports = RelationInspectorView = React.createClass
     (Tabber.Tab {label: label, component: relationView, defined: isFullyDefined})
 
   renderNodeRelationInspector: ->
-    tabs = _.map @props.node.inLinks(), (link) => @renderTabforLink(link)
+    selectedTabIndex = 0
+    tabs = _.map @props.node.inLinks(), (link, i) =>
+      selectedTabIndex = i if (@state.selectedLink is link)
+      @renderTabforLink(link)
     (div {className:'relation-inspector'},
-      (TabbedPanel {tabs: tabs})
+      (TabbedPanel {tabs: tabs, selectedTabIndex: selectedTabIndex})
     )
 
   renderLinkRelationInspector: ->
