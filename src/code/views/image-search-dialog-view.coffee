@@ -3,7 +3,7 @@ ImageDialogStore = require "../stores/image-dialog-store"
 OpenClipart = require '../utils/open-clipart'
 tr = require '../utils/translate'
 
-{div, input, button, img, i, a, form, br} = React.DOM
+{div, input, button, img, i, a, form, br, span} = React.DOM
 
 ImageSearchResult = React.createFactory React.createClass
   displayName: 'ImageSearchResult'
@@ -76,6 +76,7 @@ module.exports = React.createClass
 
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and @state.externalResults.length is 0
+    providerMessage = (div {key: "provider-message", className: "image-search-dialog-provider-message"}, tr '~IMAGE-BROWSER.PROVIDER_MESSAGE')
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
@@ -84,7 +85,7 @@ module.exports = React.createClass
         (div {},
           (div {className: 'image-search-dialog-form'},
             (form {},
-              (input {type: 'text', ref: 'search', placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
+              (input {type: 'text', ref: 'search', defaultValue: @state.query, placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
               (input {type: 'submit', value: 'Search', onClick: @searchClicked})
             )
           ),
@@ -98,19 +99,25 @@ module.exports = React.createClass
 
           (div {className: 'image-search-main-results'},[
             if not @state.searchable or showNoResultsAlert
-              (div {className: 'image-search-section', style: height: '100%'},[
-                (div {className: 'image-search-dialog-results'},
+              (div {key: 'image-search-section', className: 'image-search-section', style: height: '100%'},[
+                (div {className: 'image-search-dialog-results show-all'},
                   for node, index in _.map @props.internalLibrary
                     if node.image
                       (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
                 )
+                providerMessage
               ])
             else
               filteredExternalResultsAll = (@state.externalResults.filter (x) => not @isDisabledInExternalSearch x)
               filteredExternalResults = if @state.searchingAll then filteredExternalResultsAll else filteredExternalResultsAll[..23]
+              header = if @state.externalResults.length < @state.numExternalMatches
+                matchInfo = tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
+                  numResults: filteredExternalResults.length
+                  numTotalResults: @state.numExternalMatches
+                (span {}, matchInfo, (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL'))
               (div {className: 'image-search-section', style: height: '100%'},[
-                (div {className: 'header'}, tr 'Openclipart.org Images'),
-                (div {className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
+                (div {key: 'header', className: 'header'}, header),
+                (div {key: 'results', className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
                   if @state.searching
                     (div {},
                       (i {className: "icon-codap-options spin"})
@@ -125,15 +132,7 @@ module.exports = React.createClass
                     for node, index in filteredExternalResults
                       (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
                 )
-
-              if @state.externalResults.length < @state.numExternalMatches
-                (div {className: "image-search-dialog-results-text"},
-                  tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
-                  numResults: filteredExternalResults.length
-                  numTotalResults: @state.numExternalMatches
-                  query: @state.query
-                  (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL')
-                )
+                providerMessage
               ])
           ])
         )
