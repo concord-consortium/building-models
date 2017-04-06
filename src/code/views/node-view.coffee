@@ -16,6 +16,10 @@ NodeTitle = React.createFactory React.createClass
     if @props.isEditing
       @inputElm().off()
 
+  componentWillUpdate: (nextProps) ->
+    # mark the title as updated even if no change was made when it leaves edit mode
+    @titleUpdated = true if @props.isEditing and not nextProps.isEditing
+
   componentDidUpdate: ->
     if @props.isEditing
       $elem = @inputElm()
@@ -33,7 +37,13 @@ NodeTitle = React.createFactory React.createClass
   inputValue: ->
     @inputElm().val()
 
+  detectDeleteWhenEmpty: (e) ->
+    # 8 is backspace, 46 is delete
+    if e.which in [8, 46] and not @titleUpdated
+      @props.graphStore.removeNode @props.nodeKey
+
   updateTitle: (e) ->
+    @titleUpdated = true
     newTitle = @cleanupTitle(@inputValue())
     @props.onChange(newTitle)
 
@@ -49,10 +59,12 @@ NodeTitle = React.createFactory React.createClass
 
   renderTitleInput: ->
     displayTitle = @displayTitleForInput(@props.title)
+    canDeleteWhenEmpty = @props.node.addedThisSession and not @titleUpdated
     (input {
       type: "text"
       ref: "input"
       className: "node-title"
+      onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
       onChange: @updateTitle
       value: displayTitle
       maxLength: @maxTitleLength
@@ -274,6 +286,9 @@ module.exports = NodeView = React.createClass
               onChange: @changeTitle
               onStopEditing: @stopEditing
               onStartEditing: @startEditing
+              node: @props.data
+              nodeKey: @props.nodeKey
+              graphStore: @props.graphStore
             })
           )
         )

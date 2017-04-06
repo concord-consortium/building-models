@@ -100,6 +100,7 @@ module.exports = React.createClass
       title: title
       paletteItem: paletteItem.uuid
       image: paletteItem.image
+      addedThisSession: true
 
     @props.graphStore.addNode newNode
     @props.graphStore.editNode newNode.key

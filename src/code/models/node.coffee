@@ -33,6 +33,7 @@ module.exports = class Node extends GraphPrimitive
       @valueDefinedSemiQuantitatively=true,
       @paletteItem
       @frames=[]
+      @addedThisSession=false
     } = nodeSpec
 
     # Save internal values of min, max and initialValues. Actual values retreived
