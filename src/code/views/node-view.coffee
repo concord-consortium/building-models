@@ -68,7 +68,7 @@ NodeTitle = React.createFactory React.createClass
       className: "node-title"
       onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
       onChange: @updateTitle
-      value: displayTitle
+      defaultValue: displayTitle
       maxLength: @maxTitleLength
       placeholder: @titlePlaceholder()
       onBlur: =>
@@ -285,7 +285,7 @@ module.exports = NodeView = React.createClass
             (div {
               className: "img-background"
               onClick: ((evt) => @handleSelected true, evt)
-              onTouchend: (=> @handleSelected true)
+              onTouchEnd: (=> @handleSelected true)
               },
               @renderNodeInternal()
             )

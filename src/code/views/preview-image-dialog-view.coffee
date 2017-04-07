@@ -16,7 +16,7 @@ module.exports = React.createClass
     PaletteStore.actions.addToPalette @props.imageInfo
 
   render: ->
-    (div {},
+    (div {key: @props.key},
       (div {className: 'header'}, tr '~IMAGE-BROWSER.PREVIEW')
       (div {className: 'preview-image'},
         (img {src: @props.imageInfo?.image})
