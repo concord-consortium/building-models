@@ -40,8 +40,8 @@ module.exports =
 
   getRenderOptions: (slug) ->
     [
-      (option {value: 'public domain'}, (@getLicenseLabel 'public domain'))
-      (optgroup {label: 'Creative Commons'},
+      (option {key: "#{slug}-public-domain", value: 'public domain'}, (@getLicenseLabel 'public domain'))
+      (optgroup {key: "#{slug}-opt-group", label: 'Creative Commons'},
         (option {key: slug, value: slug}, license.label) for slug, license of @map['creative commons']
       )
     ]

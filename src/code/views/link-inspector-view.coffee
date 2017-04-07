@@ -31,7 +31,7 @@ module.exports = React.createClass
       (div {className: 'inspector-content'},
         (div {className: 'edit-row'},
           (label {name: 'title'}, tr "~LINK-EDIT.TITLE")
-          (input {type: 'text', name: 'title', value: @props.link.title, onChange: @changeTitle})
+          (input {type: 'text', name: 'title', defaultValue: @props.link.title, onChange: @changeTitle})
         )
         (div {className: 'edit-row'},
           (label {className: 'link-delete', onClick: @deleteLink}, tr("~LINK-EDIT.DELETE"))

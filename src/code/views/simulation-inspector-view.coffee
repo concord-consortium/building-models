@@ -36,21 +36,21 @@ module.exports = React.createClass
         (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
 
         (div {className: "row"},
-          (input {type: 'checkbox', value: 'cap-values', checked: @state.capNodeValues, onChange: @setCapNodeValues})
+          (input {type: 'checkbox', value: 'cap-values', defaultChecked: @state.capNodeValues, onChange: @setCapNodeValues})
           (label {}, tr '~SIMULATION.CAP_VALUES')
         )
       )
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
       (div {className: minigraphsCheckboxClass},
-        (input {type: 'checkbox', value: 'show-mini', checked: @state.showingMinigraphs, disabled: @state.diagramOnly, onChange: @setShowingMinigraphs})
+        (input {type: 'checkbox', value: 'show-mini', defaultChecked: @state.showingMinigraphs, disabled: @state.diagramOnly, onChange: @setShowingMinigraphs})
         (label {}, tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS')
       )
       (div {className: "row"},
-        (input {type: 'checkbox', value: 'diagram-only', checked: @state.diagramOnly, onChange: @setDiagramOnly})
+        (input {type: 'checkbox', value: 'diagram-only', defaultChecked: @state.diagramOnly, onChange: @setDiagramOnly})
         (label {}, tr '~SIMULATION.DIAGRAM_ONLY')
       )
       (div {className: "row"},
-        (input {type: 'checkbox', value: 'relationship-symbols', checked: @state.relationshipSymbols, onChange: @setRelationshipSymbols})
+        (input {type: 'checkbox', value: 'relationship-symbols', defaultChecked: @state.relationshipSymbols, onChange: @setRelationshipSymbols})
         (label {}, tr '~SIMULATION.RELATIONSHIP_SYMBOLS')
       )
 

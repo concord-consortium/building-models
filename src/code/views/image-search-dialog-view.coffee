@@ -85,7 +85,7 @@ module.exports = React.createClass
         (div {},
           (div {className: 'image-search-dialog-form'},
             (form {},
-              (input {type: 'text', ref: 'search', defaultValue: @state.query, placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
+              (input {type: 'text', ref: 'search', value: @state.query, placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
               (input {type: 'submit', value: 'Search', onClick: @searchClicked})
             )
           ),
@@ -100,7 +100,7 @@ module.exports = React.createClass
           (div {className: 'image-search-main-results'},[
             if not @state.searchable or showNoResultsAlert
               (div {key: 'image-search-section', className: 'image-search-section', style: height: '100%'},[
-                (div {className: 'image-search-dialog-results show-all'},
+                (div {key:'image-search-results', className: 'image-search-dialog-results show-all'},
                   for node, index in _.map @props.internalLibrary
                     if node.image
                       (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
@@ -115,7 +115,7 @@ module.exports = React.createClass
                   numResults: filteredExternalResults.length
                   numTotalResults: @state.numExternalMatches
                 (span {}, matchInfo, (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL'))
-              (div {className: 'image-search-section', style: height: '100%'},[
+              (div {key: 'image-search-section-post-search', className: 'image-search-section', style: height: '100%'},[
                 (div {key: 'header', className: 'header'}, header),
                 (div {key: 'results', className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
                   if @state.searching

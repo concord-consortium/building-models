@@ -2,7 +2,7 @@ xlat       = require '../utils/translate'
 licenses   = require '../data/licenses'
 ImageDialogStore = require '../stores/image-dialog-store'
 
-{div, table, tr, td, a, input, select, radio, p} = React.DOM
+{div, table, tbody, tr, td, a, input, select, radio, p} = React.DOM
 
 module.exports = React.createClass
 
@@ -42,18 +42,20 @@ module.exports = React.createClass
     if @props.metadata.source is 'external'
       (div {key: 'external'},
         (table {},
-          (tr {}, (td {}, xlat '~METADATA.TITLE'),
-            (td {},
-              (input {ref: 'title', value: title, onChange: @changed})))
+          (tbody {},
+            (tr {}, (td {}, xlat '~METADATA.TITLE'),
+              (td {},
+                (input {ref: 'title', defaultValue: title, onChange: @changed})))
 
-          (tr {}, (td {}, xlat '~METADATA.LINK'),
-            (td {},
-              (input {ref: 'link', value: link, onChange: @changed})))
-          (tr {}, (td {}, xlat '~METADATA.CREDIT'),
-            (td {},
-              (select {ref: 'license', value: licenseName, onChange: @changed},
-                licenses.getRenderOptions licenseName
-          )))
+            (tr {}, (td {}, xlat '~METADATA.LINK'),
+              (td {},
+                (input {ref: 'link', defaultValue: link, onChange: @changed})))
+            (tr {}, (td {}, xlat '~METADATA.CREDIT'),
+              (td {},
+                (select {ref: 'license', defaultValue: licenseName, onChange: @changed},
+                  licenses.getRenderOptions licenseName
+            )))
+          )
         )
         (p {className: 'learn-more'}, (a {href: licenseData.link, target: '_blank'}, "Learn more about #{licenseData.fullLabel}"))
       )
