@@ -10,6 +10,8 @@ gulp.task('watch', function() {
     gulp.watch(config.vendor.watch,               ['vendor']);
 });
 
+gulp.task('lint', ['coffeelint']);
+
 gulp.task('build-all', ['coffeelint', 'browserify-app', 'browserify-globals', 'css', 'assets', 'vendor']);
 
 gulp.task('default', ['build-all', 'watch']);
