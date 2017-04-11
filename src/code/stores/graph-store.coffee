@@ -187,8 +187,9 @@ GraphStore  = Reflux.createStore
   moveNodeCompleted: (nodeKey, leftDiff, topDiff) ->
     @endNodeEdit()
     @undoRedoManager.createAndExecuteCommand 'moveNode',
-      execute: => @moveNode nodeKey, 0,0 # FIXME leftDiff, topDiff
+      execute: => @moveNode nodeKey, 0, 0
       undo: => @moveNode nodeKey, -leftDiff, -topDiff
+      redo: => @moveNode nodeKey, leftDiff, topDiff
 
   moveNode: (nodeKey, leftDiff, topDiff) ->
     node = @nodeKeys[nodeKey]
