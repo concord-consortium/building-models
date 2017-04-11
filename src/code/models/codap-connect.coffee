@@ -1,6 +1,7 @@
 IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
 tr = require '../utils/translate'
 CodapActions    = require '../actions/codap-actions'
+undoRedoUIActions = (require '../stores/undo-redo-ui-store').actions
 SimulationStore = require '../stores/simulation-store'
 TimeUnits       = require '../utils/time-units'
 
@@ -212,7 +213,9 @@ module.exports = class CodapConnect
       resource: 'undoChangeNotice'
       values: {
         operation: if @standaloneMode then 'undoButtonPress' else 'undoAction'
-      }
+      }, (response) ->
+        if (response?.values?.canUndo? && response?.values?.canRedo?)
+          undoRedoUIActions.setCanUndoRedo response.values.canUndo, response.values.canRedo
 
   _sendRedoToCODAP: ->
     @codapPhone.call
@@ -220,7 +223,9 @@ module.exports = class CodapConnect
       resource: 'undoChangeNotice'
       values: {
         operation: if @standaloneMode then 'redoButtonPress' else 'redoAction'
-      }
+      }, (response) ->
+        if (response?.values?.canUndo? && response?.values?.canRedo?)
+          undoRedoUIActions.setCanUndoRedo response.values.canUndo, response.values.canRedo
 
   sendUndoableActionPerformed: (logMessage) ->
     @codapPhone.call
@@ -229,7 +234,9 @@ module.exports = class CodapConnect
       values: {
         operation: 'undoableActionPerformed',
         logMessage: logMessage
-      }
+      }, (response) ->
+        if (response?.values?.canUndo? && response?.values?.canRedo?)
+          undoRedoUIActions.setCanUndoRedo response.values.canUndo, response.values.canRedo
 
   addData: (data) ->
     timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
@@ -300,6 +307,9 @@ module.exports = class CodapConnect
         if operation is 'clearRedo'
           log.info 'Received clearRedo request from CODAP.'
           @graphStore.undoRedoManager.clearRedo()
+        # update undo/redo UI state based on CODAP undo/redo UI state
+        if (cmd.values?.canUndo? and cmd.values?.canRedo?)
+          undoRedoUIActions.setCanUndoRedo cmd.values?.canUndo, cmd.values?.canRedo
       else
         log.info 'Unknown request received from CODAP: ' + JSON.stringify cmd
 
@@ -319,7 +329,7 @@ module.exports = class CodapConnect
   #
   # Requests a CODAP action, if the Building Models tool is configured to reside
   # in CODAP. For actions that may be requested, see
-  # https://github.com/concord-consortium/codap/wiki/Data-Interactive-API .
+  # https://github.com/concord-consortium/codap/wiki/CODAP-Data-Interactive-Plugin-API .
   #
   # Similarly to the Google Drive API, this method will report results of its
   # asynchronous request either by invoking the provided callback, or, if no

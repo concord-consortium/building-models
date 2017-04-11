@@ -2,27 +2,16 @@
 AboutView        = React.createFactory require './about-view'
 AppSettingsStore = require '../stores/app-settings-store'
 CodapStore       = require '../stores/codap-store'
+UndoRedoUIStore  = require '../stores/undo-redo-ui-store'
 tr               = require '../utils/translate'
 
 SimulationRunPanel = React.createFactory require './simulation-run-panel-view'
 
 module.exports = React.createClass
 
-  mixins: [ CodapStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ CodapStore.mixin, UndoRedoUIStore.mixin, AppSettingsStore.mixin ]
 
   displayName: 'DocumentActions'
-
-  getInitialState: ->
-    canRedo: false
-    canUndo: false
-
-  componentDidMount: ->
-    @props.graphStore.addChangeListener @modelChanged
-
-  modelChanged: (status) ->
-    @setState
-      canRedo: status.canRedo
-      canUndo: status.canUndo
 
   undoClicked: ->
     @props.graphStore.undo()
