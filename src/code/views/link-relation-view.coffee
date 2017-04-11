@@ -188,7 +188,7 @@ module.exports = LinkRelationView = React.createClass
         (textarea
           defaultValue: @props.link.reasoning
           placeholder: tr "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER"
-          onBlur: @updateReasoning
+          onChange: @updateReasoning
           ref: 'reasoning'
           className: 'full'
           rows: 3
