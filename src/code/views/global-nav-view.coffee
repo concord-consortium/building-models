@@ -6,17 +6,17 @@ OpenInCodap        = React.createFactory require './open-in-codap-view'
 ModalGoogleSave    = React.createFactory require './modal-google-save-view'
 BuildInfoView      = React.createFactory require './build-info-view'
 GoogleFileStore    = require '../stores/google-file-store'
+UndoRedoUIStore    = require '../stores/undo-redo-ui-store'
 AppSettingsActions = require('../stores/app-settings-store').actions
 
 module.exports = React.createClass
 
   displayName: 'GlobalNav'
 
-  mixins: [ GoogleFileStore.mixin ]
+  mixins: [ GoogleFileStore.mixin, UndoRedoUIStore.mixin ]
 
   getInitialState: ->
     dirty: false
-    canUndo: false
     saved: false
 
   componentDidMount: ->
