@@ -43,6 +43,7 @@ module.exports = React.createClass
   updateChecked:  (evt) ->
     value = evt.target.checked
     @props.graphStore.changeNode(isAccumulator:value)
+    SimulationStore.actions.toggledCollectorTo value
 
   updateDefiningType: ->
     @props.graphStore.changeNode(valueDefinedSemiQuantitatively: not @props.node.valueDefinedSemiQuantitatively)
@@ -73,7 +74,7 @@ module.exports = React.createClass
       (input {
         className: "half small editable-prop #{classNames}"
         type: 'number'
-        value: @state["#{property}-value"]
+        defaultValue: @state["#{property}-value"]
         onChange: updateProperty
         onBlur: swapState
         onKeyDown: keyDown
@@ -105,7 +106,7 @@ module.exports = React.createClass
                 type: "number",
                 min: "#{node.min}",
                 max: "#{node.max}",
-                value: "#{node.initialValue}",
+                defaultValue: "#{node.initialValue}",
                 onClick: @selectText,
                 onChange: @updateValue}
               )
@@ -116,7 +117,7 @@ module.exports = React.createClass
               type: "range",
               min: "#{node.min}",
               max: "#{node.max}",
-              value: "#{node.initialValue}",
+              defaultValue: "#{node.initialValue}",
               onChange: @updateValue}
             )
             @renderMinAndMax(node)
@@ -124,7 +125,7 @@ module.exports = React.createClass
         )
         (span {className: "checkbox group full"},
           (span {},
-            (input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked})
+            (input {type: "checkbox", defaultChecked: node.isAccumulator, onChange: @updateChecked})
             (label {}, tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR")
           )
         )

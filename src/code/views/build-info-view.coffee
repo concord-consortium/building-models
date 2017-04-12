@@ -1,4 +1,4 @@
-{div, a, table, tr, td, i} = React.DOM
+{div, a, table, tbody, tr, td, i} = React.DOM
 Migration = require "../data/migrations/migrations"
 
 module.exports = BuildInfoView = React.createClass
@@ -44,27 +44,29 @@ module.exports = BuildInfoView = React.createClass
             (div {className: "top", style: {textAlign: "right"}},
               (i {className: 'icon-codap-ex', style: {padding: 0, cursor: "pointer"}, onClick: @close }))
             (table {},
-              (tr {className: "date"},
-                (td {className: "key"}, "released on:")
-                (td {className: "value"}, @state.date)
-              )
-              (tr {className: "commit"},
-                (td {className: "key"}, "commit:")
-                (td {className: "value"},
-                  (a {href: @link(), target: "_blank"}, @state.commit)
+              (tbody {},
+                (tr {className: "date"},
+                  (td {className: "key"}, "released on:")
+                  (td {className: "value"}, @state.date)
                 )
-              )
-              (tr {className: "tag"},
-                (td {className: "key"}, "tag:")
-                (td {className: "value"}, @state.tag)
-              )
-              (tr {className: "commit"},
-                (td {className: "key"}, "commiter:")
-                (td {className: "value"}, @state.commiter)
-              )
-              (tr {className: "buildInfo"},
-                (td {className: "key"}, "data format version:")
-                (td {className: "value"}, @state.dataVersion)
+                (tr {className: "commit"},
+                  (td {className: "key"}, "commit:")
+                  (td {className: "value"},
+                    (a {href: @link(), target: "_blank"}, @state.commit)
+                  )
+                )
+                (tr {className: "tag"},
+                  (td {className: "key"}, "tag:")
+                  (td {className: "value"}, @state.tag)
+                )
+                (tr {className: "commit"},
+                  (td {className: "key"}, "commiter:")
+                  (td {className: "value"}, @state.commiter)
+                )
+                (tr {className: "buildInfo"},
+                  (td {className: "key"}, "data format version:")
+                  (td {className: "value"}, @state.dataVersion)
+                )
               )
             )
           )

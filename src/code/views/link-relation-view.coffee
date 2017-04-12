@@ -126,7 +126,7 @@ module.exports = LinkRelationView = React.createClass
 
     (div {className: "bb-select"},
       (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
-      (select {value: currentOption, className:"", ref: "vector", onChange: @updateRelation},
+      (select {defaultValue: currentOption, className:"", ref: "vector", onChange: @updateRelation},
       options)
     )
 
@@ -151,7 +151,7 @@ module.exports = LinkRelationView = React.createClass
     else
       (div {className: "bb-select", style: style},
         (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-        (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation},
+        (select {defaultValue: currentOption, className:"", ref: "scalar", onChange: @updateRelation},
           options
         )
       )
@@ -188,7 +188,7 @@ module.exports = LinkRelationView = React.createClass
         (textarea
           defaultValue: @props.link.reasoning
           placeholder: tr "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER"
-          onBlur: @updateReasoning
+          onChange: @updateReasoning
           ref: 'reasoning'
           className: 'full'
           rows: 3

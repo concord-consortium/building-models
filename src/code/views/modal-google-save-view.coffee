@@ -34,14 +34,14 @@ module.exports = React.createClass
               (input {
                 name: "fileName"
                 ref: "fileName"
-                value: @state.filename
+                defaultValue: @state.filename
                 type: 'text',
                 placeholder: tr '~MENU.UNTITLED_MODEL'
                 onChange: @handleFilenameChange
               })
             )
             (div {className: 'make-public'},
-              (input {type: 'checkbox', value: 'public', checked: @state.isPublic, onChange: @handlePublicChange})
+              (input {type: 'checkbox', value: 'public', defaultChecked: @state.isPublic, onChange: @handlePublicChange})
               (label {}, tr '~GOOGLE_SAVE.MAKE_PUBLIC')
             )
             (div {className: 'buttons'},

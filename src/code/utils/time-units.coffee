@@ -19,6 +19,8 @@ module.exports =
 
   defaultUnit: "STEP"
 
+  defaultCollectorUnit: "DAY"
+
   toString: (unit, plural) ->
     number = if plural then ".PLURAL" else ""
     tr "~TIME.#{unit}#{number}"

@@ -8,6 +8,8 @@ GraphView   = React.createFactory require "./node-svg-graph-view"
 CodapConnect = require '../models/codap-connect'
 DEFAULT_CONTEXT_NAME = 'building-models'
 
+InspectorPanelStore = require "../stores/inspector-panel-store"
+
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
   mixins: [require '../mixins/node-title']
@@ -15,6 +17,10 @@ NodeTitle = React.createFactory React.createClass
   componentWillUnmount: ->
     if @props.isEditing
       @inputElm().off()
+
+  componentWillUpdate: (nextProps) ->
+    # mark the title as updated even if no change was made when it leaves edit mode
+    @titleUpdated = true if @props.isEditing and not nextProps.isEditing
 
   componentDidUpdate: ->
     if @props.isEditing
@@ -33,7 +39,13 @@ NodeTitle = React.createFactory React.createClass
   inputValue: ->
     @inputElm().val()
 
+  detectDeleteWhenEmpty: (e) ->
+    # 8 is backspace, 46 is delete
+    if e.which in [8, 46] and not @titleUpdated
+      @props.graphStore.removeNode @props.nodeKey
+
   updateTitle: (e) ->
+    @titleUpdated = true
     newTitle = @cleanupTitle(@inputValue())
     @props.onChange(newTitle)
 
@@ -49,12 +61,14 @@ NodeTitle = React.createFactory React.createClass
 
   renderTitleInput: ->
     displayTitle = @displayTitleForInput(@props.title)
+    canDeleteWhenEmpty = @props.node.addedThisSession and not @titleUpdated
     (input {
       type: "text"
       ref: "input"
       className: "node-title"
+      onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
       onChange: @updateTitle
-      value: displayTitle
+      defaultValue: displayTitle
       maxLength: @maxTitleLength
       placeholder: @titlePlaceholder()
       onBlur: =>
@@ -92,11 +106,18 @@ module.exports = NodeView = React.createClass
     ignoreDrag: false
 
   handleSelected: (actually_select, evt) ->
-    # console.log 'selected ' + actually_select, evt.ctrlKey, @props.selectionManager.selections
-    if @props.selectionManager
-      selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-      multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
-      @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
+    return if not @props.selectionManager
+
+    selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
+    multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
+    @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
+
+    # open the relationship panel on double click if the node has incombing links
+    if @props.data.inLinks().length > 0
+      now = (new Date()).getTime()
+      if now - (@lastClickLinkTime || 0) <= 250
+        InspectorPanelStore.actions.openInspectorPanel 'relations'
+      @lastClickLinkTime = now
 
   propTypes:
     onDelete: React.PropTypes.func
@@ -235,13 +256,12 @@ module.exports = NodeView = React.createClass
         max: @props.data.max
         data: @props.data.frames
         color: @props.dataColor
+        image: @props.data.image
       })
     else
       (SquareImage {
         image: @props.data.image,
-        ref: "thumbnail"
       })
-
 
   render: ->
     style =
@@ -265,7 +285,7 @@ module.exports = NodeView = React.createClass
             (div {
               className: "img-background"
               onClick: ((evt) => @handleSelected true, evt)
-              onTouchend: (=> @handleSelected true)
+              onTouchEnd: (=> @handleSelected true)
               },
               @renderNodeInternal()
             )
@@ -275,6 +295,9 @@ module.exports = NodeView = React.createClass
               onChange: @changeTitle
               onStopEditing: @stopEditing
               onStartEditing: @startEditing
+              node: @props.data
+              nodeKey: @props.nodeKey
+              graphStore: @props.graphStore
             })
           )
         )

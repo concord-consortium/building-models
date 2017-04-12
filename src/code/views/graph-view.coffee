@@ -33,8 +33,10 @@ module.exports = React.createClass
       Container:            $container[0]
       handleConnect:        @handleConnect
       handleClick:          @handleLinkClick
-      handleDoubleClick:    @handleLinkEditClick
       handleLabelEdit:      @handleLabelEdit
+
+    # force an initial draw of the connections
+    @_updateToolkit()
 
     @props.selectionManager.addSelectionListener (manager) =>
       [..., lastLinkSelection] = @state.selectedLink
@@ -97,6 +99,7 @@ module.exports = React.createClass
       title: title
       paletteItem: paletteItem.uuid
       image: paletteItem.image
+      addedThisSession: true
 
     @props.graphStore.addNode newNode
     @props.graphStore.editNode newNode.key
@@ -120,6 +123,7 @@ module.exports = React.createClass
     if (prevState.description.links != @state.description.links) or
         (prevState.simulationPanelExpanded != @state.simulationPanelExpanded) or
         (prevState.selectedLink != @state.selectedLink) or
+        (prevState.relationshipSymbols != @state.relationshipSymbols) or
         @forceRedrawLinks
       @diagramToolkit?.clear?()
       @_updateToolkit()
@@ -177,11 +181,6 @@ module.exports = React.createClass
       multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
       @forceRedrawLinks = true
       GraphStore.store.clickLink connection.linkModel, multipleSelections
-
-  handleLinkEditClick: (connection, evnt) ->
-    @handleEvent =>
-      @forceRedrawLinks = true
-      GraphStore.store.editLink connection.linkModel
 
   _updateNodeValue: (name, key, value) ->
     changed = 0
@@ -380,8 +379,8 @@ module.exports = React.createClass
     result = (a and b and c and d)
     result
 
-  handleLabelEdit: (title) ->
-    @props.graphStore.changeLink @state.editingLink, {title: title}
+  handleLabelEdit: (link, title) ->
+    @props.graphStore.changeLink link, {title: title}
     @props.selectionManager.clearSelection()
 
   render: ->

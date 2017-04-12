@@ -24,6 +24,7 @@ SimulationActions = Reflux.createActions(
     "recordingDidStart"
     "recordingDidEnd"
     "createExperiment"
+    "toggledCollectorTo"
   ]
 )
 SimulationActions.runSimulation = Reflux.createAction({sync: true})
@@ -34,8 +35,9 @@ SimulationStore   = Reflux.createStore
     ImportActions, GraphActions]
 
   init: ->
-    defaultUnit = TimeUnits.defaultUnit
-    unitName    = TimeUnits.toString(defaultUnit,true)
+    @defaultUnit = TimeUnits.defaultUnit
+    @unitName    = TimeUnits.toString(@defaultUnit,true)
+    @defaultCollectorUnit = TimeUnits.defaultCollectorUnit
     defaultDuration = 50
     timeUnitOptions = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
 
@@ -47,8 +49,8 @@ SimulationStore   = Reflux.createStore
       duration: defaultDuration
       experimentNumber: 1
       experimentFrame: 0
-      stepUnits: defaultUnit
-      stepUnitsName: unitName
+      stepUnits: @defaultUnit
+      stepUnitsName: @unitName
       timeUnitOptions: timeUnitOptions
       capNodeValues: false
       modelIsRunning: false
@@ -94,13 +96,16 @@ SimulationStore   = Reflux.createStore
     @_updateUnitNames()
     @notifyChange()
 
-  onSetStepUnits: (unit) ->
+  onSetStepUnits: (unit, hasCollectors=false) ->
     @settings.stepUnits = unit.unit
+    @defaultCollectorUnit = unit.unit if hasCollectors or @_hasCollectors()
     @_updateUnitNames()
     @notifyChange()
 
   onImport: (data) ->
     _.merge @settings, data.settings.simulation
+    hasCollectors = _.filter(data.nodes, (node) -> node.data.isAccumulator).length > 0
+    @onSetStepUnits(unit: data.settings.simulation.stepUnits, hasCollectors)
     @notifyChange()
 
 
@@ -115,7 +120,7 @@ SimulationStore   = Reflux.createStore
     if @settings.graphHasCollector
       @settings.stepUnits
     else
-      TimeUnits.defaultUnit # "STEPS" when not specified or not running time interval
+      @defaultUnit
 
   _runSimulation: ->
     if @settings.modelIsRunnable
@@ -202,6 +207,14 @@ SimulationStore   = Reflux.createStore
     @timeout = setTimeout(stopRecording, 500)
     @notifyChange()
 
+  onToggledCollectorTo: (checked) ->
+    # only change the units automatically when we transition from 0 to 1 or 1 to 0 collector nodes
+    numCollectors = (node for node in @nodes when node.isAccumulator).length
+    if checked and numCollectors is 1
+      @onSetStepUnits unit: @defaultCollectorUnit
+    else if not checked and numCollectors is 0
+      @onSetStepUnits unit: @defaultUnit
+
   _isModelRunnable: ->
     return false unless @settings.simulationPanelExpanded
     for node in @nodes
@@ -212,13 +225,13 @@ SimulationStore   = Reflux.createStore
   _updateModelIsRunnable: ->
     @settings.modelIsRunnable = @_isModelRunnable()
 
-  _findCollectors: ->
+  _hasCollectors: (nodes) ->
     for node in @nodes
       if node.isAccumulator then return true
     return false
 
   _updateGraphHasCollector: ->
-    hasCollectors = @_findCollectors()
+    hasCollectors = @_hasCollectors()
     @_stopRecording() if hasCollectors isnt @settings.graphHasCollector
     @settings.graphHasCollector = hasCollectors
 

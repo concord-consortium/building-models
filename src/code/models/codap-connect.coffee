@@ -96,7 +96,7 @@ module.exports = class CodapConnect
                 pluralCase: 'runs'
               attrs: [
                 name: tr '~CODAP.SIMULATION.EXPERIMENT'
-                type: 'numeric'
+                type: 'categorical'
               ]
             },
             {
@@ -149,7 +149,7 @@ module.exports = class CodapConnect
       doResolve = (listAttributeResponse) =>
         if listAttributeResponse.success
           values = listAttributeResponse.values
-          newAttributes = _.select currentAttributes, (a) =>  (! _.includes(values,a.name))
+          newAttributes = _.select currentAttributes, (a) -> (! _.includes(values,a.name))
           message =
             action: 'create'
             resource: 'dataContext[Sage Simulation].collection[Samples].attribute'
@@ -232,7 +232,7 @@ module.exports = class CodapConnect
   addData: (data) ->
     timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
     # Create the sample data values (node values array)
-    sampleData = _.map data, (frame) =>
+    sampleData = _.map data, (frame) ->
       sample = {}
       sample[tr '~CODAP.SIMULATION.EXPERIMENT'] = SimulationStore.store.settings.experimentNumber
       sample[timeUnit] = frame.time
@@ -245,7 +245,7 @@ module.exports = class CodapConnect
     else
       setTimeout(@_sendSimulationData.bind(@), @sendThrottleMs)
 
-  createGraph: (yAttributeName)->
+  createGraph: (yAttributeName) ->
     @_createMissingDataAttributes()
     timeUnit = TimeUnits.toString SimulationStore.store.stepUnits(), true
 
@@ -259,7 +259,7 @@ module.exports = class CodapConnect
         size: { width: 242, height: 221 },
         position: 'bottom'
 
-  createTable: () ->
+  createTable: ->
     unless @tableCreated
       @codapPhone.call
         action: 'create',

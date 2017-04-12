@@ -16,12 +16,13 @@
 
   .image-search-dialog-results
     position absolute
-    margin 24px 0px 24px
+    margin 26px 0px 24px 0px
     bottom 0px
     top 0px
     overflow auto
 
     &.show-all
+      margin-top: 0
       overflow auto
     img
       max-width 50px
@@ -33,9 +34,9 @@
     .in-palette
       opacity 0.25
       cursor not-allowed
-  .image-search-dialog-results-text
+  .image-search-dialog-provider-message
     position absolute
-    bottom 10px
+    bottom 0
   .image-search-main-results
     height 330px
     .image-search-section
@@ -43,8 +44,10 @@
       .header
         position absolute
         top 0
-        margin 0    
-      
+        margin 0
+        font-size: 12px
+        font-style: italic
+
 .preview-image
   margin-bottom 20px
   display inline-block
