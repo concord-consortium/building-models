@@ -263,10 +263,11 @@ module.exports = class CodapConnect
       resource: 'component',
       values:
         type: 'graph'
-        xAttributeName: timeUnit,
-        yAttributeName: yAttributeName,
-        size: { width: 242, height: 221 },
+        xAttributeName: timeUnit
+        yAttributeName: yAttributeName
+        size: { width: 242, height: 221 }
         position: 'bottom'
+        enableNumberToggle: true
 
   createTable: ->
     unless @tableCreated
