@@ -12,7 +12,7 @@ module.exports = class DiagramToolkit
     @kit       = jsPlumb.getInstance {Container: @domContext}
     @kit.importDefaults
       Connector:        ["Bezier", {curviness: 80}],
-      Anchor:           "Continuous",
+      Anchor:           ["Continuous", { faces:["top","left","right"] }]
       DragOptions :     {cursor: 'pointer', zIndex:2000},
       ConnectionsDetachable: true,
       DoNotThrowErrors: false
