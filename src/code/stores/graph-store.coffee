@@ -148,9 +148,30 @@ GraphStore  = Reflux.createStore
     @_graphUpdated()
     @updateListeners()
 
+  isUniqueTitle: (title, skipNode, nodes=@getNodes()) ->
+    nonUniqueNode = (otherNode) ->
+      sameTitle = otherNode.title is title
+      if skipNode then sameTitle and otherNode isnt skipNode else sameTitle
+    not _.find nodes, nonUniqueNode
+
+  ensureUniqueTitle: (node, newTitle=node.title) ->
+    nodes = @getNodes()
+    if not @isUniqueTitle newTitle, node, nodes
+      index = 2
+      endsWithNumber = / (\d+)$/
+      matches = newTitle.match(endsWithNumber)
+      if matches
+        index = parseInt(matches[1], 10) + 1
+        newTitle = newTitle.replace(endsWithNumber, '')
+      template = "#{newTitle} %{index}"
+      loop
+        newTitle = tr template, {index: index++}
+        break if @isUniqueTitle newTitle, node, nodes
+    node.title = newTitle
 
   addNode: (node) ->
     @endNodeEdit()
+    @ensureUniqueTitle node
     @undoRedoManager.createAndExecuteCommand 'addNode',
       execute: => @_addNode node
       undo: => @_removeNode node
