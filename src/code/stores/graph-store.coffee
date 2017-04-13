@@ -154,8 +154,7 @@ GraphStore  = Reflux.createStore
 
   ensureUniqueTitle: (node, newTitle=node.title) ->
     nodes = @getNodes()
-    defaultTitle = tr "~NODE.UNTITLED"
-    if newTitle is defaultTitle or not @isUniqueTitle newTitle, node, nodes
+    if not @isUniqueTitle newTitle, node, nodes
       index = 2
       endsWithNumber = / (\d+)$/
       matches = newTitle.match(endsWithNumber)
