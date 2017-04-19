@@ -4,6 +4,7 @@ CodapActions    = require '../actions/codap-actions'
 undoRedoUIActions = (require '../stores/undo-redo-ui-store').actions
 SimulationStore = require '../stores/simulation-store'
 TimeUnits       = require '../utils/time-units'
+escapeRegExp = (require '../utils/escape-reg-ex').escapeRegExp
 
 module.exports = class CodapConnect
 
@@ -63,6 +64,7 @@ module.exports = class CodapConnect
         if state?
           @graphStore.deleteAll()
           @graphStore.loadData state
+          @_initialSyncAttributeProperties null, true
       else
         log.info "null response in codap-connect codapPhone.call"
     )
@@ -77,10 +79,18 @@ module.exports = class CodapConnect
       # ret==null is indication of timeout, not an indication that the data set
       # doesn't exist.
       if !ret or ret.success
+        @_initialSyncAttributeProperties ret.values?.collections?[1].attrs
         @initGameHandler ret
       else
         @_createDataContext()
 
+  # initial synchronization; primarily used for synchronizing legacy documents
+  _initialSyncAttributeProperties: (attrs, isLoaded) ->
+    @_attrsToSync = attrs if attrs
+    @_attrsAreLoaded = isLoaded if isLoaded
+    if @_attrsToSync and @_attrsAreLoaded
+      @_syncAttributeProperties @_attrsToSync, true
+      @_attrsToSync = null
 
   _createDataContext: ->
     sampleDataAttrs = @_getSampleAttributes()
@@ -132,7 +142,7 @@ module.exports = class CodapConnect
     addNodeAttr = (node) ->
       type = if node.valueDefinedSemiQuantitatively then 'qualitative' else 'numeric'
       sampleDataAttrs.push
-        name: node.title
+        name: node.codapName or node.title
         type: type
 
     _.each nodes, (node) ->
@@ -159,6 +169,8 @@ module.exports = class CodapConnect
             values: newAttributes
           @codapPhone.call message, (response) =>
             if response.success
+              if (response.values?.attrs?)
+                @_syncAttributeProperties response.values.attrs, true
               @attributesKey = attributesKey
               callback() if callback
             else
@@ -172,6 +184,52 @@ module.exports = class CodapConnect
       @codapPhone.call(getListing, doResolve)
       log.info "requested list of attributes"
 
+  _syncAttributeProperties: (attrProps, initialSync) ->
+    nodesToSync = if initialSync \
+                    then _.filter @graphStore.nodeKeys, (node) -> not node.codapID or not node.codapName \
+                    else _.map @graphStore.nodeKeys, (node) -> node
+    if nodesToSync?.length
+      _.each attrProps, (attr) =>
+        # check for id match
+        node = _.find nodesToSync, (node) -> node.codapID is attr.id
+        # check for clientName match
+        if not node and attr.clientName
+          node = _.find nodesToSync, (node) -> node.title is attr.clientName
+        # check for codapName match
+        if not node and attr.name
+          node = _.find nodesToSync, (node) -> node.codapName is attr.name
+        # check for title match; use RegEx to match '_' as wildcard character
+        if not node and attr.name
+          nameRegEx = new RegExp("^#{escapeRegExp (attr.name.replace /_/g, '?')}$")
+          node = _.find nodesToSync, (node) -> nameRegEx.test node.title
+        if node
+          # sync id and name
+          if not node.codapID or not node.codapName
+            node.codapID = attr.id if not node.codapID
+            node.codapName = attr.name
+          # sync name/title, but only if it's changed on the CODAP side
+          else if not initialSync and (node.codapName isnt attr.name)
+            node.codapName = attr.name
+            if (node.title isnt attr.name)
+              @graphStore._changeNode node, { title: attr.name }
+          if initialSync
+            _.remove nodesToSync, (node) -> node.codapID and node.codapName
+          else
+            _.remove nodesToSync, (node) -> node.codapID is attr.id
+        if not nodesToSync?.length
+          false # terminate iteration if all nodes are synced
+
+  sendRenameAttribute: (nodeKey, prevTitle) ->
+    node = @graphStore.nodeKeys[nodeKey]
+    codapKey = node.codapID or node.codapName or prevTitle
+    if codapKey
+      message =
+        action: 'update'
+        resource: "dataContext[Sage Simulation].collection[Samples].attribute[#{codapKey}]"
+        values: { name: node.title }
+      @codapPhone.call message, (response) ->
+        if not response.success
+          console.log "Error: CODAP attribute rename failed!"
 
   _timeStamp: ->
     new Date().getTime()
@@ -281,7 +339,9 @@ module.exports = class CodapConnect
   codapRequestHandler: (cmd, callback) =>
     resource = cmd.resource
     action = cmd.action
-    operation = cmd.values?.operation
+    # if we have an array of changes, for now just extract the first one
+    change = if Array.isArray cmd.values then cmd.values[0] else cmd.values
+    operation = change?.operation
     paletteManager = require '../stores/palette-store'
 
     switch resource
@@ -311,10 +371,12 @@ module.exports = class CodapConnect
         # update undo/redo UI state based on CODAP undo/redo UI state
         if (cmd.values?.canUndo? and cmd.values?.canRedo?)
           undoRedoUIActions.setCanUndoRedo cmd.values?.canUndo, cmd.values?.canRedo
+      when 'dataContextChangeNotice[Sage Simulation]'
+        if operation is 'updateAttributes'
+          if change?.result?.attrs
+            @_syncAttributeProperties change.result.attrs
       else
-        log.info 'Unknown request received from CODAP: ' + JSON.stringify cmd
-
-
+        log.info 'Unhandled request received from CODAP: ' + JSON.stringify cmd
 
   # undo/redo events can return an array of successes
   # this reduces that array to true iff every element is not explicitly false
