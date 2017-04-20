@@ -79,7 +79,7 @@ module.exports = class CodapConnect
       # ret==null is indication of timeout, not an indication that the data set
       # doesn't exist.
       if !ret or ret.success
-        @_initialSyncAttributeProperties ret.values?.collections?[1].attrs
+        @_initialSyncAttributeProperties ret.values?.collections?[1]?.attrs
         @initGameHandler ret
       else
         @_createDataContext()
@@ -187,7 +187,7 @@ module.exports = class CodapConnect
   _syncAttributeProperties: (attrProps, initialSync) ->
     nodesToSync = if initialSync \
                     then _.filter @graphStore.nodeKeys, (node) -> not node.codapID or not node.codapName \
-                    else _.map @graphStore.nodeKeys, (node) -> node
+                    else _.map @graphStore.nodeKeys, (node) -> node # map nodeKeys to array of nodes
     if nodesToSync?.length
       _.each attrProps, (attr) =>
         # check for id match
@@ -208,9 +208,9 @@ module.exports = class CodapConnect
             node.codapID = attr.id if not node.codapID
             node.codapName = attr.name
           # sync name/title, but only if it's changed on the CODAP side
-          else if not initialSync and (node.codapName isnt attr.name)
+          else if node.codapName isnt attr.name
             node.codapName = attr.name
-            if (node.title isnt attr.name)
+            if not initialSync and (node.title isnt attr.name)
               @graphStore._changeNode node, { title: attr.name }
           if initialSync
             _.remove nodesToSync, (node) -> node.codapID and node.codapName
@@ -227,8 +227,11 @@ module.exports = class CodapConnect
         action: 'update'
         resource: "dataContext[Sage Simulation].collection[Samples].attribute[#{codapKey}]"
         values: { name: node.title }
-      @codapPhone.call message, (response) ->
-        if not response.success
+      @codapPhone.call message, (response) =>
+        if response.success
+          if response?.values?.attrs
+            @_syncAttributeProperties response.values.attrs
+        else
           console.log "Error: CODAP attribute rename failed!"
 
   _timeStamp: ->
