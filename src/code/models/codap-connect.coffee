@@ -227,11 +227,13 @@ module.exports = class CodapConnect
         action: 'update'
         resource: "dataContext[Sage Simulation].collection[Samples].attribute[#{codapKey}]"
         values: { name: node.title }
+        meta:
+          dirtyDocument: false
       @codapPhone.call message, (response) =>
         if response.success
           if response?.values?.attrs
             @_syncAttributeProperties response.values.attrs
-        else
+        else if node.codapID and node.codapName
           console.log "Error: CODAP attribute rename failed!"
 
   _timeStamp: ->

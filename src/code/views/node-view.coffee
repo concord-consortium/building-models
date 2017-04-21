@@ -191,10 +191,6 @@ module.exports = NodeView = React.createClass
   stopEditing: ->
     @props.graphStore.endNodeEdit()
     @props.selectionManager.clearTitleEditing()
-    finalTitle = @props.graphStore.nodeKeys[@props.nodeKey].title
-    if finalTitle isnt @initialTitle
-      codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
-      codapConnect.sendRenameAttribute @props.nodeKey, @initialTitle
 
   isEditing: ->
     @props.selectionManager.isSelectedForTitleEditing(@props.data)
