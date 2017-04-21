@@ -322,6 +322,12 @@ module.exports = NodeView = React.createClass
       )
     )
 
+# synchronized with corresponding CSS values
+NodeView.nodeImageOffset = ->
+  linkTargetTopMargin = 6   # .link-target
+  elementTopMargin = 6      # .elm .top
+  { left: 0, top: linkTargetTopMargin + elementTopMargin }
+
 myView = React.createFactory NodeView
 
 groupView = React.createFactory React.createClass
