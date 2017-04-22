@@ -330,6 +330,7 @@ module.exports = class CodapConnect
       resource: 'component',
       values:
         type: 'graph'
+        dataContext: @dataContextName
         xAttributeName: timeUnit
         yAttributeName: yAttributeName
         size: { width: 242, height: 221 }
