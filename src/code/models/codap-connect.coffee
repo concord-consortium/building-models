@@ -23,6 +23,10 @@ module.exports = class CodapConnect
     @lastTimeSent = @_timeStamp()
     @sendThrottleMs = 300
 
+    @dataContextName = "Sage Simulation"
+    @simulationCollectionName = "Simulation"
+    @samplesCollectionName = "Samples"
+
     SimulationStore.actions.recordingFramesCreated.listen  @addData.bind(@)
 
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
@@ -74,7 +78,7 @@ module.exports = class CodapConnect
     # if we don't create one with our collections. Then kick off init
     @codapPhone.call
       action: 'get',
-      resource: 'dataContext[Sage Simulation]'
+      resource: "dataContext[#{@dataContextName}]"
     , (ret) =>
       # ret==null is indication of timeout, not an indication that the data set
       # doesn't exist.
@@ -98,11 +102,11 @@ module.exports = class CodapConnect
         action: 'create'
         resource: 'dataContext'
         values:
-          name: 'Sage Simulation'
-          title: 'Sage Simulation'
+          name: @dataContextName
+          title: @dataContextName
           collections:[
             {
-              name: 'Simulation'
+              name: @simulationCollectionName
               title: 'Sage Simulation'
               labels:
                 singleCase: 'run'
@@ -113,9 +117,9 @@ module.exports = class CodapConnect
               ]
             },
             {
-              parent: "Simulation"
-              name: 'Samples'
-              title: 'Samples'
+              parent: @simulationCollectionName
+              name: @samplesCollectionName
+              title: @samplesCollectionName
               labels:
                 singleCase: 'sample'
                 pluralCase: 'samples'
@@ -165,7 +169,7 @@ module.exports = class CodapConnect
           newAttributes = _.select currentAttributes, (a) -> (! _.includes(values,a.name))
           message =
             action: 'create'
-            resource: 'dataContext[Sage Simulation].collection[Samples].attribute'
+            resource: "dataContext[#{@dataContextName}].collection[#{@samplesCollectionName}].attribute"
             values: newAttributes
           @codapPhone.call message, (response) =>
             if response.success
@@ -180,7 +184,7 @@ module.exports = class CodapConnect
 
       getListing =
         action: 'get'
-        resource: 'dataContext[Sage Simulation].collection[Samples].attributeList'
+        resource: "dataContext[#{@dataContextName}].collection[#{@samplesCollectionName}].attributeList"
       @codapPhone.call(getListing, doResolve)
       log.info "requested list of attributes"
 
@@ -253,7 +257,7 @@ module.exports = class CodapConnect
 
     createItemsMessage =
       action: 'create',
-      resource: "dataContext[Sage Simulation].item",
+      resource: "dataContext[#{@dataContextName}].item",
       values: sampleData
 
     if sampleData.length > 0
@@ -339,6 +343,7 @@ module.exports = class CodapConnect
         resource: 'component',
         values:
           type: 'caseTable'
+          dataContext: @dataContextName
       @tableCreated = true
 
   codapRequestHandler: (cmd, callback) =>
