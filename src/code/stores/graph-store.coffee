@@ -12,6 +12,8 @@ SimulationStore     = require "../stores/simulation-store"
 GraphActions        = require "../actions/graph-actions"
 CodapActions        = require '../actions/codap-actions'
 InspectorPanelStore = require "../stores/inspector-panel-store"
+CodapConnect        = require '../models/codap-connect'
+DEFAULT_CONTEXT_NAME = 'building-models'
 
 GraphStore  = Reflux.createStore
   init: (context) ->
@@ -167,11 +169,11 @@ GraphStore  = Reflux.createStore
       loop
         newTitle = tr template, {index: index++}
         break if @isUniqueTitle newTitle, node, nodes
-    node.title = newTitle
+    newTitle
 
   addNode: (node) ->
     @endNodeEdit()
-    @ensureUniqueTitle node
+    node.title = @ensureUniqueTitle node
     @undoRedoManager.createAndExecuteCommand 'addNode',
       execute: => @_addNode node
       undo: => @_removeNode node
@@ -270,12 +272,16 @@ GraphStore  = Reflux.createStore
             execute: => @_changeNode node, data
             undo: => @_changeNode node, originalData
 
-  _changeNode: (node, data) ->
+  _changeNode: (node, data, notifyCodap = true) ->
     log.info "Change for #{node.title}"
     for key in NodeModel.fields
       if data.hasOwnProperty key
         log.info "Change #{key} for #{node.title}"
+        prev = node[key]
         node[key] = data[key]
+        if notifyCodap and @usingCODAP and key is 'title'
+          codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
+          codapConnect.sendRenameAttribute node.key, prev
     node.normalizeValues(_.keys(data))
     @_notifyNodeChanged(node)
 

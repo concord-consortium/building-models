@@ -28,6 +28,8 @@ module.exports = class Node extends GraphPrimitive
       @x=0
       @y=0
       @title= tr "~NODE.UNTITLED"
+      @codapID = null
+      @codapName = null
       @image
       @isAccumulator=false
       @valueDefinedSemiQuantitatively=true,
@@ -176,6 +178,8 @@ module.exports = class Node extends GraphPrimitive
   toExport: ->
     data:
       title: @title
+      codapName: @codapName
+      codapID: @codapID
       x: @x
       y: @y
       paletteItem: @paletteItem

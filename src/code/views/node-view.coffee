@@ -185,6 +185,7 @@ module.exports = NodeView = React.createClass
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
 
   startEditing: ->
+    @initialTitle = @props.graphStore.nodeKeys[@props.nodeKey].title
     @props.selectionManager.selectNodeForTitleEditing(@props.data)
 
   stopEditing: ->
