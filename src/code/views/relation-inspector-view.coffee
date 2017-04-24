@@ -5,6 +5,7 @@ Tabber = require './tabbed-panel-view'
 tr = require "../utils/translate"
 
 inspectorPanelStore = require '../stores/inspector-panel-store'
+graphStore = require '../stores/graph-store'
 
 {div, h2, label, span, input, p, i, select, option} = React.DOM
 
@@ -12,7 +13,9 @@ module.exports = RelationInspectorView = React.createClass
 
   displayName: 'RelationInspectorView'
 
-  mixins: [ inspectorPanelStore.mixin ]
+  # listen to graphStore so that the tab for the link will re-render when the link is fully defined
+  # (link-relation-view uses @props.graphStore.changeLink() to update the link)
+  mixins: [ inspectorPanelStore.mixin, graphStore.mixin ]
 
   renderTabforLink: (link) ->
     relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
