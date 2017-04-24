@@ -45,14 +45,14 @@ module.exports = React.createClass
           (tbody {},
             (tr {}, (td {}, xlat '~METADATA.TITLE'),
               (td {},
-                (input {ref: 'title', defaultValue: title, onChange: @changed})))
+                (input {ref: 'title', value: title, onChange: @changed})))
 
             (tr {}, (td {}, xlat '~METADATA.LINK'),
               (td {},
-                (input {ref: 'link', defaultValue: link, onChange: @changed})))
+                (input {ref: 'link', value: link, onChange: @changed})))
             (tr {}, (td {}, xlat '~METADATA.CREDIT'),
               (td {},
-                (select {ref: 'license', defaultValue: licenseName, onChange: @changed},
+                (select {ref: 'license', value: licenseName, onChange: @changed},
                   licenses.getRenderOptions licenseName
             )))
           )

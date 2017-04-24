@@ -33,7 +33,7 @@ module.exports = React.createClass
       (div {className: 'inspector-content'},
         (div {className: 'edit-row'},
           (label {htmlFor: 'title'}, tr "~NODE-EDIT.TITLE")
-          (input {type: 'text', name: 'title', defaultValue: displayTitle, placeholder: @titlePlaceholder(),  onChange: @changeTitle})
+          (input {type: 'text', name: 'title', value: displayTitle, placeholder: @titlePlaceholder(),  onChange: @changeTitle})
         )
         (div {className: 'edit-row'},
           (label {htmlFor: 'color'}, tr "~NODE-EDIT.COLOR")

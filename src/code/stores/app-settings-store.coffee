@@ -15,7 +15,7 @@ AppSettingsStore   = Reflux.createStore
   init: ->
     @settings =
       showingSettingsDialog: false
-      diagramOnly: HashParams.getParam('simplified')
+      diagramOnly: HashParams.getParam('simplified') or false
       showingMinigraphs: false
       relationshipSymbols: false
 
@@ -27,7 +27,7 @@ AppSettingsStore   = Reflux.createStore
   onShowMinigraphs: (show) ->
     @settings.showingMinigraphs = show
     @notifyChange()
-    
+
   onRelationshipSymbols: (show) ->
     @settings.relationshipSymbols = show
     @notifyChange()
