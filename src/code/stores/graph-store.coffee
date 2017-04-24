@@ -272,14 +272,14 @@ GraphStore  = Reflux.createStore
             execute: => @_changeNode node, data
             undo: => @_changeNode node, originalData
 
-  _changeNode: (node, data) ->
+  _changeNode: (node, data, notifyCodap = true) ->
     log.info "Change for #{node.title}"
     for key in NodeModel.fields
       if data.hasOwnProperty key
         log.info "Change #{key} for #{node.title}"
         prev = node[key]
         node[key] = data[key]
-        if @usingCODAP and key is 'title'
+        if notifyCodap and @usingCODAP and key is 'title'
           codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
           codapConnect.sendRenameAttribute node.key, prev
     node.normalizeValues(_.keys(data))

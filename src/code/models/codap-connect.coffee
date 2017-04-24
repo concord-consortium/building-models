@@ -211,7 +211,7 @@ module.exports = class CodapConnect
           else if node.codapName isnt attr.name
             node.codapName = attr.name
             if not initialSync and (node.title isnt attr.name)
-              @graphStore._changeNode node, { title: attr.name }
+              @graphStore._changeNode node, { title: attr.name }, false
           if initialSync
             _.remove nodesToSync, (node) -> node.codapID and node.codapName
           else
