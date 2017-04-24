@@ -1,6 +1,7 @@
 Importer            = require '../utils/importer'
 Link                = require '../models/link'
 NodeModel           = require '../models/node'
+TransferModel       = require '../models/transfer'
 UndoRedo            = require '../utils/undo-redo'
 SelectionManager    = require '../models/selection-manager'
 PaletteStore        = require "../stores/palette-store"
@@ -121,6 +122,7 @@ GraphStore  = Reflux.createStore
     linkSpec.targetNode = targetNode
     link = new Link(linkSpec)
     @addLink(link)
+    link
 
   addLink: (link) ->
     @endNodeEdit()
@@ -140,8 +142,12 @@ GraphStore  = Reflux.createStore
   removeLink: (link) ->
     @endNodeEdit()
     @undoRedoManager.createAndExecuteCommand 'removeLink',
-      execute: => @_removeLink link
-      undo: => @_addLink link
+      execute: =>
+        @_removeLink link
+        @_removeNode link.transferNode if link.transferNode?
+      undo: =>
+        @_addNode link.transferNode if link.transferNode?
+        @_addLink link
 
   _removeLink: (link) ->
     delete @linkKeys[link.terminalKey()]
@@ -181,15 +187,18 @@ GraphStore  = Reflux.createStore
   removeNode: (nodeKey) ->
     @endNodeEdit()
     node = @nodeKeys[nodeKey]
+    transferRelation = node.transferLink?.relation
 
     # create a copy of the list of links
     links = node.links.slice()
 
     @undoRedoManager.createAndExecuteCommand 'removeNode',
       execute: =>
+        node.transferLink?.relation = node.transferLink.defaultRelation()
         @_removeLink(link) for link in links
         @_removeNode node
       undo: =>
+        node.transferLink?.relation = transferRelation
         @_addNode node
         @_addLink(link) for link in links
 
@@ -203,6 +212,19 @@ GraphStore  = Reflux.createStore
     delete @nodeKeys[node.key]
     @_graphUpdated()
     @updateListeners()
+
+  _addTransfer: (link) ->
+    unless link.transferNode?
+      source = link.sourceNode
+      target = link.targetNode
+      link.transferNode = new TransferModel
+        x: source.x + ((target.x - source.x) / 2)
+        y: source.y + ((target.y - source.y) / 2)
+      link.transferNode.setTransferLink link
+    @_addNode link.transferNode
+
+  _removeTransfer: (link) ->
+    @_removeNode link.transferNode if link.transferNode?
 
   _graphUpdated: ->
     node.checkIsInIndependentCycle() for key, node of @nodeKeys
@@ -279,9 +301,11 @@ GraphStore  = Reflux.createStore
         log.info "Change #{key} for #{node.title}"
         prev = node[key]
         node[key] = data[key]
-        if notifyCodap and @usingCODAP and key is 'title'
-          codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
-          codapConnect.sendRenameAttribute node.key, prev
+        if key is 'title'
+          if notifyCodap and @usingCODAP
+            codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
+            codapConnect.sendRenameAttribute node.key, prev
+          @_maybeChangeTransferTitle node
     node.normalizeValues(_.keys(data))
     @_notifyNodeChanged(node)
 
@@ -341,12 +365,25 @@ GraphStore  = Reflux.createStore
     if @selectionManager.isSelected(item)
       @selectionManager._notifySelectionChange()
 
+  _maybeChangeRelation: (link, relation) ->
+    if relation and relation.isTransfer
+      @_addTransfer link
+    else
+      @_removeTransfer link
+
+  _maybeChangeTransferTitle: (changedNode) ->
+    for key, node of @nodeKeys
+      transferLink = node.transferLink
+      if transferLink and ((transferLink.sourceNode is changedNode) or (transferLink.targetNode is changedNode))
+        @changeNodeWithKey(key, {title: node.computeTitle()})
+
   _changeLink: (link, changes) ->
     log.info "Change  for #{link.title}"
     for key in ['title','color', 'relation', 'reasoning']
       if changes[key]?
         log.info "Change #{key} for #{link.title}"
         link[key] = changes[key]
+    @_maybeChangeRelation link, changes.relation
     @_maybeChangeSelectedItem link
     @_graphUpdated()
     @updateListeners()

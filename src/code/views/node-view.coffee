@@ -1,4 +1,4 @@
-{input, div, i, img, span, label} = React.DOM
+{input, div, i, img, span, label, img} = React.DOM
 tr = require "../utils/translate"
 
 SimulationActions = require("../stores/simulation-store").actions
@@ -114,6 +114,7 @@ module.exports = NodeView = React.createClass
   getInitialState: ->
     editingNodeTitle: false
     ignoreDrag: false
+    isTransfer: @props.data.isTransfer
 
   handleSelected: (actually_select, evt) ->
     return if not @props.selectionManager
@@ -303,7 +304,6 @@ module.exports = NodeView = React.createClass
                 onClick: (=> @handleGraphClick @props.data.title)
               })
           )
-
           (div {className: @topClasses(), "data-node-key": @props.nodeKey},
             (div {
               className: "img-background"
@@ -312,16 +312,19 @@ module.exports = NodeView = React.createClass
               },
               @renderNodeInternal()
             )
-            (NodeTitle {
-              isEditing: @props.editTitle
-              title: @props.data.title
-              onChange: @changeTitle
-              onStopEditing: @stopEditing
-              onStartEditing: @startEditing
-              node: @props.data
-              nodeKey: @props.nodeKey
-              graphStore: @props.graphStore
-            })
+            if @props.data.isTransfer
+              null #(div {className: "node-title"})
+            else
+              (NodeTitle {
+                isEditing: @props.editTitle
+                title: @props.data.title
+                onChange: @changeTitle
+                onStopEditing: @stopEditing
+                onStartEditing: @startEditing
+                node: @props.data
+                nodeKey: @props.nodeKey
+                graphStore: @props.graphStore
+              })
           )
         )
         (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},

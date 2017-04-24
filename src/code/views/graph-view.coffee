@@ -234,40 +234,72 @@ module.exports = React.createClass
 
     @diagramToolkit.makeTarget target, targetStyle
 
-
   _redrawLinks: ->
     for link in @state.links
-      source = $(ReactDOM.findDOMNode this.refs[link.sourceNode.key]).find(@props.connectionTarget)
-      target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.connectionTarget)
-      isSelected = @props.selectionManager.isSelected(link)
-      isEditing = link is @state.editingLink
-      isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
-      relationDetails = RelationFactory.selectionsFromRelation(link.relation)
-      if relationDetails.vector? and relationDetails.vector.isCustomRelationship and link.relation.customData?
-        link.color = LinkColors.customRelationship
+      if link.relation?.isTransfer
+        @_redrawTransferLinks link
       else
-        link.color = LinkColors.default
-      magnitude = relationDetails.magnitude
-      gradual = relationDetails.gradual
-      useGradient = false
-      useVariableThickness = true
-      if source and target
-        opts = {
-          source: source,
-          target: target,
-          label: link.title,
-          color: link.color,
-          magnitude: magnitude,
-          isDashed: isDashed,
-          isSelected: isSelected,
-          isEditing: isEditing,
-          gradual: gradual,
-          useGradient: useGradient,
-          useVariableThickness: useVariableThickness,
-          linkModel: link,
-          showIndicators: @state.relationshipSymbols
-        }
-        @diagramToolkit.addLink opts
+        @_redrawLink link
+
+  _redrawLink: (link) ->
+    source = $(ReactDOM.findDOMNode this.refs[link.sourceNode.key]).find(@props.connectionTarget)
+    target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.connectionTarget)
+    isSelected = @props.selectionManager.isSelected(link)
+    isEditing = link is @state.editingLink
+    isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
+    relationDetails = RelationFactory.selectionsFromRelation(link.relation)
+    if relationDetails.vector? and relationDetails.vector.isCustomRelationship and link.relation.customData?
+      link.color = LinkColors.customRelationship
+    else
+      link.color = LinkColors.fromLink link
+    magnitude = relationDetails.magnitude
+    gradual = relationDetails.gradual
+    useGradient = false
+    useVariableThickness = true
+    if source and target
+      opts = {
+        source: source,
+        target: target,
+        label: link.title,
+        color: link.color,
+        magnitude: magnitude,
+        isDashed: isDashed,
+        isSelected: isSelected,
+        isEditing: isEditing,
+        gradual: gradual,
+        useGradient: useGradient,
+        useVariableThickness: useVariableThickness,
+        linkModel: link,
+        showIndicators: @state.relationshipSymbols
+      }
+      if relationDetails.transfer?
+        opts.thickness = RelationFactory.thicknessFromRelation(link.relation)
+      @diagramToolkit.addLink opts
+
+  _redrawTransferLinks: (link) ->
+    # during import of saved files .transferNode isn't set until the link is created so it may be null here
+    return unless link.transferNode
+    @_redrawTransferLink link, link.sourceNode, link.transferNode
+    @_redrawTransferLink link, link.transferNode, link.targetNode
+
+  _redrawTransferLink: (link, sourceNode, targetNode) ->
+    fromSource = sourceNode is link.sourceNode
+    source = $(ReactDOM.findDOMNode this.refs[sourceNode.key]).find(@props.connectionTarget)
+    target = $(ReactDOM.findDOMNode this.refs[targetNode.key]).find(@props.connectionTarget)
+    if source and target
+      opts = {
+        source: source,
+        target: target,
+        label: "",
+        color: if fromSource then LinkColors.decrease else LinkColors.increase
+        thickness: 10
+        showIndicators: false
+        isEditing: false,
+        linkModel: link
+        isTransfer: true
+        hideArrow: fromSource
+      }
+      @diagramToolkit.addLink opts
 
   onDragOver: (e) ->
     if not @state.canDrop
@@ -340,7 +372,7 @@ module.exports = React.createClass
 
   checkSelectBoxLinkCollisions: ->
     for link in @state.links
-      if this.checkBoxLinkCollision(link)
+      if not link.relation?.isTransfer and this.checkBoxLinkCollision(link)
         @props.selectionManager.selectLinkForInspection(link, true)
 
   checkSelectBoxCollisions: ->

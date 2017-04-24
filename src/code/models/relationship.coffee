@@ -20,6 +20,9 @@ module.exports = class Relationship
     @func        = @opts.func
     @errHandler  = @opts.errHandler or Relationship.defaultErrHandler
     @isDefined   = @opts.formula? or @opts.func?
+    @isAccumulator = /^\@accumulator/.test @opts.formula
+    @isTransfer    = @opts.formula is "@accumulator:transferred"
+    @isTransferModifier = /^\@transfer/.test @opts.formula
     @hasError    = false
     @setFormula(formula)
     @dataPoints
@@ -31,12 +34,14 @@ module.exports = class Relationship
     @checkFormula()
 
   checkFormula: ->
-    if @isDefined
+    if @isDefined and not @isAccumulator and not @isTransferModifier
       @evaluate(1, 1) #sets the @hasError flag if there is a problem
       if not @hasError and not @func?
         @func = (math.compile @formula).eval
 
-  evaluate: (inV,outV, maxIn=100, maxOut=100)->
+  evaluate: (inV,outV, maxIn=100, maxOut=100) ->
+    # TODO
+    return 0 if @isAccumulator or @isTransferModifier
     result = Relationship.errValue
     scope =
       in: inV

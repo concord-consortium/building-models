@@ -104,6 +104,86 @@ module.exports = class RelationFactory
     func: (scope) ->
       return
 
+  @added:
+    id: 0
+    text: tr "~NODE-RELATION-EDIT.ADDED_TO"
+    postfixIco: "added-to"
+    formulaFrag: "@accumulator:added-to"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
+  @subtracted:
+    id: 1
+    text: tr "~NODE-RELATION-EDIT.SUBTRACTED_FROM"
+    postfixIco: "subtracted-from"
+    formulaFrag: "@accumulator:subtracted-from"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
+  @transferred:
+    id: 2
+    text: tr "~NODE-RELATION-EDIT.TRANSFERRED_TO"
+    postfixIco: "transferred"
+    formulaFrag: "@accumulator:transferred"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
+  @all:
+    id: 0
+    text: tr "~NODE-RELATION-EDIT.ALL"
+    postfixIco: "all"
+    formulaFrag: "@transfer:all"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
+  @most:
+    id: 1
+    text: tr "~NODE-RELATION-EDIT.MOST"
+    postfixIco: "most"
+    formulaFrag: "@transfer:most"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
+  @half:
+    id: 2
+    text: tr "~NODE-RELATION-EDIT.HALF"
+    postfixIco: "half"
+    formulaFrag: "@transfer:half"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
+  @some:
+    id: 3
+    text: tr "~NODE-RELATION-EDIT.SOME"
+    postfixIco: "some"
+    formulaFrag: "@transfer:some"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
+  @aLittleBit:
+    id: 4
+    text: tr "~NODE-RELATION-EDIT.A_LITTLE_BIT"
+    postfixIco: "all"
+    formulaFrag: "@transfer:aLittleBit"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
@@ -115,6 +195,16 @@ module.exports = class RelationFactory
     @moreAndMore
     @lessAndLess
   ]
+  @accumulators: [@added, @subtracted, @transferred]
+  @singleAccumulators: [@added, @subtracted]
+  @dualAccumulators: [@transferred]
+  @transfers: [@all, @most, @half, @some, @aLittleBit]
+
+  @fromAccumulator: (acc) ->
+    new Relationship({text: acc.text, formula: acc.formulaFrag, func: acc.func, magnitude: acc.magnitude})
+
+  @fromTransfer: (trans) ->
+    new Relationship({text: trans.text, formula: trans.formulaFrag, func: trans.func, magnitude: trans.magnitude})
 
   @fromSelections: (vector,scalar,existingData) ->
     if vector? and vector.isCustomRelationship
@@ -134,6 +224,10 @@ module.exports = class RelationFactory
       _.startsWith relation.formula, v.formulaFrag
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
+    accumulator = _.find @accumulators, (s) ->
+      relation.text is s.text
+    transfer = _.find @transfers, (s) ->
+      relation.text is s.text
     if vector?
       if vector.isCustomRelationship
         scalar = @custom
@@ -144,7 +238,16 @@ module.exports = class RelationFactory
     if vector && scalar
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
-    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
+    {vector: vector, scalar: scalar, accumulator: accumulator, transfer: transfer, magnitude: magnitude, gradual: gradual}
+
+  @thicknessFromRelation: (relation) ->
+    switch relation.formula
+      when @all.formulaFrag then 9
+      when @most.formulaFrag then 7
+      when @half.formulaFrag then 5
+      when @some.formulaFrag then 3
+      when @aLittleBit.formulaFrag then 1
+      else 1
 
   # @isCustomRelationship: (vector) ->
   #  customRelationship = false

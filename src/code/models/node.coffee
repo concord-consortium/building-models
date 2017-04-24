@@ -86,6 +86,8 @@ module.exports = class Node extends GraphPrimitive
       if not @valueDefinedSemiQuantitatively then @_max = val
 
   type: 'Node'
+  isTransfer: false
+
   addLink: (link) ->
     if link.sourceNode is @ or link.targetNode is @
       if _.contains @links, link

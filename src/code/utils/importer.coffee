@@ -1,5 +1,6 @@
 Migrations          = require '../data/migrations/migrations'
 DiagramNode         = require '../models/node'
+TransferNode        = require '../models/transfer'
 ImportActions       = require '../actions/import-actions'
 
 module.exports = class MySystemImporter
@@ -23,8 +24,10 @@ module.exports = class MySystemImporter
     key = nodeSpec.key
     if data.paletteItem
       data.image = @paletteStore.store.findByUUID(data.paletteItem)?.image
-    node = new DiagramNode(data, key)
-    node
+    if /^Transfer/.test(nodeSpec.key)
+      new TransferNode(data, key)
+    else
+      new DiagramNode(data, key)
 
   importNodes: (importNodes) ->
     for nodespec in importNodes
@@ -33,4 +36,8 @@ module.exports = class MySystemImporter
 
   importLinks: (links) ->
     for link in links
-      @graphStore.importLink link
+      importedLink = @graphStore.importLink link
+      if link.transferNode and @graphStore.nodeKeys[link.transferNode]
+        importedLink.transferNode = @graphStore.nodeKeys[link.transferNode]
+        importedLink.transferNode.setTransferLink importedLink
+

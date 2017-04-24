@@ -30,6 +30,9 @@ module.exports = class Link extends GraphPrimitive
       relation = relationObj
     return relation
 
+  defaultRelation: ->
+    new Relation({})
+
   terminalKey: ->
     "#{@sourceNode.key} ------> #{@targetNode.key}"
 
@@ -43,11 +46,14 @@ module.exports = class Link extends GraphPrimitive
     [@sourceNode]
 
   toExport: ->
-    "title": @title
-    "color": @color
-    "sourceNode": @sourceNode.key
-    "sourceTerminal": @sourceTerminal
-    "targetNode": @targetNode.key
-    "targetTerminal": @targetTerminal
-    "relation": @relation.toExport()
-    "reasoning": @reasoning
+    link =
+      "title": @title
+      "color": @color
+      "sourceNode": @sourceNode.key
+      "sourceTerminal": @sourceTerminal
+      "targetNode": @targetNode.key
+      "targetTerminal": @targetTerminal
+      "relation": @relation.toExport()
+      "reasoning": @reasoning
+    link.transferNode = this.transferNode.key if this.transferNode
+    link
