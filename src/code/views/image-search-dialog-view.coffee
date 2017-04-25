@@ -85,7 +85,7 @@ module.exports = React.createClass
         (div {},
           (div {className: 'image-search-dialog-form'},
             (form {},
-              (input {type: 'text', ref: 'search', value: @state.query, placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
+              (input {type: 'text', ref: 'search', defaultValue: @state.query, placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
               (input {type: 'submit', value: 'Search', onClick: @searchClicked})
             )
           ),
