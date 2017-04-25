@@ -237,7 +237,7 @@ ValueSlider = React.createClass
       (input {
         className: property
         type: 'number'
-        defaultValue: @props[property]
+        value: @props[property]
         onBlur: swapState
         onKeyDown: keyDown
         ref: 'focusable'}
