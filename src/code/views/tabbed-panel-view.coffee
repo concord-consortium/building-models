@@ -25,7 +25,7 @@ module.exports = React.createClass
     selectedTabIndex: @props.selectedTabIndex || 0
 
   componentWillReceiveProps: (nextProps) ->
-    if @props.selectedTabIndex isnt nextProps.selectedTabIndex
+    if @state.selectedTabIndex isnt nextProps.selectedTabIndex
       @selectedTab nextProps.selectedTabIndex
 
   statics:
