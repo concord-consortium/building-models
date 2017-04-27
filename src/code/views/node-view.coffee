@@ -3,6 +3,7 @@ tr = require "../utils/translate"
 
 SimulationActions = require("../stores/simulation-store").actions
 SquareImage = React.createFactory require "./square-image-view"
+StackedImage = React.createFactory require "./stacked-image-view"
 SliderView  = React.createFactory require "./value-slider-view"
 GraphView   = React.createFactory require "./node-svg-graph-view"
 CodapConnect = require '../models/codap-connect'
@@ -267,6 +268,11 @@ module.exports = NodeView = React.createClass
         data: @props.data.frames
         color: @props.dataColor
         image: @props.data.image
+      })
+    else if @props.data.isAccumulator
+      (StackedImage {
+        image: @props.data.image,
+        imageProps: @props.data.collectorImageProps()
       })
     else
       (SquareImage {
