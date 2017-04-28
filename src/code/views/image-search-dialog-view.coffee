@@ -15,7 +15,10 @@ ImageSearchResult = React.createFactory React.createClass
     image = new Image()
     image.src = @props.imageInfo.image
     image.onload = =>
-      @setState loaded: true
+      @setState loaded: true if not @unmounted
+
+  componentWillUnmount: ->
+    @unmounted = true
 
   clicked: ->
     ImageDialogStore.actions.update @props.imageInfo
