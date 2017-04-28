@@ -28,6 +28,6 @@ module.exports = React.createClass
       transform: "rotate(#{imgProps.rotation}deg)"
     )
     div { style: { position: "relative", width: "100%", height: "100%" } },
-        @props.imageProps.map((imgProps, index) =>
+        _.map(@props.imageProps, (imgProps, index) =>
           div { style: _.assign({}, @css(index), styles[index]), key: index }
         )
