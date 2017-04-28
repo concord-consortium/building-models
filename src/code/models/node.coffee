@@ -49,6 +49,8 @@ module.exports = class Node extends GraphPrimitive
 
     @isInCycle = false      # we always initalize with no links, so we can't be in cycle
 
+    @_collectorImageProps = null
+
   # Scale the value of initialValue such that, if we are in semi-quantitative mode,
   # we always return a value between 0 and 100. Likewise, if we try to set a value while
   # we are in SQ mode, we set the actual internal value to the same proportion between
@@ -165,6 +167,23 @@ module.exports = class Node extends GraphPrimitive
     else
       @max = Math.max @max, @min
     @initialValue = Math.max @min, Math.min @max, @initialValue
+
+    # clear collector images when @isAccumulator -> false
+    if (not @isAccumulator)
+      @_collectorImageProps = null
+
+  collectorImageProps: ->
+    # preserve collector images unless explicitly cleared
+    if not @_collectorImageProps
+      @_collectorImageProps = []
+      for i in [0..8] by 2
+        row = Math.trunc(i/3)
+        col = i - row * 3
+        @_collectorImageProps.push
+          left: Math.random() * 10 + col * 20   # [0, 10) [20, 30) [40, 50)
+          top: Math.random() * 10 + row * 20    # [0, 10) [20, 30) [40, 50)
+          rotation: Math.random() * 60 - 30     # [-30, 30) [-30, 30) [-30, 30)
+    @_collectorImageProps
 
   # Given a value between _min and _max, calculate the SQ proportion
   mapQuantToSemiquant: (val) ->
