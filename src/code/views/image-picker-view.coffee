@@ -46,7 +46,7 @@ module.exports = React.createClass
             label: tr '~PALETTE-INSPECTOR.ADD_IMAGE_SHORT'
           })
         )
-        for node in @state.palette
-          (ImgChoice {key: node.id, node: node, selected: @props.selected, onChange: @props.onChange})
+        for node, i in @state.palette
+          (ImgChoice {key: i, node: node, selected: @props.selected, onChange: @props.onChange})
       )
     )

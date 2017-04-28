@@ -32,7 +32,7 @@ module.exports = React.createClass
     Tab: (settings) -> new TabInfo settings
 
   selectedTab: (index) ->
-    @setState selectedTabIndex: index
+    @setState selectedTabIndex: index or 0
 
   renderTab: (tab, index) ->
     (Tab
