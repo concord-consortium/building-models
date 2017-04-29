@@ -25,13 +25,16 @@ module.exports = RelationInspectorView = React.createClass
 
     (Tabber.Tab {label: label, component: relationView, defined: isFullyDefined})
 
+  onTabSelected: (index) ->
+    inspectorPanelStore.actions.openInspectorPanel 'relations', {link: @props.node.inLinks()?[index]}
+
   renderNodeRelationInspector: ->
     selectedTabIndex = 0
     tabs = _.map @props.node.inLinks(), (link, i) =>
       selectedTabIndex = i if (@state.selectedLink is link)
       @renderTabforLink(link)
     (div {className:'relation-inspector'},
-      (TabbedPanel {tabs: tabs, selectedTabIndex: selectedTabIndex})
+      (TabbedPanel {tabs: tabs, selectedTabIndex: selectedTabIndex, onTabSelected: @onTabSelected})
     )
 
   renderLinkRelationInspector: ->
