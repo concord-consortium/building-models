@@ -78,3 +78,8 @@ To update the icon fonts used in this project:
 1. Checkout and modify the shared icon-font project [Codap Sage Icons](https://github.com/concord-consortium/codap-ivy-icons)
 2. Follow the directions there to deploy to github pages.
 3. Run `curlfonts.sh` to download a local copy of the CSS and fonts to this project.
+
+## Disabling Rollbar integration
+
+If you want to disable Rollbar integration on your development machine just add a `disableRollbar` local storage option with the value `true` (as a string, all local storage values are strings).  This value is checked in the index.html file prior to defining
+the Rollbar configuration object and loading the Rollbar remote Javascript.
