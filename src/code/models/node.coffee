@@ -107,8 +107,8 @@ module.exports = class Node extends GraphPrimitive
   outLinks: ->
     _.filter @links, (link) => link.sourceNode is @
 
-  inLinks: ->
-    _.filter @links, (link) => link.targetNode is @
+  inLinks: (relationType = null) ->
+    _.filter @links, (link) => (link.targetNode is @) and (relationType is null or relationType is link.relation.type)
 
   inNodes: ->
     _.map @inLinks(), (link) -> link.sourceNode

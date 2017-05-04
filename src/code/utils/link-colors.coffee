@@ -14,11 +14,11 @@ linkColors = module.exports =
   fromLink            : (link) ->
     return linkColors.default if not link.relation?.formula?
     switch link.relation.formula
-      when RelationFactory.added.formulaFrag then linkColors.increase
-      when RelationFactory.subtracted.formulaFrag then linkColors.decrease
-      when RelationFactory.all.formulaFrag then linkColors.increase
-      when RelationFactory.most.formulaFrag then linkColors.increase
-      when RelationFactory.half.formulaFrag then linkColors.increase
-      when RelationFactory.some.formulaFrag then linkColors.increase
-      when RelationFactory.aLittleBit.formulaFrag then linkColors.increase
+      when RelationFactory.added.formula then linkColors.increase
+      when RelationFactory.subtracted.formula then linkColors.decrease
+      when RelationFactory.all.formula then linkColors.increase
+      when RelationFactory.most.formula then linkColors.increase
+      when RelationFactory.half.formula then linkColors.increase
+      when RelationFactory.some.formula then linkColors.increase
+      when RelationFactory.aLittleBit.formula then linkColors.increase
       else linkColors.default

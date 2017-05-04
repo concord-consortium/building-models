@@ -272,7 +272,7 @@ module.exports = React.createClass
         linkModel: link,
         showIndicators: @state.relationshipSymbols
       }
-      if relationDetails.transfer?
+      if relationDetails.transferModifier?
         opts.thickness = RelationFactory.thicknessFromRelation(link.relation)
       @diagramToolkit.addLink opts
 

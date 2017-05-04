@@ -313,7 +313,7 @@ module.exports = NodeView = React.createClass
               @renderNodeInternal()
             )
             if @props.data.isTransfer
-              null #(div {className: "node-title"})
+              (div {className: "node-title"}) # empty title to set node width the same
             else
               (NodeTitle {
                 isEditing: @props.editTitle

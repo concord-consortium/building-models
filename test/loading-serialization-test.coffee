@@ -93,7 +93,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.17.0"
+        model.version.should.equal "1.18.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 2
 
@@ -126,7 +126,7 @@ describe "Serialization and Loading", ->
         linkA.sourceTerminal.should.equal "b"
         linkA.targetNode.should.equal "b"
         linkA.targetTerminal.should.equal "a"
-        linkA.relation.should.be.empty
+        linkA.relation.type.should.equal "range"
 
         linkB = JSON.parse(jsonString).links[1]
         linkB.relation.text.should.equal "increase about the same"

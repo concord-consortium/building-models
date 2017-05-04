@@ -30,6 +30,7 @@ window.Sage =
     appView?.props.graphStore.deleteAll()
 
   serializeModel: ->
+    # console.log(JSON.stringify(appView?.props.graphStore.serialize(PaletteStore.store.palette), null, 2))
     return appView?.props.graphStore.toJsonString PaletteStore.store.palette
 
   loadModel: (data) ->

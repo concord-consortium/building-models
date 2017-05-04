@@ -41,20 +41,21 @@ module.exports = LinkRelationView = React.createClass
         title: "default source node"
 
   getInitialState: ->
-    status = @checkStatus()
+    status = @checkStatus(@props.link)
     return {
       selectedVector: null
       selectedScalar: null
       selectedVectorHasChanged: false
       selectedAccumulator: null
-      selectedTransfer: null
+      selectedTransferModifier: null
       isAccumulator: status.isAccumulator
       isDualAccumulator: status.isDualAccumulator
-      isTranser: status.isTransfer
+      isTransfer: status.isTransfer
+      isTransferModifier: status.isTransferModifier
     }
 
   componentWillMount: ->
-    if @state.isAccumulator or @state.isTransfer or not @state.selectedVector?
+    if @state.isAccumulator or @state.isTransferModifier or not @state.selectedVector?
       @updateState(@props)
     else if @props.link.relation.customData?
       selectedVector = RelationFactory.vary
@@ -74,16 +75,16 @@ module.exports = LinkRelationView = React.createClass
     # a hack to update uncontrolled textarea when viewing new links
     @refs.reasoning.value = newProps.link.reasoning
 
-  checkStatus: ->
-    {sourceNode, targetNode} = @props.link
+  checkStatus: (link) ->
+    {sourceNode, targetNode} = link
     status =
       isAccumulator: targetNode.isAccumulator
       isDualAccumulator: sourceNode.isAccumulator and targetNode.isAccumulator
-      isTransfer: targetNode.isTransfer and targetNode.transferLink?.sourceNode is sourceNode
+      isTransferModifier: targetNode.isTransfer and targetNode.transferLink?.sourceNode is sourceNode
 
   updateState: (props) ->
-    status = @checkStatus()
-    {vector, scalar, accumulator, transfer} = RelationFactory.selectionsFromRelation props.link.relation
+    status = @checkStatus(props.link)
+    {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation props.link.relation
     if props.link.relation.customData?
       vector = RelationFactory.vary
       scalar = RelationFactory.custom
@@ -91,10 +92,10 @@ module.exports = LinkRelationView = React.createClass
       selectedVector: vector
       selectedScalar: scalar
       selectedAccumulator: accumulator
-      selectedTransfer: transfer
+      selectedTransferModifier: transferModifier
       isAccumulator: status.isAccumulator
       isDualAccumulator: status.isDualAccumulator
-      isTransfer: status.isTransfer
+      isTransferModifier: status.isTransferModifier
 
   updateRelation: ->
     if @state.isAccumulator
@@ -103,16 +104,16 @@ module.exports = LinkRelationView = React.createClass
 
       if selectedAccumulator?
         link = @props.link
-        relation = RelationFactory.fromAccumulator(selectedAccumulator)
+        relation = RelationFactory.CreateRelation(selectedAccumulator)
         relation.isDefined = true
         @props.graphStore.changeLink(link, {relation: relation})
-    else if @state.isTransfer
-      selectedTransfer = @getTransfer()
-      @setState {selectedTransfer}
+    else if @state.isTransferModifier
+      selectedTransferModifier = @getTransferModifier()
+      @setState {selectedTransferModifier}
 
-      if selectedTransfer?
+      if selectedTransferModifier?
         link = @props.link
-        relation = RelationFactory.fromTransfer(selectedTransfer)
+        relation = RelationFactory.CreateRelation(selectedTransferModifier)
         relation.isDefined = true
         @props.graphStore.changeLink(link, {relation: relation})
     else
@@ -139,15 +140,13 @@ module.exports = LinkRelationView = React.createClass
     @props.graphStore.changeLink(@props.link, {reasoning: @refs.reasoning.value})
 
   getAccumulator: ->
-    id = parseInt @refs.accumulator.value
-    RelationFactory.accumulators[id]
+    RelationFactory.accumulators[@refs.accumulator.value]
 
-  getTransfer: ->
-    id = parseInt @refs.transfer.value
-    RelationFactory.transfers[id]
+  getTransferModifier: ->
+    RelationFactory.transferModifiers[@refs.transfer.value]
 
   getVector: ->
-    id = parseInt @refs.vector.value
+    id = @refs.vector.value
     newVector = RelationFactory.vectors[id]
 
     selectedVectorHasChanged = false
@@ -155,12 +154,11 @@ module.exports = LinkRelationView = React.createClass
       selectedVectorHasChanged = true
 
     @setState { selectedVectorHasChanged }
-    RelationFactory.vectors[id]
+    newVector
 
   getScalar: ->
     if @refs.scalar
-      id = parseInt @refs.scalar.value
-      RelationFactory.scalars[id]
+      RelationFactory.scalars[@refs.scalar.value]
     else
       undefined
 
@@ -208,10 +206,9 @@ module.exports = LinkRelationView = React.createClass
       )
 
   renderAccumulator: (source, target) ->
-    options = _.map RelationFactory.singleAccumulators, (opt, i) ->
-      (option {value: opt.id, key: opt.id}, opt.text)
-    if @props.link.sourceNode.isAccumulator and @props.link.targetNode.isAccumulator
-      _.each RelationFactory.isDualAccumulators, (opt, i) ->
+    options = []
+    _.each RelationFactory.accumulators, (opt, i) =>
+      if not opt.forDualAccumulator or @state.isDualAccumulator
         options.push (option {value: opt.id, key: opt.id}, opt.text)
 
     if not @state.selectedAccumulator
@@ -235,15 +232,15 @@ module.exports = LinkRelationView = React.createClass
     )
 
   renderTransfer: (source, target) ->
-    options = _.map RelationFactory.transfers, (opt, i) ->
+    options = _.map RelationFactory.transferModifiers, (opt, i) ->
       (option {value: opt.id, key: opt.id}, opt.text)
 
-    if not @state.selectedTransfer
+    if not @state.selectedTransferModifier
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
         tr "~NODE-RELATION-EDIT.UNSELECTED")
       currentOption = "unselected"
     else
-      currentOption = @state.selectedTransfer.id
+      currentOption = @state.selectedTransferModifier.id
 
     (div {className: 'top'},
       (select {value: currentOption, ref: "transfer", onChange: @updateRelation},
@@ -287,7 +284,7 @@ module.exports = LinkRelationView = React.createClass
     (div {className: 'link-relation-view'},
       if @state.isAccumulator
         @renderAccumulator(source, target)
-      else if @state.isTransfer
+      else if @state.isTransferModifier
         @renderTransfer(source, target)
       else
         @renderNonAccumulator(source, target)

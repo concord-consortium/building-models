@@ -14,15 +14,17 @@ module.exports = class Relationship
     log.error "vars=#{vars}"
 
   constructor: (@opts={}) ->
+    @type        = @opts.type or "range"
     @text        = @opts.text
     @uiText      = @opts.uiText
     formula      = @opts.formula
     @func        = @opts.func
     @errHandler  = @opts.errHandler or Relationship.defaultErrHandler
     @isDefined   = @opts.formula? or @opts.func?
-    @isAccumulator = /^\@accumulator/.test @opts.formula
-    @isTransfer    = @opts.formula is "@accumulator:transferred"
-    @isTransferModifier = /^\@transfer/.test @opts.formula
+    @isRange       = @type is "range"
+    @isAccumulator = @type is "accumulator"
+    @isTransfer    = @type is "transfer"
+    @isTransferModifier = @type is "transfer-modifier"
     @hasError    = false
     @setFormula(formula)
     @dataPoints
@@ -34,14 +36,12 @@ module.exports = class Relationship
     @checkFormula()
 
   checkFormula: ->
-    if @isDefined and not @isAccumulator and not @isTransferModifier
+    if @isDefined
       @evaluate(1, 1) #sets the @hasError flag if there is a problem
       if not @hasError and not @func?
         @func = (math.compile @formula).eval
 
   evaluate: (inV,outV, maxIn=100, maxOut=100) ->
-    # TODO
-    return 0 if @isAccumulator or @isTransferModifier
     result = Relationship.errValue
     scope =
       in: inV
@@ -77,6 +77,7 @@ module.exports = class Relationship
     @dataPoints = _.indexBy points, 'x'
 
   toExport: ->
+    type        : @type
     text        : @text
     formula     : @formula
     customData  : @customData
