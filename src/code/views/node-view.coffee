@@ -261,23 +261,29 @@ module.exports = NodeView = React.createClass
     else ""
 
   renderNodeInternal: ->
+    getNodeImage = (node) ->
+      if node.isAccumulator
+        (StackedImage {
+          image: node.image
+          imageProps: node.collectorImageProps()
+        })
+      else
+        (SquareImage {
+          image: node.image
+        })
+
+    nodeImage = getNodeImage(@props.data)
+
     if @props.showMinigraph
       (GraphView {
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
         color: @props.dataColor
-        image: @props.data.image
-      })
-    else if @props.data.isAccumulator
-      (StackedImage {
-        image: @props.data.image,
-        imageProps: @props.data.collectorImageProps()
+        image: nodeImage
       })
     else
-      (SquareImage {
-        image: @props.data.image,
-      })
+      nodeImage
 
   render: ->
     style =
