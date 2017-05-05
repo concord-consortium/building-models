@@ -62,10 +62,12 @@ NodeTitle = React.createFactory React.createClass
     @props.onStopEditing()
 
   renderTitle: ->
-    className = "node-title"
-    if @isDefaultTitle()
-      className = "node-title untitled"
-    (div {className: className, onClick: @props.onStartEditing }, @props.title)
+    (div {
+      className: "node-title#{if @isDefaultTitle then ' untitled' else ''}"
+      key: "display"
+      style: { display: if @props.isEditing then "none" else "block" }
+      onClick: @props.onStartEditing
+    }, @props.title)
 
   renderTitleInput: ->
     displayTitle = @displayTitleForInput(@props.title)
@@ -74,6 +76,8 @@ NodeTitle = React.createFactory React.createClass
     (input {
       type: "text"
       ref: "input"
+      key: "edit"
+      style: { display: if @props.isEditing then "block" else "none" }
       className: className
       onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
       onChange: @updateTitle
@@ -85,12 +89,10 @@ NodeTitle = React.createFactory React.createClass
     })
 
   render: ->
-    (div {className: 'node-title-box'},
-      if @props.isEditing
-        @renderTitleInput()
-      else
-        @renderTitle()
-    )
+    (div {className: 'node-title-box'}, [
+      @renderTitle()
+      @renderTitleInput()
+    ])
 
 module.exports = NodeView = React.createClass
 
