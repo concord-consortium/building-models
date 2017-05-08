@@ -269,11 +269,12 @@ module.exports = class RelationFactory
     {vector, scalar, accumulator, transferModifier, magnitude, gradual}
 
   @thicknessFromRelation: (relation) ->
+    dt = 1
     switch relation.formula
-      when @all.formula then 9
-      when @most.formula then 7
-      when @half.formula then 5
-      when @some.formula then 3
+      when @all.formula then 1 + 4 * dt
+      when @most.formula then 1 + 3 * dt
+      when @half.formula then 1 + 2 * dt
+      when @some.formula then 1 + 1 * dt
       when @aLittleBit.formula then 1
       else 1
 
