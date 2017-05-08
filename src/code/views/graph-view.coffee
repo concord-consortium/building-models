@@ -26,6 +26,7 @@ module.exports = React.createClass
   getDefaultProps: ->
     linkTarget: '.link-top'
     connectionTarget: '.link-target'
+    transferTarget: '.transfer-target'
 
   componentDidMount: ->
     $container = $(@refs.container)
@@ -284,8 +285,10 @@ module.exports = React.createClass
 
   _redrawTransferLink: (link, sourceNode, targetNode) ->
     fromSource = sourceNode is link.sourceNode
-    source = $(ReactDOM.findDOMNode this.refs[sourceNode.key]).find(@props.connectionTarget)
-    target = $(ReactDOM.findDOMNode this.refs[targetNode.key]).find(@props.connectionTarget)
+    sourceConnectionClass = if fromSource then @props.connectionTarget else @props.transferTarget
+    targetConnectionClass = if not fromSource then @props.connectionTarget else @props.transferTarget
+    source = $(ReactDOM.findDOMNode this.refs[sourceNode.key]).find(sourceConnectionClass)
+    target = $(ReactDOM.findDOMNode this.refs[targetNode.key]).find(targetConnectionClass)
     if source and target
       opts = {
         source: source,

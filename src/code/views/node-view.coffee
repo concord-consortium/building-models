@@ -306,7 +306,7 @@ module.exports = NodeView = React.createClass
           )
           (div {className: @topClasses(), "data-node-key": @props.nodeKey},
             (div {
-              className: "img-background"
+              className: "img-background transfer-target"
               onClick: ((evt) => @handleSelected true, evt)
               onTouchEnd: (=> @handleSelected true)
               },
