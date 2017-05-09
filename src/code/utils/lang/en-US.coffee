@@ -65,6 +65,9 @@ module.exports =
   "~NODE-RELATION-EDIT.SOME": "Some"
   "~NODE-RELATION-EDIT.A_LITTLE_BIT": "A little bit"
   "~NODE-RELATION-EDIT.OF": "of"
+  "~NODE-RELATION-EDIT.WILL_FLOW_TO": "will flow to"
+
+  "~TRANSFER_NODE.TITLE": "flow from %{sourceTitle} to %{targetTitle}"
 
   "~LINK-EDIT.DELETE": "✖ Delete Link"
   "~LINK-EDIT.TITLE": "Title"

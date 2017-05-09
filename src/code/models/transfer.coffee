@@ -1,4 +1,5 @@
 Node = require './node'
+tr = require "../utils/translate"
 
 module.exports = class Transfer extends Node
 
@@ -11,6 +12,7 @@ module.exports = class Transfer extends Node
 
   computeTitle: ->
     if @transferLink
-      "flows from #{@transferLink.sourceNode.title} to #{@transferLink.targetNode.title}"
+      tr '~TRANSFER_NODE.TITLE', { sourceTitle: @transferLink.sourceNode.title, \
+                                    targetTitle: @transferLink.targetNode.title }
     else
       undefined

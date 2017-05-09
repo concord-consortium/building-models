@@ -246,9 +246,12 @@ module.exports = LinkRelationView = React.createClass
       (select {value: currentOption, ref: "transfer", onChange: @updateRelation},
         options
       )
+      # note that localization will be a problem here due to the hard-coded order
+      # of the elements and because we can't use the string-replacement capabilities
+      # of the translate module since there is special formatting of node titles, etc.
       (span {}, " #{tr "~NODE-RELATION-EDIT.OF"} ")
       (span {className: "source"}, source)
-      (span {}, " ")
+      (span {}, " #{tr "~NODE-RELATION-EDIT.WILL_FLOW_TO"} ")
       (span {className: "target"}, target)
       (span {}, " #{tr "~NODE-RELATION-EDIT.EACH"} ")
       (span {}, @state.stepUnits.toLowerCase())
@@ -285,6 +288,7 @@ module.exports = LinkRelationView = React.createClass
       if @state.isAccumulator
         @renderAccumulator(source, target)
       else if @state.isTransferModifier
+        target = @props.link.targetNode?.transferLink?.targetNode?.title
         @renderTransfer(source, target)
       else
         @renderNonAccumulator(source, target)
