@@ -160,7 +160,8 @@ class Command
 
   execute: (debug) -> @_call 'execute', debug
   undo: (debug) -> @_call 'undo', debug
-  redo: (debug) -> @_call 'execute', debug, 'redo'
+  redo: (debug) -> if @methods.hasOwnProperty 'redo' then @_call 'redo', debug \
+                                                     else @_call 'execute', debug, 'redo'
 
 class CommandBatch
   constructor: (@name) ->

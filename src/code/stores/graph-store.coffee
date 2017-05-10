@@ -12,6 +12,8 @@ SimulationStore     = require "../stores/simulation-store"
 GraphActions        = require "../actions/graph-actions"
 CodapActions        = require '../actions/codap-actions'
 InspectorPanelStore = require "../stores/inspector-panel-store"
+CodapConnect        = require '../models/codap-connect'
+DEFAULT_CONTEXT_NAME = 'building-models'
 
 GraphStore  = Reflux.createStore
   init: (context) ->
@@ -30,6 +32,7 @@ GraphStore  = Reflux.createStore
     SimulationStore.actions.createExperiment.listen        @resetSimulation.bind(@)
     SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)
 
+    @usingCODAP = false
     @codapStandaloneMode = false
 
     @lastRunModel = ""   # string description of the model last time we ran simulation
@@ -56,20 +59,19 @@ GraphStore  = Reflux.createStore
   # modes. It can be called from the 1) button press, 2) keyboard, and 3) CODAP action.
   # We can be in CODAP standalone mode or not.
   #
-  # We want to immediately execute the action if EITHER we are not in standalone mode
-  # (for all sources), or if we are in standalone mode and the source is CODAP
-  # (forced == true).
+  # The undoRedoManager should handle the undo/redo when EITHER we are not running
+  # in CODAP or the undo/redo has been initiated from CODAP
   #
-  # If we are in standalone mode and the source was not CODAP, we want to send the
-  # event to CODAP.
-  undo: (forced) ->
-    if forced or not @codapStandaloneMode
+  # CODAP should handle the undo/redo when we are running from CODAP in either
+  # standalone or non-standalone mode and CODAP did not initiate the request
+  undo: (fromCODAP) ->
+    if fromCODAP or not @usingCODAP
       @undoRedoManager.undo()
     else
       CodapActions.sendUndoToCODAP()
 
-  redo: (forced) ->
-    if forced or not @codapStandaloneMode
+  redo: (fromCODAP) ->
+    if fromCODAP or not @usingCODAP
       @undoRedoManager.redo()
     else
       CodapActions.sendRedoToCODAP()
@@ -82,6 +84,8 @@ GraphStore  = Reflux.createStore
 
   revertToLastSave: ->
     @undoRedoManager.revertToLastSave()
+
+  setUsingCODAP: (@usingCODAP) ->
 
   setCodapStandaloneMode: (@codapStandaloneMode) ->
 
@@ -146,9 +150,30 @@ GraphStore  = Reflux.createStore
     @_graphUpdated()
     @updateListeners()
 
+  isUniqueTitle: (title, skipNode, nodes=@getNodes()) ->
+    nonUniqueNode = (otherNode) ->
+      sameTitle = otherNode.title is title
+      if skipNode then sameTitle and otherNode isnt skipNode else sameTitle
+    not _.find nodes, nonUniqueNode
+
+  ensureUniqueTitle: (node, newTitle=node.title) ->
+    nodes = @getNodes()
+    if not @isUniqueTitle newTitle, node, nodes
+      index = 2
+      endsWithNumber = / (\d+)$/
+      matches = newTitle.match(endsWithNumber)
+      if matches
+        index = parseInt(matches[1], 10) + 1
+        newTitle = newTitle.replace(endsWithNumber, '')
+      template = "#{newTitle} %{index}"
+      loop
+        newTitle = tr template, {index: index++}
+        break if @isUniqueTitle newTitle, node, nodes
+    newTitle
 
   addNode: (node) ->
     @endNodeEdit()
+    node.title = @ensureUniqueTitle node
     @undoRedoManager.createAndExecuteCommand 'addNode',
       execute: => @_addNode node
       undo: => @_removeNode node
@@ -185,8 +210,9 @@ GraphStore  = Reflux.createStore
   moveNodeCompleted: (nodeKey, leftDiff, topDiff) ->
     @endNodeEdit()
     @undoRedoManager.createAndExecuteCommand 'moveNode',
-      execute: => @moveNode nodeKey, 0,0 # FIXME leftDiff, topDiff
+      execute: => @moveNode nodeKey, 0, 0
       undo: => @moveNode nodeKey, -leftDiff, -topDiff
+      redo: => @moveNode nodeKey, leftDiff, topDiff
 
   moveNode: (nodeKey, leftDiff, topDiff) ->
     node = @nodeKeys[nodeKey]
@@ -246,12 +272,16 @@ GraphStore  = Reflux.createStore
             execute: => @_changeNode node, data
             undo: => @_changeNode node, originalData
 
-  _changeNode: (node, data) ->
+  _changeNode: (node, data, notifyCodap = true) ->
     log.info "Change for #{node.title}"
     for key in NodeModel.fields
       if data.hasOwnProperty key
         log.info "Change #{key} for #{node.title}"
+        prev = node[key]
         node[key] = data[key]
+        if notifyCodap and @usingCODAP and key is 'title'
+          codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
+          codapConnect.sendRenameAttribute node.key, prev
     node.normalizeValues(_.keys(data))
     @_notifyNodeChanged(node)
 

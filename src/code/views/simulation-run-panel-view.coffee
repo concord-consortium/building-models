@@ -82,7 +82,7 @@ module.exports = React.createClass
         max: 1000
         style:
           width: "#{Math.max 3, (@state.duration.toString().length+1)}em"
-        defaultValue: @state.duration
+        value: @state.duration
         onChange: @setDuration
       })
       (Dropdown

@@ -27,7 +27,9 @@ module.exports = class Node extends GraphPrimitive
     {
       @x=0
       @y=0
-      @title="untitled"
+      @title= tr "~NODE.UNTITLED"
+      @codapID = null
+      @codapName = null
       @image
       @isAccumulator=false
       @valueDefinedSemiQuantitatively=true,
@@ -46,6 +48,8 @@ module.exports = class Node extends GraphPrimitive
     @color ?= Colors.choices[0].value
 
     @isInCycle = false      # we always initalize with no links, so we can't be in cycle
+
+    @_collectorImageProps = null
 
   # Scale the value of initialValue such that, if we are in semi-quantitative mode,
   # we always return a value between 0 and 100. Likewise, if we try to set a value while
@@ -164,6 +168,23 @@ module.exports = class Node extends GraphPrimitive
       @max = Math.max @max, @min
     @initialValue = Math.max @min, Math.min @max, @initialValue
 
+    # clear collector images when @isAccumulator -> false
+    if (not @isAccumulator)
+      @_collectorImageProps = null
+
+  collectorImageProps: ->
+    # preserve collector images unless explicitly cleared
+    if not @_collectorImageProps
+      @_collectorImageProps = []
+      for i in [0..8] by 2
+        row = Math.trunc(i/3)
+        col = i - row * 3
+        @_collectorImageProps.push
+          left: Math.random() * 10 + col * 20   # [0, 10) [20, 30) [40, 50)
+          top: Math.random() * 10 + row * 20    # [0, 10) [20, 30) [40, 50)
+          rotation: Math.random() * 60 - 30     # [-30, 30) [-30, 30) [-30, 30)
+    @_collectorImageProps
+
   # Given a value between _min and _max, calculate the SQ proportion
   mapQuantToSemiquant: (val) ->
     SEMIQUANT_MIN + (val - @_min) / (@_max - @_min) * (SEMIQUANT_MAX - SEMIQUANT_MIN)
@@ -176,6 +197,8 @@ module.exports = class Node extends GraphPrimitive
   toExport: ->
     data:
       title: @title
+      codapName: @codapName
+      codapID: @codapID
       x: @x
       y: @y
       paletteItem: @paletteItem

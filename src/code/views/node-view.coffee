@@ -3,6 +3,7 @@ tr = require "../utils/translate"
 
 SimulationActions = require("../stores/simulation-store").actions
 SquareImage = React.createFactory require "./square-image-view"
+StackedImage = React.createFactory require "./stacked-image-view"
 SliderView  = React.createFactory require "./value-slider-view"
 GraphView   = React.createFactory require "./node-svg-graph-view"
 CodapConnect = require '../models/codap-connect'
@@ -13,6 +14,12 @@ InspectorPanelStore = require "../stores/inspector-panel-store"
 NodeTitle = React.createFactory React.createClass
   displayName: "NodeTitle"
   mixins: [require '../mixins/node-title']
+
+  getInitialState: ->
+    isUniqueTitle: @isUniqueTitle @props.node.title
+
+  isUniqueTitle: (title) ->
+    @props.graphStore.isUniqueTitle title, @props.node
 
   componentWillUnmount: ->
     if @props.isEditing
@@ -47,6 +54,7 @@ NodeTitle = React.createFactory React.createClass
   updateTitle: (e) ->
     @titleUpdated = true
     newTitle = @cleanupTitle(@inputValue())
+    @setState isUniqueTitle: @isUniqueTitle newTitle
     @props.onChange(newTitle)
 
   finishEditing: ->
@@ -54,34 +62,37 @@ NodeTitle = React.createFactory React.createClass
     @props.onStopEditing()
 
   renderTitle: ->
-    className = "node-title"
-    if @isDefaultTitle()
-      className = "node-title untitled"
-    (div {className: className, onClick: @props.onStartEditing }, @props.title)
+    (div {
+      className: "node-title#{if @isDefaultTitle then ' untitled' else ''}"
+      key: "display"
+      style: { display: if @props.isEditing then "none" else "block" }
+      onClick: @props.onStartEditing
+    }, @props.title)
 
   renderTitleInput: ->
     displayTitle = @displayTitleForInput(@props.title)
     canDeleteWhenEmpty = @props.node.addedThisSession and not @titleUpdated
+    className = "node-title#{if not @state.isUniqueTitle then ' non-unique-title' else ''}"
     (input {
       type: "text"
       ref: "input"
-      className: "node-title"
+      key: "edit"
+      style: { display: if @props.isEditing then "block" else "none" }
+      className: className
       onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
       onChange: @updateTitle
       defaultValue: displayTitle
-      maxLength: @maxTitleLength
+      maxLength: @maxTitleLength()
       placeholder: @titlePlaceholder()
       onBlur: =>
         @finishEditing()
     })
 
   render: ->
-    (div {className: 'node-title-box'},
-      if @props.isEditing
-        @renderTitleInput()
-      else
-        @renderTitle()
-    )
+    (div {className: 'node-title-box'}, [
+      @renderTitle()
+      @renderTitleInput()
+    ])
 
 module.exports = NodeView = React.createClass
 
@@ -171,11 +182,13 @@ module.exports = NodeView = React.createClass
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
 
   changeTitle: (newTitle) ->
+    newTitle = @props.graphStore.ensureUniqueTitle @props.data, newTitle
     @props.graphStore.startNodeEdit()
     log.info "Title is changing to #{newTitle}"
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
 
   startEditing: ->
+    @initialTitle = @props.graphStore.nodeKeys[@props.nodeKey].title
     @props.selectionManager.selectNodeForTitleEditing(@props.data)
 
   stopEditing: ->
@@ -250,18 +263,29 @@ module.exports = NodeView = React.createClass
     else ""
 
   renderNodeInternal: ->
+    getNodeImage = (node) ->
+      if node.isAccumulator
+        (StackedImage {
+          image: node.image
+          imageProps: node.collectorImageProps()
+        })
+      else
+        (SquareImage {
+          image: node.image
+        })
+
+    nodeImage = getNodeImage(@props.data)
+
     if @props.showMinigraph
       (GraphView {
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
         color: @props.dataColor
-        image: @props.data.image
+        image: nodeImage
       })
     else
-      (SquareImage {
-        image: @props.data.image,
-      })
+      nodeImage
 
   render: ->
     style =
@@ -311,6 +335,12 @@ module.exports = NodeView = React.createClass
         )
       )
     )
+
+# synchronized with corresponding CSS values
+NodeView.nodeImageOffset = ->
+  linkTargetTopMargin = 6   # .link-target
+  elementTopMargin = 6      # .elm .top
+  { left: 0, top: linkTargetTopMargin + elementTopMargin }
 
 myView = React.createFactory NodeView
 

@@ -25,14 +25,20 @@ module.exports = React.createClass
     selectedTabIndex: @props.selectedTabIndex || 0
 
   componentWillReceiveProps: (nextProps) ->
-    if @props.selectedTabIndex isnt nextProps.selectedTabIndex
+    if @state.selectedTabIndex isnt nextProps.selectedTabIndex
       @selectedTab nextProps.selectedTabIndex
 
   statics:
     Tab: (settings) -> new TabInfo settings
 
   selectedTab: (index) ->
-    @setState selectedTabIndex: index
+    @setState selectedTabIndex: index or 0
+
+  onTabSelected: (index) ->
+    if @props.onTabSelected
+      @props.onTabSelected index
+    else
+      @selectedTab index
 
   renderTab: (tab, index) ->
     (Tab
@@ -41,7 +47,7 @@ module.exports = React.createClass
       index: index
       defined: tab.defined
       selected: (index is @state.selectedTabIndex)
-      onSelected: @selectedTab
+      onSelected: @onTabSelected
     )
 
   renderTabs: ->

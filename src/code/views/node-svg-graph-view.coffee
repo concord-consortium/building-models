@@ -60,11 +60,7 @@ module.exports = NodeSvgGraphView = React.createClass
       width: @props.width + imageOffset
       height: @props.height + imageOffset
 
-    (div {style: imageStyle},
-      (SquareImage {
-        image: @props.image
-      })
-    )
+    (div {style: imageStyle}, @props.image)
 
   renderSVG: ->
     svgOffset = 3

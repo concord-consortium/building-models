@@ -1,4 +1,5 @@
-Node             = React.createFactory require './node-view'
+NodeView         = require './node-view'
+Node             = React.createFactory NodeView
 NodeModel        = require '../models/node'
 Importer         = require '../utils/importer'
 Color            = require '../utils/colors'
@@ -92,10 +93,11 @@ module.exports = React.createClass
   addPaletteNode: (ui, paletteItem) ->
     # Default new nodes are untitled
     title = tr "~NODE.UNTITLED"
-    offset = $(@refs.linkView).offset()
+    linkOffset = $(@refs.linkView).offset()
+    imageOffset = NodeView.nodeImageOffset()
     newNode = new NodeModel
-      x: ui.offset.left - offset.left
-      y: ui.offset.top - offset.top
+      x: ui.offset.left - linkOffset.left - imageOffset.left
+      y: ui.offset.top - linkOffset.top - imageOffset.top
       title: title
       paletteItem: paletteItem.uuid
       image: paletteItem.image

@@ -8,7 +8,14 @@
     "url": "https://github.com/concord-consortium/building-models"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha"
+    "build": "gulp build-all",
+    "deploy:dev": "./build.sh",
+    "lint": "gulp lint",
+    "pretest": "npm run lint",
+    "start": "live-server dev",
+    "test": "./node_modules/mocha/bin/mocha",
+    "test:watch": "./node_modules/mocha/bin/mocha -w",
+    "watch": "gulp"
   },
   "dependencies": {
     "autosize": "^3.0.18",

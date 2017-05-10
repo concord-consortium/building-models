@@ -15,7 +15,10 @@ ImageSearchResult = React.createFactory React.createClass
     image = new Image()
     image.src = @props.imageInfo.image
     image.onload = =>
-      @setState loaded: true
+      @setState loaded: true if not @unmounted
+
+  componentWillUnmount: ->
+    @unmounted = true
 
   clicked: ->
     ImageDialogStore.actions.update @props.imageInfo
@@ -23,10 +26,37 @@ ImageSearchResult = React.createFactory React.createClass
   render: ->
     src = if @state.loaded then @props.imageInfo.image else 'img/bb-chrome/spin.svg'
     if not @props.isDisabled(@props.imageInfo)
-      (img {src: src, onClick: @clicked, title: @props.imageInfo.title})
+      (img {src: src, onClick: @clicked, title: @props.imageInfo.metadata.title})
     else
       null
 
+ImageSearchPageLink = React.createFactory React.createClass
+  displayName: 'ImageSearchPageLink'
+
+  selectPage: (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    @props.selectPage @props.page
+
+  render: ->
+    if @props.currentPage is @props.page
+      (span {className: 'image-search-page-link'}, @props.page)
+    else
+      (a {className: 'image-search-page-link', href: '#', onClick: @selectPage}, @props.page)
+
+ImageSearchPrevNextLink = React.createFactory React.createClass
+  displayName: 'ImageSearchPrevNextLink'
+
+  selectPage: (e) ->
+    e.preventDefault()
+    e.stopPropagation()
+    @props.selectPage @props.page
+
+  render: ->
+    if @props.enabled
+      (a {className: 'image-search-prev-next-link', href: '#', onClick: @selectPage}, @props.label)
+    else
+      (span {className: 'image-search-prev-next-link', style: {color: "#777"}}, @props.label)
 
 module.exports = React.createClass
   displayName: 'ImageSearch'
@@ -37,14 +67,20 @@ module.exports = React.createClass
     @getInitialImageDialogViewState
       searching: false
       searched: false
-      externalResults: []
+      results: []
+      page: 1
+      numPages: 0
 
   searchClicked: (e) ->
     e.preventDefault()
-    @search limitResults: true
+    @search
+      page: 1
+      newSearch: true
 
-  showAllMatches: ->
-    @search limitResults: false
+  selectPage: (page) ->
+    @search
+      page: page
+      newSearch: false
 
   search: (options) ->
     query = $.trim @refs.search.value
@@ -53,17 +89,19 @@ module.exports = React.createClass
       query: query
       searchable: validQuery
       searching: validQuery
-      searchingAll: validQuery and not options.limitResults
       searched: false
-      externalResults: []
-      numExternalMatches: 0
+      results: []
+      page: if options.newSearch then 1 else options.page
+      numPages: if options.newSearch then 0 else @state.numPages
 
-    OpenClipart.search query, options, (results, numMatches) =>
-      @setState
-        searching: false
-        searched: true
-        externalResults: results
-        numExternalMatches: numMatches
+    if validQuery
+      OpenClipart.search query, options, (results, page, numPages) =>
+        @setState
+          searching: false
+          searched: true
+          results: results
+          page: page
+          numPages: numPages
 
   componentDidMount: ->
     @refs.search.focus()
@@ -74,9 +112,16 @@ module.exports = React.createClass
   isDisabledInExternalSearch: (node) ->
     (@props.inPalette node) or (@props.inLibrary node)
 
+  renderPagination: ->
+    if @state.numPages > 0
+      (div {key: "pagination", className: "image-search-dialog-pagination"},
+        (ImageSearchPrevNextLink {key: "prev", page: @state.page - 1, label: (tr "~IMAGE-BROWSER.PREVIOUS"), selectPage: @selectPage, enabled: @state.page > 1}),
+        (ImageSearchPageLink({key: "page#{page}", page: page, currentPage: @state.page, selectPage: @selectPage}) for page in [1..@state.numPages])
+        (ImageSearchPrevNextLink {key: "next", page: @state.page + 1, label: (tr "~IMAGE-BROWSER.NEXT"), selectPage: @selectPage, enabled: @state.page < @state.numPages})
+      )
+
   render: ->
-    showNoResultsAlert = @state.searchable and @state.searched and @state.externalResults.length is 0
-    providerMessage = (div {key: "provider-message", className: "image-search-dialog-provider-message"}, tr '~IMAGE-BROWSER.PROVIDER_MESSAGE')
+    showNoResultsAlert = @state.searchable and @state.searched and @state.results.length is 0
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
@@ -98,41 +143,32 @@ module.exports = React.createClass
             )
 
           (div {className: 'image-search-main-results'},[
-            if not @state.searchable or showNoResultsAlert
+            if showNoResultsAlert
               (div {key: 'image-search-section', className: 'image-search-section', style: height: '100%'},[
                 (div {key:'image-search-results', className: 'image-search-dialog-results show-all'},
                   for node, index in _.map @props.internalLibrary
                     if node.image
                       (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
                 )
-                providerMessage
               ])
             else
-              filteredExternalResultsAll = (@state.externalResults.filter (x) => not @isDisabledInExternalSearch x)
-              filteredExternalResults = if @state.searchingAll then filteredExternalResultsAll else filteredExternalResultsAll[..23]
-              header = if @state.externalResults.length < @state.numExternalMatches
-                matchInfo = tr '~IMAGE-BROWSER.SHOWING_N_OF_M',
-                  numResults: filteredExternalResults.length
-                  numTotalResults: @state.numExternalMatches
-                (span {}, matchInfo, (a {href: '#', onClick: @showAllMatches}, tr '~IMAGE-BROWSER.SHOW_ALL'))
               (div {key: 'image-search-section-post-search', className: 'image-search-section', style: height: '100%'},[
-                (div {key: 'header', className: 'header'}, header),
-                (div {key: 'results', className: "image-search-dialog-results #{if @state.externalResults.length is @state.numExternalMatches then 'show-all' else ''}"},
+                (div {key: 'results', className: "image-search-dialog-results"},
                   if @state.searching
                     (div {},
                       (i {className: "icon-codap-options spin"})
                       ' '
                       tr "~IMAGE-BROWSER.SEARCHING",
-                        scope: if @state.searchingAll then 'all matches for ' else ''
+                        page: if @state.page is 1 then (tr "~IMAGE-BROWSER.SEARCHING_FIRST_PAGE") else (tr "~IMAGE-BROWSER.SEARCHING_PAGE", page: @state.page)
                         query: @state.query
                     )
-                  else if filteredExternalResults.length is 0
+                  else if @state.searched and @state.results.length is 0
                     tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
                   else
-                    for node, index in filteredExternalResults
+                    for node, index in @state.results
                       (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
                 )
-                providerMessage
+                @renderPagination()
               ])
           ])
         )
