@@ -119,7 +119,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.ADDED_TO"
     postfixIco: "added-to"
     formula: "+in"  # needs to be +in to differentiate from @transferred
-    magnitude: 0
+    magnitude: 1  # triggers '+' relationship symbol
     gradual: 0
     func: (scope) ->
       return scope.in
@@ -131,7 +131,7 @@ module.exports = class RelationFactory
     text: tr "~NODE-RELATION-EDIT.SUBTRACTED_FROM"
     postfixIco: "subtracted-from"
     formula: "-in"
-    magnitude: 0
+    magnitude: -1 # triggers '-' relationship symbol
     gradual: 0
     func: (scope) ->
       return -scope.in
@@ -266,6 +266,8 @@ module.exports = class RelationFactory
     if vector && scalar
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
+    else if accumulator or transferModifier
+      magnitude = (accumulator or transferModifier).magnitude
     {vector, scalar, accumulator, transferModifier, magnitude, gradual}
 
   @thicknessFromRelation: (relation) ->
