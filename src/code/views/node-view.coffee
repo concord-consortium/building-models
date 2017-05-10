@@ -271,7 +271,7 @@ module.exports = NodeView = React.createClass
         })
       else
         (SquareImage {
-          image: node.image
+          image: if node.isTransfer then 'img/nodes/transfer.png' else node.image
         })
 
     nodeImage = getNodeImage(@props.data)
