@@ -191,15 +191,23 @@ GraphStore  = Reflux.createStore
 
     # create a copy of the list of links
     links = node.links.slice()
+    # identify any transfer nodes that need to be removed as well
+    transferNodes = {}
+    _.each(links, (link) ->
+      if link?.transferNode?.key?
+        transferNodes[link.transferNode.key] = link.transferNode
+    )
 
     @undoRedoManager.createAndExecuteCommand 'removeNode',
       execute: =>
         node.transferLink?.relation = node.transferLink.defaultRelation()
         @_removeLink(link) for link in links
+        _.each(transferNodes, (node) => @_removeNode node)
         @_removeNode node
       undo: =>
         node.transferLink?.relation = transferRelation
         @_addNode node
+        _.each(transferNodes, (node) => @_addNode node)
         @_addLink(link) for link in links
 
   _addNode: (node) ->
@@ -362,7 +370,7 @@ GraphStore  = Reflux.createStore
 
   changeLink: (link, changes={}) ->
     if changes.deleted
-      @removeSelectedLink()
+      @removeSelectedLinks()
     else if link
       originalData =
         title: link.title
@@ -425,19 +433,22 @@ GraphStore  = Reflux.createStore
     @setFilename 'New Model'
     @undoRedoManager.clearHistory()
 
-  removeSelectedNode: ->
+  removeSelectedNodes: ->
     selectedNodeKeys = (node.key for node in @selectedNodes())
     for nodeKey in selectedNodeKeys
       @removeNode nodeKey
 
-  removeSelectedLink: ->
+  removeSelectedLinks: ->
     for selectedLink in @selectedLinks()
       @removeLink selectedLink
 
   deleteSelected: ->
     log.info "Deleting selected items"
-    @removeSelectedNode()
-    @removeSelectedLink()
+    # deleting multiple links/nodes should be undoable as a single action
+    @undoRedoManager.startCommandBatch()
+    @removeSelectedLinks()
+    @removeSelectedNodes()
+    @undoRedoManager.endCommandBatch()
     @selectionManager.clearSelection()
 
   removeLinksForNode: (node) ->
