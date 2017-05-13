@@ -32,13 +32,12 @@ SimulationActions = requireStore('simulation-store').actions
 CodapConnect   = requireModel 'codap-connect'
 
 
-LinkNodes = (sourceNode, targetNode, formula) ->
+LinkNodes = (sourceNode, targetNode, relationSpec) ->
   link = new Link
     title: "function"
     sourceNode: sourceNode
     targetNode: targetNode
-    relation: new Relationship
-      formula: formula
+    relation: new Relationship(relationSpec)
   sourceNode.addLink(link)
   targetNode.addLink(link)
 
@@ -79,7 +78,7 @@ describe "Simulation", ->
           nodes: [@nodeA, @nodeB]
           duration: 10
 
-        LinkNodes(@nodeA, @nodeB, @formula)
+        LinkNodes(@nodeA, @nodeB, { type: 'range', formula: @formula })
         @simulation = new Simulation(@arguments)
 
       it "the link formula should work", ->
@@ -116,16 +115,16 @@ describe "Simulation", ->
         # 2: basic collector (A->[B])
         {A:5, B:"50+", AB: "1 * in",
         results: [
-          [5, 50]
-          [5, 55]
+          [5, 50.05]
+          [5, 50.1]
         ]}
 
         # 3: basic collector with feedback (A<->[B])
         {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
-          [50, 50]
-          [100, 100]
-          [200, 200]
+          [50, 50.5]
+          [50.5, 51.005]
+          [51.005, 51.51505]
         ]}
 
         # 4: three-node graph (>-) with averaging
@@ -145,37 +144,37 @@ describe "Simulation", ->
         # 6: three-node graph with collector (>-[C])
         {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
         results: [
-            [10, 20, 0]
-            [10, 20, 12]
+            [10, 20, 0.12]
+            [10, 20, 0.24]
         ]}
 
         # 7: three-node graph with collector (>-[C]) and negative relationship
         {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
         results: [
-            [10, 1, 0]
-            [10, 1, 9]
-            [10, 1, 18]
+            [10, 1, 0.09]
+            [10, 1, 0.18]
+            [10, 1, 0.27]
         ]}
 
         # *** Tests for graphs with bounded ranges ***
         # Note all nodes have min:0 and max:100 by default
 
         # 8: basic collector (A->[B])
-        {A:30, B:"50+", AB: "1 * in",
+        {A:60, B:"99+", AB: "1 * in",
         cap: true
         results: [
-          [30, 50]
-          [30, 80]
-          [30, 100]
+          [60, 99.6]
+          [60, 100]
+          [60, 100]
         ]}
 
         # 9: basic subtracting collector (A- -1 ->[B])
-        {A:30, B:"50+", AB: "-1 * in",
+        {A:60, B:"1+", AB: "-1 * in",
         cap: true
         results: [
-          [30, 50]
-          [30, 20]
-          [30, 0]
+          [60, 0.4]
+          [60, 0]
+          [60, 0]
         ]}
 
         # 10: basic independent and dependent nodes (A->B)
@@ -192,11 +191,12 @@ describe "Simulation", ->
           for key, value of scenario
             if key.length == 1
               isAccumulator = typeof value is "string" and ~value.indexOf('+')
-              nodes[key] = new Node({initialValue: parseInt(value), isAccumulator})
+              nodes[key] = new Node({title: key, initialValue: parseInt(value), isAccumulator})
             else if key.length == 2
               node1 = nodes[key[0]]
               node2 = nodes[key[1]]
-              LinkNodes(node1, node2, value)
+              type = if node2.isAccumulator then 'accumulator' else 'range'
+              LinkNodes(node1, node2, { type, formula: value })
           for result, j in scenario.results
             nodeArray = (node for key, node of nodes)
             simulation = new Simulation
@@ -209,7 +209,7 @@ describe "Simulation", ->
             else
               simulation.run()
               for node, k in nodeArray
-                node.currentValue.should.be.closeTo result[k], 0.000001
+                expect(node.currentValue, "Step: #{j}, Node: #{node.title}").to.be.closeTo result[k], 0.000001
 
     describe "for mixed semiquantitative and quantitative nodes", ->
       beforeEach ->
@@ -220,7 +220,7 @@ describe "Simulation", ->
           nodes: [@nodeA, @nodeB]
           duration: 1
 
-        LinkNodes(@nodeA, @nodeB, @formula)
+        LinkNodes(@nodeA, @nodeB, { type: 'range', formula: @formula })
         @simulation = new Simulation(@arguments)
 
       describe "when the input is SQ and the output is Q", ->
@@ -274,7 +274,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
     GraphStore.addNode @nodeA
     GraphStore.addNode @nodeB
 
-    LinkNodes(@nodeA, @nodeB, @formula)
+    LinkNodes(@nodeA, @nodeB, { type: 'range', formula: @formula })
 
   afterEach ->
     CodapConnect.instance.restore()
