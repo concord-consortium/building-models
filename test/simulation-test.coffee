@@ -20,8 +20,10 @@ requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 
 Link           = requireModel 'link'
 Node           = requireModel 'node'
+TransferNode   = requireModel 'transfer'
 Simulation     = requireModel 'simulation'
 Relationship   = requireModel 'relationship'
+RelationFactory = requireModel 'relation-factory'
 
 requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
 
@@ -40,6 +42,10 @@ LinkNodes = (sourceNode, targetNode, relationSpec) ->
     relation: new Relationship(relationSpec)
   sourceNode.addLink(link)
   targetNode.addLink(link)
+  if link.relation.type is 'transfer'
+    link.transferNode = new TransferNode
+    link.transferNode.setTransferLink link
+  link
 
 
 asyncListenTest = (done, action, func) ->
@@ -254,6 +260,33 @@ describe "Simulation", ->
           @nodeA.max = 50
           @simulation.run()
           @nodeB.currentValue.should.equal 40
+
+    describe "for transfer nodes", ->
+      beforeEach ->
+        @nodeA    = new Node({title: "A", isAccumulator: true, initialValue: 20})
+        @nodeB    = new Node({title: "B", isAccumulator: true, initialValue: 50})
+        @transferLink = LinkNodes(@nodeA, @nodeB, RelationFactory.transferred)
+        @transferNode = @transferLink.transferNode
+        @arguments =
+          nodes: [@nodeA, @nodeB, @transferNode]
+          duration: 1
+
+        @simulation = new Simulation(@arguments)
+
+      describe "should transfer appropriate mount from the source node to the target node", ->
+
+        # sanity check
+        it "should transfer 1/100th the value of the source node with no transfer-modifier", ->
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 19.5, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.5, 0.000001
+
+        # sanity check
+        it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
+          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 10, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 60, 0.000001
 
 
 describe "The SimulationStore, with a network in the GraphStore", ->
