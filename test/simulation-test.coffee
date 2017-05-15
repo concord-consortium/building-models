@@ -162,10 +162,17 @@ describe "Simulation", ->
             [10, 1, 0.27]
         ]}
 
+        # 8: four-node graph with collector (>-[D]) and scaled product combination
+        {A: 50, B: 50, C: 0, D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in"
+        results: [
+            [50, 50, 25, 0.25]
+            [50, 50, 25, 0.5]
+        ]}
+
         # *** Tests for graphs with bounded ranges ***
         # Note all nodes have min:0 and max:100 by default
 
-        # 8: basic collector (A->[B])
+        # 9: basic collector (A->[B])
         {A:60, B:"99+", AB: "1 * in",
         cap: true
         results: [
@@ -174,7 +181,7 @@ describe "Simulation", ->
           [60, 100]
         ]}
 
-        # 9: basic subtracting collector (A- -1 ->[B])
+        # 10: basic subtracting collector (A- -1 ->[B])
         {A:60, B:"1+", AB: "-1 * in",
         cap: true
         results: [
@@ -183,7 +190,7 @@ describe "Simulation", ->
           [60, 0]
         ]}
 
-        # 10: basic independent and dependent nodes (A->B)
+        # 11: basic independent and dependent nodes (A->B)
         {A:120, B:0, AB: "1 * in",
         cap: true
         results: [
