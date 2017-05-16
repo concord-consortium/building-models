@@ -15,6 +15,7 @@ module.exports = class Relationship
 
   constructor: (@opts={}) ->
     @text        = @opts.text
+    @uiText      = @opts.uiText
     formula      = @opts.formula
     @func        = @opts.func
     @errHandler  = @opts.errHandler or Relationship.defaultErrHandler
