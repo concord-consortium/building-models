@@ -51,14 +51,14 @@ NodeTitle = React.createFactory React.createClass
     if e.which in [8, 46] and not @titleUpdated
       @props.graphStore.removeNode @props.nodeKey
 
-  updateTitle: (e) ->
+  updateTitle: (isComplete) ->
     @titleUpdated = true
-    newTitle = @cleanupTitle(@inputValue())
+    newTitle = @cleanupTitle(@inputValue(), isComplete)
     @setState isUniqueTitle: @isUniqueTitle newTitle
     @props.onChange(newTitle)
 
   finishEditing: ->
-    @updateTitle()
+    @updateTitle(true)
     @props.onStopEditing()
 
   renderTitle: ->
@@ -80,12 +80,11 @@ NodeTitle = React.createFactory React.createClass
       style: { display: if @props.isEditing then "block" else "none" }
       className: className
       onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
-      onChange: @updateTitle
-      defaultValue: displayTitle
+      onChange: => @updateTitle()
+      value: displayTitle
       maxLength: @maxTitleLength()
       placeholder: @titlePlaceholder()
-      onBlur: =>
-        @finishEditing()
+      onBlur: => @finishEditing()
     })
 
   render: ->
