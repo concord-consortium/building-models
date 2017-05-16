@@ -81,7 +81,7 @@ NodeTitle = React.createFactory React.createClass
       className: className
       onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
       onChange: @updateTitle
-      defaultValue: displayTitle
+      value: displayTitle
       maxLength: @maxTitleLength()
       placeholder: @titlePlaceholder()
       onBlur: =>
