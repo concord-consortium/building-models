@@ -301,7 +301,8 @@ GraphStore  = Reflux.createStore
           originalRelations = {}
           for link in node.inLinks()
             originalRelations[link.key] = link.relation
-          accumulatorChanged = !!data.isAccumulator isnt !!originalData.isAccumulator
+          accumulatorChanged = data.isAccumulator? and \
+                                (!!data.isAccumulator isnt !!originalData.isAccumulator)
 
           @undoRedoManager.createAndExecuteCommand 'changeNode',
             execute: =>
