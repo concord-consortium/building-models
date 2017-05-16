@@ -62,7 +62,9 @@ RangeIntegrationFunction = (incrementAccumulators) ->
 SetAccumulatorValueFunction = (nodeValues) ->
   # collectors only have accumulator and transfer links
   links = @inLinks('accumulator').concat(@inLinks('transfer')).concat(@outLinks('transfer'))
-  return unless links.length > 0
+
+  startValue = if @previousValue? then @previousValue else @initialValue
+  return startValue unless links.length > 0
 
   linkScaleFactor = 100
 
@@ -70,10 +72,10 @@ SetAccumulatorValueFunction = (nodeValues) ->
   for link in links
     {sourceNode, relation, transferNode} = link
     inV = nodeValues[sourceNode.key]
+    outV = startValue
     switch relation.type
       when 'accumulator'
-        # TODO: check if outV is really equal to inV here - I'm not clear what outV is in this case'
-        deltaValue += relation.evaluate(inV, inV, sourceNode.max, @max) / linkScaleFactor
+        deltaValue += relation.evaluate(inV, outV, sourceNode.max, @max) / linkScaleFactor
 
       when 'transfer'
         transferValue = nodeValues[transferNode.key]
