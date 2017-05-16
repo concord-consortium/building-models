@@ -104,28 +104,35 @@ describe "Simulation", ->
     # node on each step.
     describe "for other scenarios", ->
       scenarios = [
-        # 0: cascade independent and dependent variables (A->B->C)
+        # 0: unlinked nodes should retain their initial values
+        {A: 0, B: 50, C: 100, D: "0+", E: "50+", F: "100+",
+        results: [
+          [0, 50, 100, 0, 50, 100]
+          [0, 50, 100, 0, 50, 100]
+        ]}
+
+        # 1: cascade independent and dependent variables (A->B->C)
         {A: 50, B: 40, C: 30, AB: "1 * in", BC: "0.1 * in",
         results: [
-            [50, 50, 5]
-            [50, 50, 5]
+          [50, 50, 5]
+          [50, 50, 5]
         ]}
 
-        # 1: cascade independent and dependent variables with negative relationship (A->B->C)
+        # 2: cascade independent and dependent variables with negative relationship (A->B->C)
         {A: 50, B: 40, C: 30, AB: "0.1 * in", BC: "-1 * in",
         results: [
-            [50, 5, -5]
-            [50, 5, -5]
+          [50, 5, -5]
+          [50, 5, -5]
         ]}
 
-        # 2: basic collector (A->[B])
+        # 3: basic collector (A->[B])
         {A:5, B:"50+", AB: "1 * in",
         results: [
           [5, 50.05]
           [5, 50.1]
         ]}
 
-        # 3: basic collector with feedback (A<->[B])
+        # 4: basic collector with feedback (A<->[B])
         {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
           [50, 50.5]
@@ -133,46 +140,46 @@ describe "Simulation", ->
           [51.005, 51.51505]
         ]}
 
-        # 4: three-node graph (>-) with averaging
+        # 5: three-node graph (>-) with averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "1 * in",
         results: [
-            [10, 20, 15]
-            [10, 20, 15]
+          [10, 20, 15]
+          [10, 20, 15]
         ]}
 
-        # 5: three-node graph (>-) with non-linear averaging
+        # 6: three-node graph (>-) with non-linear averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "0.1 * in",
         results: [
-            [10, 20, 6]
-            [10, 20, 6]
+          [10, 20, 6]
+          [10, 20, 6]
         ]}
 
-        # 6: three-node graph with collector (>-[C])
+        # 7: three-node graph with collector (>-[C])
         {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
         results: [
-            [10, 20, 0.12]
-            [10, 20, 0.24]
+          [10, 20, 0.12]
+          [10, 20, 0.24]
         ]}
 
-        # 7: three-node graph with collector (>-[C]) and negative relationship
+        # 8: three-node graph with collector (>-[C]) and negative relationship
         {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
         results: [
-            [10, 1, 0.09]
-            [10, 1, 0.18]
-            [10, 1, 0.27]
+          [10, 1, 0.09]
+          [10, 1, 0.18]
+          [10, 1, 0.27]
         ]}
 
-        # 8: four-node graph with collector (>-[D]) and scaled product combination
+        # 9: four-node graph with collector (>-[D]) and scaled product combination
         {A: 50, B: 50, C: 0, D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in"
         results: [
-            [50, 50, 25, 0.25]
-            [50, 50, 25, 0.5]
+          [50, 50, 25, 0.25]
+          [50, 50, 25, 0.5]
         ]}
 
         # *** Tests for graphs with bounded ranges ***
         # Note all nodes have min:0 and max:100 by default
 
-        # 9: basic collector (A->[B])
+        # 10: basic collector (A->[B])
         {A:60, B:"99+", AB: "1 * in",
         cap: true
         results: [
@@ -181,7 +188,7 @@ describe "Simulation", ->
           [60, 100]
         ]}
 
-        # 10: basic subtracting collector (A- -1 ->[B])
+        # 11: basic subtracting collector (A- -1 ->[B])
         {A:60, B:"1+", AB: "-1 * in",
         cap: true
         results: [
@@ -190,7 +197,7 @@ describe "Simulation", ->
           [60, 0]
         ]}
 
-        # 11: basic independent and dependent nodes (A->B)
+        # 12: basic independent and dependent nodes (A->B)
         {A:120, B:0, AB: "1 * in",
         cap: true
         results: [
