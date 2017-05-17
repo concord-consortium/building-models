@@ -198,11 +198,11 @@ module.exports = class RelationFactory
     id: "aLittleBit"
     text: tr "~NODE-RELATION-EDIT.A_LITTLE_BIT"
     postfixIco: "a-little-bit"
-    formula: "in * 0.10"
+    formula: "in * 0.03"
     magnitude: 0
     gradual: 0
     func: (scope) ->
-      return scope.in * 0.1
+      return scope.in * 0.03
 
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
