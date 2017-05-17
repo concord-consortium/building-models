@@ -13,6 +13,7 @@ module.exports = class MySystemImporter
     # increment last saved experiment number so that each session will
     # create its own experiments, and not append a prior session's
     data.settings?.simulation?.experimentNumber++
+    data.settings?.simulation?.experimentFrame = 0
     # Synchronous invocation of actions / w trigger
     ImportActions.import.trigger(data)
     @importNodes data.nodes
@@ -33,11 +34,9 @@ module.exports = class MySystemImporter
     for nodespec in importNodes
       node = @importNode(nodespec)
       @graphStore.addNode node
+    return  # prevent unused default return value
 
   importLinks: (links) ->
     for link in links
-      importedLink = @graphStore.importLink link
-      if link.transferNode and @graphStore.nodeKeys[link.transferNode]
-        importedLink.transferNode = @graphStore.nodeKeys[link.transferNode]
-        importedLink.transferNode.setTransferLink importedLink
-
+      @graphStore.importLink link
+    return  # prevent unused default return value

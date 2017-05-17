@@ -142,8 +142,7 @@ SimulationStore   = Reflux.createStore
           SimulationActions.simulationFramesCreated(frames)
           if @settings.isRecording
             framesNoTime = _.map frames, (frame) =>
-              @settings.experimentFrame++
-              frame.time = @settings.experimentFrame
+              frame.time = @settings.experimentFrame++
               return frame
             SimulationActions.recordingFramesCreated(framesNoTime)
 

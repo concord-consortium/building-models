@@ -48,6 +48,7 @@ GraphStore  = Reflux.createStore
     for frame in data
       for node, i in frame.nodes
         nodes[i].frames.push node.value
+    return  # prevent unused default return value
 
   paletteDelete: (status) ->
     {deleted,paletteItem,replacement} = status
@@ -55,6 +56,7 @@ GraphStore  = Reflux.createStore
       for node in @getNodes()
         if node.paletteItemIs paletteItem
           @changeNode({image: replacement.image, paletteItem: replacement.uuid},node)
+    return  # prevent unused default return value
 
   # This and redo() can be called from three sources, and we can be in two different
   # modes. It can be called from the 1) button press, 2) keyboard, and 3) CODAP action.
@@ -118,8 +120,10 @@ GraphStore  = Reflux.createStore
   importLink: (linkSpec) ->
     sourceNode = @nodeKeys[linkSpec.sourceNode]
     targetNode = @nodeKeys[linkSpec.targetNode]
+    transferNode = @nodeKeys[linkSpec.transferNode] if linkSpec.transferNode
     linkSpec.sourceNode = sourceNode
     linkSpec.targetNode = targetNode
+    linkSpec.transferNode = transferNode if transferNode
     link = new Link(linkSpec)
     @addLink(link)
     link
@@ -482,7 +486,7 @@ GraphStore  = Reflux.createStore
         modelDescription += link.relation.formula + ";"
         if link.relation.type is 'transfer'
           transfer = link.transferNode
-          modelDescription += "#{transfer.key}:#{transfer.initialValue};"
+          modelDescription += "#{transfer.key}:#{transfer.initialValue};" if transfer
         modelDescription += "#{target.key}#{if target.isAccumulator then ':'+(target.value ? target.initialValue) else ''}|"
 
     linkDescription += nodes.length     # we need to redraw targets when new node is added

@@ -205,17 +205,18 @@ module.exports = class Simulation
         nodeValues[node.key] = node.currentValue = node._cumulativeValue / 20
         node._cumulativeValue = 0
 
+      # output before collectors are updated
+      @generateFrame(time++)
+
       # set the accumulator values
       collectorNodes = _.filter @nodes, (node) -> node.isAccumulator
       _.each collectorNodes, (node) ->
         node.setAccumulatorValue nodeValues
 
-      time++
-      @generateFrame(time)
-
-
-    while time < @duration
+    # simulate each step
+    while time <= @duration
       step()
+
     @onFrames(@framesBundle)    # send all at once
     @onEnd()
 
