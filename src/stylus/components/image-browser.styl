@@ -2,7 +2,12 @@
   margin 10px 0px
   font-size 15px
 
+.tabbed-panel
+  .workspace-tab-component.image-browser
+    width 80%
+
 .image-search-dialog
+  max-height 380px
 
   .image-search-dialog-form
     margin-bottom 10px
@@ -46,7 +51,9 @@
       margin 0 3px
       text-decoration none
   .image-search-main-results
-    height 330px
+    height 320px
+    &.no-results
+      height 275px
     .image-search-section
       position relative
 

@@ -25,8 +25,12 @@ module.exports = React.createClass
       inLibrary: store.inLibrary
       selectedImage: @state.paletteItem #from ImageDialogStore mixin
 
-    (ModalTabbedDialogFactory {title: (tr "~ADD-NEW-IMAGE.TITLE"), close: @actions.close, tabs: [
-      TabbedPanel.Tab {label: (tr "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"), component: (ImageSearchDialog props)}
-      TabbedPanel.Tab {label: (tr "~ADD-NEW-IMAGE.MY-COMPUTER-TAB"), component: (MyComputerDialog props)}
-      TabbedPanel.Tab {label: (tr "~ADD-NEW-IMAGE.LINK-TAB"), component: (LinkDialog props)}
-    ]})
+    (ModalTabbedDialogFactory {
+      title: tr "~ADD-NEW-IMAGE.TITLE"
+      clientClass: 'image-browser'
+      close: @actions.close
+      tabs: [
+        TabbedPanel.Tab {label: (tr "~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB"), component: (ImageSearchDialog props)}
+        TabbedPanel.Tab {label: (tr "~ADD-NEW-IMAGE.MY-COMPUTER-TAB"), component: (MyComputerDialog props)}
+        TabbedPanel.Tab {label: (tr "~ADD-NEW-IMAGE.LINK-TAB"), component: (LinkDialog props)}
+      ]})

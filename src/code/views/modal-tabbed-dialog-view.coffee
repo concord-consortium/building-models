@@ -7,5 +7,5 @@ module.exports = React.createClass
 
   render: ->
     (ModalDialog {title: @props.title, close: @props.close},
-      (TabbedPanel {tabs: @props.tabs})
+      (TabbedPanel {clientClass: @props.clientClass, tabs: @props.tabs})
     )
