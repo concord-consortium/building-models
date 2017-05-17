@@ -51,7 +51,7 @@ RangeIntegrationFunction = (incrementAccumulators) ->
   # for now, if any a node points to a collector, it should use the scaled product
   # ultimately this should be a default which can be overridden by the user, in
   # which case the setting would presumably become part of the node model
-  useScaledProduct = !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
+  useScaledProduct = @isTransfer or !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
   value = combineInputs(inValues, useScaledProduct)
 
   # if we need to cap, do it at end of all calculations
