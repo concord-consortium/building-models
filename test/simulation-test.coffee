@@ -296,6 +296,13 @@ describe "Simulation", ->
           expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.5, 0.000001
 
         # sanity check
+        it "should transfer 1/100th the value of the source node with no transfer-modifier", ->
+          @transferNode.initialValue = 80
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 19.2, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.8, 0.000001
+
+        # sanity check
         it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
           @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
           @simulation.run()
