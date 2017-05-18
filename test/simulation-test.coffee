@@ -128,16 +128,16 @@ describe "Simulation", ->
         # 3: basic collector (A->[B])
         {A:5, B:"50+", AB: "1 * in",
         results: [
-          [5, 50.05]
-          [5, 50.1]
+          [5, 55]
+          [5, 60]
         ]}
 
         # 4: basic collector with feedback (A<->[B])
         {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
-          [50.5, 50.5]
-          [51.005, 51.005]
-          [51.51505, 51.51505]
+          [100, 100]
+          [200, 200]
+          [400, 400]
         ]}
 
         # 5: three-node graph (>-) with averaging
@@ -157,44 +157,44 @@ describe "Simulation", ->
         # 7: three-node graph with collector (>-[C])
         {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
         results: [
-          [10, 20, 0.12]
-          [10, 20, 0.24]
+          [10, 20, 12]
+          [10, 20, 24]
         ]}
 
         # 8: three-node graph with collector (>-[C]) and negative relationship
         {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
         results: [
-          [10, 1, 0.09]
-          [10, 1, 0.18]
-          [10, 1, 0.27]
+          [10, 1, 9]
+          [10, 1, 18]
+          [10, 1, 27]
         ]}
 
         # 9: four-node graph with collector (>-[D]) and scaled product combination
         {A: 50, B: 50, C: 0, D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in"
         results: [
-          [50, 50, 25, 0.25]
-          [50, 50, 25, 0.5]
+          [50, 50, 25, 25]
+          [50, 50, 25, 50]
         ]}
 
         # *** Tests for graphs with bounded ranges ***
         # Note all nodes have min:0 and max:100 by default
 
         # 10: basic collector (A->[B])
-        {A:60, B:"99+", AB: "1 * in",
+        {A:30, B:"20+", AB: "1 * in",
         cap: true
         results: [
-          [60, 99.6]
-          [60, 100]
-          [60, 100]
+          [30, 50]
+          [30, 80]
+          [30, 100]
         ]}
 
         # 11: basic subtracting collector (A- -1 ->[B])
-        {A:60, B:"1+", AB: "-1 * in",
+        {A:40, B:"90+", AB: "-1 * in",
         cap: true
         results: [
-          [60, 0.4]
-          [60, 0]
-          [60, 0]
+          [40, 50]
+          [40, 10]
+          [40, 0]
         ]}
 
         # 12: basic independent and dependent nodes (A->B)

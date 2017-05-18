@@ -2,6 +2,7 @@ GraphPrimitive = require './graph-primitive'
 Colors = require '../utils/colors'
 
 tr = require '../utils/translate'
+urlParams = require '../utils/url-params'
 
 SEMIQUANT_MIN = 0
 SEMIQUANT_MAX = 100
@@ -37,6 +38,9 @@ module.exports = class Node extends GraphPrimitive
       @frames=[]
       @addedThisSession=false
     } = nodeSpec
+
+    accumulatorScaleUrlParam = (urlParams.collectorScale and Number(urlParams.collectorScale)) or 1
+    @accumulatorInputScale = if accumulatorScaleUrlParam > 0 then accumulatorScaleUrlParam else 1
 
     # Save internal values of min, max and initialValues. Actual values retreived
     # using @min or node.min will depend on whether we are in quantitative or

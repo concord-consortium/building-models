@@ -66,8 +66,6 @@ SetAccumulatorValueFunction = (nodeValues) ->
   startValue = if @previousValue? then @previousValue else @initialValue
   return startValue unless links.length > 0
 
-  linkScaleFactor = 100
-
   deltaValue = 0
   for link in links
     {sourceNode, relation, transferNode} = link
@@ -75,13 +73,13 @@ SetAccumulatorValueFunction = (nodeValues) ->
     outV = startValue
     switch relation.type
       when 'accumulator'
-        deltaValue += relation.evaluate(inV, outV, sourceNode.max, @max) / linkScaleFactor
+        deltaValue += relation.evaluate(inV, outV, sourceNode.max, @max) / @accumulatorInputScale
 
       when 'transfer'
         transferValue = nodeValues[transferNode.key]
         # transfer values are scaled unless they have a modifier
         if not transferNode.inLinks('transfer-modifier').length
-          transferValue /= linkScaleFactor
+          transferValue /= 100
 
         if link.sourceNode is @
           deltaValue -= transferValue
