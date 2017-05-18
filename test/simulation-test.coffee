@@ -135,9 +135,9 @@ describe "Simulation", ->
         # 4: basic collector with feedback (A<->[B])
         {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
-          [50, 50.5]
-          [50.5, 51.005]
-          [51.005, 51.51505]
+          [50.5, 50.5]
+          [51.005, 51.005]
+          [51.51505, 51.51505]
         ]}
 
         # 5: three-node graph (>-) with averaging
@@ -350,14 +350,14 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       asyncListenTest done, SimulationActions.recordingFramesCreated, (data) ->
 
-          data.length.should.equal 10
+          data.length.should.equal 11
 
           frame0 = data[0]
-          frame0.time.should.equal 1
+          frame0.time.should.equal 0
           frame0.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
           frame9 = data[9]
-          frame9.time.should.equal 10
+          frame9.time.should.equal 9
           frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
       SimulationActions.createExperiment()
@@ -371,7 +371,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
     it "should call simulationFramesCreated with 3 frames", (done) ->
       testFunction = (data) ->
         size = data.length
-        size.should.eql(3)
+        size.should.eql(4)
 
       asyncListenTest done, SimulationActions.recordingFramesCreated, testFunction
       SimulationActions.recordPeriod()

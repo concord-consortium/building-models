@@ -188,7 +188,15 @@ module.exports = class Simulation
     # The transfer links values are then modified by the transfer-modifier links which are links
     # from the source node of a transfer link to the transfer node of the transfer link.
 
+    nodeValues = {}
+
     step = =>
+
+      # update the accumulator/collector values on all but the first step
+      if time isnt 0
+        collectorNodes = _.filter @nodes, (node) -> node.isAccumulator
+        _.each collectorNodes, (node) -> node.setAccumulatorValue nodeValues
+
       # push values down chain
       for i in [0...10]
         _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
@@ -200,18 +208,12 @@ module.exports = class Simulation
         _.each @nodes, (node) => node._cumulativeValue += @evaluateNode node
 
       # calculate average and capture the instantaneous node values
-      nodeValues = {}
       _.each @nodes, (node) ->
         nodeValues[node.key] = node.currentValue = node._cumulativeValue / 20
         node._cumulativeValue = 0
 
       # output before collectors are updated
       @generateFrame(time++)
-
-      # set the accumulator values
-      collectorNodes = _.filter @nodes, (node) -> node.isAccumulator
-      _.each collectorNodes, (node) ->
-        node.setAccumulatorValue nodeValues
 
     # simulate each step
     while time <= @duration
