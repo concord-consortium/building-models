@@ -197,6 +197,7 @@ module.exports = class Node extends GraphPrimitive
     @_min + (val - SEMIQUANT_MIN) / (SEMIQUANT_MAX - SEMIQUANT_MIN) * (@_max - @_min)
 
   toExport: ->
+    key: @key
     data:
       title: @title
       codapName: @codapName
@@ -209,8 +210,7 @@ module.exports = class Node extends GraphPrimitive
       max: @_max
       isAccumulator: @isAccumulator
       valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
-      frames: @frames
-    key: @key
+      frames: _.clone @frames
 
   canEditInitialValue: ->
     not @isDependent(true) or @isAccumulator or @isInCycle
