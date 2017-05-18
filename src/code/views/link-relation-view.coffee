@@ -142,14 +142,14 @@ module.exports = LinkRelationView = React.createClass
       currentOption = scalarSelection.id
 
     # place dropdown but hide it if we haven't selected vector (to keep spacing)
-    style = if @state.selectedVector then {} else {opacity: 0}
+    visClass = if @state.selectedVector then ' visible' else ' hidden'
 
     if @state.selectedVector?.isCustomRelationship
-      (div {className: "bb-select", style: style},
+      (div {className: "bb-select#{visClass}"},
         (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM"}")
       )
     else
-      (div {className: "bb-select", style: style},
+      (div {className: "bb-select#{visClass}"},
         (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
         (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation},
           options
