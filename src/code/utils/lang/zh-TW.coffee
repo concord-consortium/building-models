@@ -101,6 +101,7 @@ module.exports =
   "~IMAGE-BROWSER.PREVIEW": "預覽你的圖像"
   "~IMAGE-BROWSER.ADD_IMAGE": "增加圖像"
   "~IMAGE-BROWSER.SEARCH_HEADER": "搜尋圖像"
+  "~IMAGE-BROWSER.SEARCH_BUTTON_LABEL": "搜尋"  # translation by Evangeline Ireland
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "抱歉，找不到圖像"
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "嘗試搜尋別的，或是瀏覽以下圖像"
   "~IMAGE-BROWSER.SEARCHING": "到openclipart.org尋找 %{page} of \"%{query}\""
@@ -108,8 +109,8 @@ module.exports =
   "~IMAGE-BROWSER.SEARCHING_PAGE": "頁面 %{page}"
   "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "在openclipart.org 找不到結果 for \"%{query}.\""
   "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "圖片已存在"
-  "~IMAGE-BROWSER.PREVIOUS": "? 上一步？"
-  "~IMAGE-BROWSER.NEXT": "下一步？"
+  "~IMAGE-BROWSER.PREVIOUS": "‹ 上一步"
+  "~IMAGE-BROWSER.NEXT": "下一步 ›"
 
   "~IMAGE-BROWSER.PLEASE_DROP_IMAGE": "請放入圖片或輸入圖片網址"
   "~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER": "從瀏覽器中放入圖像"
