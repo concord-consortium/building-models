@@ -20,7 +20,8 @@ defaultLang = if urlParams.lang and translations[urlParams.lang] then urlParams.
 varRegExp = /%\{\s*([^}\s]*)\s*\}/g
 
 translate = (key, vars={}, lang=defaultLang) ->
-  translation = translations[lang]?[key] or key
+  translation = translations[lang]?[key]
+  translation = key if not translation?
   translation.replace varRegExp, (match, key) ->
     if vars.hasOwnProperty key then vars[key] else "'** UKNOWN KEY: #{key} **"
 
