@@ -83,7 +83,8 @@ module.exports = class CodapConnect
       # ret==null is indication of timeout, not an indication that the data set
       # doesn't exist.
       if !ret or ret.success
-        @_initialSyncAttributeProperties ret.values?.collections?[1]?.attrs
+        if (attrs = ret?.values?.collections?[1]?.attrs?)
+          @_initialSyncAttributeProperties attrs
         @initGameHandler ret
       else
         @_createDataContext()
@@ -164,7 +165,7 @@ module.exports = class CodapConnect
       callback() if callback
     else
       doResolve = (listAttributeResponse) =>
-        if listAttributeResponse.success
+        if listAttributeResponse?.success
           values = listAttributeResponse.values
           newAttributes = _.select currentAttributes, (a) -> (! _.includes(values,a.name))
           message =
