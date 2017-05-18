@@ -339,15 +339,15 @@ ValueSlider = React.createClass
       border: "0px"
       width: width + (if not horizontal and not filled then lengendHeight else 0)
       height: height + (if horizontal then lengendHeight else 0)
-    classNames = "value-slider"
+    classNames = "value-slider#{if showHandle then ' show-handle' else ' no-handle'}"
     if not horizontal then classNames += " vertical"
     if filled then classNames += " filled"
     (div {
       className: classNames
       style: style
       ref: (s) => @slider = s
-      onMouseDown: @handleJumpAndDrag
-      onTouchStart: @handleJumpAndDrag
+      onMouseDown: if showHandle then @handleJumpAndDrag else @handleNoop
+      onTouchStart: if showHandle then @handleJumpAndDrag else @handleNoop
       onTouchEnd: @handleNoop
       },
       (svg {className: "svg-background", width: "#{width}px", height:"#{height}px", viewBox: "0 0 #{width} #{height}"},

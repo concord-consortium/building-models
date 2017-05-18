@@ -11,6 +11,8 @@ gray-fill   = #dbdbea
     stroke none
   .svg-background
     position relative
+  &.no-handle
+    cursor not-allowed
   .value-slider-handle
     z-index 2
     cursor pointer
@@ -73,7 +75,6 @@ gray-fill   = #dbdbea
       flex-direction column
 
     .value-slider-handle
-      cursor not-allowed
       background-color #DDD
     .legend
       color rgba(1, 136, 158, 0.42)
