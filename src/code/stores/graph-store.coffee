@@ -302,23 +302,31 @@ GraphStore  = Reflux.createStore
 
         if nodeChanged        # don't do anything unless we've actually changed the node
 
-          originalRelations = {}
-          for link in node.inLinks()
-            originalRelations[link.key] = link.relation
           accumulatorChanged = data.isAccumulator? and \
                                 (!!data.isAccumulator isnt !!originalData.isAccumulator)
+
+          if accumulatorChanged
+                            # all inbound links are invalidated
+            changedLinks = [].concat(node.inLinks())
+                            # along with outbound transfer links
+                              .concat(_.filter(node.outLinks(), (link) ->
+                                link.relation.type is 'transfer'))
+            originalRelations = {}
+            for link in changedLinks
+              originalRelations[link.key] = link.relation
 
           @undoRedoManager.createAndExecuteCommand 'changeNode',
             execute: =>
               if accumulatorChanged
-                for link in node.inLinks()
-                  link.relation = link.defaultRelation() if link.relation
+                for link in changedLinks
+                  @_changeLink link, { relation: link.defaultRelation() }
               @_changeNode node, data
             undo: =>
               @_changeNode node, originalData
               if accumulatorChanged
-                for link in node.inLinks()
-                  link.relation = originalRelations[link.key] if originalRelations[link.key]
+                for link in changedLinks
+                  @_changeLink link, { relation: originalRelations[link.key] }
+              return
 
   _changeNode: (node, data, notifyCodap = true) ->
     log.info "Change for #{node.title}"
