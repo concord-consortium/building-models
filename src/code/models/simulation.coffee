@@ -68,7 +68,7 @@ SetAccumulatorValueFunction = (nodeValues) ->
 
   deltaValue = 0
   for link in links
-    {sourceNode, relation, transferNode} = link
+    {sourceNode, targetNode, relation, transferNode} = link
     inV = nodeValues[sourceNode.key]
     outV = startValue
     switch relation.type
@@ -77,13 +77,16 @@ SetAccumulatorValueFunction = (nodeValues) ->
 
       when 'transfer'
         transferValue = nodeValues[transferNode.key]
-        # transfer values are scaled unless they have a modifier
-        if not transferNode.inLinks('transfer-modifier').length
+        # transfer values are scaled if they have no modifier and
+        # their source is an independent node (has no inputs)
+        sourceInputCount = sourceNode.inLinks().length
+        transferModifierCount = transferNode.inLinks('transfer-modifier').length
+        if sourceInputCount is 0 and transferModifierCount is 0
           transferValue /= 100
 
-        if link.sourceNode is @
+        if sourceNode is @
           deltaValue -= transferValue
-        else if link.targetNode is @
+        else if targetNode is @
           deltaValue += transferValue
 
   # accumulators hold their values in previousValue which is confusing
