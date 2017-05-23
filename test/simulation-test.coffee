@@ -201,7 +201,7 @@ describe "Simulation", ->
         {A:120, B:0, AB: "1 * in",
         cap: true
         results: [
-          [120, 100]
+          [100, 100]
         ]}
       ]
 
@@ -287,7 +287,7 @@ describe "Simulation", ->
 
         @simulation = new Simulation(@arguments)
 
-      describe "should transfer appropriate mount from the source node to the target node", ->
+      describe "should transfer appropriate amount from the source node to the target node", ->
 
         # sanity check
         it "should transfer 1/100th the value of the source node with no transfer-modifier", ->
@@ -303,8 +303,19 @@ describe "Simulation", ->
           expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.8, 0.000001
 
         # sanity check
+        it "should limit the transfer to the quantity in the source node", ->
+          @nodeA.initialValue = 5
+          @nodeA.capNodeValues = @nodeB.capNodeValues = true
+          @simulation.duration = 12
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 0, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 55, 0.000001
+
+        # sanity check
         it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
+          @nodeA.initialValue = 20
           @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
+          @simulation.duration = 1
           @simulation.run()
           expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 10, 0.000001
           expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 60, 0.000001

@@ -1,3 +1,14 @@
+# transfer values are scaled if they have no modifier and
+# their source is an independent node (has no inputs)
+isScaledTransferNode = (node) ->
+  return false unless node.isTransfer
+  return false if node.inLinks('transfer-modifier').length
+  sourceNode = node.transferLink?.sourceNode
+  not sourceNode?.inLinks().length
+
+isUnscaledTransferNode = (node) ->
+  node.isTransfer and not isScaledTransferNode(node)
+
 scaleInput = (val, nodeIn, nodeOut) ->
   if (nodeIn.valueDefinedSemiQuantitatively isnt nodeOut.valueDefinedSemiQuantitatively)
     if (nodeIn.valueDefinedSemiQuantitatively)
@@ -26,20 +37,16 @@ RangeIntegrationFunction = (incrementAccumulators) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
   return @currentValue if @currentValue?
-  return @previousValue if @isAccumulator and not incrementAccumulators
-
-  # regular nodes and flow nodes only have 'range' and 'transfer-modifier' links
-  links = @inLinks('range').concat(@inLinks('transfer-modifier'))
-  count = links.length
 
   # if we have no incoming links, we always remain our previous or initial value
   # collectors aren't calculated in this phase, but they do capture initial/previous values
   startValue = if @previousValue? then @previousValue else @initialValue
-  return startValue if @isAccumulator or count < 1
+  return startValue if @isAccumulator and not incrementAccumulators
 
-  value = 0
+  # regular nodes and flow nodes only have 'range' and 'transfer-modifier' links
+  links = @inLinks('range').concat(@inLinks('transfer-modifier'))
+
   inValues = []
-
   _.each links, (link) =>
     return unless link.relation.isDefined
     sourceNode = link.sourceNode
@@ -52,10 +59,10 @@ RangeIntegrationFunction = (incrementAccumulators) ->
   # ultimately this should be a default which can be overridden by the user, in
   # which case the setting would presumably become part of the node model
   useScaledProduct = @isTransfer or !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
-  value = combineInputs(inValues, useScaledProduct)
+  value = if inValues.length then combineInputs(inValues, useScaledProduct) else startValue
 
   # can't transfer more than is present in source
-  if @capNodeValues and @isTransfer and @transferLink?.sourceNode?.previousValue?
+  if @capNodeValues and isUnscaledTransferNode(@) and @transferLink?.sourceNode?.previousValue?
     value = Math.min(value, @transferLink.sourceNode.previousValue)
 
   # if we need to cap, do it at end of all calculations
@@ -83,10 +90,10 @@ SetAccumulatorValueFunction = (nodeValues) ->
         transferValue = nodeValues[transferNode.key]
         # transfer values are scaled if they have no modifier and
         # their source is an independent node (has no inputs)
-        sourceInputCount = sourceNode.inLinks().length
-        transferModifierCount = transferNode.inLinks('transfer-modifier').length
-        if sourceInputCount is 0 and transferModifierCount is 0
+        if isScaledTransferNode(transferNode)
           transferValue /= 100
+          if @capNodeValues and transferNode.transferLink?.sourceNode?.previousValue?
+            transferValue = Math.min(transferValue, transferNode.transferLink.sourceNode.previousValue)
 
         if sourceNode is @
           deltaValue -= transferValue
