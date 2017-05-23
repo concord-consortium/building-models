@@ -40,17 +40,22 @@ module.exports = class CodapConnect
     # or if we are in standalone mode.
     @codapPhone.call([
       {
-        action: 'get',
+        action: 'update'
+        resource: 'interactiveFrame'
+        values: { title: tr "~CODAP.INTERACTIVE_FRAME.TITLE"}
+      },
+      {
+        action: 'get'
         resource: 'interactiveFrame'
       },
       {
-        action: 'get',
+        action: 'get'
         resource: 'dataContext'
       }
     ], (ret) =>
       if ret
-        frame   = ret[0]
-        context = ret[1]
+        frame   = ret[1]
+        context = ret[2]
 
         @graphStore.setUsingCODAP true
 
@@ -64,11 +69,6 @@ module.exports = class CodapConnect
         # (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
         state = frame?.values.savedState or
                 context?.values?.contextStorage?.gameState
-
-        @codapPhone.call
-          action: 'update'
-          resource: 'interactiveFrame'
-          values: { title: tr "~CODAP.INTERACTIVE_FRAME.TITLE"}
 
         if state?
           @graphStore.deleteAll()
