@@ -65,6 +65,11 @@ module.exports = class CodapConnect
         state = frame?.values.savedState or
                 context?.values?.contextStorage?.gameState
 
+        @codapPhone.call
+          action: 'update'
+          resource: 'interactiveFrame'
+          values: { title: tr "~CODAP.INTERACTIVE_FRAME.TITLE"}
+
         if state?
           @graphStore.deleteAll()
           @graphStore.loadData state
