@@ -47,7 +47,8 @@ GraphStore  = Reflux.createStore
     nodes = @getNodes()
     for frame in data
       for node, i in frame.nodes
-        nodes[i].frames.push node.value
+        if nodes[i]?
+          nodes[i].frames.push node.value
     return  # prevent unused default return value
 
   paletteDelete: (status) ->

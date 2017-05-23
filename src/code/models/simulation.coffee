@@ -54,6 +54,10 @@ RangeIntegrationFunction = (incrementAccumulators) ->
   useScaledProduct = @isTransfer or !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
   value = combineInputs(inValues, useScaledProduct)
 
+  # can't transfer more than is present in source
+  if @capNodeValues and @isTransfer and @transferLink?.sourceNode?.previousValue?
+    value = Math.min(value, @transferLink.sourceNode.previousValue)
+
   # if we need to cap, do it at end of all calculations
   value = @filterFinalValue value
 
