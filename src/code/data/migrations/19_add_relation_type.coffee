@@ -1,6 +1,6 @@
 migration =
   version: "1.18.0"
-  description: "Adds link reasoning"
+  description: "Adds link relationship type"
   date: "2016-05-24"
 
   doUpdate: (data) ->

@@ -250,6 +250,7 @@ module.exports = class DiagramToolkit
 
     @kit.importDefaults
       Connector: ["Bezier", {curviness: 60, variableWidth: null}]
+      Anchor: ["Continuous", { faces:["top","left","right"] }]
 
   setSuspendDrawing: (shouldwestop) ->
     if not shouldwestop
