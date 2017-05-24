@@ -171,6 +171,7 @@ module.exports =
 
   "~RELATIONSHIP.NO_RELATION": "沒有關係被定義"
 
+  "~CODAP.INTERACTIVE_FRAME.TITLE": "SageModeler"
   "~CODAP.SIMULATION.RUN": "執行"
   "~CODAP.SIMULATION.EXPERIMENT": "實驗.#"
   "~CODAP.SIMULATION.STEPS": "步驟"
