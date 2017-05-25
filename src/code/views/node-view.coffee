@@ -55,7 +55,7 @@ NodeTitle = React.createFactory React.createClass
     @titleUpdated = true
     newTitle = @cleanupTitle(@inputValue(), isComplete)
     @setState isUniqueTitle: @isUniqueTitle newTitle
-    @props.onChange(newTitle)
+    @props.onChange(newTitle, isComplete)
 
   finishEditing: ->
     @updateTitle(true)
@@ -180,8 +180,8 @@ module.exports = NodeView = React.createClass
   changeValue: (newValue) ->
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
 
-  changeTitle: (newTitle) ->
-    newTitle = @props.graphStore.ensureUniqueTitle @props.data, newTitle
+  changeTitle: (newTitle, isComplete) ->
+    newTitle = @props.graphStore.ensureUniqueTitle @props.data, newTitle if isComplete
     @props.graphStore.startNodeEdit()
     log.info "Title is changing to #{newTitle}"
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
