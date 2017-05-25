@@ -251,6 +251,8 @@ module.exports = React.createClass
     relationDetails = RelationFactory.selectionsFromRelation(link.relation)
     if relationDetails.vector? and relationDetails.vector.isCustomRelationship and link.relation.customData?
       link.color = LinkColors.customRelationship
+    else if link.relation.isTransferModifier
+      link.color = LinkColors.transferModifier
     else
       link.color = LinkColors.fromLink link
     magnitude = relationDetails.magnitude
