@@ -52,22 +52,22 @@ module.exports =
   "~NODE-RELATION-EDIT.LESS_AND_LESS": "越來越少"
   "~NODE-RELATION-EDIT.CUSTOM": "如下描述:"
   "~NODE-RELATION-EDIT.CUSTOM_HINT": "在此處畫出一個關係"
-  "~NODE-RELATION-EDIT.BECAUSE": "因為"
-  "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER": "在此處寫下你的解釋"
-  "~NODE-RELATION-EDIT.IS": "is"
-  "~NODE-RELATION-EDIT.ADDED_TO": "added to"
-  "~NODE-RELATION-EDIT.SUBTRACTED_FROM": "subtracted from"
-  "~NODE-RELATION-EDIT.TRANSFERRED_TO": "transferred to"
-  "~NODE-RELATION-EDIT.EACH": "each"
-  "~NODE-RELATION-EDIT.ALL": "All"
-  "~NODE-RELATION-EDIT.MOST": "Most"
-  "~NODE-RELATION-EDIT.HALF": "Half"
-  "~NODE-RELATION-EDIT.SOME": "Some"
-  "~NODE-RELATION-EDIT.A_LITTLE_BIT": "A little bit"
-  "~NODE-RELATION-EDIT.OF": "of"
-  "~NODE-RELATION-EDIT.WILL_FLOW_TO": "will flow to"
+  "~NODE-RELATION-EDIT.BECAUSE": "因為" # RETRANSLATE: "Why do you think so?"
+  "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER": "在此處寫下你的解釋"  # RETRANSLATE: "Write your response here"
+  "~NODE-RELATION-EDIT.IS": "is"  # TRANSLATE
+  "~NODE-RELATION-EDIT.ADDED_TO": "added to"  # TRANSLATE
+  "~NODE-RELATION-EDIT.SUBTRACTED_FROM": "subtracted from"  # TRANSLATE
+  "~NODE-RELATION-EDIT.TRANSFERRED_TO": "transferred to"  # TRANSLATE
+  "~NODE-RELATION-EDIT.EACH": "each"  # TRANSLATE
+  "~NODE-RELATION-EDIT.ALL": "All"  # TRANSLATE
+  "~NODE-RELATION-EDIT.MOST": "Most"  # TRANSLATE
+  "~NODE-RELATION-EDIT.HALF": "Half"  # TRANSLATE
+  "~NODE-RELATION-EDIT.SOME": "Some"  # TRANSLATE
+  "~NODE-RELATION-EDIT.A_LITTLE_BIT": "A little bit"  # TRANSLATE
+  "~NODE-RELATION-EDIT.OF": "of"  # TRANSLATE
+  "~NODE-RELATION-EDIT.WILL_FLOW_TO": "will flow to"  # TRANSLATE
 
-  "~TRANSFER_NODE.TITLE": "flow from %{sourceTitle} to %{targetTitle}"
+  "~TRANSFER_NODE.TITLE": "flow from %{sourceTitle} to %{targetTitle}"  # TRANSLATE
 
   "~LINK-EDIT.DELETE": "x刪除連結"
   "~LINK-EDIT.TITLE": "標題"
@@ -101,7 +101,7 @@ module.exports =
   "~IMAGE-BROWSER.PREVIEW": "預覽你的圖像"
   "~IMAGE-BROWSER.ADD_IMAGE": "增加圖像"
   "~IMAGE-BROWSER.SEARCH_HEADER": "搜尋圖像"
-  "~IMAGE-BROWSER.SEARCH_BUTTON_LABEL": "搜尋"  # translation by Evangeline Ireland
+  "~IMAGE-BROWSER.SEARCH_BUTTON_LABEL": "搜尋"
   "~IMAGE-BROWSER.NO_IMAGES_FOUND": "抱歉，找不到圖像"
   "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "嘗試搜尋別的，或是瀏覽以下圖像"
   "~IMAGE-BROWSER.SEARCHING": "到openclipart.org尋找 %{page} of \"%{query}\""
