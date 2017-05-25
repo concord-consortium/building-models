@@ -2,6 +2,7 @@ GraphPrimitive = require './graph-primitive'
 Colors = require '../utils/colors'
 
 tr = require '../utils/translate'
+urlParams = require '../utils/url-params'
 
 SEMIQUANT_MIN = 0
 SEMIQUANT_MAX = 100
@@ -37,6 +38,9 @@ module.exports = class Node extends GraphPrimitive
       @frames=[]
       @addedThisSession=false
     } = nodeSpec
+
+    accumulatorScaleUrlParam = (urlParams.collectorScale and Number(urlParams.collectorScale)) or 1
+    @accumulatorInputScale = if accumulatorScaleUrlParam > 0 then accumulatorScaleUrlParam else 1
 
     # Save internal values of min, max and initialValues. Actual values retreived
     # using @min or node.min will depend on whether we are in quantitative or
@@ -86,6 +90,8 @@ module.exports = class Node extends GraphPrimitive
       if not @valueDefinedSemiQuantitatively then @_max = val
 
   type: 'Node'
+  isTransfer: false
+
   addLink: (link) ->
     if link.sourceNode is @ or link.targetNode is @
       if _.contains @links, link
@@ -105,8 +111,8 @@ module.exports = class Node extends GraphPrimitive
   outLinks: ->
     _.filter @links, (link) => link.sourceNode is @
 
-  inLinks: ->
-    _.filter @links, (link) => link.targetNode is @
+  inLinks: (relationType = null) ->
+    _.filter @links, (link) => (link.targetNode is @) and (relationType is null or relationType is link.relation.type)
 
   inNodes: ->
     _.map @inLinks(), (link) -> link.sourceNode
@@ -195,6 +201,7 @@ module.exports = class Node extends GraphPrimitive
     @_min + (val - SEMIQUANT_MIN) / (SEMIQUANT_MAX - SEMIQUANT_MIN) * (@_max - @_min)
 
   toExport: ->
+    key: @key
     data:
       title: @title
       codapName: @codapName
@@ -207,8 +214,7 @@ module.exports = class Node extends GraphPrimitive
       max: @_max
       isAccumulator: @isAccumulator
       valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
-      frames: @frames
-    key: @key
+      frames: _.clone @frames
 
   canEditInitialValue: ->
     not @isDependent(true) or @isAccumulator or @isInCycle

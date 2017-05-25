@@ -20,8 +20,8 @@ module.exports = RelationInspectorView = React.createClass
   renderTabforLink: (link) ->
     relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
     label = link.sourceNode.title
-    {vector, scalar} = RelationFactory.selectionsFromRelation link.relation
-    isFullyDefined = (link.relation.isDefined and vector? and scalar?) or link.relation.customData?
+    {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation link.relation
+    isFullyDefined = (link.relation.isDefined and vector? and scalar?) or link.relation.customData? or accumulator? or transferModifier?
 
     (Tabber.Tab {label: label, component: relationView, defined: isFullyDefined})
 

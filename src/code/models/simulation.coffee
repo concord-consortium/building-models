@@ -1,3 +1,14 @@
+# transfer values are scaled if they have no modifier and
+# their source is an independent node (has no inputs)
+isScaledTransferNode = (node) ->
+  return false unless node.isTransfer
+  return false if node.inLinks('transfer-modifier').length
+  sourceNode = node.transferLink?.sourceNode
+  not sourceNode?.inLinks().length
+
+isUnscaledTransferNode = (node) ->
+  node.isTransfer and not isScaledTransferNode(node)
+
 scaleInput = (val, nodeIn, nodeOut) ->
   if (nodeIn.valueDefinedSemiQuantitatively isnt nodeOut.valueDefinedSemiQuantitatively)
     if (nodeIn.valueDefinedSemiQuantitatively)
@@ -7,60 +18,92 @@ scaleInput = (val, nodeIn, nodeOut) ->
   else
     return val
 
-IntegrationFunction = (incrementAccumulators) ->
+combineInputs = (inValues, useScaledProduct) ->
+  return null if not inValues?.length
+  return inValues[0] if inValues.length is 1
+
+  if useScaledProduct
+    # scaled product is computed as (n1 * n2 * ...) / 100^(n-1)
+    numerator = _.reduce(inValues, ((prod, value) -> prod * value), 1)
+    denominator = Math.pow(100, inValues.length - 1)
+  else
+    # simple arithmetic mean
+    numerator = _.reduce(inValues, ((sum, value) -> sum + value), 0)
+    denominator = inValues.length
+
+  numerator / denominator
+
+RangeIntegrationFunction = (incrementAccumulators) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
-  if @currentValue
-    return @currentValue
-  if @isAccumulator and not incrementAccumulators
-    return @previousValue
+  return @currentValue if @currentValue?
 
-  links = @inLinks()
-  count = links.length
-  nextValue = 0
-  value = 0
+  # if we have no incoming links, we always remain our previous or initial value
+  # collectors aren't calculated in this phase, but they do capture initial/previous values
+  startValue = if @previousValue? then @previousValue else @initialValue
+  return startValue if @isAccumulator and not incrementAccumulators
 
-  # if we have no incoming links, we always remain our initial value
-  if count < 1
-    return @initialValue
+  # regular nodes and flow nodes only have 'range' and 'transfer-modifier' links
+  links = @inLinks('range').concat(@inLinks('transfer-modifier'))
 
-  if @isAccumulator
-    value = if @previousValue? then @previousValue else @initialValue            # start from our last value
-    _.each links, (link) =>
-      return unless link.relation.isDefined
-      sourceNode = link.sourceNode
-      inV = sourceNode.previousValue
-      return unless inV               # we simply ignore nodes with no previous value
-      outV = @previousValue or @initialValue
+  inValues = []
+  _.each links, (link) =>
+    return unless link.relation.isDefined
+    sourceNode = link.sourceNode
+    inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
+    inV = scaleInput(inV, sourceNode, this)
+    outV = startValue
+    inValues.push link.relation.evaluate(inV, outV, link.sourceNode.max, @max)
 
-      inV = scaleInput(inV, sourceNode, this)
+  # for now, if any a node points to a collector, it should use the scaled product
+  # ultimately this should be a default which can be overridden by the user, in
+  # which case the setting would presumably become part of the node model
+  useScaledProduct = @isTransfer or !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
+  value = if inValues.length then combineInputs(inValues, useScaledProduct) else startValue
 
-      # Here we set maxIn to zero because we want to substract inV when
-      # we are in a `(maxIn - inV)` formula for accumulators (decreases by)
-      # Need a better long-term solution for this.
-      nextValue = link.relation.evaluate(inV, outV, 0)
-      value += nextValue
-  else
-    _.each links, (link) =>
-      if not link.relation.isDefined
-        count--
-        return
-      sourceNode = link.sourceNode
-      inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
-      inV = scaleInput(inV, sourceNode, this)
-      outV = @previousValue or @initialValue
-      nextValue = link.relation.evaluate(inV, outV, link.sourceNode.max, @max)
-      value += nextValue
-    if count >= 1
-      value = value / count
-    else
-      value = @previousValue or @initialValue       # we had no defined inbound links
+  # can't transfer more than is present in source
+  if @capNodeValues and isUnscaledTransferNode(@) and @transferLink?.sourceNode?.previousValue?
+    value = Math.min(value, @transferLink.sourceNode.previousValue)
 
   # if we need to cap, do it at end of all calculations
-  if @capNodeValues
-    value = Math.max @min, Math.min @max, value
+  value = @filterFinalValue value
 
   value
+
+SetAccumulatorValueFunction = (nodeValues) ->
+  # collectors only have accumulator and transfer links
+  links = @inLinks('accumulator').concat(@inLinks('transfer')).concat(@outLinks('transfer'))
+
+  startValue = if @previousValue? then @previousValue else @initialValue
+  return startValue unless links.length > 0
+
+  deltaValue = 0
+  for link in links
+    {sourceNode, targetNode, relation, transferNode} = link
+    inV = nodeValues[sourceNode.key]
+    outV = startValue
+    switch relation.type
+      when 'accumulator'
+        deltaValue += relation.evaluate(inV, outV, sourceNode.max, @max) / @accumulatorInputScale
+
+      when 'transfer'
+        transferValue = nodeValues[transferNode.key]
+        # transfer values are scaled if they have no modifier and
+        # their source is an independent node (has no inputs)
+        if isScaledTransferNode(transferNode)
+          transferValue /= 100
+          if @capNodeValues and transferNode.transferLink?.sourceNode?.previousValue?
+            transferValue = Math.min(transferValue, transferNode.transferLink.sourceNode.previousValue)
+
+        if sourceNode is @
+          deltaValue -= transferValue
+        else if targetNode is @
+          deltaValue += transferValue
+
+  # accumulators hold their values in previousValue which is confusing
+  # (this done because the accumulator values is only computed on the first of the 20 loops in RangeIntegrationFunction)
+  # TODO: possibly change RangeIntegrationFunction function to make this more clear
+  @currentValue = @filterFinalValue @previousValue + deltaValue
 
 module.exports = class Simulation
 
@@ -86,11 +129,13 @@ module.exports = class Simulation
     _.each @nodes, (node) =>
       # make this a local node property (it may eventually be different per node)
       node.capNodeValues = @capNodeValues
+      node.filterFinalValue = (value) => if @capNodeValues then Math.max(node.min, Math.min(node.max, value)) else value
       node._cumulativeValue = 0  # for averaging
       # Create a bound method on this node.
       # Put the functionality here rather than in the class "Node".
       # Keep all the logic for integration here in one file for clarity.
-      node.getCurrentValue = IntegrationFunction.bind(node)
+      node.getCurrentValue = RangeIntegrationFunction.bind(node)
+      node.setAccumulatorValue = SetAccumulatorValueFunction.bind(node)
 
   initializeValues: (node) ->
     node.currentValue = null
@@ -134,13 +179,36 @@ module.exports = class Simulation
     # integration function on each node that only pulls values from immediate parents.
     # Note that this "pushing" may not do anything of value in a closed loop, as the values
     # will simply move around the circle.
-    # We then run the simulation an additional 20 times, and the average the 20 results to
+    # We then run the simulation an additional 20 times, and average the 20 results to
     # obtain a final value.
-    # The number "20" used is arbitrary, but large enough not to affect loops the we expect
+    # The number "20" used is arbitrary, but large enough not to affect loops that we expect
     # to see in Sage. In any loop, if the number of nodes in the loop and the number of times
-    # we iterate are not dividible by each other, we'll see imbalances, but the effect of the
+    # we iterate are not divisible by each other, we'll see imbalances, but the effect of the
     # imbalance is smaller the more times we loop around.
+
+    # Changes to accomodate data flows:
+    #
+    # There are now three types of nodes: normal, collector, and transfer and four types of links:
+    # range, accumulator, transfer and transfer-modifier.  Transfer nodes are created automatically
+    # between two accumulator nodes when the link type is set to transfer and are automatically
+    # removed if the link is changed away from transfer or either of the nodes in the link
+    # is changed from not being an accumulator.  Range links are the type of the original links -
+    # they are pure functions that transmit a value from a source (domain) to a target (range) node
+    # and are the only links evaluated during the 20 step cumulative value calculation.
+    # Once each node's cumulative value is obtained and then averaged across the nodes, the accumulator
+    # values are updated by checking the accumulator and transfer links into any accumulator node.
+    # The transfer links values are then modified by the transfer-modifier links which are links
+    # from the source node of a transfer link to the transfer node of the transfer link.
+
+    nodeValues = {}
+
     step = =>
+
+      # update the accumulator/collector values on all but the first step
+      if time isnt 0
+        collectorNodes = _.filter @nodes, (node) -> node.isAccumulator
+        _.each collectorNodes, (node) -> node.setAccumulatorValue nodeValues
+
       # push values down chain
       for i in [0...10]
         _.each @nodes, (node) => @nextStep node  # toggles previous / current val.
@@ -151,17 +219,18 @@ module.exports = class Simulation
         _.each @nodes, (node) => @nextStep node
         _.each @nodes, (node) => node._cumulativeValue += @evaluateNode node
 
-      # calculate average
+      # calculate average and capture the instantaneous node values
       _.each @nodes, (node) ->
-        node.currentValue = node._cumulativeValue / 20
+        nodeValues[node.key] = node.currentValue = node._cumulativeValue / 20
         node._cumulativeValue = 0
 
-      time++
-      @generateFrame(time)
+      # output before collectors are updated
+      @generateFrame(time++)
 
-
-    while time < @duration
+    # simulate each step
+    while time <= @duration
       step()
+
     @onFrames(@framesBundle)    # send all at once
     @onEnd()
 

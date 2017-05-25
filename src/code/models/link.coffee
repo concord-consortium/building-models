@@ -16,6 +16,9 @@ module.exports = class Link extends GraphPrimitive
       @sourceNode, @sourceTerminal, @targetNode, @targetTerminal,
       @color, @title
     } = @options
+    if @options.transferNode
+      @transferNode = @options.transferNode
+      @transferNode.setTransferLink @
     @relation = @_makeRelation @options.relation
     @reasoning = @options.reasoning or ""
     @jsPlumbConnection = null # place to keep underlaying connection
@@ -30,6 +33,9 @@ module.exports = class Link extends GraphPrimitive
       relation = relationObj
     return relation
 
+  defaultRelation: ->
+    new Relation({})
+
   terminalKey: ->
     "#{@sourceNode.key} ------> #{@targetNode.key}"
 
@@ -43,11 +49,14 @@ module.exports = class Link extends GraphPrimitive
     [@sourceNode]
 
   toExport: ->
-    "title": @title
-    "color": @color
-    "sourceNode": @sourceNode.key
-    "sourceTerminal": @sourceTerminal
-    "targetNode": @targetNode.key
-    "targetTerminal": @targetTerminal
-    "relation": @relation.toExport()
-    "reasoning": @reasoning
+    link =
+      "title": @title
+      "color": @color
+      "sourceNode": @sourceNode.key
+      "sourceTerminal": @sourceTerminal
+      "targetNode": @targetNode.key
+      "targetTerminal": @targetTerminal
+      "relation": @relation.toExport()
+      "reasoning": @reasoning
+    link.transferNode = @transferNode.key if @transferNode
+    link

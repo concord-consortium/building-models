@@ -19,6 +19,7 @@ migrations = [
   require "./16_add_link_reasoning"
   require "./17_remove_simulation_speed"
   require "./18_serialize_experiment_number"
+  require "./19_add_relation_type"
 ]
 
 module.exports =

@@ -3,7 +3,8 @@ Relationship = require "./relationship"
 
 module.exports = class RelationFactory
   @increase:
-    id: 0
+    type: "range"
+    id: "increase"
     prefixIco: "inc"
     text: "increase"
     uiText: tr "~NODE-RELATION-EDIT.INCREASES"
@@ -15,7 +16,8 @@ module.exports = class RelationFactory
         scalarFunc(scope)
 
   @decrease:
-    id: 1
+    type: "range"
+    id: "decrease"
     prefixIco: "dec"
     text: "decrease"
     uiText: tr "~NODE-RELATION-EDIT.DECREASES"
@@ -27,7 +29,8 @@ module.exports = class RelationFactory
         scope.maxIn - scalarFunc(scope)
 
   @vary:
-    id: 2
+    type: "range"
+    id: "vary"
     prefixIco: "var"
     text: "vary"
     uiText: tr "~NODE-RELATION-EDIT.VARIES"
@@ -39,7 +42,8 @@ module.exports = class RelationFactory
         scalarFunc(scope)
 
   @aboutTheSame:
-    id: 0
+    type: "range"
+    id: "aboutTheSame"
     text: "about the same"
     uiText: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
     postfixIco: "the-same"
@@ -50,7 +54,8 @@ module.exports = class RelationFactory
       return scope.in
 
   @aLot:
-    id: 1
+    type: "range"
+    id: "aLot"
     text: "a lot"
     uiText: tr "~NODE-RELATION-EDIT.A_LOT"
     postfixIco: "a-lot"
@@ -61,7 +66,8 @@ module.exports = class RelationFactory
       return Math.min(scope.in * 2, scope.maxOut)
 
   @aLittle:
-    id: 2
+    type: "range"
+    id: "aLittle"
     text: "a little"
     uiText: tr "~NODE-RELATION-EDIT.A_LITTLE"
     postfixIco: "a-little"
@@ -72,7 +78,8 @@ module.exports = class RelationFactory
       return (scope.in + (scope.maxOut/2)) / 2
 
   @moreAndMore:
-    id: 3
+    type: "range"
+    id: "moreAndMore"
     text: "more and more"
     uiText: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
     postfixIco: "more-and-more"
@@ -83,7 +90,8 @@ module.exports = class RelationFactory
       return Math.min(Math.exp(scope.in / 21.7)-1, scope.maxOut)
 
   @lessAndLess:
-    id: 4
+    type: "range"
+    id: "lessAndLess"
     text: "less and less"
     uiText: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
@@ -94,7 +102,8 @@ module.exports = class RelationFactory
       return 21.7 * Math.log(Math.max(1,scope.in))
 
   @custom:
-    id: 5
+    type: "range"
+    id: "custom"
     text: "as described below:"
     uiText: tr "~NODE-RELATION-EDIT.CUSTOM"
     postfixIco: "cus"
@@ -104,17 +113,126 @@ module.exports = class RelationFactory
     func: (scope) ->
       return
 
+  @added:
+    type: "accumulator"
+    id: "added"
+    text: tr "~NODE-RELATION-EDIT.ADDED_TO"
+    postfixIco: "added-to"
+    formula: "+in"  # needs to be +in to differentiate from @transferred
+    magnitude: 1  # triggers '+' relationship symbol
+    gradual: 0
+    func: (scope) ->
+      return scope.in
+    forDualAccumulator: false # used in link-relation-view#renderAccumulator
+
+  @subtracted:
+    type: "accumulator"
+    id: "subtracted"
+    text: tr "~NODE-RELATION-EDIT.SUBTRACTED_FROM"
+    postfixIco: "subtracted-from"
+    formula: "-in"
+    magnitude: -1 # triggers '-' relationship symbol
+    gradual: 0
+    func: (scope) ->
+      return -scope.in
+    forDualAccumulator: false
+
+  @transferred:
+    type: "transfer"
+    id: "transferred"
+    text: tr "~NODE-RELATION-EDIT.TRANSFERRED_TO"
+    postfixIco: "transferred"
+    formula: "in"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in
+    forDualAccumulator: true
+
+  @all:
+    type: "transfer-modifier"
+    id: "all"
+    text: tr "~NODE-RELATION-EDIT.ALL"
+    postfixIco: "all"
+    formula: "in"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in
+
+  @most:
+    type: "transfer-modifier"
+    id: "most"
+    text: tr "~NODE-RELATION-EDIT.MOST"
+    postfixIco: "most"
+    formula: "in * 0.75"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in * 0.75
+
+  @half:
+    type: "transfer-modifier"
+    id: "half"
+    text: tr "~NODE-RELATION-EDIT.HALF"
+    postfixIco: "half"
+    formula: "in * 0.5"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in * 0.5
+
+  @some:
+    type: "transfer-modifier"
+    id: "some"
+    text: tr "~NODE-RELATION-EDIT.SOME"
+    postfixIco: "some"
+    formula: "in * 0.25"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in * 0.25
+
+  @aLittleBit:
+    type: "transfer-modifier"
+    id: "aLittleBit"
+    text: tr "~NODE-RELATION-EDIT.A_LITTLE_BIT"
+    postfixIco: "a-little-bit"
+    formula: "in * 0.03"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in * 0.03
+
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
-  @vectors: [@increase, @decrease, @vary]
-  @scalars: [
-    @aboutTheSame
-    @aLot
-    @aLittle
-    @moreAndMore
-    @lessAndLess
-  ]
+  @vectors:
+    increase: @increase
+    decrease: @decrease
+    vary: @vary
+
+  @scalars:
+    aboutTheSame: @aboutTheSame
+    aLot: @aLot
+    aLittle: @aLittle
+    moreAndMore: @moreAndMore
+    lessAndLess: @lessAndLess
+
+  @accumulators:
+    added: @added
+    subtracted: @subtracted
+    transferred: @transferred
+
+  @transferModifiers:
+    all: @all
+    most: @most
+    half: @half
+    some: @some
+    aLittleBit: @aLittleBit
+
+  @CreateRelation: (options) ->
+    new Relationship(options)
 
   @fromSelections: (vector,scalar,existingData) ->
     if vector? and vector.isCustomRelationship
@@ -127,13 +245,17 @@ module.exports = class RelationFactory
       formula = "#{vector.formulaFrag} #{scalar.formulaFrag}"
       func = vector.func(scalar.func)
       magnitude = vector.magnitude * scalar.magnitude
-    new Relationship({text: name, formula: formula, func: func, magnitude: magnitude, customData: existingData})
+    new Relationship({type: 'range', text: name, formula: formula, func: func, magnitude: magnitude, customData: existingData})
 
   @selectionsFromRelation: (relation) ->
     vector = _.find @vectors, (v) ->
       _.startsWith relation.formula, v.formulaFrag
     scalar = _.find @scalars, (s) ->
       _.endsWith relation.formula, s.formulaFrag
+    accumulator = _.find @accumulators, (s) ->
+      relation.formula is s.formula
+    transferModifier = _.find @transferModifiers, (s) ->
+      relation.formula is s.formula
     if vector?
       if vector.isCustomRelationship
         scalar = @custom
@@ -144,7 +266,19 @@ module.exports = class RelationFactory
     if vector && scalar
       magnitude = vector.magnitude * scalar.magnitude
       gradual = scalar.gradual
-    {vector: vector, scalar: scalar, magnitude: magnitude, gradual: gradual}
+    else if accumulator or transferModifier
+      magnitude = (accumulator or transferModifier).magnitude
+    {vector, scalar, accumulator, transferModifier, magnitude, gradual}
+
+  @thicknessFromRelation: (relation) ->
+    dt = 1
+    switch relation.formula
+      when @all.formula then 1 + 4 * dt
+      when @most.formula then 1 + 3 * dt
+      when @half.formula then 1 + 2 * dt
+      when @some.formula then 1 + 1 * dt
+      when @aLittleBit.formula then 1
+      else 1
 
   # @isCustomRelationship: (vector) ->
   #  customRelationship = false

@@ -123,14 +123,13 @@ module.exports = React.createClass
             @renderMinAndMax(node)
           )
         )
-        (span {className: "checkbox group full"},
-          (span {},
+        if not node.isTransfer
+          (span {className: "checkbox group full"},
             (label {}, [
               input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked}
               tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR"
             ])
           )
-        )
       )
 
       (div {className: "bottom-pane"},

@@ -107,14 +107,16 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link) ->
-    results = [["Arrow", {
-      location: 1.0
-      length: 10
-      variableWidth: variableWidth
-      width: 9 + thickness
-      foldback: arrowFoldback
-    }]]
+  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) ->
+    results = []
+    if not hideArrow
+      results.push ["Arrow", {
+        location: 1.0
+        length: 10
+        variableWidth: variableWidth
+        width: 9 + thickness
+        foldback: arrowFoldback
+      }]
     if changeIndicator && variableWidth != 0
       results.push ["Label", {
         location: 0.1,
@@ -198,6 +200,8 @@ module.exports = class DiagramToolkit
     if opts.color != LinkColors.default
       fixedColor = opts.color
       thickness = 2
+    if opts.thickness
+      thickness = opts.thickness
 
     paintStyle.lineWidth = thickness
     startColor = finalColor
@@ -227,11 +231,16 @@ module.exports = class DiagramToolkit
     if opts.showIndicators? and not opts.showIndicators
       changeIndicator = null
 
+    if opts.isTransfer
+      @kit.importDefaults
+        Connector: ["Flowchart", {}]
+        Anchor:    ["Continuous", { faces:["left","right"] }]
+
     connection = @kit.connect
       source: opts.source
       target: opts.target
       paintStyle: paintStyle
-      overlays: @_overlays opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel
+      overlays: @_overlays opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel, opts.hideArrow
       endpoint: @_endpointOptions("Rectangle", thickness, 'node-link-endpoint')
 
     connection.bind 'click', @handleClick.bind @
@@ -241,6 +250,7 @@ module.exports = class DiagramToolkit
 
     @kit.importDefaults
       Connector: ["Bezier", {curviness: 60, variableWidth: null}]
+      Anchor: ["Continuous", { faces:["top","left","right"] }]
 
   setSuspendDrawing: (shouldwestop) ->
     if not shouldwestop
