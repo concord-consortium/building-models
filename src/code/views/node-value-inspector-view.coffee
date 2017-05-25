@@ -125,8 +125,10 @@ module.exports = React.createClass
         )
         (span {className: "checkbox group full"},
           (span {},
-            (input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked})
-            (label {}, tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR")
+            (label {}, [
+              input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked}
+              tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR"
+            ])
           )
         )
       )
