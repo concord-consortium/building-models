@@ -29,7 +29,7 @@ GraphStore  = Reflux.createStore
 
     SimulationStore.actions.createExperiment.listen        @resetSimulation.bind(@)
     SimulationStore.actions.setDuration.listen             @resetSimulation.bind(@)
-    SimulationStore.actions.createExperiment.listen        @resetSimulation.bind(@)
+    SimulationStore.actions.capNodeValues.listen           @resetSimulation.bind(@)
     SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)
 
     @usingCODAP = false
@@ -404,8 +404,10 @@ GraphStore  = Reflux.createStore
   #
   # We pass nodes and links so as not to calculate @getNodes and @getLinks redundantly.
   getDescription: (nodes, links) ->
+    settings = SimulationStore.store.serialize()
+
     linkDescription = ""
-    modelDescription = ""
+    modelDescription = "steps:#{settings.duration}|cap:#{settings.capNodeValues}|"
 
     _.each links, (link) ->
       return unless (source = link.sourceNode) and (target = link.targetNode)
