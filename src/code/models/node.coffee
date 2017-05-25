@@ -54,6 +54,7 @@ module.exports = class Node extends GraphPrimitive
     @color ?= Colors.choices[0].value
 
     @isInCycle = false      # we always initalize with no links, so we can't be in cycle
+    @hasAccumulatorAncestor = false
 
     @_collectorImageProps = null
 
@@ -131,20 +132,23 @@ module.exports = class Node extends GraphPrimitive
   checkIsInIndependentCycle: ->
     visitedNodes = []
     original = this
-    isOwnGrandpa = false
+    hasAccumulatorAncestor = false
+    isOwnAncestor = false
 
     visit = (node) ->
       visitedNodes.push node
       for link in node.inLinks() when link.relation?.isDefined
         upstreamNode = link.sourceNode
         return true unless upstreamNode.isDependent(true)      # fast exit if we have an independent ancestor
-        if upstreamNode is original then isOwnGrandpa = true
+        if upstreamNode is original then isOwnAncestor = true
+        if upstreamNode.isAccumulator then hasAccumulatorAncestor = true
         unless _.contains visitedNodes, upstreamNode
           return true if visit upstreamNode
 
     hasIndependentAncestor = visit @
 
-    @isInCycle = not hasIndependentAncestor and isOwnGrandpa
+    @isInCycle = not hasIndependentAncestor and isOwnAncestor
+    @hasAccumulatorAncestor = hasAccumulatorAncestor
 
   infoString: ->
     linkNamer = (link) ->
@@ -220,7 +224,7 @@ module.exports = class Node extends GraphPrimitive
       frames: _.clone @frames
 
   canEditInitialValue: ->
-    not @isDependent(true) or @isAccumulator or @isInCycle
+    not @isDependent(true) or @isAccumulator or (@isInCycle and not @hasAccumulatorAncestor)
 
   canEditValueWhileRunning: ->
     not @isDependent(true)
