@@ -55,14 +55,15 @@ module.exports = class DiagramToolkit
     ]
     results
 
-  makeSource: (div) ->
+  makeSource: (div, clientClasses) ->
+    classes = 'node-link-button' + if clientClasses then " #{clientClasses}" else ''
     endpoints = @kit.addEndpoint(div,
       isSource: true
       dropOptions:
         activeClass: "dragActive"
       anchor: "Bottom"
       connectorStyle : { strokeStyle:"#666" }
-      endpoint: @_endpointOptions("Rectangle", 19, 'node-link-button')
+      endpoint: @_endpointOptions("Rectangle", 26, classes)
       connectorOverlays: [["Arrow", {location:1.0, width:10, length:10}]]
       maxConnections: -1
     )

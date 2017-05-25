@@ -201,9 +201,34 @@ module.exports = React.createClass
       @_redrawTargets()
       @diagramToolkit.resumeDrawing()
       @ignoringEvents = false
+      @_checkForLinkButtonClientClass()
+
+  # There is a bug which only manifests in Firefox (but which may well be a jsPlumb bug)
+  # in which the draggable rectangle that corresponds to the link source action circle
+  # is offset from the link source action circle by half the size of the rectangle, i.e.
+  # its top is aligned with the center of the action circle rather than its top. If we
+  # hard-code the correction factor and browser-sniff for Firefox, then the fix becomes
+  # a bug if the underlying bug is fixed by some future version of jsPlumb. Therefore,
+  # we dynamically check for the existence of the bug and apply the `.correct-drag-top`
+  # class only in situations where we've determined the fix applies. We can't easily
+  # apply an arbitrary correction factor because the node in question is absolutely
+  # positioned by jsPlumb. We can apply a class with a constant correction factor that
+  # we know corresponds to the observed Firefox behavior and only apply it if the
+  # detected offset is great enough to make the constant correction an improvement.
+  # https://www.pivotaltracker.com/story/show/142418227
+  _checkForLinkButtonClientClass: ->
+    return if @linkButtonClientClass?
+    nodeLinkButtonElts = $('.graph-view').find('.node-link-button')
+    nodeLinkButtonElt = nodeLinkButtonElts and nodeLinkButtonElts[0]
+    connectionSrcElt = nodeLinkButtonElt and nodeLinkButtonElt._jsPlumbRelatedElement
+    if connectionSrcElt and nodeLinkButtonElt
+      connectionSrcTop = connectionSrcElt.getBoundingClientRect().top
+      nodeLinkButtonTop = nodeLinkButtonElt.getBoundingClientRect().top
+      topOffset = nodeLinkButtonTop - connectionSrcTop
+      @linkButtonClientClass = if topOffset > 6 then 'correct-drag-top' else ''
 
   _redrawTargets: ->
-    @diagramToolkit.makeSource $(@refs.linkView).find '.connection-source'
+    @diagramToolkit.makeSource ($(@refs.linkView).find '.connection-source'), @linkButtonClientClass
     target = $(@refs.linkView).find @props.linkTarget
     targetStyle = 'node-link-target'
 
