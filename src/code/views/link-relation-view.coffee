@@ -115,7 +115,7 @@ module.exports = LinkRelationView = React.createClass
 
   renderVectorPulldown: (vectorSelection)->
     options = _.map RelationFactory.vectors, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.text)
+      (option {value: opt.id, key: i}, opt.uiText)
 
     if not vectorSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -132,7 +132,7 @@ module.exports = LinkRelationView = React.createClass
 
   renderScalarPulldown:(scalarSelection) ->
     options = _.map RelationFactory.scalars, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.text)
+      (option {value: opt.id, key: i}, opt.uiText)
 
     if not scalarSelection?
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},

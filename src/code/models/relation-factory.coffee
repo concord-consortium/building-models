@@ -5,7 +5,8 @@ module.exports = class RelationFactory
   @increase:
     id: 0
     prefixIco: "inc"
-    text: tr "~NODE-RELATION-EDIT.INCREASES"
+    text: "increase"
+    uiText: tr "~NODE-RELATION-EDIT.INCREASES"
     formulaFrag: "1 *"
     magnitude: 1
     isCustomRelationship: false
@@ -16,7 +17,8 @@ module.exports = class RelationFactory
   @decrease:
     id: 1
     prefixIco: "dec"
-    text: tr "~NODE-RELATION-EDIT.DECREASES"
+    text: "decrease"
+    uiText: tr "~NODE-RELATION-EDIT.DECREASES"
     formulaFrag: "maxIn -"
     magnitude: -1
     isCustomRelationship: false
@@ -27,7 +29,8 @@ module.exports = class RelationFactory
   @vary:
     id: 2
     prefixIco: "var"
-    text: tr "~NODE-RELATION-EDIT.VARIES"
+    text: "vary"
+    uiText: tr "~NODE-RELATION-EDIT.VARIES"
     formulaFrag: "0"
     magnitude: 1
     isCustomRelationship: true
@@ -37,7 +40,8 @@ module.exports = class RelationFactory
 
   @aboutTheSame:
     id: 0
-    text: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
+    text: "about the same"
+    uiText: tr "~NODE-RELATION-EDIT.ABOUT_THE_SAME"
     postfixIco: "the-same"
     formulaFrag: "in"
     magnitude: 2
@@ -47,7 +51,8 @@ module.exports = class RelationFactory
 
   @aLot:
     id: 1
-    text: tr "~NODE-RELATION-EDIT.A_LOT"
+    text: "a lot"
+    uiText: tr "~NODE-RELATION-EDIT.A_LOT"
     postfixIco: "a-lot"
     formulaFrag: "min(in * 2, maxOut)"
     magnitude: 4
@@ -57,7 +62,8 @@ module.exports = class RelationFactory
 
   @aLittle:
     id: 2
-    text: tr "~NODE-RELATION-EDIT.A_LITTLE"
+    text: "a little"
+    uiText: tr "~NODE-RELATION-EDIT.A_LITTLE"
     postfixIco: "a-little"
     formulaFrag: "(in+(maxOut/2)) / 2"
     magnitude: 1
@@ -67,7 +73,8 @@ module.exports = class RelationFactory
 
   @moreAndMore:
     id: 3
-    text: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
+    text: "more and more"
+    uiText: tr "~NODE-RELATION-EDIT.MORE_AND_MORE"
     postfixIco: "more-and-more"
     formulaFrag: "min(exp(in/21.7)-1, maxOut)"
     magnitude: 2
@@ -77,7 +84,8 @@ module.exports = class RelationFactory
 
   @lessAndLess:
     id: 4
-    text: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
+    text: "less and less"
+    uiText: tr "~NODE-RELATION-EDIT.LESS_AND_LESS"
     postfixIco: "less-and-less"
     formulaFrag: "21.7 * log(max(1,in))"
     magnitude: 2
@@ -87,7 +95,8 @@ module.exports = class RelationFactory
 
   @custom:
     id: 5
-    text: tr "~NODE-RELATION-EDIT.CUSTOM"
+    text: "as described below:"
+    uiText: tr "~NODE-RELATION-EDIT.CUSTOM"
     postfixIco: "cus"
     formulaFrag: ""
     magnitude: 0
