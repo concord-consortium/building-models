@@ -32,6 +32,10 @@ module.exports =
   "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS": "改以文字去定義"
   "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS": "改以數字去定義"
   "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "累積量"
+  "~NODE-VALUE-EDIT.RESTRICT_POSITIVE": "Cannot go below zero"  # TRANSLATE
+  "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP": "Click to allow negative values"  # TRANSLATE
+  "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP": "Click to prevent negative values"  # TRANSLATE
+  "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP": "Enabled for all collectors by \"Limit values\" simulation setting"  # TRANSLATE
   "~NODE-VALUE-EDIT.LOW": "低"
   "~NODE-VALUE-EDIT.HIGH": "高"
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "這個節點是一個依變數"

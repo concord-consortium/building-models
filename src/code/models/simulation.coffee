@@ -34,6 +34,19 @@ combineInputs = (inValues, useScaledProduct) ->
 
   numerator / denominator
 
+getTransferLimit = (transferNode) ->
+  return 0 if not transferNode?.transferLink?.sourceNode?
+  if transferNode.transferLink.sourceNode.previousValue? \
+    then transferNode.transferLink.sourceNode.previousValue \
+    else transferNode.transferLink.sourceNode.initialValue
+
+filterFinalValue = (value) ->
+  # limit max value
+  value = if @capNodeValues then Math.min(@max, value) else value
+  # limit min value
+  shouldLimitMinValue = @capNodeValues or (@isAccumulator and not @allowNegativeValues)
+  if shouldLimitMinValue then Math.max(@min, value) else value
+
 RangeIntegrationFunction = (incrementAccumulators) ->
 
   # if we've already calculated a currentValue for ourselves this step, return it
@@ -63,8 +76,8 @@ RangeIntegrationFunction = (incrementAccumulators) ->
   value = if inValues.length then combineInputs(inValues, useScaledProduct) else startValue
 
   # can't transfer more than is present in source
-  if @capNodeValues and isUnscaledTransferNode(@) and @transferLink?.sourceNode?.previousValue?
-    value = Math.min(value, @transferLink.sourceNode.previousValue)
+  if @capNodeValues and isUnscaledTransferNode(@)
+    value = Math.min(value, getTransferLimit(@))
 
   # if we need to cap, do it at end of all calculations
   value = @filterFinalValue value
@@ -93,8 +106,8 @@ SetAccumulatorValueFunction = (nodeValues) ->
         # their source is an independent node (has no inputs)
         if isScaledTransferNode(transferNode)
           transferValue /= 100
-          if @capNodeValues and transferNode.transferLink?.sourceNode?.previousValue?
-            transferValue = Math.min(transferValue, transferNode.transferLink.sourceNode.previousValue)
+          if @capNodeValues or (sourceNode.isAccumulator and not sourceNode.allowNegativeValues)
+            transferValue = Math.min(transferValue, getTransferLimit(transferNode))
 
         if sourceNode is @
           deltaValue -= transferValue
@@ -130,7 +143,7 @@ module.exports = class Simulation
     _.each @nodes, (node) =>
       # make this a local node property (it may eventually be different per node)
       node.capNodeValues = @capNodeValues
-      node.filterFinalValue = (value) => if @capNodeValues then Math.max(node.min, Math.min(node.max, value)) else value
+      node.filterFinalValue = filterFinalValue.bind(node)
       node._cumulativeValue = 0  # for averaging
       # Create a bound method on this node.
       # Put the functionality here rather than in the class "Node".

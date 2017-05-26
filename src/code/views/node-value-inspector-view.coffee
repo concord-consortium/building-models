@@ -40,10 +40,14 @@ module.exports = React.createClass
       value = @trim(parseInt(value))
       @props.graphStore.changeNode(initialValue:value)
 
-  updateChecked:  (evt) ->
+  updateAccumulatorChecked: (evt) ->
     value = evt.target.checked
     @props.graphStore.changeNode(isAccumulator:value)
     SimulationStore.actions.toggledCollectorTo value
+
+  updateNegativeValuesAllowed: (evt) ->
+    value = !evt.target.checked   # checkbox is reverse polarity from property
+    @props.graphStore.changeNode(allowNegativeValues:value)
 
   updateDefiningType: ->
     @props.graphStore.changeNode(valueDefinedSemiQuantitatively: not @props.node.valueDefinedSemiQuantitatively)
@@ -124,11 +128,41 @@ module.exports = React.createClass
           )
         )
         if not node.isTransfer
+          # checkbox is reverse polarity from node property
+          isChecked = @state.capNodeValues or not node.allowNegativeValues
+          tooltip = if @state.capNodeValues \
+                      then tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP" \
+                      else (if isChecked \
+                              then tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP" \
+                              else tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP")
+          positiveCheckbox = (
+            label {
+              className: if @state.capNodeValues then 'disabled' else ''
+              title: tooltip
+              key: 'positive-label'
+            }, [
+              input {
+                key: 'positive-checkbox'
+                type: 'checkbox'
+                checked: isChecked
+                disabled: @state.capNodeValues
+                onChange: if @state.capNodeValues then null else @updateNegativeValuesAllowed
+              }
+              tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE"
+            ]
+          )
+
           (span {className: "checkbox group full"},
-            (label {}, [
-              input {type: "checkbox", checked: node.isAccumulator, onChange: @updateChecked}
+            (label {key: 'accumulator-label'}, [
+              input {
+                key: 'accumulator-checkbox'
+                type: 'checkbox'
+                checked: node.isAccumulator
+                onChange: @updateAccumulatorChecked
+              }
               tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR"
             ])
+            if node.isAccumulator then positiveCheckbox else null
           )
       )
 

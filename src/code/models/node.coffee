@@ -16,8 +16,9 @@ module.exports = class Node extends GraphPrimitive
   @fields: [
     'title', 'image', 'color', 'paletteItem',
     'initialValue', 'min', 'max',
-    'isAccumulator', 'valueDefinedSemiQuantitatively'
-    'frames']
+    'isAccumulator', 'allowNegativeValues',
+    'valueDefinedSemiQuantitatively', 'frames'
+  ]
 
   constructor: (nodeSpec={}, key) ->
     super()
@@ -33,6 +34,7 @@ module.exports = class Node extends GraphPrimitive
       @codapName = null
       @image
       @isAccumulator=false
+      @allowNegativeValues = false
       @valueDefinedSemiQuantitatively=true,
       @paletteItem
       @frames=[]
@@ -74,7 +76,7 @@ module.exports = class Node extends GraphPrimitive
   @property 'min',
     get: ->
       if not @valueDefinedSemiQuantitatively
-        @_min
+        if @isAccumulator and not @allowNegativeValues then Math.max(0, @_min) else @_min
       else
         SEMIQUANT_MIN
     set: (val) ->
@@ -213,6 +215,7 @@ module.exports = class Node extends GraphPrimitive
       min: @_min
       max: @_max
       isAccumulator: @isAccumulator
+      allowNegativeValues: @allowNegativeValues
       valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
       frames: _.clone @frames
 

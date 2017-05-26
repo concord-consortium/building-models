@@ -401,4 +401,4 @@ describe "Graph Descriptions", ->
   it "should describe the model graph correctly", ->
     graphStore = GraphStore.store
     desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks())
-    desc.model.should.equal "steps:10|cap:false|Node-71:10;1 * in;Node-72:20|Node-72:20;1 * in;Node-73|"
+    desc.model.should.equal "steps:10|cap:false|Node-71:10;1 * in;Node-72:20|Node-72:20:cap;1 * in;Node-73|"
