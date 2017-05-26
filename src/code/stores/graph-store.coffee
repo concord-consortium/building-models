@@ -294,6 +294,7 @@ GraphStore  = Reflux.createStore
           min: node.min
           max: node.max
           isAccumulator: node.isAccumulator
+          allowNegativeValues: node.allowNegativeValues
           valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
 
         nodeChanged = false
@@ -491,7 +492,9 @@ GraphStore  = Reflux.createStore
       linkDescription += "#{target.x},#{target.y}|"
 
       if link.relation.isDefined
-        modelDescription += "#{source.key}:#{source.initialValue};"
+        isCappedAccumulator = source.isAccumulator and not source.allowNegativeValues
+        capValue = if isCappedAccumulator then ':cap' else ''
+        modelDescription += "#{source.key}:#{source.initialValue}#{capValue};"
         modelDescription += link.relation.formula + ";"
         if link.relation.type is 'transfer'
           transfer = link.transferNode

@@ -12,9 +12,12 @@
 
       label
         text-transform none
+        no-select()
         width initial
         margin 5px
         color #666
+        &.disabled
+          opacity 0.75
       input[type=number]
         width 80px
       input[type=checkbox]
