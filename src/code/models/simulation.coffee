@@ -35,10 +35,8 @@ combineInputs = (inValues, useScaledProduct) ->
   numerator / denominator
 
 getTransferLimit = (transferNode) ->
-  return 0 if not transferNode?.transferLink?.sourceNode?
-  if transferNode.transferLink.sourceNode.previousValue? \
-    then transferNode.transferLink.sourceNode.previousValue \
-    else transferNode.transferLink.sourceNode.initialValue
+  {sourceNode} = transferNode?.transferLink
+  if sourceNode then sourceNode.previousValue ? sourceNode.initialValue else 0
 
 filterFinalValue = (value) ->
   # limit max value
@@ -54,7 +52,7 @@ RangeIntegrationFunction = (incrementAccumulators) ->
 
   # if we have no incoming links, we always remain our previous or initial value
   # collectors aren't calculated in this phase, but they do capture initial/previous values
-  startValue = if @previousValue? then @previousValue else @initialValue
+  startValue = @previousValue ? @initialValue
   return startValue if @isAccumulator and not incrementAccumulators
 
   # regular nodes and flow nodes only have 'range' and 'transfer-modifier' links
@@ -64,7 +62,7 @@ RangeIntegrationFunction = (incrementAccumulators) ->
   _.each links, (link) =>
     return unless link.relation.isDefined
     sourceNode = link.sourceNode
-    inV = if sourceNode.previousValue? then sourceNode.previousValue else sourceNode.initialValue
+    inV = sourceNode.previousValue ? sourceNode.initialValue
     inV = scaleInput(inV, sourceNode, this)
     outV = startValue
     inValues.push link.relation.evaluate(inV, outV, link.sourceNode.max, @max)
@@ -88,7 +86,7 @@ SetAccumulatorValueFunction = (nodeValues) ->
   # collectors only have accumulator and transfer links
   links = @inLinks('accumulator').concat(@inLinks('transfer')).concat(@outLinks('transfer'))
 
-  startValue = if @previousValue? then @previousValue else @initialValue
+  startValue = @previousValue ? @initialValue
   return startValue unless links.length > 0
 
   deltaValue = 0

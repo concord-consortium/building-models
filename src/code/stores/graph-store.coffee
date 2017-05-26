@@ -294,6 +294,7 @@ GraphStore  = Reflux.createStore
           min: node.min
           max: node.max
           isAccumulator: node.isAccumulator
+          allowNegativeValues: node.allowNegativeValues
           valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
 
         nodeChanged = false
