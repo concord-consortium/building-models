@@ -4,7 +4,8 @@ isScaledTransferNode = (node) ->
   return false unless node.isTransfer
   return false if node.inLinks('transfer-modifier').length
   sourceNode = node.transferLink?.sourceNode
-  not sourceNode?.inLinks().length
+  targetNode = node.transferLink?.targetNode
+  not sourceNode?.inLinks().length and not (targetNode?.inLinks().length > 1)
 
 isUnscaledTransferNode = (node) ->
   node.isTransfer and not isScaledTransferNode(node)
