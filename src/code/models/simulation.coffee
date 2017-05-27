@@ -240,7 +240,7 @@ module.exports = class Simulation
       @generateFrame(time++)
 
     # simulate each step
-    while time <= @duration
+    while time < @duration
       step()
 
     @onFrames(@framesBundle)    # send all at once

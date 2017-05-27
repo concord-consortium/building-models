@@ -122,18 +122,23 @@ SimulationStore   = Reflux.createStore
     else
       @defaultUnit
 
+  simulationDuration: ->
+    @settings.duration + (if @settings.graphHasCollector then 1 else 0)
+
+  simulationStepCount: ->
+    return @settings.duration + 1 if @settings.graphHasCollector
+    return @settings.duration if @settings.isRecordingPeriod
+    1
+
   _runSimulation: ->
     if @settings.modelIsRunnable
       # graph-store listens and will reset the simulation when
       # it is run to clear pre-saved data after first load
       @settings.modelIsRunning = true
-      duration = 1
-      if @settings.graphHasCollector || @settings.isRecordingPeriod
-        duration = @settings.duration
       @notifyChange()
       @currentSimulation = new Simulation
         nodes: @nodes
-        duration: duration
+        duration: @simulationStepCount()
         capNodeValues: @settings.capNodeValues
 
         # Simulation events get triggered as Actions here, and are

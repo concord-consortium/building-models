@@ -43,12 +43,20 @@ GraphStore  = Reflux.createStore
       node.frames = []
     @updateListeners()
 
+  _trimSimulation: ->
+    #settings = SimulationStore.store.serialize()
+    for node in @getNodes()
+      # leaving some excess data reduces flicker during rapid changes
+      excessFrames = node.frames.length - 2 * SimulationStore.store.simulationDuration()
+      if excessFrames > 0
+        node.frames.splice(0, excessFrames)
+    return  # prevent unused default return value
+
   updateSimulationData: (data) ->
     nodes = @getNodes()
     for frame in data
       for node, i in frame.nodes
-        if nodes[i]?
-          nodes[i].frames.push node.value
+        nodes[i]?.frames.push node.value
     return  # prevent unused default return value
 
   paletteDelete: (status) ->
@@ -480,7 +488,7 @@ GraphStore  = Reflux.createStore
   #
   # We pass nodes and links so as not to calculate @getNodes and @getLinks redundantly.
   getDescription: (nodes, links) ->
-    settings = SimulationStore.store.serialize()
+    settings = SimulationStore.store.settings
 
     linkDescription = ""
     modelDescription = "steps:#{settings.duration}|cap:#{settings.capNodeValues}|"
@@ -561,9 +569,10 @@ GraphStore  = Reflux.createStore
     GraphActions.graphChanged.trigger(graphState)
 
     if @lastRunModel != graphState.description.model
+      @_trimSimulation()
       SimulationStore.actions.runSimulation()
       @lastRunModel = graphState.description.model
-
+    return
 
 mixin =
   getInitialState: ->
