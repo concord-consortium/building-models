@@ -44,7 +44,6 @@ GraphStore  = Reflux.createStore
     @updateListeners()
 
   _trimSimulation: ->
-    #settings = SimulationStore.store.serialize()
     for node in @getNodes()
       # leaving some excess data reduces flicker during rapid changes
       excessFrames = node.frames.length - 2 * SimulationStore.store.simulationDuration()
