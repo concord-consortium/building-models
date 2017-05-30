@@ -128,6 +128,7 @@ describe "Simulation", ->
         # 3: basic collector (A->[B])
         {A:5, B:"50+", AB: "1 * in",
         results: [
+          [5, 50]
           [5, 55]
           [5, 60]
         ]}
@@ -135,9 +136,9 @@ describe "Simulation", ->
         # 4: basic collector with feedback (A<->[B])
         {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
+          [50, 50]
           [100, 100]
           [200, 200]
-          [400, 400]
         ]}
 
         # 5: three-node graph (>-) with averaging
@@ -157,6 +158,7 @@ describe "Simulation", ->
         # 7: three-node graph with collector (>-[C])
         {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
         results: [
+          [10, 20, 0]
           [10, 20, 12]
           [10, 20, 24]
         ]}
@@ -164,14 +166,15 @@ describe "Simulation", ->
         # 8: three-node graph with collector (>-[C]) and negative relationship
         {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
         results: [
+          [10, 1, 0]
           [10, 1, 9]
           [10, 1, 18]
-          [10, 1, 27]
         ]}
 
         # 9: four-node graph with collector (>-[D]) and scaled product combination
         {A: 50, B: 50, C: 0, D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in"
         results: [
+          [50, 50, 25, 0]
           [50, 50, 25, 25]
           [50, 50, 25, 50]
         ]}
@@ -183,6 +186,7 @@ describe "Simulation", ->
         {A:30, B:"20+", AB: "1 * in",
         cap: true
         results: [
+          [30, 20]
           [30, 50]
           [30, 80]
           [30, 100]
@@ -192,6 +196,7 @@ describe "Simulation", ->
         {A:40, B:"90+", AB: "-1 * in",
         cap: true
         results: [
+          [40, 90]
           [40, 50]
           [40, 10]
           [40, 0]
@@ -283,7 +288,7 @@ describe "Simulation", ->
         @transferNode = @transferLink.transferNode
         @arguments =
           nodes: [@nodeA, @nodeB, @transferNode]
-          duration: 1
+          duration: 2
 
         @simulation = new Simulation(@arguments)
 
@@ -315,7 +320,7 @@ describe "Simulation", ->
         it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
           @nodeA.initialValue = 20
           @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
-          @simulation.duration = 1
+          @simulation.duration = 2
           @simulation.run()
           expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 10, 0.000001
           expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 60, 0.000001
@@ -361,7 +366,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       asyncListenTest done, SimulationActions.recordingFramesCreated, (data) ->
 
-          data.length.should.equal 11
+          data.length.should.equal 10
 
           frame0 = data[0]
           frame0.time.should.equal 0
@@ -382,7 +387,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
     it "should call simulationFramesCreated with 3 frames", (done) ->
       testFunction = (data) ->
         size = data.length
-        size.should.eql(4)
+        size.should.eql(3)
 
       asyncListenTest done, SimulationActions.recordingFramesCreated, testFunction
       SimulationActions.recordPeriod()
