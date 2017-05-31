@@ -51,7 +51,7 @@ module.exports = React.createClass
     )
 
   renderTabs: (clientClass) ->
-    (div {className: "workspace-tabs#{clientClass}"},
+    (div {className: "workspace-tabs#{clientClass}", key: 'tabs'},
       (ul {}, (@renderTab(tab,index) for tab, index in @props.tabs))
     )
 
@@ -71,6 +71,9 @@ module.exports = React.createClass
   render: ->
     clientClass = if @props.clientClass then ' ' + @props.clientClass else ''
     (div {className: "tabbed-panel#{clientClass}"},
-      @renderTabs(clientClass)
+      (div {className: "tabbed-panel-left#{clientClass}"}, [
+        @renderTabs(clientClass)
+        @props.onRenderBelowTabsComponent() if @props.onRenderBelowTabsComponent?
+      ])
       @renderSelectedPanel(clientClass)
     )

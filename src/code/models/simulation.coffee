@@ -67,10 +67,10 @@ RangeIntegrationFunction = (incrementAccumulators) ->
     outV = startValue
     inValues.push link.relation.evaluate(inV, outV, link.sourceNode.max, @max)
 
-  # for now, if any a node points to a collector, it should use the scaled product
-  # ultimately this should be a default which can be overridden by the user, in
-  # which case the setting would presumably become part of the node model
-  useScaledProduct = @isTransfer or !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
+  # if the user has explicitly set the combination method, we use that
+  # otherwise, if any link points to a collector, it should use the scaled product
+  useScaledProduct = if @combineMethod? then @combineMethod is 'product' \
+                      else @isTransfer or !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
   value = if inValues.length then combineInputs(inValues, useScaledProduct) else startValue
 
   # can't transfer more than is present in source
