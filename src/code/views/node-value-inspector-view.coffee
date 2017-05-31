@@ -46,7 +46,7 @@ module.exports = React.createClass
     SimulationStore.actions.toggledCollectorTo value
 
   updateNegativeValuesAllowed: (evt) ->
-    value = !evt.target.checked   # checkbox is reverse polarity from property
+    value = !!evt.target.checked
     @props.graphStore.changeNode(allowNegativeValues:value)
 
   updateDefiningType: ->
@@ -128,8 +128,7 @@ module.exports = React.createClass
           )
         )
         if not node.isTransfer
-          # checkbox is reverse polarity from node property
-          isChecked = @state.capNodeValues or not node.allowNegativeValues
+          isChecked = not @state.capNodeValues and node.allowNegativeValues
           tooltip = if @state.capNodeValues \
                       then tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP" \
                       else (if isChecked \
