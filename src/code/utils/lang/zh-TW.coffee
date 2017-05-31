@@ -41,6 +41,9 @@ module.exports =
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "這個節點是一個依變數"
 
   # views/relation-inspector-view.coffee
+  "~NODE-RELATION-EDIT.COMBINATION_METHOD": "Combine variables using:"  # TRANSLATE
+  "~NODE-RELATION-EDIT.ARITHMETIC_MEAN": "average"  #TRANSLATE
+  "~NODE-RELATION-EDIT.SCALED_PRODUCT": "limiting factor"   # TRANSLATE
   "~NODE-RELATION-EDIT.UNSELECTED": "選擇一個選項"
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "增加"
   "~NODE-RELATION-EDIT.CAUSES": "會造成"
