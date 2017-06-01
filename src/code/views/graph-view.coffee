@@ -26,7 +26,7 @@ module.exports = React.createClass
   getDefaultProps: ->
     linkTarget: '.link-top'
     connectionTarget: '.link-target'
-    transferTarget: '.transfer-target'
+    transferTarget: '.link-target'
 
   componentDidMount: ->
     $container = $(@refs.container)
@@ -293,13 +293,14 @@ module.exports = React.createClass
     target = $(ReactDOM.findDOMNode this.refs[targetNode.key]).find(targetConnectionClass)
     if source and target
       opts = {
-        source: source,
-        target: target,
-        label: "",
+        fromSource: fromSource
+        source: source
+        target: target
+        label: ""
         color: if fromSource then LinkColors.decrease else LinkColors.increase
         thickness: 10
         showIndicators: false
-        isEditing: false,
+        isEditing: false
         linkModel: link
         isTransfer: true
         hideArrow: fromSource
