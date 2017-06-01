@@ -46,7 +46,7 @@ module.exports = React.createClass
     SimulationStore.actions.toggledCollectorTo value
 
   updateNegativeValuesAllowed: (evt) ->
-    value = !!evt.target.checked
+    value = evt.target.checked
     @props.graphStore.changeNode(allowNegativeValues:value)
 
   updateDefiningType: ->
