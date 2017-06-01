@@ -41,6 +41,9 @@ module.exports =
   "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable"
 
   # views/relation-inspector-view.coffee
+  "~NODE-RELATION-EDIT.COMBINATION_METHOD": "Combine variables using:"
+  "~NODE-RELATION-EDIT.ARITHMETIC_MEAN": "average"
+  "~NODE-RELATION-EDIT.SCALED_PRODUCT": "limiting factor"
   "~NODE-RELATION-EDIT.UNSELECTED": "Select an option..."
   "~NODE-RELATION-EDIT.AN_INCREASE_IN": "An increase in"
   "~NODE-RELATION-EDIT.CAUSES": "causes"

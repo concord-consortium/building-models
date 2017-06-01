@@ -16,7 +16,7 @@ module.exports = class Node extends GraphPrimitive
   @fields: [
     'title', 'image', 'color', 'paletteItem',
     'initialValue', 'min', 'max',
-    'isAccumulator', 'allowNegativeValues',
+    'isAccumulator', 'allowNegativeValues', 'combineMethod',
     'valueDefinedSemiQuantitatively', 'frames'
   ]
 
@@ -204,21 +204,25 @@ module.exports = class Node extends GraphPrimitive
     @_min + (val - SEMIQUANT_MIN) / (SEMIQUANT_MAX - SEMIQUANT_MIN) * (@_max - @_min)
 
   toExport: ->
-    key: @key
-    data:
-      title: @title
-      codapName: @codapName
-      codapID: @codapID
-      x: @x
-      y: @y
-      paletteItem: @paletteItem
-      initialValue: @initialValue
-      min: @_min
-      max: @_max
-      isAccumulator: @isAccumulator
-      allowNegativeValues: @allowNegativeValues
-      valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
-      frames: _.clone @frames
+    result =
+      key: @key
+      data:
+        title: @title
+        codapName: @codapName
+        codapID: @codapID
+        x: @x
+        y: @y
+        paletteItem: @paletteItem
+        initialValue: @initialValue
+        min: @_min
+        max: @_max
+        isAccumulator: @isAccumulator
+        allowNegativeValues: @allowNegativeValues
+        valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
+        frames: _.clone @frames
+    # only serialize if it's been set explicitly
+    result.combineMethod = @combineMethod if @combineMethod?
+    result
 
   canEditInitialValue: ->
     not @isDependent(true) or @isAccumulator or @isInDependentCycle

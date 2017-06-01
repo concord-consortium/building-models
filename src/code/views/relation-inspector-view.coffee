@@ -28,13 +28,36 @@ module.exports = RelationInspectorView = React.createClass
   onTabSelected: (index) ->
     inspectorPanelStore.actions.openInspectorPanel 'relations', {link: @props.node.inLinks()?[index]}
 
+  onMethodSelected: (evt) ->
+    graphStore.store.changeNode({ combineMethod: evt.target.value }, @props.node)
+
+  renderNodeDetailsInspector: ->
+    inputCount = @props.node.inLinks()?.length ? 0
+    return null unless inputCount > 1
+
+    method = @props.node.combineMethod ? 'average'
+    (div { className: 'node-details-inspector', key: 'details' }, [
+      tr "~NODE-RELATION-EDIT.COMBINATION_METHOD"
+      (select { key: 0, value: method, onChange: @onMethodSelected }, [
+        (option {value: 'average', key: 1},
+          tr "~NODE-RELATION-EDIT.ARITHMETIC_MEAN")
+        (option {value: 'product', key: 2},
+          tr "~NODE-RELATION-EDIT.SCALED_PRODUCT")
+      ])
+    ])
+
   renderNodeRelationInspector: ->
     selectedTabIndex = 0
     tabs = _.map @props.node.inLinks(), (link, i) =>
       selectedTabIndex = i if (@state.selectedLink is link)
       @renderTabforLink(link)
     (div {className:'relation-inspector'},
-      (TabbedPanel {tabs: tabs, selectedTabIndex: selectedTabIndex, onTabSelected: @onTabSelected})
+      (TabbedPanel {
+        tabs: tabs
+        selectedTabIndex: selectedTabIndex
+        onTabSelected: @onTabSelected
+        onRenderBelowTabsComponent: @renderNodeDetailsInspector
+      })
     )
 
   renderLinkRelationInspector: ->
