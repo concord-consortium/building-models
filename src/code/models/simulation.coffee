@@ -104,8 +104,10 @@ SetAccumulatorValueFunction = (nodeValues) ->
         # their source is an independent node (has no inputs)
         if isScaledTransferNode(transferNode)
           transferValue /= 100
-          if @capNodeValues or (sourceNode.isAccumulator and not sourceNode.allowNegativeValues)
-            transferValue = Math.min(transferValue, getTransferLimit(transferNode))
+
+        # can't overdraw non-negative collectors
+        if @capNodeValues or (sourceNode.isAccumulator and not sourceNode.allowNegativeValues)
+          transferValue = Math.min(transferValue, getTransferLimit(transferNode))
 
         if sourceNode is @
           deltaValue -= transferValue
