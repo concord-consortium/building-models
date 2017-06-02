@@ -41,8 +41,10 @@ module.exports = React.createClass
               })
             )
             (div {className: 'make-public'},
-              (input {type: 'checkbox', value: 'public', checked: @state.isPublic, onChange: @handlePublicChange})
-              (label {}, tr '~GOOGLE_SAVE.MAKE_PUBLIC')
+              (label {}, [
+                input {type: 'checkbox', value: 'public', checked: @state.isPublic, onChange: @handlePublicChange}
+                tr '~GOOGLE_SAVE.MAKE_PUBLIC'
+              ])
             )
             (div {className: 'buttons'},
               (button {name: 'cancel', value: 'Cancel', onClick: @props.onClose}, 'Cancel')

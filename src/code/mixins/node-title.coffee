@@ -8,7 +8,7 @@ module.exports =
 
   isDefaultTitle: ->
     @props.title is @titlePlaceholder()
-    
+
   displayTitleForInput: (proposedTitle) ->
     # For input fields, use 'placeholder' value @defaultTitle
     # to work, the 'value' attribute of the input should be blank
@@ -17,6 +17,8 @@ module.exports =
   maxTitleLength: ->
     35
 
-  cleanupTitle: (newTitle) ->
-    newTitle = newTitle.substr(0, @maxTitleLength())
-    newTitle = if newTitle.length > 0 then newTitle else @defaultTitle()
+  cleanupTitle: (newTitle, isComplete) ->
+    cleanTitle = if isComplete then _.trim(newTitle) else newTitle
+    cleanTitle = cleanTitle.substr(0, @maxTitleLength())
+    cleanTitle = if isComplete then _.trim(cleanTitle) else cleanTitle
+    cleanTitle = if cleanTitle.length > 0 then cleanTitle else @defaultTitle()

@@ -122,6 +122,7 @@ module.exports = React.createClass
 
   render: ->
     showNoResultsAlert = @state.searchable and @state.searched and @state.results.length is 0
+    noResultsClass = if showNoResultsAlert then ' no-results' else ''
 
     (div {className: 'image-search-dialog'},
       if @props.selectedImage?.image
@@ -131,7 +132,7 @@ module.exports = React.createClass
           (div {className: 'image-search-dialog-form'},
             (form {},
               (input {type: 'text', ref: 'search', defaultValue: @state.query, placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
-              (input {type: 'submit', value: 'Search', onClick: @searchClicked})
+              (input {type: 'submit', value: (tr "~IMAGE-BROWSER.SEARCH_BUTTON_LABEL"), onClick: @searchClicked})
             )
           ),
 
@@ -142,7 +143,7 @@ module.exports = React.createClass
               tr '~IMAGE-BROWSER.TRY_ANOTHER_SEARCH'
             )
 
-          (div {className: 'image-search-main-results'},[
+          (div {className: 'image-search-main-results' + noResultsClass},[
             if showNoResultsAlert
               (div {key: 'image-search-section', className: 'image-search-section', style: height: '100%'},[
                 (div {key:'image-search-results', className: 'image-search-dialog-results show-all'},

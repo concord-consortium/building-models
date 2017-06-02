@@ -8,6 +8,18 @@ colored-span(color)
 .relation-inspector
   .tabbed-panel
     width: 400px
+    .tabbed-panel-left
+      enable-flex(column, justify: center, alignItems: center)
+      justify-content space-between
+      background-color white
+    .node-details-inspector
+      enable-flex(column, justify: center, alignItems: center)
+      height 60px
+      margin-bottom 10px
+
+      select
+        margin 5px
+
   .inspector-content.group
       padding 0px
       width 100%
@@ -36,6 +48,8 @@ colored-span(color)
     margin-left 0px
     margin-top 0.25em
     overflow hidden
+    &.hidden
+      visibility: hidden
     label
       font-weight bold
       font-size 1em

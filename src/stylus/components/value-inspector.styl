@@ -12,16 +12,19 @@
 
       label
         text-transform none
+        no-select()
         width initial
         margin 5px
         color #666
+        &.disabled
+          opacity 0.75
       input[type=number]
         width 80px
       input[type=checkbox]
         width initial
 
       .small
-        font-size 6pt
+        font-size 8pt
         padding 0px
         margin 0px
         display inline-block
@@ -44,7 +47,7 @@
         box-shadow 1px 1px 3px -2px rgba(0,0,0,0.75)
         width 18px
         text-align center
-        font-size 7pt
+        font-size 8pt
         cursor pointer
 
   .bottom-pane

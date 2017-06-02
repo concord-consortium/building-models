@@ -20,13 +20,31 @@ module.exports = RelationInspectorView = React.createClass
   renderTabforLink: (link) ->
     relationView = (LinkRelationView {link: link, graphStore: @props.graphStore})
     label = link.sourceNode.title
-    {vector, scalar} = RelationFactory.selectionsFromRelation link.relation
-    isFullyDefined = (link.relation.isDefined and vector? and scalar?) or link.relation.customData?
+    {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation link.relation
+    isFullyDefined = (link.relation.isDefined and vector? and scalar?) or link.relation.customData? or accumulator? or transferModifier?
 
     (Tabber.Tab {label: label, component: relationView, defined: isFullyDefined})
 
   onTabSelected: (index) ->
     inspectorPanelStore.actions.openInspectorPanel 'relations', {link: @props.node.inLinks()?[index]}
+
+  onMethodSelected: (evt) ->
+    graphStore.store.changeNode({ combineMethod: evt.target.value }, @props.node)
+
+  renderNodeDetailsInspector: ->
+    inputCount = @props.node.inLinks()?.length ? 0
+    return null unless inputCount > 1
+
+    method = @props.node.combineMethod ? 'average'
+    (div { className: 'node-details-inspector', key: 'details' }, [
+      tr "~NODE-RELATION-EDIT.COMBINATION_METHOD"
+      (select { key: 0, value: method, onChange: @onMethodSelected }, [
+        (option {value: 'average', key: 1},
+          tr "~NODE-RELATION-EDIT.ARITHMETIC_MEAN")
+        (option {value: 'product', key: 2},
+          tr "~NODE-RELATION-EDIT.SCALED_PRODUCT")
+      ])
+    ])
 
   renderNodeRelationInspector: ->
     selectedTabIndex = 0
@@ -34,7 +52,12 @@ module.exports = RelationInspectorView = React.createClass
       selectedTabIndex = i if (@state.selectedLink is link)
       @renderTabforLink(link)
     (div {className:'relation-inspector'},
-      (TabbedPanel {tabs: tabs, selectedTabIndex: selectedTabIndex, onTabSelected: @onTabSelected})
+      (TabbedPanel {
+        tabs: tabs
+        selectedTabIndex: selectedTabIndex
+        onTabSelected: @onTabSelected
+        onRenderBelowTabsComponent: @renderNodeDetailsInspector
+      })
     )
 
   renderLinkRelationInspector: ->

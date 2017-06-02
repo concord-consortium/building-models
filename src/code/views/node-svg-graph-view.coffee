@@ -1,7 +1,6 @@
 {svg, path, line, text, div, tspan, image} = React.DOM
 
 SimulationStore = require '../stores/simulation-store'
-SquareImage = React.createFactory require "./square-image-view"
 
 module.exports = NodeSvgGraphView = React.createClass
   displayName: 'NodeSvgGraphView'
@@ -36,7 +35,7 @@ module.exports = NodeSvgGraphView = React.createClass
     min  = @props.min
     data = @props.data
 
-    rangex = @state.duration - 1
+    rangex = SimulationStore.store.simulationDuration()
     data = _.takeRight(data, rangex).reverse()
 
     for point in data

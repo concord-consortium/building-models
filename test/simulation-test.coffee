@@ -20,8 +20,10 @@ requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 
 Link           = requireModel 'link'
 Node           = requireModel 'node'
+TransferNode   = requireModel 'transfer'
 Simulation     = requireModel 'simulation'
 Relationship   = requireModel 'relationship'
+RelationFactory = requireModel 'relation-factory'
 
 requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
 
@@ -32,15 +34,18 @@ SimulationActions = requireStore('simulation-store').actions
 CodapConnect   = requireModel 'codap-connect'
 
 
-LinkNodes = (sourceNode, targetNode, formula) ->
+LinkNodes = (sourceNode, targetNode, relationSpec) ->
   link = new Link
     title: "function"
     sourceNode: sourceNode
     targetNode: targetNode
-    relation: new Relationship
-      formula: formula
+    relation: new Relationship(relationSpec)
   sourceNode.addLink(link)
   targetNode.addLink(link)
+  if link.relation.type is 'transfer'
+    link.transferNode = new TransferNode
+    link.transferNode.setTransferLink link
+  link
 
 
 asyncListenTest = (done, action, func) ->
@@ -79,7 +84,7 @@ describe "Simulation", ->
           nodes: [@nodeA, @nodeB]
           duration: 10
 
-        LinkNodes(@nodeA, @nodeB, @formula)
+        LinkNodes(@nodeA, @nodeB, { type: 'range', formula: @formula })
         @simulation = new Simulation(@arguments)
 
       it "the link formula should work", ->
@@ -99,28 +104,36 @@ describe "Simulation", ->
     # node on each step.
     describe "for other scenarios", ->
       scenarios = [
-        # 0: cascade independent and dependent variables (A->B->C)
+        # 0: unlinked nodes should retain their initial values
+        {A: 0, B: 50, C: 100, D: "0+", E: "50+", F: "100+",
+        results: [
+          [0, 50, 100, 0, 50, 100]
+          [0, 50, 100, 0, 50, 100]
+        ]}
+
+        # 1: cascade independent and dependent variables (A->B->C)
         {A: 50, B: 40, C: 30, AB: "1 * in", BC: "0.1 * in",
         results: [
-            [50, 50, 5]
-            [50, 50, 5]
+          [50, 50, 5]
+          [50, 50, 5]
         ]}
 
-        # 1: cascade independent and dependent variables with negative relationship (A->B->C)
+        # 2: cascade independent and dependent variables with negative relationship (A->B->C)
         {A: 50, B: 40, C: 30, AB: "0.1 * in", BC: "-1 * in",
         results: [
-            [50, 5, -5]
-            [50, 5, -5]
+          [50, 5, -5]
+          [50, 5, -5]
         ]}
 
-        # 2: basic collector (A->[B])
+        # 3: basic collector (A->[B])
         {A:5, B:"50+", AB: "1 * in",
         results: [
           [5, 50]
           [5, 55]
+          [5, 60]
         ]}
 
-        # 3: basic collector with feedback (A<->[B])
+        # 4: basic collector with feedback (A<->[B])
         {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
         results: [
           [50, 50]
@@ -128,61 +141,72 @@ describe "Simulation", ->
           [200, 200]
         ]}
 
-        # 4: three-node graph (>-) with averaging
+        # 5: three-node graph (>-) with averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "1 * in",
         results: [
-            [10, 20, 15]
-            [10, 20, 15]
+          [10, 20, 15]
+          [10, 20, 15]
         ]}
 
-        # 5: three-node graph (>-) with non-linear averaging
+        # 6: three-node graph (>-) with non-linear averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "0.1 * in",
         results: [
-            [10, 20, 6]
-            [10, 20, 6]
+          [10, 20, 6]
+          [10, 20, 6]
         ]}
 
-        # 6: three-node graph with collector (>-[C])
+        # 7: three-node graph with collector (>-[C])
         {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
         results: [
-            [10, 20, 0]
-            [10, 20, 12]
+          [10, 20, 0]
+          [10, 20, 12]
+          [10, 20, 24]
         ]}
 
-        # 7: three-node graph with collector (>-[C]) and negative relationship
+        # 8: three-node graph with collector (>-[C]) and negative relationship
         {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
         results: [
-            [10, 1, 0]
-            [10, 1, 9]
-            [10, 1, 18]
+          [10, 1, 0]
+          [10, 1, 9]
+          [10, 1, 18]
+        ]}
+
+        # 9: four-node graph with collector (>-[D]) and scaled product combination
+        {A: 50, B: 50, C: 0, D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in"
+        results: [
+          [50, 50, 25, 0]
+          [50, 50, 25, 25]
+          [50, 50, 25, 50]
         ]}
 
         # *** Tests for graphs with bounded ranges ***
         # Note all nodes have min:0 and max:100 by default
 
-        # 8: basic collector (A->[B])
-        {A:30, B:"50+", AB: "1 * in",
+        # 10: basic collector (A->[B])
+        {A:30, B:"20+", AB: "1 * in",
         cap: true
         results: [
+          [30, 20]
           [30, 50]
           [30, 80]
           [30, 100]
         ]}
 
-        # 9: basic subtracting collector (A- -1 ->[B])
-        {A:30, B:"50+", AB: "-1 * in",
+        # 11: basic subtracting collector (A- -1 ->[B])
+        {A:40, B:"90+", AB: "-1 * in",
         cap: true
         results: [
-          [30, 50]
-          [30, 20]
-          [30, 0]
+          [40, 90]
+          [40, 50]
+          [40, 10]
+          [40, 0]
         ]}
 
-        # 10: basic independent and dependent nodes (A->B)
+        # 12: basic independent and dependent nodes (A->B)
         {A:120, B:0, AB: "1 * in",
         cap: true
         results: [
-          [120, 100]
+          [100, 100]
         ]}
       ]
 
@@ -192,11 +216,12 @@ describe "Simulation", ->
           for key, value of scenario
             if key.length == 1
               isAccumulator = typeof value is "string" and ~value.indexOf('+')
-              nodes[key] = new Node({initialValue: parseInt(value), isAccumulator})
+              nodes[key] = new Node({title: key, initialValue: parseInt(value), isAccumulator})
             else if key.length == 2
               node1 = nodes[key[0]]
               node2 = nodes[key[1]]
-              LinkNodes(node1, node2, value)
+              type = if node2.isAccumulator then 'accumulator' else 'range'
+              LinkNodes(node1, node2, { type, formula: value })
           for result, j in scenario.results
             nodeArray = (node for key, node of nodes)
             simulation = new Simulation
@@ -209,7 +234,7 @@ describe "Simulation", ->
             else
               simulation.run()
               for node, k in nodeArray
-                node.currentValue.should.be.closeTo result[k], 0.000001
+                expect(node.currentValue, "Step: #{j}, Node: #{node.title}").to.be.closeTo result[k], 0.000001
 
     describe "for mixed semiquantitative and quantitative nodes", ->
       beforeEach ->
@@ -220,7 +245,7 @@ describe "Simulation", ->
           nodes: [@nodeA, @nodeB]
           duration: 1
 
-        LinkNodes(@nodeA, @nodeB, @formula)
+        LinkNodes(@nodeA, @nodeB, { type: 'range', formula: @formula })
         @simulation = new Simulation(@arguments)
 
       describe "when the input is SQ and the output is Q", ->
@@ -255,6 +280,51 @@ describe "Simulation", ->
           @simulation.run()
           @nodeB.currentValue.should.equal 40
 
+    describe "for transfer nodes", ->
+      beforeEach ->
+        @nodeA    = new Node({title: "A", isAccumulator: true, initialValue: 20})
+        @nodeB    = new Node({title: "B", isAccumulator: true, initialValue: 50})
+        @transferLink = LinkNodes(@nodeA, @nodeB, RelationFactory.transferred)
+        @transferNode = @transferLink.transferNode
+        @arguments =
+          nodes: [@nodeA, @nodeB, @transferNode]
+          duration: 2
+
+        @simulation = new Simulation(@arguments)
+
+      describe "should transfer appropriate amount from the source node to the target node", ->
+
+        # sanity check
+        it "should transfer 1/100th the value of the source node with no transfer-modifier", ->
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 19.5, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.5, 0.000001
+
+        # sanity check
+        it "should transfer 1/100th the value of the source node with no transfer-modifier", ->
+          @transferNode.initialValue = 80
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 19.2, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.8, 0.000001
+
+        # sanity check
+        it "should limit the transfer to the quantity in the source node", ->
+          @nodeA.initialValue = 5
+          @nodeA.capNodeValues = @nodeB.capNodeValues = true
+          @simulation.duration = 12
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 0, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 55, 0.000001
+
+        # sanity check
+        it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
+          @nodeA.initialValue = 20
+          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
+          @simulation.duration = 2
+          @simulation.run()
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 10, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 60, 0.000001
+
 
 describe "The SimulationStore, with a network in the GraphStore", ->
   beforeEach ->
@@ -274,7 +344,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
     GraphStore.addNode @nodeA
     GraphStore.addNode @nodeB
 
-    LinkNodes(@nodeA, @nodeB, @formula)
+    LinkNodes(@nodeA, @nodeB, { type: 'range', formula: @formula })
 
   afterEach ->
     CodapConnect.instance.restore()
@@ -299,11 +369,11 @@ describe "The SimulationStore, with a network in the GraphStore", ->
           data.length.should.equal 10
 
           frame0 = data[0]
-          frame0.time.should.equal 1
+          frame0.time.should.equal 0
           frame0.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
           frame9 = data[9]
-          frame9.time.should.equal 10
+          frame9.time.should.equal 9
           frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
       SimulationActions.createExperiment()

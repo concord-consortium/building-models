@@ -29,10 +29,11 @@ module.exports = React.createClass
       # Previous design comps
       # (InspectorTabs {tabs: tabs, selected: selected} )
       (div {className: 'inspector-content'},
-        (div {className: 'edit-row'},
-          (label {name: 'title'}, tr "~LINK-EDIT.TITLE")
-          (input {type: 'text', name: 'title', value: @props.link.title, onChange: @changeTitle})
-        )
+        if not @props.link.transferNode
+          (div {className: 'edit-row'},
+            (label {name: 'title'}, tr "~LINK-EDIT.TITLE")
+            (input {type: 'text', name: 'title', value: @props.link.title, onChange: @changeTitle})
+          )
         (div {className: 'edit-row'},
           (label {className: 'link-delete', onClick: @deleteLink}, tr("~LINK-EDIT.DELETE"))
         )

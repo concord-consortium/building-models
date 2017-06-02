@@ -24,8 +24,13 @@ module.exports = React.createClass
 
   renderToggleButton: ->
     iconClass = if @state.simulationPanelExpanded then "inspectorArrow-collapse" else "inspectorArrow-expand"
+    simRefFunc = (elt) => @simulateElt = elt
+    simText = tr "~DOCUMENT.ACTIONS.SIMULATE"
+    simTextWidth = if @simulateElt? then @simulateElt.clientWidth else simText.length * 6
+    simTextLeft = simTextWidth / 2 - 6
+    simStyle = { left: simTextLeft }
     (div {className: "flow", onClick: @toggle},
-      (div {className: "toggle-title"}, tr "~DOCUMENT.ACTIONS.SIMULATE")
+      (div {className: "toggle-title", ref: simRefFunc, style: simStyle }, simText)
       (i {className: "icon-codap-#{iconClass}"})
     )
 

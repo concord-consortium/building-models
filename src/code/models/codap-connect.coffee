@@ -40,17 +40,22 @@ module.exports = class CodapConnect
     # or if we are in standalone mode.
     @codapPhone.call([
       {
-        action: 'get',
+        action: 'update'
+        resource: 'interactiveFrame'
+        values: { title: tr "~CODAP.INTERACTIVE_FRAME.TITLE"}
+      },
+      {
+        action: 'get'
         resource: 'interactiveFrame'
       },
       {
-        action: 'get',
+        action: 'get'
         resource: 'dataContext'
       }
     ], (ret) =>
       if ret
-        frame   = ret[0]
-        context = ret[1]
+        frame   = ret[1]
+        context = ret[2]
 
         @graphStore.setUsingCODAP true
 
@@ -83,8 +88,8 @@ module.exports = class CodapConnect
       # ret==null is indication of timeout, not an indication that the data set
       # doesn't exist.
       if !ret or ret.success
-        if ret?.values?
-          @_initialSyncAttributeProperties ret.values.collections?[1]?.attrs
+        if (attrs = ret?.values?.collections?[1]?.attrs?)
+          @_initialSyncAttributeProperties attrs
         @initGameHandler ret
       else
         @_createDataContext()

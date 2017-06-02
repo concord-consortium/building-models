@@ -26,6 +26,7 @@ module.exports = React.createClass
   getDefaultProps: ->
     linkTarget: '.link-top'
     connectionTarget: '.link-target'
+    transferTarget: '.link-target'
 
   componentDidMount: ->
     $container = $(@refs.container)
@@ -201,48 +202,110 @@ module.exports = React.createClass
       @_redrawTargets()
       @diagramToolkit.resumeDrawing()
       @ignoringEvents = false
+      @_checkForLinkButtonClientClass()
+
+  # There is a bug which only manifests in Firefox (but which may well be a jsPlumb bug)
+  # in which the draggable rectangle that corresponds to the link source action circle
+  # is offset from the link source action circle by half the size of the rectangle, i.e.
+  # its top is aligned with the center of the action circle rather than its top. If we
+  # hard-code the correction factor and browser-sniff for Firefox, then the fix becomes
+  # a bug if the underlying bug is fixed by some future version of jsPlumb. Therefore,
+  # we dynamically check for the existence of the bug and apply the `.correct-drag-top`
+  # class only in situations where we've determined the fix applies. We can't easily
+  # apply an arbitrary correction factor because the node in question is absolutely
+  # positioned by jsPlumb. We can apply a class with a constant correction factor that
+  # we know corresponds to the observed Firefox behavior and only apply it if the
+  # detected offset is great enough to make the constant correction an improvement.
+  # https://www.pivotaltracker.com/story/show/142418227
+  _checkForLinkButtonClientClass: ->
+    return if @linkButtonClientClass?
+    nodeLinkButtonElts = $('.graph-view').find('.node-link-button')
+    nodeLinkButtonElt = nodeLinkButtonElts and nodeLinkButtonElts[0]
+    connectionSrcElt = nodeLinkButtonElt and nodeLinkButtonElt._jsPlumbRelatedElement
+    if connectionSrcElt and nodeLinkButtonElt
+      connectionSrcTop = connectionSrcElt.getBoundingClientRect().top
+      nodeLinkButtonTop = nodeLinkButtonElt.getBoundingClientRect().top
+      topOffset = nodeLinkButtonTop - connectionSrcTop
+      @linkButtonClientClass = if topOffset > 6 then 'correct-drag-top' else ''
 
   _redrawTargets: ->
-    @diagramToolkit.makeSource $(@refs.linkView).find '.connection-source'
+    @diagramToolkit.makeSource ($(@refs.linkView).find '.connection-source'), @linkButtonClientClass
     target = $(@refs.linkView).find @props.linkTarget
     targetStyle = 'node-link-target'
 
     @diagramToolkit.makeTarget target, targetStyle
 
-
   _redrawLinks: ->
     for link in @state.links
-      source = $(ReactDOM.findDOMNode this.refs[link.sourceNode.key]).find(@props.connectionTarget)
-      target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.connectionTarget)
-      isSelected = @props.selectionManager.isSelected(link)
-      isEditing = link is @state.editingLink
-      isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
-      relationDetails = RelationFactory.selectionsFromRelation(link.relation)
-      if relationDetails.vector? and relationDetails.vector.isCustomRelationship and link.relation.customData?
-        link.color = LinkColors.customRelationship
+      if link.relation?.isTransfer
+        @_redrawTransferLinks link
       else
-        link.color = LinkColors.default
-      magnitude = relationDetails.magnitude
-      gradual = relationDetails.gradual
-      useGradient = false
-      useVariableThickness = true
-      if source and target
-        opts = {
-          source: source,
-          target: target,
-          label: link.title,
-          color: link.color,
-          magnitude: magnitude,
-          isDashed: isDashed,
-          isSelected: isSelected,
-          isEditing: isEditing,
-          gradual: gradual,
-          useGradient: useGradient,
-          useVariableThickness: useVariableThickness,
-          linkModel: link,
-          showIndicators: @state.relationshipSymbols
-        }
-        @diagramToolkit.addLink opts
+        @_redrawLink link
+
+  _redrawLink: (link) ->
+    source = $(ReactDOM.findDOMNode this.refs[link.sourceNode.key]).find(@props.connectionTarget)
+    target = $(ReactDOM.findDOMNode this.refs[link.targetNode.key]).find(@props.connectionTarget)
+    isSelected = @props.selectionManager.isSelected(link)
+    isEditing = link is @state.editingLink
+    isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
+    relationDetails = RelationFactory.selectionsFromRelation(link.relation)
+    if relationDetails.vector? and relationDetails.vector.isCustomRelationship and link.relation.customData?
+      link.color = LinkColors.customRelationship
+    else if link.relation.isTransferModifier
+      link.color = LinkColors.transferModifier
+    else
+      link.color = LinkColors.fromLink link
+    magnitude = relationDetails.magnitude
+    gradual = relationDetails.gradual
+    useGradient = false
+    useVariableThickness = true
+    if source and target
+      opts = {
+        source: source,
+        target: target,
+        label: link.title,
+        color: link.color,
+        magnitude: magnitude,
+        isDashed: isDashed,
+        isSelected: isSelected,
+        isEditing: isEditing,
+        gradual: gradual,
+        useGradient: useGradient,
+        useVariableThickness: useVariableThickness,
+        linkModel: link,
+        showIndicators: @state.relationshipSymbols
+      }
+      if relationDetails.transferModifier?
+        opts.thickness = RelationFactory.thicknessFromRelation(link.relation)
+      @diagramToolkit.addLink opts
+
+  _redrawTransferLinks: (link) ->
+    # during import of saved files .transferNode isn't set until the link is created so it may be null here
+    return unless link.transferNode
+    @_redrawTransferLink link, link.sourceNode, link.transferNode
+    @_redrawTransferLink link, link.transferNode, link.targetNode
+
+  _redrawTransferLink: (link, sourceNode, targetNode) ->
+    fromSource = sourceNode is link.sourceNode
+    sourceConnectionClass = if fromSource then @props.connectionTarget else @props.transferTarget
+    targetConnectionClass = if not fromSource then @props.connectionTarget else @props.transferTarget
+    source = $(ReactDOM.findDOMNode this.refs[sourceNode.key]).find(sourceConnectionClass)
+    target = $(ReactDOM.findDOMNode this.refs[targetNode.key]).find(targetConnectionClass)
+    if source and target
+      opts = {
+        fromSource: fromSource
+        source: source
+        target: target
+        label: ""
+        color: if fromSource then LinkColors.decrease else LinkColors.increase
+        thickness: 10
+        showIndicators: false
+        isEditing: false
+        linkModel: link
+        isTransfer: true
+        hideArrow: fromSource
+      }
+      @diagramToolkit.addLink opts
 
   onDragOver: (e) ->
     if not @state.canDrop
@@ -315,7 +378,7 @@ module.exports = React.createClass
 
   checkSelectBoxLinkCollisions: ->
     for link in @state.links
-      if this.checkBoxLinkCollision(link)
+      if not link.relation?.isTransfer and this.checkBoxLinkCollision(link)
         @props.selectionManager.selectLinkForInspection(link, true)
 
   checkSelectBoxCollisions: ->

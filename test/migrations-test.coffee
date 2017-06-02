@@ -3,7 +3,7 @@ TimeUnits      = require "../src/code/utils/time-units"
 originalData   = require "./serialized-test-data/v-0.1"
 
 chai   = require('chai')
-should = require('chai').should();
+should = require('chai').should()
 expect = chai.expect
 
 
@@ -13,8 +13,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.17.0", ->
-        @result.version.should.equal "1.17.0"
+      it "should be 1.18.0", ->
+        @result.version.should.equal "1.18.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -129,3 +129,8 @@ describe "Migrations",  ->
         frame = @result.settings.simulation.experimentFrame
         should.equal(experiment, 0)
         should.equal(frame, 0)
+
+    describe "v-1.18.0 changes", ->
+      it "should have link relation type", ->
+        for link in @result.links
+          link.relation.type.should.exist

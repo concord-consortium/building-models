@@ -2,6 +2,7 @@ GraphPrimitive = require './graph-primitive'
 Colors = require '../utils/colors'
 
 tr = require '../utils/translate'
+urlParams = require '../utils/url-params'
 
 SEMIQUANT_MIN = 0
 SEMIQUANT_MAX = 100
@@ -15,8 +16,9 @@ module.exports = class Node extends GraphPrimitive
   @fields: [
     'title', 'image', 'color', 'paletteItem',
     'initialValue', 'min', 'max',
-    'isAccumulator', 'valueDefinedSemiQuantitatively'
-    'frames']
+    'isAccumulator', 'allowNegativeValues', 'combineMethod',
+    'valueDefinedSemiQuantitatively', 'frames'
+  ]
 
   constructor: (nodeSpec={}, key) ->
     super()
@@ -32,11 +34,15 @@ module.exports = class Node extends GraphPrimitive
       @codapName = null
       @image
       @isAccumulator=false
+      @allowNegativeValues = false
       @valueDefinedSemiQuantitatively=true,
       @paletteItem
       @frames=[]
       @addedThisSession=false
     } = nodeSpec
+
+    accumulatorScaleUrlParam = (urlParams.collectorScale and Number(urlParams.collectorScale)) or 1
+    @accumulatorInputScale = if accumulatorScaleUrlParam > 0 then accumulatorScaleUrlParam else 1
 
     # Save internal values of min, max and initialValues. Actual values retreived
     # using @min or node.min will depend on whether we are in quantitative or
@@ -47,7 +53,7 @@ module.exports = class Node extends GraphPrimitive
 
     @color ?= Colors.choices[0].value
 
-    @isInCycle = false      # we always initalize with no links, so we can't be in cycle
+    @isInDependentCycle = false   # we always initalize with no links, so we can't be in cycle
 
     @_collectorImageProps = null
 
@@ -70,7 +76,7 @@ module.exports = class Node extends GraphPrimitive
   @property 'min',
     get: ->
       if not @valueDefinedSemiQuantitatively
-        @_min
+        if @isAccumulator and not @allowNegativeValues then Math.max(0, @_min) else @_min
       else
         SEMIQUANT_MIN
     set: (val) ->
@@ -86,6 +92,8 @@ module.exports = class Node extends GraphPrimitive
       if not @valueDefinedSemiQuantitatively then @_max = val
 
   type: 'Node'
+  isTransfer: false
+
   addLink: (link) ->
     if link.sourceNode is @ or link.targetNode is @
       if _.contains @links, link
@@ -105,8 +113,8 @@ module.exports = class Node extends GraphPrimitive
   outLinks: ->
     _.filter @links, (link) => link.sourceNode is @
 
-  inLinks: ->
-    _.filter @links, (link) => link.targetNode is @
+  inLinks: (relationType = null) ->
+    _.filter @links, (link) => (link.targetNode is @) and (relationType is null or relationType is link.relation.type)
 
   inNodes: ->
     _.map @inLinks(), (link) -> link.sourceNode
@@ -129,14 +137,15 @@ module.exports = class Node extends GraphPrimitive
       visitedNodes.push node
       for link in node.inLinks() when link.relation?.isDefined
         upstreamNode = link.sourceNode
-        return true unless upstreamNode.isDependent(true)      # fast exit if we have an independent ancestor
+        return true if upstreamNode.isAccumulator         # fast exit if we have a collector ancestor
+        return true unless upstreamNode.isDependent(true) # or an independent ancestor
         if upstreamNode is original then isOwnGrandpa = true
         unless _.contains visitedNodes, upstreamNode
           return true if visit upstreamNode
 
     hasIndependentAncestor = visit @
 
-    @isInCycle = not hasIndependentAncestor and isOwnGrandpa
+    @isInDependentCycle = not hasIndependentAncestor and isOwnGrandpa
 
   infoString: ->
     linkNamer = (link) ->
@@ -195,23 +204,28 @@ module.exports = class Node extends GraphPrimitive
     @_min + (val - SEMIQUANT_MIN) / (SEMIQUANT_MAX - SEMIQUANT_MIN) * (@_max - @_min)
 
   toExport: ->
-    data:
-      title: @title
-      codapName: @codapName
-      codapID: @codapID
-      x: @x
-      y: @y
-      paletteItem: @paletteItem
-      initialValue: @initialValue
-      min: @_min
-      max: @_max
-      isAccumulator: @isAccumulator
-      valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
-      frames: @frames
-    key: @key
+    result =
+      key: @key
+      data:
+        title: @title
+        codapName: @codapName
+        codapID: @codapID
+        x: @x
+        y: @y
+        paletteItem: @paletteItem
+        initialValue: @initialValue
+        min: @_min
+        max: @_max
+        isAccumulator: @isAccumulator
+        allowNegativeValues: @allowNegativeValues
+        valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
+        frames: _.clone @frames
+    # only serialize if it's been set explicitly
+    result.combineMethod = @combineMethod if @combineMethod?
+    result
 
   canEditInitialValue: ->
-    not @isDependent(true) or @isAccumulator or @isInCycle
+    not @isDependent(true) or @isAccumulator or @isInDependentCycle
 
   canEditValueWhileRunning: ->
     not @isDependent(true)

@@ -1,4 +1,4 @@
-{input, div, i, img, span, label} = React.DOM
+{input, div, i, img, span, label, img} = React.DOM
 tr = require "../utils/translate"
 
 SimulationActions = require("../stores/simulation-store").actions
@@ -51,14 +51,14 @@ NodeTitle = React.createFactory React.createClass
     if e.which in [8, 46] and not @titleUpdated
       @props.graphStore.removeNode @props.nodeKey
 
-  updateTitle: (e) ->
+  updateTitle: (isComplete) ->
     @titleUpdated = true
-    newTitle = @cleanupTitle(@inputValue())
+    newTitle = @cleanupTitle(@inputValue(), isComplete)
     @setState isUniqueTitle: @isUniqueTitle newTitle
-    @props.onChange(newTitle)
+    @props.onChange(newTitle, isComplete)
 
   finishEditing: ->
-    @updateTitle()
+    @updateTitle(true)
     @props.onStopEditing()
 
   renderTitle: ->
@@ -80,12 +80,11 @@ NodeTitle = React.createFactory React.createClass
       style: { display: if @props.isEditing then "block" else "none" }
       className: className
       onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
-      onChange: @updateTitle
-      defaultValue: displayTitle
+      onChange: => @updateTitle()
+      value: displayTitle
       maxLength: @maxTitleLength()
       placeholder: @titlePlaceholder()
-      onBlur: =>
-        @finishEditing()
+      onBlur: => @finishEditing()
     })
 
   render: ->
@@ -115,6 +114,7 @@ module.exports = NodeView = React.createClass
   getInitialState: ->
     editingNodeTitle: false
     ignoreDrag: false
+    isTransfer: @props.data.isTransfer
 
   handleSelected: (actually_select, evt) ->
     return if not @props.selectionManager
@@ -181,8 +181,8 @@ module.exports = NodeView = React.createClass
   changeValue: (newValue) ->
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {initialValue:newValue})
 
-  changeTitle: (newTitle) ->
-    newTitle = @props.graphStore.ensureUniqueTitle @props.data, newTitle
+  changeTitle: (newTitle, isComplete) ->
+    newTitle = @props.graphStore.ensureUniqueTitle @props.data, newTitle if isComplete
     @props.graphStore.startNodeEdit()
     log.info "Title is changing to #{newTitle}"
     @props.graphStore.changeNodeWithKey(@props.nodeKey, {title:newTitle})
@@ -271,7 +271,7 @@ module.exports = NodeView = React.createClass
         })
       else
         (SquareImage {
-          image: node.image
+          image: if node.isTransfer then 'img/nodes/transfer.png' else node.image
         })
 
     nodeImage = getNodeImage(@props.data)
@@ -304,25 +304,27 @@ module.exports = NodeView = React.createClass
                 onClick: (=> @handleGraphClick @props.data.title)
               })
           )
-
           (div {className: @topClasses(), "data-node-key": @props.nodeKey},
             (div {
-              className: "img-background"
+              className: "img-background transfer-target"
               onClick: ((evt) => @handleSelected true, evt)
               onTouchEnd: (=> @handleSelected true)
               },
               @renderNodeInternal()
             )
-            (NodeTitle {
-              isEditing: @props.editTitle
-              title: @props.data.title
-              onChange: @changeTitle
-              onStopEditing: @stopEditing
-              onStartEditing: @startEditing
-              node: @props.data
-              nodeKey: @props.nodeKey
-              graphStore: @props.graphStore
-            })
+            if @props.data.isTransfer
+              (div {className: "node-title"}) # empty title to set node width the same
+            else
+              (NodeTitle {
+                isEditing: @props.editTitle
+                title: @props.data.title
+                onChange: @changeTitle
+                onStopEditing: @stopEditing
+                onStartEditing: @startEditing
+                node: @props.data
+                nodeKey: @props.nodeKey
+                graphStore: @props.graphStore
+              })
           )
         )
         (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},

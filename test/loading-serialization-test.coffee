@@ -58,6 +58,8 @@ describe "Serialization and Loading", ->
 
   describe "For a model created by a user", ->
 
+    jsonString = ""
+
     beforeEach ->
       @graphStore = GraphStore.store
       @graphStore.init()
@@ -84,21 +86,25 @@ describe "Serialization and Loading", ->
       @graphStore.addLink @linkB
       @graphStore.changeLink(@linkB, {relation: relationB})
 
+      # Generate the JSON string once here rather than in each test below.
+      # Previously, we were getting intermittent unit test failures in the
+      # node serialization test because node B's frames array would sometimes
+      # be cleared between now and when the node serialization test was run.
+      jsonString = @graphStore.toJsonString()
+
     describe "The toJsonString function", ->
       it "should serialize all the properties of the model", ->
-        jsonString = @graphStore.toJsonString()
         model = JSON.parse jsonString
 
         model.version.should.exist
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.17.0"
+        model.version.should.equal "1.18.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 2
 
       it "should correctly serialize a node", ->
-        jsonString = @graphStore.toJsonString()
         nodeA = JSON.parse(jsonString).nodes[0]
         nodeB = JSON.parse(jsonString).nodes[1]
         nodeA.key.should.equal "a"
@@ -113,12 +119,12 @@ describe "Serialization and Loading", ->
         expect(nodeA.data.image).to.not.exist
         expect(nodeA.data.paletteItem).to.equal "uuid-dingo"
         expect(nodeB.data.paletteItem).to.equal "uuid-bee"
-        nodeA.data.frames.length.should.equal 0
-        nodeB.data.frames.length.should.equal 1
-        nodeB.data.frames[0].should.equal 50
+        expect(nodeA.data.frames.length, "nodeA.data.frames.length").to.equal 0
+        expect(nodeB.data.frames, "nodeB.data.frames").to.exist
+        expect(nodeB.data.frames.length, "nodeB.data.frames.length").to.equal 1
+        expect(nodeB.data.frames[0], "nodeB.data.frames[0]").to.equal 50
 
       it "should correctly serialize links", ->
-        jsonString = @graphStore.toJsonString()
         linkA = JSON.parse(jsonString).links[0]
         linkA.title.should.equal ""
         linkA.color.should.equal "#777"
@@ -126,14 +132,13 @@ describe "Serialization and Loading", ->
         linkA.sourceTerminal.should.equal "b"
         linkA.targetNode.should.equal "b"
         linkA.targetTerminal.should.equal "a"
-        linkA.relation.should.be.empty
+        linkA.relation.type.should.equal "range"
 
         linkB = JSON.parse(jsonString).links[1]
         linkB.relation.text.should.equal "increase about the same"
         linkB.relation.formula.should.equal "1 * in"
 
       it "should not serialize certain properties", ->
-        jsonString = @graphStore.toJsonString()
         jsonString.should.not.match(/"description":/)
         jsonString.should.not.match(/"metadata":/)
 

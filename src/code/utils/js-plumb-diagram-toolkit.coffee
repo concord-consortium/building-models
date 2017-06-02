@@ -18,6 +18,19 @@ module.exports = class DiagramToolkit
       DoNotThrowErrors: false
     @registerListeners()
 
+    # transfer-modifier links attach to fixed locations on the left or right of the flow node
+    @flowNodeModifierAnchors = [[0, 0.4, -1, 0, 8, 0], [1, 0.7, 1, 0, -8, 0]]
+    # flow links attach to fixed locations on the left or right of the flow node
+    @flowNodeFlowAnchors = [[0, 0.6, -1, 0, 16, 0], [1, 0.6, 1, 0, -16, 0]]
+    # other links attach to three fixed locations on the top or bottom of the flow node or
+    # two fixed locations on the left or right of the flow node chosen to not overlap the others
+    @flowNodeLinkAnchors = [[0.3, 0, 0, -1, 0, 12], [0.5, 0, 0, -1, 0, 12], [0.7, 0, 0, -1, 0, 12], # top
+                            [0, 0.25, -1, 0, 8, 0], [0, 0.75, -1, 0, 8, 0],                         # left
+                            [0.3, 1, 0, 1, 0, 0], [0.5, 1, 0, 1, 0, 0], [0.7, 1, 0, 1, 0, 0],       # bottom
+                            [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]]   # right
+    # links to non-flow nodes link to locations assigned by jsPlumb on the left, top, or right faces
+    @standardAnchors = ["Continuous", { faces:["top","left","right"] }]
+
   registerListeners: ->
     @kit.bind 'connection', @handleConnect.bind @
     @kit.bind 'beforeDrag', (source) =>
@@ -55,14 +68,15 @@ module.exports = class DiagramToolkit
     ]
     results
 
-  makeSource: (div) ->
+  makeSource: (div, clientClasses) ->
+    classes = 'node-link-button' + if clientClasses then " #{clientClasses}" else ''
     endpoints = @kit.addEndpoint(div,
       isSource: true
       dropOptions:
         activeClass: "dragActive"
       anchor: "Bottom"
       connectorStyle : { strokeStyle:"#666" }
-      endpoint: @_endpointOptions("Rectangle", 19, 'node-link-button')
+      endpoint: @_endpointOptions("Rectangle", 26, classes)
       connectorOverlays: [["Arrow", {location:1.0, width:10, length:10}]]
       maxConnections: -1
     )
@@ -106,14 +120,16 @@ module.exports = class DiagramToolkit
     outlineColor: "rgb(0,240,10)"
     outlineWidth: "10px"
 
-  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link) ->
-    results = [["Arrow", {
-      location: 1.0
-      length: 10
-      variableWidth: variableWidth
-      width: 9 + thickness
-      foldback: arrowFoldback
-    }]]
+  _overlays: (label, selected, editingLabel=true, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) ->
+    results = []
+    if not hideArrow
+      results.push ["Arrow", {
+        location: 1.0
+        length: 10
+        variableWidth: variableWidth
+        width: 9 + thickness
+        foldback: arrowFoldback
+      }]
     if changeIndicator && variableWidth != 0
       results.push ["Label", {
         location: 0.1,
@@ -197,6 +213,8 @@ module.exports = class DiagramToolkit
     if opts.color != LinkColors.default
       fixedColor = opts.color
       thickness = 2
+    if opts.thickness
+      thickness = opts.thickness
 
     paintStyle.lineWidth = thickness
     startColor = finalColor
@@ -226,11 +244,31 @@ module.exports = class DiagramToolkit
     if opts.showIndicators? and not opts.showIndicators
       changeIndicator = null
 
+    if opts.isTransfer
+      @kit.importDefaults
+        Connector: ["Flowchart", {}]
+
+    linkSource = opts.linkModel?.sourceNode
+    linkTarget = opts.linkModel?.targetNode
+    linkRelation = opts.linkModel?.relation
+
+    isLinkToFlowNode = linkTarget?.isTransfer
+    isModifierToFlowNode = linkRelation?.isTransferModifier or
+                            # transfer-modifier link isn't identified as such until it's defined
+                            linkTarget?.isTransfer and linkTarget.transferLink?.sourceNode is linkSource
+    isTransferToFlowNode = opts.isTransfer and opts.fromSource
+    isTransferFromFlowNode = opts.isTransfer and not opts.fromSource
+    sourceAnchors = if isTransferFromFlowNode then @flowNodeFlowAnchors else @standardAnchors
+    targetAnchors = if isTransferToFlowNode then @flowNodeFlowAnchors else \
+                      if isModifierToFlowNode then @flowNodeModifierAnchors else \
+                        if isLinkToFlowNode then @flowNodeLinkAnchors else @standardAnchors
+
     connection = @kit.connect
       source: opts.source
       target: opts.target
+      anchors: [sourceAnchors, targetAnchors]
       paintStyle: paintStyle
-      overlays: @_overlays opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel
+      overlays: @_overlays opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel, opts.hideArrow
       endpoint: @_endpointOptions("Rectangle", thickness, 'node-link-endpoint')
 
     connection.bind 'click', @handleClick.bind @

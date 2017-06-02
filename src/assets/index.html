@@ -44,18 +44,18 @@
   <script type="text/javascript" charset="utf-8">
     if(self == top) {
       // redirect to CFM wrapper if we have none
-      if (~window.location.href.indexOf("index")) {
-        window.location = window.location.toString().replace("index","sage");
-      } else {
-        window.location = window.location.href + "sage.html";
-      }
+      path = window.location.pathname.indexOf('index') >= 0
+              ? window.location.pathname.replace('index', 'sage')
+              : window.location.pathname + 'sage.html';
+      window.location = window.location.protocol + "//" + window.location.host +
+                          path + window.location.search + window.location.hash;
     }
     else {
       Sage.initApp(false);
 
       var cfm, client;
       try {
-        cfm = parent && parent.SageCloundFileManager ? parent.SageCloundFileManager : null;
+        cfm = parent && parent.SageCloudFileManager ? parent.SageCloudFileManager : null;
       }
       catch(e) {
         console.log("Error connecting to CFM: " + e);
@@ -63,7 +63,6 @@
 
       if (cfm) {
         cfm.clientConnect(function (event) {
-          console.log(event);
           switch (event.type) {
             case 'connected':
               client = event.data.client;
