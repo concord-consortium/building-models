@@ -24,10 +24,10 @@ module.exports = class DiagramToolkit
     @flowNodeFlowAnchors = [[0, 0.6, -1, 0, 16, 0], [1, 0.6, 1, 0, -16, 0]]
     # other links attach to three fixed locations on the top or bottom of the flow node or
     # two fixed locations on the left or right of the flow node chosen to not overlap the others
-    @flowNodeLinkAnchors = [[0.3, 0, 0, -1, 0, 12], [0.5, 0, 0, -1, 0, 12], [0.7, 0, 0, -1, 0, 12],
-                            [0, 0.25, -1, 0, 8, 0], [0, 0.75, -1, 0, 8, 0],
-                            [0.3, 1, 0, 1, 0, -10], [0.5, 1, 0, 1, 0, -10], [0.7, 1, 0, 1, 0, -10],
-                            [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]]
+    @flowNodeLinkAnchors = [[0.3, 0, 0, -1, 0, 12], [0.5, 0, 0, -1, 0, 12], [0.7, 0, 0, -1, 0, 12], # top
+                            [0, 0.25, -1, 0, 8, 0], [0, 0.75, -1, 0, 8, 0],                         # left
+                            [0.3, 1, 0, 1, 0, 0], [0.5, 1, 0, 1, 0, 0], [0.7, 1, 0, 1, 0, 0],       # bottom
+                            [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]]   # right
     # links to non-flow nodes link to locations assigned by jsPlumb on the left, top, or right faces
     @standardAnchors = ["Continuous", { faces:["top","left","right"] }]
 
