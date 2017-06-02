@@ -2,6 +2,9 @@
 
 SimulationStore = require '../stores/simulation-store'
 
+limitMin = 0
+limitMax = 120
+
 module.exports = NodeSvgGraphView = React.createClass
   displayName: 'NodeSvgGraphView'
   mixins: [ SimulationStore.mixin ]
@@ -39,8 +42,8 @@ module.exports = NodeSvgGraphView = React.createClass
     data = _.takeRight(data, rangex).reverse()
 
     for point in data
-      if point > max then max = point
-      if point < min then min = point
+      if point > max and max < limitMax then max = Math.min(point, limitMax)
+      if point < min and min > limitMin then min = Math.max(point, limitMin)
     rangey = max - min
 
     data = _.map data, (d, i) ->
