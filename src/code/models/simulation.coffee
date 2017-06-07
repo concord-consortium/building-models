@@ -215,12 +215,12 @@ module.exports = class Simulation
     # from the source node of a transfer link to the transfer node of the transfer link.
 
     nodeValues = {}
+    collectorNodes = _.filter @nodes, (node) -> node.isAccumulator
 
     step = =>
 
       # update the accumulator/collector values on all but the first step
       if time isnt 0
-        collectorNodes = _.filter @nodes, (node) -> node.isAccumulator
         _.each collectorNodes, (node) -> node.setAccumulatorValue nodeValues
 
       # push values down chain
