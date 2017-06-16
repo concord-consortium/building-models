@@ -3,7 +3,7 @@
 # this will deploy the current public folder to a subfolder in the s3 bucket
 # the subfolder is the name of the TRAVIS_BRANCH
 if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-	echo "skiping deploy to S3: this is a pull request"
+	echo "skipping deploy to S3: this is a pull request"
 	exit 0
 fi
 
@@ -38,11 +38,17 @@ s3_website push
 # Let rollbars know of our new deployment:
 # https://rollbar.com/knowuh/Sage deployment tracking
 ACCESS_TOKEN=daa3852e6c4f46008fc4043793a0ff38
-ENVIRONMENT=$TRAVIS_BRANCH
+if [ "$TRAVIS_BRANCH" = "production" ]; then
+  ENVIRONMENT="production"
+elif [ "$TRAVIS_BRANCH" = "master" ]; then
+  ENVIRONMENT="staging"
+else
+  ENVIRONMENT="development"
+fi
 REVISION=`git log -n 1 --pretty=format:"%H"`
 curl https://api.rollbar.com/api/1/deploy/ \
   -F access_token=$ACCESS_TOKEN \
-  -F environment=$TRAVIS_BRANCH\
+  -F environment=$ENVIRONMENT \
   -F revision=$REVISION \
   -F local_username=Travis\
   -F comment="available at https://sage.concord.org/branch/$TRAVIS_BRANCH/"
