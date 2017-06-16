@@ -45,10 +45,10 @@ elif [ "$TRAVIS_BRANCH" = "master" ]; then
 else
   ENVIRONMENT="development"
 fi
-REVISION=`git log -n 1 --pretty=format:"%H"`
+REVISION=`git log -n 1 --pretty=format:"%h"`
 curl https://api.rollbar.com/api/1/deploy/ \
   -F access_token=$ACCESS_TOKEN \
   -F environment=$ENVIRONMENT \
-  -F revision=$REVISION \
+  -F revision="\`$REVISION $TRAVIS_BRANCH\`" \
   -F local_username=Travis\
   -F comment="available at https://sage.concord.org/branch/$TRAVIS_BRANCH/"
