@@ -1,20 +1,24 @@
 var execSync = require('sync-exec'),
     buildDate = execSync('date +"%Y-%m-%d"').stdout,
+    gitBranch = execSync('git symbolic-ref --short HEAD').stdout.trim(),
     gitTags   = execSync('git describe --tags').stdout,
     gitLog = execSync('git log -1 --date=short --pretty=format:"%cd %h %ce"').stdout;
 
 
 var argv = require('yargs').argv,
-    environment = process.env.ENVIRONMENT || "development",
+    envMap = { production: "production", master: "staging" },
+    environment = process.env.ENVIRONMENT || envMap[gitBranch] || "development",
     production = !!argv.production,
     buildInfo = {
       date: buildDate,
       tag: gitTags.split('-')[0],
+      branch: gitBranch,
       commiter: gitLog.split(" ")[2],
       commit: gitLog.split(" ")[1]
     };
     buildInfoString = (buildInfo.date + " " +
       buildInfo.tag + " " +
+      buildInfo.branch + " " +
       buildInfo.commit + " " +
       buildInfo.commiter).replace(/\n|\r/g,"");
     src = './src';
