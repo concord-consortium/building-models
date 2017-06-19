@@ -110,8 +110,8 @@ module.exports = class Node extends GraphPrimitive
     else
       throw new Error "Bad link for Node:#{@.id}"
 
-  outLinks: ->
-    _.filter @links, (link) => link.sourceNode is @
+  outLinks: (relationType = null) ->
+    _.filter @links, (link) => (link.sourceNode is @) and (relationType is null or relationType is link.relation.type)
 
   inLinks: (relationType = null) ->
     _.filter @links, (link) => (link.targetNode is @) and (relationType is null or relationType is link.relation.type)
