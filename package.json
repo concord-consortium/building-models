@@ -12,7 +12,7 @@
     "deploy:dev": "./build.sh",
     "lint": "gulp lint",
     "poeditor:pull:comment": "echo Usage: `npm run poeditor:pull -- -a <your_poeditor_api_key>`",
-    "poeditor:pull": "./bin/poeditor-pull-project.sh and ./bin/process-strings.sh",
+    "poeditor:pull": "./bin/poeditor-pull-project.sh",
     "poeditor:push:comment": "echo Usage: `npm run poeditor:push -- -a <your_poeditor_api_key>`",
     "poeditor:push": "./bin/poeditor-push-project.sh",
     "pretest": "npm run lint",

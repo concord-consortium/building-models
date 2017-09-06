@@ -1,6 +1,6 @@
 #!/bin/bash
 PROJECT_ID=125331
-INPUT_FILE="src/code/utils/lang/en-US.json"
+INPUT_FILE="src/code/utils/lang/en-US-master.json"
 
 # argument processing from https://stackoverflow.com/a/14203146
 while [[ $# -gt 1 ]]
