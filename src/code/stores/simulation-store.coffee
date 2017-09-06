@@ -148,6 +148,8 @@ SimulationStore   = Reflux.createStore
           if @settings.isRecording
             framesNoTime = _.map frames, (frame) =>
               frame.time = @settings.experimentFrame++
+              # without collectors, start steps at 1
+              ++frame.time unless @settings.graphHasCollector
               return frame
             SimulationActions.recordingFramesCreated(framesNoTime)
 
