@@ -26,3 +26,7 @@ do
     # echo "PULLARGS=$PULLARGS"
     ./bin/poeditor-pull.sh $PULLARGS
 done
+
+# copy English strings, stripping comments
+./node_modules/.bin/strip-json-comments src/code/utils/lang/en-US-master.json \
+                                      > src/code/utils/lang/en-US.json
