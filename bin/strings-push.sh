@@ -42,8 +42,9 @@ CURLARGS="-X POST -F api_token=$API_TOKEN -F id=$PROJECT_ID
 # 1. strip comments
 # 2. convert empty strings to [u200b] before push
 # 3. use curl to push to POEditor
-./node_modules/bin/strip-json-comments "$INPUT_FILE" | \
+./node_modules/.bin/strip-json-comments "$INPUT_FILE" | \
     sed 's/"[ ]*:[ ]*""/": "[u200b]"/g' | \
     $CURL $CURLARGS $POEDITOR_UPLOAD_URL
 
-echo "\n"
+echo ""
+echo ""
