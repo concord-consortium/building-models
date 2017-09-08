@@ -22,6 +22,7 @@ done
 
 for LANGUAGE in "${LANGUAGES[@]}"
 do
+    echo "Requesting strings for '$LANGUAGE'..."
     PULLARGS="-p $PROJECT_ID -l $LANGUAGE -o $OUTPUT_DIR -a $API_TOKEN"
     # echo "PULLARGS=$PULLARGS"
     ./bin/poeditor-pull.sh $PULLARGS
