@@ -218,6 +218,7 @@ module.exports = SvgGraphView = React.createClass
   pointToScaledCoords: (evt) ->
     rect = this.refs.graphBody?.getBoundingClientRect()
     coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
+    coords.y = Math.max(0, Math.min(coords.y, rect.height))
     scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
     scaledCoords
 
