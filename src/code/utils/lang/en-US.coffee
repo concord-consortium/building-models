@@ -168,7 +168,11 @@ module.exports =
   "~SIMULATION.STEP_UNIT": "Each calculation is 1"
   "~SIMULATION.DURATION": "Calculations per run"
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
-  "~SIMULATION.DIAGRAM_ONLY": "Diagram only tools"
+  "~SIMULATION.COMPLEXITY": "Complexity:"
+  "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "Diagram only tools"
+  "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships"
+  "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs"
+  "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors"
   "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols"
 
   "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed."

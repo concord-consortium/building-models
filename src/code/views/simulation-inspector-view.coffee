@@ -1,3 +1,6 @@
+{RadioGroup, Radio}  = require 'react-radio-group'
+RadioGroupF     = React.createFactory RadioGroup
+RadioF          = React.createFactory Radio
 Dropdown        = React.createFactory require './dropdown-view'
 SimulationStore = require '../stores/simulation-store'
 AppSettingsStore = require '../stores/app-settings-store'
@@ -62,17 +65,26 @@ module.exports = React.createClass
           tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS'
         ])
       )
-      (div {className: "row"},
-        (label {key: 'diagram-label'}, [
-          input {
-            key: 'diagram-checkbox'
-            type: 'checkbox'
-            value: 'diagram-only'
-            checked: @state.diagramOnly
-            onChange: @setDiagramOnly
-          }
-          tr '~SIMULATION.DIAGRAM_ONLY'
-        ])
+      (div {},
+        (div {className: "radio-title"}, tr "~SIMULATION.COMPLEXITY")
+        (RadioGroupF {name: "complexity", className: "radio-group"},
+          (label {key: 'complexity-diagram-only'},
+            (RadioF {value: "diagram-only"})
+            (span {}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
+          )
+          (label {key: 'complexity-basic'},
+            (RadioF {value: "basic"})
+            (span {}, tr '~SIMULATION.COMPLEXITY.BASIC')
+          )
+          (label {key: 'complexity-expanded'},
+            (RadioF {value: "expanded"})
+            (span {}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
+          )
+          (label {key: 'complexity-collectors'},
+            (RadioF {value: "collectors"})
+            (span {}, tr '~SIMULATION.COMPLEXITY.COLLECTORS')
+          )
+        )
       )
       (div {className: "row"},
         (label {key: 'symbols-label'}, [

@@ -27,6 +27,7 @@
     "mathjs": "1.7.0",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
+    "react-radio-group": "^3.0.2",
     "reflux": "0.2.7",
     "uuid": "2.0.1"
   },
