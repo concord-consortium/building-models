@@ -35,6 +35,54 @@ module.exports = React.createClass
     if @state.diagramOnly then minigraphsCheckboxClass += " disabled"
 
     (div {className: "simulation-panel"},
+      (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
+      (RadioGroupF {
+        name: "complexity"
+        className: "radio-group"
+      }, [
+        (label {key: 'complexity-diagram-only'},
+          (RadioF {value: "diagram-only"})
+          (span {}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
+        )
+        (label {key: 'complexity-basic'},
+          (RadioF {value: "basic"})
+          (span {}, tr '~SIMULATION.COMPLEXITY.BASIC')
+        )
+        (label {key: 'complexity-expanded'},
+          (RadioF {value: "expanded"})
+          (span {}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
+        )
+        (label {key: 'complexity-collectors'},
+          (RadioF {value: "collectors"})
+          (span {}, tr '~SIMULATION.COMPLEXITY.COLLECTORS')
+        )
+      ])
+      (div {className: "title"}, tr "~SIMULATION.VIEW_SETTINGS")
+      (div {className: minigraphsCheckboxClass},
+        (label {key: 'minigraphs-label'}, [
+          input {
+            key: 'minigraphs-checkbox'
+            type: 'checkbox'
+            value: 'show-mini'
+            checked: @state.showingMinigraphs
+            disabled: @state.diagramOnly
+            onChange: @setShowingMinigraphs
+          }
+          tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS'
+        ])
+      )
+      (div {className: "row"},
+        (label {key: 'symbols-label'}, [
+          input {
+            key: 'symbols-checkbox'
+            type: 'checkbox'
+            value: 'relationship-symbols'
+            checked: @state.relationshipSymbols
+            onChange: @setRelationshipSymbols
+          }
+          tr '~SIMULATION.RELATIONSHIP_SYMBOLS'
+        ])
+      )
       (div {className: runPanelClasses},
         (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
 
@@ -50,53 +98,6 @@ module.exports = React.createClass
             tr '~SIMULATION.CAP_VALUES'
           ])
         )
-      )
-      (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
-      (div {className: minigraphsCheckboxClass},
-        (label {key: 'minigraphs-label'}, [
-          input {
-            key: 'minigraphs-checkbox'
-            type: 'checkbox'
-            value: 'show-mini'
-            checked: @state.showingMinigraphs
-            disabled: @state.diagramOnly
-            onChange: @setShowingMinigraphs
-          }
-          tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS'
-        ])
-      )
-      (div {},
-        (div {className: "radio-title"}, tr "~SIMULATION.COMPLEXITY")
-        (RadioGroupF {name: "complexity", className: "radio-group"},
-          (label {key: 'complexity-diagram-only'},
-            (RadioF {value: "diagram-only"})
-            (span {}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
-          )
-          (label {key: 'complexity-basic'},
-            (RadioF {value: "basic"})
-            (span {}, tr '~SIMULATION.COMPLEXITY.BASIC')
-          )
-          (label {key: 'complexity-expanded'},
-            (RadioF {value: "expanded"})
-            (span {}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
-          )
-          (label {key: 'complexity-collectors'},
-            (RadioF {value: "collectors"})
-            (span {}, tr '~SIMULATION.COMPLEXITY.COLLECTORS')
-          )
-        )
-      )
-      (div {className: "row"},
-        (label {key: 'symbols-label'}, [
-          input {
-            key: 'symbols-checkbox'
-            type: 'checkbox'
-            value: 'relationship-symbols'
-            checked: @state.relationshipSymbols
-            onChange: @setRelationshipSymbols
-          }
-          tr '~SIMULATION.RELATIONSHIP_SYMBOLS'
-        ])
       )
 
     )

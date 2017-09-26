@@ -165,10 +165,10 @@ module.exports =
 
   "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings"
   "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings"
+  "~SIMULATION.VIEW_SETTINGS": "View settings"
   "~SIMULATION.STEP_UNIT": "Each calculation is 1"
   "~SIMULATION.DURATION": "Calculations per run"
   "~SIMULATION.CAP_VALUES": "Limit values to min/max range"
-  "~SIMULATION.COMPLEXITY": "Complexity:"
   "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "Diagram only tools"
   "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships"
   "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs"
