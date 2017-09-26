@@ -185,6 +185,7 @@ module.exports = SvgGraphView = React.createClass
     # can only draw on custom relationships
     if @state.canDraw
       document.addEventListener 'mousemove', @drawCurve
+      document.addEventListener 'mouseup', @endDrawCurve
       @drawing = true
       if @state.newCustomData
         scaledCoords = @pointToScaledCoords(evt)
@@ -211,6 +212,7 @@ module.exports = SvgGraphView = React.createClass
   endDrawCurve: (evt) ->
     if @drawing
       document.removeEventListener 'mousemove', @drawCurve
+      document.removeEventListener 'mouseup', @endDrawCurve
       @drawing = false
       #update relation with custom data
       @updateRelationCustomData(@state.currentData)
@@ -241,7 +243,6 @@ module.exports = SvgGraphView = React.createClass
       (div
         className: drawClass
         onMouseDown: @startDrawCurve
-        onMouseUp: @endDrawCurve
         ref: "graphBody"
         ,
         if @state.newCustomData
