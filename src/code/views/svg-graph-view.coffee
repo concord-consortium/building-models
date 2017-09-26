@@ -184,6 +184,7 @@ module.exports = SvgGraphView = React.createClass
   startDrawCurve: (evt) ->
     # can only draw on custom relationships
     if @state.canDraw
+      document.addEventListener 'mousemove', @drawCurve
       @drawing = true
       if @state.newCustomData
         scaledCoords = @pointToScaledCoords(evt)
@@ -209,12 +210,13 @@ module.exports = SvgGraphView = React.createClass
 
   endDrawCurve: (evt) ->
     if @drawing
+      document.removeEventListener 'mousemove', @drawCurve
       @drawing = false
       #update relation with custom data
       @updateRelationCustomData(@state.currentData)
 
   pointToScaledCoords: (evt) ->
-    rect = evt.target.getBoundingClientRect()
+    rect = this.refs.graphBody?.getBoundingClientRect()
     coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
     scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
     scaledCoords
@@ -238,9 +240,8 @@ module.exports = SvgGraphView = React.createClass
       (div
         className: drawClass
         onMouseDown: @startDrawCurve
-        onMouseMove: @drawCurve
         onMouseUp: @endDrawCurve
-        onMouseOut: @endDrawCurve
+        ref: "graphBody"
         ,
         if @state.newCustomData
           (div {className: 'graph-hint'},
