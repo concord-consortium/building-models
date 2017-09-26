@@ -46,7 +46,7 @@
     "gulp-stylus": "^2.0.1",
     "mocha": "^2.1.0",
     "react-addons-test-utils": "^15.4.2",
-    "require-dir": "^0.1.0",
+    "require-dir": "^0.3",
     "semver": "^5.1.0",
     "sinon": "^1.12.2",
     "sync-exec": "~0.6.x",
