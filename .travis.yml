@@ -6,7 +6,7 @@ rvm:
   - 2.2.0
 
 node_js:
-  - "0.10"
+  - "node"
 
 sudo: false
 
