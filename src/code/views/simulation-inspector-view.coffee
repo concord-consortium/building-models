@@ -4,8 +4,11 @@ RadioF          = React.createFactory Radio
 Dropdown        = React.createFactory require './dropdown-view'
 SimulationStore = require '../stores/simulation-store'
 AppSettingsStore = require '../stores/app-settings-store'
+GraphStore      = require('../stores/graph-store').store
 tr              = require '../utils/translate'
 {div, span, i, input, label}  = React.DOM
+
+Complexity = AppSettingsStore.store.Complexity
 
 module.exports = React.createClass
 
@@ -28,10 +31,25 @@ module.exports = React.createClass
   setComplexity: (val) ->
     AppSettingsStore.actions.setComplexity val
 
+  isDisabled: (myComplexity, minComplexity) ->
+    if minComplexity is Complexity.diagramOnly
+      return false
+    if minComplexity is Complexity.basic
+      return myComplexity is Complexity.diagramOnly
+    if minComplexity is Complexity.expanded
+      return myComplexity is Complexity.diagramOnly or
+             myComplexity is Complexity.basic
+    return myComplexity isnt Complexity.collectors
+
   render: ->
     runPanelClasses = "run-panel"
-    diagramOnly = @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
+    diagramOnly = @state.complexity is Complexity.diagramOnly
     if diagramOnly then runPanelClasses += " collapsed"
+
+    minComplexity = GraphStore.getMinimumComplexity()
+    diagramOnlyDisabled = @isDisabled(Complexity.diagramOnly, minComplexity)
+    basicDisabled = @isDisabled(Complexity.basic, minComplexity)
+    expandedDisabled = @isDisabled(Complexity.expanded, minComplexity)
 
     (div {className: "simulation-panel"},
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
@@ -42,16 +60,16 @@ module.exports = React.createClass
         className: "radio-group"
       }, [
         (label {key: 'complexity-diagram-only'},
-          (RadioF {value: "diagram-only"})
-          (span {}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
+          (RadioF {value: "diagram-only", disabled: diagramOnlyDisabled})
+          (span {className: if diagramOnlyDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
         )
         (label {key: 'complexity-basic'},
-          (RadioF {value: "basic"})
-          (span {}, tr '~SIMULATION.COMPLEXITY.BASIC')
+          (RadioF {value: "basic", disabled: basicDisabled})
+          (span {className: if basicDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.BASIC')
         )
         (label {key: 'complexity-expanded'},
-          (RadioF {value: "expanded"})
-          (span {}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
+          (RadioF {value: "expanded", disabled: expandedDisabled})
+          (span {className: if expandedDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
         )
         (label {key: 'complexity-collectors'},
           (RadioF {value: "collectors"})
