@@ -31,9 +31,7 @@ module.exports = React.createClass
   render: ->
     runPanelClasses = "run-panel"
     diagramOnly = @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
-    if not diagramOnly then runPanelClasses += " expanded"
-    minigraphsCheckboxClass = "row"
-    if diagramOnly then minigraphsCheckboxClass += " disabled"
+    if diagramOnly then runPanelClasses += " collapsed"
 
     (div {className: "simulation-panel"},
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
@@ -60,31 +58,32 @@ module.exports = React.createClass
           (span {}, tr '~SIMULATION.COMPLEXITY.COLLECTORS')
         )
       ])
-      (div {className: "title"}, tr "~SIMULATION.VIEW_SETTINGS")
-      (div {className: minigraphsCheckboxClass},
-        (label {key: 'minigraphs-label'}, [
-          input {
-            key: 'minigraphs-checkbox'
-            type: 'checkbox'
-            value: 'show-mini'
-            checked: @state.showingMinigraphs
-            disabled: @state.diagramOnly
-            onChange: @setShowingMinigraphs
-          }
-          tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS'
-        ])
-      )
-      (div {className: "row"},
-        (label {key: 'symbols-label'}, [
-          input {
-            key: 'symbols-checkbox'
-            type: 'checkbox'
-            value: 'relationship-symbols'
-            checked: @state.relationshipSymbols
-            onChange: @setRelationshipSymbols
-          }
-          tr '~SIMULATION.RELATIONSHIP_SYMBOLS'
-        ])
+      (div {className: runPanelClasses},
+        (div {className: "title"}, tr "~SIMULATION.VIEW_SETTINGS")
+        (div {className: "row"},
+          (label {key: 'minigraphs-label'}, [
+            input {
+              key: 'minigraphs-checkbox'
+              type: 'checkbox'
+              value: 'show-mini'
+              checked: @state.showingMinigraphs
+              onChange: @setShowingMinigraphs
+            }
+            tr '~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS'
+          ])
+        )
+        (div {className: "row"},
+          (label {key: 'symbols-label'}, [
+            input {
+              key: 'symbols-checkbox'
+              type: 'checkbox'
+              value: 'relationship-symbols'
+              checked: @state.relationshipSymbols
+              onChange: @setRelationshipSymbols
+            }
+            tr '~SIMULATION.RELATIONSHIP_SYMBOLS'
+          ])
+        )
       )
       (div {className: runPanelClasses},
         (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
