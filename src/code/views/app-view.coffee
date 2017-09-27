@@ -61,7 +61,7 @@ module.exports = React.createClass
           })
           (DocumentActions
             graphStore: @props.graphStore
-            diagramOnly: @state.diagramOnly
+            diagramOnly: @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
             iframed: @state.iframed
           )
         )
@@ -77,7 +77,7 @@ module.exports = React.createClass
           onNodeChanged: @onNodeChanged
           onNodeDelete: @onNodeDelete
           palette: @state.palette
-          diagramOnly: @state.diagramOnly
+          diagramOnly: @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
           toggleImageBrowser: @toggleImageBrowser
           graphStore: @props.graphStore
           ref: "inspectorPanel"

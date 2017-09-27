@@ -19,25 +19,28 @@ module.exports = React.createClass
   setCapNodeValues: (e) ->
     SimulationStore.actions.capNodeValues e.target.checked
 
-  setDiagramOnly: (e) ->
-    AppSettingsStore.actions.diagramOnly e.target.checked
-
   setShowingMinigraphs: (e) ->
     AppSettingsStore.actions.showMinigraphs e.target.checked
 
   setRelationshipSymbols: (e) ->
     AppSettingsStore.actions.relationshipSymbols e.target.checked
 
+  setComplexity: (val) ->
+    AppSettingsStore.actions.setComplexity val
+
   render: ->
     runPanelClasses = "run-panel"
-    if not @state.diagramOnly then runPanelClasses += " expanded"
+    diagramOnly = @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
+    if not diagramOnly then runPanelClasses += " expanded"
     minigraphsCheckboxClass = "row"
-    if @state.diagramOnly then minigraphsCheckboxClass += " disabled"
+    if diagramOnly then minigraphsCheckboxClass += " disabled"
 
     (div {className: "simulation-panel"},
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
       (RadioGroupF {
         name: "complexity"
+        selectedValue: @state.complexity
+        onChange: @setComplexity
         className: "radio-group"
       }, [
         (label {key: 'complexity-diagram-only'},
