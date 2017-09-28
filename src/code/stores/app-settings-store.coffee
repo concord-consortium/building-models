@@ -10,10 +10,10 @@ AppSettingsActions = Reflux.createActions(
 )
 
 Complexity = {
-  diagramOnly: "diagram-only",
-  basic: "basic",
-  expanded: "expanded",
-  collectors: "collectors"
+  diagramOnly: 0,
+  basic: 1,
+  expanded: 2,
+  collectors: 3
 }
 
 AppSettingsStore   = Reflux.createStore

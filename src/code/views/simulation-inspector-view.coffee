@@ -31,25 +31,15 @@ module.exports = React.createClass
   setComplexity: (val) ->
     AppSettingsStore.actions.setComplexity val
 
-  isDisabled: (myComplexity, minComplexity) ->
-    if minComplexity is Complexity.diagramOnly
-      return false
-    if minComplexity is Complexity.basic
-      return myComplexity is Complexity.diagramOnly
-    if minComplexity is Complexity.expanded
-      return myComplexity is Complexity.diagramOnly or
-             myComplexity is Complexity.basic
-    return myComplexity isnt Complexity.collectors
-
   render: ->
     runPanelClasses = "run-panel"
     diagramOnly = @state.complexity is Complexity.diagramOnly
     if diagramOnly then runPanelClasses += " collapsed"
 
     minComplexity = GraphStore.getMinimumComplexity()
-    diagramOnlyDisabled = @isDisabled(Complexity.diagramOnly, minComplexity)
-    basicDisabled = @isDisabled(Complexity.basic, minComplexity)
-    expandedDisabled = @isDisabled(Complexity.expanded, minComplexity)
+    diagramOnlyDisabled = minComplexity > Complexity.diagramOnly
+    basicDisabled = minComplexity > Complexity.basic
+    expandedDisabled = minComplexity > Complexity.expanded
 
     (div {className: "simulation-panel"},
       (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
@@ -60,19 +50,19 @@ module.exports = React.createClass
         className: "radio-group"
       }, [
         (label {key: 'complexity-diagram-only'},
-          (RadioF {value: "diagram-only", disabled: diagramOnlyDisabled})
+          (RadioF {value: Complexity.diagramOnly, disabled: diagramOnlyDisabled})
           (span {className: if diagramOnlyDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
         )
         (label {key: 'complexity-basic'},
-          (RadioF {value: "basic", disabled: basicDisabled})
+          (RadioF {value: Complexity.basic, disabled: basicDisabled})
           (span {className: if basicDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.BASIC')
         )
         (label {key: 'complexity-expanded'},
-          (RadioF {value: "expanded", disabled: expandedDisabled})
+          (RadioF {value: Complexity.expanded, disabled: expandedDisabled})
           (span {className: if expandedDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
         )
         (label {key: 'complexity-collectors'},
-          (RadioF {value: "collectors"})
+          (RadioF {value: Complexity.collectors})
           (span {}, tr '~SIMULATION.COMPLEXITY.COLLECTORS')
         )
       ])

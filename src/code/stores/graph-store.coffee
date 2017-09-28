@@ -519,18 +519,11 @@ GraphStore  = Reflux.createStore
 
   # Returns the minimum complexity that the current graph allows.
   # Returns
-  #   diagramOnly    if there are no defined relationships
-  #   basic          if all scalars are `about the same`
-  #   expanded       if there are no collectors
-  #   collectors     if there are collectors
+  #   0 (diagramOnly)    if there are no defined relationships
+  #   1 (basic)          if all scalars are `about the same`
+  #   2 (expanded)       if there are no collectors
+  #   3 (collectors)     if there are collectors
   getMinimumComplexity: ->
-    complexities = {
-      0: AppSettingsStore.store.Complexity.diagramOnly
-      1: AppSettingsStore.store.Complexity.basic
-      2: AppSettingsStore.store.Complexity.expanded
-      3: AppSettingsStore.store.Complexity.collectors
-    }
-
     minComplexity = 0
 
     links = @getLinks()
@@ -549,7 +542,7 @@ GraphStore  = Reflux.createStore
         if linkComplexity > minComplexity
           minComplexity = linkComplexity
 
-    return complexities[minComplexity]
+    return minComplexity
 
   loadData: (data) ->
     log.info "json success"

@@ -25,7 +25,8 @@ CodapConnect    = requireModel 'codap-connect'
 
 requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
 
-GraphStore      = requireStore('graph-store').store
+GraphStore       = requireStore('graph-store').store
+AppSettingsStore = requireStore('app-settings-store').store
 
 
 LinkNodes = (sourceNode, targetNode, relation) ->
@@ -59,7 +60,7 @@ describe "The minimum complexity", ->
       @graphStore.addLink link
 
     it "should be diagram-only", ->
-      @graphStore.getMinimumComplexity().should.equal "diagram-only"
+      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.diagramOnly
 
   describe "for a graph with only an `about the same` relation", ->
     beforeEach ->
@@ -75,7 +76,7 @@ describe "The minimum complexity", ->
       @graphStore.addLink link
 
     it "should be basic", ->
-      @graphStore.getMinimumComplexity().should.equal "basic"
+      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.basic
 
   describe "for a graph with an `a lot` relation", ->
     beforeEach ->
@@ -91,7 +92,7 @@ describe "The minimum complexity", ->
       @graphStore.addLink link
 
     it "should be expanded", ->
-      @graphStore.getMinimumComplexity().should.equal "expanded"
+      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.expanded
 
   describe "for a graph with a collector", ->
     beforeEach ->
@@ -104,4 +105,4 @@ describe "The minimum complexity", ->
       @graphStore.addLink link
 
     it "should be collectors", ->
-      @graphStore.getMinimumComplexity().should.equal "collectors"
+      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.collectors

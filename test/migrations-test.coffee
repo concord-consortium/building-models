@@ -138,4 +138,4 @@ describe "Migrations",  ->
 
     describe "v-1.19.0 changes", ->
       it "should have complexity setting", ->
-        @result.settings.complexity.should.equal "basic"
+        @result.settings.complexity.should.equal 1
