@@ -542,7 +542,6 @@ GraphStore  = Reflux.createStore
         minComplexity = 3
       else if link.relation?.formula
         # we know we'll be at least 1 or 2
-        linkComplexity
         relation = RelationFactory.selectionsFromRelation(link.relation)
         if relation.scalar.id is "aboutTheSame"
           linkComplexity = 1
