@@ -143,7 +143,6 @@
     "~SIMULATION.STEP_UNIT": "Wszystkie obliczenia są 1",
     "~SIMULATION.DURATION": "Obliczenia na symulację",
     "~SIMULATION.CAP_VALUES": "Ogranicz wartości do zakresu min/max",
-    "~SIMULATION.DIAGRAM_ONLY": "Tylko narzędzia diagramów",
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "Pokaż symbole relacji",
     "~DROP.ONLY_IMAGES_ALLOWED": "Przepraszamy, tylko obrazy są dozwolone.",
     "~DROPZONE.DROP_IMAGES_HERE": "Upuść tutaj obraz",
@@ -169,5 +168,10 @@
     "~TIME.DAY.PLURAL": "Dni",
     "~TIME.WEEK.PLURAL": "Tygodnie",
     "~TIME.MONTH.PLURAL": "Miesiące",
-    "~TIME.YEAR.PLURAL": "Lata"
+    "~TIME.YEAR.PLURAL": "Lata",
+    "~SIMULATION.VIEW_SETTINGS": "View settings",
+    "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "Tylko narzędzia diagramów",
+    "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships",
+    "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs",
+    "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors"
 }
