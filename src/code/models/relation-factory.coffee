@@ -207,6 +207,10 @@ module.exports = class RelationFactory
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
+  @basicVectors:
+    increase: @increase
+    decrease: @decrease
+
   @vectors:
     increase: @increase
     decrease: @decrease

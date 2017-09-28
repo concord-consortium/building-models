@@ -452,6 +452,7 @@ module.exports = React.createClass
     dataColor = Color.colors.mediumGray.value
     if @state.isRecording
       dataColor = Color.colors.data.value
+    diagramOnly = @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
 
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container', onMouseDown: @onMouseDown, onMouseUp: @onMouseUp, onMouseMove: @onMouseMove},
@@ -476,7 +477,7 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
             showMinigraph: @state.showingMinigraphs
-            showGraphButton: @state.codapHasLoaded and not @state.diagramOnly
+            showGraphButton: @state.codapHasLoaded and not diagramOnly
           })
       )
     )

@@ -13,8 +13,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.18.0", ->
-        @result.version.should.equal "1.18.0"
+      it "should be 1.19.0", ->
+        @result.version.should.equal "1.19.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -77,9 +77,10 @@ describe "Migrations",  ->
         for paletteItem in @result.palette
           paletteItem.uuid.should.not.be.null
 
-    describe "v-1.6 changes", ->
-      it "should have diagramOnly setting", ->
-        @result.settings.diagramOnly.should.equal false
+    # Removed in 1.19
+    # describe "v-1.6 changes", ->
+    #   it "should have diagramOnly setting", ->
+    #     @result.settings.diagramOnly.should.equal false
 
     describe "v-1.7 changes", ->
       it "should have settings for the simulation", ->
@@ -134,3 +135,7 @@ describe "Migrations",  ->
       it "should have link relation type", ->
         for link in @result.links
           link.relation.type.should.exist
+
+    describe "v-1.19.0 changes", ->
+      it "should have complexity setting", ->
+        @result.settings.complexity.should.equal 1

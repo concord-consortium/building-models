@@ -3,29 +3,40 @@ ImportActions   = require '../actions/import-actions'
 
 AppSettingsActions = Reflux.createActions(
   [
-    "diagramOnly"
+    "setComplexity"
     "showMinigraphs"
     "relationshipSymbols"
   ]
 )
 
+Complexity = {
+  diagramOnly: 0,
+  basic: 1,
+  expanded: 2,
+  collectors: 3
+}
+
 AppSettingsStore   = Reflux.createStore
   listenables: [AppSettingsActions, ImportActions]
 
   init: ->
+    complexity = if HashParams.getParam('simplified')
+      Complexity.diagramOnly
+    else
+      Complexity.basic
+
     @settings =
       showingSettingsDialog: false
-      diagramOnly: HashParams.getParam('simplified') or false
+      complexity: complexity
       showingMinigraphs: false
       relationshipSymbols: false
 
-  onDiagramOnly: (diagramOnly) ->
-    @settings.diagramOnly = diagramOnly
-    if diagramOnly then @settings.showingMinigraphs = false
-    @notifyChange()
-
   onShowMinigraphs: (show) ->
     @settings.showingMinigraphs = show
+    @notifyChange()
+
+  onSetComplexity: (val) ->
+    @settings.complexity = val
     @notifyChange()
 
   onRelationshipSymbols: (show) ->
@@ -34,19 +45,17 @@ AppSettingsStore   = Reflux.createStore
 
   notifyChange: ->
     @trigger _.clone @settings
-    if @settings.diagramOnly
-      HashParams.setParam('simplified','true')
-    else
-      HashParams.clearParam('simplified')
 
   onImport: (data) ->
     _.merge @settings, data.settings
     @notifyChange()
 
   serialize: ->
-    diagramOnly: @settings.diagramOnly
+    complexity: @settings.complexity
     showingMinigraphs: @settings.showingMinigraphs
     relationshipSymbols: @settings.relationshipSymbols
+
+AppSettingsStore.Complexity = Complexity
 
 mixin =
   getInitialState: ->

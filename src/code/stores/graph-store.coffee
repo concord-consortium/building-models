@@ -14,6 +14,7 @@ GraphActions        = require "../actions/graph-actions"
 CodapActions        = require '../actions/codap-actions'
 InspectorPanelStore = require "../stores/inspector-panel-store"
 CodapConnect        = require '../models/codap-connect'
+RelationFactory     = require "../models/relation-factory"
 DEFAULT_CONTEXT_NAME = 'building-models'
 
 GraphStore  = Reflux.createStore
@@ -515,6 +516,33 @@ GraphStore  = Reflux.createStore
       links: linkDescription
       model: modelDescription
     }
+
+  # Returns the minimum complexity that the current graph allows.
+  # Returns
+  #   0 (diagramOnly)    if there are no defined relationships
+  #   1 (basic)          if all scalars are `about the same`
+  #   2 (expanded)       if there are no collectors
+  #   3 (collectors)     if there are collectors
+  getMinimumComplexity: ->
+    minComplexity = 0
+
+    links = @getLinks()
+    _.each links, (link) ->
+      return unless (source = link.sourceNode) and (target = link.targetNode)
+
+      if source.isAccumulator or target.isAccumulator
+        # we know we have to be the highest complexity
+        minComplexity = 3
+      else if link.relation?.formula
+        # we know we'll be at least 1 or 2
+        relation = RelationFactory.selectionsFromRelation(link.relation)
+        if relation.scalar.id is "aboutTheSame"
+          linkComplexity = 1
+        else linkComplexity = 2
+        if linkComplexity > minComplexity
+          minComplexity = linkComplexity
+
+    return minComplexity
 
   loadData: (data) ->
     log.info "json success"
