@@ -13,6 +13,11 @@
     "lint": "gulp lint",
     "pretest": "npm run lint",
     "start": "live-server dev",
+    "strings:build": "./node_modules/.bin/strip-json-comments src/code/utils/lang/en-US-master.json > src/code/utils/lang/en-US.json",
+    "strings:pull:usage": "echo Usage: `npm run strings:pull -- -a <poeditor_api_key>`",
+    "strings:pull": "./bin/strings-pull-project.sh",
+    "strings:push:usage": "echo Usage: `npm run strings:push -- -a <poeditor_api_key>`",
+    "strings:push": "./bin/strings-push-project.sh",
     "test": "./node_modules/mocha/bin/mocha",
     "test:watch": "./node_modules/mocha/bin/mocha -w",
     "watch": "gulp"
@@ -47,9 +52,10 @@
     "gulp-stylus": "^2.0.1",
     "mocha": "^2.1.0",
     "react-addons-test-utils": "^15.4.2",
-    "require-dir": "^0.3",
+    "require-dir": "^0.3.2",
     "semver": "^5.1.0",
     "sinon": "^1.12.2",
+    "strip-json-comments-cli": "^1.0.1",
     "sync-exec": "~0.6.x",
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^3.6.0"
