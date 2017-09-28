@@ -143,7 +143,6 @@
     "~SIMULATION.STEP_UNIT": "כל חישוב הוא אחד",
     "~SIMULATION.DURATION": "חישובים להרצה",
     "~SIMULATION.CAP_VALUES": "הגבל ערכים לטווח מינימום\\מקסימום",
-    "~SIMULATION.DIAGRAM_ONLY": "ציור בלבד ללא סימולציה",
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "הצג סמלי שינוי יחס",
     "~DROP.ONLY_IMAGES_ALLOWED": "סליחה, מותר רק תמונות",
     "~DROPZONE.DROP_IMAGES_HERE": "גרור ושחרר תמונה כאן",
@@ -169,5 +168,10 @@
     "~TIME.DAY.PLURAL": "ימים",
     "~TIME.WEEK.PLURAL": "שבועות",
     "~TIME.MONTH.PLURAL": "חודשים",
-    "~TIME.YEAR.PLURAL": "שנים"
+    "~TIME.YEAR.PLURAL": "שנים",
+    "~SIMULATION.VIEW_SETTINGS": "View settings",
+    "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "ציור בלבד ללא סימולציה",
+    "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships",
+    "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs",
+    "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors"
 }

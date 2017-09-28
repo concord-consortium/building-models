@@ -143,7 +143,6 @@
     "~SIMULATION.STEP_UNIT": "每次計算為1",
     "~SIMULATION.DURATION": "每次執行的運算",
     "~SIMULATION.CAP_VALUES": "設定最小/最大值的範圍",
-    "~SIMULATION.DIAGRAM_ONLY": "僅使用繪製模型工具",
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "顯示關係符號",
     "~DROP.ONLY_IMAGES_ALLOWED": "抱歉，只允許圖片。",
     "~DROPZONE.DROP_IMAGES_HERE": "在此處放入圖像",
@@ -169,5 +168,10 @@
     "~TIME.DAY.PLURAL": "天",
     "~TIME.WEEK.PLURAL": "週",
     "~TIME.MONTH.PLURAL": "月",
-    "~TIME.YEAR.PLURAL": "年"
+    "~TIME.YEAR.PLURAL": "年",
+    "~SIMULATION.VIEW_SETTINGS": "View settings",
+    "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "僅使用繪製模型工具",
+    "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships",
+    "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs",
+    "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors"
 }

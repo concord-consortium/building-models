@@ -143,7 +143,6 @@
     "~SIMULATION.STEP_UNIT": "Her hesaplama 1 olsun",
     "~SIMULATION.DURATION": "Her çalıştırmada yapılan hesap",
     "~SIMULATION.CAP_VALUES": "En az/en çok aralığında değerleri sınırlandırın",
-    "~SIMULATION.DIAGRAM_ONLY": "Yalnızca grafik için araçlar",
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "İlişki sembollerini göster",
     "~DROP.ONLY_IMAGES_ALLOWED": "Üzgünüz, yalnızca resimler kabul ediliyor.",
     "~DROPZONE.DROP_IMAGES_HERE": "Resmi buraya sürükleyin",
@@ -169,5 +168,10 @@
     "~TIME.DAY.PLURAL": "Günler",
     "~TIME.WEEK.PLURAL": "Haftalar",
     "~TIME.MONTH.PLURAL": "Aylar",
-    "~TIME.YEAR.PLURAL": "Yıllar"
+    "~TIME.YEAR.PLURAL": "Yıllar",
+    "~SIMULATION.VIEW_SETTINGS": "View settings",
+    "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "Yalnızca grafik için araçlar",
+    "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships",
+    "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs",
+    "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors"
 }
