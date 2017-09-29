@@ -219,7 +219,8 @@ module.exports = LinkRelationView = React.createClass
   renderAccumulator: (source, target) ->
     options = []
     _.each RelationFactory.accumulators, (opt, i) =>
-      if not opt.forDualAccumulator or @state.isDualAccumulator
+      if (not opt.forDualAccumulator or @state.isDualAccumulator) and
+          (not opt.forSoloAccumulatorOnly or not @state.isDualAccumulator)
         options.push (option {value: opt.id, key: opt.id}, opt.text)
 
     if not @state.selectedAccumulator
@@ -229,17 +230,19 @@ module.exports = LinkRelationView = React.createClass
     else
       currentOption = @state.selectedAccumulator.id
 
+    textClass = if @state.selectedAccumulator?.hideAdditionalText then "hidden" else ""
+
     (div {className: 'top'},
       (span {className: "source"}, source)
-      (span {}, " #{tr "~NODE-RELATION-EDIT.IS"} ")
+      (span {className: textClass}, " #{tr "~NODE-RELATION-EDIT.IS"} ")
       (div {},
         (select {value: currentOption, ref: "accumulator", onChange: @updateRelation},
           options
         )
       )
       (span {className: "target"}, target)
-      (span {}, " #{tr "~NODE-RELATION-EDIT.EACH"} ")
-      (span {}, @state.stepUnits.toLowerCase())
+      (span {className: textClass}, " #{tr "~NODE-RELATION-EDIT.EACH"} ")
+      (span {className: textClass}, @state.stepUnits.toLowerCase())
     )
 
   renderTransfer: (source, target) ->
