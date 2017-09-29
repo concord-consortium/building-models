@@ -82,6 +82,19 @@ RangeIntegrationFunction = (incrementAccumulators) ->
 
   value
 
+# Sets the value of node.initialValue before the simulations starts. If there
+# are inbound `initial-value` links, we request the initial values of the
+# source nodes (no calculations needed) and average them.
+SetInitialAccumulatorValueFunction = () ->
+  initialValueLinks = @inLinks('initial-value')
+  inValues = []
+  _.each initialValueLinks, (link) ->
+    return unless link.relation.isDefined
+    sourceNode = link.sourceNode
+    inValues.push sourceNode.initialValue
+  if inValues.length
+    @initialValue = combineInputs(inValues)
+
 SetAccumulatorValueFunction = (nodeValues) ->
   # collectors only have accumulator and transfer links
   links = @inLinks('accumulator').concat(@inLinks('transfer')).concat(@outLinks('transfer'))
@@ -117,7 +130,7 @@ SetAccumulatorValueFunction = (nodeValues) ->
   # accumulators hold their values in previousValue which is confusing
   # (this done because the accumulator values is only computed on the first of the 20 loops in RangeIntegrationFunction)
   # TODO: possibly change RangeIntegrationFunction function to make this more clear
-  @currentValue = @filterFinalValue @previousValue + deltaValue
+  @currentValue = @filterFinalValue startValue + deltaValue
 
 module.exports = class Simulation
 
@@ -150,6 +163,7 @@ module.exports = class Simulation
       # Keep all the logic for integration here in one file for clarity.
       node.getCurrentValue = RangeIntegrationFunction.bind(node)
       node.setAccumulatorValue = SetAccumulatorValueFunction.bind(node)
+      node.setInitialAccumulatorValue = SetInitialAccumulatorValueFunction.bind(node)
 
   initializeValues: (node) ->
     node.currentValue = null
@@ -216,6 +230,10 @@ module.exports = class Simulation
 
     nodeValues = {}
     collectorNodes = _.filter @nodes, (node) -> node.isAccumulator
+
+    # before the first step, set the initial values of all aqccumulators,
+    # in case they are linked with `initial-value` relationships
+    _.each collectorNodes, (node) -> node.setInitialAccumulatorValue()
 
     step = =>
 
