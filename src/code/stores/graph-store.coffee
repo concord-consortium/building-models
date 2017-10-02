@@ -157,9 +157,9 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.createAndExecuteCommand 'removeLink',
       execute: =>
         @_removeLink link
-        @_removeNode link.transferNode if link.transferNode?
+        @_removeTransfer link if link.transferNode?
       undo: =>
-        @_addNode link.transferNode if link.transferNode?
+        @_addTransfer link if link.transferNode?
         @_addLink link
 
   _removeLink: (link) ->
@@ -205,22 +205,22 @@ GraphStore  = Reflux.createStore
     # create a copy of the list of links
     links = node.links.slice()
     # identify any transfer nodes that need to be removed as well
-    transferNodes = {}
+    transferLinks = []
     _.each(links, (link) ->
       if link?.transferNode?.key?
-        transferNodes[link.transferNode.key] = link.transferNode
+        transferLinks.push link
     )
 
     @undoRedoManager.createAndExecuteCommand 'removeNode',
       execute: =>
         node.transferLink?.relation = node.transferLink.defaultRelation()
         @_removeLink(link) for link in links
-        _.each(transferNodes, (node) => @_removeNode node)
+        @_removeTransfer(link) for link in transferLinks
         @_removeNode node
       undo: =>
         node.transferLink?.relation = transferRelation
         @_addNode node
-        _.each(transferNodes, (node) => @_addNode node)
+        @_addTransfer(link) for link in transferLinks
         @_addLink(link) for link in links
 
   _addNode: (node) ->
@@ -244,8 +244,15 @@ GraphStore  = Reflux.createStore
       link.transferNode.setTransferLink link
     @_addNode link.transferNode
 
-  _removeTransfer: (link) ->
-    @_removeNode link.transferNode if link.transferNode?
+  _removeTransfer: (tLink) ->
+    transfer = tLink.transferNode
+    return unless transfer
+
+    links = @getLinks()
+    _.each links, (link) =>
+      if link.sourceNode is transfer or link.targetNode is transfer
+        @removeLink link
+    @_removeNode transfer
 
   _graphUpdated: ->
     node.checkIsInIndependentCycle() for key, node of @nodeKeys
@@ -327,6 +334,7 @@ GraphStore  = Reflux.createStore
             for link in changedLinks
               originalRelations[link.key] = link.relation
 
+          @undoRedoManager.startCommandBatch()
           @undoRedoManager.createAndExecuteCommand 'changeNode',
             execute: =>
               if accumulatorChanged
@@ -339,6 +347,7 @@ GraphStore  = Reflux.createStore
                 for link in changedLinks
                   @_changeLink link, { relation: originalRelations[link.key] }
               return
+          @undoRedoManager.endCommandBatch()
 
   _changeNode: (node, data, notifyCodap = true) ->
     log.info "Change for #{node.title}"
@@ -402,9 +411,11 @@ GraphStore  = Reflux.createStore
         color: link.color
         relation: link.relation
         reasoning: link.reasoning
+      @undoRedoManager.startCommandBatch()
       @undoRedoManager.createAndExecuteCommand 'changeLink',
         execute: => @_changeLink link,  changes
         undo: => @_changeLink link, originalData
+      @undoRedoManager.endCommandBatch()
 
   _maybeChangeSelectedItem: (item) ->
     # TODO: This is kind of hacky:
