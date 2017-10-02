@@ -321,7 +321,8 @@ GraphStore  = Reflux.createStore
             changedLinks = [].concat(node.inLinks())
                             # along with outbound transfer links
                               .concat(_.filter(node.outLinks(), (link) ->
-                                link.relation.type is 'transfer'))
+                                link.relation.type is 'transfer' or
+                                link.relation.type is 'initial-value'))
             originalRelations = {}
             for link in changedLinks
               originalRelations[link.key] = link.relation

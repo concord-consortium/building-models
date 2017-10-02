@@ -64,6 +64,7 @@
     "~NODE-RELATION-EDIT.IS": "is",
     "~NODE-RELATION-EDIT.ADDED_TO": "added to",
     "~NODE-RELATION-EDIT.SUBTRACTED_FROM": "subtracted from",
+    "~NODE-RELATION-EDIT.SETS_INITIAL": "sets the initial value of",
     "~NODE-RELATION-EDIT.TRANSFERRED_TO": "transferred to",
     "~NODE-RELATION-EDIT.EACH": "each",
     "~NODE-RELATION-EDIT.ALL": "All",
@@ -92,7 +93,7 @@
     "~PALETTE-INSPECTOR.DELETE": "Delete Image",
     "~PALETTE-INSPECTOR.REPLACE": "Replace Image",
 
-    // views/palette-delete-view.coffee    
+    // views/palette-delete-view.coffee
     "~PALETTE-DIALOG.TITLE": "Delete image?",
     "~PALETTE-DIALOG.DELETE": "Delete",
     "~PALETTE-DIALOG.REPLACE": "and replace with",
