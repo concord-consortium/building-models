@@ -14,7 +14,7 @@ migration =
     defaultComplexity = if wasDiagramOnly
       AppSettingsStore.Complexity.diagramOnly
     else
-      AppSettingsStore.Complexity.basic
+      AppSettingsStore.Complexity.DEFAULT
 
     data.settings.complexity ?= defaultComplexity
 

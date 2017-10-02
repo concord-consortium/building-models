@@ -13,7 +13,8 @@ Complexity = {
   diagramOnly: 0,
   basic: 1,
   expanded: 2,
-  collectors: 3
+  collectors: 3,
+  DEFAULT: 3
 }
 
 AppSettingsStore   = Reflux.createStore
@@ -23,7 +24,7 @@ AppSettingsStore   = Reflux.createStore
     complexity = if HashParams.getParam('simplified')
       Complexity.diagramOnly
     else
-      Complexity.basic
+      Complexity.DEFAULT
 
     @settings =
       showingSettingsDialog: false
