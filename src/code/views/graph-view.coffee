@@ -299,7 +299,7 @@ module.exports = React.createClass
         source: source
         target: target
         label: ""
-        color: if fromSource then LinkColors.decrease else LinkColors.increase
+        color: LinkColors.transferPipe
         thickness: 10
         showIndicators: false
         isEditing: false

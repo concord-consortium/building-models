@@ -292,6 +292,7 @@ module.exports = NodeView = React.createClass
       top: @props.data.y
       left: @props.data.x
       "color": @props.data.color
+    fullWidthBackgroundClass = if @props.data.isTransfer then "full-width" else ""
 
     (div { className: @nodeClasses(), ref: "node", style: style},
       (div {className: @linkTargetClasses(), "data-node-key": @props.nodeKey},
@@ -306,7 +307,7 @@ module.exports = NodeView = React.createClass
           )
           (div {className: @topClasses(), "data-node-key": @props.nodeKey},
             (div {
-              className: "img-background transfer-target"
+              className: "img-background transfer-target "+fullWidthBackgroundClass
               onClick: ((evt) => @handleSelected true, evt)
               onTouchEnd: (=> @handleSelected true)
               },

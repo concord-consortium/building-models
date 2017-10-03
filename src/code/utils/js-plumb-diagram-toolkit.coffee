@@ -21,7 +21,7 @@ module.exports = class DiagramToolkit
     # transfer-modifier links attach to fixed locations on the left or right of the flow node
     @flowNodeModifierAnchors = [[0, 0.4, -1, 0, 8, 0], [1, 0.7, 1, 0, -8, 0]]
     # flow links attach to fixed locations on the left or right of the flow node
-    @flowNodeFlowAnchors = [[0, 0.6, -1, 0, 16, 0], [1, 0.6, 1, 0, -16, 0]]
+    @flowNodeFlowAnchors = [[0.1, 0.6, -1, 0, 16, 0], [1, 0.6, 1, 0, -16, 0]]
     # other links attach to three fixed locations on the top or bottom of the flow node or
     # two fixed locations on the left or right of the flow node chosen to not overlap the others
     @flowNodeLinkAnchors = [[0.3, 0, 0, -1, 0, 12], [0.5, 0, 0, -1, 0, 12], [0.7, 0, 0, -1, 0, 12], # top
