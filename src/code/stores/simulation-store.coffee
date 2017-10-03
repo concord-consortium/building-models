@@ -257,8 +257,6 @@ SimulationStore   = Reflux.createStore
     duration:         @settings.duration
     stepUnits:        @settings.stepUnits
     capNodeValues:    @settings.capNodeValues
-    experimentNumber: @settings.experimentNumber
-    experimentFrame:  @settings.experimentFrame
 
 mixin =
   getInitialState: ->

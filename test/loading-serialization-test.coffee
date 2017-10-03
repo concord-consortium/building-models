@@ -100,7 +100,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.19.0"
+        model.version.should.equal "1.20.0"
         model.nodes.length.should.equal 2
         model.links.length.should.equal 2
 
@@ -169,8 +169,6 @@ describe "Serialization and Loading", ->
         simulationData.duration.should.equal 15
         simulationData.stepUnits.should.equal "SECOND"
         simulationData.capNodeValues.should.equal true
-        simulationData.experimentNumber.should.equal 10
-        simulationData.experimentFrame.should.equal 12
 
   describe "loadData", ->
     beforeEach ->
