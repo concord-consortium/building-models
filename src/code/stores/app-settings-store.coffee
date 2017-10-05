@@ -38,6 +38,8 @@ AppSettingsStore   = Reflux.createStore
 
   onSetComplexity: (val) ->
     @settings.complexity = val
+    if val is 0
+      @settings.showingMinigraphs = false
     @notifyChange()
 
   onRelationshipSymbols: (show) ->
