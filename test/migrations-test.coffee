@@ -13,8 +13,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.19.0", ->
-        @result.version.should.equal "1.19.0"
+      it "should be 1.20.0", ->
+        @result.version.should.equal "1.20.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -124,12 +124,13 @@ describe "Migrations",  ->
         speed = @result.settings.simulation.speed
         should.equal(speed, undefined)
 
-    describe "v-1.17.0 changes", ->
-      it "should have experiment number and frame", ->
-        experiment = @result.settings.simulation.experimentNumber
-        frame = @result.settings.simulation.experimentFrame
-        should.equal(experiment, 0)
-        should.equal(frame, 0)
+    ## removed in 1.20.0
+    # describe "v-1.17.0 changes", ->
+    #   it "should have experiment number and frame", ->
+    #     experiment = @result.settings.simulation.experimentNumber
+    #     frame = @result.settings.simulation.experimentFrame
+    #     should.equal(experiment, 0)
+    #     should.equal(frame, 0)
 
     describe "v-1.18.0 changes", ->
       it "should have link relation type", ->

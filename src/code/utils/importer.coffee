@@ -10,10 +10,6 @@ module.exports = class MySystemImporter
 
   importData: (data) ->
     Migrations.update(data)
-    # increment last saved experiment number so that each session will
-    # create its own experiments, and not append a prior session's
-    data.settings?.simulation?.experimentNumber++
-    data.settings?.simulation?.experimentFrame = 0
     # Synchronous invocation of actions / w trigger
     ImportActions.import.trigger(data)
     @importNodes data.nodes

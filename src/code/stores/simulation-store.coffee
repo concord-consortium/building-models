@@ -25,6 +25,7 @@ SimulationActions = Reflux.createActions(
     "recordingDidEnd"
     "createExperiment"
     "toggledCollectorTo"
+    "setExperimentNumber"
   ]
 )
 SimulationActions.runSimulation = Reflux.createAction({sync: true})
@@ -63,6 +64,10 @@ SimulationStore   = Reflux.createStore
 
     @_updateModelIsRunnable()
     @_updateGraphHasCollector()
+
+  onSetExperimentNumber: (nextExperimentNumber) ->
+    @settings.experimentNumber = nextExperimentNumber
+    @notifyChange()
 
   onSetComplexity: (complexity) ->
     if complexity is AppSettingsStore.store.Complexity.diagramOnly
@@ -257,8 +262,6 @@ SimulationStore   = Reflux.createStore
     duration:         @settings.duration
     stepUnits:        @settings.stepUnits
     capNodeValues:    @settings.capNodeValues
-    experimentNumber: @settings.experimentNumber
-    experimentFrame:  @settings.experimentFrame
 
 mixin =
   getInitialState: ->
