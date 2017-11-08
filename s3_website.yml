@@ -38,13 +38,13 @@ exclude_from_upload: .git
 
 cloudfront_distribution_config:
   default_cache_behavior:
-    min_TTL: <%= 60 * 60 * 24 %>
+    min_ttl: <%= 60 * 60 * 24 %>
   aliases:
     quantity: 2
     items:
-      CNAME0: building-models-app.concord.org
-      CNAME1: ivy.concord.org
-      CNAME2: sage.concord.org
+      - building-models-app.concord.org
+      - ivy.concord.org
+      - sage.concord.org
 
 
 cloudfront_invalidate_root: true
