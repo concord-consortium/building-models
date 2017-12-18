@@ -85,7 +85,7 @@ RangeIntegrationFunction = (incrementAccumulators) ->
 # Sets the value of node.initialValue before the simulations starts. If there
 # are inbound `initial-value` links, we request the initial values of the
 # source nodes (no calculations needed) and average them.
-SetInitialAccumulatorValueFunction = () ->
+SetInitialAccumulatorValueFunction = ->
   initialValueLinks = @inLinks('initial-value')
   inValues = []
   _.each initialValueLinks, (link) ->

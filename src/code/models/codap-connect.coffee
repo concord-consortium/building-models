@@ -419,7 +419,7 @@ module.exports = class CodapConnect
           @codapPhone.call
             action: 'get',
             resource: "#{runsCollection}.caseByIndex[#{caseCount-1}]"
-          , (ret2) =>
+          , (ret2) ->
             if ret2?.success
               lastCase = ret2.values['case']
               lastExperimentNumber = lastCase.values[tr "~CODAP.SIMULATION.EXPERIMENT"]
