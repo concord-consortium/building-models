@@ -207,6 +207,28 @@ module.exports = class RelationFactory
     func: (scope) ->
       return scope.in * 0.25
 
+  @proportionalSourceMore:
+    type: "transfer-modifier"
+    id: "proportionalSourceMore"
+    text: tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_MORE"
+    postfixIco: "more"
+    formula: "in * 0.10"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in * 0.10
+
+  @proportionalSourceLess:
+    type: "transfer-modifier"
+    id: "proportionalSourceLess"
+    text: tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS"
+    postfixIco: "less"
+    formula: "(maxIn - in) * 0.10 + 0.001"
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return scope.in * 0.10
+
   @aLittleBit:
     type: "transfer-modifier"
     id: "aLittleBit"
@@ -244,11 +266,8 @@ module.exports = class RelationFactory
     transferred: @transferred
 
   @transferModifiers:
-    all: @all
-    most: @most
-    half: @half
-    some: @some
-    aLittleBit: @aLittleBit
+    proportionalSourceMore: @proportionalSourceMore
+    proportionalSourceLess: @proportionalSourceLess
 
   @CreateRelation: (options) ->
     new Relationship(options)

@@ -81,7 +81,9 @@ module.exports = LinkRelationView = React.createClass
     status =
       isAccumulator: targetNode.isAccumulator
       isDualAccumulator: sourceNode.isAccumulator and targetNode.isAccumulator
-      isTransferModifier: targetNode.isTransfer and targetNode.transferLink?.sourceNode is sourceNode
+      isTransferModifier: targetNode.isTransfer and
+        (targetNode.transferLink?.sourceNode is sourceNode) or
+        (targetNode.transferLink?.targetNode is sourceNode)
 
   updateState: (props) ->
     status = @checkStatus(props.link)
@@ -248,6 +250,16 @@ module.exports = LinkRelationView = React.createClass
   renderTransfer: (source, target) ->
     options = _.map RelationFactory.transferModifiers, (opt, i) ->
       (option {value: opt.id, key: opt.id}, opt.text)
+    sourceTitle = @props.link.sourceNode?.title || "NONE"
+    targetTitle = @props.link.targetNode?.transferLink?.targetNode?.title || "NONE"
+    line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A",
+      { sourceTitle: sourceTitle }
+    line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B",
+      { targetTitle: targetTitle }
+
+    console.log @props
+    console.log @state
+    console.log @state.selectedTransferModifier
 
     if not @state.selectedTransferModifier
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -255,20 +267,18 @@ module.exports = LinkRelationView = React.createClass
       currentOption = "unselected"
     else
       currentOption = @state.selectedTransferModifier.id
-
     (div {className: 'top'},
-      (select {value: currentOption, ref: "transfer", onChange: @updateRelation},
-        options
-      )
+
+
       # note that localization will be a problem here due to the hard-coded order
       # of the elements and because we can't use the string-replacement capabilities
       # of the translate module since there is special formatting of node titles, etc.
-      (span {}, " #{tr "~NODE-RELATION-EDIT.OF"} ")
-      (span {className: "source"}, source)
-      (span {}, " #{tr "~NODE-RELATION-EDIT.WILL_FLOW_TO"} ")
-      (span {className: "target"}, target)
-      (span {}, " #{tr "~NODE-RELATION-EDIT.EACH"} ")
-      (span {}, @state.stepUnits.toLowerCase())
+      (span {className: "source"}, line_a)
+      (select {value: currentOption, ref: "transfer", onChange: @updateRelation},
+        options
+      )
+      (span {}, line_b)
+      (span {}, "#{@state.stepUnits.toLowerCase()}.")
     )
 
   renderNonAccumulator: (source, target) ->
