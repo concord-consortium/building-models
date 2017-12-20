@@ -90,7 +90,7 @@ module.exports = class CodapConnect
       if !ret or ret.success
         if (attrs = ret?.values?.collections?[1]?.attrs?)
           @_initialSyncAttributeProperties attrs
-        @initGameHandler ret
+        @_getExperimentNumber()
       else
         @_createDataContext()
 
@@ -401,6 +401,31 @@ module.exports = class CodapConnect
     return successes unless successes?.length        # return successes unless it's a non-zero length array
     return false for s in successes when s is false  # return false if we encounter *any* explicit false values in the array
     return true
+
+  # Get the experiment-number of the last case in CODAP, and set the simulation store
+  # to the next experiment number. This is only called in the case where we found an
+  # existing data context in CODAP.
+  _getExperimentNumber: (result) ->
+    runsCollection = "dataContext[#{@dataContextName}].collection[#{@simulationCollectionName}]"
+    # find out how many cases there are
+    @codapPhone.call
+      action: 'get',
+      resource: "#{runsCollection}.caseCount"
+    , (ret) =>
+      if ret?.success
+        caseCount = ret.values
+        if caseCount > 0
+          # get last case, and find its number
+          @codapPhone.call
+            action: 'get',
+            resource: "#{runsCollection}.caseByIndex[#{caseCount-1}]"
+          , (ret2) ->
+            if ret2?.success
+              lastCase = ret2.values['case']
+              lastExperimentNumber = lastCase.values[tr "~CODAP.SIMULATION.EXPERIMENT"]
+              SimulationStore.actions.setExperimentNumber lastExperimentNumber + 1
+
+      @initGameHandler ret
 
   initGameHandler: (result) ->
     if result and result.success

@@ -1,10 +1,11 @@
 {br, div, h2, label, span, input, p, i, select, option, textarea} = React.DOM
 
-RelationFactory = require "../models/relation-factory"
-SvgGraph        = React.createFactory require "./svg-graph-view"
-tr              = require "../utils/translate"
-autosize        = require "autosize"
-SimulationStore = require '../stores/simulation-store'
+RelationFactory  = require "../models/relation-factory"
+SvgGraph         = React.createFactory require "./svg-graph-view"
+tr               = require "../utils/translate"
+autosize         = require "autosize"
+SimulationStore  = require '../stores/simulation-store'
+AppSettingsStore = require '../stores/app-settings-store'
 
 Graph = React.createFactory React.createClass
   render: ->
@@ -31,7 +32,7 @@ module.exports = LinkRelationView = React.createClass
 
   displayName: 'LinkRelationView'
 
-  mixins: [SimulationStore.mixin]
+  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ]
 
   getDefaultProps: ->
     link:
@@ -157,13 +158,19 @@ module.exports = LinkRelationView = React.createClass
     newVector
 
   getScalar: ->
-    if @refs.scalar
+    if @state.complexity is AppSettingsStore.store.Complexity.basic
+      RelationFactory.scalars.aboutTheSame
+    else if @refs.scalar
       RelationFactory.scalars[@refs.scalar.value]
     else
       undefined
 
   renderVectorPulldown: (vectorSelection)->
-    options = _.map RelationFactory.vectors, (opt, i) ->
+    vectorOptions = if @state.complexity is AppSettingsStore.store.Complexity.basic
+      RelationFactory.basicVectors
+    else
+      RelationFactory.vectors
+    options = _.map vectorOptions, (opt, i) ->
       (option {value: opt.id, key: i}, opt.uiText)
 
     if not vectorSelection?
@@ -190,8 +197,12 @@ module.exports = LinkRelationView = React.createClass
     else
       currentOption = scalarSelection.id
 
-    # place dropdown but hide it if we haven't selected vector (to keep spacing)
-    visClass = if @state.selectedVector then ' visible' else ' hidden'
+    onlyBasic = @state.complexity is AppSettingsStore.store.Complexity.basic
+    vectorSelected = @state.selectedVector
+    # place dropdown but hide it (to keep spacing) if we haven't selected
+    # the vector or we have only basic complecity settings
+    visible = vectorSelected and not onlyBasic
+    visClass = if visible then ' visible' else ' hidden'
 
     if @state.selectedVector?.isCustomRelationship
       (div {className: "bb-select#{visClass}"},
@@ -208,7 +219,8 @@ module.exports = LinkRelationView = React.createClass
   renderAccumulator: (source, target) ->
     options = []
     _.each RelationFactory.accumulators, (opt, i) =>
-      if not opt.forDualAccumulator or @state.isDualAccumulator
+      if (not opt.forDualAccumulator or @state.isDualAccumulator) and
+          (not opt.forSoloAccumulatorOnly or not @state.isDualAccumulator)
         options.push (option {value: opt.id, key: opt.id}, opt.text)
 
     if not @state.selectedAccumulator
@@ -218,17 +230,19 @@ module.exports = LinkRelationView = React.createClass
     else
       currentOption = @state.selectedAccumulator.id
 
+    textClass = if @state.selectedAccumulator?.hideAdditionalText then "hidden" else ""
+
     (div {className: 'top'},
       (span {className: "source"}, source)
-      (span {}, " #{tr "~NODE-RELATION-EDIT.IS"} ")
+      (span {className: textClass}, " #{tr "~NODE-RELATION-EDIT.IS"} ")
       (div {},
         (select {value: currentOption, ref: "accumulator", onChange: @updateRelation},
           options
         )
       )
       (span {className: "target"}, target)
-      (span {}, " #{tr "~NODE-RELATION-EDIT.EACH"} ")
-      (span {}, @state.stepUnits.toLowerCase())
+      (span {className: textClass}, " #{tr "~NODE-RELATION-EDIT.EACH"} ")
+      (span {className: textClass}, @state.stepUnits.toLowerCase())
     )
 
   renderTransfer: (source, target) ->

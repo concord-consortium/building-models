@@ -208,6 +208,29 @@ describe "Simulation", ->
         results: [
           [100, 100]
         ]}
+
+        # *** Collector initial-value tests ***
+
+        # 13: (A-init->B+)
+        {A:10, B:"50+", AB: "initial-value",
+        results: [
+          [10, 10]
+          [10, 10]
+        ]}
+
+        # 14: A and B averageing initial values >- (A-init->C+, B-init->C+)
+        {A:10, B:20, C:"50+", AC: "initial-value", BC: "initial-value",
+        results: [
+          [10, 20, 15]
+          [10, 20, 15]
+        ]}
+
+        # 15: Setting initial values, and accumulating >- (A-init->C+, B->C+)
+        {A:10, B:20, C:"50+", AC: "initial-value", BC: "1 * in",
+        results: [
+          [10, 20, 10]
+          [10, 20, 30]
+        ]}
       ]
 
       _.each scenarios, (scenario, i) ->
@@ -220,8 +243,13 @@ describe "Simulation", ->
             else if key.length == 2
               node1 = nodes[key[0]]
               node2 = nodes[key[1]]
-              type = if node2.isAccumulator then 'accumulator' else 'range'
-              LinkNodes(node1, node2, { type, formula: value })
+              func = null
+              if node2.isAccumulator
+                type = if value is 'initial-value' then value else 'accumulator'
+                if type is 'initial-value' then func = () => {}
+              else
+                type = 'range'
+              LinkNodes(node1, node2, { type, formula: value, func })
           for result, j in scenario.results
             nodeArray = (node for key, node of nodes)
             simulation = new Simulation

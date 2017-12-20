@@ -1,13 +1,14 @@
 {div, h2, label, span, input, p, i} = React.DOM
 
-SimulationStore = require '../stores/simulation-store'
+SimulationStore  = require '../stores/simulation-store'
+AppSettingsStore = require '../stores/app-settings-store'
 tr = require "../utils/translate"
 
 module.exports = React.createClass
 
   displayName: 'NodeValueInspectorView'
 
-  mixins: [ SimulationStore.mixin ]
+  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ]
 
   propTypes:
     max: React.PropTypes.number
@@ -97,6 +98,46 @@ module.exports = React.createClass
         @renderEditableProperty("max", "right")
       )
 
+  renderCollectorOptions: (node) ->
+    unless @state.complexity is AppSettingsStore.store.Complexity.collectors
+      return null
+
+    isChecked = not @state.capNodeValues and node.allowNegativeValues
+    tooltip = if @state.capNodeValues \
+                then tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP" \
+                else (if isChecked \
+                        then tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP" \
+                        else tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP")
+    positiveCheckbox = (
+      label {
+        className: if @state.capNodeValues then 'disabled' else ''
+        title: tooltip
+        key: 'positive-label'
+      }, [
+        input {
+          key: 'positive-checkbox'
+          type: 'checkbox'
+          checked: isChecked
+          disabled: @state.capNodeValues
+          onChange: if @state.capNodeValues then null else @updateNegativeValuesAllowed
+        }
+        tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE"
+      ]
+    )
+
+    return (span {className: "checkbox group full"},
+      (label {key: 'accumulator-label'}, [
+        input {
+          key: 'accumulator-checkbox'
+          type: 'checkbox'
+          checked: node.isAccumulator
+          onChange: @updateAccumulatorChecked
+        }
+        tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR"
+      ])
+      if node.isAccumulator then positiveCheckbox else null
+    )
+
   render: ->
     node = @props.node
     (div {className: 'value-inspector'},
@@ -128,41 +169,7 @@ module.exports = React.createClass
           )
         )
         if not node.isTransfer
-          isChecked = not @state.capNodeValues and node.allowNegativeValues
-          tooltip = if @state.capNodeValues \
-                      then tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP" \
-                      else (if isChecked \
-                              then tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP" \
-                              else tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP")
-          positiveCheckbox = (
-            label {
-              className: if @state.capNodeValues then 'disabled' else ''
-              title: tooltip
-              key: 'positive-label'
-            }, [
-              input {
-                key: 'positive-checkbox'
-                type: 'checkbox'
-                checked: isChecked
-                disabled: @state.capNodeValues
-                onChange: if @state.capNodeValues then null else @updateNegativeValuesAllowed
-              }
-              tr "~NODE-VALUE-EDIT.RESTRICT_POSITIVE"
-            ]
-          )
-
-          (span {className: "checkbox group full"},
-            (label {key: 'accumulator-label'}, [
-              input {
-                key: 'accumulator-checkbox'
-                type: 'checkbox'
-                checked: node.isAccumulator
-                onChange: @updateAccumulatorChecked
-              }
-              tr "~NODE-VALUE-EDIT.IS_ACCUMULATOR"
-            ])
-            if node.isAccumulator then positiveCheckbox else null
-          )
+          @renderCollectorOptions(node)
       )
 
       (div {className: "bottom-pane"},

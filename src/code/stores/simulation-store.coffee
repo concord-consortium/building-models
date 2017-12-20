@@ -1,4 +1,4 @@
-AppSettingsActions = require('./app-settings-store').actions
+AppSettingsStore   = require './app-settings-store'
 ImportActions      = require '../actions/import-actions'
 GraphActions       = require '../actions/graph-actions'
 Simulation         = require "../models/simulation"
@@ -25,13 +25,14 @@ SimulationActions = Reflux.createActions(
     "recordingDidEnd"
     "createExperiment"
     "toggledCollectorTo"
+    "setExperimentNumber"
   ]
 )
 SimulationActions.runSimulation = Reflux.createAction({sync: true})
 
 SimulationStore   = Reflux.createStore
   listenables: [
-    SimulationActions, AppSettingsActions,
+    SimulationActions, AppSettingsStore.actions,
     ImportActions, GraphActions]
 
   init: ->
@@ -64,8 +65,13 @@ SimulationStore   = Reflux.createStore
     @_updateModelIsRunnable()
     @_updateGraphHasCollector()
 
-  onDiagramOnly: ->
-    SimulationActions.collapseSimulationPanel()
+  onSetExperimentNumber: (nextExperimentNumber) ->
+    @settings.experimentNumber = nextExperimentNumber
+    @notifyChange()
+
+  onSetComplexity: (complexity) ->
+    if complexity is AppSettingsStore.store.Complexity.diagramOnly
+      SimulationActions.collapseSimulationPanel()
 
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
@@ -256,8 +262,6 @@ SimulationStore   = Reflux.createStore
     duration:         @settings.duration
     stepUnits:        @settings.stepUnits
     capNodeValues:    @settings.capNodeValues
-    experimentNumber: @settings.experimentNumber
-    experimentFrame:  @settings.experimentFrame
 
 mixin =
   getInitialState: ->

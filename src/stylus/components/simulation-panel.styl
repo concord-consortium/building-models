@@ -82,13 +82,29 @@ panelWidth = 236px
         color #AAA
   .run-panel
     overflow: hidden
-    height: 0px
-    webkit-transition: height 0.7s
-    transition: height 0.7s
-    &.expanded
-      height: 60px
+    max-height: 1000px
+    webkit-transition: max-height 2.7s
+    transition: max-height 2.7s
+    &.collapsed
+      max-height: 0px
+      webkit-transition: max-height 0.7s
+      transition: max-height 0.7s
   .full
     width 100%
   .wide
     width 100%
     margin 0 7px 0 8px
+
+  .radio-group
+    display flex
+    flex-direction column
+    margin 5px
+    label
+      display flex
+      padding-bottom 7px
+      input[type="radio"]
+        flex none
+        margin-right 7px
+
+  span.disabled
+    color #AAA

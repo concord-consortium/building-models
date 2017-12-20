@@ -20,6 +20,8 @@ migrations = [
   require "./17_remove_simulation_speed"
   require "./18_serialize_experiment_number"
   require "./19_add_relation_type"
+  require "./20_add_complexity"
+  require "./21_remove_experiment_number"
 ]
 
 module.exports =

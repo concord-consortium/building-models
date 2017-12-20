@@ -14,6 +14,7 @@ GraphActions        = require "../actions/graph-actions"
 CodapActions        = require '../actions/codap-actions'
 InspectorPanelStore = require "../stores/inspector-panel-store"
 CodapConnect        = require '../models/codap-connect'
+RelationFactory     = require "../models/relation-factory"
 DEFAULT_CONTEXT_NAME = 'building-models'
 
 GraphStore  = Reflux.createStore
@@ -156,9 +157,9 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.createAndExecuteCommand 'removeLink',
       execute: =>
         @_removeLink link
-        @_removeNode link.transferNode if link.transferNode?
+        @_removeTransfer link if link.transferNode?
       undo: =>
-        @_addNode link.transferNode if link.transferNode?
+        @_addTransfer link if link.transferNode?
         @_addLink link
 
   _removeLink: (link) ->
@@ -204,22 +205,22 @@ GraphStore  = Reflux.createStore
     # create a copy of the list of links
     links = node.links.slice()
     # identify any transfer nodes that need to be removed as well
-    transferNodes = {}
+    transferLinks = []
     _.each(links, (link) ->
       if link?.transferNode?.key?
-        transferNodes[link.transferNode.key] = link.transferNode
+        transferLinks.push link
     )
 
     @undoRedoManager.createAndExecuteCommand 'removeNode',
       execute: =>
         node.transferLink?.relation = node.transferLink.defaultRelation()
         @_removeLink(link) for link in links
-        _.each(transferNodes, (node) => @_removeNode node)
+        @_removeTransfer(link) for link in transferLinks
         @_removeNode node
       undo: =>
         node.transferLink?.relation = transferRelation
         @_addNode node
-        _.each(transferNodes, (node) => @_addNode node)
+        @_addTransfer(link) for link in transferLinks
         @_addLink(link) for link in links
 
   _addNode: (node) ->
@@ -243,8 +244,15 @@ GraphStore  = Reflux.createStore
       link.transferNode.setTransferLink link
     @_addNode link.transferNode
 
-  _removeTransfer: (link) ->
-    @_removeNode link.transferNode if link.transferNode?
+  _removeTransfer: (tLink) ->
+    transfer = tLink.transferNode
+    return unless transfer
+
+    links = @getLinks()
+    _.each links, (link) =>
+      if link.sourceNode is transfer or link.targetNode is transfer
+        @removeLink link
+    @_removeNode transfer
 
   _graphUpdated: ->
     node.checkIsInIndependentCycle() for key, node of @nodeKeys
@@ -320,11 +328,13 @@ GraphStore  = Reflux.createStore
             changedLinks = [].concat(node.inLinks())
                             # along with outbound transfer links
                               .concat(_.filter(node.outLinks(), (link) ->
-                                link.relation.type is 'transfer'))
+                                link.relation.type is 'transfer' or
+                                link.relation.type is 'initial-value'))
             originalRelations = {}
             for link in changedLinks
               originalRelations[link.key] = link.relation
 
+          @undoRedoManager.startCommandBatch()
           @undoRedoManager.createAndExecuteCommand 'changeNode',
             execute: =>
               if accumulatorChanged
@@ -337,6 +347,7 @@ GraphStore  = Reflux.createStore
                 for link in changedLinks
                   @_changeLink link, { relation: originalRelations[link.key] }
               return
+          @undoRedoManager.endCommandBatch()
 
   _changeNode: (node, data, notifyCodap = true) ->
     log.info "Change for #{node.title}"
@@ -400,9 +411,11 @@ GraphStore  = Reflux.createStore
         color: link.color
         relation: link.relation
         reasoning: link.reasoning
+      @undoRedoManager.startCommandBatch()
       @undoRedoManager.createAndExecuteCommand 'changeLink',
         execute: => @_changeLink link,  changes
         undo: => @_changeLink link, originalData
+      @undoRedoManager.endCommandBatch()
 
   _maybeChangeSelectedItem: (item) ->
     # TODO: This is kind of hacky:
@@ -515,6 +528,33 @@ GraphStore  = Reflux.createStore
       links: linkDescription
       model: modelDescription
     }
+
+  # Returns the minimum complexity that the current graph allows.
+  # Returns
+  #   0 (diagramOnly)    if there are no defined relationships
+  #   1 (basic)          if all scalars are `about the same`
+  #   2 (expanded)       if there are no collectors
+  #   3 (collectors)     if there are collectors
+  getMinimumComplexity: ->
+    minComplexity = 0
+
+    links = @getLinks()
+    _.each links, (link) ->
+      return unless (source = link.sourceNode) and (target = link.targetNode)
+
+      if source.isAccumulator or target.isAccumulator
+        # we know we have to be the highest complexity
+        minComplexity = 3
+      else if link.relation?.formula
+        # we know we'll be at least 1 or 2
+        relation = RelationFactory.selectionsFromRelation(link.relation)
+        if relation.scalar.id is "aboutTheSame"
+          linkComplexity = 1
+        else linkComplexity = 2
+        if linkComplexity > minComplexity
+          minComplexity = linkComplexity
+
+    return minComplexity
 
   loadData: (data) ->
     log.info "json success"

@@ -249,7 +249,9 @@ module.exports = React.createClass
     isEditing = link is @state.editingLink
     isDashed = !link.relation.isDefined && @state.simulationPanelExpanded
     relationDetails = RelationFactory.selectionsFromRelation(link.relation)
-    if relationDetails.vector? and relationDetails.vector.isCustomRelationship and link.relation.customData?
+    if relationDetails.vector?.isCustomRelationship and link.relation.customData?
+      link.color = LinkColors.customRelationship
+    else if relationDetails.accumulator?.id is "setInitialValue"
       link.color = LinkColors.customRelationship
     else if link.relation.isTransferModifier
       link.color = LinkColors.transferModifier
@@ -297,7 +299,7 @@ module.exports = React.createClass
         source: source
         target: target
         label: ""
-        color: if fromSource then LinkColors.decrease else LinkColors.increase
+        color: LinkColors.transferPipe
         thickness: 10
         showIndicators: false
         isEditing: false
@@ -452,6 +454,7 @@ module.exports = React.createClass
     dataColor = Color.colors.mediumGray.value
     if @state.isRecording
       dataColor = Color.colors.data.value
+    diagramOnly = @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
 
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container', onMouseDown: @onMouseDown, onMouseUp: @onMouseUp, onMouseMove: @onMouseMove},
@@ -476,7 +479,7 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
             showMinigraph: @state.showingMinigraphs
-            showGraphButton: @state.codapHasLoaded and not @state.diagramOnly
+            showGraphButton: @state.codapHasLoaded and not diagramOnly
           })
       )
     )

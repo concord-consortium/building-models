@@ -2,16 +2,13 @@ language:
   - node_js
   - ruby
 
-rvm:
-  - 2.2.0
-
 node_js:
-  - "0.10"
+  - "node"
 
 sudo: false
 
 install:
-  - travis_retry gem install s3_website -v 2.12.3
+  - travis_retry gem install s3_website -v 3.4.0
   - travis_retry npm install
 script:
   - "travis_retry npm test"

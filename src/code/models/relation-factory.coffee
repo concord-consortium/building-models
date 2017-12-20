@@ -137,6 +137,20 @@ module.exports = class RelationFactory
       return -scope.in
     forDualAccumulator: false
 
+  @setInitialValue:
+    type: "initial-value"
+    id: "setInitialValue"
+    text: tr "~NODE-RELATION-EDIT.SETS_INITIAL"
+    postfixIco: "initial-value"
+    formula: "initial-value"          # used only for matching
+    magnitude: 0
+    gradual: 0
+    func: (scope) ->
+      return
+    forDualAccumulator: false
+    forSoloAccumulatorOnly: true      # not allowed for dual accumulator
+    hideAdditionalText: true          # may eventually need each relation to set entire text...
+
   @transferred:
     type: "transfer"
     id: "transferred"
@@ -207,6 +221,10 @@ module.exports = class RelationFactory
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
 
+  @basicVectors:
+    increase: @increase
+    decrease: @decrease
+
   @vectors:
     increase: @increase
     decrease: @decrease
@@ -222,6 +240,7 @@ module.exports = class RelationFactory
   @accumulators:
     added: @added
     subtracted: @subtracted
+    setInitialValue: @setInitialValue
     transferred: @transferred
 
   @transferModifiers:
