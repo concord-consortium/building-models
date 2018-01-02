@@ -247,19 +247,24 @@ module.exports = LinkRelationView = React.createClass
       (span {className: textClass}, @state.stepUnits.toLowerCase())
     )
 
-  renderTransfer: (source, target) ->
+  renderTransfer: (source, target, isTargetProportional) ->
     options = _.map RelationFactory.transferModifiers, (opt, i) ->
       (option {value: opt.id, key: opt.id}, opt.text)
     sourceTitle = @props.link.sourceNode?.title || "NONE"
     targetTitle = @props.link.targetNode?.transferLink?.targetNode?.title || "NONE"
-    line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A",
-      { sourceTitle: sourceTitle }
-    line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B",
-      { targetTitle: targetTitle }
 
-    console.log @props
-    console.log @state
-    console.log @state.selectedTransferModifier
+    if (isTargetProportional)
+      sourceTitle = @props.link.targetNode?.transferLink?.sourceNode?.title || "NONE"
+      line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A",
+        { targetTitle: targetTitle }
+      line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B",
+        { sourceTitle: sourceTitle }
+
+    else
+      line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A",
+        { sourceTitle: sourceTitle }
+      line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B",
+        { targetTitle: targetTitle }
 
     if not @state.selectedTransferModifier
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -313,7 +318,8 @@ module.exports = LinkRelationView = React.createClass
         @renderAccumulator(source, target)
       else if @state.isTransferModifier
         target = @props.link.targetNode?.transferLink?.targetNode?.title
-        @renderTransfer(source, target)
+        isTargetProportional = @props.link.sourceNode == @props.link.targetNode?.transferLink?.targetNode
+        @renderTransfer(source, target, isTargetProportional)
       else
         @renderNonAccumulator(source, target)
       (div {className: 'bottom'},
