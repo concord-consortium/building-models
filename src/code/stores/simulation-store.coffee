@@ -39,7 +39,7 @@ SimulationStore   = Reflux.createStore
     @defaultUnit = TimeUnits.defaultUnit
     @unitName    = TimeUnits.toString(@defaultUnit,true)
     @defaultCollectorUnit = TimeUnits.defaultCollectorUnit
-    defaultDuration = 50
+    defaultDuration = 10
     timeUnitOptions = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
 
     @nodes = []
