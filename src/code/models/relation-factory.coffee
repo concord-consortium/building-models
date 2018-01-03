@@ -163,50 +163,6 @@ module.exports = class RelationFactory
       return scope.in
     forDualAccumulator: true
 
-  @all:
-    type: "transfer-modifier"
-    id: "all"
-    text: tr "~NODE-RELATION-EDIT.ALL"
-    postfixIco: "all"
-    formula: "in"
-    magnitude: 0
-    gradual: 0
-    func: (scope) ->
-      return scope.in
-
-  @most:
-    type: "transfer-modifier"
-    id: "most"
-    text: tr "~NODE-RELATION-EDIT.MOST"
-    postfixIco: "most"
-    formula: "in * 0.75"
-    magnitude: 0
-    gradual: 0
-    func: (scope) ->
-      return scope.in * 0.75
-
-  @half:
-    type: "transfer-modifier"
-    id: "half"
-    text: tr "~NODE-RELATION-EDIT.HALF"
-    postfixIco: "half"
-    formula: "in * 0.5"
-    magnitude: 0
-    gradual: 0
-    func: (scope) ->
-      return scope.in * 0.5
-
-  @some:
-    type: "transfer-modifier"
-    id: "some"
-    text: tr "~NODE-RELATION-EDIT.SOME"
-    postfixIco: "some"
-    formula: "in * 0.25"
-    magnitude: 0
-    gradual: 0
-    func: (scope) ->
-      return scope.in * 0.25
-
   @proportionalSourceMore:
     type: "transfer-modifier"
     id: "proportionalSourceMore"
@@ -228,17 +184,6 @@ module.exports = class RelationFactory
     gradual: 0
     func: (scope) ->
       return (scope.maxIn - scope.in) * 0.10 + 0.001
-
-  @aLittleBit:
-    type: "transfer-modifier"
-    id: "aLittleBit"
-    text: tr "~NODE-RELATION-EDIT.A_LITTLE_BIT"
-    postfixIco: "a-little-bit"
-    formula: "in * 0.03"
-    magnitude: 0
-    gradual: 0
-    func: (scope) ->
-      return scope.in * 0.03
 
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
@@ -311,11 +256,8 @@ module.exports = class RelationFactory
   @thicknessFromRelation: (relation) ->
     dt = 1
     switch relation.formula
-      when @all.formula then 1 + 4 * dt
-      when @most.formula then 1 + 3 * dt
-      when @half.formula then 1 + 2 * dt
-      when @some.formula then 1 + 1 * dt
-      when @aLittleBit.formula then 1
+      when @proportionalSourceMore.formula then 1 + 1 * dt
+      when @proportionalSourceLess.formula then 1 + 1 * dt
       else 1
 
   # @isCustomRelationship: (vector) ->
