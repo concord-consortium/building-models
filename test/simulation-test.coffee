@@ -180,16 +180,17 @@ describe "Simulation", ->
         ]}
 
         # *** Tests for graphs with bounded ranges ***
-        # Note all nodes have min:0 and max:100 by default
-
+        # Note most nodes have min:0 and max:100 by default
+        # But collectors have a default max of 1000
         # 10: basic collector (A->[B])
-        {A:30, B:"20+", AB: "1 * in",
+        {A:30, B:"900+", AB: "1 * in",
         cap: true
         results: [
-          [30, 20]
-          [30, 50]
-          [30, 80]
-          [30, 100]
+          [30, 900]
+          [30, 930]
+          [30, 960]
+          [30, 990]
+          [30, 1000]
         ]}
 
         # 11: basic subtracting collector (A- -1 ->[B])
