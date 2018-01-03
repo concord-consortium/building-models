@@ -6,6 +6,7 @@ urlParams = require '../utils/url-params'
 
 SEMIQUANT_MIN = 0
 SEMIQUANT_MAX = 100
+SEMIQUANT_ACCUMULATOR_MAX = 1000
 
 # Enable ES5 getters and setters
 Function::property = (prop, desc) ->
@@ -48,7 +49,7 @@ module.exports = class Node extends GraphPrimitive
     # using @min or node.min will depend on whether we are in quantitative or
     # semi-quantitative mode. (See getters and setters below).
     @_min = nodeSpec.min ? SEMIQUANT_MIN
-    @_max = nodeSpec.max ? SEMIQUANT_MAX
+    @_max = nodeSpec.max ? if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
     @_initialValue = nodeSpec.initialValue ? 50
 
     @color ?= Colors.choices[0].value
@@ -87,7 +88,7 @@ module.exports = class Node extends GraphPrimitive
       if not @valueDefinedSemiQuantitatively
         @_max
       else
-        SEMIQUANT_MAX
+        if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
     set: (val) ->
       if not @valueDefinedSemiQuantitatively then @_max = val
 
@@ -196,12 +197,14 @@ module.exports = class Node extends GraphPrimitive
 
   # Given a value between _min and _max, calculate the SQ proportion
   mapQuantToSemiquant: (val) ->
-    SEMIQUANT_MIN + (val - @_min) / (@_max - @_min) * (SEMIQUANT_MAX - SEMIQUANT_MIN)
+    max = if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
+    SEMIQUANT_MIN + (val - @_min) / (@_max - @_min) * (max - SEMIQUANT_MIN)
 
   # Given an SQ value (i.e. between 0 and 100), calculate quantatative value
   # (i.e. between _min and _max)
   mapSemiquantToQuant: (val) ->
-    @_min + (val - SEMIQUANT_MIN) / (SEMIQUANT_MAX - SEMIQUANT_MIN) * (@_max - @_min)
+    max = if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
+    @_min + (val - SEMIQUANT_MIN) / (max - SEMIQUANT_MIN) * (@_max - @_min)
 
   toExport: ->
     result =
