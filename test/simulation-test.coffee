@@ -346,13 +346,14 @@ describe "Simulation", ->
           expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 55, 0.000001
 
         # sanity check
+        # transfer 10% of source (2) per step. 20 - 2 = 18 ,  50 + 2 = 52
         it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
           @nodeA.initialValue = 20
-          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
+          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.proportionalSourceMore)
           @simulation.duration = 2
           @simulation.run()
-          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 10, 0.000001
-          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 60, 0.000001
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 18, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 52, 0.000001
 
 
 describe "The SimulationStore, with a network in the GraphStore", ->
