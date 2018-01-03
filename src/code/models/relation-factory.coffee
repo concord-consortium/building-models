@@ -227,7 +227,7 @@ module.exports = class RelationFactory
     magnitude: 0
     gradual: 0
     func: (scope) ->
-      return scope.in * 0.10
+      return (scope.maxIn - scope.in) * 0.10 + 0.001
 
   @aLittleBit:
     type: "transfer-modifier"
