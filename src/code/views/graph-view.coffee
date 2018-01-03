@@ -254,7 +254,7 @@ module.exports = React.createClass
     else if relationDetails.accumulator?.id is "setInitialValue"
       link.color = LinkColors.customRelationship
     else if link.relation.isTransferModifier
-      link.color = LinkColors.transferModifier
+      link.color = LinkColors.fromLink link
     else
       link.color = LinkColors.fromLink link
     magnitude = relationDetails.magnitude

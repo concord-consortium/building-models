@@ -23,4 +23,6 @@ linkColors = module.exports =
       when RelationFactory.half.formula then linkColors.increase
       when RelationFactory.some.formula then linkColors.increase
       when RelationFactory.aLittleBit.formula then linkColors.increase
+      when RelationFactory.proportionalSourceLess.formula then linkColors.decrease
+      when RelationFactory.proportionalSourceMore.formula then linkColors.increase
       else linkColors.default
