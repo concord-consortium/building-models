@@ -179,11 +179,11 @@ module.exports = class RelationFactory
     id: "proportionalSourceLess"
     text: tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS"
     postfixIco: "less"
-    formula: "(maxIn - in) * 0.10 + 0.001"
+    formula: "(maxIn - in) * 0.10 + 0.02"
     magnitude: 0
     gradual: 0
     func: (scope) ->
-      return (scope.maxIn - scope.in) * 0.10 + 0.001
+      return (scope.maxIn - scope.in) * 0.10 + 0.02
 
   @iconName: (incdec,amount)->
     "icon-#{incdec.prefixIco}-#{amount.postfixIco}"
