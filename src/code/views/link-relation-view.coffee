@@ -248,6 +248,7 @@ module.exports = LinkRelationView = React.createClass
     )
 
   renderTransfer: (source, target, isTargetProportional) ->
+    spanWrap = (string,className) -> "<span class='#{className}'>#{string}</span>"
     options = _.map RelationFactory.transferModifiers, (opt, i) ->
       (option {value: opt.id, key: opt.id}, opt.text)
     sourceTitle = @props.link.sourceNode?.title || "NONE"
@@ -256,15 +257,15 @@ module.exports = LinkRelationView = React.createClass
     if (isTargetProportional)
       sourceTitle = @props.link.targetNode?.transferLink?.sourceNode?.title || "NONE"
       line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A",
-        { targetTitle: targetTitle }
+        { targetTitle: spanWrap targetTitle, 'target' }
       line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B",
-        { sourceTitle: sourceTitle }
+        { sourceTitle: spanWrap sourceTitle, 'source' }
 
     else
       line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A",
-        { sourceTitle: sourceTitle }
+        { sourceTitle: spanWrap sourceTitle, 'source' }
       line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B",
-        { targetTitle: targetTitle }
+        { targetTitle: spanWrap targetTitle, 'target' }
 
     if not @state.selectedTransferModifier
       options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
@@ -278,11 +279,11 @@ module.exports = LinkRelationView = React.createClass
       # note that localization will be a problem here due to the hard-coded order
       # of the elements and because we can't use the string-replacement capabilities
       # of the translate module since there is special formatting of node titles, etc.
-      (span {className: "source"}, line_a)
+      (span { dangerouslySetInnerHTML: {__html: line_a} })
       (select {value: currentOption, ref: "transfer", onChange: @updateRelation},
         options
       )
-      (span {}, line_b)
+      (span { dangerouslySetInnerHTML: {__html: line_b} })
       (span {}, "#{@state.stepUnits.toLowerCase()}.")
     )
 
