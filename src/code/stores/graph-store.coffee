@@ -519,7 +519,7 @@ GraphStore  = Reflux.createStore
         modelDescription += link.relation.formula + ";"
         if link.relation.type is 'transfer'
           transfer = link.transferNode
-          modelDescription += "#{transfer.key}:#{transfer.initialValue};" if transfer
+          modelDescription += "#{transfer.key}:#{transfer.initialValue}:#{transfer.combineMethod};" if transfer
         modelDescription += "#{target.key}#{if target.isAccumulator then ':'+(target.value ? target.initialValue) else ''}|"
 
     linkDescription += nodes.length     # we need to redraw targets when new node is added
