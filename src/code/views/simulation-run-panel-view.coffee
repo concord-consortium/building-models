@@ -1,4 +1,6 @@
 SimulationStore = require '../stores/simulation-store'
+AppSettingsStore = require '../stores/app-settings-store'
+
 tr              = require '../utils/translate'
 RecordButton    = React.createFactory require './record-button-view'
 Dropdown        = React.createFactory require './dropdown-view'
@@ -10,7 +12,7 @@ module.exports = React.createClass
 
   displayName: 'SimulationRunPanel'
 
-  mixins: [ SimulationStore.mixin ]
+  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ]
 
 
   setDuration: (e) ->
@@ -21,6 +23,8 @@ module.exports = React.createClass
       SimulationStore.actions.collapseSimulationPanel()
     else
       SimulationStore.actions.expandSimulationPanel()
+      if ! @state.showingMinigraphs
+        AppSettingsStore.actions.showMinigraphs true
 
   renderToggleButton: ->
     iconClass = if @state.simulationPanelExpanded then "inspectorArrow-collapse" else "inspectorArrow-expand"
