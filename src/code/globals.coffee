@@ -1,6 +1,11 @@
 # global vars
 
-global.$ = require './vendor/touchpunch.js'
+# Kinda hard to get all jquery plugins to load …
+global.jQuery = global.$ = require('jquery')
+require('jquery-ui-dist/jquery-ui.js')
+Touchpunch = require './vendor/touchpunch.js'
+Touchpunch(global.jQuery)
+
 global.React = require 'react'
 global.ReactDOM = require 'react-dom'
 global._ = require 'lodash'

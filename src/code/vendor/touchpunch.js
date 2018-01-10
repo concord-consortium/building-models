@@ -176,7 +176,4 @@ var TouchPunch = function (jQuery) {
   };
 };
 
-jQuery = require('jquery');
-jQueryUI = require('jquery-ui');
-TouchPunch(jQuery);
-module.exports = jQuery;
+module.exports = TouchPunch;

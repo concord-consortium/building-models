@@ -56,6 +56,7 @@ asyncListenTest = (done, action, func) ->
     catch ex
       done(ex)
     stopListening()
+  return
 
 describe "Simulation", ->
   beforeEach ->
@@ -391,6 +392,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       SimulationActions.createExperiment()
       SimulationActions.recordPeriod()
+      return
 
     it "should call simulationFramesCreated with all the step values", (done) ->
 
@@ -408,6 +410,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       SimulationActions.createExperiment()
       SimulationActions.recordPeriod()
+      return
 
   describe "for a slow simulation for 3 iterations", ->
 
@@ -421,6 +424,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       asyncListenTest done, SimulationActions.recordingFramesCreated, testFunction
       SimulationActions.recordPeriod()
+      return
 
 
 
