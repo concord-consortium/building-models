@@ -180,16 +180,17 @@ describe "Simulation", ->
         ]}
 
         # *** Tests for graphs with bounded ranges ***
-        # Note all nodes have min:0 and max:100 by default
-
+        # Note most nodes have min:0 and max:100 by default
+        # But collectors have a default max of 1000
         # 10: basic collector (A->[B])
-        {A:30, B:"20+", AB: "1 * in",
+        {A:30, B:"900+", AB: "1 * in",
         cap: true
         results: [
-          [30, 20]
-          [30, 50]
-          [30, 80]
-          [30, 100]
+          [30, 900]
+          [30, 930]
+          [30, 960]
+          [30, 990]
+          [30, 1000]
         ]}
 
         # 11: basic subtracting collector (A- -1 ->[B])
@@ -345,13 +346,14 @@ describe "Simulation", ->
           expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 55, 0.000001
 
         # sanity check
+        # transfer 10% of source (2) per step. 20 - 2 = 18 ,  50 + 2 = 52
         it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
           @nodeA.initialValue = 20
-          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
+          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.proportionalSourceMore)
           @simulation.duration = 2
           @simulation.run()
-          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 10, 0.000001
-          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 60, 0.000001
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 18, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 52, 0.000001
 
 
 describe "The SimulationStore, with a network in the GraphStore", ->
