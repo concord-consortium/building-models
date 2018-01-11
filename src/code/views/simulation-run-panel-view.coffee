@@ -23,8 +23,10 @@ module.exports = React.createClass
       SimulationStore.actions.collapseSimulationPanel()
     else
       SimulationStore.actions.expandSimulationPanel()
-      if ! @state.showingMinigraphs
-        AppSettingsStore.actions.showMinigraphs true
+      # -- TBD: There was discussion about automatically showing
+      # -- MiniGraphs when this panel is opened  …  NP 2018-01
+      # if ! @state.showingMinigraphs
+      #   AppSettingsStore.actions.showMinigraphs true
 
   renderToggleButton: ->
     iconClass = if @state.simulationPanelExpanded then "inspectorArrow-collapse" else "inspectorArrow-expand"
