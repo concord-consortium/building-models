@@ -334,6 +334,17 @@ GraphStore  = Reflux.createStore
             for link in changedLinks
               originalRelations[link.key] = link.relation
 
+            # If we are chaning to accumulator, set the max to 1000
+            if data.isAccumulator == true
+              data.max = NodeModel.SEMIQUANT_ACCUMULATOR_MAX
+
+            # If we are chaning to non-accumulator, set the max to 100
+            else
+              data.max = NodeModel.SEMIQUANT_MAX
+            # We changed node type, set defaults:
+            data.min = NodeModel.SEMIQUANT_MIN
+            data.initialValue = Math.round(data.max/2)
+
           @undoRedoManager.startCommandBatch()
           @undoRedoManager.createAndExecuteCommand 'changeNode',
             execute: =>

@@ -21,13 +21,13 @@ module.exports = React.createClass
     'min-value': @props.node.min
     'max-value': @props.node.max
 
-  componentWillReceiveProps: ->
+  componentWillReceiveProps: (nextProps)->
     # min and max are copied to state to disconnect the state and property, so
     # that we can set the text field and only update the model when the input field
     # is blured. This way we don't perform min/max validation while user is typing
     @setState
-      'min-value': @props.node.min
-      'max-value': @props.node.max
+      'min-value': nextProps.node.min
+      'max-value': nextProps.node.max
 
   trim: (inputValue) ->
     return Math.max(@props.node.min, Math.min(@props.node.max, inputValue))

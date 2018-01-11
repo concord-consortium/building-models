@@ -20,6 +20,9 @@ module.exports = class Node extends GraphPrimitive
     'isAccumulator', 'allowNegativeValues', 'combineMethod',
     'valueDefinedSemiQuantitatively', 'frames'
   ]
+  @SEMIQUANT_MIN: SEMIQUANT_MIN
+  @SEMIQUANT_MAX: SEMIQUANT_MAX
+  @SEMIQUANT_ACCUMULATOR_MAX: SEMIQUANT_ACCUMULATOR_MAX
 
   constructor: (nodeSpec={}, key) ->
     super()
@@ -81,7 +84,7 @@ module.exports = class Node extends GraphPrimitive
       else
         SEMIQUANT_MIN
     set: (val) ->
-      if not @valueDefinedSemiQuantitatively then @_min = val
+      @_min = val
 
   @property 'max',
     get: ->
@@ -90,7 +93,7 @@ module.exports = class Node extends GraphPrimitive
       else
         if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
     set: (val) ->
-      if not @valueDefinedSemiQuantitatively then @_max = val
+      @_max =  val
 
   type: 'Node'
   isTransfer: false
