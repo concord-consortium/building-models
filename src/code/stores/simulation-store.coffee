@@ -5,6 +5,7 @@ Simulation         = require "../models/simulation"
 TimeUnits          = require '../utils/time-units'
 tr                 = require '../utils/translate'
 
+DEFAULT_SIMULATION_STEPS = 20
 SimulationActions = Reflux.createActions(
   [
     "expandSimulationPanel"
@@ -39,7 +40,6 @@ SimulationStore   = Reflux.createStore
     @defaultUnit = TimeUnits.defaultUnit
     @unitName    = TimeUnits.toString(@defaultUnit,true)
     @defaultCollectorUnit = TimeUnits.defaultCollectorUnit
-    defaultDuration = 50
     timeUnitOptions = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
 
     @nodes = []
@@ -47,7 +47,7 @@ SimulationStore   = Reflux.createStore
 
     @settings =
       simulationPanelExpanded: false
-      duration: defaultDuration
+      duration: DEFAULT_SIMULATION_STEPS
       experimentNumber: 1
       experimentFrame: 0
       stepUnits: @defaultUnit
@@ -77,6 +77,8 @@ SimulationStore   = Reflux.createStore
     @settings.simulationPanelExpanded = true
     @settings.modelIsRunning = true
     @_updateModelIsRunnable()
+    if @settings.graphHasCollector
+      @_runSimulation()
     @notifyChange()
 
   onCollapseSimulationPanel: ->

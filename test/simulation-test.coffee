@@ -56,6 +56,7 @@ asyncListenTest = (done, action, func) ->
     catch ex
       done(ex)
     stopListening()
+  return
 
 describe "Simulation", ->
   beforeEach ->
@@ -180,16 +181,17 @@ describe "Simulation", ->
         ]}
 
         # *** Tests for graphs with bounded ranges ***
-        # Note all nodes have min:0 and max:100 by default
-
+        # Note most nodes have min:0 and max:100 by default
+        # But collectors have a default max of 1000
         # 10: basic collector (A->[B])
-        {A:30, B:"20+", AB: "1 * in",
+        {A:30, B:"900+", AB: "1 * in",
         cap: true
         results: [
-          [30, 20]
-          [30, 50]
-          [30, 80]
-          [30, 100]
+          [30, 900]
+          [30, 930]
+          [30, 960]
+          [30, 990]
+          [30, 1000]
         ]}
 
         # 11: basic subtracting collector (A- -1 ->[B])
@@ -310,7 +312,7 @@ describe "Simulation", ->
 
     describe "for transfer nodes", ->
       beforeEach ->
-        @nodeA    = new Node({title: "A", isAccumulator: true, initialValue: 20})
+        @nodeA    = new Node({title: "A", isAccumulator: true, initialValue: 100})
         @nodeB    = new Node({title: "B", isAccumulator: true, initialValue: 50})
         @transferLink = LinkNodes(@nodeA, @nodeB, RelationFactory.transferred)
         @transferNode = @transferLink.transferNode
@@ -323,17 +325,18 @@ describe "Simulation", ->
       describe "should transfer appropriate amount from the source node to the target node", ->
 
         # sanity check
-        it "should transfer 1/100th the value of the source node with no transfer-modifier", ->
+        it "should transfer (transwerNode.initialValue 50) to B with no transfer-modifier", ->
+          @transferNode.initialValue = 50
           @simulation.run()
-          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 19.5, 0.000001
-          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.5, 0.000001
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 50, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 100, 0.000001
 
         # sanity check
-        it "should transfer 1/100th the value of the source node with no transfer-modifier", ->
+        it "should transfer (transwerNode.initialValue 80) to B with no transfer-modifier", ->
           @transferNode.initialValue = 80
           @simulation.run()
-          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 19.2, 0.000001
-          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 50.8, 0.000001
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 20, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 130, 0.000001
 
         # sanity check
         it "should limit the transfer to the quantity in the source node", ->
@@ -345,13 +348,14 @@ describe "Simulation", ->
           expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 55, 0.000001
 
         # sanity check
+        # transfer 10% of source (2) per step. 20 - 2 = 18 ,  50 + 2 = 52
         it "should transfer the appropriate percentage of the source node with a transfer-modifer", ->
           @nodeA.initialValue = 20
-          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.half)
+          @transferModifier = LinkNodes(@nodeA, @transferNode, RelationFactory.proportionalSourceMore)
           @simulation.duration = 2
           @simulation.run()
-          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 10, 0.000001
-          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 60, 0.000001
+          expect(@nodeA.currentValue, "Node: #{@nodeA.title}").to.be.closeTo 18, 0.000001
+          expect(@nodeB.currentValue, "Node: #{@nodeB.title}").to.be.closeTo 52, 0.000001
 
 
 describe "The SimulationStore, with a network in the GraphStore", ->
@@ -389,6 +393,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       SimulationActions.createExperiment()
       SimulationActions.recordPeriod()
+      return
 
     it "should call simulationFramesCreated with all the step values", (done) ->
 
@@ -406,6 +411,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       SimulationActions.createExperiment()
       SimulationActions.recordPeriod()
+      return
 
   describe "for a slow simulation for 3 iterations", ->
 
@@ -419,6 +425,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
 
       asyncListenTest done, SimulationActions.recordingFramesCreated, testFunction
       SimulationActions.recordPeriod()
+      return
 
 
 

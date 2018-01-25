@@ -75,6 +75,15 @@
     "~NODE-RELATION-EDIT.OF": "of",
     "~NODE-RELATION-EDIT.WILL_FLOW_TO": "will flow to",
 
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_MORE": "more",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS": "fewer/less",
+
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A": "More %{sourceTitle} means",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B": " will be transferred to %{targetTitle} each ",
+
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "More %{targetTitle} means",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} will be transferred each ",
+
     "~TRANSFER_NODE.TITLE": "flow from %{sourceTitle} to %{targetTitle}",
 
     "~LINK-EDIT.DELETE": "✖ Delete Link",
