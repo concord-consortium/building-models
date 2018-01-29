@@ -45,6 +45,7 @@ module.exports = class Node extends GraphPrimitive
       @addedThisSession=false
     } = nodeSpec
 
+    @combineMethod = nodeSpec.combineMethod if nodeSpec.combineMethod
     accumulatorScaleUrlParam = (urlParams.collectorScale and Number(urlParams.collectorScale)) or 1
     @accumulatorInputScale = if accumulatorScaleUrlParam > 0 then accumulatorScaleUrlParam else 1
 
@@ -238,7 +239,7 @@ module.exports = class Node extends GraphPrimitive
         valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
         frames: _.clone @frames
     # only serialize if it's been set explicitly
-    result.combineMethod = @combineMethod if @combineMethod?
+    result.data.combineMethod = @combineMethod if @combineMethod?
     result
 
   canEditInitialValue: ->

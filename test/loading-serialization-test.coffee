@@ -66,6 +66,7 @@ describe "Serialization and Loading", ->
 
       @nodeA = new Node({title: "a", x:10, y:15, paletteItem:"uuid-dingo", frames:[] }, 'a')
       @nodeB = new Node({title: "b", x:20, y:25, paletteItem:"uuid-bee", frames: [50]}, 'b')
+      @nodeC = new Node({title: "c", x:30, y:25, paletteItem:"uuid-see", frames: [], combineMethod: "product"}, 'c')
       @linkA = new Link({
         sourceNode: @nodeA
         targetNode: @nodeB
@@ -82,6 +83,7 @@ describe "Serialization and Loading", ->
 
       @graphStore.addNode @nodeA
       @graphStore.addNode @nodeB
+      @graphStore.addNode @nodeC
       @graphStore.addLink @linkA
       @graphStore.addLink @linkB
       @graphStore.changeLink(@linkB, {relation: relationB})
@@ -100,13 +102,14 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.20.0"
-        model.nodes.length.should.equal 2
+        model.version.should.equal "1.21.0"
+        model.nodes.length.should.equal 3
         model.links.length.should.equal 2
 
       it "should correctly serialize a node", ->
         nodeA = JSON.parse(jsonString).nodes[0]
         nodeB = JSON.parse(jsonString).nodes[1]
+        nodeC = JSON.parse(jsonString).nodes[2]
         nodeA.key.should.equal "a"
         nodeA.data.title.should.equal "a"
         nodeA.data.x.should.equal 10
@@ -123,6 +126,7 @@ describe "Serialization and Loading", ->
         expect(nodeB.data.frames, "nodeB.data.frames").to.exist
         expect(nodeB.data.frames.length, "nodeB.data.frames.length").to.equal 1
         expect(nodeB.data.frames[0], "nodeB.data.frames[0]").to.equal 50
+        expect(nodeC.data.combineMethod).to.equal "product"
 
       it "should correctly serialize links", ->
         linkA = JSON.parse(jsonString).links[0]
