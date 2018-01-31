@@ -3,6 +3,8 @@ urlParams = require './url-params'
 languageFiles = {
   'en-US': require './lang/en-US'
   'he': require './lang/he'
+  'it': require './lang/it'
+  'pl': require './lang/pl'
   'tr': require './lang/tr'
   'zh-TW': require './lang/zh-TW'
 }

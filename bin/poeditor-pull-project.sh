@@ -25,10 +25,9 @@ do
     echo "Requesting strings for '$LANGUAGE'..."
     PULLARGS="-p $PROJECT_ID -l $LANGUAGE -o $OUTPUT_DIR -a $API_TOKEN"
     # echo "PULLARGS=$PULLARGS"
-    ./bin/strings-pull.sh $PULLARGS
-    echo ""
+    ./bin/poeditor-pull.sh $PULLARGS
 done
 
-# update English strings as well (e.g. stripping comments)
+# copy English strings, stripping comments
 ./node_modules/.bin/strip-json-comments src/code/utils/lang/en-US-master.json \
                                       > src/code/utils/lang/en-US.json
