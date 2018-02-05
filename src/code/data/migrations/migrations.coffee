@@ -22,6 +22,7 @@ migrations = [
   require "./19_add_relation_type"
   require "./20_add_complexity"
   require "./21_remove_experiment_number"
+  require "./22_add_combine_method"
 ]
 
 module.exports =
