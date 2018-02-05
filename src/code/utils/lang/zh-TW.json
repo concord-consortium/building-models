@@ -173,5 +173,12 @@
     "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "僅使用繪製模型工具",
     "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships",
     "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs",
-    "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors"
+    "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors",
+    "~NODE-RELATION-EDIT.SETS_INITIAL": "sets the initial value of",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_MORE": "more",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS": "fewer/less",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A": "More %{sourceTitle} means",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B": " will be transferred to %{targetTitle} each ",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "More %{targetTitle} means",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} will be transferred each "
 }
