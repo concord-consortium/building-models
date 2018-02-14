@@ -42,7 +42,10 @@ module.exports = class CodapConnect
       {
         action: 'update'
         resource: 'interactiveFrame'
-        values: { title: tr "~CODAP.INTERACTIVE_FRAME.TITLE"}
+        values: {
+          title: tr "~CODAP.INTERACTIVE_FRAME.TITLE"
+          preventBringToFront: true
+        }
       },
       {
         action: 'get'
