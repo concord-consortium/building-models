@@ -40,7 +40,7 @@
     "~NODE-RELATION-EDIT.UNSELECTED": "Seleccionar una opción...",
     "~NODE-RELATION-EDIT.AN_INCREASE_IN": "Un aumento en",
     "~NODE-RELATION-EDIT.CAUSES": "causa que",
-    "~NODE-RELATION-EDIT.TO": "(u200B)",
+    "~NODE-RELATION-EDIT.TO": "\u200B",
     "~NODE-RELATION-EDIT.INCREASES": "aumente",
     "~NODE-RELATION-EDIT.DECREASES": "disminuya",
     "~NODE-RELATION-EDIT.VARIES": "varíe",
@@ -178,7 +178,7 @@
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_MORE": "más",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS": "menos",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A": "Más %{sourceTitle} significa",
-    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B": "␣se transferirá a %{targetTitle} cada␣",
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B": " se transferirá a %{targetTitle} cada ",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "Más %{targetTitle} significa",
-    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": "␣%{sourceTitle} se transferirá cada␣"
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} se transferirá cada "
 }
