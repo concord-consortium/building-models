@@ -5,6 +5,7 @@ languageFiles = {
   'he': require './lang/he'
   'tr': require './lang/tr'
   'zh-TW': require './lang/zh-TW'
+  'es': require './lang/es'
 }
 
 translations =  {}
