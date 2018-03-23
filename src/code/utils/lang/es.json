@@ -129,7 +129,7 @@
     "~DOCUMENT.ACTIONS.DATA.RECORD-1": "Registro 1",
     "~DOCUMENT.ACTIONS.DATA.POINT": "Punto del dato",
     "~DOCUMENT.ACTIONS.DATA.RECORD": "Grabar",
-    "~DOCUMENT.ACTIONS.DATA.STREAM": "Flujo de datos",
+    "~DOCUMENT.ACTIONS.DATA.STREAM": "datos",
     "~DOCUMENT.ACTIONS.DATA.STOP": "Detener",
     "~DOCUMENT.ACTIONS.DATA.RECORDING": "Registrando",
     "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Guardar a gráficos",
