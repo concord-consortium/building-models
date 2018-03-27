@@ -203,6 +203,7 @@ module.exports = SvgGraphView = React.createClass
       x = Math.round scaledCoords.x
       y = scaledCoords.y
 
+      # sanity check, but it shouldn't be possible to be out of bounds with our scaledCoords
       return if x < 0 || x > 100 || y < 0 || y > 100
 
       # our data is ordered in the format [[0, y], [1, y], [2, y], ...]
@@ -244,6 +245,7 @@ module.exports = SvgGraphView = React.createClass
   pointToScaledCoords: (evt) ->
     rect = this.refs.graphBody?.getBoundingClientRect()
     coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
+    coords.x = Math.max(0, Math.min(coords.x, rect.width))
     coords.y = Math.max(0, Math.min(coords.y, rect.height))
     scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
     scaledCoords
