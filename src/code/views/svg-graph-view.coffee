@@ -200,14 +200,38 @@ module.exports = SvgGraphView = React.createClass
       evt.preventDefault()
       scaledCoords = @pointToScaledCoords(evt)
 
-      if scaledCoords.x >= 0 && scaledCoords.x <= 100 && scaledCoords.y >= 0 && scaledCoords.y <= 100
-        newData = _.map @state.currentData, (d) ->
-          x = d[0]
-          y = d[1]
-          if x > scaledCoords.x - 4 && x < scaledCoords.x + 4
-            y = scaledCoords.y
-          [x, y]
-        @updatePointData @props.formula, newData
+      x = Math.round scaledCoords.x
+      y = scaledCoords.y
+
+      # sanity check, but it shouldn't be possible to be out of bounds with our scaledCoords
+      return if x < 0 || x > 100 || y < 0 || y > 100
+
+      # our data is ordered in the format [[0, y], [1, y], [2, y], ...]
+      # so we can set a new x, y simply using data[x] = [x, y]
+
+      newData = _.clone @state.currentData
+
+      currentTime = Date.now()
+      if @_lastPoint && @_lastPoint.x != x && currentTime - @_lastPoint.time < 100
+        # if our last point was < 100ms ago, this is probably the mouse moving across the canvas,
+        # so interpolate all the points between that point and this point
+        minX = Math.min x, @_lastPoint.x
+        maxX = Math.max x, @_lastPoint.x
+        minY = if x < @_lastPoint.x then y else @_lastPoint.y
+        maxY = if x < @_lastPoint.x then @_lastPoint.y else y
+        steps = maxX - minX
+        yStep = (maxY - minY) / steps
+        for i in [0..steps]
+          interpolatedX = minX + i
+          interpolatedY = minY + (yStep * i)
+          newData[interpolatedX] = [interpolatedX, interpolatedY]
+      else
+        # otherwise, just set this point
+        newData[x] = [x, y]
+
+      @updatePointData @props.formula, newData
+
+      @_lastPoint = {x: x, y: y, time: currentTime}
 
   endDrawCurve: (evt) ->
     if @drawing
@@ -216,10 +240,12 @@ module.exports = SvgGraphView = React.createClass
       @drawing = false
       #update relation with custom data
       @updateRelationCustomData(@state.currentData)
+    delete @_lastPoint
 
   pointToScaledCoords: (evt) ->
     rect = this.refs.graphBody?.getBoundingClientRect()
     coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
+    coords.x = Math.max(0, Math.min(coords.x, rect.width))
     coords.y = Math.max(0, Math.min(coords.y, rect.height))
     scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
     scaledCoords
