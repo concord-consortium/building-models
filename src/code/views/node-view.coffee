@@ -99,8 +99,6 @@ module.exports = NodeView = React.createClass
 
   componentDidUpdate: ->
     handle = '.img-background'
-    if @props.selected
-      handle = null
     $elem = $(@refs.node)
     $elem.draggable( "option", "handle", handle)
 
