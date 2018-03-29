@@ -325,16 +325,21 @@ module.exports = NodeView = React.createClass
             if @props.data.isTransfer
               (div {className: "node-title"}) # empty title to set node width the same
             else
-              (NodeTitle {
-                isEditing: @props.editTitle
-                title: @props.data.title
-                onChange: @changeTitle
-                onStopEditing: @stopEditing
-                onStartEditing: @startEditing
-                node: @props.data
-                nodeKey: @props.nodeKey
-                graphStore: @props.graphStore
-              })
+              (div {
+                draggable: @props.showGraphButton
+                onDragStart: ((evt) => @handleCODAPAttributeDrag evt, @props.data.codapID)
+              },
+                (NodeTitle {
+                  isEditing: @props.editTitle
+                  title: @props.data.title
+                  onChange: @changeTitle
+                  onStopEditing: @stopEditing
+                  onStartEditing: @startEditing
+                  node: @props.data
+                  nodeKey: @props.nodeKey
+                  graphStore: @props.graphStore
+                })
+              )
           )
         )
         (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},
