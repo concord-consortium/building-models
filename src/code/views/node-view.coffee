@@ -152,7 +152,6 @@ module.exports = NodeView = React.createClass
       color: "dark-blue"
 
   doMove: (evt, extra) ->
-    # console.log "Moving " + @props.nodeKey
     @props.onMove
       nodeKey: @props.nodeKey
       reactComponent: this
@@ -240,6 +239,14 @@ module.exports = NodeView = React.createClass
     codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
     codapConnect.createGraph(attributeName)
 
+  handleCODAPAttributeDrag: (evt, attributeName) ->
+    evt.dataTransfer.effectAllowed = 'moveCopy'
+    evt.dataTransfer.setData('text/html', attributeName)
+    evt.dataTransfer.setData('text', attributeName)
+    evt.dataTransfer.setData('application/x-codap-attr-' + attributeName, attributeName)
+    # CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
+    evt.dataTransfer.contains = () -> false
+
   nodeClasses: ->
     classes = ['elm']
     if @props.selected
@@ -302,6 +309,8 @@ module.exports = NodeView = React.createClass
             if @props.showGraphButton
               (div {
                 className: "graph-source action-circle icon-codap-graph",
+                draggable: true
+                onDragStart: ((evt) => @handleCODAPAttributeDrag evt, @props.data.codapID)
                 onClick: (=> @handleGraphClick @props.data.title)
               })
           )
