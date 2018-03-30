@@ -454,7 +454,7 @@ module.exports = React.createClass
     dataColor = Color.colors.mediumGray.value
     if @state.isRecording
       dataColor = Color.colors.data.value
-    diagramOnly = @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
+    diagramOnly = @state.simulationType is AppSettingsStore.store.SimulationType.diagramOnly
 
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
       (div {className: 'container', ref: 'container', onMouseDown: @onMouseDown, onMouseUp: @onMouseUp, onMouseMove: @onMouseMove},

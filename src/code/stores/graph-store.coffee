@@ -529,32 +529,43 @@ GraphStore  = Reflux.createStore
       model: modelDescription
     }
 
-  # Returns the minimum complexity that the current graph allows.
+  # Returns the minimum simulation type that the current graph allows.
   # Returns
   #   0 (diagramOnly)    if there are no defined relationships
-  #   1 (basic)          if all scalars are `about the same`
-  #   2 (expanded)       if there are no collectors
-  #   3 (collectors)     if there are collectors
-  getMinimumComplexity: ->
-    minComplexity = 0
+  #   1 (static)         if there are no collectors
+  #   2 (time)           if there are collectors
+  getMinimumSimulationType: ->
+    minSimulationType = 0
 
     links = @getLinks()
-    _.each links, (link) ->
-      return unless (source = link.sourceNode) and (target = link.targetNode)
+    for link in links
+      continue unless (source = link.sourceNode) and (target = link.targetNode)
 
       if source.isAccumulator or target.isAccumulator
-        # we know we have to be the highest complexity
-        minComplexity = 3
+        # we know we have to be time-based
+        return 2
       else if link.relation?.formula
+        # we have a defined relationship, so we know we'll be at least 1
+        minSimulationType = 1
+
+    return minSimulationType
+
+  # Returns the minimum complexity that the current graph allows.
+  # Returns
+  #   0 (basic)          if there are no defined relationships, or all scalars are `about the same`
+  #   1 (expanded)       otherwise
+  getMinimumComplexity: ->
+    links = @getLinks()
+    for link in links
+      continue unless (source = link.sourceNode) and (target = link.targetNode)
+
+      if link.relation?.formula
         # we know we'll be at least 1 or 2
         relation = RelationFactory.selectionsFromRelation(link.relation)
-        if relation.scalar.id is "aboutTheSame"
-          linkComplexity = 1
-        else linkComplexity = 2
-        if linkComplexity > minComplexity
-          minComplexity = linkComplexity
+        if relation.scalar.id isnt "aboutTheSame"
+          return 1
 
-    return minComplexity
+    return 0
 
   loadData: (data) ->
     log.info "json success"

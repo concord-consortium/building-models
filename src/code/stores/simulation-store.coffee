@@ -69,8 +69,8 @@ SimulationStore   = Reflux.createStore
     @settings.experimentNumber = nextExperimentNumber
     @notifyChange()
 
-  onSetComplexity: (complexity) ->
-    if complexity is AppSettingsStore.store.Complexity.diagramOnly
+  onSetSimulationType: (simulationType) ->
+    if simulationType is AppSettingsStore.store.SimulationType.diagramOnly
       SimulationActions.collapseSimulationPanel()
 
   onExpandSimulationPanel: ->
