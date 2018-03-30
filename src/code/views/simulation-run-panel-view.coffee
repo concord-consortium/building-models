@@ -48,7 +48,7 @@ module.exports = React.createClass
     (div {className: wrapperClasses},
       (div {className: "vertical" },
         (ExperimentPanel {disabled: experimentDisabled})
-        if @state.graphHasCollector
+        if @state.isTimeBased
           @renderRecordForCollectors()
         else
           (div {className: "horizontal"},

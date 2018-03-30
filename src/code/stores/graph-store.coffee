@@ -630,16 +630,22 @@ mixin =
     GraphStore.getGraphState()
 
   componentDidMount: ->
-    @unsubscribe = GraphActions.graphChanged.listen @onGraphChanged
+    @subscriptions = []
+    @subscriptions.push GraphActions.graphChanged.listen @onGraphChanged
+    @subscriptions.push GraphActions.resetSimulation.listen @onResetSimulation
 
   componentWillUnmount: ->
-    @unsubscribe()
+    for unsubscribe in @subscriptions
+      unsubscribe()
 
   onGraphChanged: (state) ->
     @setState state
 
     # TODO: not this:
     @diagramToolkit?.repaint()
+
+  onResetSimulation: ->
+    GraphStore.resetSimulation()
 
 
 module.exports =
