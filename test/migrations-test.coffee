@@ -7,14 +7,14 @@ should = require('chai').should()
 expect = chai.expect
 
 
-describe "Migrations",  ->
+describe.only "Migrations",  ->
   describe "update", ->
     beforeEach ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.21.0", ->
-        @result.version.should.equal "1.21.0"
+      it "should be 1.22.0", ->
+        @result.version.should.equal "1.22.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -137,6 +137,13 @@ describe "Migrations",  ->
         for link in @result.links
           link.relation.type.should.exist
 
-    describe "v-1.19.0 changes", ->
-      it "should have complexity setting", ->
-        @result.settings.complexity.should.equal 3
+    ## removed in 1.22.0
+    # describe "v-1.19.0 changes", ->
+    #   it "should have complexity setting", ->
+    #     @result.settings.complexity.should.equal 3
+
+    describe "v-1.22.0 changes", ->
+      it "should have complexity and simulation settings", ->
+        @result.settings.simulationType.should.equal 1
+        @result.settings.complexity.should.equal 1
+
