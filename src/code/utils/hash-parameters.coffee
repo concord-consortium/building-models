@@ -50,7 +50,7 @@ class HashParameters
   readHash: ->
     if window and window.location
       # remove the leading slash
-      hash = window.location.hash.substring(1)
+      hash = window.top.location.hash.substring(1)
     else
       ""
 
