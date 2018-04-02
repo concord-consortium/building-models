@@ -452,8 +452,10 @@ module.exports = React.createClass
 
   render: ->
     dataColor = Color.colors.mediumGray.value
+    innerColor = Color.colors.mediumGrayInner.value
     if @state.isRecording
       dataColor = Color.colors.data.value
+      innerColor = Color.colors.dataInner.value
     diagramOnly = @state.simulationType is AppSettingsStore.store.SimulationType.diagramOnly
 
     (div {className: "graph-view #{if @state.canDrop then 'can-drop' else ''}", ref: 'linkView', onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
@@ -467,6 +469,7 @@ module.exports = React.createClass
             key: node.key
             data: node
             dataColor: dataColor
+            innerColor: innerColor
             selected: node in @state.selectedNodes
             simulating: @state.simulationPanelExpanded
             running: @state.modelIsRunning
@@ -479,6 +482,7 @@ module.exports = React.createClass
             graphStore: @props.graphStore
             selectionManager: @props.selectionManager
             showMinigraph: @state.showingMinigraphs
+            isTimeBased: @state.isTimeBased
             showGraphButton: @state.codapHasLoaded and not diagramOnly
           })
       )

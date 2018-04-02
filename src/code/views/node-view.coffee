@@ -283,10 +283,12 @@ module.exports = NodeView = React.createClass
 
     if @props.showMinigraph
       (GraphView {
+        isTimeBased: @props.isTimeBased
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
         color: @props.dataColor
+        innerColor: @props.innerColor
         image: nodeImage
       })
     else
