@@ -73,8 +73,7 @@ SimulationStore   = Reflux.createStore
 
     @settings.isTimeBased = simulationType is AppSettingsStore.store.SimulationType.time
 
-    if @settings.isTimeBased
-      @_runSimulation()
+    @_runSimulation()
 
     if simulationType is AppSettingsStore.store.SimulationType.diagramOnly
       SimulationActions.collapseSimulationPanel()
@@ -83,8 +82,7 @@ SimulationStore   = Reflux.createStore
     @settings.simulationPanelExpanded = true
     @settings.modelIsRunning = true
     @_updateModelIsRunnable()
-    if @settings.isTimeBased
-      @_runSimulation()
+    @_runSimulation()
     @notifyChange()
 
   onCollapseSimulationPanel: ->
