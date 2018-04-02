@@ -262,11 +262,6 @@ module.exports = NodeView = React.createClass
       classes.push "simulate"
     classes.join " "
 
-  nodeSliderClasses: ->
-    if @props.simulating and @props.data.canEditInitialValue()
-      "slider"
-    else ""
-
   renderNodeInternal: ->
     getNodeImage = (node) ->
       if node.isAccumulator
@@ -303,6 +298,14 @@ module.exports = NodeView = React.createClass
 
     (div { className: @nodeClasses(), ref: "node", style: style},
       (div {className: @linkTargetClasses(), "data-node-key": @props.nodeKey},
+        (div {className: "slider" ,"data-node-key": @props.nodeKey},
+          if @props.simulating
+            (div {},
+              # if not @props.data.valueDefinedSemiQuantitatively
+              #   @renderValue()     # not sure if we plan to render value
+              @renderSliderView()
+            )
+        )
         (div {},
           (div {className: "actions"},
             (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
@@ -341,14 +344,6 @@ module.exports = NodeView = React.createClass
                 })
               )
           )
-        )
-        (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},
-          if @props.simulating
-            (div {},
-              # if not @props.data.valueDefinedSemiQuantitatively
-              #   @renderValue()     # not sure if we plan to render value
-              @renderSliderView()
-            )
         )
       )
     )
