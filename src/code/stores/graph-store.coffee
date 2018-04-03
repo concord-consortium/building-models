@@ -535,7 +535,7 @@ GraphStore  = Reflux.createStore
   #   1 (static)         if there are no collectors
   #   2 (time)           if there are collectors
   getMinimumSimulationType: ->
-    minSimulationType = 0
+    minSimulationType = AppSettingsStore.store.SimulationType.diagramOnly
 
     links = @getLinks()
     for link in links
@@ -543,10 +543,10 @@ GraphStore  = Reflux.createStore
 
       if source.isAccumulator or target.isAccumulator
         # we know we have to be time-based
-        return 2
+        return AppSettingsStore.store.SimulationType.time
       else if link.relation?.formula
         # we have a defined relationship, so we know we'll be at least 1
-        minSimulationType = 1
+        minSimulationType = AppSettingsStore.store.SimulationType.static
 
     return minSimulationType
 
@@ -560,12 +560,11 @@ GraphStore  = Reflux.createStore
       continue unless (source = link.sourceNode) and (target = link.targetNode)
 
       if link.relation?.formula
-        # we know we'll be at least 1 or 2
         relation = RelationFactory.selectionsFromRelation(link.relation)
         if relation.scalar.id isnt "aboutTheSame"
-          return 1
+          return AppSettingsStore.store.Complexity.expanded
 
-    return 0
+    return AppSettingsStore.store.Complexity.basic
 
   loadData: (data) ->
     log.info "json success"
