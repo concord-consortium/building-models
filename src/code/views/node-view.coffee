@@ -282,6 +282,7 @@ module.exports = NodeView = React.createClass
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
+        currentValue: @props.data.currentValue
         color: @props.dataColor
         innerColor: @props.innerColor
         image: nodeImage

@@ -51,8 +51,7 @@ module.exports = NodeSvgGraphView = React.createClass
   getBarPath: ->
     max  = @props.max
     min  = @props.min
-    lastPoint = _.last @props.data
-    val = Math.min(max, Math.max(min, lastPoint))
+    val = Math.min(max, Math.max(min, @props.currentValue))
     val = val / (max - min)
 
     left = @props.width * 0.25
