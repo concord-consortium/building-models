@@ -4,31 +4,39 @@ ImportActions   = require '../actions/import-actions'
 AppSettingsActions = Reflux.createActions(
   [
     "setComplexity"
+    "setSimulationType"
     "showMinigraphs"
     "relationshipSymbols"
   ]
 )
 
 Complexity = {
-  diagramOnly: 0,
-  basic: 1,
-  expanded: 2,
-  collectors: 3,
-  DEFAULT: 3
+  basic: 0
+  expanded: 1
+  DEFAULT: 1
 }
+
+SimulationType = {
+  diagramOnly: 0
+  static: 1
+  time: 2
+  DEFAULT: 1
+}
+
 
 AppSettingsStore   = Reflux.createStore
   listenables: [AppSettingsActions, ImportActions]
 
   init: ->
-    complexity = if HashParams.getParam('simplified')
-      Complexity.diagramOnly
+    simulationType = if HashParams.getParam('simplified')
+      SimulationType.diagramOnly
     else
-      Complexity.DEFAULT
+      SimulationType.DEFAULT
 
     @settings =
       showingSettingsDialog: false
-      complexity: complexity
+      complexity: Complexity.DEFAULT
+      simulationType: simulationType
       showingMinigraphs: false
       relationshipSymbols: false
 
@@ -40,6 +48,10 @@ AppSettingsStore   = Reflux.createStore
     @settings.complexity = val
     if val is 0
       @settings.showingMinigraphs = false
+    @notifyChange()
+
+  onSetSimulationType: (val) ->
+    @settings.simulationType = val
     @notifyChange()
 
   onRelationshipSymbols: (show) ->
@@ -55,10 +67,12 @@ AppSettingsStore   = Reflux.createStore
 
   serialize: ->
     complexity: @settings.complexity
+    simulationType: @settings.simulationType
     showingMinigraphs: @settings.showingMinigraphs
     relationshipSymbols: @settings.relationshipSymbols
 
 AppSettingsStore.Complexity = Complexity
+AppSettingsStore.SimulationType = SimulationType
 
 mixin =
   getInitialState: ->

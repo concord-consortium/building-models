@@ -11,8 +11,6 @@ DocumentActions    = React.createFactory require './document-actions-view'
 ModalPaletteDelete = React.createFactory require './modal-palette-delete-view'
 BuildInfoView      = React.createFactory require './build-info-view'
 
-window.HashParameters = require "../utils/hash-parameters"
-
 ImageDialogStore    = require '../stores/image-dialog-store'
 AppSettingsStore    = require '../stores/app-settings-store'
 
@@ -61,7 +59,7 @@ module.exports = React.createClass
           })
           (DocumentActions
             graphStore: @props.graphStore
-            diagramOnly: @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
+            diagramOnly: @state.simulationType is AppSettingsStore.store.SimulationType.diagramOnly
             iframed: @state.iframed
           )
         )
@@ -77,7 +75,7 @@ module.exports = React.createClass
           onNodeChanged: @onNodeChanged
           onNodeDelete: @onNodeDelete
           palette: @state.palette
-          diagramOnly: @state.complexity is AppSettingsStore.store.Complexity.diagramOnly
+          diagramOnly: @state.simulationType is AppSettingsStore.store.SimulationType.diagramOnly
           toggleImageBrowser: @toggleImageBrowser
           graphStore: @props.graphStore
           ref: "inspectorPanel"

@@ -59,8 +59,8 @@ describe "The minimum complexity", ->
       @graphStore.addNode nodeB
       @graphStore.addLink link
 
-    it "should be diagram-only", ->
-      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.diagramOnly
+    it "should be basic", ->
+      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.basic
 
   describe "for a graph with only an `about the same` relation", ->
     beforeEach ->
@@ -94,6 +94,48 @@ describe "The minimum complexity", ->
     it "should be expanded", ->
       @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.expanded
 
+
+describe "The minimum simulation type", ->
+  beforeEach ->
+    @sandbox = Sinon.sandbox.create()
+    @sandbox.stub CodapConnect, "instance", ->
+      sendUndoableActionPerformed: -> return ''
+
+    @graphStore = GraphStore
+    @graphStore.init()
+
+  afterEach ->
+    CodapConnect.instance.restore()
+
+  describe "for a graph without relations", ->
+    beforeEach ->
+      nodeA    = new Node()
+      nodeB    = new Node()
+      link     = LinkNodes(nodeA, nodeB)
+
+      @graphStore.addNode nodeA
+      @graphStore.addNode nodeB
+      @graphStore.addLink link
+
+    it "should be diagramOnly", ->
+      @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.diagramOnly
+
+  describe "for a graph with relations but no collectors", ->
+    beforeEach ->
+      nodeA    = new Node()
+      nodeB    = new Node()
+      vector   = RelationFactory.increase
+      scalar   = RelationFactory.aLot
+      relation = RelationFactory.fromSelections vector, scalar
+      link     = LinkNodes(nodeA, nodeB, relation)
+
+      @graphStore.addNode nodeA
+      @graphStore.addNode nodeB
+      @graphStore.addLink link
+
+    it "should be static", ->
+      @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.static
+
   describe "for a graph with a collector", ->
     beforeEach ->
       nodeA    = new Node()
@@ -105,4 +147,4 @@ describe "The minimum complexity", ->
       @graphStore.addLink link
 
     it "should be collectors", ->
-      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.collectors
+      @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.time

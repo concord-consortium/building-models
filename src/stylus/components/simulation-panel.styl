@@ -108,3 +108,13 @@ panelWidth = 236px
 
   span.disabled
     color #AAA
+
+  .expanding-submenu
+    padding-left: 10px
+
+    max-height: 0;
+    overflow: hidden;
+
+    &.expanded
+      max-height: 70px;
+      transition: max-height 0.5s ease-out;

@@ -102,7 +102,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.21.0"
+        model.version.should.equal "1.22.0"
         model.nodes.length.should.equal 3
         model.links.length.should.equal 2
 
@@ -153,10 +153,12 @@ describe "Serialization and Loading", ->
         palette[1].uuid.should.equal "uuid-bee"
 
       it "should be able to serialize the settings", ->
+        AppSettingsStore.store.settings.simulationType = "static"
         AppSettingsStore.store.settings.complexity = "expanded"
         AppSettingsStore.store.settings.showingMinigraphs = true
         jsonString = @graphStore.toJsonString(@fakePalette)
         model = JSON.parse jsonString
+        model.settings.simulationType.should.equal "static"
         model.settings.complexity.should.equal "expanded"
         model.settings.showingMinigraphs.should.equal true
 
@@ -187,8 +189,9 @@ describe "Serialization and Loading", ->
 
     it "should read the settings without error", ->
       data = JSON.parse(@serializedForm)
-      data.settings = {complexity: "expanded", showMinigraphs: true}
+      data.settings = {simulationType: "static", complexity: "expanded", showMinigraphs: true}
       @graphStore.loadData(data)
+      AppSettingsStore.store.settings.simulationType.should.equal "static"
       AppSettingsStore.store.settings.complexity.should.equal "expanded"
       AppSettingsStore.store.settings.showMinigraphs.should.equal true
 

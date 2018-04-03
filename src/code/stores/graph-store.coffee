@@ -529,32 +529,42 @@ GraphStore  = Reflux.createStore
       model: modelDescription
     }
 
-  # Returns the minimum complexity that the current graph allows.
+  # Returns the minimum simulation type that the current graph allows.
   # Returns
   #   0 (diagramOnly)    if there are no defined relationships
-  #   1 (basic)          if all scalars are `about the same`
-  #   2 (expanded)       if there are no collectors
-  #   3 (collectors)     if there are collectors
-  getMinimumComplexity: ->
-    minComplexity = 0
+  #   1 (static)         if there are no collectors
+  #   2 (time)           if there are collectors
+  getMinimumSimulationType: ->
+    minSimulationType = AppSettingsStore.store.SimulationType.diagramOnly
 
     links = @getLinks()
-    _.each links, (link) ->
-      return unless (source = link.sourceNode) and (target = link.targetNode)
+    for link in links
+      continue unless (source = link.sourceNode) and (target = link.targetNode)
 
       if source.isAccumulator or target.isAccumulator
-        # we know we have to be the highest complexity
-        minComplexity = 3
+        # we know we have to be time-based
+        return AppSettingsStore.store.SimulationType.time
       else if link.relation?.formula
-        # we know we'll be at least 1 or 2
-        relation = RelationFactory.selectionsFromRelation(link.relation)
-        if relation.scalar.id is "aboutTheSame"
-          linkComplexity = 1
-        else linkComplexity = 2
-        if linkComplexity > minComplexity
-          minComplexity = linkComplexity
+        # we have a defined relationship, so we know we'll be at least 1
+        minSimulationType = AppSettingsStore.store.SimulationType.static
 
-    return minComplexity
+    return minSimulationType
+
+  # Returns the minimum complexity that the current graph allows.
+  # Returns
+  #   0 (basic)          if there are no defined relationships, or all scalars are `about the same`
+  #   1 (expanded)       otherwise
+  getMinimumComplexity: ->
+    links = @getLinks()
+    for link in links
+      continue unless (source = link.sourceNode) and (target = link.targetNode)
+
+      if link.relation?.formula
+        relation = RelationFactory.selectionsFromRelation(link.relation)
+        if relation.scalar.id isnt "aboutTheSame"
+          return AppSettingsStore.store.Complexity.expanded
+
+    return AppSettingsStore.store.Complexity.basic
 
   loadData: (data) ->
     log.info "json success"
@@ -619,16 +629,22 @@ mixin =
     GraphStore.getGraphState()
 
   componentDidMount: ->
-    @unsubscribe = GraphActions.graphChanged.listen @onGraphChanged
+    @subscriptions = []
+    @subscriptions.push GraphActions.graphChanged.listen @onGraphChanged
+    @subscriptions.push GraphActions.resetSimulation.listen @onResetSimulation
 
   componentWillUnmount: ->
-    @unsubscribe()
+    for unsubscribe in @subscriptions
+      unsubscribe()
 
   onGraphChanged: (state) ->
     @setState state
 
     # TODO: not this:
     @diagramToolkit?.repaint()
+
+  onResetSimulation: ->
+    GraphStore.resetSimulation()
 
 
 module.exports =

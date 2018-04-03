@@ -12,9 +12,9 @@ migration =
     delete data.settings.diagramOnly
 
     defaultComplexity = if wasDiagramOnly
-      AppSettingsStore.Complexity.diagramOnly
+      0 # was `AppSettingsStore.Complexity.diagramOnly` but this no longer exists as of 1.22.0
     else
-      AppSettingsStore.Complexity.DEFAULT
+      2 # was `AppSettingsStore.Complexity.DEFAULT` but this is now '1' as of 1.22.0
 
     data.settings.complexity ?= defaultComplexity
 
