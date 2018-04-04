@@ -243,7 +243,7 @@ module.exports = NodeView = React.createClass
     evt.dataTransfer.setData('text', attributeName)
     evt.dataTransfer.setData('application/x-codap-attr-' + attributeName, attributeName)
     # CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
-    evt.dataTransfer.contains = () -> false
+    evt.dataTransfer.contains = -> false
 
   nodeClasses: ->
     classes = ['elm']
