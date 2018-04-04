@@ -173,7 +173,6 @@
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship.",
 
     "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings",
-    "~SIMULATION.DIAGRAM_SETTINGS": "Diagram settings",
     "~SIMULATION.VIEW_SETTINGS": "View settings",
     "~SIMULATION.STEP_UNIT": "Each calculation is 1",
     "~SIMULATION.DURATION": "Calculations per run",

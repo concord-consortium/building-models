@@ -65,12 +65,12 @@ module.exports = React.createClass
     )
 
     (div {className: "simulation-panel"},
-      (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
+      (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
       (RadioGroupF {
         name: "simulationType"
         selectedValue: @state.simulationType
         onChange: @setSimulationType
-        className: "radio-group"
+        className: "radio-group simulation-radio-buttons"
       }, [
         (label {key: 'simulation-type-diagram-only'},
           (RadioF {value: SimulationType.diagramOnly, disabled: diagramOnlyDisabled})
@@ -97,6 +97,20 @@ module.exports = React.createClass
           )
         )
       ])
+
+      (div {className: "row "+runPanelClasses},
+          (label {key: 'cap-label'}, [
+            input {
+              key: 'cap-checkbox'
+              type: 'checkbox'
+              value: 'cap-values'
+              checked: @state.capNodeValues
+              onChange: @setCapNodeValues
+            }
+            tr '~SIMULATION.CAP_VALUES'
+          ])
+        )
+
       (div {className: runPanelClasses},
         (div {className: "title"}, tr "~SIMULATION.VIEW_SETTINGS")
         (div {className: "row"},
@@ -121,22 +135,6 @@ module.exports = React.createClass
               onChange: @setRelationshipSymbols
             }
             tr '~SIMULATION.RELATIONSHIP_SYMBOLS'
-          ])
-        )
-      )
-      (div {className: runPanelClasses},
-        (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
-
-        (div {className: "row"},
-          (label {key: 'cap-label'}, [
-            input {
-              key: 'cap-checkbox'
-              type: 'checkbox'
-              value: 'cap-values'
-              checked: @state.capNodeValues
-              onChange: @setCapNodeValues
-            }
-            tr '~SIMULATION.CAP_VALUES'
           ])
         )
       )
