@@ -227,6 +227,8 @@ GraphStore  = Reflux.createStore
     unless @hasNode node
       @nodeKeys[node.key] = node
       @_graphUpdated()
+      # add variable to CODAP
+      CodapConnect.instance(DEFAULT_CONTEXT_NAME)._createMissingDataAttributes()
       @updateListeners()
 
   _removeNode: (node) ->
