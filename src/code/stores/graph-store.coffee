@@ -561,7 +561,7 @@ GraphStore  = Reflux.createStore
 
       if link.relation?.formula
         relation = RelationFactory.selectionsFromRelation(link.relation)
-        if relation.scalar.id isnt "aboutTheSame"
+        if relation.scalar and relation.scalar.id isnt "aboutTheSame"
           return AppSettingsStore.store.Complexity.expanded
 
     return AppSettingsStore.store.Complexity.basic
