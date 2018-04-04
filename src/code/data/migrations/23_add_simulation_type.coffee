@@ -20,7 +20,7 @@ migration =
     #  2: simulation: static      / complexity: expanded
     #  3: simulation: time        / complexity: expanded
 
-    previousComplexity = data.settings.complexity or 2
+    previousComplexity = if data.settings.complexity? then data.settings.complexity else 2
 
     if previousComplexity == 0
       data.settings.simulationType = AppSettingsStore.SimulationType.diagramOnly
