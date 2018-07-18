@@ -1,6 +1,7 @@
 {input, div, i, img, span, label, img} = React.DOM
 tr = require "../utils/translate"
 
+AppSettingsStore    = require "../stores/app-settings-store"
 SimulationActions = require("../stores/simulation-store").actions
 SquareImage = React.createFactory require "./square-image-view"
 StackedImage = React.createFactory require "./stacked-image-view"
@@ -125,7 +126,9 @@ module.exports = NodeView = React.createClass
     if @props.data.inLinks().length > 0
       now = (new Date()).getTime()
       if now - (@lastClickLinkTime || 0) <= 250
-        InspectorPanelStore.actions.openInspectorPanel 'relations'
+        # Only open inspector if we're not in diagram-only mode
+        if AppSettingsStore.store.settings.simulationType != AppSettingsStore.store.SimulationType.diagramOnly
+          InspectorPanelStore.actions.openInspectorPanel 'relations'
       @lastClickLinkTime = now
 
   propTypes:

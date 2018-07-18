@@ -391,7 +391,8 @@ GraphStore  = Reflux.createStore
 
     if isDoubleClick
       @selectionManager.selectNodeForInspection(link.targetNode)
-      InspectorPanelStore.actions.openInspectorPanel('relations', {link: link})
+      if AppSettingsStore.store.settings.simulationType != AppSettingsStore.store.SimulationType.diagramOnly
+        InspectorPanelStore.actions.openInspectorPanel('relations', {link: link})
     else
       # set single click handler to run 250ms from now so we can wait to see if this is a double click
       singleClickHandler = =>

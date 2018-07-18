@@ -76,7 +76,7 @@ module.exports = React.createClass
           (RadioF {value: SimulationType.diagramOnly, disabled: diagramOnlyDisabled})
           (span {className: if diagramOnlyDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
         )
-        (div {},
+        (div {key: 'simulation-static-options'},
           (label {key: 'simulation-type-static'},
             (RadioF {value: SimulationType.static, disabled: staticDisabled})
             (span {className: if staticDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.STATIC')
@@ -86,7 +86,7 @@ module.exports = React.createClass
               complexityRadioButtons
           )
         )
-        (div {},
+        (div {key: 'simulation-complexity-options'},
           (label {key: 'simulation-type-time'},
             (RadioF {value: SimulationType.time})
             (span {}, tr '~SIMULATION.COMPLEXITY.TIME')
