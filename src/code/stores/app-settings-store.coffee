@@ -23,7 +23,6 @@ SimulationType = {
   DEFAULT: 1
 }
 
-
 AppSettingsStore   = Reflux.createStore
   listenables: [AppSettingsActions, ImportActions]
 
@@ -33,12 +32,28 @@ AppSettingsStore   = Reflux.createStore
     else
       SimulationType.DEFAULT
 
+
+    uiElements = {
+      globalNav: true,
+      actionBar: true,
+      canvas: true,
+      inspectorPanel: true
+    }
+    uiParams = HashParams.getParam('uielements')
+    if uiParams
+      uiOpts = uiParams.split("")
+      uiElements.globalNav = uiOpts[0] == "1"
+      uiElements.actionBar = uiOpts[1] == "1"
+      uiElements.canvas = uiOpts[2] == "1"
+      uiElements.inspectorPanel = uiOpts[3] == "1"
+
     @settings =
       showingSettingsDialog: false
       complexity: Complexity.DEFAULT
       simulationType: simulationType
       showingMinigraphs: false
       relationshipSymbols: false
+      uiElements: uiElements
 
   onShowMinigraphs: (show) ->
     @settings.showingMinigraphs = show

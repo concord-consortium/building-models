@@ -50,12 +50,14 @@ module.exports = React.createClass
             username: @state.username
             graphStore: @props.graphStore
             GraphStore: @GraphStore
+            display: AppSettingsStore.store.settings.uiElements.globalNav
           )
         (div {className: 'action-bar'},
           (NodeWell {
             palette: @state.palette
             toggleImageBrowser: @toggleImageBrowser
-            graphStore: @props.graphStore
+            graphStore: @props.graphStore,
+            display: AppSettingsStore.store.settings.uiElements.actionBar
           })
           (DocumentActions
             graphStore: @props.graphStore
@@ -67,7 +69,8 @@ module.exports = React.createClass
           (GraphView {
             graphStore: @props.graphStore,
             selectionManager: @props.graphStore.selectionManager,
-            selectedLink: @state.selectedLink})
+            selectedLink: @state.selectedLink,
+            display: AppSettingsStore.store.settings.uiElements.canvas})
         )
         (InspectorPanel
           node: @state.selectedNode
@@ -79,6 +82,7 @@ module.exports = React.createClass
           toggleImageBrowser: @toggleImageBrowser
           graphStore: @props.graphStore
           ref: "inspectorPanel"
+          display: AppSettingsStore.store.settings.uiElements.inspectorPanel
         )
         if @state.showingDialog
           (ImageBrowser

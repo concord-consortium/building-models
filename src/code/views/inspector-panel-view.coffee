@@ -125,6 +125,11 @@ module.exports = React.createClass
 
   render: ->
     className = "inspector-panel"
+    if (@props.display != undefined)
+      if @props.display == true
+        className = "inspector-panel"
+      else
+        className = "inspector-panel hidden"
     unless @state.nowShowing
       className = "#{className} collapsed"
 
