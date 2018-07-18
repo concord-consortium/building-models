@@ -127,7 +127,7 @@ module.exports = NodeView = React.createClass
       now = (new Date()).getTime()
       if now - (@lastClickLinkTime || 0) <= 250
         # Only open inspector if we're not in diagram-only mode
-        if AppSettingsStore.store.settings.simulationType != 0
+        if AppSettingsStore.store.settings.simulationType != AppSettingsStore.store.SimulationType.diagramOnly
           InspectorPanelStore.actions.openInspectorPanel 'relations'
       @lastClickLinkTime = now
 
