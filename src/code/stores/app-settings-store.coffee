@@ -37,7 +37,8 @@ AppSettingsStore   = Reflux.createStore
       globalNav: true,
       actionBar: true,
       canvas: true,
-      inspectorPanel: true
+      inspectorPanel: true,
+      showNodePalette: true
     }
     uiParams = HashParams.getParam('uielements')
     if uiParams
@@ -46,6 +47,7 @@ AppSettingsStore   = Reflux.createStore
       uiElements.actionBar = uiOpts[1] == "1"
       uiElements.canvas = uiOpts[2] == "1"
       uiElements.inspectorPanel = uiOpts[3] == "1"
+      uiElements.showNodePalette = uiOpts[4] == "1"
 
     @settings =
       showingSettingsDialog: false

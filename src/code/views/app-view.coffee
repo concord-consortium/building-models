@@ -44,7 +44,7 @@ module.exports = React.createClass
   render: ->
     (div {className: 'app'},
       (div {className: if @state.iframed then 'iframed-workspace' else 'workspace'},
-        if not @state.iframed
+        if not @state.iframed && AppSettingsStore.store.settings.uiElements.globalNav != false
           (GlobalNav
             filename: @state.filename
             username: @state.username
@@ -52,12 +52,12 @@ module.exports = React.createClass
             GraphStore: @GraphStore
             display: AppSettingsStore.store.settings.uiElements.globalNav
           )
-        (div {className: 'action-bar'},
+        (div {className: if AppSettingsStore.store.settings.uiElements.actionBar == false then 'action-bar hidden' else 'action-bar'},
           (NodeWell {
             palette: @state.palette
             toggleImageBrowser: @toggleImageBrowser
-            graphStore: @props.graphStore,
-            display: AppSettingsStore.store.settings.uiElements.actionBar
+            graphStore: @props.graphStore
+            showNodePalette: AppSettingsStore.store.settings.uiElements.showNodePalette
           })
           (DocumentActions
             graphStore: @props.graphStore
@@ -65,12 +65,11 @@ module.exports = React.createClass
             iframed: @state.iframed
           )
         )
-        (div {className: 'canvas'},
+        (div {className: if AppSettingsStore.store.settings.uiElements.canvas == false then 'canvas hidden' else 'canvas'},
           (GraphView {
             graphStore: @props.graphStore,
             selectionManager: @props.graphStore.selectionManager,
-            selectedLink: @state.selectedLink,
-            display: AppSettingsStore.store.settings.uiElements.canvas})
+            selectedLink: @state.selectedLink})
         )
         (InspectorPanel
           node: @state.selectedNode

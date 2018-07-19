@@ -30,7 +30,8 @@ module.exports = React.createClass
     if @state.collapsed
       topNodePaletteClass    = 'top-node-palette-wrapper collapsed'
       topNodeTabPaletteClass = 'top-node-palette-tab collapsed'
-    (div {className: 'wrapperwrapper'},
+
+    (div {className: if @props.showNodePalette == false then 'wrapperwrapper hidden' else 'wrapperwrapper'},
       (div {className: topNodePaletteClass},
         (PaletteInspectorView {
           toggleImageBrowser: @props.toggleImageBrowser,
