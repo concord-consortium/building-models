@@ -116,6 +116,7 @@ SimulationStore   = Reflux.createStore
 
   onImport: (data) ->
     _.merge @settings, data.settings.simulation
+    @settings.isTimeBased = data.settings.simulationType is AppSettingsStore.store.SimulationType.time
     hasCollectors = _.filter(data.nodes, (node) -> node.data.isAccumulator).length > 0
     @onSetStepUnits(unit: data.settings.simulation.stepUnits, hasCollectors)
     @notifyChange()
