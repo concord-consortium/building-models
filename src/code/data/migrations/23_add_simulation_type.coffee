@@ -32,7 +32,11 @@ migration =
       data.settings.simulationType = AppSettingsStore.SimulationType.static
       data.settings.complexity     = AppSettingsStore.Complexity.expanded
     else if previousComplexity == 3
-      data.settings.simulationType = AppSettingsStore.SimulationType.time
+      hasCollectors = data.nodes.some((node) -> node.data.isAccumulator)
+      if hasCollectors
+        data.settings.simulationType = AppSettingsStore.SimulationType.time
+      else
+        data.settings.simulationType = AppSettingsStore.SimulationType.static
       data.settings.complexity     = AppSettingsStore.Complexity.expanded
 
 module.exports = _.mixin migration, require './migration-mixin'
