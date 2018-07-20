@@ -12,7 +12,15 @@ module.exports = class MySystemImporter
     Migrations.update(data)
     # Synchronous invocation of actions / w trigger
     ImportActions.import.trigger(data)
-    @importNodes data.nodes
+    hasCollectors = @importNodes data.nodes
+
+    simType = @settings.settings.simulationType
+
+    if simType == @settings.SimulationType.time and hasCollectors == false
+      # Downgrade to static equilibrium - older models with the "can have collectors" checkbox
+      # will always import as time-based simulations even if they don't have collectors
+      @settings.settings.simulationType = @settings.SimulationType.static
+
     @importLinks data.links
     @graphStore.setFilename data.filename or 'New Model'
 
@@ -27,10 +35,12 @@ module.exports = class MySystemImporter
       new DiagramNode(data, key)
 
   importNodes: (importNodes) ->
+    hasCollectors = false
     for nodespec in importNodes
       node = @importNode(nodespec)
+      if node._isAccumulator then hasCollectors = true
       @graphStore.addNode node
-    return  # prevent unused default return value
+    return hasCollectors
 
   importLinks: (links) ->
     for link in links
