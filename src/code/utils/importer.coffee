@@ -9,6 +9,7 @@ module.exports = class MySystemImporter
     undefined
 
   importData: (data) ->
+    importVersion = data.version
     Migrations.update(data)
     # Synchronous invocation of actions / w trigger
     ImportActions.import.trigger(data)
@@ -16,7 +17,7 @@ module.exports = class MySystemImporter
 
     simType = @settings.settings.simulationType
 
-    if simType == @settings.SimulationType.time and hasCollectors == false
+    if importVersion != data.version and simType == @settings.SimulationType.time and hasCollectors == false
       # Downgrade to static equilibrium - older models with the "can have collectors" checkbox
       # will always import as time-based simulations even if they don't have collectors
       @settings.settings.simulationType = @settings.SimulationType.static
