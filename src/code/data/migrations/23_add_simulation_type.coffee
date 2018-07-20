@@ -18,7 +18,8 @@ migration =
     #  0: simulation: diagramOnly / complexity: basic
     #  1: simulation: static      / complexity: basic
     #  2: simulation: static      / complexity: expanded
-    #  3: simulation: time        / complexity: expanded
+    #  3 (for models with nodes set up as collectors): simulation: time   / complexity: expanded
+    #  3 (no collectors in model):                     simulation: static / complexity: expanded
 
     previousComplexity = if data.settings.complexity? then data.settings.complexity else 2
 
