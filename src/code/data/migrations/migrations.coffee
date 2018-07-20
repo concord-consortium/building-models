@@ -23,6 +23,7 @@ migrations = [
   require "./20_add_complexity"
   require "./21_remove_experiment_number"
   require "./22_add_combine_method"
+  require "./23_add_simulation_type"
 ]
 
 module.exports =

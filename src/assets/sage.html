@@ -50,7 +50,7 @@
     <script>
       if(self != top) {
         // redirect to non CFM wrapped version if we are in an iframe.
-        path = window.location.pathname.replace('sage', 'index');
+        path = window.location.pathname.replace('sage.html', 'index.html');
         window.location = window.location.protocol + "//" + window.location.host +
                             path + window.location.search + window.location.hash;
       }

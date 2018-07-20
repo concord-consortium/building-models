@@ -52,9 +52,9 @@ module.exports = class Relationship
       roundedInV = Math.round(inV)
       if roundedInV > (maxIn-1)
         roundedInV = (maxIn-1)
-      if not @dataPoints then @updateCustomData @customdata
-      if @dataPoints[roundedInV]?
-        result = @dataPoints[roundedInV].y
+      # @customData is in the form [[0,y], [1,y], [2,y], ...]
+      if @customData[roundedInV]?
+        result = @customData[roundedInV][1]
       else result = 0
     else if @func
       result = @func scope
@@ -65,16 +65,6 @@ module.exports = class Relationship
         @hasError = true
         @errHandler(error, @formula, inV, outV)
     result
-
-  updateCustomData: (source)->
-    if source?
-      @customData = source
-
-    points = _.map @customData, (point) ->
-      x = _.first point
-      y = _.last point
-      { y: y, x: x}
-    @dataPoints = _.indexBy points, 'x'
 
   toExport: ->
     type        : @type

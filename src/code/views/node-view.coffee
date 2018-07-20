@@ -1,6 +1,7 @@
 {input, div, i, img, span, label, img} = React.DOM
 tr = require "../utils/translate"
 
+AppSettingsStore    = require "../stores/app-settings-store"
 SimulationActions = require("../stores/simulation-store").actions
 SquareImage = React.createFactory require "./square-image-view"
 StackedImage = React.createFactory require "./stacked-image-view"
@@ -99,8 +100,6 @@ module.exports = NodeView = React.createClass
 
   componentDidUpdate: ->
     handle = '.img-background'
-    if @props.selected
-      handle = null
     $elem = $(@refs.node)
     $elem.draggable( "option", "handle", handle)
 
@@ -127,7 +126,9 @@ module.exports = NodeView = React.createClass
     if @props.data.inLinks().length > 0
       now = (new Date()).getTime()
       if now - (@lastClickLinkTime || 0) <= 250
-        InspectorPanelStore.actions.openInspectorPanel 'relations'
+        # Only open inspector if we're not in diagram-only mode
+        if AppSettingsStore.store.settings.simulationType != AppSettingsStore.store.SimulationType.diagramOnly
+          InspectorPanelStore.actions.openInspectorPanel 'relations'
       @lastClickLinkTime = now
 
   propTypes:
@@ -152,7 +153,6 @@ module.exports = NodeView = React.createClass
       color: "dark-blue"
 
   doMove: (evt, extra) ->
-    # console.log "Moving " + @props.nodeKey
     @props.onMove
       nodeKey: @props.nodeKey
       reactComponent: this
@@ -240,6 +240,14 @@ module.exports = NodeView = React.createClass
     codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
     codapConnect.createGraph(attributeName)
 
+  handleCODAPAttributeDrag: (evt, attributeName) ->
+    evt.dataTransfer.effectAllowed = 'moveCopy'
+    evt.dataTransfer.setData('text/html', attributeName)
+    evt.dataTransfer.setData('text', attributeName)
+    evt.dataTransfer.setData('application/x-codap-attr-' + attributeName, attributeName)
+    # CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
+    evt.dataTransfer.contains = -> false
+
   nodeClasses: ->
     classes = ['elm']
     if @props.selected
@@ -257,11 +265,6 @@ module.exports = NodeView = React.createClass
       classes.push "simulate"
     classes.join " "
 
-  nodeSliderClasses: ->
-    if @props.simulating and @props.data.canEditInitialValue()
-      "slider"
-    else ""
-
   renderNodeInternal: ->
     getNodeImage = (node) ->
       if node.isAccumulator
@@ -278,10 +281,13 @@ module.exports = NodeView = React.createClass
 
     if @props.showMinigraph
       (GraphView {
+        isTimeBased: @props.isTimeBased
         min: @props.data.min
         max: @props.data.max
         data: @props.data.frames
+        currentValue: @props.data.currentValue
         color: @props.dataColor
+        innerColor: @props.innerColor
         image: nodeImage
       })
     else
@@ -296,12 +302,22 @@ module.exports = NodeView = React.createClass
 
     (div { className: @nodeClasses(), ref: "node", style: style},
       (div {className: @linkTargetClasses(), "data-node-key": @props.nodeKey},
+        (div {className: "slider" ,"data-node-key": @props.nodeKey},
+          if @props.simulating
+            (div {},
+              # if not @props.data.valueDefinedSemiQuantitatively
+              #   @renderValue()     # not sure if we plan to render value
+              @renderSliderView()
+            )
+        )
         (div {},
           (div {className: "actions"},
             (div {className: "connection-source action-circle icon-codap-link", "data-node-key": @props.nodeKey})
             if @props.showGraphButton
               (div {
                 className: "graph-source action-circle icon-codap-graph",
+                draggable: true
+                onDragStart: ((evt) => @handleCODAPAttributeDrag evt, @props.data.codapID)
                 onClick: (=> @handleGraphClick @props.data.title)
               })
           )
@@ -316,25 +332,22 @@ module.exports = NodeView = React.createClass
             if @props.data.isTransfer
               (div {className: "node-title"}) # empty title to set node width the same
             else
-              (NodeTitle {
-                isEditing: @props.editTitle
-                title: @props.data.title
-                onChange: @changeTitle
-                onStopEditing: @stopEditing
-                onStartEditing: @startEditing
-                node: @props.data
-                nodeKey: @props.nodeKey
-                graphStore: @props.graphStore
-              })
+              (div {
+                draggable: @props.showGraphButton
+                onDragStart: ((evt) => @handleCODAPAttributeDrag evt, @props.data.codapID)
+              },
+                (NodeTitle {
+                  isEditing: @props.editTitle
+                  title: @props.data.title
+                  onChange: @changeTitle
+                  onStopEditing: @stopEditing
+                  onStartEditing: @startEditing
+                  node: @props.data
+                  nodeKey: @props.nodeKey
+                  graphStore: @props.graphStore
+                })
+              )
           )
-        )
-        (div {className: @nodeSliderClasses() ,"data-node-key": @props.nodeKey},
-          if @props.simulating
-            (div {},
-              # if not @props.data.valueDefinedSemiQuantitatively
-              #   @renderValue()     # not sure if we plan to render value
-              @renderSliderView()
-            )
         )
       )
     )

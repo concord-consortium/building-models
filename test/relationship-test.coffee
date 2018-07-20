@@ -58,15 +58,15 @@ describe "relationship", ->
 
     describe "a custom relationship", ->
       beforeEach ->
-        @customData = [[1,5],[2,16],[3,11],[4,16]]
+        @customData = [[0,5],[1,16],[2,11],[3,16]]
         @arguments = {customData: @customData}
         @undertest = new Relationship(@arguments)
-        
+
       it "should retrieve a point via lookup", ->
-        @undertest.evaluate(3,0).should.equal 11
-      
+        @undertest.evaluate(3,0).should.equal 16
+
       it "should handle out-of-range lookups", ->
         @undertest.evaluate(5,0).should.equal 0
-      
+
       it "should handle non-integer lookups via rounding", ->
-        @undertest.evaluate(2.9,0).should.equal 11
+        @undertest.evaluate(2.9,0).should.equal 16

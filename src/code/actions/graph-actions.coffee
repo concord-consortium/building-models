@@ -1,1 +1,6 @@
-module.exports = Reflux.createActions [ "graphChanged" ]
+module.exports = Reflux.createActions(
+  [
+    "graphChanged"
+    "resetSimulation"
+  ]
+)

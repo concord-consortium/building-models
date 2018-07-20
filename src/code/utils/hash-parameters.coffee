@@ -48,11 +48,14 @@ class HashParameters
         window.location.hash = "?#{string}"
 
   readHash: ->
-    if window and window.location
-      # remove the leading slash
-      hash = window.location.hash.substring(1)
-    else
-      ""
+    try
+      if window and window.top.location
+        # remove the leading slash
+        hash = window.top.location.hash.substring(1)
+    catch     # x-origin exception
+      if window and window.location
+        hash = window.location.hash.substring(1)
+    return hash or ""
 
 
 module.exports = new HashParameters()

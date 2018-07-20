@@ -56,41 +56,45 @@ SimulationStore   = Reflux.createStore
       capNodeValues: false
       modelIsRunning: false
       modelIsRunnable: false
-      graphHasCollector: false
+      isTimeBased: false
       isRecording: false            # sending data to codap?
       isRecordingOne: false         # record-1 pressed?
       isRecordingStream: false      # record stream pressed?
       isRecordingPeriod: false      # record n units' pressed?
 
     @_updateModelIsRunnable()
-    @_updateGraphHasCollector()
 
   onSetExperimentNumber: (nextExperimentNumber) ->
     @settings.experimentNumber = nextExperimentNumber
     @notifyChange()
 
-  onSetComplexity: (complexity) ->
-    if complexity is AppSettingsStore.store.Complexity.diagramOnly
+  onSetSimulationType: (simulationType) ->
+    GraphActions.resetSimulation.trigger()
+
+    @settings.isTimeBased = simulationType is AppSettingsStore.store.SimulationType.time
+
+    @_runSimulation()
+
+    if simulationType is AppSettingsStore.store.SimulationType.diagramOnly
       SimulationActions.collapseSimulationPanel()
 
   onExpandSimulationPanel: ->
     @settings.simulationPanelExpanded = true
     @settings.modelIsRunning = true
     @_updateModelIsRunnable()
-    if @settings.graphHasCollector
-      @_runSimulation()
+    @_runSimulation()
     @notifyChange()
 
   onCollapseSimulationPanel: ->
     @settings.simulationPanelExpanded = false
     @settings.modelIsRunning = false
     @_stopRecording()
+    GraphActions.resetSimulation.trigger()
     @notifyChange()
 
   onGraphChanged: (data)->
     @nodes = data.nodes
     @_updateModelIsRunnable()
-    @settings.graphHasCollector = @_updateGraphHasCollector()
     @notifyChange()
 
   _updateUnitNames: ->
@@ -112,6 +116,7 @@ SimulationStore   = Reflux.createStore
 
   onImport: (data) ->
     _.merge @settings, data.settings.simulation
+    @settings.isTimeBased = data.settings.simulationType is AppSettingsStore.store.SimulationType.time
     hasCollectors = _.filter(data.nodes, (node) -> node.data.isAccumulator).length > 0
     @onSetStepUnits(unit: data.settings.simulation.stepUnits, hasCollectors)
     @notifyChange()
@@ -125,16 +130,16 @@ SimulationStore   = Reflux.createStore
     @_runSimulation()
 
   stepUnits: ->
-    if @settings.graphHasCollector
+    if @settings.isTimeBased
       @settings.stepUnits
     else
       @defaultUnit
 
   simulationDuration: ->
-    @settings.duration + (if @settings.graphHasCollector then 1 else 0)
+    @settings.duration + (if @settings.isTimeBased then 1 else 0)
 
   simulationStepCount: ->
-    return @settings.duration + 1 if @settings.graphHasCollector
+    return @settings.duration + 1 if @settings.isTimeBased
     return @settings.duration if @settings.isRecordingPeriod
     1
 
@@ -157,7 +162,7 @@ SimulationStore   = Reflux.createStore
             framesNoTime = _.map frames, (frame) =>
               frame.time = @settings.experimentFrame++
               # without collectors, start steps at 1
-              ++frame.time unless @settings.graphHasCollector
+              ++frame.time unless @settings.isTimeBased
               return frame
             SimulationActions.recordingFramesCreated(framesNoTime)
 
@@ -243,11 +248,6 @@ SimulationStore   = Reflux.createStore
     for node in @nodes
       if node.isAccumulator then return true
     return false
-
-  _updateGraphHasCollector: ->
-    hasCollectors = @_hasCollectors()
-    @_stopRecording() if hasCollectors isnt @settings.graphHasCollector
-    @settings.graphHasCollector = hasCollectors
 
   _getErrorMessage: ->
     # we just have the one error state right now

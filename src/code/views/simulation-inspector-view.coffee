@@ -8,6 +8,7 @@ GraphStore      = require('../stores/graph-store').store
 tr              = require '../utils/translate'
 {div, span, i, input, label}  = React.DOM
 
+SimulationType = AppSettingsStore.store.SimulationType
 Complexity = AppSettingsStore.store.Complexity
 
 module.exports = React.createClass
@@ -28,44 +29,88 @@ module.exports = React.createClass
   setRelationshipSymbols: (e) ->
     AppSettingsStore.actions.relationshipSymbols e.target.checked
 
+  setSimulationType: (val) ->
+    AppSettingsStore.actions.setSimulationType val
+
   setComplexity: (val) ->
     AppSettingsStore.actions.setComplexity val
 
   render: ->
     runPanelClasses = "run-panel"
-    diagramOnly = @state.complexity is Complexity.diagramOnly
+    diagramOnly = @state.simulationType is SimulationType.diagramOnly
     if diagramOnly then runPanelClasses += " collapsed"
 
+    minSimulationType = GraphStore.getMinimumSimulationType()
     minComplexity = GraphStore.getMinimumComplexity()
-    diagramOnlyDisabled = minComplexity > Complexity.diagramOnly
+    diagramOnlyDisabled = minSimulationType > SimulationType.diagramOnly
+    staticDisabled = minSimulationType > SimulationType.static
     basicDisabled = minComplexity > Complexity.basic
-    expandedDisabled = minComplexity > Complexity.expanded
 
-    (div {className: "simulation-panel"},
-      (div {className: "title"}, tr "~SIMULATION.DIAGRAM_SETTINGS")
+    complexityRadioButtons = (
       (RadioGroupF {
         name: "complexity"
         selectedValue: @state.complexity
         onChange: @setComplexity
         className: "radio-group"
       }, [
-        (label {key: 'complexity-diagram-only'},
-          (RadioF {value: Complexity.diagramOnly, disabled: diagramOnlyDisabled})
-          (span {className: if diagramOnlyDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
-        )
         (label {key: 'complexity-basic'},
           (RadioF {value: Complexity.basic, disabled: basicDisabled})
           (span {className: if basicDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.BASIC')
         )
         (label {key: 'complexity-expanded'},
-          (RadioF {value: Complexity.expanded, disabled: expandedDisabled})
-          (span {className: if expandedDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
-        )
-        (label {key: 'complexity-collectors'},
-          (RadioF {value: Complexity.collectors})
-          (span {}, tr '~SIMULATION.COMPLEXITY.COLLECTORS')
+          (RadioF {value: Complexity.expanded})
+          (span {}, tr '~SIMULATION.COMPLEXITY.EXPANDED')
         )
       ])
+    )
+
+    (div {className: "simulation-panel"},
+      (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
+      (RadioGroupF {
+        name: "simulationType"
+        selectedValue: @state.simulationType
+        onChange: @setSimulationType
+        className: "radio-group simulation-radio-buttons"
+      }, [
+        (label {key: 'simulation-type-diagram-only'},
+          (RadioF {value: SimulationType.diagramOnly, disabled: diagramOnlyDisabled})
+          (span {className: if diagramOnlyDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.DIAGRAM_ONLY')
+        )
+        (div {key: 'simulation-static-options'},
+          (label {key: 'simulation-type-static'},
+            (RadioF {value: SimulationType.static, disabled: staticDisabled})
+            (span {className: if staticDisabled then "disabled"}, tr '~SIMULATION.COMPLEXITY.STATIC')
+          )
+          (div {key: 'static-complexity', className: "expanding-submenu" + if @state.simulationType == SimulationType.static then " expanded" else ""},
+            if @state.simulationType == SimulationType.static
+              complexityRadioButtons
+          )
+        )
+        (div {key: 'simulation-complexity-options'},
+          (label {key: 'simulation-type-time'},
+            (RadioF {value: SimulationType.time})
+            (span {}, tr '~SIMULATION.COMPLEXITY.TIME')
+          )
+          (div {key: 'time-complexity',className: "expanding-submenu" + if @state.simulationType == SimulationType.time then " expanded" else ""},
+            if @state.simulationType == SimulationType.time
+              complexityRadioButtons
+          )
+        )
+      ])
+
+      (div {className: "row "+runPanelClasses},
+          (label {key: 'cap-label'}, [
+            input {
+              key: 'cap-checkbox'
+              type: 'checkbox'
+              value: 'cap-values'
+              checked: @state.capNodeValues
+              onChange: @setCapNodeValues
+            }
+            tr '~SIMULATION.CAP_VALUES'
+          ])
+        )
+
       (div {className: runPanelClasses},
         (div {className: "title"}, tr "~SIMULATION.VIEW_SETTINGS")
         (div {className: "row"},
@@ -90,22 +135,6 @@ module.exports = React.createClass
               onChange: @setRelationshipSymbols
             }
             tr '~SIMULATION.RELATIONSHIP_SYMBOLS'
-          ])
-        )
-      )
-      (div {className: runPanelClasses},
-        (div {className: "title"}, tr "~SIMULATION.SIMULATION_SETTINGS")
-
-        (div {className: "row"},
-          (label {key: 'cap-label'}, [
-            input {
-              key: 'cap-checkbox'
-              type: 'checkbox'
-              value: 'cap-values'
-              checked: @state.capNodeValues
-              onChange: @setCapNodeValues
-            }
-            tr '~SIMULATION.CAP_VALUES'
           ])
         )
       )

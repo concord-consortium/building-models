@@ -23,8 +23,7 @@ module.exports = NodeSvgGraphView = React.createClass
     y = (@props.strokeWidth-1) + point.y * (@props.height - (@props.strokeWidth+1))
     @invertPoint x:x, y:y
 
-  pointsToPath: (points)->
-    return "" unless points.length
+  pointsToPath: (points) ->
     data = _.map points, (p) => @graphMapPoint(p)
     data = _.map data,   (p) -> "#{p.x} #{p.y}"
     data = data.join " L "
@@ -49,6 +48,22 @@ module.exports = NodeSvgGraphView = React.createClass
       {x: x, y: y}
     data
 
+  getBarPath: ->
+    max  = @props.max
+    min  = @props.min
+    val = Math.min(max, Math.max(min, @props.currentValue))
+    val = val / (max - min)
+
+    left = @props.width * 0.25
+    right = @props.width * 0.75
+    bottom = @props.height
+    top = @props.height - ((@props.strokeWidth-1) + val * (@props.height - (@props.strokeWidth+1)))
+
+    data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}]
+    data = _.map data,   (p) -> "#{p.x} #{p.y}"
+    data = data.join " L "
+    "M #{data}"
+
   renderImage: ->
     imageOffset = 2
     imageStyle =
@@ -67,8 +82,17 @@ module.exports = NodeSvgGraphView = React.createClass
       position: "absolute"
       top: svgOffset
       left: svgOffset
+
+    if @props.data.length > 0
+      if @props.isTimeBased
+        chart = (path {d: @pointsToPath(@getPathPoints()), strokeWidth: @props.strokeWidth, stroke: @props.color, fill: "none"})
+      else
+        chart = (path {d: @getBarPath(), strokeWidth: @props.strokeWidth, stroke: @props.color, fill: @props.innerColor})
+    else
+      chart = null
+
     (svg {style: svgStyle, width: @props.width, height: @props.height},
-      (path {d: @pointsToPath(@getPathPoints()), strokeWidth: @props.strokeWidth, stroke: @props.color, fill: "none"})
+      chart
     )
 
   render: ->

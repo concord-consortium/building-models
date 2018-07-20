@@ -106,5 +106,20 @@ panelWidth = 236px
         flex none
         margin-right 7px
 
+    &.simulation-radio-buttons
+      border: 1px solid #D2D2D2
+      padding: 2px
+      border-radius: 4px
+
   span.disabled
     color #AAA
+
+  .expanding-submenu
+    padding-left: 10px
+
+    max-height: 0;
+    overflow: hidden;
+
+    &.expanded
+      max-height: 70px;
+      transition: max-height 0.2s ease-out;

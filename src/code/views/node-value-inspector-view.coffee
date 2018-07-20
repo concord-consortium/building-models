@@ -99,7 +99,7 @@ module.exports = React.createClass
       )
 
   renderCollectorOptions: (node) ->
-    unless @state.complexity is AppSettingsStore.store.Complexity.collectors
+    unless @state.simulationType is AppSettingsStore.store.SimulationType.time
       return null
 
     isChecked = not @state.capNodeValues and node.allowNegativeValues
