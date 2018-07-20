@@ -52,12 +52,12 @@ module.exports = React.createClass
             GraphStore: @GraphStore
             display: AppSettingsStore.store.settings.uiElements.globalNav
           )
-        (div {className: if AppSettingsStore.store.settings.uiElements.actionBar == false then 'action-bar hidden' else 'action-bar'},
+        (div {className: if AppSettingsStore.store.settings.uiElements.actionBar == false then 'action-bar hidden' else if AppSettingsStore.store.settings.uiElements.globalNav is false then 'action-bar small' else 'action-bar'},
           (NodeWell {
             palette: @state.palette
             toggleImageBrowser: @toggleImageBrowser
             graphStore: @props.graphStore
-            showNodePalette: AppSettingsStore.store.settings.uiElements.showNodePalette
+            uiElements: AppSettingsStore.store.settings.uiElements
           })
           (DocumentActions
             graphStore: @props.graphStore
@@ -65,7 +65,7 @@ module.exports = React.createClass
             iframed: @state.iframed
           )
         )
-        (div {className: if AppSettingsStore.store.settings.uiElements.canvas == false then 'canvas hidden' else 'canvas'},
+        (div {className: if AppSettingsStore.store.settings.uiElements.canvas == false then 'canvas hidden' else if AppSettingsStore.store.settings.uiElements.globalNav is false then 'canvas full' else 'canvas'},
           (GraphView {
             graphStore: @props.graphStore,
             selectionManager: @props.graphStore.selectionManager,
