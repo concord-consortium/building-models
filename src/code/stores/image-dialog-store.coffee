@@ -48,6 +48,7 @@ store = Reflux.createStore
     @resetPaletteItem()
 
   onClose: ->
+    @callback=null
     @close()
     @_updateChanges()
 
