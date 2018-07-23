@@ -139,7 +139,6 @@
     "~DOCUMENT.ACTIONS.REDO": "עשה מחדש",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "צריך להיות לפחות קשר אחד עם יחס מוגדר",
     "~SIMULATION.SIMULATION_SETTINGS": "הגדרות סימולציה",
-    "~SIMULATION.DIAGRAM_SETTINGS": "הגדרות ציור",
     "~SIMULATION.STEP_UNIT": "כל חישוב הוא אחד",
     "~SIMULATION.DURATION": "חישובים להרצה",
     "~SIMULATION.CAP_VALUES": "הגבל ערכים לטווח מינימום\\מקסימום",
@@ -173,12 +172,13 @@
     "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "ציור בלבד ללא סימולציה",
     "~SIMULATION.COMPLEXITY.BASIC": "קשרי עליה\\ירידה בסיסיים ",
     "~SIMULATION.COMPLEXITY.EXPANDED": "קשרים מתקדמים כוללים גרפים מותאמים",
-    "~SIMULATION.COMPLEXITY.COLLECTORS": "כולל מצבורים",
     "~NODE-RELATION-EDIT.SETS_INITIAL": "קובע את הערך ההתחלתי של",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_MORE": "יותר",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS": "פחות",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A": "יותר %{sourceTitle} פירושו",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B": "␣יעבור ל %{targetTitle} בכל␣",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "יותר %{targetTitle} פירושו",
-    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": "␣%{sourceTitle} יעבור בכל␣"
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": "␣%{sourceTitle} יעבור בכל␣",
+    "~SIMULATION.COMPLEXITY.STATIC": "סימולצית שיווי-משקל סטטי",
+    "~SIMULATION.COMPLEXITY.TIME": "סימולציה דינמית תלוית-זמן"
 }

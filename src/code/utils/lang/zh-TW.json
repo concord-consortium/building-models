@@ -139,7 +139,6 @@
     "~DOCUMENT.ACTIONS.REDO": "重複",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "必須至少有一個具有定義關係的鏈接。",
     "~SIMULATION.SIMULATION_SETTINGS": "模擬設定",
-    "~SIMULATION.DIAGRAM_SETTINGS": "圖表設定",
     "~SIMULATION.STEP_UNIT": "每次計算為1",
     "~SIMULATION.DURATION": "每次執行的運算",
     "~SIMULATION.CAP_VALUES": "設定最小/最大值的範圍",
@@ -171,14 +170,15 @@
     "~TIME.YEAR.PLURAL": "年",
     "~SIMULATION.VIEW_SETTINGS": "View settings",
     "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "僅使用繪製模型工具",
-    "~SIMULATION.COMPLEXITY.BASIC": "Basic (increases/decreases) relationships",
-    "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships including custom graphs",
-    "~SIMULATION.COMPLEXITY.COLLECTORS": "Include collectors",
+    "~SIMULATION.COMPLEXITY.BASIC": "Basic relationships",
+    "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships",
     "~NODE-RELATION-EDIT.SETS_INITIAL": "sets the initial value of",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_MORE": "more",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS": "fewer/less",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A": "More %{sourceTitle} means",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B": " will be transferred to %{targetTitle} each ",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "More %{targetTitle} means",
-    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} will be transferred each "
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} will be transferred each ",
+    "~SIMULATION.COMPLEXITY.STATIC": "Static equilibrium simulation",
+    "~SIMULATION.COMPLEXITY.TIME": "Dynamic time-based simulation"
 }
