@@ -32,7 +32,6 @@ AppSettingsStore   = Reflux.createStore
     else
       SimulationType.DEFAULT
 
-
     uiElements = {
       globalNav: true,
       actionBar: true,
@@ -41,13 +40,18 @@ AppSettingsStore   = Reflux.createStore
       showNodePalette: true
     }
     uiParams = HashParams.getParam('uielements')
+    # For hosted situations where some ui elements are to be hidden, this parameter can be specified.
+    # If this parameter is present, Any unspecified elements are assumed to be disabled.
+    # Example usage for full (normal) display: uielements=globalNav,actionBar,canvas,inspectorPanel,showNodePalette
     if uiParams
-      uiOpts = uiParams.split("")
-      uiElements.globalNav = uiOpts[0] == "1"
-      uiElements.actionBar = uiOpts[1] == "1"
-      uiElements.canvas = uiOpts[2] == "1"
-      uiElements.inspectorPanel = uiOpts[3] == "1"
-      uiElements.showNodePalette = uiOpts[4] == "1"
+      uiOpts = uiParams.split(",")
+      uiElements.globalNav = uiParams.indexOf("globalNav") > -1
+      uiElements.actionBar = uiParams.indexOf("actionBar") > -1
+      uiElements.canvas = uiParams.indexOf("canvas") > -1
+      uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") > -1
+      uiElements.showNodePalette = uiParams.indexOf("showNodePalette") > -1
+
+    lockdown = HashParams.getParam('lockdown') == "true"
 
     @settings =
       showingSettingsDialog: false
@@ -56,6 +60,7 @@ AppSettingsStore   = Reflux.createStore
       showingMinigraphs: false
       relationshipSymbols: false
       uiElements: uiElements
+      lockdown: lockdown
 
   onShowMinigraphs: (show) ->
     @settings.showingMinigraphs = show
