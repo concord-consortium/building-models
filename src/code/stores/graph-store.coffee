@@ -514,7 +514,6 @@ GraphStore  = Reflux.createStore
       linkDescription += "#{source.x},#{source.y};"
       linkDescription += link.relation.formula + ";"
       linkDescription += "#{target.x},#{target.y}|"
-
       if link.relation.isDefined
         isCappedAccumulator = source.isAccumulator and not source.allowNegativeValues
         capValue = if isCappedAccumulator then ':cap' else ''
@@ -524,7 +523,7 @@ GraphStore  = Reflux.createStore
           transfer = link.transferNode
           modelDescription += "#{transfer.key}:#{transfer.initialValue}:#{transfer.combineMethod};" if transfer
         modelDescription += "#{target.key}#{if target.isAccumulator then ':'+(target.value ? target.initialValue) else ''}|"
-
+        modelDescription += target.combineMethod
     linkDescription += nodes.length     # we need to redraw targets when new node is added
 
     return {
