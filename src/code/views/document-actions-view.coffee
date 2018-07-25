@@ -20,8 +20,8 @@ module.exports = React.createClass
       selectedLinks      = manager.getLinkInspection() or []
 
       @setState
-        #selectedNodes: selectedNodes
-        #selectedLinks: selectedLinks
+        selectedNodes: selectedNodes
+        selectedLinks: selectedLinks
         selectedItems: selectedNodes.concat selectedLinks
 
   undoClicked: ->
@@ -32,12 +32,10 @@ module.exports = React.createClass
 
   deleteClicked: ->
     if @state.lockdown
+      # only allow deletion of links in lockdown mode
       @props.graphStore.removeSelectedLinks()
-      # if @state.selectedLinks && @state.selectedLinks.length
-        # only allow deletion of links in lockdown mode
-        # @props.graphStore.removeSelectedLinks()
 
-    else #if @state.selectedItems && @state.selectedItems.length > 0
+    else
       @props.graphStore.deleteSelected()
 
     @props.graphStore.selectionManager.clearSelection()
@@ -56,9 +54,9 @@ module.exports = React.createClass
       unless @state.hideUndoRedo
         (div {className: 'misc-actions'},
           # lockdown mode only highlight delete button when we have a link selected
-          # @state.lockdown && @state.selectedLinks && @state.selectedLinks.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked}
-          # )
-          @state.selectedItems && @state.selectedItems.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked})
+          @state.lockdown && @state.selectedLinks && @state.selectedLinks.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked}
+          )
+          !@state.lockdown && @state.selectedItems && @state.selectedItems.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked})
           (i {className: "icon-codap-arrow-undo #{buttonClass @state.canUndo}", onClick: @undoClicked, disabled: not @state.canUndo})
           (i {className: "icon-codap-arrow-redo #{buttonClass @state.canRedo}", onClick: @redoClicked, disabled: not @state.canRedo})
         )
