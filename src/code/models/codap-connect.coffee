@@ -5,6 +5,7 @@ undoRedoUIActions = (require '../stores/undo-redo-ui-store').actions
 SimulationStore = require '../stores/simulation-store'
 TimeUnits       = require '../utils/time-units'
 escapeRegExp = (require '../utils/escape-reg-ex').escapeRegExp
+# log -- see loglevel in package.json
 
 module.exports = class CodapConnect
 
@@ -27,6 +28,7 @@ module.exports = class CodapConnect
     @simulationCollectionName = "Simulation"
     @samplesCollectionName = "Samples"
 
+    @defaultExperimentName = "ExpNo"
     SimulationStore.actions.recordingFramesCreated.listen  @addData.bind(@)
 
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
@@ -104,6 +106,7 @@ module.exports = class CodapConnect
     if @_attrsToSync and @_attrsAreLoaded
       @_syncAttributeProperties @_attrsToSync, true
       @_attrsToSync = null
+      @updateExperimentColumn()
 
   _createDataContext: ->
     sampleDataAttrs = @_getSampleAttributes()
@@ -121,7 +124,7 @@ module.exports = class CodapConnect
                 singleCase: 'run'
                 pluralCase: 'runs'
               attrs: [
-                name: tr '~CODAP.SIMULATION.EXPERIMENT'
+                name: @defaultExperimentName
                 type: 'categorical'
               ]
             },
@@ -238,7 +241,7 @@ module.exports = class CodapConnect
     if codapKey
       message =
         action: 'update'
-        resource: "dataContext[Sage Simulation].collection[Samples].attribute[#{codapKey}]"
+        resource: "dataContext[#{@dataContextName}].collection[#{@samplesCollectionName}].attribute[#{codapKey}]"
         values: { name: node.title }
         meta:
           dirtyDocument: false
@@ -247,7 +250,56 @@ module.exports = class CodapConnect
           if response?.values?.attrs
             @_syncAttributeProperties response.values.attrs
         else if node.codapID and node.codapName
-          console.log "Error: CODAP attribute rename failed!"
+          log.warn "Error: CODAP attribute rename failed!"
+
+  updateExperimentColumn: ->
+    experimentNumberLabel = tr '~CODAP.SIMULATION.EXPERIMENT'
+    handleSimulationAttributes = (listAttributeResponse) =>
+      if listAttributeResponse?.success
+        values = _.pluck(listAttributeResponse.values, 'name')
+        if  _.includes(values, @defaultExperimentName)
+          @renameExperimentNumberColumn(experimentNumberLabel)
+        else if (! _.includes(values, experimentNumberLabel))
+          @createExperimentNumberColumn experimentNumberLabel
+        else
+          log.info "No update requred: #{experimentNumberLabel} exists."
+      else
+        log.warn "CODAP: unable to list Simulation attributes"
+
+    getListing =
+      action: 'get'
+      resource: "dataContext[#{@dataContextName}].collection[#{@simulationCollectionName}].attributeList"
+    @codapPhone.call(getListing, handleSimulationAttributes)
+
+  createExperimentNumberColumn: (label) ->
+    experimentAttributes =
+      name: label
+      type: 'categorical'
+    message =
+      action: 'create'
+      resource: "dataContext[#{@dataContextName}].collection[#{@simulationCollectionName}].attribute"
+      values: [ experimentAttributes ]
+    @codapPhone.call message, (response) ->
+      if response.success
+        log.info "created attribute #{label}"
+      else
+        log.warn "Unable to create attribute #{label}"
+
+  renameExperimentNumberColumn: (label) ->
+    @renameSimulationProperty(@defaultExperimentName, label)
+
+  renameSimulationProperty: (oldValue, newValue) ->
+    message =
+      action: 'update'
+      resource: "dataContext[#{@dataContextName}].collection[#{@simulationCollectionName}].attribute[#{oldValue}]"
+      values: { name: newValue }
+      meta:
+        dirtyDocument: false
+    @codapPhone.call message, (response) ->
+      if response.success
+        log.info "Renamed Simulation attribute: #{oldValue} → #{newValue}"
+      else
+        log.info "CODAP rename Simulation attribute failed!"
 
   _timeStamp: ->
     new Date().getTime()
@@ -425,7 +477,7 @@ module.exports = class CodapConnect
           , (ret2) ->
             if ret2?.success
               lastCase = ret2.values['case']
-              lastExperimentNumber = lastCase.values[tr "~CODAP.SIMULATION.EXPERIMENT"]
+              lastExperimentNumber = parseInt(lastCase.values[tr '~CODAP.SIMULATION.EXPERIMENT']) || 0
               SimulationStore.actions.setExperimentNumber lastExperimentNumber + 1
 
       @initGameHandler ret
