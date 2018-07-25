@@ -65,7 +65,7 @@ module.exports = React.createClass
             iframed: @state.iframed
           )
         )
-        (div {className: if AppSettingsStore.store.settings.uiElements.canvas == false then 'canvas hidden' else if AppSettingsStore.store.settings.uiElements.globalNav is false then 'canvas full' else 'canvas'},
+        (div {className: if AppSettingsStore.store.settings.uiElements.globalNav is false then 'canvas full' else 'canvas'},
           (GraphView {
             graphStore: @props.graphStore,
             selectionManager: @props.graphStore.selectionManager,
