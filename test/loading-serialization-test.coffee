@@ -27,6 +27,7 @@ describe "Serialization and Loading", ->
     @sandbox = Sinon.sandbox.create()
     @sandbox.stub CodapConnect, "instance", ->
       sendUndoableActionPerformed: -> return ''
+      _createMissingDataAttributes: -> return ''
 
     @serializedForm = JSON.stringify SerializedTestData
     @fakePalette = [

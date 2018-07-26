@@ -172,6 +172,7 @@ describe 'Node', ->
       sandbox.stub(CodapConnect, "instance", ->
         return {
           sendUndoableActionPerformed: -> return ''
+          _createMissingDataAttributes: -> return ''
         }
       )
 
@@ -225,6 +226,7 @@ describe "Graph Topology", ->
     sandbox.stub(CodapConnect, "instance", ->
       return {
         sendUndoableActionPerformed: -> return ''
+        _createMissingDataAttributes: -> return ''
       }
     )
 
@@ -367,6 +369,7 @@ describe "Graph Descriptions", ->
     sandbox.stub(CodapConnect, "instance", ->
       return {
         sendUndoableActionPerformed: -> return ''
+        _createMissingDataAttributes: -> return ''
       }
     )
 

@@ -42,7 +42,7 @@ describe "The minimum complexity", ->
     @sandbox = Sinon.sandbox.create()
     @sandbox.stub CodapConnect, "instance", ->
       sendUndoableActionPerformed: -> return ''
-
+      _createMissingDataAttributes: -> return ''
     @graphStore = GraphStore
     @graphStore.init()
 
@@ -100,7 +100,7 @@ describe "The minimum simulation type", ->
     @sandbox = Sinon.sandbox.create()
     @sandbox.stub CodapConnect, "instance", ->
       sendUndoableActionPerformed: -> return ''
-
+      _createMissingDataAttributes: -> return ''
     @graphStore = GraphStore
     @graphStore.init()
 

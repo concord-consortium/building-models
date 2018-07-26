@@ -364,6 +364,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
     @sandbox.stub(CodapConnect, "instance", ->
       return {
         sendUndoableActionPerformed: -> return ''
+        _createMissingDataAttributes: -> return ''
       }
     )
 

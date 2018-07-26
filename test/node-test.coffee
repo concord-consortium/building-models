@@ -19,6 +19,7 @@ describe "A Node", ->
     sandbox.stub(CodapConnect, "instance", ->
       return {
         sendUndoableActionPerformed: -> return ''
+        _createMissingDataAttributes: -> return ''
       }
     )
     @graphStore = GraphStore.store
