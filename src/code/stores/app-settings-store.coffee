@@ -36,18 +36,18 @@ AppSettingsStore   = Reflux.createStore
       globalNav: true,
       actionBar: true,
       inspectorPanel: true,
-      showNodePalette: true
+      nodePalette: true
     }
-    uiParams = HashParams.getParam('uielements')
-    # For hosted situations where some ui elements are to be hidden, this parameter can be specified.
-    # If this parameter is present, Any unspecified elements are assumed to be disabled.
-    # Example usage for full (normal) display: uielements=globalNav,actionBar,canvas,inspectorPanel,showNodePalette
+    uiParams = HashParams.getParam('hide')
+    # For situations where some ui elements need to be hidden, this parameter can be specified.
+    # If this parameter is present, Any specified elements are disabled or hidden.
+    # Example usage: hide=globalNav,inspectorPanel
     if uiParams
       uiOpts = uiParams.split(",")
-      uiElements.globalNav = uiParams.indexOf("globalNav") > -1
-      uiElements.actionBar = uiParams.indexOf("actionBar") > -1
-      uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") > -1
-      uiElements.showNodePalette = uiParams.indexOf("showNodePalette") > -1
+      uiElements.globalNav = uiParams.indexOf("globalNav") == -1
+      uiElements.actionBar = uiParams.indexOf("actionBar") == -1
+      uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") == -1
+      uiElements.nodePalette = uiParams.indexOf("nodePalette") == -1
 
     lockdown = HashParams.getParam('lockdown') == "true"
 
