@@ -7,7 +7,7 @@ should = require('chai').should()
 expect = chai.expect
 
 
-describe.only "Migrations",  ->
+describe "Migrations",  ->
   describe "update", ->
     beforeEach ->
       @result = Migrations.update(originalData)
