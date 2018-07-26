@@ -42,6 +42,12 @@ module.exports = React.createClass
     @setState showImageBrowser: not @state.showImageBrowser
 
   render: ->
+    actionBarStyle = 'action-bar'
+    if AppSettingsStore.store.settings.uiElements.actionBar is false
+      actionBarStyle += ' hidden'
+    else if AppSettingsStore.store.settings.uiElements.globalNav is false
+      actionBarStyle += ' small'
+
     (div {className: 'app'},
       (div {className: if @state.iframed then 'iframed-workspace' else 'workspace'},
         if not @state.iframed && AppSettingsStore.store.settings.uiElements.globalNav != false
@@ -52,7 +58,7 @@ module.exports = React.createClass
             GraphStore: @GraphStore
             display: AppSettingsStore.store.settings.uiElements.globalNav
           )
-        (div {className: if AppSettingsStore.store.settings.uiElements.actionBar == false then 'action-bar hidden' else if AppSettingsStore.store.settings.uiElements.globalNav is false then 'action-bar small' else 'action-bar'},
+        (div {className: actionBarStyle},
           (NodeWell {
             palette: @state.palette
             toggleImageBrowser: @toggleImageBrowser
