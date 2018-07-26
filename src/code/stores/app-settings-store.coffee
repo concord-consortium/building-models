@@ -43,7 +43,6 @@ AppSettingsStore   = Reflux.createStore
     # If this parameter is present, Any specified elements are disabled or hidden.
     # Example usage: hide=globalNav,inspectorPanel
     if uiParams
-      uiOpts = uiParams.split(",")
       uiElements.globalNav = uiParams.indexOf("globalNav") == -1
       uiElements.actionBar = uiParams.indexOf("actionBar") == -1
       uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") == -1

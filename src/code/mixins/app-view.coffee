@@ -23,6 +23,7 @@ module.exports =
   addDeleteKeyHandler: (add) ->
     if add
       if AppSettingsStore.store.settings.lockdown
+        # In Lockdown mode users can only remove relationships between links
         deleteFunction = @props.graphStore.removeSelectedLinks.bind @props.graphStore
       else
         deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
