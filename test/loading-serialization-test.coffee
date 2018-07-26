@@ -17,17 +17,14 @@ Node             = requireModel 'node'
 GraphStore       = require "#{__dirname}/../src/code/stores/graph-store"
 AppSettingsStore = require "#{__dirname}/../src/code/stores/app-settings-store"
 SimulationStore  = require "#{__dirname}/../src/code/stores/simulation-store"
-CodapConnect     = requireModel 'codap-connect'
 RelationFactory  = requireModel 'relation-factory'
+CodapHelper      = require "./codap-helper"
 
 SerializedTestData = require "./serialized-test-data/v-0.1"
 
 describe "Serialization and Loading", ->
   beforeEach ->
-    @sandbox = Sinon.sandbox.create()
-    @sandbox.stub CodapConnect, "instance", ->
-      sendUndoableActionPerformed: -> return ''
-      _createMissingDataAttributes: -> return ''
+    CodapHelper.Stub()
 
     @serializedForm = JSON.stringify SerializedTestData
     @fakePalette = [
@@ -54,7 +51,7 @@ describe "Serialization and Loading", ->
     ]
 
   afterEach ->
-    CodapConnect.instance.restore()
+    CodapHelper.UnStub()
 
 
   describe "For a model created by a user", ->

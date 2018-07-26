@@ -10,24 +10,17 @@ Sinon          = require('sinon')
 requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 
 Node           = requireModel 'node'
-GraphStore    = require "#{__dirname}/../src/code/stores/graph-store"
-CodapConnect   = requireModel 'codap-connect'
+GraphStore     = require "#{__dirname}/../src/code/stores/graph-store"
+CodapHelper    = require './codap-helper'
 
 describe "A Node", ->
   beforeEach ->
-    sandbox = Sinon.sandbox.create()
-    sandbox.stub(CodapConnect, "instance", ->
-      return {
-        sendUndoableActionPerformed: -> return ''
-        _createMissingDataAttributes: -> return ''
-      }
-    )
+    CodapHelper.Stub()
     @graphStore = GraphStore.store
     @graphStore.init()
 
   afterEach ->
-    CodapConnect.instance.restore()
-
+    CodapHelper.UnStub()
 
   it "can be added with properties", ->
     newNode = new Node({title: "a", x:10, y:15}, 'a')
