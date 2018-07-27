@@ -205,6 +205,7 @@ describe "Serialization and Loading", ->
       @graphStore.nodeKeys['a'].image.should.equal "img/nodes/chicken.png"
       @graphStore.nodeKeys['b'].image.should.equal "img/nodes/egg.png"
 
+
     it "should load the nodes previous frames", ->
       data = JSON.parse(@serializedForm)
       data.nodes[1].frames = [50]
@@ -212,3 +213,24 @@ describe "Serialization and Loading", ->
       @graphStore.nodeKeys['a'].frames.length.should.equal 0
       @graphStore.nodeKeys['b'].frames.length.should.equal 1
       @graphStore.nodeKeys['b'].frames[0].should.equal 50
+
+    it "Should load saved `combineMethod` for nodes if present", ->
+      sampleNodes = '{
+        "filename": "sample model",
+        "nodes": [
+          {
+            "key": "a",
+            "combineMethod": "average"
+          },{
+            "key": "b",
+            "combineMethod": "product"
+          },{
+            "key": "c"
+          }
+        ]
+      }'
+      data = JSON.parse(sampleNodes)
+      @graphStore.loadData(data)
+      @graphStore.nodeKeys['a'].combineMethod.should.equal "average"
+      @graphStore.nodeKeys['b'].combineMethod.should.equal "product"
+      should.not.exist(@graphStore.nodeKeys['c'].combineMethod)
