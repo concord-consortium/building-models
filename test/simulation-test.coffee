@@ -31,7 +31,7 @@ GraphStore        = requireStore('graph-store').store
 SimulationStore   = requireStore('simulation-store').store
 SimulationActions = requireStore('simulation-store').actions
 
-CodapConnect   = requireModel 'codap-connect'
+CodapHelper = require './codap-helper'
 
 
 LinkNodes = (sourceNode, targetNode, relationSpec) ->
@@ -360,12 +360,7 @@ describe "Simulation", ->
 
 describe "The SimulationStore, with a network in the GraphStore", ->
   beforeEach ->
-    @sandbox = Sinon.sandbox.create()
-    @sandbox.stub(CodapConnect, "instance", ->
-      return {
-        sendUndoableActionPerformed: -> return ''
-      }
-    )
+    CodapHelper.Stub()
 
     @nodeA    = new Node({title: "A", initialValue: 10})
     @nodeB    = new Node({title: "B", initialValue: 0 })
@@ -379,7 +374,7 @@ describe "The SimulationStore, with a network in the GraphStore", ->
     LinkNodes(@nodeA, @nodeB, { type: 'range', formula: @formula })
 
   afterEach ->
-    CodapConnect.instance.restore()
+    CodapHelper.UnStub()
 
   describe "for a fast simulation for 10 iterations", ->
 
@@ -402,11 +397,11 @@ describe "The SimulationStore, with a network in the GraphStore", ->
           data.length.should.equal 10
 
           frame0 = data[0]
-          frame0.time.should.equal 1
+          frame0.time.should.equal 11
           frame0.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
           frame9 = data[9]
-          frame9.time.should.equal 10
+          frame9.time.should.equal 20
           frame9.nodes.should.eql [ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]
 
       SimulationActions.createExperiment()
