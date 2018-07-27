@@ -1,5 +1,6 @@
 PaletteStore    = require "../stores/palette-store"
 CodapStore      = require "../stores/codap-store"
+LaraStore       = require "../stores/lara-store"
 GoogleFileStore = require "../stores/google-file-store"
 HashParams      = require "../utils/hash-parameters"
 tr              = require '../utils/translate'
@@ -59,6 +60,7 @@ module.exports =
     @_registerUndoRedoKeys()
     PaletteStore.store.listen @onPaletteChange
     CodapStore.store.listen @onCodapStateChange
+    LaraStore.store.listen @onLaraStateChange
 
   componentWillUnmount: ->
     @addDeleteKeyHandler false

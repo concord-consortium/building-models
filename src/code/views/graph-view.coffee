@@ -14,6 +14,7 @@ RelationFactory  = require "../models/relation-factory"
 SimulationStore  = require "../stores/simulation-store"
 AppSettingsStore = require "../stores/app-settings-store"
 CodapStore       = require "../stores/codap-store"
+LaraStore        = require "../stores/lara-store"
 LinkColors       = require "../utils/link-colors"
 
 {div} = React.DOM
@@ -21,7 +22,7 @@ LinkColors       = require "../utils/link-colors"
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin ]
+  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin, LaraStore.mixin ]
 
   getDefaultProps: ->
     linkTarget: '.link-top'

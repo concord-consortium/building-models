@@ -12,8 +12,10 @@ AppSettingsStore    = require "../stores/app-settings-store"
 SimulationStore     = require "../stores/simulation-store"
 GraphActions        = require "../actions/graph-actions"
 CodapActions        = require '../actions/codap-actions'
+LaraActions         = require "../actions/lara-actions"
 InspectorPanelStore = require "../stores/inspector-panel-store"
 CodapConnect        = require '../models/codap-connect'
+LaraConnect         = require '../models/lara-connect'
 RelationFactory     = require "../models/relation-factory"
 DEFAULT_CONTEXT_NAME = 'building-models'
 
@@ -35,6 +37,7 @@ GraphStore  = Reflux.createStore
     SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)
 
     @usingCODAP = false
+    @usingLara = false
     @codapStandaloneMode = false
 
     @lastRunModel = ""   # string description of the model last time we ran simulation
@@ -97,7 +100,8 @@ GraphStore  = Reflux.createStore
   revertToLastSave: ->
     @undoRedoManager.revertToLastSave()
 
-  setUsingCODAP: (@usingCODAP) ->
+  setUsingCODAP: (@usingCODAP) -> console.log "using codap", @usingCODAP
+  setUsingLara: (@usingLara) -> console.log "using lara", @usingLara
 
   setCodapStandaloneMode: (@codapStandaloneMode) ->
 
