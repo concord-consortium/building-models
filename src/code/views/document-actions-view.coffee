@@ -2,6 +2,7 @@
 AboutView        = React.createFactory require './about-view'
 AppSettingsStore = require '../stores/app-settings-store'
 CodapStore       = require '../stores/codap-store'
+LaraStore        = require '../stores/lara-store'
 UndoRedoUIStore  = require '../stores/undo-redo-ui-store'
 tr               = require '../utils/translate'
 
@@ -9,7 +10,7 @@ SimulationRunPanel = React.createFactory require './simulation-run-panel-view'
 
 module.exports = React.createClass
 
-  mixins: [ CodapStore.mixin, UndoRedoUIStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ CodapStore.mixin, LaraStore.mixin, UndoRedoUIStore.mixin, AppSettingsStore.mixin ]
 
   displayName: 'DocumentActions'
 
