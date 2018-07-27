@@ -353,7 +353,7 @@ describe 'NodeList', ->
       # A -> B+ -> C -x-> D
       nodeA    = new Node({x: 10, y: 15, initialValue: 10})
       nodeB    = new Node({x: 20, y: 25, initialValue: 20, isAccumulator: true})
-      nodeC    = new Node({x: 30, y: 35, initialValue: 30})
+      nodeC    = new Node({x: 30, y: 35, initialValue: 30, combineMethod: 'average'})
       nodeD    = new Node({x: 40, y: 45, initialValue: 40})
       formula  = "1 * in"
       linkA = makeLink(nodeA, nodeB, formula)
@@ -378,4 +378,4 @@ describe 'NodeList', ->
     it "should describe the model graph correctly", ->
       graphStore = GraphStore.store
       desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks())
-      desc.model.should.equal "steps:10|cap:false|Node-71:10;1 * in;Node-72:20|Node-72:20:cap;1 * in;Node-73|"
+      desc.model.should.equal "steps:10|cap:false|Node-71:10;1 * in;Node-72:20|Node-72:20:cap;1 * in;Node-73;average|"
