@@ -1,4 +1,5 @@
 IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
+IframePhone = (require 'iframe-phone')
 tr = require '../utils/translate'
 LaraActions    = require '../actions/lara-actions'
 undoRedoUIActions = (require '../stores/undo-redo-ui-store').actions
@@ -27,54 +28,29 @@ module.exports = class LaraConnect
     @simulationCollectionName = "Simulation"
     @samplesCollectionName = "Samples"
 
-    @laraPhone = new IframePhoneRpcEndpoint( @laraRequestHandler,
-      'initInteractive', window.parent )
+    @laraPhone = IframePhone.getIFrameEndpoint()
 
-    # load any previous data
-    @laraPhone.call(
-      'initInteractive',
-      (response) -> console.log(response)
+    # Setup listeners
+    @laraPhone.addListener 'initInteractive', (data) =>
+      console.log "Init received from parent", data
+      @laraPhone.post "response", data
 
-    )
+    @laraPhone.addListener 'getInteractiveState', (data) =>
+      console.log "Get Request for state received from parent - TODO: Respond with interactiveState", data
+      @laraPhone.post "response", data
 
-    console.log('got lara?')
-    @graphStore.setUsingLara true
+    @laraPhone.addListener 'interactiveState', (data) =>
+      console.log "Request for state received from parent", data
+      @laraPhone.post "response", data
 
+    # load any previous data by initializing handshake
+    @laraPhone.post 'initInteractive', 'hi'
 
   _timeStamp: ->
     new Date().getTime()
-
 
   _shouldSend: ->
     currentTime = @_timeStamp()
     elapsedTime = currentTime - @lastTimeSent
     return elapsedTime > @sendThrottleMs
 
-  laraRequestHandler: (cmd, callback) ->
-    console.log(cmd)
-
-
-  #
-  # Requests a CODAP action, if the Building Models tool is configured to reside
-  # in CODAP. For actions that may be requested, see
-  # https://github.com/concord-consortium/codap/wiki/CODAP-Data-Interactive-Plugin-API .
-  #
-  # Similarly to the Google Drive API, this method will report results of its
-  # asynchronous request either by invoking the provided callback, or, if no
-  # callback is provided, will return a Promise.
-  #
-  # Example:
-  #   codapConnect.request('logAction', {formatStr: 'test message'}).then ->
-  #     log.info 'received log reply!'
-  #
-
-  request: (action, args, callback) ->
-    promise = new Promise (resolve, reject) =>
-      @laraPhone.call { action: action, args: args }, (reply) ->
-        if callback
-          callback reply
-        if reply and reply.success
-          resolve reply
-        else
-          reject 'LARA request error'
-    promise
