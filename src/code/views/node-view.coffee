@@ -119,7 +119,7 @@ module.exports = NodeView = React.createClass
     return if not @props.selectionManager
 
     selectionKey = if actually_select then @props.nodeKey else "dont-select-anything"
-    multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey
+    multipleSelections = evt && (evt.ctrlKey || evt.metaKey || evt.shiftKey)
     @props.selectionManager.selectNodeForInspection(@props.data, multipleSelections)
 
     # open the relationship panel on double click if the node has incombing links

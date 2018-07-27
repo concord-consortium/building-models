@@ -28,18 +28,16 @@ module.exports = class LaraConnect
     @samplesCollectionName = "Samples"
 
     @laraPhone = new IframePhoneRpcEndpoint( @laraRequestHandler,
-      'initInteractive', window.parent )
+      'laraInteractive', window.parent )
 
     # load any previous data
     @laraPhone.call(
       'initInteractive',
-      (response) -> console.log(response)
-
+      (response) ->
+        if (response)
+          console.log 'got lara?', response
+          GraphStore.store.setUsingLara true
     )
-
-    console.log('got lara?')
-    @graphStore.setUsingLara true
-
 
   _timeStamp: ->
     new Date().getTime()
@@ -52,21 +50,6 @@ module.exports = class LaraConnect
 
   laraRequestHandler: (cmd, callback) ->
     console.log(cmd)
-
-
-  #
-  # Requests a CODAP action, if the Building Models tool is configured to reside
-  # in CODAP. For actions that may be requested, see
-  # https://github.com/concord-consortium/codap/wiki/CODAP-Data-Interactive-Plugin-API .
-  #
-  # Similarly to the Google Drive API, this method will report results of its
-  # asynchronous request either by invoking the provided callback, or, if no
-  # callback is provided, will return a Promise.
-  #
-  # Example:
-  #   codapConnect.request('logAction', {formatStr: 'test message'}).then ->
-  #     log.info 'received log reply!'
-  #
 
   request: (action, args, callback) ->
     promise = new Promise (resolve, reject) =>
