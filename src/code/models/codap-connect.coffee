@@ -257,12 +257,11 @@ module.exports = class CodapConnect
     handleSimulationAttributes = (listAttributeResponse) =>
       if listAttributeResponse?.success
         values = _.pluck(listAttributeResponse.values, 'name')
-        if  _.includes(values, @defaultExperimentName)
-          @renameExperimentNumberColumn(experimentNumberLabel)
-        else if (! _.includes(values, experimentNumberLabel))
-          @createExperimentNumberColumn experimentNumberLabel
-        else
-          log.info "No update requred: #{experimentNumberLabel} exists."
+        if not _.includes(values, experimentNumberLabel)
+          if _.includes(values, @defaultExperimentName)
+            @renameExperimentNumberColumn experimentNumberLabel
+          else
+            @createExperimentNumberColumn experimentNumberLabel
       else
         log.warn "CODAP: unable to list Simulation attributes"
 
@@ -477,7 +476,7 @@ module.exports = class CodapConnect
           , (ret2) ->
             if ret2?.success
               lastCase = ret2.values['case']
-              lastExperimentNumber = parseInt(lastCase.values[tr '~CODAP.SIMULATION.EXPERIMENT']) || 0
+              lastExperimentNumber = parseInt(lastCase.values[tr '~CODAP.SIMULATION.EXPERIMENT'], 10) || 0
               SimulationStore.actions.setExperimentNumber lastExperimentNumber + 1
 
       @initGameHandler ret
