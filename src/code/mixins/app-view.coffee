@@ -20,6 +20,17 @@ module.exports =
   componentDidUpdate: ->
     log.info 'Did Update: AppView'
 
+  addTouchDeviceHandler: (add) ->
+    isMobileDevice = /Android|webOS|iPhone|iPad|iPod|Opera Mini/i.test navigator.userAgent
+    if isMobileDevice
+      AppSettingsStore.actions.setTouchDevice true
+    else if add
+      $(window).on 'touchstart', (e) ->
+        AppSettingsStore.actions.setTouchDevice true
+        $(window).off 'touchstart'
+    else
+      $(window).off 'touchstart'
+
   addDeleteKeyHandler: (add) ->
     if add
       if AppSettingsStore.store.settings.lockdown
@@ -38,6 +49,7 @@ module.exports =
 
   componentDidMount: ->
     @addDeleteKeyHandler true
+    @addTouchDeviceHandler true
     @props.graphStore.selectionManager.addSelectionListener @_updateSelection
 
     @props.graphStore.addFilenameListener (filename) =>

@@ -44,18 +44,18 @@ module.exports = React.createClass
       (SimulationRunPanel {})
 
   render: ->
+    showDeleteUI = !@state.uiElements.inspectorPanel && @state.touchDevice
     buttonClass = (enabled) -> if not enabled then 'disabled' else ''
     (div {className: 'document-actions'},
       (div {className: "misc-actions"},
         @renderRunPanel()
       )
-
       unless @state.hideUndoRedo
         (div {className: 'misc-actions'},
           # In Lockdown mode only show the Delete button when we have a link selected
-          @state.lockdown && @state.selectedLinks && @state.selectedLinks.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked})
+          showDeleteUI && @state.lockdown && @state.selectedLinks && @state.selectedLinks.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked})
           # In normal operation, show the Delete button whenever we have a node or relationship selected
-          !@state.lockdown && @state.selectedItems && @state.selectedItems.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked})
+          showDeleteUI && !@state.lockdown && @state.selectedItems && @state.selectedItems.length > 0 && (i {className: "icon-codap-trash", onClick: @deleteClicked})
           (i {className: "icon-codap-arrow-undo #{buttonClass @state.canUndo}", onClick: @undoClicked, disabled: not @state.canUndo})
           (i {className: "icon-codap-arrow-redo #{buttonClass @state.canRedo}", onClick: @redoClicked, disabled: not @state.canRedo})
         )
