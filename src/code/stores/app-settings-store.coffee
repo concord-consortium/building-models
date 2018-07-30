@@ -23,7 +23,6 @@ SimulationType = {
   DEFAULT: 1
 }
 
-
 AppSettingsStore   = Reflux.createStore
   listenables: [AppSettingsActions, ImportActions]
 
@@ -33,12 +32,32 @@ AppSettingsStore   = Reflux.createStore
     else
       SimulationType.DEFAULT
 
+    uiElements = {
+      globalNav: true,
+      actionBar: true,
+      inspectorPanel: true,
+      nodePalette: true
+    }
+    uiParams = HashParams.getParam('hide')
+    # For situations where some ui elements need to be hidden, this parameter can be specified.
+    # If this parameter is present, Any specified elements are disabled or hidden.
+    # Example usage: hide=globalNav,inspectorPanel
+    if uiParams
+      uiElements.globalNav = uiParams.indexOf("globalNav") == -1
+      uiElements.actionBar = uiParams.indexOf("actionBar") == -1
+      uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") == -1
+      uiElements.nodePalette = uiParams.indexOf("nodePalette") == -1
+
+    lockdown = HashParams.getParam('lockdown') == "true"
+
     @settings =
       showingSettingsDialog: false
       complexity: Complexity.DEFAULT
       simulationType: simulationType
       showingMinigraphs: false
       relationshipSymbols: false
+      uiElements: uiElements
+      lockdown: lockdown
 
   onShowMinigraphs: (show) ->
     @settings.showingMinigraphs = show

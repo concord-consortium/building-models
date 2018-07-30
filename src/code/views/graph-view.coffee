@@ -45,7 +45,8 @@ module.exports = React.createClass
       selectedNodes     = manager.getNodeInspection() or []
       editingNode       = manager.getNodeTitleEditing()[0] or null
       selectedLink      = manager.getLinkInspection() or []
-      editingLink       = manager.getLinkTitleEditing()[0] or null
+      # only allow link labels if simulation is not in lockdown mode
+      editingLink       = if not AppSettingsStore.store.settings.lockdown then manager.getLinkTitleEditing()[0] or null else false
 
       @setState
         selectedNodes: selectedNodes

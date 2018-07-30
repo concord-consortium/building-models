@@ -3,6 +3,7 @@ CodapStore      = require "../stores/codap-store"
 GoogleFileStore = require "../stores/google-file-store"
 HashParams      = require "../utils/hash-parameters"
 tr              = require '../utils/translate'
+AppSettingsStore = require '../stores/app-settings-store'
 
 module.exports =
 
@@ -21,7 +22,12 @@ module.exports =
 
   addDeleteKeyHandler: (add) ->
     if add
-      deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
+      if AppSettingsStore.store.settings.lockdown
+        # In Lockdown mode users can only remove relationships between links
+        deleteFunction = @props.graphStore.removeSelectedLinks.bind @props.graphStore
+      else
+        deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
+
       $(window).on 'keydown', (e) ->
         # 8 is backspace, 46 is delete
         if e.which in [8, 46] and not $(e.target).is('input, textarea')
