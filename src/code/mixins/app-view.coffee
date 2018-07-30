@@ -21,7 +21,10 @@ module.exports =
     log.info 'Did Update: AppView'
 
   addTouchDeviceHandler: (add) ->
-    if add
+    isMobileDevice = /Android|webOS|iPhone|iPad|iPod|Opera Mini/i.test navigator.userAgent
+    if isMobileDevice
+      AppSettingsStore.actions.setTouchDevice true
+    else if add
       $(window).on 'touchstart', (e) ->
         AppSettingsStore.actions.setTouchDevice true
         $(window).off 'touchstart'
