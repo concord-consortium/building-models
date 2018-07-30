@@ -7,6 +7,7 @@ AppSettingsActions = Reflux.createActions(
     "setSimulationType"
     "showMinigraphs"
     "relationshipSymbols"
+    "setTouchDevice"
   ]
 )
 
@@ -57,7 +58,8 @@ AppSettingsStore   = Reflux.createStore
       showingMinigraphs: false
       relationshipSymbols: false
       uiElements: uiElements
-      lockdown: lockdown
+      lockdown: lockdown,
+      touchDevice: false
 
   onShowMinigraphs: (show) ->
     @settings.showingMinigraphs = show
@@ -67,6 +69,10 @@ AppSettingsStore   = Reflux.createStore
     @settings.complexity = val
     if val is 0
       @settings.showingMinigraphs = false
+    @notifyChange()
+
+  onSetTouchDevice: (val) ->
+    @settings.touchDevice = val
     @notifyChange()
 
   onSetSimulationType: (val) ->

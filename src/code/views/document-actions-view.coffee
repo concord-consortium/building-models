@@ -43,8 +43,8 @@ module.exports = React.createClass
     if not @props.diagramOnly
       (SimulationRunPanel {})
 
-   render: ->
-    showDeleteUI = !@state.uiElements.inspectorPanel
+  render: ->
+    showDeleteUI = !@state.uiElements.inspectorPanel && @state.touchDevice
     buttonClass = (enabled) -> if not enabled then 'disabled' else ''
     (div {className: 'document-actions'},
       (div {className: "misc-actions"},
