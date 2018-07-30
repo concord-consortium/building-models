@@ -1,4 +1,3 @@
-IframePhoneRpcEndpoint = (require 'iframe-phone').IframePhoneRpcEndpoint
 IframePhone = (require 'iframe-phone')
 tr = require '../utils/translate'
 LaraActions    = require '../actions/lara-actions'
@@ -23,6 +22,8 @@ module.exports = class LaraConnect
     @graphStore = GraphStore.store
     @lastTimeSent = @_timeStamp()
     @sendThrottleMs = 300
+
+    @laraPhone = IframePhone.getIFrameEndpoint()
 
     # Setup listeners
     @laraPhone.addListener 'initInteractive', (data) =>

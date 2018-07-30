@@ -15,6 +15,7 @@ module.exports = React.createClass
   displayName: 'DocumentActions'
 
   componentDidMount: ->
+    isTouchDevice = "ontouchstart" in document.documentElement # works on console, not in here
     deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
     @props.graphStore.selectionManager.addSelectionListener (manager) =>
       selectedNodes     = manager.getNodeInspection() or []
@@ -24,6 +25,7 @@ module.exports = React.createClass
         selectedNodes: selectedNodes
         selectedLinks: selectedLinks
         selectedItems: selectedNodes.concat selectedLinks
+        touchDevice: isTouchDevice
 
   undoClicked: ->
     @props.graphStore.undo()
