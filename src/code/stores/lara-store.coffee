@@ -7,7 +7,6 @@ laraStore   = Reflux.createStore
   init: ->
     laraConnect = LaraConnect.instance 'building-models'
     @laraHasLoaded = false
-    @hideUndoRedo   = false
 
   onLaraLoaded: ->
     @laraHasLoaded = true
@@ -16,7 +15,6 @@ laraStore   = Reflux.createStore
   notifyChange: ->
     data =
       laraHasLoaded: @laraHasLoaded
-      hideUndoRedo:   @hideUndoRedo
     @trigger(data)
 
 mixin =

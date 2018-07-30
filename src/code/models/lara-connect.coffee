@@ -24,12 +24,6 @@ module.exports = class LaraConnect
     @lastTimeSent = @_timeStamp()
     @sendThrottleMs = 300
 
-    @dataContextName = "Sage Simulation"
-    @simulationCollectionName = "Simulation"
-    @samplesCollectionName = "Samples"
-
-    @laraPhone = IframePhone.getIFrameEndpoint()
-
     # Setup listeners
     @laraPhone.addListener 'initInteractive', (data) =>
       console.log "Init received from parent", data
