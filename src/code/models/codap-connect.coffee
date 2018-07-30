@@ -252,6 +252,20 @@ module.exports = class CodapConnect
         else if node.codapID and node.codapName
           log.warn "Error: CODAP attribute rename failed!"
 
+
+
+  # updateExperimentColumn
+  #
+  # At the time of document creation in CODAP we don't always know
+  # the final language the document is going to be rendered in. For
+  # example, An author sets up a CODAP document with Sage, and some
+  # other CODAP plugins. Next, they make copies of this document for
+  # several languages. Regardless of the author's language setting,
+  # the experiment number column has the un-localized label. Later
+  # when an i18 user collects experiment data for the first time, we
+  # then rename the column from the default to that user's language.
+  # We could partially avoid this if data CODAP table attributes
+  # supported `titles` for localized names.
   updateExperimentColumn: ->
     experimentNumberLabel = tr '~CODAP.SIMULATION.EXPERIMENT'
     handleSimulationAttributes = (listAttributeResponse) =>
