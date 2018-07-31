@@ -1,5 +1,6 @@
 HashParams      = require '../utils/hash-parameters'
 ImportActions   = require '../actions/import-actions'
+urlParams       = require '../utils/url-params'
 
 AppSettingsActions = Reflux.createActions(
   [
@@ -28,7 +29,7 @@ AppSettingsStore   = Reflux.createStore
   listenables: [AppSettingsActions, ImportActions]
 
   init: ->
-    simulationType = if HashParams.getParam('simplified')
+    simulationType = if HashParams.getParam('simplified') || urlParams['simplified']
       SimulationType.diagramOnly
     else
       SimulationType.DEFAULT
@@ -39,7 +40,7 @@ AppSettingsStore   = Reflux.createStore
       inspectorPanel: true,
       nodePalette: true
     }
-    uiParams = HashParams.getParam('hide')
+    uiParams = HashParams.getParam('hide') || urlParams['hide']
     # For situations where some ui elements need to be hidden, this parameter can be specified.
     # If this parameter is present, Any specified elements are disabled or hidden.
     # Example usage: hide=globalNav,inspectorPanel
@@ -49,7 +50,7 @@ AppSettingsStore   = Reflux.createStore
       uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") == -1
       uiElements.nodePalette = uiParams.indexOf("nodePalette") == -1
 
-    lockdown = HashParams.getParam('lockdown') == "true"
+    lockdown = HashParams.getParam('lockdown') == "true" || urlParams['lockdown']
 
     @settings =
       showingSettingsDialog: false
