@@ -106,7 +106,7 @@
     });
 
     let initialSample = {}
-    $.getJSON('./json/dat-cross_base.json', (data) => {initialSample = data;});
+    $.getJSON('/json/dat-cross_base.json', (data) => {initialSample = data;});
     // does the frame call init down to child first, or does it respond to when the child has loaded?
     // Assuming the frame is loaded after the parent, so we respond to the child's "I'm ready" call
     phone.addListener('initInteractive', function(data){
