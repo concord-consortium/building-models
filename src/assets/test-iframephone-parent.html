@@ -46,15 +46,15 @@
       font-weight: bold;
     }
   </style>
-
-  <script src="js/iframe-phone.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script src="https://s3.amazonaws.com/models-resources/iframe-phone/iframe-phone.js"></script>
 </head>
 <body>
   <p>
     Drag the bottom right thumb to resize. Currently <span id="size">600x500</span>.  Auto resize to <a href="800x600">800x600</a>, <a href="1024x768">1024x768</a>, <a href="1280x1024">1280x1024</a>, <a href="1366x768">1366x768</a>.
   </p>
   <div id="container">
-    <iframe src="index.html" id="testFrame"></iframe>
+    <iframe src="index.html#hide=inspectorPanel,globalNav,nodePalette&simplified=true&lockdown=true" id="testFrame"></iframe>
     <img id="resize-handle" src="img/wireframes/resize_handle.gif" alt='resize'/>
   </div>
   <div id="overlay"></div>
@@ -105,11 +105,13 @@
       console.log("connection with iframe established");
     });
 
+    let initialSample = {}
+    $.getJSON('./json/dat-cross_base.json', (data) => {initialSample = data;});
     // does the frame call init down to child first, or does it respond to when the child has loaded?
     // Assuming the frame is loaded after the parent, so we respond to the child's "I'm ready" call
     phone.addListener('initInteractive', function(data){
       console.log("Init received from child", data);
-      phone.post('initInteractive', 'abc');
+      phone.post('initInteractive', initialSample);
     });
     phone.addListener('response', function (content) {
       console.log("parent received response: " + JSON.stringify(content));
@@ -117,8 +119,14 @@
     phone.addListener('log', function (content) {
       console.log("parent received log: " + JSON.stringify(content));
     });
-    phone.addListener('save', function (content) {
+    // Can send phone.post('interactiveState') to get the current state of the interactive
+    // Interactive will respond with data.
+    phone.addListener('interactiveState', function (content) {
       console.log("parent received save: " + JSON.stringify(content));
+    });
+
+    phone.addListener('data-interactive', function (data) {
+        // Do nothing - we are not using CODAP
     });
   </script>
 </body>
