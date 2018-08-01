@@ -58,6 +58,7 @@
     <img id="resize-handle" src="img/wireframes/resize_handle.gif" alt='resize'/>
   </div>
   <div id="overlay"></div>
+  <input type="button" id="getStateButton" onclick="interactiveState()" value="Get State" />
   <script src="js/globals.js"></script>
   <script>
     var $container = $("#container"),
@@ -101,9 +102,10 @@
     });
 
     let frame = document.getElementById('testFrame');
-    var phone = new iframePhone.ParentEndpoint(frame, function () {
+    let phone = new iframePhone.ParentEndpoint(frame, function () {
       console.log("connection with iframe established");
     });
+    window.phone = phone;
 
     let initialSample = {}
     $.getJSON('json/dat-cross_base.json', (data) => {initialSample = data;});
@@ -128,6 +130,10 @@
     phone.addListener('data-interactive', function (data) {
         // Do nothing - we are not using CODAP
     });
+
+    function interactiveState() {
+      window.phone.post('interactiveState');
+    };
   </script>
 </body>
 </html>

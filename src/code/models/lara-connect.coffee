@@ -17,9 +17,11 @@ module.exports = class LaraConnect
   constructor: (context) ->
     log.info 'LaraConnect: initializing'
     GraphStore = require '../stores/graph-store'
+    PaletteStore  = require '../stores/palette-store'
     @standaloneMode = false
     @queue = []
     @graphStore = GraphStore.store
+    @paletteStore = PaletteStore.store
     @lastTimeSent = @_timeStamp()
     @sendThrottleMs = 300
 
@@ -27,15 +29,19 @@ module.exports = class LaraConnect
 
     # Setup listeners
     @laraPhone.addListener 'initInteractive', (data) =>
-      console.log "Init received from parent", data
-      if typeof data is "string"
-        data = JSON.parse data
-      if data and data.content
-        @graphStore.loadData data.content
+      if not data
+        @laraPhone.post "response", "init failed!"
+      else
+        console.log "Init received from parent", data
+        if typeof data is "string"
+          data = JSON.parse data
+        if data.content
+          @graphStore.loadData data.content
+        else
+          @graphStore.loadData data
         nodeCount = @graphStore.getNodes().length
         console.log "loaded " + nodeCount + " node(s)"
         @laraPhone.post "response", "init Success!"
-      else
 
     @laraPhone.addListener 'getInteractiveState', (data) =>
       console.log "Get Request for state received from parent - TODO: Respond with interactiveState", data
@@ -43,11 +49,11 @@ module.exports = class LaraConnect
 
     @laraPhone.addListener 'interactiveState', (data) =>
       console.log "Request for state received from parent", data
-      serializedData = @graphStore.serialize
-      @laraPhone.post "response", serializedData
+      saveData = @graphStore.toJsonString @paletteStore.palette
+      @laraPhone.post "response", saveData
 
     # load any previous data by initializing handshake
-    @laraPhone.post 'initInteractive', 'hi'
+    @laraPhone.post 'initInteractive', 'Sage is ready'
 
   _timeStamp: ->
     new Date().getTime()
