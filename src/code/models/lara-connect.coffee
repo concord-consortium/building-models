@@ -44,13 +44,9 @@ module.exports = class LaraConnect
         @laraPhone.post "response", "init Success!"
 
     @laraPhone.addListener 'getInteractiveState', (data) =>
-      console.log "Get Request for state received from parent - TODO: Respond with interactiveState", data
-      @laraPhone.post "response", data
-
-    @laraPhone.addListener 'interactiveState', (data) =>
       console.log "Request for state received from parent", data
       saveData = @graphStore.toJsonString @paletteStore.palette
-      @laraPhone.post "response", saveData
+      @laraPhone.post "interactiveState", saveData
 
     # load any previous data by initializing handshake
     @laraPhone.post 'initInteractive', 'Sage is ready'

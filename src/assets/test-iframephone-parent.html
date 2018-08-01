@@ -121,7 +121,7 @@
     phone.addListener('log', function (content) {
       console.log("parent received log: " + JSON.stringify(content));
     });
-    // Can send phone.post('interactiveState') to get the current state of the interactive
+    // Can send phone.post('getInteractiveState') to get the current state of the interactive
     // Interactive will respond with data.
     phone.addListener('interactiveState', function (content) {
       console.log("parent received save: " + JSON.stringify(content));
@@ -132,7 +132,7 @@
     });
 
     function interactiveState() {
-      window.phone.post('interactiveState');
+      window.phone.post('getInteractiveState');
     };
   </script>
 </body>
