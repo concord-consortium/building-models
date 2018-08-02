@@ -21,13 +21,8 @@ module.exports = class LaraConnect
     PaletteStore  = require '../stores/palette-store'
     @undoRedoManager = UndoRedo.instance debug:false, context:context
     @loaded = false
-    @standaloneMode = false
-    @queue = []
     @graphStore = GraphStore.store
     @paletteStore = PaletteStore.store
-    @lastTimeSent = @_timeStamp()
-    @sendThrottleMs = 300
-
     @laraPhone = IframePhone.getIFrameEndpoint()
 
     # Setup listeners
@@ -35,7 +30,7 @@ module.exports = class LaraConnect
       if not data
         @laraPhone.post "response", "init failed!"
       else
-        console.log "Init received from parent", data
+        log.info "Init received from parent", data
         @graphStore.setUsingLara true
         if typeof data is "string"
           data = JSON.parse data
@@ -44,16 +39,17 @@ module.exports = class LaraConnect
         else
           @graphStore.loadData data
         nodeCount = @graphStore.getNodes().length
-        console.log "loaded " + nodeCount + " node(s)"
-        @laraPhone.post "response", "init Success!"
+        loadResult = "Initialization success! Loaded " + nodeCount + " node(s)"
+        log.info loadResult
+        @laraPhone.post "response", loadResult
         @loaded = true
 
     @laraPhone.addListener 'getInteractiveState', (data) =>
-      console.log "Request for state received from parent", data
+      log.info "Request for interactiveState received from parent Iframe", data
       saveData = @graphStore.toJsonString @paletteStore.palette
       @laraPhone.post "interactiveState", saveData
 
-    @unsubscribe = @graphStore.addChangeListener @onUndoRedoStateChange.bind(@)
+    @graphStore.addChangeListener @onUndoRedoStateChange.bind(@)
 
     # load any previous data by initializing handshake
     @laraPhone.post 'initInteractive', 'Sage is ready'
@@ -62,12 +58,3 @@ module.exports = class LaraConnect
     lastAction = @undoRedoManager.commands[@undoRedoManager.stackPosition]
     if lastAction and @loaded
       @laraPhone.post 'log', {action: lastAction.name}
-
-  _timeStamp: ->
-    new Date().getTime()
-
-  _shouldSend: ->
-    currentTime = @_timeStamp()
-    elapsedTime = currentTime - @lastTimeSent
-    return elapsedTime > @sendThrottleMs
-

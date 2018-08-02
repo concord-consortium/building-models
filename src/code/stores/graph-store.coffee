@@ -100,8 +100,8 @@ GraphStore  = Reflux.createStore
   revertToLastSave: ->
     @undoRedoManager.revertToLastSave()
 
-  setUsingCODAP: (@usingCODAP) -> console.log "using codap", @usingCODAP
-  setUsingLara: (@usingLara) -> console.log "using lara", @usingLara
+  setUsingCODAP: (@usingCODAP) ->
+  setUsingLara: (@usingLara) ->
 
   setCodapStandaloneMode: (@codapStandaloneMode) ->
 
