@@ -134,6 +134,9 @@ class Manager
     @_clearRedo()
     @_changed()
 
+  lastChange: ->
+    "Undo Stack: [#{(_.pluck (@commands.slice 0, @stackPosition + 1), 'name').join ', '}]"
+
   _clearRedo: ->
     @commands = @commands.slice 0, @stackPosition + 1
 

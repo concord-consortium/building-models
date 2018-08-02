@@ -2,7 +2,6 @@
 AboutView        = React.createFactory require './about-view'
 AppSettingsStore = require '../stores/app-settings-store'
 CodapStore       = require '../stores/codap-store'
-LaraStore        = require '../stores/lara-store'
 UndoRedoUIStore  = require '../stores/undo-redo-ui-store'
 tr               = require '../utils/translate'
 
@@ -10,12 +9,12 @@ SimulationRunPanel = React.createFactory require './simulation-run-panel-view'
 
 module.exports = React.createClass
 
-  mixins: [ CodapStore.mixin, LaraStore.mixin, UndoRedoUIStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ CodapStore.mixin, UndoRedoUIStore.mixin, AppSettingsStore.mixin ]
 
   displayName: 'DocumentActions'
 
   componentDidMount: ->
-    isTouchDevice = "ontouchstart" in document.documentElement # works on console, not in here
+    # isTouchDevice = "ontouchstart" in document.documentElement # works on console, not in here
     deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
     @props.graphStore.selectionManager.addSelectionListener (manager) =>
       selectedNodes     = manager.getNodeInspection() or []
@@ -25,7 +24,7 @@ module.exports = React.createClass
         selectedNodes: selectedNodes
         selectedLinks: selectedLinks
         selectedItems: selectedNodes.concat selectedLinks
-        touchDevice: isTouchDevice
+        # touchDevice: isTouchDevice
 
   undoClicked: ->
     @props.graphStore.undo()
@@ -47,7 +46,7 @@ module.exports = React.createClass
       (SimulationRunPanel {})
 
   render: ->
-    showDeleteUI = !@state.uiElements.inspectorPanel && @state.touchDevice
+    showDeleteUI = !@state.uiElements.inspectorPanel && (@state.touchDevice || @props.graphStore.usingLara)
     buttonClass = (enabled) -> if not enabled then 'disabled' else ''
     (div {className: 'document-actions'},
       (div {className: "misc-actions"},
