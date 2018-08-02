@@ -24,6 +24,7 @@ module.exports = class LaraConnect
     @graphStore = GraphStore.store
     @paletteStore = PaletteStore.store
     @laraPhone = IframePhone.getIFrameEndpoint()
+    @lastCommandStackPosition = -1
 
     # Setup listeners
     @laraPhone.addListener 'initInteractive', (data) =>
@@ -57,4 +58,9 @@ module.exports = class LaraConnect
   onUndoRedoStateChange: (state) ->
     lastAction = @undoRedoManager.commands[@undoRedoManager.stackPosition]
     if lastAction and @loaded
-      @laraPhone.post 'log', {action: lastAction.name}
+      if @undoRedoManager.stackPosition < (@undoRedoManager.commands.length - 1) and @lastCommandStackPosition > @undoRedoManager.stackPosition
+        # User clicked Undo
+        @laraPhone.post 'log', {action: "undo"}
+      else
+        @laraPhone.post 'log', {action: lastAction.name}
+    @lastCommandStackPosition = @undoRedoManager.stackPosition
