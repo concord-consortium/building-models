@@ -95,9 +95,10 @@ module.exports = class CodapConnect
       if !ret or ret.success
         if (attrs = ret?.values?.collections?[1]?.attrs?)
           @_initialSyncAttributeProperties attrs
-        @_getExperimentNumber()
       else
         @_createDataContext()
+      @updateExperimentColumn()
+      @_getExperimentNumber()
 
   # initial synchronization; primarily used for synchronizing legacy documents
   _initialSyncAttributeProperties: (attrs, isLoaded) ->
@@ -106,7 +107,7 @@ module.exports = class CodapConnect
     if @_attrsToSync and @_attrsAreLoaded
       @_syncAttributeProperties @_attrsToSync, true
       @_attrsToSync = null
-      @updateExperimentColumn()
+
 
   _createDataContext: ->
     sampleDataAttrs = @_getSampleAttributes()
