@@ -34,7 +34,9 @@ we are using.
 
 3. Run:
     * `gulp` — watches the project sources in `./src/` and builds artifacts into `dev`.
-    * `live-server dev`– starts a live webserver on localhost:8080 with autorefreshing.
+    * `live-server dev`– starts a live webserver on https://localhost:8080 with autorefreshing.  You will need to allow the self-signed live-server-https certificate
+       (click the Advanced link on the error page when the app loads in Chrome and then accept the certificate there).
+    * `dev` - runs both scripts above in a single command
     * Edit code in `./src/`, watch live changes in browser. (Gulp will build your changes automatically to `./dev/`, and Live-Server will automatically refresh when it sees changes there.)
     * Place static files you want to be copied to `dev/` in `src/assets/`
 
