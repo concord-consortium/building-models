@@ -147,3 +147,27 @@ describe "Migrations",  ->
         @result.settings.simulationType.should.equal 1
         @result.settings.complexity.should.equal 1
 
+      describe "a known failing case", ->
+        brokenExample   = require "./serialized-test-data/v-1.21.0"
+        expect(brokenExample).to.exist
+        expect(brokenExample.version).to.equal('1.21.0')
+        # Before 1.22.0 complexity settings were:
+        # 0:Diagram Only, 1:Basic relations 2:Expanded relations 3:Collectors
+        expect(brokenExample.settings.complexity).to.equal(3)
+        Migrations.update(brokenExample)
+        expect(brokenExample.version).to.equal('1.22.0')
+        # see `app-settings-store.coffee`
+        # Complexity = {
+        #   basic: 0
+        #   expanded: 1
+        #   DEFAULT: 1
+        # }
+        # SimulationType = {
+        #   diagramOnly: 0
+        #   static: 1
+        #   time: 2
+        #   DEFAULT: 1
+        # }
+        expect(brokenExample.settings.simulationType).to.equal(2)
+        expect(brokenExample.settings.complexity).to.equal(1)
+
