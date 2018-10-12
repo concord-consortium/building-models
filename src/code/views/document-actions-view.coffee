@@ -44,7 +44,7 @@ module.exports = React.createClass
       (SimulationRunPanel {})
 
   render: ->
-    showDeleteUI = !@state.uiElements.inspectorPanel && @state.touchDevice
+    showDeleteUI = !@state.uiElements.inspectorPanel && (@state.touchDevice || @props.graphStore.usingLara)
     buttonClass = (enabled) -> if not enabled then 'disabled' else ''
     (div {className: 'document-actions'},
       (div {className: "misc-actions"},
