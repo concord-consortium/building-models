@@ -100,7 +100,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.22.0"
+        model.version.should.equal "1.23.0"
         model.nodes.length.should.equal 3
         model.links.length.should.equal 2
 
