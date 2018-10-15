@@ -11,8 +11,8 @@ migration =
     # This migration addresses a failing case where a simulation with
     # collector nodes was not coreectly migrating the simulationType
     # to time-based.
-    
-    if data.nodes.some((node) -> node.data.isAccumulator)
+
+    if _.some(data.nodes, (node) -> node.data.isAccumulator)
       data.settings.simulationType = AppSettingsStore.SimulationType.time
 
 module.exports = _.mixin migration, require './migration-mixin'

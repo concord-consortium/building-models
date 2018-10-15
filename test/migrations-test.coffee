@@ -150,7 +150,7 @@ describe "Migrations",  ->
     describe "v-1.23.0 changes", ->
       describe "a known failing case", ->
         # This test case is based on a field-reported bug whereby a simulation
-        # containg collector nodes was not coreectly migrating the simulationType
+        # containg collector nodes was not corectly migrating the simulationType
         # to time-based. In other words, the wrong value is 1 and the value
         # we want is 2.
         brokenExample = require "./serialized-test-data/v-1.22.0"
