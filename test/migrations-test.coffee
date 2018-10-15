@@ -13,8 +13,8 @@ describe "Migrations",  ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.22.0", ->
-        @result.version.should.equal "1.22.0"
+      it "should be 1.23.0", ->
+        @result.version.should.equal "1.23.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -147,27 +147,18 @@ describe "Migrations",  ->
         @result.settings.simulationType.should.equal 1
         @result.settings.complexity.should.equal 1
 
+    describe "v-1.23.0 changes", ->
       describe "a known failing case", ->
-        brokenExample   = require "./serialized-test-data/v-1.21.0"
-        expect(brokenExample).to.exist
-        expect(brokenExample.version).to.equal('1.21.0')
-        # Before 1.22.0 complexity settings were:
-        # 0:Diagram Only, 1:Basic relations 2:Expanded relations 3:Collectors
-        expect(brokenExample.settings.complexity).to.equal(3)
-        Migrations.update(brokenExample)
+        # This test case is based on a field-reported bug whereby a simulation
+        # containg collector nodes was not coreectly migrating the simulationType
+        # to time-based. In other words, the wrong value is 1 and the value
+        # we want is 2.
+        brokenExample = require "./serialized-test-data/v-1.22.0"
+        # Pre-test our broken json is our expected version of 1.22.0
         expect(brokenExample.version).to.equal('1.22.0')
-        # see `app-settings-store.coffee`
-        # Complexity = {
-        #   basic: 0
-        #   expanded: 1
-        #   DEFAULT: 1
-        # }
-        # SimulationType = {
-        #   diagramOnly: 0
-        #   static: 1
-        #   time: 2
-        #   DEFAULT: 1
-        # }
+        expect(brokenExample.settings.simulationType).to.equal(1) # wrong value!
+        # Now migrate & test for corrected migration. 
+        Migrations.update(brokenExample)
+        expect(brokenExample.version).to.equal('1.23.0')
         expect(brokenExample.settings.simulationType).to.equal(2)
-        expect(brokenExample.settings.complexity).to.equal(1)
 
