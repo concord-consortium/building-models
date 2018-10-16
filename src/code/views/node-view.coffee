@@ -17,29 +17,32 @@ NodeTitle = React.createFactory React.createClass
   mixins: [require '../mixins/node-title']
 
   getInitialState: ->
-    isUniqueTitle: @isUniqueTitle @props.node.title
+    @getStateFromProps @props
 
-  isUniqueTitle: (title) ->
-    @props.graphStore.isUniqueTitle title, @props.node
+  isUniqueTitle: (title, props) ->
+    @props.graphStore.isUniqueTitle title, (props or @props).node
 
   componentWillUnmount: ->
     if @props.isEditing
       @inputElm().off()
 
   componentWillUpdate: (nextProps) ->
-    # mark the title as updated even if no change was made when it leaves edit mode
-    @titleUpdated = true if @props.isEditing and not nextProps.isEditing
+    if @props.isEditing and not nextProps.isEditing
+      # mark the title as updated even if no change was made when it leaves edit mode
+      @titleUpdated = true
+    else if not @props.isEditing and nextProps.isEditing
+      # reset title state based on node title
+      @setState @getStateFromProps nextProps
 
   componentDidUpdate: ->
     if @props.isEditing
       $elem = @inputElm()
       $elem.focus()
 
-      $elem.off()
-      enterKey = 13
-      $elem.on "keyup", (e)=>
-        if e.which is enterKey
-          @finishEditing()
+  getStateFromProps: (props) ->
+    title: props.node.title
+    isUniqueTitle: @isUniqueTitle props.node.title, props
+    isCancelled: false
 
   inputElm: ->
     $(@refs.input)
@@ -47,20 +50,32 @@ NodeTitle = React.createFactory React.createClass
   inputValue: ->
     @inputElm().val()
 
-  detectDeleteWhenEmpty: (e) ->
+  handleKeyUp: (e) ->
     # 8 is backspace, 46 is delete
     if e.which in [8, 46] and not @titleUpdated
-      @props.graphStore.removeNode @props.nodeKey
+      canDeleteWhenEmpty = @props.node.addedThisSession and not @titleUpdated
+      if canDeleteWhenEmpty
+        @props.graphStore.removeNode @props.nodeKey
+    # 13 is enter
+    else if e.which is 13
+      @finishEditing()
+    # 27 is escape
+    else if e.which is 27
+      @setState isCancelled: true, => @finishEditing()
 
-  updateTitle: (isComplete) ->
+  updateTitle: (isComplete, callback) ->
     @titleUpdated = true
-    newTitle = @cleanupTitle(@inputValue(), isComplete)
-    @setState isUniqueTitle: @isUniqueTitle newTitle
-    @props.onChange(newTitle, isComplete)
+    title = if @state.isCancelled then @props.node.title else @inputValue()
+    newTitle = @cleanupTitle(title, isComplete)
+    newState =
+      title: newTitle,
+      isUniqueTitle: @isUniqueTitle newTitle
+    @setState newState, callback
 
   finishEditing: ->
-    @updateTitle(true)
-    @props.onStopEditing()
+    @updateTitle true, =>
+      @props.onChange(@state.title, true) unless @state.isCancelled
+      @props.onStopEditing()
 
   renderTitle: ->
     (div {
@@ -71,8 +86,7 @@ NodeTitle = React.createFactory React.createClass
     }, @props.title)
 
   renderTitleInput: ->
-    displayTitle = @displayTitleForInput(@props.title)
-    canDeleteWhenEmpty = @props.node.addedThisSession and not @titleUpdated
+    displayTitle = @displayTitleForInput(@state.title)
     className = "node-title#{if not @state.isUniqueTitle then ' non-unique-title' else ''}"
     (input {
       type: "text"
@@ -80,7 +94,7 @@ NodeTitle = React.createFactory React.createClass
       key: "edit"
       style: { display: if @props.isEditing then "block" else "none" }
       className: className
-      onKeyUp: if canDeleteWhenEmpty then @detectDeleteWhenEmpty else null
+      onKeyUp: if @props.isEditing then @handleKeyUp else null
       onChange: => @updateTitle()
       value: displayTitle
       maxLength: @maxTitleLength()
