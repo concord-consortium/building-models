@@ -137,7 +137,10 @@ GraphStore  = Reflux.createStore
     transferNode = @nodeKeys[linkSpec.transferNode] if linkSpec.transferNode
     linkSpec.sourceNode = sourceNode
     linkSpec.targetNode = targetNode
-    linkSpec.transferNode = transferNode if transferNode
+    if transferNode
+      linkSpec.transferNode = transferNode
+    else
+      delete linkSpec.transferNode
     link = new Link(linkSpec)
     @addLink(link)
     link
