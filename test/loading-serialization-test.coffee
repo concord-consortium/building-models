@@ -234,3 +234,9 @@ describe "Serialization and Loading", ->
       @graphStore.nodeKeys['a'].combineMethod.should.equal "average"
       @graphStore.nodeKeys['b'].combineMethod.should.equal "product"
       should.not.exist(@graphStore.nodeKeys['c'].combineMethod)
+
+    it "should remove references to missing transferNodes", ->
+      data = JSON.parse(@serializedForm)
+      data.links[0].transferNode = "Transfer-1"
+      @graphStore.loadData(data)
+      should.not.exist @graphStore.linkKeys['a ------> b'].transferNode
