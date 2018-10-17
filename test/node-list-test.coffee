@@ -51,7 +51,7 @@ describe 'NodeList', ->
 
     describe 'the id', ->
       beforeEach ->
-        GraphPrimitive.reset_counters()
+        GraphPrimitive.resetCounters()
 
       describe 'of a GraphPrimitive', ->
         it 'should increment the counter, and use the type name (GraphPrimitive)', ->

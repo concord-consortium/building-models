@@ -17,6 +17,7 @@ InspectorPanelStore = require "../stores/inspector-panel-store"
 CodapConnect        = require '../models/codap-connect'
 LaraConnect         = require '../models/lara-connect'
 RelationFactory     = require "../models/relation-factory"
+GraphPrimitive      = require '../models/graph-primitive'
 DEFAULT_CONTEXT_NAME = 'building-models'
 
 GraphStore  = Reflux.createStore
@@ -473,6 +474,7 @@ GraphStore  = Reflux.createStore
   deleteAll: ->
     for node of @nodeKeys
       @removeNode node
+    GraphPrimitive.resetCounters()
     @setFilename 'New Model'
     @undoRedoManager.clearHistory()
 
