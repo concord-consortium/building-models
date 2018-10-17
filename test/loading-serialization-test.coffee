@@ -100,7 +100,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.23.0"
+        model.version.should.equal "1.24.0"
         model.nodes.length.should.equal 3
         model.links.length.should.equal 2
 
@@ -214,7 +214,7 @@ describe "Serialization and Loading", ->
       @graphStore.nodeKeys['b'].frames.length.should.equal 1
       @graphStore.nodeKeys['b'].frames[0].should.equal 50
 
-    it "Should load saved `combineMethod` for nodes if present", ->
+    it "Should load saved `combineMethod` for all nodes, defaulting to 'average'", ->
       sampleNodes = '{
         "filename": "sample model",
         "nodes": [
@@ -233,7 +233,8 @@ describe "Serialization and Loading", ->
       @graphStore.loadData(data)
       @graphStore.nodeKeys['a'].combineMethod.should.equal "average"
       @graphStore.nodeKeys['b'].combineMethod.should.equal "product"
-      should.not.exist(@graphStore.nodeKeys['c'].combineMethod)
+      @graphStore.nodeKeys['c'].combineMethod.should.equal "average"
+ 
 
     it "should remove references to missing transferNodes", ->
       data = JSON.parse(@serializedForm)

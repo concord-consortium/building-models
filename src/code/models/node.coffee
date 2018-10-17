@@ -30,6 +30,9 @@ module.exports = class Node extends GraphPrimitive
       @key = key
     @links = []
 
+    # Set the nodes instance variables from `nodespec` constructor param
+    # Specify default values using key = <defaultValue>
+    # see https://halfdecent.net/2013/12/02/coffeescript-constructor-options-with-defaults/
     {
       @x=0
       @y=0
@@ -39,13 +42,13 @@ module.exports = class Node extends GraphPrimitive
       @image
       @isAccumulator=false
       @allowNegativeValues = false
-      @valueDefinedSemiQuantitatively=true,
+      @valueDefinedSemiQuantitatively=true
       @paletteItem
       @frames=[]
       @addedThisSession=false
+      @combineMethod = 'average'
     } = nodeSpec
 
-    @combineMethod = nodeSpec.combineMethod if nodeSpec.combineMethod
     accumulatorScaleUrlParam = (urlParams.collectorScale and Number(urlParams.collectorScale)) or 1
     @accumulatorInputScale = if accumulatorScaleUrlParam > 0 then accumulatorScaleUrlParam else 1
 
@@ -238,8 +241,7 @@ module.exports = class Node extends GraphPrimitive
         allowNegativeValues: @allowNegativeValues
         valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
         frames: _.clone @frames
-    # only serialize if it's been set explicitly
-    result.data.combineMethod = @combineMethod if @combineMethod?
+        combineMethod: @combineMethod
     result
 
   canEditInitialValue: ->
