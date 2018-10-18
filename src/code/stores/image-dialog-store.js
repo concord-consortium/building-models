@@ -6,11 +6,11 @@
  */
 // TODO:  This should be split up into and ImageDialogStore and a DialogStore…
 
-const PaletteStore = require('./palette-store');
+const PaletteStore = require("./palette-store");
 
 const imageDialogActions = Reflux.createActions([
-    "open", "close", "update", "cancel"
-  ]);
+  "open", "close", "update", "cancel"
+]);
 
 
 const store = Reflux.createStore({
@@ -83,7 +83,7 @@ const store = Reflux.createStore({
   },
 
   invoke_callback() {
-    if (typeof this.callback === 'function') {
+    if (typeof this.callback === "function") {
       this.callback(this.paletteItem);
     }
     return this.callback = null;

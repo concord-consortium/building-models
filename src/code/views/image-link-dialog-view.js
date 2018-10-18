@@ -3,16 +3,16 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const DropZone = React.createFactory(require('./dropzone-view'));
-const ImageDialogStore = require('../stores/image-dialog-store');
-const tr = require('../utils/translate');
+const DropZone = React.createFactory(require("./dropzone-view"));
+const ImageDialogStore = require("../stores/image-dialog-store");
+const tr = require("../utils/translate");
 
 const {div, p, input} = React.DOM;
 
 module.exports = React.createClass({
-  displayName: 'Link',
+  displayName: "Link",
 
-  mixins: [ ImageDialogStore.mixin, require('../mixins/image-dialog-view')],
+  mixins: [ ImageDialogStore.mixin, require("../mixins/image-dialog-view")],
 
 
   previewImage(e) {
@@ -24,7 +24,7 @@ module.exports = React.createClass({
       return this.imageSelected({
         image: url,
         metadata: {
-          source: 'external',
+          source: "external",
           link: url
         }
       });
@@ -32,15 +32,15 @@ module.exports = React.createClass({
   },
 
   render() {
-    return (div({className: 'link-dialog'},
+    return (div({className: "link-dialog"},
       this.state.selectedImage ?
         this.renderPreviewImage()
-      :
+        :
         (div({},
           (DropZone({header: (tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER")), dropped: this.imageDropped})),
           (p({}, (tr("~IMAGE-BROWSER.TYPE_OR_PASTE_LINK")))),
-          (p({}, (tr("~IMAGE-BROWSER.IMAGE_URL")), (input({ref: 'url', type: 'text'})))),
-          (p({}, (input({type: 'submit', onClick: this.previewImage, value: (tr("~IMAGE-BROWSER.PREVIEW_IMAGE"))}))))
+          (p({}, (tr("~IMAGE-BROWSER.IMAGE_URL")), (input({ref: "url", type: "text"})))),
+          (p({}, (input({type: "submit", onClick: this.previewImage, value: (tr("~IMAGE-BROWSER.PREVIEW_IMAGE"))}))))
         ))
     ));
   }

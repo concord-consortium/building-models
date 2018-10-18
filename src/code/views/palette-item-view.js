@@ -5,11 +5,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const {div, img} = React.DOM;
-const Draggable = require('../mixins/draggable');
-const SquareImage = React.createFactory(require('./square-image-view'));
+const Draggable = require("../mixins/draggable");
+const SquareImage = React.createFactory(require("./square-image-view"));
 module.exports = React.createClass({
 
-  displayName: 'ProtoNode',
+  displayName: "ProtoNode",
 
   mixins: [Draggable],
 
@@ -25,20 +25,20 @@ module.exports = React.createClass({
     const imageUrl = (this.props.image != null ? this.props.image.length : undefined) > 0 ? this.props.image : defaultImage;
 
     return (div({
-      'data-index': this.props.index,
-      'data-title': this.props.node.title,
-      'data-droptype': 'paletteItem',
+      "data-index": this.props.index,
+      "data-title": this.props.node.title,
+      "data-droptype": "paletteItem",
       className,
-      ref: 'node',
+      ref: "node",
       onClick: this.onClick
-      },
+    },
 
-      (div({ className: 'proto-node'},
-        (div({className: 'img-background'},
-          (SquareImage({image: imageUrl}) ))
-          // (img {src: imageUrl})
-        )
-      ))
+    (div({ className: "proto-node"},
+      (div({className: "img-background"},
+        (SquareImage({image: imageUrl}) ))
+      // (img {src: imageUrl})
+      )
+    ))
     ));
   }
 });

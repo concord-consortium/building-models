@@ -13,20 +13,20 @@ const circleRadius = 2;
 const constants = {
   orientation: {
     horizontal: {
-      dimension: 'width',
-      direction: 'left',
-      coordinate: 'x'
+      dimension: "width",
+      direction: "left",
+      coordinate: "x"
     },
     vertical: {
-      dimension: 'height',
-      direction: 'top',
-      coordinate: 'y'
+      dimension: "height",
+      direction: "top",
+      coordinate: "y"
     }
   }
 };
 
 const ValueSlider = React.createClass({
-  displayName: 'SVGSlider',
+  displayName: "SVGSlider",
 
   getDefaultProps() {
     return {
@@ -91,12 +91,12 @@ const ValueSlider = React.createClass({
   },
 
   componentDidMount() {
-    window.addEventListener('resize', this.handleUpdate);
+    window.addEventListener("resize", this.handleUpdate);
     return this.handleUpdate();
   },
 
   componentWillUnmount() {
-    return window.removeEventListener('resize', this.handleUpdate);
+    return window.removeEventListener("resize", this.handleUpdate);
   },
 
   handleUpdate() {
@@ -118,7 +118,7 @@ const ValueSlider = React.createClass({
 
   sliderPercent() {
     const p = this.sliderLocation() * 100;
-    if (this.props.orientation === 'horizontal') {
+    if (this.props.orientation === "horizontal") {
       return p;
     } else {
       return 100 - p;
@@ -126,10 +126,10 @@ const ValueSlider = React.createClass({
   },
 
   thickness() {
-    if (this.props.orientation === 'horizontal') { return this.props.height; } else { return this.props.width; }
+    if (this.props.orientation === "horizontal") { return this.props.height; } else { return this.props.width; }
   },
   length() {
-    if (this.props.orientation === 'horizontal') { return this.props.width; } else { return this.props.height; }
+    if (this.props.orientation === "horizontal") { return this.props.width; } else { return this.props.height; }
   },
 
   renderNumber() {
@@ -149,19 +149,19 @@ const ValueSlider = React.createClass({
 
   handleStart(e) {
     this.handleNoop(e);
-    if (typeof this.props.onSliderDragStart === 'function') {
+    if (typeof this.props.onSliderDragStart === "function") {
       this.props.onSliderDragStart();
     }
-    document.addEventListener('mousemove', this.handleDrag);
-    return document.addEventListener('mouseup',   this.handleEnd);
+    document.addEventListener("mousemove", this.handleDrag);
+    return document.addEventListener("mouseup",   this.handleEnd);
   },
 
   handleEnd() {
-    if (typeof this.props.onSliderDragEnd === 'function') {
+    if (typeof this.props.onSliderDragEnd === "function") {
       this.props.onSliderDragEnd();
     }
-    document.removeEventListener('mousemove', this.handleDrag);
-    return document.removeEventListener('mouseup',   this.handleEnd);
+    document.removeEventListener("mousemove", this.handleDrag);
+    return document.removeEventListener("mouseup",   this.handleEnd);
   },
 
   handleDrag(e) {
@@ -191,7 +191,7 @@ const ValueSlider = React.createClass({
     const percentage = (this.clamp(pos, 0, limit) / (limit || 1));
     const baseVal = stepSize * Math.round((percentage * (max - min)) / stepSize);
 
-    if (orientation === 'horizontal') {
+    if (orientation === "horizontal") {
       value = baseVal + min;
     } else {
       value = max - baseVal;
@@ -228,7 +228,7 @@ const ValueSlider = React.createClass({
       "fontSize": `${handleSize / 2}px`
     };
 
-    if (orientation === 'horizontal') {
+    if (orientation === "horizontal") {
       style.top  = `${outerEdge}px`;
       style.left = centerOfDiv; // margin will take care of the rest?
       style.marginLeft = `-${handleSize/2}px`;
@@ -245,7 +245,7 @@ const ValueSlider = React.createClass({
     } else { label = null; }
 
     let classNames = "icon-codap-smallSliderLines";
-    if (orientation !== 'horizontal') { classNames += " rotated"; }
+    if (orientation !== "horizontal") { classNames += " rotated"; }
 
     return (div({
       className: "value-slider-handle",
@@ -254,10 +254,10 @@ const ValueSlider = React.createClass({
       onMouseDown: this.handleStart,
       onTouchEnd: this.handleNoop,
       onTouchMove: this.handleDrag
-      },
+    },
 
-      (i({className: classNames})),
-      ( label )
+    (i({className: classNames})),
+    ( label )
     ));
   },
 
@@ -278,7 +278,7 @@ const ValueSlider = React.createClass({
     };
 
     const keyDown = function(evt) {
-      if (evt.key === 'Enter') {
+      if (evt.key === "Enter") {
         return swapState();
       }
     };
@@ -291,11 +291,11 @@ const ValueSlider = React.createClass({
     } else {
       return (input({
         className: property,
-        type: 'number',
+        type: "number",
         value: this.props[property],
         onBlur: swapState,
         onKeyDown: keyDown,
-        ref: 'focusable'})
+        ref: "focusable"})
       );
     }
   },
@@ -308,7 +308,7 @@ const ValueSlider = React.createClass({
     const max = maxLabel ||
       (displaySemiQuant ? tr("~NODE-VALUE-EDIT.HIGH") : this.renderEditableProperty("max"));
 
-    if (orientation === 'horizontal') {
+    if (orientation === "horizontal") {
       return (div({className:"legend"},
         min, max
       ));
@@ -329,7 +329,7 @@ const ValueSlider = React.createClass({
     const tickHeight = circleRadius * 1.5;
     const ticks = [];
     for (let j = 1, end = numTicks, asc = 1 <= end; asc ? j < end : j > end; asc ? j++ : j--) {
-      if (orientation === 'horizontal') {
+      if (orientation === "horizontal") {
         ticks.push((path({key: j, d:`M${j*tickDistance} ${center-tickHeight} l 0 ${tickHeight * 2}`, className:"slider-line"})));
       } else {
         ticks.push((path({key: j, d:`M${center-tickHeight} ${j*tickDistance} l ${tickHeight * 2} 0`, className:"slider-line"})));
@@ -344,7 +344,7 @@ const ValueSlider = React.createClass({
     const center = this.thickness() / 2;
     let inset = circleRadius;
     if (filled) { inset += 1; }
-    if (orientation === 'horizontal') {
+    if (orientation === "horizontal") {
       return (g({},
         (path({d:`M${inset} ${center} l ${width - (inset*2)} 0`, className:"slider-line", stroke:"#ccc"})),
         !filled ?
@@ -371,7 +371,7 @@ const ValueSlider = React.createClass({
     let { orientation, color, width, height } = this.props;
     const center = this.thickness() / 2;
     const inset = circleRadius + 1;
-    if (orientation === 'horizontal') {
+    if (orientation === "horizontal") {
       return (path({
         d: `M${inset} ${center} l ${width - (inset*2)} 0`,
         className: "slider-line fill-line",
@@ -400,7 +400,7 @@ const ValueSlider = React.createClass({
 
   render() {
     const { orientation, width, height, filled, showHandle, showLabels } = this.props;
-    const horizontal = orientation === 'horizontal';
+    const horizontal = orientation === "horizontal";
     const lengendHeight = 9 + 4.5;
     const style = {
       padding: "0px",
@@ -408,7 +408,7 @@ const ValueSlider = React.createClass({
       width: width + (!horizontal && !filled ? lengendHeight : 0),
       height: height + (horizontal ? lengendHeight : 0)
     };
-    let classNames = `value-slider${showHandle ? ' show-handle' : ' no-handle'}`;
+    let classNames = `value-slider${showHandle ? " show-handle" : " no-handle"}`;
     if (!horizontal) { classNames += " vertical"; }
     if (filled) { classNames += " filled"; }
     return (div({
@@ -418,16 +418,16 @@ const ValueSlider = React.createClass({
       onMouseDown: showHandle ? this.handleJumpAndDrag : this.handleNoop,
       onTouchStart: showHandle ? this.handleJumpAndDrag : this.handleNoop,
       onTouchEnd: this.handleNoop
-      },
-      (svg({className: "svg-background", width: `${width}px`, height:`${height}px`, viewBox: `0 0 ${width} ${height}`},
-        this.renderLine(),
-        filled ?
-          this.renderFill() : undefined
-      )),
-      showHandle ?
-        this.renderHandle() : undefined,
-      showLabels ?
-        this.renderLegend() : undefined
+    },
+    (svg({className: "svg-background", width: `${width}px`, height:`${height}px`, viewBox: `0 0 ${width} ${height}`},
+      this.renderLine(),
+      filled ?
+        this.renderFill() : undefined
+    )),
+    showHandle ?
+      this.renderHandle() : undefined,
+    showLabels ?
+      this.renderLegend() : undefined
     ));
   }
 });
@@ -524,5 +524,5 @@ const Demo = React.createClass({
 window.testComponent = domID => ReactDOM.render(React.createElement(Demo,{}), domID);
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

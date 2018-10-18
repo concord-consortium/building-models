@@ -10,11 +10,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Node;
-const GraphPrimitive = require('./graph-primitive');
-const Colors = require('../utils/colors');
+const GraphPrimitive = require("./graph-primitive");
+const Colors = require("../utils/colors");
 
-const tr = require('../utils/translate');
-const urlParams = require('../utils/url-params');
+const tr = require("../utils/translate");
+const urlParams = require("../utils/url-params");
 
 const SEMIQUANT_MIN = 0;
 const SEMIQUANT_MAX = 100;
@@ -30,10 +30,10 @@ module.exports = (Node = (function() {
     static initClass() {
       // Properties that can be changed.
       this.fields = [
-        'title', 'image', 'color', 'paletteItem',
-        'initialValue', 'min', 'max',
-        'isAccumulator', 'allowNegativeValues', 'combineMethod',
-        'valueDefinedSemiQuantitatively', 'frames'
+        "title", "image", "color", "paletteItem",
+        "initialValue", "min", "max",
+        "isAccumulator", "allowNegativeValues", "combineMethod",
+        "valueDefinedSemiQuantitatively", "frames"
       ];
       this.SEMIQUANT_MIN = SEMIQUANT_MIN;
       this.SEMIQUANT_MAX = SEMIQUANT_MAX;
@@ -43,7 +43,7 @@ module.exports = (Node = (function() {
       // we always return a value between 0 and 100. Likewise, if we try to set a value while
       // we are in SQ mode, we set the actual internal value to the same proportion between
       // the internal min and max
-      this.property('initialValue', {
+      this.property("initialValue", {
         get() {
           if (!this.valueDefinedSemiQuantitatively) {
             return this._initialValue;
@@ -61,7 +61,7 @@ module.exports = (Node = (function() {
       }
       );
   
-      this.property('min', {
+      this.property("min", {
         get() {
           if (!this.valueDefinedSemiQuantitatively) {
             if (this.isAccumulator && !this.allowNegativeValues) { return Math.max(0, this._min); } else { return this._min; }
@@ -75,7 +75,7 @@ module.exports = (Node = (function() {
       }
       );
   
-      this.property('max', {
+      this.property("max", {
         get() {
           if (!this.valueDefinedSemiQuantitatively) {
             return this._max;
@@ -89,7 +89,7 @@ module.exports = (Node = (function() {
       }
       );
   
-      this.property('isAccumulator', {
+      this.property("isAccumulator", {
         get() {
           return this._isAccumulator;
         },
@@ -106,7 +106,7 @@ module.exports = (Node = (function() {
       }
       );
   
-      this.prototype.type = 'Node';
+      this.prototype.type = "Node";
       this.prototype.isTransfer = false;
     }
 
@@ -123,29 +123,29 @@ module.exports = (Node = (function() {
       // Specify default values using key = <defaultValue>
       // see https://halfdecent.net/2013/12/02/coffeescript-constructor-options-with-defaults/
       val = nodeSpec.x,
-        this.x = val != null ? val : 0,
-        val1 = nodeSpec.y,
-        this.y = val1 != null ? val1 : 0,
-        val2 = nodeSpec.title,
-        this.title = val2 != null ? val2 : tr("~NODE.UNTITLED"),
-        val3 = nodeSpec.codapID,
-        this.codapID = val3 != null ? val3 : null,
-        val4 = nodeSpec.codapName,
-        this.codapName = val4 != null ? val4 : null,
-        this.image = nodeSpec.image,
-        val5 = nodeSpec.isAccumulator,
-        this.isAccumulator = val5 != null ? val5 : false,
-        val6 = nodeSpec.allowNegativeValues,
-        this.allowNegativeValues = val6 != null ? val6 : false,
-        val7 = nodeSpec.valueDefinedSemiQuantitatively,
-        this.valueDefinedSemiQuantitatively = val7 != null ? val7 : true,
-        this.paletteItem = nodeSpec.paletteItem,
-        val8 = nodeSpec.frames,
-        this.frames = val8 != null ? val8 : [],
-        val9 = nodeSpec.addedThisSession,
-        this.addedThisSession = val9 != null ? val9 : false,
-        val10 = nodeSpec.combineMethod,
-        this.combineMethod = val10 != null ? val10 : 'average';
+      this.x = val != null ? val : 0,
+      val1 = nodeSpec.y,
+      this.y = val1 != null ? val1 : 0,
+      val2 = nodeSpec.title,
+      this.title = val2 != null ? val2 : tr("~NODE.UNTITLED"),
+      val3 = nodeSpec.codapID,
+      this.codapID = val3 != null ? val3 : null,
+      val4 = nodeSpec.codapName,
+      this.codapName = val4 != null ? val4 : null,
+      this.image = nodeSpec.image,
+      val5 = nodeSpec.isAccumulator,
+      this.isAccumulator = val5 != null ? val5 : false,
+      val6 = nodeSpec.allowNegativeValues,
+      this.allowNegativeValues = val6 != null ? val6 : false,
+      val7 = nodeSpec.valueDefinedSemiQuantitatively,
+      this.valueDefinedSemiQuantitatively = val7 != null ? val7 : true,
+      this.paletteItem = nodeSpec.paletteItem,
+      val8 = nodeSpec.frames,
+      this.frames = val8 != null ? val8 : [],
+      val9 = nodeSpec.addedThisSession,
+      this.addedThisSession = val9 != null ? val9 : false,
+      val10 = nodeSpec.combineMethod,
+      this.combineMethod = val10 != null ? val10 : "average";
 
       const accumulatorScaleUrlParam = (urlParams.collectorScale && Number(urlParams.collectorScale)) || 1;
       this.accumulatorInputScale = accumulatorScaleUrlParam > 0 ? accumulatorScaleUrlParam : 1;
@@ -351,5 +351,5 @@ module.exports = (Node = (function() {
 })());
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

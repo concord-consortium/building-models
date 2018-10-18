@@ -5,20 +5,20 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const NodeInspectorView = React.createFactory(require('./node-inspector-view'));
-const LinkInspectorView = React.createFactory(require('./link-inspector-view'));
-const LinkValueInspectorView = React.createFactory(require('./link-value-inspector-view'));
-const NodeValueInspectorView = React.createFactory(require('./node-value-inspector-view'));
-const LinkRelationInspectorView = React.createFactory(require('./relation-inspector-view'));
-const NodeRelationInspectorView = React.createFactory(require('./relation-inspector-view'));
-const SimulationInspectorView   = React.createFactory(require('./simulation-inspector-view'));
+const NodeInspectorView = React.createFactory(require("./node-inspector-view"));
+const LinkInspectorView = React.createFactory(require("./link-inspector-view"));
+const LinkValueInspectorView = React.createFactory(require("./link-value-inspector-view"));
+const NodeValueInspectorView = React.createFactory(require("./node-value-inspector-view"));
+const LinkRelationInspectorView = React.createFactory(require("./relation-inspector-view"));
+const NodeRelationInspectorView = React.createFactory(require("./relation-inspector-view"));
+const SimulationInspectorView   = React.createFactory(require("./simulation-inspector-view"));
 
 const InspectorPanelStore  = require("../stores/inspector-panel-store");
 
 const {div, i, span} = React.DOM;
 
 const ToolButton = React.createFactory(React.createClass({
-  displayName: 'toolButton',
+  displayName: "toolButton",
   render() {
     const { name } = this.props;
     const onClick = () => {
@@ -34,20 +34,20 @@ const ToolButton = React.createFactory(React.createClass({
 );
 
 const ToolPanel = React.createFactory(React.createClass({
-  displayName: 'toolPanel',
+  displayName: "toolPanel",
 
   buttonData: [
-      {name: "styles", simple: true, shows: "design",'enabled': ['node','link'] },
-      {name: "values", simple: false, shows: "value", 'enabled': ['node'] },
-      {name: "qualRel", simple: false, shows: "relations",'enabled': ['dependent-node']},
-      {name: "options",  simple: true, shows: "simulation", 'enabled': ['nothing'] }
-    ],
+    {name: "styles", simple: true, shows: "design","enabled": ["node","link"] },
+    {name: "values", simple: false, shows: "value", "enabled": ["node"] },
+    {name: "qualRel", simple: false, shows: "relations","enabled": ["dependent-node"]},
+    {name: "options",  simple: true, shows: "simulation", "enabled": ["nothing"] }
+  ],
 
   isDisabled(button) {
-    if (_.includes(button.enabled, 'nothing')) { return false; }
-    if (_.includes(button.enabled, 'node') && this.props.node) { return false; }
-    if (_.includes(button.enabled, 'dependent-node') && (this.props.node != null ? this.props.node.isDependent() : undefined)) { return false; }
-    if (_.includes(button.enabled, 'link') && this.props.link) { return false; }
+    if (_.includes(button.enabled, "nothing")) { return false; }
+    if (_.includes(button.enabled, "node") && this.props.node) { return false; }
+    if (_.includes(button.enabled, "dependent-node") && (this.props.node != null ? this.props.node.isDependent() : undefined)) { return false; }
+    if (_.includes(button.enabled, "link") && this.props.link) { return false; }
     return true;
   },
 
@@ -91,14 +91,14 @@ const ToolPanel = React.createFactory(React.createClass({
       return (ToolButton(props));
     });
 
-    return (div({className: 'tool-panel'}, buttonsView));
+    return (div({className: "tool-panel"}, buttonsView));
   }
 })
 );
 
 module.exports = React.createClass({
 
-  displayName: 'InspectorPanelView',
+  displayName: "InspectorPanelView",
 
   mixins: [ InspectorPanelStore.mixin ],
 
@@ -147,10 +147,10 @@ module.exports = React.createClass({
 
   renderInspectorPanel() {
     const view = (() => { switch (this.state.nowShowing) {
-      case 'simulation': return this.renderSimulationInspector();
-      case 'design':     return this.renderDesignInspector();
-      case 'value':      return this.renderValueInspector();
-      case 'relations':  return this.renderRelationInspector();
+    case "simulation": return this.renderSimulationInspector();
+    case "design":     return this.renderDesignInspector();
+    case "value":      return this.renderValueInspector();
+    case "relations":  return this.renderRelationInspector();
     } })();
 
     return (div({className: "inspector-panel-content"},

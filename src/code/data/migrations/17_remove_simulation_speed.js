@@ -15,8 +15,8 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

@@ -5,12 +5,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const GoogleDriveIO = require('../utils/google-drive-io');
-const GraphStore    = require('./graph-store');
-const PaletteStore  = require('./palette-store');
+const GoogleDriveIO = require("../utils/google-drive-io");
+const GraphStore    = require("./graph-store");
+const PaletteStore  = require("./palette-store");
 const HashParams    = require("../utils/hash-parameters");
 
-const tr = require('../utils/translate');
+const tr = require("../utils/translate");
 
 const GoogleFileActions = Reflux.createActions([
   "showSaveDialog", "newFile", "openFile",
@@ -53,8 +53,8 @@ const GoogleFileStore = Reflux.createStore({
   onNewFile() {
     if (confirm(tr("~FILE.CONFIRM"))) {
       GraphStore.store.deleteAll();
-      HashParams.clearParam('googleDoc');
-      HashParams.clearParam('publicUrl');
+      HashParams.clearParam("googleDoc");
+      HashParams.clearParam("publicUrl");
       this.fileId = null;
       return this.notifyChange();
     }
@@ -79,8 +79,8 @@ const GoogleFileStore = Reflux.createStore({
   onRename(filename) {
     if (filename.length > 0) {
       GraphStore.store.setFilename(filename);
-      HashParams.clearParam('publicUrl');
-      HashParams.clearParam('googleDoc');
+      HashParams.clearParam("publicUrl");
+      HashParams.clearParam("googleDoc");
       this.notifyChange();
     }
     return filename;
@@ -89,7 +89,7 @@ const GoogleFileStore = Reflux.createStore({
   onSetIsPublic(isPublic) {
     this.isPublic = isPublic;
     if (!isPublic) {
-      HashParams.clearParam('publicUrl');
+      HashParams.clearParam("publicUrl");
     }
     return this.notifyChange();
   },
@@ -179,7 +179,7 @@ const GoogleFileStore = Reflux.createStore({
         GraphStore.store.deleteAll();
         GraphStore.store.loadData(data);
         GraphStore.store.setFilename(data.filename);
-        HashParams.setParam('googleDoc', this.fileId);
+        HashParams.setParam("googleDoc", this.fileId);
       }
       return this.notifyChange();
     });
@@ -190,7 +190,7 @@ var GoogleDrive = new GoogleDriveIO();
 
 // wait for gapi to finish initing
 var waitForAuthCheck = function() {
-  if (__guard__(typeof gapi !== 'undefined' && gapi !== null ? gapi.auth : undefined, x => x.authorize)) {
+  if (__guard__(typeof gapi !== "undefined" && gapi !== null ? gapi.auth : undefined, x => x.authorize)) {
     return GoogleDrive.authorize(true, () => GoogleFileActions.connectToApi());
   } else {
     return setTimeout(waitForAuthCheck, 10);
@@ -231,5 +231,5 @@ module.exports = {
 };
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

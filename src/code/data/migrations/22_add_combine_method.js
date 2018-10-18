@@ -5,7 +5,7 @@ const migration = {
 
   doUpdate(data) {}
 };
-    // Nothing to do here, this is an optional field.
-    // Not present in most nodes. NP 2018-01-29
+// Nothing to do here, this is an optional field.
+// Not present in most nodes. NP 2018-01-29
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

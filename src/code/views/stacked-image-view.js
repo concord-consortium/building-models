@@ -41,9 +41,9 @@ module.exports = React.createClass({
       })
     );
     return div({ style: { position: "relative", width: "100%", height: "100%" } },
-        _.map(this.props.imageProps, (imgProps, index) => {
-          return div({ style: _.assign({}, this.css(index), styles[index]), key: index });
-        })
+      _.map(this.props.imageProps, (imgProps, index) => {
+        return div({ style: _.assign({}, this.css(index), styles[index]), key: index });
+      })
     );
   }
 });

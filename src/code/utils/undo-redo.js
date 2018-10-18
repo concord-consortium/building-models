@@ -8,9 +8,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 // based on https://github.com/jzaefferer/undo/blob/master/undo.js
-const CodapConnect = require('../models/codap-connect');
+const CodapConnect = require("../models/codap-connect");
 
-const DEFAULT_CONTEXT_NAME = 'building-models';
+const DEFAULT_CONTEXT_NAME = "building-models";
 
 // Note: We use several actions, because they hook into Reflux's dispatching system
 // which puts actions in a stack before calling them. We frequently want to ensure
@@ -182,8 +182,8 @@ class Manager {
   }
 
   log() {
-    log.info(`Undo Stack: [${(_.pluck((this.commands.slice(0, this.stackPosition + 1)), 'name')).join(', ')}]`);
-    return log.info(`Redo Stack: [${(_.pluck((this.commands.slice(this.stackPosition + 1)), 'name')).join(', ')}]`);
+    log.info(`Undo Stack: [${(_.pluck((this.commands.slice(0, this.stackPosition + 1)), "name")).join(", ")}]`);
+    return log.info(`Redo Stack: [${(_.pluck((this.commands.slice(this.stackPosition + 1)), "name")).join(", ")}]`);
   }
 
   clearRedo() {
@@ -215,7 +215,7 @@ class Command {
 
   _call(method, debug, via) {
     if (debug) {
-      log.info(`Command: ${this.name}.${method}()` + (via ? ` via ${via}` : ''));
+      log.info(`Command: ${this.name}.${method}()` + (via ? ` via ${via}` : ""));
     }
     if (this.methods.hasOwnProperty(method)) {
       return this.methods[method]();
@@ -224,10 +224,10 @@ class Command {
     }
   }
 
-  execute(debug) { return this._call('execute', debug); }
-  undo(debug) { return this._call('undo', debug); }
-  redo(debug) { if (this.methods.hasOwnProperty('redo')) { return this._call('redo', debug); 
-                                                     } else { return this._call('execute', debug, 'redo'); } }
+  execute(debug) { return this._call("execute", debug); }
+  undo(debug) { return this._call("undo", debug); }
+  redo(debug) { if (this.methods.hasOwnProperty("redo")) { return this._call("redo", debug); 
+  } else { return this._call("execute", debug, "redo"); } }
 }
 
 class CommandBatch {

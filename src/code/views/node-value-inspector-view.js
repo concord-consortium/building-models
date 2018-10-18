@@ -6,13 +6,13 @@
  */
 const {div, h2, label, span, input, p, i} = React.DOM;
 
-const SimulationStore  = require('../stores/simulation-store');
-const AppSettingsStore = require('../stores/app-settings-store');
+const SimulationStore  = require("../stores/simulation-store");
+const AppSettingsStore = require("../stores/app-settings-store");
 const tr = require("../utils/translate");
 
 module.exports = React.createClass({
 
-  displayName: 'NodeValueInspectorView',
+  displayName: "NodeValueInspectorView",
 
   mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 
@@ -24,10 +24,10 @@ module.exports = React.createClass({
 
   getInitialState() {
     return {
-      'editing-min': false,
-      'editing-max': false,
-      'min-value': this.props.node.min,
-      'max-value': this.props.node.max
+      "editing-min": false,
+      "editing-max": false,
+      "min-value": this.props.node.min,
+      "max-value": this.props.node.max
     };
   },
 
@@ -36,8 +36,8 @@ module.exports = React.createClass({
     // that we can set the text field and only update the model when the input field
     // is blured. This way we don't perform min/max validation while user is typing
     return this.setState({
-      'min-value': nextProps.node.min,
-      'max-value': nextProps.node.max
+      "min-value": nextProps.node.min,
+      "max-value": nextProps.node.max
     });
   },
 
@@ -95,7 +95,7 @@ module.exports = React.createClass({
     };
 
     const keyDown = function(evt) {
-      if (evt.key === 'Enter') {
+      if (evt.key === "Enter") {
         return swapState();
       }
     };
@@ -105,12 +105,12 @@ module.exports = React.createClass({
     } else {
       return (input({
         className: `half small editable-prop ${classNames}`,
-        type: 'number',
+        type: "number",
         value: this.state[`${property}-value`],
         onChange: updateProperty,
         onBlur: swapState,
         onKeyDown: keyDown,
-        ref: 'focusable'})
+        ref: "focusable"})
       );
     }
   },
@@ -136,19 +136,19 @@ module.exports = React.createClass({
 
     const isChecked = !this.state.capNodeValues && node.allowNegativeValues;
     const tooltip = this.state.capNodeValues 
-                ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP") 
-                : (isChecked 
-                        ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP") 
-                        : tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP"));
+      ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP") 
+      : (isChecked 
+        ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP") 
+        : tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP"));
     const positiveCheckbox = (
       label({
-        className: this.state.capNodeValues ? 'disabled' : '',
+        className: this.state.capNodeValues ? "disabled" : "",
         title: tooltip,
-        key: 'positive-label'
+        key: "positive-label"
       }, [
         input({
-          key: 'positive-checkbox',
-          type: 'checkbox',
+          key: "positive-checkbox",
+          type: "checkbox",
           checked: isChecked,
           disabled: this.state.capNodeValues,
           onChange: this.state.capNodeValues ? null : this.updateNegativeValuesAllowed
@@ -158,10 +158,10 @@ module.exports = React.createClass({
     );
 
     return (span({className: "checkbox group full"},
-      (label({key: 'accumulator-label'}, [
+      (label({key: "accumulator-label"}, [
         input({
-          key: 'accumulator-checkbox',
-          type: 'checkbox',
+          key: "accumulator-checkbox",
+          type: "checkbox",
           checked: node.isAccumulator,
           onChange: this.updateAccumulatorChecked
         }),
@@ -173,14 +173,14 @@ module.exports = React.createClass({
 
   render() {
     const { node } = this.props;
-    return (div({className: 'value-inspector'},
-      (div({className: 'inspector-content group'},
-        (div({className: 'full'},
+    return (div({className: "value-inspector"},
+      (div({className: "inspector-content group"},
+        (div({className: "full"},
           !node.valueDefinedSemiQuantitatively ?
-            (span({className: 'full'},
-              (label({className: 'right'}, tr("~NODE-VALUE-EDIT.INITIAL-VALUE"))),
+            (span({className: "full"},
+              (label({className: "right"}, tr("~NODE-VALUE-EDIT.INITIAL-VALUE"))),
               (input({
-                className: 'left',
+                className: "left",
                 type: "number",
                 min: `${node.min}`,
                 max: `${node.max}`,
@@ -208,11 +208,11 @@ module.exports = React.createClass({
       (div({className: "bottom-pane"},
         (p({},
           node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.DEFINING_WITH_WORDS")
-          :  tr("~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS"))),
+            :  tr("~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS"))),
         (p({},
-          (label({className: 'node-switch-edit-mode', onClick: this.updateDefiningType},
+          (label({className: "node-switch-edit-mode", onClick: this.updateDefiningType},
             node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS")
-            : tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS")
+              : tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS")
           ))
         ))
       ))

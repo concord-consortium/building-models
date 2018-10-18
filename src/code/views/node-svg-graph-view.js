@@ -7,10 +7,10 @@
 let NodeSvgGraphView;
 const {svg, path, line, text, div, tspan, image} = React.DOM;
 
-const SimulationStore = require('../stores/simulation-store');
+const SimulationStore = require("../stores/simulation-store");
 
 module.exports = (NodeSvgGraphView = React.createClass({
-  displayName: 'NodeSvgGraphView',
+  displayName: "NodeSvgGraphView",
   mixins: [ SimulationStore.mixin ],
 
   getDefaultProps() {
@@ -21,7 +21,7 @@ module.exports = (NodeSvgGraphView = React.createClass({
       min: 0,
       max: 100,
       data: [],
-      color: '#aaa'
+      color: "#aaa"
     };
   },
 
@@ -60,7 +60,7 @@ module.exports = (NodeSvgGraphView = React.createClass({
       const x = i / rangex;
       const y = d / rangey;
       return {x, y};
-  });
+    });
     return data;
   },
 

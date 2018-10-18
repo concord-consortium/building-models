@@ -3,9 +3,9 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const HashParams      = require('../utils/hash-parameters');
-const ImportActions   = require('../actions/import-actions');
-const urlParams       = require('../utils/url-params');
+const HashParams      = require("../utils/hash-parameters");
+const ImportActions   = require("../actions/import-actions");
+const urlParams       = require("../utils/url-params");
 
 const AppSettingsActions = Reflux.createActions(
   [
@@ -34,9 +34,9 @@ const AppSettingsStore   = Reflux.createStore({
   listenables: [AppSettingsActions, ImportActions],
 
   init() {
-    const simulationType = HashParams.getParam('simplified') || urlParams['simplified'] ?
+    const simulationType = HashParams.getParam("simplified") || urlParams["simplified"] ?
       SimulationType.diagramOnly
-    :
+      :
       SimulationType.DEFAULT;
 
     const uiElements = {
@@ -45,7 +45,7 @@ const AppSettingsStore   = Reflux.createStore({
       inspectorPanel: true,
       nodePalette: true
     };
-    const uiParams = HashParams.getParam('hide') || urlParams['hide'];
+    const uiParams = HashParams.getParam("hide") || urlParams["hide"];
     // For situations where some ui elements need to be hidden, this parameter can be specified.
     // If this parameter is present, Any specified elements are disabled or hidden.
     // Example usage: hide=globalNav,inspectorPanel
@@ -56,7 +56,7 @@ const AppSettingsStore   = Reflux.createStore({
       uiElements.nodePalette = uiParams.indexOf("nodePalette") === -1;
     }
 
-    const lockdown = (HashParams.getParam('lockdown') === "true") || urlParams['lockdown'];
+    const lockdown = (HashParams.getParam("lockdown") === "true") || urlParams["lockdown"];
 
     return this.settings = {
       showingSettingsDialog: false,

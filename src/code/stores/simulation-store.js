@@ -5,12 +5,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const AppSettingsStore   = require('./app-settings-store');
-const ImportActions      = require('../actions/import-actions');
-const GraphActions       = require('../actions/graph-actions');
+const AppSettingsStore   = require("./app-settings-store");
+const ImportActions      = require("../actions/import-actions");
+const GraphActions       = require("../actions/graph-actions");
 const Simulation         = require("../models/simulation");
-const TimeUnits          = require('../utils/time-units');
-const tr                 = require('../utils/translate');
+const TimeUnits          = require("../utils/time-units");
+const tr                 = require("../utils/translate");
 
 const DEFAULT_SIMULATION_STEPS = 20;
 const SimulationActions = Reflux.createActions(

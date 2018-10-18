@@ -16,4 +16,4 @@ const migration = {
 };
 
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

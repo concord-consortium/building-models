@@ -3,26 +3,26 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const Modal = React.createFactory(require('./modal-view'));
+const Modal = React.createFactory(require("./modal-view"));
 const {div, i} = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'ModalDialog',
+  displayName: "ModalDialog",
 
   close() {
-    return (typeof this.props.close === 'function' ? this.props.close() : undefined);
+    return (typeof this.props.close === "function" ? this.props.close() : undefined);
   },
 
   render() {
     return (Modal({close: this.props.close},
-      (div({className: 'modal-dialog'},
-        (div({className: 'modal-dialog-wrapper'},
-          (div({className: 'modal-dialog-title'},
+      (div({className: "modal-dialog"},
+        (div({className: "modal-dialog-wrapper"},
+          (div({className: "modal-dialog-title"},
             (i({className: "modal-dialog-title-close icon-codap-ex", onClick: this.close})),
-            this.props.title || 'Untitled Dialog'
+            this.props.title || "Untitled Dialog"
           )),
-          (div({className: 'modal-dialog-workspace'}, this.props.children))
+          (div({className: "modal-dialog-workspace"}, this.props.children))
         ))
       ))
     ));

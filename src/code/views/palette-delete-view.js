@@ -4,32 +4,32 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const tr = require('../utils/translate');
-const PaletteDialogStore = require('../stores/palette-delete-dialog-store');
-const ImagePickerView = React.createFactory(require('./image-picker-view'));
+const tr = require("../utils/translate");
+const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
+const ImagePickerView = React.createFactory(require("./image-picker-view"));
 
 const {div, span, i, img, button, a} = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'PaletteDeleteView',
+  displayName: "PaletteDeleteView",
   changePalette(args) {
     return PaletteDialogStore.actions.select(args);
   },
 
   cancel() {
-    return (typeof this.props.cancel === 'function' ? this.props.cancel() : undefined);
+    return (typeof this.props.cancel === "function" ? this.props.cancel() : undefined);
   },
 
   ok() {
-    return (typeof this.props.ok === 'function' ? this.props.ok() : undefined);
+    return (typeof this.props.ok === "function" ? this.props.ok() : undefined);
   },
 
 
   renderArrow() {
     if (this.props.showReplacement) {
       return (div({className: "vertical-content"},
-        (i({className: 'arrow-div icon-codap-right-arrow'}))
+        (i({className: "arrow-div icon-codap-right-arrow"}))
       ));
     }
   },
@@ -58,7 +58,7 @@ module.exports = React.createClass({
   renderButtons() {
     return (div({className: "vertical-content buttons"},
       (div({},
-        (button({className: 'button ok', onClick: this.ok}, tr("~PALETTE-DIALOG.OK")))
+        (button({className: "button ok", onClick: this.ok}, tr("~PALETTE-DIALOG.OK")))
       )),
       (div({className: "cancel"},
         (a({onClick: this.cancel}, tr("~PALETTE-DIALOG.CANCEL")))
@@ -67,8 +67,8 @@ module.exports = React.createClass({
   },
 
   render() {
-    return (div({className: 'palette-delete-view'},
-      (div({className: 'horizontal-content'},
+    return (div({className: "palette-delete-view"},
+      (div({className: "horizontal-content"},
         this.renderPaletteItem(),
         this.renderArrow(),
         this.renderReplacement(),

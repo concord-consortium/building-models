@@ -3,11 +3,11 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const tr              = require('../utils/translate');
+const tr              = require("../utils/translate");
 const {div, span, i}  = React.DOM;
 
 module.exports = React.createClass({
-  displayName: 'RecordButton',
+  displayName: "RecordButton",
 
   getDefaultProps() {
     return {
@@ -20,11 +20,11 @@ module.exports = React.createClass({
 
   renderRecordingLight() {
     if (this.props.includeLight) {
-      const classNames = ['recording-light'];
+      const classNames = ["recording-light"];
       if (this.props.recording) {
-        classNames.push('recording');
+        classNames.push("recording");
       }
-      return (div({className: 'recording-box vertical'},
+      return (div({className: "recording-box vertical"},
         (div({className: classNames.join(" ")}))
       ));
     }
@@ -51,7 +51,7 @@ module.exports = React.createClass({
     let onClick;
     let verticalStyle = {};
     if (this.props.includeLight) {
-      verticalStyle = {'paddingRight':'0.5em'};
+      verticalStyle = {"paddingRight":"0.5em"};
     }
     if (this.props.disabled) {
       onClick = () => null;
@@ -59,8 +59,8 @@ module.exports = React.createClass({
       ({ onClick } = this.props);
     }
     return (div({className: this.classNames(), onClick},
-      (div({className: 'horizontal'},
-        (div({className: 'vertical', style: verticalStyle},
+      (div({className: "horizontal"},
+        (div({className: "vertical", style: verticalStyle},
           this.props.children
         )),
         this.renderRecordingLight()

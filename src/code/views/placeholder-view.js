@@ -7,11 +7,11 @@ const {div} = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'Placeholder',
+  displayName: "Placeholder",
 
   render() {
     return (div({className: `placeholder ${this.props.className}`},
-      (div({className: 'placeholder-content'}, this.props.label))
+      (div({className: "placeholder-content"}, this.props.label))
     ));
   }
 });

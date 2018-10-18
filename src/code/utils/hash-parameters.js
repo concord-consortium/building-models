@@ -39,7 +39,7 @@ class HashParameters {
       const value = this.parameters[key];
       return [key, this.encode(value)].join(VALUE_TOKEN);
     });
-    return this.writeHash(strings.join('&'));
+    return this.writeHash(strings.join("&"));
   }
 
   setParam(key,value) {

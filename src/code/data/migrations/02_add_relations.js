@@ -5,7 +5,7 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const Relationship = require('../../models/relationship');
+const Relationship = require("../../models/relationship");
 
 const migration = {
   version: "1.1.0",
@@ -42,4 +42,4 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

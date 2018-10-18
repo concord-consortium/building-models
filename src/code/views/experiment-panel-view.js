@@ -3,14 +3,14 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const SimulationStore = require('../stores/simulation-store');
-const tr              = require('../utils/translate');
+const SimulationStore = require("../stores/simulation-store");
+const tr              = require("../utils/translate");
 
 const {div, span, i, input}  = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'ExperimentView',
+  displayName: "ExperimentView",
 
   mixins: [ SimulationStore.mixin ],
 
@@ -37,7 +37,7 @@ module.exports = React.createClass({
   render() {
     const classes = ["experiment-panel"];
     if (this.props.disabled) {
-      classes.push('disabled');
+      classes.push("disabled");
     }
     return (div({className: classes.join(" ") },
       this.renderLabel(),

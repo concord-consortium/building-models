@@ -11,10 +11,10 @@ module.exports = (GoogleDriveIO = (function() {
   GoogleDriveIO = class GoogleDriveIO {
     static initClass() {
 
-      this.prototype.APP_ID  = '1095918012594';
-      this.prototype.DEVELOPER_KEY = 'AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA';
-      this.prototype.CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com';
-      this.prototype.SCOPES = 'https://www.googleapis.com/auth/drive';
+      this.prototype.APP_ID  = "1095918012594";
+      this.prototype.DEVELOPER_KEY = "AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA";
+      this.prototype.CLIENT_ID = "1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com";
+      this.prototype.SCOPES = "https://www.googleapis.com/auth/drive";
 
       this.prototype.authorized = false;
 
@@ -26,9 +26,9 @@ module.exports = (GoogleDriveIO = (function() {
         return callback(null, this.token);
       } else {
         const args = {
-          'client_id': this.CLIENT_ID,
-          'scope': this.SCOPES,
-          'immediate': immediate || false
+          "client_id": this.CLIENT_ID,
+          "scope": this.SCOPES,
+          "immediate": immediate || false
         };
         return gapi.auth.authorize(args, token => {
           if (token && !token.error) {
@@ -36,11 +36,11 @@ module.exports = (GoogleDriveIO = (function() {
           }
           if (callback) {
             const err = (!token ?
-              'Unable to authorize'
-            : token.error ?
-              token.error
-            :
-              null
+              "Unable to authorize"
+              : token.error ?
+                token.error
+                :
+                null
             );
             this.authorized = err === null;
             return callback(err, token);
@@ -52,26 +52,26 @@ module.exports = (GoogleDriveIO = (function() {
     makeMultipartBody(parts, boundary) {
       return ((Array.from(parts).map((part) =>
         `\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${part}`)
-      ).join('')) + `\r\n--${boundary}--`;
+      ).join("")) + `\r\n--${boundary}--`;
     }
 
     sendFile(fileSpec, contents, callback) {
-      const boundary = '-------314159265358979323846';
+      const boundary = "-------314159265358979323846";
       const metadata = JSON.stringify({
         title: fileSpec.fileName,
-        mimeType: 'application/json'
+        mimeType: "application/json"
       });
 
       const [method, path] = Array.from(fileSpec.fileId ?
-        ['PUT', `/upload/drive/v2/files/${fileSpec.fileId}`]
-      :
-        ['POST', '/upload/drive/v2/files']);
+        ["PUT", `/upload/drive/v2/files/${fileSpec.fileId}`]
+        :
+        ["POST", "/upload/drive/v2/files"]);
 
       const request = gapi.client.request({
         path,
         method,
-        params: {uploadType: 'multipart', alt: 'json'},
-        headers: {'Content-Type': `multipart/mixed; boundary="${boundary}"`},
+        params: {uploadType: "multipart", alt: "json"},
+        headers: {"Content-Type": `multipart/mixed; boundary="${boundary}"`},
         body: this.makeMultipartBody([metadata, contents], boundary)
       });
 
@@ -80,7 +80,7 @@ module.exports = (GoogleDriveIO = (function() {
           if (file) {
             return callback(null, file);
           } else {
-            return callback('Unabled to upload file');
+            return callback("Unabled to upload file");
           }
         }
       });
@@ -89,7 +89,7 @@ module.exports = (GoogleDriveIO = (function() {
     upload(fileSpec, contents, callback) {
       return this.authorize(this.authorized, err => {
         if (!err) {
-          return gapi.client.load('drive', 'v2', () => this.sendFile(fileSpec, contents, callback));
+          return gapi.client.load("drive", "v2", () => this.sendFile(fileSpec, contents, callback));
         } else {
           return callback(`No authorization. Upload failed for file: ${fileSpec.fileName}`);
         }
@@ -98,14 +98,14 @@ module.exports = (GoogleDriveIO = (function() {
 
     makePublic(fileId) {
       const perms = {
-        'value': '',
-        'type': 'anyone',
-        'role': 'reader'
+        "value": "",
+        "type": "anyone",
+        "role": "reader"
       };
 
       const request = gapi.client.drive.permissions.insert({
-        'fileId': fileId,
-        'resource': perms
+        "fileId": fileId,
+        "resource": perms
       });
 
       return request.execute(function(resp) {
@@ -120,7 +120,7 @@ module.exports = (GoogleDriveIO = (function() {
         if (err) {
           return callback(err);
         } else {
-          return gapi.client.load('drive', 'v2', () => {
+          return gapi.client.load("drive", "v2", () => {
             const request = gapi.client.drive.files.get({
               fileId: fileSpec.id});
             return request.execute(file => {
@@ -148,9 +148,9 @@ module.exports = (GoogleDriveIO = (function() {
 
     _downloadFromUrl(url, token, callback) {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', url);
+      xhr.open("GET", url);
       if (token) {
-        xhr.setRequestHeader('Authorization', `Bearer ${token.access_token}`);
+        xhr.setRequestHeader("Authorization", `Bearer ${token.access_token}`);
       }
       xhr.onload = function() {
         let json;
@@ -171,8 +171,8 @@ module.exports = (GoogleDriveIO = (function() {
         if (err) {
           return callback(err);
         } else {
-          return gapi.load('picker', { callback() {
-            const pickerCallback = (data, etc) => callback(null, data.action === 'picked' ? data.docs[0] : null);
+          return gapi.load("picker", { callback() {
+            const pickerCallback = (data, etc) => callback(null, data.action === "picked" ? data.docs[0] : null);
             const picker = new google.picker.PickerBuilder()
               .addView(google.picker.ViewId.DOCS)
               .setOAuthToken(token.access_token)
@@ -180,7 +180,7 @@ module.exports = (GoogleDriveIO = (function() {
               .build();
             return picker.setVisible(true);
           }
-        }
+          }
           );
         }
       });

@@ -13,8 +13,8 @@ const RelationFactory  = require("../models/relation-factory");
 const SvgGraph         = React.createFactory(require("./svg-graph-view"));
 const tr               = require("../utils/translate");
 const autosize         = require("autosize");
-const SimulationStore  = require('../stores/simulation-store');
-const AppSettingsStore = require('../stores/app-settings-store');
+const SimulationStore  = require("../stores/simulation-store");
+const AppSettingsStore = require("../stores/app-settings-store");
 
 const Graph = React.createFactory(React.createClass({
   render() {
@@ -45,7 +45,7 @@ const QuantStart = React.createFactory(React.createClass({
 
 module.exports = (LinkRelationView = React.createClass({
 
-  displayName: 'LinkRelationView',
+  displayName: "LinkRelationView",
 
   mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 
@@ -219,7 +219,7 @@ module.exports = (LinkRelationView = React.createClass({
     let currentOption;
     const vectorOptions = this.state.complexity === AppSettingsStore.store.Complexity.basic ?
       RelationFactory.basicVectors
-    :
+      :
       RelationFactory.vectors;
     const options = _.map(vectorOptions, (opt, i) => option({value: opt.id, key: i}, opt.uiText));
 
@@ -235,7 +235,7 @@ module.exports = (LinkRelationView = React.createClass({
     return (div({className: "bb-select"},
       (span({}, `${tr("~NODE-RELATION-EDIT.TO")} `)),
       (select({value: currentOption, className:"", ref: "vector", onChange: this.updateRelation},
-      options))
+        options))
     ));
   },
 
@@ -257,7 +257,7 @@ module.exports = (LinkRelationView = React.createClass({
     // place dropdown but hide it (to keep spacing) if we haven't selected
     // the vector or we have only basic complecity settings
     const visible = vectorSelected && !onlyBasic;
-    const visClass = visible ? ' visible' : ' hidden';
+    const visClass = visible ? " visible" : " hidden";
 
     if ((this.state.selectedVector != null ? this.state.selectedVector.isCustomRelationship : undefined)) {
       return (div({className: `bb-select${visClass}`},
@@ -294,7 +294,7 @@ module.exports = (LinkRelationView = React.createClass({
 
     const textClass = (this.state.selectedAccumulator != null ? this.state.selectedAccumulator.hideAdditionalText : undefined) ? "hidden" : "";
 
-    return (div({className: 'top'},
+    return (div({className: "top"},
       (span({className: "source"}, source)),
       (span({className: textClass}, ` ${tr("~NODE-RELATION-EDIT.IS")} `)),
       (div({},
@@ -318,15 +318,15 @@ module.exports = (LinkRelationView = React.createClass({
     if (isTargetProportional) {
       sourceTitle = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x3 => x3.sourceNode), x2 => x2.title) || "NONE";
       line_a = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A",
-        { targetTitle: spanWrap(targetTitle, 'target') });
+        { targetTitle: spanWrap(targetTitle, "target") });
       line_b = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B",
-        { sourceTitle: spanWrap(sourceTitle, 'source') });
+        { sourceTitle: spanWrap(sourceTitle, "source") });
 
     } else {
       line_a = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A",
-        { sourceTitle: spanWrap(sourceTitle, 'source') });
+        { sourceTitle: spanWrap(sourceTitle, "source") });
       line_b = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B",
-        { targetTitle: spanWrap(targetTitle, 'target') });
+        { targetTitle: spanWrap(targetTitle, "target") });
     }
 
     if (!this.state.selectedTransferModifier) {
@@ -337,7 +337,7 @@ module.exports = (LinkRelationView = React.createClass({
     } else {
       currentOption = this.state.selectedTransferModifier.id;
     }
-    return (div({className: 'top'},
+    return (div({className: "top"},
 
 
       // note that localization will be a problem here due to the hard-coded order
@@ -354,17 +354,17 @@ module.exports = (LinkRelationView = React.createClass({
 
   renderNonAccumulator(source, target) {
     return (div({},
-      (div({className: 'top'},
+      (div({className: "top"},
         (QuantStart({source, target})),
-        (div({className: 'full'},
+        (div({className: "full"},
           this.renderVectorPulldown(this.state.selectedVector)
         )),
-        (div({className: 'full'},
+        (div({className: "full"},
           this.renderScalarPulldown(this.state.selectedScalar)
         ))
       )),
-      (div({className: 'bottom'},
-        (div({className: 'graph', id:'relation-graph'},
+      (div({className: "bottom"},
+        (div({className: "graph", id:"relation-graph"},
           (Graph({
             xAxis: source,
             yAxis: target,
@@ -381,19 +381,19 @@ module.exports = (LinkRelationView = React.createClass({
     const source = this.props.link.sourceNode.title;
     target = this.props.link.targetNode.title;
 
-    return (div({className: 'link-relation-view'},
+    return (div({className: "link-relation-view"},
       (() => {
-      if (this.state.isAccumulator) {
-        return this.renderAccumulator(source, target);
-      } else if (this.state.isTransferModifier) {
-        target = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x1 => x1.targetNode), x => x.title);
-        const isTargetProportional = this.props.link.sourceNode === __guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x2 => x2.targetNode);
-        return this.renderTransfer(source, target, isTargetProportional);
-      } else {
-        return this.renderNonAccumulator(source, target);
-      }
-    })(),
-      (div({className: 'bottom'},
+        if (this.state.isAccumulator) {
+          return this.renderAccumulator(source, target);
+        } else if (this.state.isTransferModifier) {
+          target = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x1 => x1.targetNode), x => x.title);
+          const isTargetProportional = this.props.link.sourceNode === __guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x2 => x2.targetNode);
+          return this.renderTransfer(source, target, isTargetProportional);
+        } else {
+          return this.renderNonAccumulator(source, target);
+        }
+      })(),
+      (div({className: "bottom"},
         (div({},
           (span({}, `${tr("~NODE-RELATION-EDIT.BECAUSE")} `))
         )),
@@ -401,8 +401,8 @@ module.exports = (LinkRelationView = React.createClass({
           defaultValue: this.props.link.reasoning,
           placeholder: tr("~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER"),
           onChange: this.updateReasoning,
-          ref: 'reasoning',
-          className: 'full',
+          ref: "reasoning",
+          className: "full",
           rows: 3,
           style: { overflowY: "scroll", resize: "none"}})
         )
@@ -414,5 +414,5 @@ module.exports = (LinkRelationView = React.createClass({
 
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

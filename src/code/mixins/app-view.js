@@ -9,8 +9,8 @@ const CodapStore      = require("../stores/codap-store");
 const LaraStore       = require("../stores/lara-store");
 const GoogleFileStore = require("../stores/google-file-store");
 const HashParams      = require("../utils/hash-parameters");
-const tr              = require('../utils/translate');
-const AppSettingsStore = require('../stores/app-settings-store');
+const tr              = require("../utils/translate");
+const AppSettingsStore = require("../stores/app-settings-store");
 
 module.exports = {
 
@@ -27,7 +27,7 @@ module.exports = {
   },
 
   componentDidUpdate() {
-    return log.info('Did Update: AppView');
+    return log.info("Did Update: AppView");
   },
 
   addTouchDeviceHandler(add) {
@@ -35,12 +35,12 @@ module.exports = {
     if (isMobileDevice) {
       return AppSettingsStore.actions.setTouchDevice(true);
     } else if (add) {
-      return $(window).on('touchstart', function(e) {
+      return $(window).on("touchstart", function(e) {
         AppSettingsStore.actions.setTouchDevice(true);
-        return $(window).off('touchstart');
+        return $(window).off("touchstart");
       });
     } else {
-      return $(window).off('touchstart');
+      return $(window).off("touchstart");
     }
   },
 
@@ -54,15 +54,15 @@ module.exports = {
         deleteFunction = this.props.graphStore.deleteSelected.bind(this.props.graphStore);
       }
 
-      return $(window).on('keydown', function(e) {
+      return $(window).on("keydown", function(e) {
         // 8 is backspace, 46 is delete
-        if ([8, 46].includes(e.which) && !$(e.target).is('input, textarea')) {
+        if ([8, 46].includes(e.which) && !$(e.target).is("input, textarea")) {
           e.preventDefault();
           return deleteFunction();
         }
       });
     } else {
-      return $(window).off('keydown');
+      return $(window).off("keydown");
     }
   },
 
@@ -124,12 +124,12 @@ module.exports = {
   _loadInitialData() {
     if ((this.props.data != null ? this.props.data.length : undefined) > 0) {
       this.props.graphStore.addAfterAuthHandler(JSON.parse(this.props.data));
-      return HashParams.clearParam('data');
+      return HashParams.clearParam("data");
 
     } else if ((this.props.publicUrl != null ? this.props.publicUrl.length : undefined) > 0) {
       const { publicUrl } = this.props;
       GoogleFileStore.actions.addAfterAuthHandler(context => context.loadPublicUrl(publicUrl));
-      return HashParams.clearParam('publicUrl');
+      return HashParams.clearParam("publicUrl");
 
     } else if ((this.props.googleDoc != null ? this.props.googleDoc.length : undefined) > 0) {
       const { googleDoc } = this.props;
@@ -149,7 +149,7 @@ module.exports = {
 
   // cross platform undo/redo key-binding ctr-z ctr-y
   _registerUndoRedoKeys() {
-    return ($(window)).on('keydown', e => {
+    return ($(window)).on("keydown", e => {
       let redo, undo;
       const y = (e.keyCode === 89) || (e.keyCode === 121);
       const z = (e.keyCode === 90) || (e.keyCode === 122);

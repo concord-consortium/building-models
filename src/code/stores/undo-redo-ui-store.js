@@ -46,7 +46,7 @@ const undoRedoUIMixin = {
   componentDidMount() {
     this.unsubscribe = undoRedoUIStore.listen(this.onUndoRedoUIStateChange);
     // can't add listener in init due to order-of-initialization issues
-    const GraphStore = require('./graph-store');
+    const GraphStore = require("./graph-store");
     return __guard__(__guard__(GraphStore != null ? GraphStore.store : undefined, x1 => x1.undoRedoManager), x => x.addChangeListener(this.onUndoRedoUIStateChange));
   },
 
@@ -69,5 +69,5 @@ module.exports = {
 };
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

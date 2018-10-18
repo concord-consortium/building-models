@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Link;
-const GraphPrimitive = require('./graph-primitive');
+const GraphPrimitive = require("./graph-primitive");
 const Relation       = require("./relationship");
 const LinkColors     = require("../utils/link-colors");
 
@@ -19,7 +19,7 @@ module.exports = (Link = (function() {
       this.defaultRelation = new Relation({
         formula: "1 * in"});
   
-      this.prototype.type = 'Link';
+      this.prototype.type = "Link";
     }
 
     constructor(options) {
@@ -27,13 +27,13 @@ module.exports = (Link = (function() {
         // Hack: trick Babel/TypeScript into allowing this before super.
         if (false) { super(); }
         let thisFn = (() => { return this; }).toString();
-        let thisName = thisFn.slice(thisFn.indexOf('return') + 6 + 1, thisFn.indexOf(';')).trim();
+        let thisName = thisFn.slice(thisFn.indexOf("return") + 6 + 1, thisFn.indexOf(";")).trim();
         eval(`${thisName} = this;`);
       }
       if (options == null) { options = {}; }
       this.options = options;
       if (this.options.color == null) { this.options.color = Link.defaultColor; }
-      if (this.options.title == null) { this.options.title = ''; }
+      if (this.options.title == null) { this.options.title = ""; }
 
       ({
         sourceNode: this.sourceNode, sourceTerminal: this.sourceTerminal, targetNode: this.targetNode, targetTerminal: this.targetTerminal,

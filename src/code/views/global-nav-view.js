@@ -4,19 +4,19 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const {div, i, span} = React.DOM;
-const tr = require('../utils/translate');
+const tr = require("../utils/translate");
 
-const Dropdown           = React.createFactory(require('./dropdown-view'));
-const OpenInCodap        = React.createFactory(require('./open-in-codap-view'));
-const ModalGoogleSave    = React.createFactory(require('./modal-google-save-view'));
-const BuildInfoView      = React.createFactory(require('./build-info-view'));
-const GoogleFileStore    = require('../stores/google-file-store');
-const UndoRedoUIStore    = require('../stores/undo-redo-ui-store');
-const AppSettingsActions = require('../stores/app-settings-store').actions;
+const Dropdown           = React.createFactory(require("./dropdown-view"));
+const OpenInCodap        = React.createFactory(require("./open-in-codap-view"));
+const ModalGoogleSave    = React.createFactory(require("./modal-google-save-view"));
+const BuildInfoView      = React.createFactory(require("./build-info-view"));
+const GoogleFileStore    = require("../stores/google-file-store");
+const UndoRedoUIStore    = require("../stores/undo-redo-ui-store");
+const AppSettingsActions = require("../stores/app-settings-store").actions;
 
 module.exports = React.createClass({
 
-  displayName: 'GlobalNav',
+  displayName: "GlobalNav",
 
   mixins: [ GoogleFileStore.mixin, UndoRedoUIStore.mixin ],
 
@@ -66,11 +66,11 @@ module.exports = React.createClass({
     }
     ];
 
-    return (div({className: 'global-nav'},
+    return (div({className: "global-nav"},
       (div({},
-        (Dropdown({anchor: this.props.filename, items: options, className:'global-nav-content-filename'})),
+        (Dropdown({anchor: this.props.filename, items: options, className:"global-nav-content-filename"})),
         this.state.dirty ?
-          (span({className: 'global-nav-file-status'}, 'Unsaved')) : undefined
+          (span({className: "global-nav-file-status"}, "Unsaved")) : undefined
       )),
       this.state.action ?
         (div({},
@@ -91,7 +91,7 @@ module.exports = React.createClass({
         setIsPublic: GoogleFileStore.actions.setIsPublic
       })),
       (BuildInfoView({})),
-      (div({className: 'global-nav-name-and-help'},
+      (div({className: "global-nav-name-and-help"},
         (OpenInCodap({ disabled: this.state.dirty }))
       ))
     ));

@@ -16,7 +16,7 @@ class TabInfo {
 
 const Tab = React.createFactory(React.createClass({
 
-  displayName: 'TabbedPanelTab',
+  displayName: "TabbedPanelTab",
 
   clicked(e) {
     e.preventDefault();
@@ -24,8 +24,8 @@ const Tab = React.createFactory(React.createClass({
   },
 
   render() {
-    let classname = this.props.defined ? 'tab-link-defined' : '';
-    if (this.props.selected) { classname += ' tab-selected'; }
+    let classname = this.props.defined ? "tab-link-defined" : "";
+    if (this.props.selected) { classname += " tab-selected"; }
     return (li({className: classname, onClick: this.clicked}, this.props.label));
   }
 })
@@ -33,7 +33,7 @@ const Tab = React.createFactory(React.createClass({
 
 module.exports = React.createClass({
 
-  displayName: 'TabbedPanelView',
+  displayName: "TabbedPanelView",
 
   getInitialState() {
     return {selectedTabIndex: this.props.selectedTabIndex || 0};
@@ -73,7 +73,7 @@ module.exports = React.createClass({
   },
 
   renderTabs(clientClass) {
-    return (div({className: `workspace-tabs${clientClass}`, key: 'tabs'},
+    return (div({className: `workspace-tabs${clientClass}`, key: "tabs"},
       (ul({}, (Array.from(this.props.tabs).map((tab, index) => this.renderTab(tab,index)))))
     ));
   },
@@ -85,16 +85,16 @@ module.exports = React.createClass({
         (div({
           key: index,
           style: {
-            display: index === this.state.selectedTabIndex ? 'block' : 'none'
+            display: index === this.state.selectedTabIndex ? "block" : "none"
           }
-          },
-          tab.component
+        },
+        tab.component
         )))
     ));
   },
 
   render() {
-    const clientClass = this.props.clientClass ? ` ${this.props.clientClass}` : '';
+    const clientClass = this.props.clientClass ? ` ${this.props.clientClass}` : "";
     return (div({className: `tabbed-panel${clientClass}`},
       (div({className: `tabbed-panel-left${clientClass}`}, [
         this.renderTabs(clientClass),

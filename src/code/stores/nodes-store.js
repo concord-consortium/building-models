@@ -3,8 +3,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const PaletteStore       = require('./palette-store');
-const GraphActions       = require('../actions/graph-actions');
+const PaletteStore       = require("./palette-store");
+const GraphActions       = require("../actions/graph-actions");
 
 const nodeActions = Reflux.createActions(
   [

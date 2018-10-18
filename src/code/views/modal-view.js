@@ -7,26 +7,26 @@ const {div} = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'Modal',
+  displayName: "Modal",
 
   watchForEscape(e) {
     if (e.keyCode === 27) {
-      return (typeof this.props.close === 'function' ? this.props.close() : undefined);
+      return (typeof this.props.close === "function" ? this.props.close() : undefined);
     }
   },
 
   componentDidMount() {
-    return $(window).on('keyup', this.watchForEscape);
+    return $(window).on("keyup", this.watchForEscape);
   },
 
   componentWillUnmount() {
-    return $(window).off('keyup', this.watchForEscape);
+    return $(window).off("keyup", this.watchForEscape);
   },
 
   render() {
-    return (div({className: 'modal'},
-      (div({className: 'modal-background'})),
-      (div({className: 'modal-content'}, this.props.children))
+    return (div({className: "modal"},
+      (div({className: "modal-background"})),
+      (div({className: "modal-content"}, this.props.children))
     ));
   }
 });

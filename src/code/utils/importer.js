@@ -6,11 +6,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let MySystemImporter;
-const Migrations          = require('../data/migrations/migrations');
-const DiagramNode         = require('../models/node');
-const TransferNode        = require('../models/transfer');
-const ImportActions       = require('../actions/import-actions');
-const GraphPrimitive      = require('../models/graph-primitive');
+const Migrations          = require("../data/migrations/migrations");
+const DiagramNode         = require("../models/node");
+const TransferNode        = require("../models/transfer");
+const ImportActions       = require("../actions/import-actions");
+const GraphPrimitive      = require("../models/graph-primitive");
 
 module.exports = (MySystemImporter = class MySystemImporter {
 
@@ -29,7 +29,7 @@ module.exports = (MySystemImporter = class MySystemImporter {
     this.importLinks(data.links);
     // set the nextID counters
     GraphPrimitive.initCounters({nodes: this.graphStore.getNodes(), links: this.graphStore.getLinks()});
-    return this.graphStore.setFilename(data.filename || 'New Model');
+    return this.graphStore.setFilename(data.filename || "New Model");
   }
 
   importNode(nodeSpec) {
@@ -52,7 +52,7 @@ module.exports = (MySystemImporter = class MySystemImporter {
       node.id = node.key;
       this.graphStore.addNode(node);
     }
-      // prevent unused default return value
+    // prevent unused default return value
   }
 
   importLinks(links) {
@@ -61,10 +61,10 @@ module.exports = (MySystemImporter = class MySystemImporter {
       // ensure id matches key for imported documents
       link.id = link.key;
     }
-      // prevent unused default return value
+    // prevent unused default return value
   }
 });
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

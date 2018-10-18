@@ -5,11 +5,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const {div} = React.DOM;
-const tr = require('../utils/translate');
-const Color = require('../utils/colors');
+const tr = require("../utils/translate");
+const Color = require("../utils/colors");
 
 const ColorChoice = React.createFactory(React.createClass({
-  displayName: 'ColorChoice',
+  displayName: "ColorChoice",
 
   selectColor() {
     return this.props.onChange(this.props.color);
@@ -18,14 +18,14 @@ const ColorChoice = React.createFactory(React.createClass({
   render() {
     const { name } = this.props.color;
     const { value } = this.props.color;
-    let className = 'color-choice';
+    let className = "color-choice";
     if (this.props.selected === value) {
-      className = 'color-choice selected';
+      className = "color-choice selected";
     }
 
     return (div({className, onClick: this.selectColor},
-      (div({className: 'color-swatch', style: {'backgroundColor': value}})),
-      (div({className: 'color-label'}, name))
+      (div({className: "color-swatch", style: {"backgroundColor": value}})),
+      (div({className: "color-label"}, name))
     ));
   }
 })
@@ -33,7 +33,7 @@ const ColorChoice = React.createFactory(React.createClass({
 
 module.exports = React.createClass({
 
-  displayName: 'ColorPickerView',
+  displayName: "ColorPickerView",
 
   getInitialState() {
     return {opened: false};

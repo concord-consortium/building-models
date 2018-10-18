@@ -4,16 +4,16 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const urlParams = require('./url-params');
+const urlParams = require("./url-params");
 
 const languageFiles = {
-  'en-US': require('./lang/en-US'),
-  'he': require('./lang/he'),
-  'tr': require('./lang/tr'),
-  'zh-TW': require('./lang/zh-TW'),
-  'es': require('./lang/es'),
-  'et': require('./lang/et'),
-  'pl': require('./lang/pl')
+  "en-US": require("./lang/en-US"),
+  "he": require("./lang/he"),
+  "tr": require("./lang/tr"),
+  "zh-TW": require("./lang/zh-TW"),
+  "es": require("./lang/es"),
+  "et": require("./lang/et"),
+  "pl": require("./lang/pl")
 };
 
 const translations =  {};
@@ -21,14 +21,14 @@ _.each(languageFiles, function(langContents, langKey) {
   let dashLoc;
   translations[langKey] = langContents;
   // accept full key with region code or just the language code
-  if ((dashLoc = langKey.indexOf('-')) > 0) {
+  if ((dashLoc = langKey.indexOf("-")) > 0) {
     const lang = langKey.substring(0, dashLoc);
     translations[lang] = langContents;
   }
 });
 
 // default to English unless the user expresses another preference (via URL param for now)
-const defaultLang = urlParams.lang && translations[urlParams.lang] ? urlParams.lang : 'en';
+const defaultLang = urlParams.lang && translations[urlParams.lang] ? urlParams.lang : "en";
 
 const varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
 

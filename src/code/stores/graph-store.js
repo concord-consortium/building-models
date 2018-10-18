@@ -8,12 +8,12 @@
  * DS208: Avoid top-level this
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const Importer            = require('../utils/importer');
-const Link                = require('../models/link');
-const NodeModel           = require('../models/node');
-const TransferModel       = require('../models/transfer');
-const UndoRedo            = require('../utils/undo-redo');
-const SelectionManager    = require('../models/selection-manager');
+const Importer            = require("../utils/importer");
+const Link                = require("../models/link");
+const NodeModel           = require("../models/node");
+const TransferModel       = require("../models/transfer");
+const UndoRedo            = require("../utils/undo-redo");
+const SelectionManager    = require("../models/selection-manager");
 const PaletteStore        = require("../stores/palette-store");
 const tr                  = require("../utils/translate");
 const Migrations          = require("../data/migrations/migrations");
@@ -21,14 +21,14 @@ const PaletteDeleteStore  = require("../stores/palette-delete-dialog-store");
 const AppSettingsStore    = require("../stores/app-settings-store");
 const SimulationStore     = require("../stores/simulation-store");
 const GraphActions        = require("../actions/graph-actions");
-const CodapActions        = require('../actions/codap-actions');
+const CodapActions        = require("../actions/codap-actions");
 const LaraActions         = require("../actions/lara-actions");
 const InspectorPanelStore = require("../stores/inspector-panel-store");
-const CodapConnect        = require('../models/codap-connect');
-const LaraConnect         = require('../models/lara-connect');
+const CodapConnect        = require("../models/codap-connect");
+const LaraConnect         = require("../models/lara-connect");
 const RelationFactory     = require("../models/relation-factory");
-const GraphPrimitive      = require('../models/graph-primitive');
-const DEFAULT_CONTEXT_NAME = 'building-models';
+const GraphPrimitive      = require("../models/graph-primitive");
+const DEFAULT_CONTEXT_NAME = "building-models";
 
 const GraphStore  = Reflux.createStore({
   init(context) {
@@ -210,7 +210,7 @@ const GraphStore  = Reflux.createStore({
 
   addLink(link) {
     this.endNodeEdit();
-    return this.undoRedoManager.createAndExecuteCommand('addLink', {
+    return this.undoRedoManager.createAndExecuteCommand("addLink", {
       execute: () => this._addLink(link),
       undo: () => this._removeLink(link)
     }
@@ -230,7 +230,7 @@ const GraphStore  = Reflux.createStore({
 
   removeLink(link) {
     this.endNodeEdit();
-    return this.undoRedoManager.createAndExecuteCommand('removeLink', {
+    return this.undoRedoManager.createAndExecuteCommand("removeLink", {
       execute: () => {
         this._removeLink(link);
         if (link.transferNode != null) { return this._removeTransfer(link); }
@@ -273,7 +273,7 @@ const GraphStore  = Reflux.createStore({
       const matches = newTitle.match(endsWithNumber);
       if (matches) {
         index = parseInt(matches[1], 10) + 1;
-        newTitle = newTitle.replace(endsWithNumber, '');
+        newTitle = newTitle.replace(endsWithNumber, "");
       }
       const template = `${newTitle} %{index}`;
       while (true) {
@@ -287,7 +287,7 @@ const GraphStore  = Reflux.createStore({
   addNode(node) {
     this.endNodeEdit();
     node.title = this.ensureUniqueTitle(node);
-    return this.undoRedoManager.createAndExecuteCommand('addNode', {
+    return this.undoRedoManager.createAndExecuteCommand("addNode", {
       execute: () => this._addNode(node),
       undo: () => this._removeNode(node)
     }
@@ -309,7 +309,7 @@ const GraphStore  = Reflux.createStore({
       }
     });
 
-    return this.undoRedoManager.createAndExecuteCommand('removeNode', {
+    return this.undoRedoManager.createAndExecuteCommand("removeNode", {
       execute: () => {
         if (node.transferLink != null) {
           node.transferLink.relation = node.transferLink.defaultRelation();
@@ -390,7 +390,7 @@ const GraphStore  = Reflux.createStore({
 
   moveNodeCompleted(nodeKey, leftDiff, topDiff) {
     this.endNodeEdit();
-    return this.undoRedoManager.createAndExecuteCommand('moveNode', {
+    return this.undoRedoManager.createAndExecuteCommand("moveNode", {
       execute: () => this.moveNode(nodeKey, 0, 0),
       undo: () => this.moveNode(nodeKey, -leftDiff, -topDiff),
       redo: () => this.moveNode(nodeKey, leftDiff, topDiff)
@@ -471,13 +471,13 @@ const GraphStore  = Reflux.createStore({
                                   (!!data.isAccumulator !== !!originalData.isAccumulator);
 
             if (accumulatorChanged) {
-                              // all inbound links are invalidated
+              // all inbound links are invalidated
               changedLinks = [].concat(node.inLinks())
-                              // along with outbound transfer links
-                                .concat(_.filter(node.outLinks(), link =>
-                                  (link.relation.type === 'transfer') ||
-                                  (link.relation.type === 'initial-value')
-                              ));
+              // along with outbound transfer links
+                .concat(_.filter(node.outLinks(), link =>
+                  (link.relation.type === "transfer") ||
+                                  (link.relation.type === "initial-value")
+                ));
               originalRelations = {};
               for (link of Array.from(changedLinks)) {
                 originalRelations[link.key] = link.relation;
@@ -485,7 +485,7 @@ const GraphStore  = Reflux.createStore({
             }
 
             this.undoRedoManager.startCommandBatch();
-            this.undoRedoManager.createAndExecuteCommand('changeNode', {
+            this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
                 if (accumulatorChanged) {
                   for (link of Array.from(changedLinks)) {
@@ -524,7 +524,7 @@ const GraphStore  = Reflux.createStore({
         log.info(`Change ${key} for ${node.title}`);
         const prev = node[key];
         node[key] = data[key];
-        if (key === 'title') {
+        if (key === "title") {
           if (notifyCodap && this.usingCODAP) {
             const codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
             codapConnect.sendRenameAttribute(node.key, prev);
@@ -568,7 +568,7 @@ const GraphStore  = Reflux.createStore({
     if (isDoubleClick) {
       this.selectionManager.selectNodeForInspection(link.targetNode);
       if (AppSettingsStore.store.settings.simulationType !== AppSettingsStore.store.SimulationType.diagramOnly) {
-        return InspectorPanelStore.actions.openInspectorPanel('relations', {link});
+        return InspectorPanelStore.actions.openInspectorPanel("relations", {link});
       }
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click
@@ -599,7 +599,7 @@ const GraphStore  = Reflux.createStore({
         reasoning: link.reasoning
       };
       this.undoRedoManager.startCommandBatch();
-      this.undoRedoManager.createAndExecuteCommand('changeLink', {
+      this.undoRedoManager.createAndExecuteCommand("changeLink", {
         execute: () => this._changeLink(link,  changes),
         undo: () => this._changeLink(link, originalData)
       }
@@ -641,7 +641,7 @@ const GraphStore  = Reflux.createStore({
 
   _changeLink(link, changes) {
     log.info(`Change  for ${link.title}`);
-    for (let key of ['title','color', 'relation', 'reasoning']) {
+    for (let key of ["title","color", "relation", "reasoning"]) {
       if (changes[key] != null) {
         log.info(`Change ${key} for ${link.title}`);
         link[key] = changes[key];
@@ -659,8 +659,8 @@ const GraphStore  = Reflux.createStore({
 
   newLinkFromEvent(info) {
     const newLink = {};
-    const startKey = $(info.source).data('node-key') || 'undefined';
-    const endKey   = $(info.target).data('node-key') || 'undefined';
+    const startKey = $(info.source).data("node-key") || "undefined";
+    const endKey   = $(info.target).data("node-key") || "undefined";
     const startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
     const endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
     this.importLink({
@@ -679,7 +679,7 @@ const GraphStore  = Reflux.createStore({
       this.removeNode(node);
     }
     GraphPrimitive.resetCounters();
-    this.setFilename('New Model');
+    this.setFilename("New Model");
     return this.undoRedoManager.clearHistory();
   },
 
@@ -732,14 +732,14 @@ const GraphStore  = Reflux.createStore({
       linkDescription += `${target.x},${target.y}|`;
       if (link.relation.isDefined) {
         const isCappedAccumulator = source.isAccumulator && !source.allowNegativeValues;
-        const capValue = isCappedAccumulator ? ':cap' : '';
+        const capValue = isCappedAccumulator ? ":cap" : "";
         modelDescription += `${source.key}:${source.initialValue}${capValue};`;
         modelDescription += link.relation.formula + ";";
-        if (link.relation.type === 'transfer') {
+        if (link.relation.type === "transfer") {
           const transfer = link.transferNode;
           if (transfer) { modelDescription += `${transfer.key}:${transfer.initialValue}:${transfer.combineMethod};`; }
         }
-        modelDescription += `${target.key}${target.isAccumulator ? `:${target.value != null ? target.value : target.initialValue}` : ''}`;
+        modelDescription += `${target.key}${target.isAccumulator ? `:${target.value != null ? target.value : target.initialValue}` : ""}`;
         return modelDescription += `;${target.combineMethod}|`;
       }
     });
@@ -809,7 +809,7 @@ const GraphStore  = Reflux.createStore({
     log.info(`url ${url}`);
     return $.ajax({
       url,
-      dataType: 'json',
+      dataType: "json",
       success: data => {
         return this.loadData(data);
       },
@@ -915,5 +915,5 @@ module.exports = {
 };
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

@@ -10,9 +10,9 @@ let SvgGraphView;
 const {svg, path, line, text, div, tspan, span} = React.DOM;
 
 const tr   = require("../utils/translate");
-const math = require('mathjs');  // For formula parsing...
+const math = require("mathjs");  // For formula parsing...
 module.exports = (SvgGraphView = React.createClass({
-  displayName: 'SvgGraphView',
+  displayName: "SvgGraphView",
   getDefaultProps() {
     return {
       width: 200,
@@ -167,7 +167,7 @@ module.exports = (SvgGraphView = React.createClass({
         console.error(`Error: ${error}`); // eslint-disable-line no-console
       }
       return [x,y];
-  });
+    });
   },
 
   getPathPoints(currentData) {
@@ -182,7 +182,7 @@ module.exports = (SvgGraphView = React.createClass({
         if (y < miny) { miny = y; }
         if (y > maxy) { maxy = y; }
         return { y, x};
-    });
+      });
     }
 
     data = _.map(data, function(d) {
@@ -190,7 +190,7 @@ module.exports = (SvgGraphView = React.createClass({
       x = x / rangex;
       y = y / rangex;
       return {x, y};
-  });
+    });
     return data;
   },
 
@@ -213,16 +213,16 @@ module.exports = (SvgGraphView = React.createClass({
 
   renderAxisLines() {
     const data = [ {x:0, y:1}, {x:0, y:0}, {x:1, y:0}];
-    return (path({className: 'axisLines', d: this.pointsToPath(data)}));
+    return (path({className: "axisLines", d: this.pointsToPath(data)}));
   },
 
   renderLineData() {
     if (this.state.definedRelationship) {
       const data = this.pointsToPath(this.state.pointPathData);
       if (this.state.newCustomData) {
-        return (path({className: 'data', d:data, strokeWidth:this.props.strokeWidth, strokeDasharray:this.props.strokeDasharray}));
+        return (path({className: "data", d:data, strokeWidth:this.props.strokeWidth, strokeDasharray:this.props.strokeDasharray}));
       } else {
-        return (path({className: 'data', d:data, strokeWidth:this.props.strokeWidth}));
+        return (path({className: "data", d:data, strokeWidth:this.props.strokeWidth}));
       }
     }
   },
@@ -230,8 +230,8 @@ module.exports = (SvgGraphView = React.createClass({
   startDrawCurve(evt) {
     // can only draw on custom relationships
     if (this.state.canDraw) {
-      document.addEventListener('mousemove', this.drawCurve);
-      document.addEventListener('mouseup', this.endDrawCurve);
+      document.addEventListener("mousemove", this.drawCurve);
+      document.addEventListener("mouseup", this.endDrawCurve);
       this.drawing = true;
       if (this.state.newCustomData) {
         const scaledCoords = this.pointToScaledCoords(evt);
@@ -288,8 +288,8 @@ module.exports = (SvgGraphView = React.createClass({
 
   endDrawCurve(evt) {
     if (this.drawing) {
-      document.removeEventListener('mousemove', this.drawCurve);
-      document.removeEventListener('mouseup', this.endDrawCurve);
+      document.removeEventListener("mousemove", this.drawCurve);
+      document.removeEventListener("mouseup", this.endDrawCurve);
       this.drawing = false;
       //update relation with custom data
       this.updateRelationCustomData(this.state.currentData);
@@ -314,9 +314,9 @@ module.exports = (SvgGraphView = React.createClass({
   },
 
   render() {
-    let drawClass = 'draw-graph';
-    if (this.state.canDraw) { drawClass += ' drawing'; }
-    return (div({className: 'svgGraphView' },
+    let drawClass = "draw-graph";
+    if (this.state.canDraw) { drawClass += " drawing"; }
+    return (div({className: "svgGraphView" },
       (svg({width: this.props.width, height: this.props.height },
         this.renderAxisLines(),
         this.renderLineData(),
@@ -328,14 +328,14 @@ module.exports = (SvgGraphView = React.createClass({
         onMouseDown: this.startDrawCurve,
         ref: "graphBody"
       }
-        ,
-        (() => {
+      ,
+      (() => {
         if (this.state.newCustomData) {
-          return (div({className: 'graph-hint'},
+          return (div({className: "graph-hint"},
             (span({}, `${tr("~NODE-RELATION-EDIT.CUSTOM_HINT")} `))
           ));
         } else if (!this.state.definedRelationship) {
-          return (div({className: 'unknown-graph'},
+          return (div({className: "unknown-graph"},
             "?"
           ));
         }

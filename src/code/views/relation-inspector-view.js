@@ -9,18 +9,18 @@
 let RelationInspectorView;
 const LinkRelationView = React.createFactory(require("./link-relation-view"));
 const RelationFactory = require("../models/relation-factory");
-const TabbedPanel = React.createFactory(require('./tabbed-panel-view'));
-const Tabber = require('./tabbed-panel-view');
+const TabbedPanel = React.createFactory(require("./tabbed-panel-view"));
+const Tabber = require("./tabbed-panel-view");
 const tr = require("../utils/translate");
 
-const inspectorPanelStore = require('../stores/inspector-panel-store');
-const graphStore = require('../stores/graph-store');
+const inspectorPanelStore = require("../stores/inspector-panel-store");
+const graphStore = require("../stores/graph-store");
 
 let {div, h2, label, span, input, p, i, select, option} = React.DOM;
 
 module.exports = (RelationInspectorView = React.createClass({
 
-  displayName: 'RelationInspectorView',
+  displayName: "RelationInspectorView",
 
   // listen to graphStore so that the tab for the link will re-render when the link is fully defined
   // (link-relation-view uses @props.graphStore.changeLink() to update the link)
@@ -36,7 +36,7 @@ module.exports = (RelationInspectorView = React.createClass({
   },
 
   onTabSelected(index) {
-    return inspectorPanelStore.actions.openInspectorPanel('relations', {link: __guard__(this.props.node.inLinks(), x => x[index])});
+    return inspectorPanelStore.actions.openInspectorPanel("relations", {link: __guard__(this.props.node.inLinks(), x => x[index])});
   },
 
   onMethodSelected(evt) {
@@ -48,13 +48,13 @@ module.exports = (RelationInspectorView = React.createClass({
     const inputCount = (left = __guard__(this.props.node.inLinks(), x => x.length)) != null ? left : 0;
     if (!(inputCount > 1)) { return null; }
 
-    const method = this.props.node.combineMethod != null ? this.props.node.combineMethod : 'average';
-    return (div({ className: 'node-details-inspector', key: 'details' }, [
+    const method = this.props.node.combineMethod != null ? this.props.node.combineMethod : "average";
+    return (div({ className: "node-details-inspector", key: "details" }, [
       tr("~NODE-RELATION-EDIT.COMBINATION_METHOD"),
       (select({ key: 0, value: method, onChange: this.onMethodSelected }, [
-        (option({value: 'average', key: 1},
+        (option({value: "average", key: 1},
           tr("~NODE-RELATION-EDIT.ARITHMETIC_MEAN"))),
-        (option({value: 'product', key: 2},
+        (option({value: "product", key: 2},
           tr("~NODE-RELATION-EDIT.SCALED_PRODUCT")))
       ]))
     ]));
@@ -66,7 +66,7 @@ module.exports = (RelationInspectorView = React.createClass({
       if (this.state.selectedLink === link) { selectedTabIndex = i; }
       return this.renderTabforLink(link);
     });
-    return (div({className:'relation-inspector'},
+    return (div({className:"relation-inspector"},
       (TabbedPanel({
         tabs,
         selectedTabIndex,
@@ -77,7 +77,7 @@ module.exports = (RelationInspectorView = React.createClass({
   },
 
   renderLinkRelationInspector() {
-    return (div({className:'relation-inspector'}));
+    return (div({className:"relation-inspector"}));
   },
 
   render() {
@@ -90,5 +90,5 @@ module.exports = (RelationInspectorView = React.createClass({
 }));
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

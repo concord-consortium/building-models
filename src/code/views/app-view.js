@@ -4,30 +4,30 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const Reflux = require('reflux');
-const tr                  = require('../utils/translate');
+const Reflux = require("reflux");
+const tr                  = require("../utils/translate");
 
-const Placeholder        = React.createFactory(require('./placeholder-view'));
-const GlobalNav          = React.createFactory(require('./global-nav-view'));
-const GraphView          = React.createFactory(require('./graph-view'));
-const NodeWell           = React.createFactory(require('./node-well-view'));
-const InspectorPanel     = React.createFactory(require('./inspector-panel-view'));
-const ImageBrowser       = React.createFactory(require('./image-browser-view'));
-const DocumentActions    = React.createFactory(require('./document-actions-view'));
-const ModalPaletteDelete = React.createFactory(require('./modal-palette-delete-view'));
-const BuildInfoView      = React.createFactory(require('./build-info-view'));
+const Placeholder        = React.createFactory(require("./placeholder-view"));
+const GlobalNav          = React.createFactory(require("./global-nav-view"));
+const GraphView          = React.createFactory(require("./graph-view"));
+const NodeWell           = React.createFactory(require("./node-well-view"));
+const InspectorPanel     = React.createFactory(require("./inspector-panel-view"));
+const ImageBrowser       = React.createFactory(require("./image-browser-view"));
+const DocumentActions    = React.createFactory(require("./document-actions-view"));
+const ModalPaletteDelete = React.createFactory(require("./modal-palette-delete-view"));
+const BuildInfoView      = React.createFactory(require("./build-info-view"));
 
-const ImageDialogStore    = require('../stores/image-dialog-store');
-const AppSettingsStore    = require('../stores/app-settings-store');
+const ImageDialogStore    = require("../stores/image-dialog-store");
+const AppSettingsStore    = require("../stores/app-settings-store");
 
 
 const {div, a} = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'WirefameApp',
+  displayName: "WirefameApp",
 
-  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require('../mixins/app-view')],
+  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require("../mixins/app-view")],
 
   getInitialState() {
 
@@ -40,7 +40,7 @@ module.exports = React.createClass({
 
     return this.getInitialAppViewState({
       iframed,
-      username: 'Jane Doe',
+      username: "Jane Doe",
       filename: tr("~MENU.UNTITLED_MODEL")
     });
   },
@@ -54,15 +54,15 @@ module.exports = React.createClass({
   },
 
   render() {
-    let actionBarStyle = 'action-bar';
+    let actionBarStyle = "action-bar";
     if (AppSettingsStore.store.settings.uiElements.actionBar === false) {
-      actionBarStyle += ' hidden';
+      actionBarStyle += " hidden";
     } else if (AppSettingsStore.store.settings.uiElements.globalNav === false) {
-      actionBarStyle += ' small';
+      actionBarStyle += " small";
     }
 
-    return (div({className: 'app'},
-      (div({className: this.state.iframed ? 'iframed-workspace' : 'workspace'},
+    return (div({className: "app"},
+      (div({className: this.state.iframed ? "iframed-workspace" : "workspace"},
         !this.state.iframed && (AppSettingsStore.store.settings.uiElements.globalNav !== false) ?
           (GlobalNav({
             filename: this.state.filename,
@@ -84,7 +84,7 @@ module.exports = React.createClass({
             iframed: this.state.iframed
           }))
         )),
-        (div({className: AppSettingsStore.store.settings.uiElements.globalNav === false ? 'canvas full' : 'canvas'},
+        (div({className: AppSettingsStore.store.settings.uiElements.globalNav === false ? "canvas full" : "canvas"},
           (GraphView({
             graphStore: this.props.graphStore,
             selectionManager: this.props.graphStore.selectionManager,

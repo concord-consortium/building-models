@@ -3,13 +3,13 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const PaletteInspectorView  = React.createFactory(require('./palette-inspector-view'));
-const PaletteStore = require('../stores/palette-store');
+const PaletteInspectorView  = React.createFactory(require("./palette-inspector-view"));
+const PaletteStore = require("../stores/palette-store");
 const {div} = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'NodeWell',
+  displayName: "NodeWell",
 
   mixins: [ PaletteStore.mixin ],
 
@@ -37,21 +37,21 @@ module.exports = React.createClass({
   },
 
   render() {
-    let topNodePaletteClass    = 'top-node-palette-wrapper';
-    let topNodeTabPaletteClass = 'top-node-palette-tab';
+    let topNodePaletteClass    = "top-node-palette-wrapper";
+    let topNodeTabPaletteClass = "top-node-palette-tab";
     if (this.state.collapsed) {
-      topNodePaletteClass    = 'top-node-palette-wrapper collapsed';
-      topNodeTabPaletteClass = 'top-node-palette-tab collapsed';
+      topNodePaletteClass    = "top-node-palette-wrapper collapsed";
+      topNodeTabPaletteClass = "top-node-palette-tab collapsed";
     }
 
-    return (div({className: this.props.uiElements.nodePalette === false ? 'wrapperwrapper hidden' : this.props.uiElements.globalNav === false ? 'wrapperwrapper top' : 'wrapperwrapper'},
+    return (div({className: this.props.uiElements.nodePalette === false ? "wrapperwrapper hidden" : this.props.uiElements.globalNav === false ? "wrapperwrapper top" : "wrapperwrapper"},
       (div({className: topNodePaletteClass},
         (PaletteInspectorView({
           toggleImageBrowser: this.props.toggleImageBrowser,
           graphStore: this.props.graphStore
         }))
       )),
-      (div({className: 'tab-wrapper'},
+      (div({className: "tab-wrapper"},
         (div({className: topNodeTabPaletteClass, onClick: this.toggle}))
       ))
     ));

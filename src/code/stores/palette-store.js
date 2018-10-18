@@ -5,12 +5,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const resizeImage    = require('../utils/resize-image');
-const initialPalette = require('../data/initial-palette');
-const initialLibrary = require('../data/internal-library');
-const UndoRedo       = require('../utils/undo-redo');
-const ImportActions  = require('../actions/import-actions');
-const uuid           = require('uuid');
+const resizeImage    = require("../utils/resize-image");
+const initialPalette = require("../data/initial-palette");
+const initialLibrary = require("../data/internal-library");
+const UndoRedo       = require("../utils/undo-redo");
+const ImportActions  = require("../actions/import-actions");
+const uuid           = require("uuid");
 
 
 // TODO: Maybe loadData goes into some other action-set
@@ -29,10 +29,10 @@ const paletteStore   = Reflux.createStore({
     this.initializePalette();
     // prepare a template for new library items
     this.blankMetadata = {
-      source: 'external',
-      title: 'blank',
-      link: '',
-      license: ''
+      source: "external",
+      title: "blank",
+      link: "",
+      license: ""
     };
     this.imageMetadata = _.clone(this.blankMetadata, true);
     return this.undoManger = UndoRedo.instance({debug:false});
@@ -99,7 +99,7 @@ const paletteStore   = Reflux.createStore({
 
   onDelete(paletteItem){
     if (paletteItem) {
-      return this.undoManger.createAndExecuteCommand('deletePaletteItem', {
+      return this.undoManger.createAndExecuteCommand("deletePaletteItem", {
         execute: () => {
           this.removePaletteItem(paletteItem);
           return this.updateChanges();
@@ -124,7 +124,7 @@ const paletteStore   = Reflux.createStore({
   },
 
   onAddToPalette(node) {
-    return this.undoManger.createAndExecuteCommand('addPaletteItem', {
+    return this.undoManger.createAndExecuteCommand("addPaletteItem", {
       execute: () => {
         this.addToPalette(node);
         return this.updateChanges();

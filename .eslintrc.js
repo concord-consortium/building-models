@@ -9,7 +9,7 @@ module.exports = {
     },
     "rules": {
         "indent": [
-            "warn", // TODO: change to error in cleanup
+            "error",
             2
         ],
         "linebreak-style": [
@@ -17,7 +17,7 @@ module.exports = {
             "unix"
         ],
         "quotes": [
-            "error",  // TODO: change to error in cleanup
+            "error",
             "double"
         ],
         "semi": [

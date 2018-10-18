@@ -3,14 +3,14 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const CodapConnect = require('../models/codap-connect');
-const CodapActions = require('../actions/codap-actions');
+const CodapConnect = require("../models/codap-connect");
+const CodapActions = require("../actions/codap-actions");
 
 const codapStore   = Reflux.createStore({
   listenables: [CodapActions],
 
   init() {
-    const codapConnect = CodapConnect.instance('building-models');
+    const codapConnect = CodapConnect.instance("building-models");
     this.codapHasLoaded = false;
     return this.hideUndoRedo   = false;
   },

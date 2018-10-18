@@ -14,7 +14,7 @@ module.exports = (GraphPrimitive = (function() {
     static initClass() {
       this.counters = {};
   
-      this.prototype.type = 'GraphPrimitive';
+      this.prototype.type = "GraphPrimitive";
     }
 
     static resetCounters() {

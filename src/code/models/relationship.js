@@ -6,7 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Relationship;
-const math = require('mathjs');  // For formula parsing...
+const math = require("mathjs");  // For formula parsing...
 const tr   = require("../utils/translate");
 
 module.exports = (Relationship = (function() {

@@ -3,9 +3,9 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
-const hasValidImageExtension = require('../utils/has-valid-image-extension');
-const ImageDialogStore = require('../stores/image-dialog-store');
+const PreviewImage = React.createFactory(require("../views/preview-image-dialog-view"));
+const hasValidImageExtension = require("../utils/has-valid-image-extension");
+const ImageDialogStore = require("../stores/image-dialog-store");
 
 
 module.exports = {

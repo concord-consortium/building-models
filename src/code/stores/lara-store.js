@@ -3,14 +3,14 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const LaraConnect = require('../models/lara-connect');
-const LaraActions = require('../actions/lara-actions');
+const LaraConnect = require("../models/lara-connect");
+const LaraActions = require("../actions/lara-actions");
 
 const laraStore   = Reflux.createStore({
   listenables: [LaraActions],
 
   init() {
-    const laraConnect = LaraConnect.instance('building-models');
+    const laraConnect = LaraConnect.instance("building-models");
     return this.laraHasLoaded = false;
   },
 

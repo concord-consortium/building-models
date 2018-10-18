@@ -1,4 +1,4 @@
-const tr = require('./translate');
+const tr = require("./translate");
 
 const colors = {
   yellow: {

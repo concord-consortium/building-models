@@ -28,7 +28,7 @@ module.exports = (OpenClipArt = {
         results.push({
           image: item.svg.png_thumb,
           metadata: {
-            source: 'search',
+            source: "search",
             title: item.title,
             description: item.description,
             link: item.detail_link
@@ -42,5 +42,5 @@ module.exports = (OpenClipArt = {
 
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

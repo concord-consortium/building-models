@@ -10,7 +10,7 @@
 let Simulation;
 const isScaledTransferNode = function(node) {
   if (!node.isTransfer) { return false; }
-  if (node.inLinks('transfer-modifier').length) { return false; }
+  if (node.inLinks("transfer-modifier").length) { return false; }
   const sourceNode = node.transferLink != null ? node.transferLink.sourceNode : undefined;
   const targetNode = node.transferLink != null ? node.transferLink.targetNode : undefined;
   return !(sourceNode != null ? sourceNode.inLinks().length : undefined) && !((targetNode != null ? targetNode.inLinks().length : undefined) > 1);
@@ -72,7 +72,7 @@ const RangeIntegrationFunction = function(incrementAccumulators) {
   if (this.isAccumulator && !incrementAccumulators) { return startValue; }
 
   // regular nodes and flow nodes only have 'range' and 'transfer-modifier' links
-  const links = this.inLinks('range').concat(this.inLinks('transfer-modifier'));
+  const links = this.inLinks("range").concat(this.inLinks("transfer-modifier"));
 
   const inValues = [];
   _.each(links, link => {
@@ -86,7 +86,7 @@ const RangeIntegrationFunction = function(incrementAccumulators) {
 
   // if the user has explicitly set the combination method, we use that
   // otherwise, if any link points to a collector, it should use the scaled product
-  const useScaledProduct = (this.combineMethod === 'product') || this.isTransfer;
+  const useScaledProduct = (this.combineMethod === "product") || this.isTransfer;
 
   let value = inValues.length ? combineInputs(inValues, useScaledProduct) : startValue;
 
@@ -105,7 +105,7 @@ const RangeIntegrationFunction = function(incrementAccumulators) {
 // are inbound `initial-value` links, we request the initial values of the
 // source nodes (no calculations needed) and average them.
 const SetInitialAccumulatorValueFunction = function() {
-  const initialValueLinks = this.inLinks('initial-value');
+  const initialValueLinks = this.inLinks("initial-value");
   const inValues = [];
   _.each(initialValueLinks, function(link) {
     if (!link.relation.isDefined) { return; }
@@ -119,7 +119,7 @@ const SetInitialAccumulatorValueFunction = function() {
 
 const SetAccumulatorValueFunction = function(nodeValues) {
   // collectors only have accumulator and transfer links
-  const links = this.inLinks('accumulator').concat(this.inLinks('transfer')).concat(this.outLinks('transfer'));
+  const links = this.inLinks("accumulator").concat(this.inLinks("transfer")).concat(this.outLinks("transfer"));
 
   const startValue = this.previousValue != null ? this.previousValue : this.initialValue;
   if (!(links.length > 0)) { return startValue; }
@@ -130,24 +130,24 @@ const SetAccumulatorValueFunction = function(nodeValues) {
     const inV = nodeValues[sourceNode.key];
     const outV = startValue;
     switch (relation.type) {
-      case 'accumulator':
-        deltaValue += relation.evaluate(inV, outV, sourceNode.max, this.max) / this.accumulatorInputScale;
-        break;
+    case "accumulator":
+      deltaValue += relation.evaluate(inV, outV, sourceNode.max, this.max) / this.accumulatorInputScale;
+      break;
 
-      case 'transfer':
-        var transferValue = nodeValues[transferNode.key];
+    case "transfer":
+      var transferValue = nodeValues[transferNode.key];
         
-        // can't overdraw non-negative collectors
-        if (this.capNodeValues || (sourceNode.isAccumulator && !sourceNode.allowNegativeValues)) {
-          transferValue = Math.min(transferValue, getTransferLimit(transferNode));
-        }
+      // can't overdraw non-negative collectors
+      if (this.capNodeValues || (sourceNode.isAccumulator && !sourceNode.allowNegativeValues)) {
+        transferValue = Math.min(transferValue, getTransferLimit(transferNode));
+      }
 
-        if (sourceNode === this) {
-          deltaValue -= transferValue;
-        } else if (targetNode === this) {
-          deltaValue += transferValue;
-        }
-        break;
+      if (sourceNode === this) {
+        deltaValue -= transferValue;
+      } else if (targetNode === this) {
+        deltaValue += transferValue;
+      }
+      break;
     }
   }
 
@@ -234,7 +234,7 @@ module.exports = (Simulation = class Simulation {
     this.framesBundle = [];
     _.each(this.nodes, node => this.initializeValues(node));
 
-    const nodeNames = _.pluck(this.nodes, 'title');
+    const nodeNames = _.pluck(this.nodes, "title");
     this.onStart(nodeNames);
 
     // For each step, we run the simulation many times, and then average the final few results.

@@ -10,14 +10,14 @@ const {div, i, span, ul, li} = React.DOM;
 
 const DropdownItem = React.createFactory(React.createClass({
 
-  displayName: 'DropdownItem',
+  displayName: "DropdownItem",
 
   clicked() {
     return this.props.select(this.props.item);
   },
 
   render() {
-    const className = `menuItem ${this.props.isActionMenu && !this.props.item.action ? 'disabled' : ''}`;
+    const className = `menuItem ${this.props.isActionMenu && !this.props.item.action ? "disabled" : ""}`;
     const name = this.props.item.name || this.props.item;
     return (li({className, onClick: this.clicked }, name));
   }
@@ -26,7 +26,7 @@ const DropdownItem = React.createFactory(React.createClass({
 
 module.exports = (DropDown = React.createClass({
 
-  displayName: 'Dropdown',
+  displayName: "Dropdown",
 
   getDefaultProps() {
     return {
@@ -70,23 +70,23 @@ module.exports = (DropDown = React.createClass({
 
   render() {
     let item;
-    const menuClass = this.state.showingMenu ? 'menu-showing' : 'menu-hidden';
+    const menuClass = this.state.showingMenu ? "menu-showing" : "menu-hidden";
     const select = item => {
       return ( () => this.select(item));
     };
-    return (div({className: 'menu'},
-      (span({className: 'menu-anchor', onClick: () => this.select(null)},
+    return (div({className: "menu"},
+      (span({className: "menu-anchor", onClick: () => this.select(null)},
         this.props.anchor,
-        (i({className: 'icon-codap-arrow-expand'}))
+        (i({className: "icon-codap-arrow-expand"}))
       )),
       (div({className: menuClass, onMouseLeave: this.blur, onMouseEnter: this.unblur},
         (ul({},
           (() => {
-          const result = [];
-          for (item of Array.from(this.props.items)) {             result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
-          }
-          return result;
-        })()
+            const result = [];
+            for (item of Array.from(this.props.items)) {             result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
+            }
+            return result;
+          })()
         ))
       ))
     ));

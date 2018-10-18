@@ -4,7 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const AppSettingsStore = require('../../stores/app-settings-store').store;
+const AppSettingsStore = require("../../stores/app-settings-store").store;
 
 const migration = {
   version: "1.19.0",
@@ -19,11 +19,11 @@ const migration = {
 
     const defaultComplexity = wasDiagramOnly ?
       0 // was `AppSettingsStore.Complexity.diagramOnly` but this no longer exists as of 1.22.0
-    :
+      :
       2; // was `AppSettingsStore.Complexity.DEFAULT` but this is now '1' as of 1.22.0
 
     return data.settings.complexity != null ? data.settings.complexity : (data.settings.complexity = defaultComplexity);
   }
 };
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

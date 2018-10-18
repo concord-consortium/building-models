@@ -14,14 +14,14 @@ const SquareImage = React.createFactory(require("./square-image-view"));
 const StackedImage = React.createFactory(require("./stacked-image-view"));
 const SliderView  = React.createFactory(require("./value-slider-view"));
 const GraphView   = React.createFactory(require("./node-svg-graph-view"));
-const CodapConnect = require('../models/codap-connect');
-const DEFAULT_CONTEXT_NAME = 'building-models';
+const CodapConnect = require("../models/codap-connect");
+const DEFAULT_CONTEXT_NAME = "building-models";
 
 const InspectorPanelStore = require("../stores/inspector-panel-store");
 
 const NodeTitle = React.createFactory(React.createClass({
   displayName: "NodeTitle",
-  mixins: [require('../mixins/node-title')],
+  mixins: [require("../mixins/node-title")],
 
   getInitialState() {
     return this.getStateFromProps(this.props);
@@ -106,7 +106,7 @@ const NodeTitle = React.createFactory(React.createClass({
 
   renderTitle() {
     return (div({
-      className: `node-title${this.isDefaultTitle ? ' untitled' : ''}`,
+      className: `node-title${this.isDefaultTitle ? " untitled" : ""}`,
       key: "display",
       style: { display: this.props.isEditing ? "none" : "block" },
       onClick: this.props.onStartEditing
@@ -115,7 +115,7 @@ const NodeTitle = React.createFactory(React.createClass({
 
   renderTitleInput() {
     const displayTitle = this.displayTitleForInput(this.state.title);
-    const className = `node-title${!this.state.isUniqueTitle ? ' non-unique-title' : ''}`;
+    const className = `node-title${!this.state.isUniqueTitle ? " non-unique-title" : ""}`;
     return (input({
       type: "text",
       ref: "input",
@@ -132,7 +132,7 @@ const NodeTitle = React.createFactory(React.createClass({
   },
 
   render() {
-    return (div({className: 'node-title-box'}, [
+    return (div({className: "node-title-box"}, [
       this.renderTitle(),
       this.renderTitleInput()
     ]));
@@ -145,7 +145,7 @@ module.exports = (NodeView = React.createClass({
   displayName: "NodeView",
 
   componentDidUpdate() {
-    const handle = '.img-background';
+    const handle = ".img-background";
     const $elem = $(this.refs.node);
     return $elem.draggable( "option", "handle", handle);
   },
@@ -180,7 +180,7 @@ module.exports = (NodeView = React.createClass({
       if ((now - (this.lastClickLinkTime || 0)) <= 250) {
         // Only open inspector if we're not in diagram-only mode
         if (AppSettingsStore.store.settings.simulationType !== AppSettingsStore.store.SimulationType.diagramOnly) {
-          InspectorPanelStore.actions.openInspectorPanel('relations');
+          InspectorPanelStore.actions.openInspectorPanel("relations");
         }
       }
       return this.lastClickLinkTime = now;
@@ -321,16 +321,16 @@ module.exports = (NodeView = React.createClass({
   },
 
   handleCODAPAttributeDrag(evt, attributeName) {
-    evt.dataTransfer.effectAllowed = 'moveCopy';
-    evt.dataTransfer.setData('text/html', attributeName);
-    evt.dataTransfer.setData('text', attributeName);
+    evt.dataTransfer.effectAllowed = "moveCopy";
+    evt.dataTransfer.setData("text/html", attributeName);
+    evt.dataTransfer.setData("text", attributeName);
     evt.dataTransfer.setData(`application/x-codap-attr-${attributeName}`, attributeName);
     // CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
     return evt.dataTransfer.contains = () => false;
   },
 
   nodeClasses() {
-    const classes = ['elm'];
+    const classes = ["elm"];
     if (this.props.selected) {
       classes.push("selected");
     }
@@ -338,13 +338,13 @@ module.exports = (NodeView = React.createClass({
   },
 
   topClasses() {
-    const classes = ['top'];
+    const classes = ["top"];
     classes.push("link-top");
     return classes.join(" ");
   },
 
   linkTargetClasses() {
-    const classes = ['link-target'];
+    const classes = ["link-target"];
     if (this.props.simulating) {
       classes.push("simulate");
     }
@@ -360,7 +360,7 @@ module.exports = (NodeView = React.createClass({
         }));
       } else {
         return (SquareImage({
-          image: node.isTransfer ? 'img/nodes/transfer.png' : node.image
+          image: node.isTransfer ? "img/nodes/transfer.png" : node.image
         }));
       }
     };
@@ -417,26 +417,26 @@ module.exports = (NodeView = React.createClass({
               className: `img-background transfer-target ${fullWidthBackgroundClass}`,
               onClick: (evt => this.handleSelected(true, evt)),
               onTouchEnd: (() => this.handleSelected(true))
-              },
-              this.renderNodeInternal()
+            },
+            this.renderNodeInternal()
             )),
             this.props.data.isTransfer ?
               (div({className: "node-title"})) // empty title to set node width the same
-            :
+              :
               (div({
                 draggable: this.props.showGraphButton,
                 onDragStart: (evt => this.handleCODAPAttributeDrag(evt, this.props.data.codapID))
               },
-                (NodeTitle({
-                  isEditing: this.props.editTitle,
-                  title: this.props.data.title,
-                  onChange: this.changeTitle,
-                  onStopEditing: this.stopEditing,
-                  onStartEditing: this.startEditing,
-                  node: this.props.data,
-                  nodeKey: this.props.nodeKey,
-                  graphStore: this.props.graphStore
-                }))
+              (NodeTitle({
+                isEditing: this.props.editTitle,
+                title: this.props.data.title,
+                onChange: this.changeTitle,
+                onStopEditing: this.stopEditing,
+                onStartEditing: this.startEditing,
+                node: this.props.data,
+                nodeKey: this.props.nodeKey,
+                graphStore: this.props.graphStore
+              }))
               ))
           ))
         ))

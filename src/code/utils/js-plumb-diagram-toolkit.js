@@ -23,7 +23,7 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     this.kit.importDefaults({
       Connector:        ["Bezier", {curviness: 80}],
       Anchor:           ["Continuous", { faces:["top","left","right"] }],
-      DragOptions :     {cursor: 'pointer', zIndex:2000},
+      DragOptions :     {cursor: "pointer", zIndex:2000},
       ConnectionsDetachable: true,
       DoNotThrowErrors: false
     });
@@ -36,47 +36,47 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     // other links attach to three fixed locations on the top or bottom of the flow node or
     // two fixed locations on the left or right of the flow node chosen to not overlap the others
     this.flowNodeLinkAnchors = [[0.3, 0, 0, -1, 0, 12], [0.5, 0, 0, -1, 0, 12], [0.7, 0, 0, -1, 0, 12], // top
-                            [0, 0.25, -1, 0, 8, 0], [0, 0.75, -1, 0, 8, 0],                         // left
-                            [0.3, 1, 0, 1, 0, 0], [0.5, 1, 0, 1, 0, 0], [0.7, 1, 0, 1, 0, 0],       // bottom
-                            [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]];   // right
+      [0, 0.25, -1, 0, 8, 0], [0, 0.75, -1, 0, 8, 0],                         // left
+      [0.3, 1, 0, 1, 0, 0], [0.5, 1, 0, 1, 0, 0], [0.7, 1, 0, 1, 0, 0],       // bottom
+      [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]];   // right
     // links to non-flow nodes link to locations assigned by jsPlumb on the left, top, or right faces
     this.standardAnchors = ["Continuous", { faces:["top","left","right"] }];
   }
 
   registerListeners() {
-    this.kit.bind('connection', this.handleConnect.bind(this));
-    this.kit.bind('beforeDrag', source => {
+    this.kit.bind("connection", this.handleConnect.bind(this));
+    this.kit.bind("beforeDrag", source => {
       this.$currentSource = $(source.source);
       this.$currentSource.addClass("show-drag");
       return true;
     });
-    return this.kit.bind(['connectionAborted', 'beforeDrop'], args => {
+    return this.kit.bind(["connectionAborted", "beforeDrop"], args => {
       this.$currentSource.removeClass("show-drag");
       return true;
     });
   }
 
   handleConnect(info, evnt)  {
-    if (typeof this.options.handleConnect === 'function') {
+    if (typeof this.options.handleConnect === "function") {
       this.options.handleConnect(info, evnt);
     }
     return true;
   }
 
   handleClick(connection, evnt) {
-    return (typeof this.options.handleClick === 'function' ? this.options.handleClick(connection, evnt) : undefined);
+    return (typeof this.options.handleClick === "function" ? this.options.handleClick(connection, evnt) : undefined);
   }
 
   handleDoubleClick(connection, evnt) {
-    return (typeof this.options.handleDoubleClick === 'function' ? this.options.handleDoubleClick(connection, evnt) : undefined);
+    return (typeof this.options.handleDoubleClick === "function" ? this.options.handleDoubleClick(connection, evnt) : undefined);
   }
 
   handleLabelClick(label, evnt) {
-    return (typeof this.options.handleDoubleClick === 'function' ? this.options.handleDoubleClick(label.component, evnt) : undefined);
+    return (typeof this.options.handleDoubleClick === "function" ? this.options.handleDoubleClick(label.component, evnt) : undefined);
   }
 
   handleDisconnect(info, evnt) {
-    return (typeof this.options.handleDisconnect === 'function' ? this.options.handleDisconnect(info, evnt) : undefined) || true;
+    return (typeof this.options.handleDisconnect === "function" ? this.options.handleDisconnect(info, evnt) : undefined) || true;
   }
 
   repaint() {
@@ -94,7 +94,7 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
   }
 
   makeSource(div, clientClasses) {
-    const classes = `node-link-button${clientClasses ? ` ${clientClasses}` : ''}`;
+    const classes = `node-link-button${clientClasses ? ` ${clientClasses}` : ""}`;
     const endpoints = this.kit.addEndpoint(div, {
       isSource: true,
       dropOptions: {
@@ -171,14 +171,14 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     if (changeIndicator && (variableWidth !== 0)) {
       results.push(["Label", {
         location: 0.1,
-        label: changeIndicator || '',
-        cssClass: `link-indicator${changeIndicator === '+' ? ' increase' : ' decrease'}`
+        label: changeIndicator || "",
+        cssClass: `link-indicator${changeIndicator === "+" ? " increase" : " decrease"}`
       }]);
     } else if (changeIndicator) {
       results.push(["Label", {
         location: 0.9,
-        label: changeIndicator || '',
-        cssClass: `link-indicator${changeIndicator === '+' ? ' increase' : ' decrease'}`
+        label: changeIndicator || "",
+        cssClass: `link-indicator${changeIndicator === "+" ? " increase" : " decrease"}`
       }]);
     }
     if (editingLabel) {
@@ -191,8 +191,8 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
       results.push(["Label", {
         location: 0.5,
         events: { click: this.handleLabelClick.bind(this) },
-        label: label || '',
-        cssClass: `label${selected ? ' selected' : ''}`
+        label: label || "",
+        cssClass: `label${selected ? " selected" : ""}`
       }]);
     }
     return results;
@@ -206,22 +206,22 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
   _createEditLabel(link, label) {
     const width =
       label.length < 13 ? 90
-      : label.length < 19 ? 130
-      : 200;
+        : label.length < 19 ? 130
+          : 200;
     const style = {width};
     return () => {
       const _self = this;
       return $("<input>").val(label).css(style)
-      .show(function() {
-        return $(this).focus();}).change(function() {
-        return (typeof _self.options.handleLabelEdit === 'function' ? _self.options.handleLabelEdit(link, this.value) : undefined);
-      });
+        .show(function() {
+          return $(this).focus();}).change(function() {
+          return (typeof _self.options.handleLabelEdit === "function" ? _self.options.handleLabelEdit(link, this.value) : undefined);
+        });
     };
   }
 
 
   _clean_borked_endpoints() {
-    return $('._jsPlumb_endpoint:not(.jsplumb-draggable)').remove();
+    return $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
   }
 
 
@@ -234,7 +234,7 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     let finalColor = LinkColors.default;
     let fixedColor = LinkColors.default;
     let fadedColor = LinkColors.defaultFaded;
-    let changeIndicator = '';
+    let changeIndicator = "";
 
     let thickness = Math.abs(opts.magnitude);
     if (!thickness) {
@@ -254,12 +254,12 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     if (opts.magnitude < 0) {
       fixedColor = LinkColors.decrease;
       fadedColor = LinkColors.decreaseFaded;
-      changeIndicator = '\u2013';
+      changeIndicator = "\u2013";
     }
     if (opts.magnitude > 0) {
       fixedColor = LinkColors.increase;
       fadedColor = LinkColors.increaseFaded;
-      changeIndicator = '+';
+      changeIndicator = "+";
     }
     if (opts.color !== LinkColors.default) {
       fixedColor = opts.color;
@@ -320,8 +320,8 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     const isTransferFromFlowNode = opts.isTransfer && !opts.fromSource;
     const sourceAnchors = isTransferFromFlowNode ? this.flowNodeFlowAnchors : this.standardAnchors;
     const targetAnchors = isTransferToFlowNode ? this.flowNodeFlowAnchors : 
-                      isModifierToFlowNode ? this.flowNodeModifierAnchors : 
-                        isLinkToFlowNode ? this.flowNodeLinkAnchors : this.standardAnchors;
+      isModifierToFlowNode ? this.flowNodeModifierAnchors : 
+        isLinkToFlowNode ? this.flowNodeLinkAnchors : this.standardAnchors;
 
     const connection = this.kit.connect({
       source: opts.source,
@@ -329,11 +329,11 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
       anchors: [sourceAnchors, targetAnchors],
       paintStyle,
       overlays: this._overlays(opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel, opts.hideArrow),
-      endpoint: this._endpointOptions("Rectangle", thickness, 'node-link-endpoint')
+      endpoint: this._endpointOptions("Rectangle", thickness, "node-link-endpoint")
     });
 
-    connection.bind('click', this.handleClick.bind(this));
-    connection.bind('dblclick', this.handleDoubleClick.bind(this));
+    connection.bind("click", this.handleClick.bind(this));
+    connection.bind("dblclick", this.handleDoubleClick.bind(this));
     connection.linkModel = opts.linkModel;
     opts.linkModel.jsPlumbConnection = connection;
 

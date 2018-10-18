@@ -5,16 +5,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let Transfer;
-const Node = require('./node');
+const Node = require("./node");
 const tr = require("../utils/translate");
 
-const DEFAULT_COMBINE_METHOD='product';
+const DEFAULT_COMBINE_METHOD="product";
 
 module.exports = (Transfer = (function() {
   Transfer = class Transfer extends Node {
     static initClass() {
   
-      this.prototype.type = 'Transfer';
+      this.prototype.type = "Transfer";
       this.prototype.isTransfer = true;
       this.prototype.combineMethod = DEFAULT_COMBINE_METHOD;
     }
@@ -26,8 +26,8 @@ module.exports = (Transfer = (function() {
 
     computeTitle() {
       if (this.transferLink) {
-        return tr('~TRANSFER_NODE.TITLE', { sourceTitle: this.transferLink.sourceNode.title, 
-                                      targetTitle: this.transferLink.targetNode.title });
+        return tr("~TRANSFER_NODE.TITLE", { sourceTitle: this.transferLink.sourceNode.title, 
+          targetTitle: this.transferLink.targetNode.title });
       } else {
         return undefined;
       }

@@ -6,21 +6,21 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let LaraConnect;
-const IframePhone = (require('iframe-phone'));
-const tr = require('../utils/translate');
-const LaraActions    = require('../actions/lara-actions');
-const UndoRedoUIStore = require('../stores/undo-redo-ui-store');
-const UndoRedo = require('../utils/undo-redo');
-const SimulationStore = require('../stores/simulation-store');
-const TimeUnits       = require('../utils/time-units');
-const { escapeRegExp } = (require('../utils/escape-reg-ex'));
+const IframePhone = (require("iframe-phone"));
+const tr = require("../utils/translate");
+const LaraActions    = require("../actions/lara-actions");
+const UndoRedoUIStore = require("../stores/undo-redo-ui-store");
+const UndoRedo = require("../utils/undo-redo");
+const SimulationStore = require("../stores/simulation-store");
+const TimeUnits       = require("../utils/time-units");
+const { escapeRegExp } = (require("../utils/escape-reg-ex"));
 
 module.exports = (LaraConnect = (function() {
   LaraConnect = class LaraConnect {
     static initClass() {
   
       this.instances = {};
-       // map of context -> instance
+      // map of context -> instance
     }
 
     static instance(context) {
@@ -29,9 +29,9 @@ module.exports = (LaraConnect = (function() {
     }
 
     constructor(context) {
-      log.info('LaraConnect: initializing');
-      const GraphStore = require('../stores/graph-store');
-      const PaletteStore  = require('../stores/palette-store');
+      log.info("LaraConnect: initializing");
+      const GraphStore = require("../stores/graph-store");
+      const PaletteStore  = require("../stores/palette-store");
       this.undoRedoManager = UndoRedo.instance({debug:false, context});
       this.loaded = false;
       this.graphStore = GraphStore.store;
@@ -40,7 +40,7 @@ module.exports = (LaraConnect = (function() {
       this.lastCommandStackPosition = -1;
 
       // Setup listeners
-      this.laraPhone.addListener('initInteractive', data => {
+      this.laraPhone.addListener("initInteractive", data => {
         if (!data) {
           return this.laraPhone.post("response", "init failed!");
         } else {
@@ -62,7 +62,7 @@ module.exports = (LaraConnect = (function() {
         }
       });
 
-      this.laraPhone.addListener('getInteractiveState', data => {
+      this.laraPhone.addListener("getInteractiveState", data => {
         log.info("Request for interactiveState received from parent Iframe", data);
         const saveData = this.graphStore.toJsonString(this.paletteStore.palette);
         return this.laraPhone.post("interactiveState", saveData);
@@ -71,7 +71,7 @@ module.exports = (LaraConnect = (function() {
       this.graphStore.addChangeListener(this.onUndoRedoStateChange.bind(this));
 
       // load any previous data by initializing handshake
-      this.laraPhone.post('initInteractive', 'Sage is ready');
+      this.laraPhone.post("initInteractive", "Sage is ready");
     }
 
     onUndoRedoStateChange(state) {
@@ -79,9 +79,9 @@ module.exports = (LaraConnect = (function() {
       if (lastAction && this.loaded) {
         if ((this.undoRedoManager.stackPosition < (this.undoRedoManager.commands.length - 1)) && (this.lastCommandStackPosition > this.undoRedoManager.stackPosition)) {
           // User clicked Undo
-          this.laraPhone.post('log', {action: "undo"});
+          this.laraPhone.post("log", {action: "undo"});
         } else {
-          this.laraPhone.post('log', {action: lastAction.name});
+          this.laraPhone.post("log", {action: lastAction.name});
         }
       }
       return this.lastCommandStackPosition = this.undoRedoManager.stackPosition;

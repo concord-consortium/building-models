@@ -274,7 +274,7 @@ module.exports = (RelationFactory = (function() {
         func = vector.func(scalar.func);
         magnitude = vector.magnitude * scalar.magnitude;
       }
-      return new Relationship({type: 'range', text: name, formula, func, magnitude, customData: existingData});
+      return new Relationship({type: "range", text: name, formula, func, magnitude, customData: existingData});
     }
 
     static selectionsFromRelation(relation) {
@@ -303,9 +303,9 @@ module.exports = (RelationFactory = (function() {
     static thicknessFromRelation(relation) {
       const dt = 1;
       switch (relation.formula) {
-        case this.proportionalSourceMore.formula: return 1 + (1 * dt);
-        case this.proportionalSourceLess.formula: return 1 + (1 * dt);
-        default: return 1;
+      case this.proportionalSourceMore.formula: return 1 + (1 * dt);
+      case this.proportionalSourceLess.formula: return 1 + (1 * dt);
+      default: return 1;
       }
     }
   };
@@ -313,8 +313,8 @@ module.exports = (RelationFactory = (function() {
   return RelationFactory;
 })());
 
-  // @isCustomRelationship: (vector) ->
-  //  customRelationship = false
-  //  if vector? and vector.id == @vary.id
-  //    customRelationship = true
-  //  customRelationship
+// @isCustomRelationship: (vector) ->
+//  customRelationship = false
+//  if vector? and vector.id == @vary.id
+//    customRelationship = true
+//  customRelationship

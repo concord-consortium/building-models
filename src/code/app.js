@@ -4,11 +4,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const AppView     = React.createFactory(require('./views/app-view'));
+const AppView     = React.createFactory(require("./views/app-view"));
 
-const GraphStore   = require('./stores/graph-store');
-const PaletteStore = require('./stores/palette-store');
-const HashParams   = require('./utils/hash-parameters');
+const GraphStore   = require("./stores/graph-store");
+const PaletteStore = require("./stores/palette-store");
+const HashParams   = require("./utils/hash-parameters");
 
 let appView = null;
 
@@ -22,15 +22,15 @@ window.Sage = {
       // googleDoc: try to load a googledoc from the url
       // data: the json to load (compare with publicUrl above)
       graphStore: GraphStore.store,
-      publicUrl: HashParams.getParam('publicUrl'),
-      data: HashParams.getParam('data'),
-      googleDoc: HashParams.getParam('googleDoc')
+      publicUrl: HashParams.getParam("publicUrl"),
+      data: HashParams.getParam("data"),
+      googleDoc: HashParams.getParam("googleDoc")
     };
 
     appView = AppView(opts);
-    const elem = '#app';
+    const elem = "#app";
 
-    return jsPlumb.bind('ready', () => ReactDOM.render(appView, $(elem)[0]));
+    return jsPlumb.bind("ready", () => ReactDOM.render(appView, $(elem)[0]));
   },
 
   clearModel() {

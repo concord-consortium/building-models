@@ -4,13 +4,13 @@
  * DS201: Simplify complex destructure assignments
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const tr = require('./translate');
+const tr = require("./translate");
 
 module.exports = function(imageName) {
-  const link = document.createElement('a');
-  link.setAttribute('href', imageName);
-  const array = link.pathname.split('.'), extension = array[array.length - 1];
-  const valid = (['gif', 'png', 'jpg', 'jpeg'].indexOf(extension.toLowerCase())) !== -1;
+  const link = document.createElement("a");
+  link.setAttribute("href", imageName);
+  const array = link.pathname.split("."), extension = array[array.length - 1];
+  const valid = (["gif", "png", "jpg", "jpeg"].indexOf(extension.toLowerCase())) !== -1;
   if (!valid) {
     alert(tr("~DROP.ONLY_IMAGES_ALLOWED"));
   }

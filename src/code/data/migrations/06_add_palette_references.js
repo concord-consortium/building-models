@@ -5,7 +5,7 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const uuid = require('uuid');
+const uuid = require("uuid");
 
 const imageToUUIDMap= {};
 
@@ -42,4 +42,4 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

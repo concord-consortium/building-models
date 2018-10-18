@@ -6,7 +6,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const FLICKR_API_KEY = '1082174cc952ccc6a97412e9e14aaf88';
+const FLICKR_API_KEY = "1082174cc952ccc6a97412e9e14aaf88";
 
 module.exports = {
   search(query, callback) {
@@ -25,5 +25,5 @@ module.exports = {
 };
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

@@ -4,7 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const AppSettingsStore = require('../../stores/app-settings-store').store;
+const AppSettingsStore = require("../../stores/app-settings-store").store;
 
 const migration = {
   version: "1.24.0",
@@ -29,13 +29,13 @@ const migration = {
     return _.each(nodes, function(n) {
       if (n.data.combineMethod === undefined) {
         if (_.include(productNodeNames, n.key)) {
-          return n.data.combineMethod = 'product';
+          return n.data.combineMethod = "product";
         } else {
-          return n.data.combineMethod = 'average';
+          return n.data.combineMethod = "average";
         }
       }
     });
   }
 };
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

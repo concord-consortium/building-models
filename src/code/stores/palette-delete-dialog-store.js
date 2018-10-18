@@ -3,11 +3,11 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const PaletteStore = require('./palette-store');
-const UndoRedo     = require('../utils/undo-redo');
+const PaletteStore = require("./palette-store");
+const UndoRedo     = require("../utils/undo-redo");
 
 const paletteDialogActions = Reflux.createActions([
-    "open", "close", "delete", "cancel", "select"
+  "open", "close", "delete", "cancel", "select"
 ]);
 
 
@@ -35,7 +35,7 @@ const store = Reflux.createStore({
     this.deleted         = false;
     this.replacement     = null;
 
-    _.each((require('./nodes-store')).store.nodes, node => {
+    _.each((require("./nodes-store")).store.nodes, node => {
       if (node.paletteItemIs(this.paletteItem)) {
         return this.showReplacement = true;
       }

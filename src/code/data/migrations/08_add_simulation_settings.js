@@ -4,7 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const TimeUnits = require('../../utils/time-units');
+const TimeUnits = require("../../utils/time-units");
 
 const migration = {
   version: "1.7.0",
@@ -21,4 +21,4 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

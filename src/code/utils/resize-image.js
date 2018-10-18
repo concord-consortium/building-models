@@ -8,15 +8,15 @@ module.exports = function(src, callback) {
 
   const fail = () => callback(src);
 
-  if (typeof document !== 'undefined' && document !== null) {
+  if (typeof document !== "undefined" && document !== null) {
     const maxWidth = 100;
     const maxHeight = 100;
 
-    const img = document.createElement('img');
-    img.setAttribute('crossOrigin', 'anonymous');
+    const img = document.createElement("img");
+    img.setAttribute("crossOrigin", "anonymous");
     img.src = src;
     img.onload = function() {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       let {width, height} = img;
       if (width > height) {
         if (width > maxWidth) {
@@ -31,9 +31,9 @@ module.exports = function(src, callback) {
       }
       canvas.width = width;
       canvas.height = height;
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
 
-      return callback(canvas.toDataURL('image/png'));
+      return callback(canvas.toDataURL("image/png"));
     };
 
     return img.onerror = e => fail();

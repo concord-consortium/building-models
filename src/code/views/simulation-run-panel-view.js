@@ -4,19 +4,19 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const SimulationStore = require('../stores/simulation-store');
-const AppSettingsStore = require('../stores/app-settings-store');
+const SimulationStore = require("../stores/simulation-store");
+const AppSettingsStore = require("../stores/app-settings-store");
 
-const tr              = require('../utils/translate');
-const RecordButton    = React.createFactory(require('./record-button-view'));
-const Dropdown        = React.createFactory(require('./dropdown-view'));
-const ExperimentPanel = React.createFactory(require('./experiment-panel-view'));
+const tr              = require("../utils/translate");
+const RecordButton    = React.createFactory(require("./record-button-view"));
+const Dropdown        = React.createFactory(require("./dropdown-view"));
+const ExperimentPanel = React.createFactory(require("./experiment-panel-view"));
 
 const {div, span, i, input}  = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'SimulationRunPanel',
+  displayName: "SimulationRunPanel",
 
   mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 
@@ -32,10 +32,10 @@ module.exports = React.createClass({
       return SimulationStore.actions.expandSimulationPanel();
     }
   },
-      // -- TBD: There was discussion about automatically showing
-      // -- MiniGraphs when this panel is opened  …  NP 2018-01
-      // if ! @state.showingMinigraphs
-      //   AppSettingsStore.actions.showMinigraphs true
+  // -- TBD: There was discussion about automatically showing
+  // -- MiniGraphs when this panel is opened  …  NP 2018-01
+  // if ! @state.showingMinigraphs
+  //   AppSettingsStore.actions.showMinigraphs true
 
   renderToggleButton() {
     const iconClass = this.state.simulationPanelExpanded ? "inspectorArrow-collapse" : "inspectorArrow-expand";
@@ -60,20 +60,20 @@ module.exports = React.createClass({
         (ExperimentPanel({disabled: experimentDisabled})),
         this.state.isTimeBased ?
           this.renderRecordForCollectors()
-        :
+          :
           (div({className: "horizontal"},
             (RecordButton({
               onClick: SimulationStore.actions.recordOne,
               disabled
             }
-              ,
-              (div({className: "horizontal"},
-                (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD-1"))),
-                (i({className: "icon-codap-camera"}))
-              )),
-              (div({className: "horizontal"},
-                (span({}, tr("~DOCUMENT.ACTIONS.DATA.POINT")))
-              ))
+            ,
+            (div({className: "horizontal"},
+              (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD-1"))),
+              (i({className: "icon-codap-camera"}))
+            )),
+            (div({className: "horizontal"},
+              (span({}, tr("~DOCUMENT.ACTIONS.DATA.POINT")))
+            ))
             )),
             this.renderRecordStreamButton()
           ))
@@ -94,9 +94,9 @@ module.exports = React.createClass({
       recording: this.state.isRecording,
       disabled: !this.state.modelIsRunnable
     };
-    return (div({className:'horizontal'},
+    return (div({className:"horizontal"},
       (RecordButton(props,
-        (div({className: 'horizontal'},
+        (div({className: "horizontal"},
           (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD"))),
           (i({className: "icon-codap-video-camera"}))
         ))
@@ -136,21 +136,21 @@ module.exports = React.createClass({
 
     if (this.state.isRecording) {
       return (RecordButton(props,
-        (div({className: 'horizontal'},
+        (div({className: "horizontal"},
           (span({}, tr("~DOCUMENT.ACTIONS.DATA.STOP"))),
           (i({className: "icon-codap-video-camera"}))
         )),
-        (div({className: 'horizontal'},
+        (div({className: "horizontal"},
           (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORDING")))
         ))
       ));
     } else {
       return (RecordButton(props,
-        (div({className: 'horizontal'},
+        (div({className: "horizontal"},
           (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD"))),
           (i({className: "icon-codap-video-camera"}))
         )),
-        (div({className: 'horizontal'},
+        (div({className: "horizontal"},
           (span({}, tr("~DOCUMENT.ACTIONS.DATA.STREAM")))
         ))
       ));

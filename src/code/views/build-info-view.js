@@ -11,11 +11,11 @@ const Migration = require("../data/migrations/migrations");
 
 module.exports = (BuildInfoView = React.createClass({
 
-  displayName: 'BuildInfoView',
+  displayName: "BuildInfoView",
 
   componentWillMount() {
-    const build_info = $('html').find("meta[name='build-info']").attr('content');
-    const [date,tag,commit,commiter]= Array.from(build_info.split(' '));
+    const build_info = $("html").find("meta[name='build-info']").attr("content");
+    const [date,tag,commit,commiter]= Array.from(build_info.split(" "));
     return this.setState({
       commit,
       date,
@@ -26,8 +26,8 @@ module.exports = (BuildInfoView = React.createClass({
 
   getInitialState() {
     return {
-      commit: 'somegithub sha',
-      date: '2015-12-16',
+      commit: "somegithub sha",
+      date: "2015-12-16",
       dataVersion: Migration.latestVersion(),
       showing: false
     };
@@ -53,45 +53,45 @@ module.exports = (BuildInfoView = React.createClass({
 
   render() {
     let className;
-    return (div({className: 'build-info-bottom-bar'},
-      (div({className: 'build-info-button', onClick:this.open}, `built on ${this.state.date}`)),
+    return (div({className: "build-info-bottom-bar"},
+      (div({className: "build-info-button", onClick:this.open}, `built on ${this.state.date}`)),
       (() => {
-      if (this.state.showing) {
-        className = "BuildInfoView";
-        return (div({className: "BuildInfoView", onClick: this.close },
-          (div({className: "content", onClick(e){ return e.stopPropagation(); } },
-            (div({className: "top", style: {textAlign: "right"}},
-              (i({className: 'icon-codap-ex', style: {padding: 0, cursor: "pointer"}, onClick: this.close })))),
-            (table({},
-              (tbody({},
-                (tr({className: "date"},
-                  (td({className: "key"}, "released on:")),
-                  (td({className: "value"}, this.state.date))
-                )),
-                (tr({className: "commit"},
-                  (td({className: "key"}, "commit:")),
-                  (td({className: "value"},
-                    (a({href: this.link(), target: "_blank"}, this.state.commit))
+        if (this.state.showing) {
+          className = "BuildInfoView";
+          return (div({className: "BuildInfoView", onClick: this.close },
+            (div({className: "content", onClick(e){ return e.stopPropagation(); } },
+              (div({className: "top", style: {textAlign: "right"}},
+                (i({className: "icon-codap-ex", style: {padding: 0, cursor: "pointer"}, onClick: this.close })))),
+              (table({},
+                (tbody({},
+                  (tr({className: "date"},
+                    (td({className: "key"}, "released on:")),
+                    (td({className: "value"}, this.state.date))
+                  )),
+                  (tr({className: "commit"},
+                    (td({className: "key"}, "commit:")),
+                    (td({className: "value"},
+                      (a({href: this.link(), target: "_blank"}, this.state.commit))
+                    ))
+                  )),
+                  (tr({className: "tag"},
+                    (td({className: "key"}, "tag:")),
+                    (td({className: "value"}, this.state.tag))
+                  )),
+                  (tr({className: "commit"},
+                    (td({className: "key"}, "commiter:")),
+                    (td({className: "value"}, this.state.commiter))
+                  )),
+                  (tr({className: "buildInfo"},
+                    (td({className: "key"}, "data format version:")),
+                    (td({className: "value"}, this.state.dataVersion))
                   ))
-                )),
-                (tr({className: "tag"},
-                  (td({className: "key"}, "tag:")),
-                  (td({className: "value"}, this.state.tag))
-                )),
-                (tr({className: "commit"},
-                  (td({className: "key"}, "commiter:")),
-                  (td({className: "value"}, this.state.commiter))
-                )),
-                (tr({className: "buildInfo"},
-                  (td({className: "key"}, "data format version:")),
-                  (td({className: "value"}, this.state.dataVersion))
                 ))
               ))
             ))
-          ))
-        ));
-      }
-    })()
+          ));
+        }
+      })()
     ));
   }
 }));

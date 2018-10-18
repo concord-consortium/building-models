@@ -6,9 +6,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let SelectionManager;
-const Importer    = require('../utils/importer');
-const Link        = require('./link');
-const DiagramNode = require('./node');
+const Importer    = require("../utils/importer");
+const Link        = require("./link");
+const DiagramNode = require("./node");
 const tr          = require("../utils/translate");
 
 
@@ -56,8 +56,8 @@ module.exports = (SelectionManager = (function() {
       const where = {};
       if (context) { where.context = context; }
       return _.chain(this.selections)
-      .where(where)
-      .map(obj => obj.graphprimitive).value();
+        .where(where)
+        .map(obj => obj.graphprimitive).value();
     }
 
     _clearSelection(context=null) {
@@ -82,8 +82,8 @@ module.exports = (SelectionManager = (function() {
       const where = {key: graphprimitive.key};
       if (context) { where.context = context; }
       const found = _.chain(this.selections)
-      .where(where)
-      .value();
+        .where(where)
+        .value();
       return found.length > 0;
     }
 
@@ -178,9 +178,9 @@ module.exports = (SelectionManager = (function() {
       log.info(removeCritereon);
       if (removeCritereon.context || removeCritereon.key) {
         log.info(`removing ${removeCritereon.key}`);
-        log.info(`in collection ${_.pluck(this.selections, 'key')}`);
+        log.info(`in collection ${_.pluck(this.selections, "key")}`);
         _.remove(this.selections, removeCritereon);
-        return log.info(`in collection ${_.pluck(this.selections, 'key')}`);
+        return log.info(`in collection ${_.pluck(this.selections, "key")}`);
       } else {
         return this.selections = [];
       }

@@ -8,17 +8,17 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const NodeView         = require('./node-view');
+const NodeView         = require("./node-view");
 const Node             = React.createFactory(NodeView);
-const NodeModel        = require('../models/node');
-const Importer         = require('../utils/importer');
-const Color            = require('../utils/colors');
-const DiagramToolkit   = require('../utils/js-plumb-diagram-toolkit');
-const dropImageHandler = require('../utils/drop-image-handler');
-const tr               = require('../utils/translate');
-const PaletteStore     = require('../stores/palette-store');
-const GraphStore       = require('../stores/graph-store');
-const ImageDialogStore = require('../stores/image-dialog-store');
+const NodeModel        = require("../models/node");
+const Importer         = require("../utils/importer");
+const Color            = require("../utils/colors");
+const DiagramToolkit   = require("../utils/js-plumb-diagram-toolkit");
+const dropImageHandler = require("../utils/drop-image-handler");
+const tr               = require("../utils/translate");
+const PaletteStore     = require("../stores/palette-store");
+const GraphStore       = require("../stores/graph-store");
+const ImageDialogStore = require("../stores/image-dialog-store");
 const RelationFactory  = require("../models/relation-factory");
 
 const SimulationStore  = require("../stores/simulation-store");
@@ -31,14 +31,14 @@ const {div} = React.DOM;
 
 module.exports = React.createClass({
 
-  displayName: 'LinkView',
+  displayName: "LinkView",
   mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin, LaraStore.mixin ],
 
   getDefaultProps() {
     return {
-      linkTarget: '.link-top',
-      connectionTarget: '.link-target',
-      transferTarget: '.link-target'
+      linkTarget: ".link-top",
+      connectionTarget: ".link-target",
+      transferTarget: ".link-target"
     };
   },
 
@@ -77,12 +77,12 @@ module.exports = React.createClass({
     });
 
     return $container.droppable({
-      accept: '.palette-image',
+      accept: ".palette-image",
       hoverClass: "ui-state-highlight",
       drop: (e, ui) => {
         // this seems crazy but we can't get the real drop target from the event so we have to calculate it
         // we also can't just make the inspector panel eat the drops because the container handler is called first
-        const $panel = $('.inspector-panel-content');
+        const $panel = $(".inspector-panel-content");
         const panel = {
           width: $panel.width(),
           height: $panel.height(),
@@ -104,10 +104,10 @@ module.exports = React.createClass({
   addNode(e, ui) {
     let paletteItem;
     const data = ui.draggable.data();
-    if (data.droptype === 'new') {
+    if (data.droptype === "new") {
       return paletteItem = this.addNewPaletteNode(e,ui);
 
-    } else if (data.droptype === 'paletteItem') {
+    } else if (data.droptype === "paletteItem") {
       paletteItem = PaletteStore.store.palette[data.index];
       PaletteStore.actions.selectPaletteIndex(data.index);
       return this.addPaletteNode(ui,paletteItem);
@@ -165,7 +165,7 @@ module.exports = React.createClass({
         (prevState.selectedLink !== this.state.selectedLink) ||
         (prevState.relationshipSymbols !== this.state.relationshipSymbols) ||
         this.forceRedrawLinks) {
-      __guardMethod__(this.diagramToolkit, 'clear', o => o.clear());
+      __guardMethod__(this.diagramToolkit, "clear", o => o.clear());
       this._updateToolkit();
       return this.forceRedrawLinks = false;
     }
@@ -275,21 +275,21 @@ module.exports = React.createClass({
   // https://www.pivotaltracker.com/story/show/142418227
   _checkForLinkButtonClientClass() {
     if (this.linkButtonClientClass != null) { return; }
-    const nodeLinkButtonElts = $('.graph-view').find('.node-link-button');
+    const nodeLinkButtonElts = $(".graph-view").find(".node-link-button");
     const nodeLinkButtonElt = nodeLinkButtonElts && nodeLinkButtonElts[0];
     const connectionSrcElt = nodeLinkButtonElt && nodeLinkButtonElt._jsPlumbRelatedElement;
     if (connectionSrcElt && nodeLinkButtonElt) {
       const connectionSrcTop = connectionSrcElt.getBoundingClientRect().top;
       const nodeLinkButtonTop = nodeLinkButtonElt.getBoundingClientRect().top;
       const topOffset = nodeLinkButtonTop - connectionSrcTop;
-      return this.linkButtonClientClass = topOffset > 6 ? 'correct-drag-top' : '';
+      return this.linkButtonClientClass = topOffset > 6 ? "correct-drag-top" : "";
     }
   },
 
   _redrawTargets() {
-    this.diagramToolkit.makeSource(($(this.refs.linkView).find('.connection-source')), this.linkButtonClientClass);
+    this.diagramToolkit.makeSource(($(this.refs.linkView).find(".connection-source")), this.linkButtonClientClass);
     const target = $(this.refs.linkView).find(this.props.linkTarget);
-    const targetStyle = 'node-link-target';
+    const targetStyle = "node-link-target";
 
     return this.diagramToolkit.makeTarget(target, targetStyle);
   },
@@ -298,7 +298,7 @@ module.exports = React.createClass({
     return Array.from(this.state.links).map((link) =>
       (link.relation != null ? link.relation.isTransfer : undefined) ?
         this._redrawTransferLinks(link)
-      :
+        :
         this._redrawLink(link));
   },
 
@@ -439,7 +439,7 @@ module.exports = React.createClass({
     // deselect links when background is clicked
       this.props.selectionManager.clearSelection();
       if (this.state.drawingMarquee) {
-     // end of drawing Marquee, check what is selected
+        // end of drawing Marquee, check what is selected
         this.checkSelectBoxCollisions();
         this.setState({drawingMarquee: false});
       }
@@ -568,15 +568,15 @@ module.exports = React.createClass({
     }
     const diagramOnly = this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly;
 
-    return (div({className: `graph-view ${this.state.canDrop ? 'can-drop' : ''}`, ref: 'linkView', onDragOver: this.onDragOver, onDrop: this.onDrop, onDragLeave: this.onDragLeave},
-      (div({className: 'container', ref: 'container', onMouseDown: this.onMouseDown, onMouseUp: this.onMouseUp, onMouseMove: this.onMouseMove},
+    return (div({className: `graph-view ${this.state.canDrop ? "can-drop" : ""}`, ref: "linkView", onDragOver: this.onDragOver, onDrop: this.onDrop, onDragLeave: this.onDragLeave},
+      (div({className: "container", ref: "container", onMouseDown: this.onMouseDown, onMouseUp: this.onMouseUp, onMouseMove: this.onMouseMove},
         (() => {
-        if (this.state.drawingMarquee) {
-          const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
-          const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
-          return (div({className: 'selectionBox', ref: 'selectionBox', style: {width: Math.abs(this.state.selectBox.x-this.state.selectBox.startX), height: Math.abs(this.state.selectBox.y-this.state.selectBox.startY), left, top, border: '1px dotted #CCC', position: 'absolute', backgroundColor: '#FFFFFF'}}));
-        }
-      })(),
+          if (this.state.drawingMarquee) {
+            const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
+            const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
+            return (div({className: "selectionBox", ref: "selectionBox", style: {width: Math.abs(this.state.selectBox.x-this.state.selectBox.startX), height: Math.abs(this.state.selectBox.y-this.state.selectBox.startY), left, top, border: "1px dotted #CCC", position: "absolute", backgroundColor: "#FFFFFF"}}));
+          }
+        })(),
         Array.from(this.state.nodes).map((node) =>
           (Node({
             key: node.key,
@@ -604,7 +604,7 @@ module.exports = React.createClass({
 });
 
 function __guardMethod__(obj, methodName, transform) {
-  if (typeof obj !== 'undefined' && obj !== null && typeof obj[methodName] === 'function') {
+  if (typeof obj !== "undefined" && obj !== null && typeof obj[methodName] === "function") {
     return transform(obj, methodName);
   } else {
     return undefined;

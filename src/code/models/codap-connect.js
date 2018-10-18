@@ -8,13 +8,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let CodapConnect;
-const { IframePhoneRpcEndpoint } = (require('iframe-phone'));
-const tr = require('../utils/translate');
-const CodapActions    = require('../actions/codap-actions');
-const undoRedoUIActions = (require('../stores/undo-redo-ui-store')).actions;
-const SimulationStore = require('../stores/simulation-store');
-const TimeUnits       = require('../utils/time-units');
-const { escapeRegExp } = (require('../utils/escape-reg-ex'));
+const { IframePhoneRpcEndpoint } = (require("iframe-phone"));
+const tr = require("../utils/translate");
+const CodapActions    = require("../actions/codap-actions");
+const undoRedoUIActions = (require("../stores/undo-redo-ui-store")).actions;
+const SimulationStore = require("../stores/simulation-store");
+const TimeUnits       = require("../utils/time-units");
+const { escapeRegExp } = (require("../utils/escape-reg-ex"));
 // log -- see loglevel in package.json
 
 module.exports = (CodapConnect = (function() {
@@ -22,7 +22,7 @@ module.exports = (CodapConnect = (function() {
     static initClass() {
   
       this.instances = {};
-       // map of context -> instance
+      // map of context -> instance
     }
 
     static instance(context) {
@@ -32,8 +32,8 @@ module.exports = (CodapConnect = (function() {
 
     constructor(context) {
       this.codapRequestHandler = this.codapRequestHandler.bind(this);
-      log.info('CodapConnect: initializing');
-      const GraphStore = require('../stores/graph-store');
+      log.info("CodapConnect: initializing");
+      const GraphStore = require("../stores/graph-store");
       this.standaloneMode = false;
       this.queue = [];
       this.graphStore = GraphStore.store;
@@ -52,26 +52,26 @@ module.exports = (CodapConnect = (function() {
 
 
       this.codapPhone = new IframePhoneRpcEndpoint( this.codapRequestHandler,
-        'data-interactive', window.parent );
+        "data-interactive", window.parent );
 
       // load any previous data; also check if CODAP's undo is available,
       // or if we are in standalone mode.
       this.codapPhone.call([
         {
-          action: 'update',
-          resource: 'interactiveFrame',
+          action: "update",
+          resource: "interactiveFrame",
           values: {
             title: tr("~CODAP.INTERACTIVE_FRAME.TITLE"),
             preventBringToFront: true
           }
         },
         {
-          action: 'get',
-          resource: 'interactiveFrame'
+          action: "get",
+          resource: "interactiveFrame"
         },
         {
-          action: 'get',
-          resource: 'dataContext'
+          action: "get",
+          resource: "dataContext"
         }
       ], ret => {
         if (ret) {
@@ -106,7 +106,7 @@ module.exports = (CodapConnect = (function() {
       // check if we already have a datacontext (if we're opening a saved model).
       // if we don't create one with our collections. Then kick off init
       this.codapPhone.call({
-        action: 'get',
+        action: "get",
         resource: `dataContext[${this.dataContextName}]`
       }
       , ret => {
@@ -139,38 +139,38 @@ module.exports = (CodapConnect = (function() {
     _createDataContext() {
       const sampleDataAttrs = this._getSampleAttributes();
       const message = {
-          action: 'create',
-          resource: 'dataContext',
-          values: {
-            name: this.dataContextName,
-            title: this.dataContextName,
-            collections:[
-              {
-                name: this.simulationCollectionName,
-                title: 'Sage Simulation',
-                labels: {
-                  singleCase: 'run',
-                  pluralCase: 'runs'
-                },
-                attrs: [{
-                  name: this.defaultExperimentName,
-                  type: 'categorical'
-                }
-                ]
+        action: "create",
+        resource: "dataContext",
+        values: {
+          name: this.dataContextName,
+          title: this.dataContextName,
+          collections:[
+            {
+              name: this.simulationCollectionName,
+              title: "Sage Simulation",
+              labels: {
+                singleCase: "run",
+                pluralCase: "runs"
               },
-              {
-                parent: this.simulationCollectionName,
-                name: this.samplesCollectionName,
-                title: this.samplesCollectionName,
-                labels: {
-                  singleCase: 'sample',
-                  pluralCase: 'samples'
-                },
-                attrs:  sampleDataAttrs
+              attrs: [{
+                name: this.defaultExperimentName,
+                type: "categorical"
               }
-            ]
-          }
-        };
+              ]
+            },
+            {
+              parent: this.simulationCollectionName,
+              name: this.samplesCollectionName,
+              title: this.samplesCollectionName,
+              labels: {
+                singleCase: "sample",
+                pluralCase: "samples"
+              },
+              attrs:  sampleDataAttrs
+            }
+          ]
+        }
+      };
 
       return this.codapPhone.call(message, this.initGameHandler);
     }
@@ -190,7 +190,7 @@ module.exports = (CodapConnect = (function() {
       ];
 
       const addNodeAttr = function(node) {
-        const type = node.valueDefinedSemiQuantitatively ? 'qualitative' : 'numeric';
+        const type = node.valueDefinedSemiQuantitatively ? "qualitative" : "numeric";
         return sampleDataAttrs.push({
           name: node.codapName || node.title,
           type
@@ -206,8 +206,8 @@ module.exports = (CodapConnect = (function() {
     // If CODAPs Samples collection doesn't have all our data attributes add the new ones.
     _createMissingDataAttributes(callback) {
       // TODO: Computing this every time is expensive. Use a flag set from GraphChange event?
-      const currentAttributes = _.sortBy(this._getSampleAttributes(), 'name');
-      const attributesKey = _.pluck(currentAttributes,'name').join("|");
+      const currentAttributes = _.sortBy(this._getSampleAttributes(), "name");
+      const attributesKey = _.pluck(currentAttributes,"name").join("|");
       if (this.attributesKey === attributesKey) {
         if (callback) { return callback(); }
       } else {
@@ -216,7 +216,7 @@ module.exports = (CodapConnect = (function() {
             const { values } = listAttributeResponse;
             const newAttributes = _.select(currentAttributes, a => !_.includes(values,a.name));
             const message = {
-              action: 'create',
+              action: "create",
               resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute`,
               values: newAttributes
             };
@@ -237,7 +237,7 @@ module.exports = (CodapConnect = (function() {
         };
 
         const getListing = {
-          action: 'get',
+          action: "get",
           resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attributeList`
         };
         this.codapPhone.call(getListing, doResolve);
@@ -247,8 +247,8 @@ module.exports = (CodapConnect = (function() {
 
     _syncAttributeProperties(attrProps, initialSync) {
       const nodesToSync = initialSync 
-                      ? _.filter(this.graphStore.nodeKeys, node => !node.codapID || !node.codapName) 
-                      : _.map(this.graphStore.nodeKeys, node => node); // map nodeKeys to array of nodes
+        ? _.filter(this.graphStore.nodeKeys, node => !node.codapID || !node.codapName) 
+        : _.map(this.graphStore.nodeKeys, node => node); // map nodeKeys to array of nodes
       if (nodesToSync != null ? nodesToSync.length : undefined) {
         return _.each(attrProps, attr => {
           // check for id match
@@ -263,7 +263,7 @@ module.exports = (CodapConnect = (function() {
           }
           // check for title match; use RegEx to match '_' as wildcard character
           if (!node && attr.name) {
-            const nameRegEx = new RegExp(`^${escapeRegExp((attr.name.replace(/_/g, '?')))}$`);
+            const nameRegEx = new RegExp(`^${escapeRegExp((attr.name.replace(/_/g, "?")))}$`);
             node = _.find(nodesToSync, node => nameRegEx.test(node.title));
           }
           if (node) {
@@ -296,7 +296,7 @@ module.exports = (CodapConnect = (function() {
       const codapKey = node.codapID || node.codapName || prevTitle;
       if (codapKey) {
         const message = {
-          action: 'update',
+          action: "update",
           resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute[${codapKey}]`,
           values: { name: node.title },
           meta: {
@@ -330,10 +330,10 @@ module.exports = (CodapConnect = (function() {
     // We could partially avoid this if data CODAP table attributes
     // supported `titles` for localized names.
     updateExperimentColumn() {
-      const experimentNumberLabel = tr('~CODAP.SIMULATION.EXPERIMENT');
+      const experimentNumberLabel = tr("~CODAP.SIMULATION.EXPERIMENT");
       const handleSimulationAttributes = listAttributeResponse => {
         if (listAttributeResponse != null ? listAttributeResponse.success : undefined) {
-          const values = _.pluck(listAttributeResponse.values, 'name');
+          const values = _.pluck(listAttributeResponse.values, "name");
           if (!_.includes(values, experimentNumberLabel)) {
             if (_.includes(values, this.defaultExperimentName)) {
               return this.renameExperimentNumberColumn(experimentNumberLabel);
@@ -347,7 +347,7 @@ module.exports = (CodapConnect = (function() {
       };
 
       const getListing = {
-        action: 'get',
+        action: "get",
         resource: `dataContext[${this.dataContextName}].collection[${this.simulationCollectionName}].attributeList`
       };
       return this.codapPhone.call(getListing, handleSimulationAttributes);
@@ -356,10 +356,10 @@ module.exports = (CodapConnect = (function() {
     createExperimentNumberColumn(label) {
       const experimentAttributes = {
         name: label,
-        type: 'categorical'
+        type: "categorical"
       };
       const message = {
-        action: 'create',
+        action: "create",
         resource: `dataContext[${this.dataContextName}].collection[${this.simulationCollectionName}].attribute`,
         values: [ experimentAttributes ]
       };
@@ -378,7 +378,7 @@ module.exports = (CodapConnect = (function() {
 
     renameSimulationProperty(oldValue, newValue) {
       const message = {
-        action: 'update',
+        action: "update",
         resource: `dataContext[${this.dataContextName}].collection[${this.simulationCollectionName}].attribute[${oldValue}]`,
         values: { name: newValue },
         meta: {
@@ -412,7 +412,7 @@ module.exports = (CodapConnect = (function() {
       this.queue = [];
 
       const createItemsMessage = {
-        action: 'create',
+        action: "create",
         resource: `dataContext[${this.dataContextName}].item`,
         values: sampleData
       };
@@ -438,44 +438,44 @@ module.exports = (CodapConnect = (function() {
 
     _sendUndoToCODAP() {
       return this.codapPhone.call({
-        action: 'notify',
-        resource: 'undoChangeNotice',
+        action: "notify",
+        resource: "undoChangeNotice",
         values: {
-          operation: this.standaloneMode ? 'undoButtonPress' : 'undoAction'
+          operation: this.standaloneMode ? "undoButtonPress" : "undoAction"
         }
       }, function(response) {
-          if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
-            return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
-          }
+        if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+          return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
+        }
       });
     }
 
     _sendRedoToCODAP() {
       return this.codapPhone.call({
-        action: 'notify',
-        resource: 'undoChangeNotice',
+        action: "notify",
+        resource: "undoChangeNotice",
         values: {
-          operation: this.standaloneMode ? 'redoButtonPress' : 'redoAction'
+          operation: this.standaloneMode ? "redoButtonPress" : "redoAction"
         }
       }, function(response) {
-          if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
-            return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
-          }
+        if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+          return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
+        }
       });
     }
 
     sendUndoableActionPerformed(logMessage) {
       return this.codapPhone.call({
-        action: 'notify',
-        resource: 'undoChangeNotice',
+        action: "notify",
+        resource: "undoChangeNotice",
         values: {
-          operation: 'undoableActionPerformed',
+          operation: "undoableActionPerformed",
           logMessage
         }
       }, function(response) {
-          if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
-            return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
-          }
+        if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+          return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
+        }
       });
     }
 
@@ -484,7 +484,7 @@ module.exports = (CodapConnect = (function() {
       // Create the sample data values (node values array)
       const sampleData = _.map(data, function(frame) {
         const sample = {};
-        sample[tr('~CODAP.SIMULATION.EXPERIMENT')] = SimulationStore.store.settings.experimentNumber;
+        sample[tr("~CODAP.SIMULATION.EXPERIMENT")] = SimulationStore.store.settings.experimentNumber;
         sample[timeUnit] = frame.time;
         _.each(frame.nodes, n => sample[n.title] = n.value);
         return sample;
@@ -503,15 +503,15 @@ module.exports = (CodapConnect = (function() {
       const timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
 
       return this.codapPhone.call({
-        action: 'create',
-        resource: 'component',
+        action: "create",
+        resource: "component",
         values: {
-          type: 'graph',
+          type: "graph",
           dataContext: this.dataContextName,
           xAttributeName: timeUnit,
           yAttributeName,
           size: { width: 242, height: 221 },
-          position: 'bottom',
+          position: "bottom",
           enableNumberToggle: true
         }
       });
@@ -520,10 +520,10 @@ module.exports = (CodapConnect = (function() {
     createTable() {
       if (!this.tableCreated) {
         this.codapPhone.call({
-          action: 'create',
-          resource: 'component',
+          action: "create",
+          resource: "component",
           values: {
-            type: 'caseTable',
+            type: "caseTable",
             dataContext: this.dataContextName
           }
         });
@@ -538,53 +538,53 @@ module.exports = (CodapConnect = (function() {
       // if we have an array of changes, for now just extract the first one
       const change = Array.isArray(cmd.values) ? cmd.values[0] : cmd.values;
       const operation = change != null ? change.operation : undefined;
-      const paletteManager = require('../stores/palette-store');
+      const paletteManager = require("../stores/palette-store");
 
       switch (resource) {
-        case 'interactiveState':
-          if (action === 'get') {
-            log.info('Received saveState request from CODAP.');
-            return callback({
-              success: true,
-              state: this.graphStore.serialize(paletteManager.store.palette)
-            });
+      case "interactiveState":
+        if (action === "get") {
+          log.info("Received saveState request from CODAP.");
+          return callback({
+            success: true,
+            state: this.graphStore.serialize(paletteManager.store.palette)
+          });
+        }
+        break;
+      case "undoChangeNotice":
+        if (operation === "undoAction") {
+          log.info("Received undoAction request from CODAP.");
+          successes = this.graphStore.undo(true);
+          callback({
+            success: this.reduceSuccesses(successes) !== false});
+        }
+        if (operation === "redoAction") {
+          log.info("Received redoAction request from CODAP.");
+          successes = this.graphStore.redo(true);
+          callback({
+            success: this.reduceSuccesses(successes) !== false});
+        }
+        if (operation === "clearUndo") {
+          log.info("Received clearUndo request from CODAP.");
+          this.graphStore.undoRedoManager.clearHistory();
+        }
+        if (operation === "clearRedo") {
+          log.info("Received clearRedo request from CODAP.");
+          this.graphStore.undoRedoManager.clearRedo();
+        }
+        // update undo/redo UI state based on CODAP undo/redo UI state
+        if (((cmd.values != null ? cmd.values.canUndo : undefined) != null) && ((cmd.values != null ? cmd.values.canRedo : undefined) != null)) {
+          return undoRedoUIActions.setCanUndoRedo(cmd.values != null ? cmd.values.canUndo : undefined, cmd.values != null ? cmd.values.canRedo : undefined);
+        }
+        break;
+      case "dataContextChangeNotice[Sage Simulation]":
+        if (operation === "updateAttributes") {
+          if (__guard__(change != null ? change.result : undefined, x => x.attrs)) {
+            return this._syncAttributeProperties(change.result.attrs);
           }
-          break;
-        case 'undoChangeNotice':
-          if (operation === 'undoAction') {
-            log.info('Received undoAction request from CODAP.');
-            successes = this.graphStore.undo(true);
-            callback({
-              success: this.reduceSuccesses(successes) !== false});
-          }
-          if (operation === 'redoAction') {
-            log.info('Received redoAction request from CODAP.');
-            successes = this.graphStore.redo(true);
-            callback({
-              success: this.reduceSuccesses(successes) !== false});
-          }
-          if (operation === 'clearUndo') {
-            log.info('Received clearUndo request from CODAP.');
-            this.graphStore.undoRedoManager.clearHistory();
-          }
-          if (operation === 'clearRedo') {
-            log.info('Received clearRedo request from CODAP.');
-            this.graphStore.undoRedoManager.clearRedo();
-          }
-          // update undo/redo UI state based on CODAP undo/redo UI state
-          if (((cmd.values != null ? cmd.values.canUndo : undefined) != null) && ((cmd.values != null ? cmd.values.canRedo : undefined) != null)) {
-            return undoRedoUIActions.setCanUndoRedo(cmd.values != null ? cmd.values.canUndo : undefined, cmd.values != null ? cmd.values.canRedo : undefined);
-          }
-          break;
-        case 'dataContextChangeNotice[Sage Simulation]':
-          if (operation === 'updateAttributes') {
-            if (__guard__(change != null ? change.result : undefined, x => x.attrs)) {
-              return this._syncAttributeProperties(change.result.attrs);
-            }
-          }
-          break;
-        default:
-          return log.info(`Unhandled request received from CODAP: ${JSON.stringify(cmd)}`);
+        }
+        break;
+      default:
+        return log.info(`Unhandled request received from CODAP: ${JSON.stringify(cmd)}`);
       }
     }
 
@@ -603,7 +603,7 @@ module.exports = (CodapConnect = (function() {
       const runsCollection = `dataContext[${this.dataContextName}].collection[${this.simulationCollectionName}]`;
       // find out how many cases there are
       return this.codapPhone.call({
-        action: 'get',
+        action: "get",
         resource: `${runsCollection}.caseCount`
       }
       , ret => {
@@ -612,13 +612,13 @@ module.exports = (CodapConnect = (function() {
           if (caseCount > 0) {
             // get last case, and find its number
             this.codapPhone.call({
-              action: 'get',
+              action: "get",
               resource: `${runsCollection}.caseByIndex[${caseCount-1}]`
             }
             , function(ret2) {
               if (ret2 != null ? ret2.success : undefined) {
-                const lastCase = ret2.values['case'];
-                const lastExperimentNumber = parseInt(lastCase.values[tr('~CODAP.SIMULATION.EXPERIMENT')], 10) || 0;
+                const lastCase = ret2.values["case"];
+                const lastExperimentNumber = parseInt(lastCase.values[tr("~CODAP.SIMULATION.EXPERIMENT")], 10) || 0;
                 return SimulationStore.actions.setExperimentNumber(lastExperimentNumber + 1);
               }
             });
@@ -658,7 +658,7 @@ module.exports = (CodapConnect = (function() {
           if (reply && reply.success) {
             return resolve(reply);
           } else {
-            return reject('CODAP request error');
+            return reject("CODAP request error");
           }
         });
       });
@@ -670,5 +670,5 @@ module.exports = (CodapConnect = (function() {
 })());
 
 function __guard__(value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
 }

@@ -4,7 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const AppSettingsStore = require('../../stores/app-settings-store').store;
+const AppSettingsStore = require("../../stores/app-settings-store").store;
 
 const migration = {
   version: "1.23.0",
@@ -24,4 +24,4 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require('./migration-mixin'));
+module.exports = _.mixin(migration, require("./migration-mixin"));

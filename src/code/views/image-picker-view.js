@@ -5,12 +5,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const {div, img} = React.DOM;
-const tr = require('../utils/translate');
-const PaletteAddView     = React.createFactory(require('./palette-add-view'));
-const PaletteStore = require('../stores/palette-store');
+const tr = require("../utils/translate");
+const PaletteAddView     = React.createFactory(require("./palette-add-view"));
+const PaletteStore = require("../stores/palette-store");
 
 const ImgChoice = React.createFactory(React.createClass({
-  displayName: 'ImgChoice',
+  displayName: "ImgChoice",
 
   selectNode() {
     return this.props.onChange(this.props.node);
@@ -22,7 +22,7 @@ const ImgChoice = React.createFactory(React.createClass({
       className = "image-choice selected";
     }
     return (div({className, onClick: this.selectNode},
-      (img({src: this.props.node.image, className: 'image-choice'}))
+      (img({src: this.props.node.image, className: "image-choice"}))
     ));
   }
 })
@@ -30,7 +30,7 @@ const ImgChoice = React.createFactory(React.createClass({
 
 module.exports = React.createClass({
 
-  displayName: 'ImagePickerView',
+  displayName: "ImagePickerView",
 
   getInitialState() {
     return {opened: false};
@@ -50,15 +50,15 @@ module.exports = React.createClass({
   },
 
   render() {
-    return (div({onClick: this.toggleOpen, className: 'image-picker'},
-      (div({className: 'selected-image'},
+    return (div({onClick: this.toggleOpen, className: "image-picker"},
+      (div({className: "selected-image"},
         (img({src: this.props.selected.image}))
       )),
       (div({className: this.className()},
         (div({className: "image-choice"},
           (PaletteAddView({
             callback:  this.props.onChange,
-            label: tr('~PALETTE-INSPECTOR.ADD_IMAGE_SHORT')
+            label: tr("~PALETTE-INSPECTOR.ADD_IMAGE_SHORT")
           }))
         )),
         Array.from(this.state.palette).map((node, i) =>

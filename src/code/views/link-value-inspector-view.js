@@ -9,15 +9,15 @@ const tr = require("../utils/translate");
 
 module.exports = React.createClass({
 
-  displayName: 'LinkValueInspectorView',
+  displayName: "LinkValueInspectorView",
 
 
   render() {
-    return (div({className: 'link-inspector-view'}));
+    return (div({className: "link-inspector-view"}));
   }
 });
-    // TODO: complete this later
-    //   (div {className: 'inspector-content'},
-    //     (h2 {}, "Link Value")
-    //   )
-    // )
+// TODO: complete this later
+//   (div {className: 'inspector-content'},
+//     (h2 {}, "Link Value")
+//   )
+// )

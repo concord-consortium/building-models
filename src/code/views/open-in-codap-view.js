@@ -4,16 +4,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const {a, span} = React.DOM;
-const tr = require('../utils/translate');
+const tr = require("../utils/translate");
 
-const Dropdown = React.createFactory(require('./dropdown-view'));
+const Dropdown = React.createFactory(require("./dropdown-view"));
 module.exports = React.createClass({
 
-  displayName: 'OpenInCodap',
+  displayName: "OpenInCodap",
 
   getDefaultProps() {
     return {
-      linkTitle: tr('~OPEN_IN_CODAP.TITLE'),
+      linkTitle: tr("~OPEN_IN_CODAP.TITLE"),
       codapUrl: "http://codap.concord.org/releases/latest/static/dg/en/cert/index.html",
       documentServer: "http://document-store.herokuapp.com/",
       openInNewWindow: true
@@ -44,7 +44,7 @@ module.exports = React.createClass({
       };
     }
 
-    return (span({className: 'link'},
+    return (span({className: "link"},
       (a(opts, this.props.linkTitle))
     ));
   }
