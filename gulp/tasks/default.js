@@ -21,15 +21,15 @@ function gulpWatch(watchConfig, tasks) {
 
 gulp.task('watch', function() {
   gulpWatch(config.css.watch,                 ['css']);
-  gulpWatch(config.coffeelint.watch,          ['coffeelint']);
+  gulpWatch(config.eslint.watch,              ['eslint']);
   gulpWatch(config.browserify.app.watch,      ['browserify-app']);
   gulpWatch(config.browserify.globals.watch,  ['browserify-globals']);
   gulpWatch(config.assets.watch,              ['assets']);
   gulpWatch(config.vendor.watch,              ['vendor']);
 });
 
-gulp.task('lint', ['coffeelint']);
+gulp.task('lint', ['eslint']);
 
-gulp.task('build-all', ['coffeelint', 'browserify-app', 'browserify-globals', 'css', 'assets', 'vendor']);
+gulp.task('build-all', ['eslint', 'browserify-app', 'browserify-globals', 'css', 'assets', 'vendor']);
 
 gulp.task('default', ['build-all', 'watch']);

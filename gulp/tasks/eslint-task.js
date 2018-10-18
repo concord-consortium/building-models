@@ -1,13 +1,13 @@
-var gulp        = require('gulp');
-var beep        = require('beepbeep');
-var coffeelint  = require('gulp-coffeelint');
-var config      = require('../config').coffeelint;
+var gulp   = require('gulp');
+var beep   = require('beepbeep');
+var eslint  = require('gulp-eslint');
+var config = require('../config').eslint;
 
-gulp.task('coffeelint', function(){
+gulp.task('eslint', function(){
   return gulp.src(config.src)
-    .pipe(coffeelint())
-    .pipe(coffeelint.reporter())
-    .pipe(coffeelint.reporter('fail'))
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError())
     .on('error', function () {
       beep();
     });
