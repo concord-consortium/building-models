@@ -36,3 +36,7 @@ dev/
 # except jspm config
 building-models.sublime-workspace
 .env
+
+# vscode settings
+.vscode
+
