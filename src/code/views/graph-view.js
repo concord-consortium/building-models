@@ -415,7 +415,7 @@ module.exports = React.createClass({
     } catch (ex) {
       // user could have selected elements on the page and dragged those instead
       // of valid application items like connections or images
-      return console.log("Invalid drag/drop operation", ex);
+      return console.error("Invalid drag/drop operation", ex); // eslint-disable-line no-console
     }
   },
 

@@ -51,6 +51,7 @@ module.exports = {
   eslint: {
     watch: src + '/code/**/*.js',
     src: src + '/code/**/*.js',
+    fix: src + '/code',
   },
   assets: {
     watch: src + '/assets/**/*.*',

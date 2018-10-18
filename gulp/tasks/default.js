@@ -29,6 +29,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('lint', ['eslint']);
+gulp.task('lint:fix', ['eslint:fix']);
 
 gulp.task('build-all', ['eslint', 'browserify-app', 'browserify-globals', 'css', 'assets', 'vendor']);
 

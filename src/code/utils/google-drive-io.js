@@ -10,14 +10,14 @@ let GoogleDriveIO;
 module.exports = (GoogleDriveIO = (function() {
   GoogleDriveIO = class GoogleDriveIO {
     static initClass() {
-  
+
       this.prototype.APP_ID  = '1095918012594';
       this.prototype.DEVELOPER_KEY = 'AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA';
       this.prototype.CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com';
       this.prototype.SCOPES = 'https://www.googleapis.com/auth/drive';
-  
+
       this.prototype.authorized = false;
-  
+
       this.prototype.token = null;
     }
 
@@ -139,7 +139,7 @@ module.exports = (GoogleDriveIO = (function() {
       if (authorize == null) { authorize = true; }
       if (authorize) {
         return this.authorize(this.authorized, (err, token) => {
-          return this._downloadFromUrl(url, token, callack);
+          return this._downloadFromUrl(url, token, callback);
         });
       } else {
         return this._downloadFromUrl(url, null, callback);

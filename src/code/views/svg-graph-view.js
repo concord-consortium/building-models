@@ -164,7 +164,7 @@ module.exports = (SvgGraphView = React.createClass({
         if (y < miny) { miny = y; }
         if (y > maxy) { maxy = y; }
       } catch (error) {
-        console.log(`Error: ${error}`);
+        console.error(`Error: ${error}`); // eslint-disable-line no-console
       }
       return [x,y];
   });

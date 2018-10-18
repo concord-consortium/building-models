@@ -5,7 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const {div} = React.DOM;
-
+const {img} = React.DOM;
 
 module.exports = React.createClass({
 

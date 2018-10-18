@@ -17,7 +17,7 @@ module.exports = {
             "unix"
         ],
         "quotes": [
-            "warn",  // TODO: change to error in cleanup
+            "error",  // TODO: change to error in cleanup
             "double"
         ],
         "semi": [
