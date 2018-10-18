@@ -24,13 +24,12 @@ we are using.
     * [Node.js](http://nodejs.org): `brew install node` on OS X
     * [Gulp](http://gulpjs.com/): `npm install -g gulp`
     * [live-server](https://www.npmjs.com/package/live-server) `npm install -g live-server`
-    * [yarn](https://yarnpkg.com/) `npm install -g yarn`
 `
 
 2. Check out the project and install the local dependencies:
     * `git checkout https://github.com/concord-consortium/building-models.git`
     * `cd building-models`
-    * `yarn`
+    * `npm install`
 
 3. Run:
     * `gulp` — watches the project sources in `./src/` and builds artifacts into `dev`.
