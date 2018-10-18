@@ -1,114 +1,150 @@
-# TODO:  This should be split up into and ImageDialogStore and a DialogStore…
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+// TODO:  This should be split up into and ImageDialogStore and a DialogStore…
 
-PaletteStore = require './palette-store'
+const PaletteStore = require('./palette-store');
 
-imageDialogActions = Reflux.createActions([
+const imageDialogActions = Reflux.createActions([
     "open", "close", "update", "cancel"
-  ])
+  ]);
 
 
-store = Reflux.createStore
-  listenables: [ imageDialogActions ]
+const store = Reflux.createStore({
+  listenables: [ imageDialogActions ],
 
-  init: ->
-    @enableListening()
-    @initValues()
+  init() {
+    this.enableListening();
+    return this.initValues();
+  },
 
-  initValues: ->
-    @showingDialog    = false
-    @keepShowing      = false
-    @callback         = -> undefined
+  initValues() {
+    this.showingDialog    = false;
+    this.keepShowing      = false;
+    this.callback         = () => undefined;
 
-    @resetPaletteItem()
-    @_updateChanges()
+    this.resetPaletteItem();
+    return this._updateChanges();
+  },
 
-  resetPaletteItem: ->
-    @paletteItem = null
+  resetPaletteItem() {
+    return this.paletteItem = null;
+  },
 
-  enableListening: ->
-    PaletteStore.store.listen @onPaletteSelect
+  enableListening() {
+    return PaletteStore.store.listen(this.onPaletteSelect);
+  },
 
-  onOpen: (callback=false)->
-    @keepShowing = true
-    @resetPaletteItem()
-    @showingDialog = true
+  onOpen(callback){
+    if (callback == null) { callback = false; }
+    this.keepShowing = true;
+    this.resetPaletteItem();
+    this.showingDialog = true;
 
-    @callback = null
-    if callback
-      @callback = callback
-      @keepShowing = false
-    @_updateChanges()
+    this.callback = null;
+    if (callback) {
+      this.callback = callback;
+      this.keepShowing = false;
+    }
+    return this._updateChanges();
+  },
 
-  onPaletteSelect: (status) ->
-    @paletteItem = status.selectedPaletteItem
-    @finish()  # Incase we need to trigger window closing
+  onPaletteSelect(status) {
+    this.paletteItem = status.selectedPaletteItem;
+    return this.finish();
+  },  // Incase we need to trigger window closing
 
-  close: ->
-    @showingDialog = false
-    @resetPaletteItem()
+  close() {
+    this.showingDialog = false;
+    return this.resetPaletteItem();
+  },
 
-  onClose: ->
-    @callback=null
-    @close()
-    @_updateChanges()
+  onClose() {
+    this.callback=null;
+    this.close();
+    return this._updateChanges();
+  },
 
-  onUpdate: (data) ->
-    if @paletteItem
-      @paletteItem = _.merge @paletteItem, data
-    else
-    @paletteItem ||= data
-    @_updateChanges()
+  onUpdate(data) {
+    if (this.paletteItem) {
+      this.paletteItem = _.merge(this.paletteItem, data);
+    }
+    else {}
+    if (!this.paletteItem) { this.paletteItem = data; }
+    return this._updateChanges();
+  },
 
-  onCancel: ->
-    @resetPaletteItem()
-    @finish()
+  onCancel() {
+    this.resetPaletteItem();
+    return this.finish();
+  },
 
-  invoke_callback: ->
-    @callback?(@paletteItem)
-    @callback = null # once only
+  invoke_callback() {
+    if (typeof this.callback === 'function') {
+      this.callback(this.paletteItem);
+    }
+    return this.callback = null;
+  }, // once only
 
-  finish: ->
-    @_updateChanges()
-    @invoke_callback()
-    @callback = null
-    @resetPaletteItem()
-    @_updateChanges()
-    unless @keepShowing
-      imageDialogActions.close.trigger()
+  finish() {
+    this._updateChanges();
+    this.invoke_callback();
+    this.callback = null;
+    this.resetPaletteItem();
+    this._updateChanges();
+    if (!this.keepShowing) {
+      return imageDialogActions.close.trigger();
+    }
+  },
 
-  _updateChanges: ->
-    data =
-      showingDialog: @showingDialog
-      keepShowing: @keepShowing
-      paletteItem: @paletteItem
+  _updateChanges() {
+    const data = {
+      showingDialog: this.showingDialog,
+      keepShowing: this.keepShowing,
+      paletteItem: this.paletteItem
+    };
 
-    # log.info "Sending changes to listeners: #{JSON.stringify(data)}"
-    @trigger(data)
+    // log.info "Sending changes to listeners: #{JSON.stringify(data)}"
+    return this.trigger(data);
+  }
+});
 
 
-listenerMixin =
-  actions: imageDialogActions
+const listenerMixin = {
+  actions: imageDialogActions,
 
-  getInitialState: ->
-    showingDialog: store.showingDialog
-    keepShowing: store.keepShowing
-    paletteItem: store.paletteItem
-    selectedImage: store.paletteItem
+  getInitialState() {
+    return {
+      showingDialog: store.showingDialog,
+      keepShowing: store.keepShowing,
+      paletteItem: store.paletteItem,
+      selectedImage: store.paletteItem
+    };
+  },
 
-  componentDidMount: ->
-    @unsubscribe = store.listen @onChange
+  componentDidMount() {
+    return this.unsubscribe = store.listen(this.onChange);
+  },
 
-  componentWillUnmount: ->
-    @unsubscribe()
+  componentWillUnmount() {
+    return this.unsubscribe();
+  },
 
-  onChange: (status) ->
-    @setState
-      showingDialog: status.showingDialog
-      keepShowing: status.keepShowing
-      paletteItem: status.paletteItem
+  onChange(status) {
+    return this.setState({
+      showingDialog: status.showingDialog,
+      keepShowing: status.keepShowing,
+      paletteItem: status.paletteItem,
       selectedImage: status.paletteItem
+    });
+  }
+};
 
-module.exports =
-  store: store
-  actions: imageDialogActions
+module.exports = {
+  store,
+  actions: imageDialogActions,
   mixin: listenerMixin
+};

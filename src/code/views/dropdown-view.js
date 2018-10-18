@@ -1,95 +1,132 @@
-{div, i, span, ul, li} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let DropDown;
+const {div, i, span, ul, li} = React.DOM;
 
-DropdownItem = React.createFactory React.createClass
+const DropdownItem = React.createFactory(React.createClass({
 
-  displayName: 'DropdownItem'
+  displayName: 'DropdownItem',
 
-  clicked: ->
-    @props.select @props.item
+  clicked() {
+    return this.props.select(this.props.item);
+  },
 
-  render: ->
-    className = "menuItem #{if @props.isActionMenu and not @props.item.action then 'disabled' else ''}"
-    name = @props.item.name or @props.item
-    (li {className: className, onClick: @clicked }, name)
+  render() {
+    const className = `menuItem ${this.props.isActionMenu && !this.props.item.action ? 'disabled' : ''}`;
+    const name = this.props.item.name || this.props.item;
+    return (li({className, onClick: this.clicked }, name));
+  }
+})
+);
 
-module.exports = DropDown = React.createClass
+module.exports = (DropDown = React.createClass({
 
-  displayName: 'Dropdown'
+  displayName: 'Dropdown',
 
-  getDefaultProps: ->
-    isActionMenu: true              # Whether each item contains its own action
-    onSelect: (item) ->             # If not, @props.onSelect is called
-      log.info "Selected #{item}"
+  getDefaultProps() {
+    return {
+      isActionMenu: true,              // Whether each item contains its own action
+      onSelect(item) {             // If not, @props.onSelect is called
+        return log.info(`Selected ${item}`);
+      }
+    };
+  },
 
-  getInitialState: ->
-    showingMenu: false
-    timeout: null
+  getInitialState() {
+    return {
+      showingMenu: false,
+      timeout: null
+    };
+  },
 
-  blur: ->
-    @unblur()
-    timeout = setTimeout ( => @setState {showingMenu: false} ), 500
-    @setState {timeout: timeout}
+  blur() {
+    this.unblur();
+    const timeout = setTimeout(( () => this.setState({showingMenu: false}) ), 500);
+    return this.setState({timeout});
+  },
 
-  unblur: ->
-    if @state.timeout
-      clearTimeout(@state.timeout)
-    @setState {timeout: null}
+  unblur() {
+    if (this.state.timeout) {
+      clearTimeout(this.state.timeout);
+    }
+    return this.setState({timeout: null});
+  },
 
-  select: (item) ->
-    nextState = (not @state.showingMenu)
-    @setState {showingMenu: nextState}
-    return unless item
-    if @props.isActionMenu and item.action
-      item.action()
-    else
-      @props.onSelect item
+  select(item) {
+    const nextState = (!this.state.showingMenu);
+    this.setState({showingMenu: nextState});
+    if (!item) { return; }
+    if (this.props.isActionMenu && item.action) {
+      return item.action();
+    } else {
+      return this.props.onSelect(item);
+    }
+  },
 
-  render: ->
-    menuClass = if @state.showingMenu then 'menu-showing' else 'menu-hidden'
-    select = (item) =>
-      ( => @select(item))
-    (div {className: 'menu'},
-      (span {className: 'menu-anchor', onClick: => @select(null)},
-        @props.anchor
-        (i {className: 'icon-codap-arrow-expand'})
-      )
-      (div {className: menuClass, onMouseLeave: @blur, onMouseEnter: @unblur},
-        (ul {},
-          (DropdownItem {key: item.name or item, item: item, select: @select, isActionMenu: @props.isActionMenu}) for item in @props.items
-        )
-      )
-    )
+  render() {
+    let item;
+    const menuClass = this.state.showingMenu ? 'menu-showing' : 'menu-hidden';
+    const select = item => {
+      return ( () => this.select(item));
+    };
+    return (div({className: 'menu'},
+      (span({className: 'menu-anchor', onClick: () => this.select(null)},
+        this.props.anchor,
+        (i({className: 'icon-codap-arrow-expand'}))
+      )),
+      (div({className: menuClass, onMouseLeave: this.blur, onMouseEnter: this.unblur},
+        (ul({},
+          (() => {
+          const result = [];
+          for (item of Array.from(this.props.items)) {             result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
+          }
+          return result;
+        })()
+        ))
+      ))
+    ));
+  }
+}));
 
 
-DemoDropDown = React.createFactory DropDown
-Demo = React.createClass
-  getInitialState: ->
-    nonActionMenuSelection: "Selection menu"
-  onNonActionMenuSelect: (item) ->
-    @setState({nonActionMenuSelection: item})
-  render: ->
-    (div {},
-      (div {},
-        (DemoDropDown {
+const DemoDropDown = React.createFactory(DropDown);
+const Demo = React.createClass({
+  getInitialState() {
+    return {nonActionMenuSelection: "Selection menu"};
+  },
+  onNonActionMenuSelect(item) {
+    return this.setState({nonActionMenuSelection: item});
+  },
+  render() {
+    return (div({},
+      (div({},
+        (DemoDropDown({
           anchor: "Action Menu",
           items: [
-            {name: "Action 1", action: -> alert "Action 1"}
-            {name: "Action 2", action: -> alert "Action 2"}
+            {name: "Action 1", action() { return alert("Action 1"); }},
+            {name: "Action 2", action() { return alert("Action 2"); }},
             {name: "Disabled action"}
           ]
-        })
-      )
-      (div {},
-        (DemoDropDown {
-          isActionMenu: false
-          onSelect: @onNonActionMenuSelect
-          anchor: @state.nonActionMenuSelection,
+        }))
+      )),
+      (div({},
+        (DemoDropDown({
+          isActionMenu: false,
+          onSelect: this.onNonActionMenuSelect,
+          anchor: this.state.nonActionMenuSelection,
           items: [
-            "Option 1"
+            "Option 1",
             "Option 2"
           ]
-        })
-      )
-    )
+        }))
+      ))
+    ));
+  }
+});
 
-# window.testComponent = (domID) -> ReactDOM.render React.createElement(Demo,{}), domID
+// window.testComponent = (domID) -> ReactDOM.render React.createElement(Demo,{}), domID

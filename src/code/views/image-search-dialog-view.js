@@ -1,176 +1,249 @@
-ImageDialogStore = require "../stores/image-dialog-store"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS202: Simplify dynamic range loops
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const ImageDialogStore = require("../stores/image-dialog-store");
 
-OpenClipart = require '../utils/open-clipart'
-tr = require '../utils/translate'
+const OpenClipart = require('../utils/open-clipart');
+const tr = require('../utils/translate');
 
-{div, input, button, img, i, a, form, br, span} = React.DOM
+const {div, input, button, img, i, a, form, br, span} = React.DOM;
 
-ImageSearchResult = React.createFactory React.createClass
-  displayName: 'ImageSearchResult'
+const ImageSearchResult = React.createFactory(React.createClass({
+  displayName: 'ImageSearchResult',
 
-  getInitialState: ->
-    loaded: false
+  getInitialState() {
+    return {loaded: false};
+  },
 
-  componentDidMount: ->
-    image = new Image()
-    image.src = @props.imageInfo.image
-    image.onload = =>
-      @setState loaded: true if not @unmounted
+  componentDidMount() {
+    const image = new Image();
+    image.src = this.props.imageInfo.image;
+    return image.onload = () => {
+      if (!this.unmounted) { return this.setState({loaded: true}); }
+    };
+  },
 
-  componentWillUnmount: ->
-    @unmounted = true
+  componentWillUnmount() {
+    return this.unmounted = true;
+  },
 
-  clicked: ->
-    ImageDialogStore.actions.update @props.imageInfo
+  clicked() {
+    return ImageDialogStore.actions.update(this.props.imageInfo);
+  },
 
-  render: ->
-    src = if @state.loaded then @props.imageInfo.image else 'img/bb-chrome/spin.svg'
-    if not @props.isDisabled(@props.imageInfo)
-      (img {src: src, onClick: @clicked, title: @props.imageInfo.metadata.title})
-    else
-      null
+  render() {
+    const src = this.state.loaded ? this.props.imageInfo.image : 'img/bb-chrome/spin.svg';
+    if (!this.props.isDisabled(this.props.imageInfo)) {
+      return (img({src, onClick: this.clicked, title: this.props.imageInfo.metadata.title}));
+    } else {
+      return null;
+    }
+  }
+})
+);
 
-ImageSearchPageLink = React.createFactory React.createClass
-  displayName: 'ImageSearchPageLink'
+const ImageSearchPageLink = React.createFactory(React.createClass({
+  displayName: 'ImageSearchPageLink',
 
-  selectPage: (e) ->
-    e.preventDefault()
-    e.stopPropagation()
-    @props.selectPage @props.page
+  selectPage(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return this.props.selectPage(this.props.page);
+  },
 
-  render: ->
-    if @props.currentPage is @props.page
-      (span {className: 'image-search-page-link'}, @props.page)
-    else
-      (a {className: 'image-search-page-link', href: '#', onClick: @selectPage}, @props.page)
+  render() {
+    if (this.props.currentPage === this.props.page) {
+      return (span({className: 'image-search-page-link'}, this.props.page));
+    } else {
+      return (a({className: 'image-search-page-link', href: '#', onClick: this.selectPage}, this.props.page));
+    }
+  }
+})
+);
 
-ImageSearchPrevNextLink = React.createFactory React.createClass
-  displayName: 'ImageSearchPrevNextLink'
+const ImageSearchPrevNextLink = React.createFactory(React.createClass({
+  displayName: 'ImageSearchPrevNextLink',
 
-  selectPage: (e) ->
-    e.preventDefault()
-    e.stopPropagation()
-    @props.selectPage @props.page
+  selectPage(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return this.props.selectPage(this.props.page);
+  },
 
-  render: ->
-    if @props.enabled
-      (a {className: 'image-search-prev-next-link', href: '#', onClick: @selectPage}, @props.label)
-    else
-      (span {className: 'image-search-prev-next-link', style: {color: "#777"}}, @props.label)
+  render() {
+    if (this.props.enabled) {
+      return (a({className: 'image-search-prev-next-link', href: '#', onClick: this.selectPage}, this.props.label));
+    } else {
+      return (span({className: 'image-search-prev-next-link', style: {color: "#777"}}, this.props.label));
+    }
+  }
+})
+);
 
-module.exports = React.createClass
-  displayName: 'ImageSearch'
+module.exports = React.createClass({
+  displayName: 'ImageSearch',
 
-  mixins: [require '../mixins/image-dialog-view', ImageDialogStore.mixin]
+  mixins: [require('../mixins/image-dialog-view', ImageDialogStore.mixin)],
 
-  getInitialState: ->
-    @getInitialImageDialogViewState
-      searching: false
-      searched: false
-      results: []
-      page: 1
+  getInitialState() {
+    return this.getInitialImageDialogViewState({
+      searching: false,
+      searched: false,
+      results: [],
+      page: 1,
       numPages: 0
+    });
+  },
 
-  searchClicked: (e) ->
-    e.preventDefault()
-    @search
-      page: 1
+  searchClicked(e) {
+    e.preventDefault();
+    return this.search({
+      page: 1,
       newSearch: true
+    });
+  },
 
-  selectPage: (page) ->
-    @search
-      page: page
+  selectPage(page) {
+    return this.search({
+      page,
       newSearch: false
+    });
+  },
 
-  search: (options) ->
-    query = $.trim @refs.search.value
-    validQuery = query.length > 0
-    @setState
-      query: query
-      searchable: validQuery
-      searching: validQuery
-      searched: false
-      results: []
-      page: if options.newSearch then 1 else options.page
-      numPages: if options.newSearch then 0 else @state.numPages
+  search(options) {
+    const query = $.trim(this.refs.search.value);
+    const validQuery = query.length > 0;
+    this.setState({
+      query,
+      searchable: validQuery,
+      searching: validQuery,
+      searched: false,
+      results: [],
+      page: options.newSearch ? 1 : options.page,
+      numPages: options.newSearch ? 0 : this.state.numPages
+    });
 
-    if validQuery
-      OpenClipart.search query, options, (results, page, numPages) =>
-        @setState
-          searching: false
-          searched: true
-          results: results
-          page: page
-          numPages: numPages
+    if (validQuery) {
+      return OpenClipart.search(query, options, (results, page, numPages) => {
+        return this.setState({
+          searching: false,
+          searched: true,
+          results,
+          page,
+          numPages
+        });
+      });
+    }
+  },
 
-  componentDidMount: ->
-    @refs.search.focus()
+  componentDidMount() {
+    return this.refs.search.focus();
+  },
 
-  isDisabledInInternalLibrary: (node) ->
-    @props.inPalette node
+  isDisabledInInternalLibrary(node) {
+    return this.props.inPalette(node);
+  },
 
-  isDisabledInExternalSearch: (node) ->
-    (@props.inPalette node) or (@props.inLibrary node)
+  isDisabledInExternalSearch(node) {
+    return (this.props.inPalette(node)) || (this.props.inLibrary(node));
+  },
 
-  renderPagination: ->
-    if @state.numPages > 0
-      (div {key: "pagination", className: "image-search-dialog-pagination"},
-        (ImageSearchPrevNextLink {key: "prev", page: @state.page - 1, label: (tr "~IMAGE-BROWSER.PREVIOUS"), selectPage: @selectPage, enabled: @state.page > 1}),
-        (ImageSearchPageLink({key: "page#{page}", page: page, currentPage: @state.page, selectPage: @selectPage}) for page in [1..@state.numPages])
-        (ImageSearchPrevNextLink {key: "next", page: @state.page + 1, label: (tr "~IMAGE-BROWSER.NEXT"), selectPage: @selectPage, enabled: @state.page < @state.numPages})
-      )
+  renderPagination() {
+    let page;
+    if (this.state.numPages > 0) {
+      return (div({key: "pagination", className: "image-search-dialog-pagination"},
+        (ImageSearchPrevNextLink({key: "prev", page: this.state.page - 1, label: (tr("~IMAGE-BROWSER.PREVIOUS")), selectPage: this.selectPage, enabled: this.state.page > 1})),
+        ((() => {
+        let asc, end;
+        const result = [];
+        for (page = 1, end = this.state.numPages, asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
+          result.push(ImageSearchPageLink({key: `page${page}`, page, currentPage: this.state.page, selectPage: this.selectPage}));
+        }
+        return result;
+      })()),
+        (ImageSearchPrevNextLink({key: "next", page: this.state.page + 1, label: (tr("~IMAGE-BROWSER.NEXT")), selectPage: this.selectPage, enabled: this.state.page < this.state.numPages}))
+      ));
+    }
+  },
 
-  render: ->
-    showNoResultsAlert = @state.searchable and @state.searched and @state.results.length is 0
-    noResultsClass = if showNoResultsAlert then ' no-results' else ''
+  render() {
+    let index, node;
+    const showNoResultsAlert = this.state.searchable && this.state.searched && (this.state.results.length === 0);
+    const noResultsClass = showNoResultsAlert ? ' no-results' : '';
 
-    (div {className: 'image-search-dialog'},
-      if @props.selectedImage?.image
-        @renderPreviewImage()
-      else
-        (div {},
-          (div {className: 'image-search-dialog-form'},
-            (form {},
-              (input {type: 'text', ref: 'search', defaultValue: @state.query, placeholder: tr '~IMAGE-BROWSER.SEARCH_HEADER'})
-              (input {type: 'submit', value: (tr "~IMAGE-BROWSER.SEARCH_BUTTON_LABEL"), onClick: @searchClicked})
-            )
-          ),
+    return (div({className: 'image-search-dialog'},
+      (this.props.selectedImage != null ? this.props.selectedImage.image : undefined) ?
+        this.renderPreviewImage()
+      :
+        (div({},
+          (div({className: 'image-search-dialog-form'},
+            (form({},
+              (input({type: 'text', ref: 'search', defaultValue: this.state.query, placeholder: tr('~IMAGE-BROWSER.SEARCH_HEADER')})),
+              (input({type: 'submit', value: (tr("~IMAGE-BROWSER.SEARCH_BUTTON_LABEL")), onClick: this.searchClicked}))
+            ))
+          )),
 
-          if showNoResultsAlert
-            (div {className: 'modal-dialog-alert'},
-              tr '~IMAGE-BROWSER.NO_IMAGES_FOUND'
-              (br {})
-              tr '~IMAGE-BROWSER.TRY_ANOTHER_SEARCH'
-            )
+          showNoResultsAlert ?
+            (div({className: 'modal-dialog-alert'},
+              tr('~IMAGE-BROWSER.NO_IMAGES_FOUND'),
+              (br({})),
+              tr('~IMAGE-BROWSER.TRY_ANOTHER_SEARCH')
+            )) : undefined,
 
-          (div {className: 'image-search-main-results' + noResultsClass},[
-            if showNoResultsAlert
-              (div {key: 'image-search-section', className: 'image-search-section', style: height: '100%'},[
-                (div {key:'image-search-results', className: 'image-search-dialog-results show-all'},
-                  for node, index in _.map @props.internalLibrary
-                    if node.image
-                      (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInInternalLibrary}) if node.image
-                )
-              ])
-            else
-              (div {key: 'image-search-section-post-search', className: 'image-search-section', style: height: '100%'},[
-                (div {key: 'results', className: "image-search-dialog-results"},
-                  if @state.searching
-                    (div {},
-                      (i {className: "icon-codap-options spin"})
-                      ' '
-                      tr "~IMAGE-BROWSER.SEARCHING",
-                        page: if @state.page is 1 then (tr "~IMAGE-BROWSER.SEARCHING_FIRST_PAGE") else (tr "~IMAGE-BROWSER.SEARCHING_PAGE", page: @state.page)
-                        query: @state.query
-                    )
-                  else if @state.searched and @state.results.length is 0
-                    tr '~IMAGE-BROWSER.NO_EXTERNAL_FOUND', query: @state.query
-                  else
-                    for node, index in @state.results
-                      (ImageSearchResult {key: index, imageInfo: node, clicked: @imageSelected, isDisabled: @isDisabledInExternalSearch})
-                )
-                @renderPagination()
-              ])
-          ])
-        )
-    )
+          (div({className: `image-search-main-results${noResultsClass}`},[
+            showNoResultsAlert ?
+              (div({key: 'image-search-section', className: 'image-search-section', style: {height: '100%'}},[
+                (div({key:'image-search-results', className: 'image-search-dialog-results show-all'},
+                  (() => {
+                  const result = [];
+                  const iterable = _.map(this.props.internalLibrary);
+                  for (index = 0; index < iterable.length; index++) {
+                    node = iterable[index];
+                    if (node.image) {
+                      if (node.image) { result.push((ImageSearchResult({key: index, imageInfo: node, clicked: this.imageSelected, isDisabled: this.isDisabledInInternalLibrary}))); } else {
+                        result.push(undefined);
+                      }
+                    } else {
+                      result.push(undefined);
+                    }
+                  }
+                  return result;
+                })()
+                ))
+              ]))
+            :
+              (div({key: 'image-search-section-post-search', className: 'image-search-section', style: {height: '100%'}},[
+                (div({key: 'results', className: "image-search-dialog-results"},
+                  this.state.searching ?
+                    (div({},
+                      (i({className: "icon-codap-options spin"})),
+                      ' ',
+                      tr("~IMAGE-BROWSER.SEARCHING", {
+                        page: this.state.page === 1 ? (tr("~IMAGE-BROWSER.SEARCHING_FIRST_PAGE")) : (tr("~IMAGE-BROWSER.SEARCHING_PAGE", {page: this.state.page})),
+                        query: this.state.query
+                      })
+                    ))
+                  : this.state.searched && (this.state.results.length === 0) ?
+                    tr('~IMAGE-BROWSER.NO_EXTERNAL_FOUND', {query: this.state.query})
+                  :
+                    (() => {
+                      const result1 = [];
+                      for (index = 0; index < this.state.results.length; index++) {
+                        node = this.state.results[index];
+                        result1.push((ImageSearchResult({key: index, imageInfo: node, clicked: this.imageSelected, isDisabled: this.isDisabledInExternalSearch})));
+                      }
+                      return result1;
+                    })()
+                )),
+                this.renderPagination()
+              ]))
+          ]))
+        ))
+    ));
+  }
+});

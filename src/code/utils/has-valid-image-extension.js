@@ -1,10 +1,18 @@
-tr = require './translate'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS201: Simplify complex destructure assignments
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const tr = require('./translate');
 
-module.exports = (imageName) ->
-  link = document.createElement 'a'
-  link.setAttribute 'href', imageName
-  [..., extension] = link.pathname.split '.'
-  valid = (['gif', 'png', 'jpg', 'jpeg'].indexOf extension.toLowerCase()) isnt -1
-  if not valid
-    alert tr "~DROP.ONLY_IMAGES_ALLOWED"
-  valid
+module.exports = function(imageName) {
+  const link = document.createElement('a');
+  link.setAttribute('href', imageName);
+  const array = link.pathname.split('.'), extension = array[array.length - 1];
+  const valid = (['gif', 'png', 'jpg', 'jpeg'].indexOf(extension.toLowerCase())) !== -1;
+  if (!valid) {
+    alert(tr("~DROP.ONLY_IMAGES_ALLOWED"));
+  }
+  return valid;
+};

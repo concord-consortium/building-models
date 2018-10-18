@@ -1,66 +1,92 @@
-IframePhone = (require 'iframe-phone')
-tr = require '../utils/translate'
-LaraActions    = require '../actions/lara-actions'
-UndoRedoUIStore = require '../stores/undo-redo-ui-store'
-UndoRedo = require '../utils/undo-redo'
-SimulationStore = require '../stores/simulation-store'
-TimeUnits       = require '../utils/time-units'
-escapeRegExp = (require '../utils/escape-reg-ex').escapeRegExp
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS206: Consider reworking classes to avoid initClass
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let LaraConnect;
+const IframePhone = (require('iframe-phone'));
+const tr = require('../utils/translate');
+const LaraActions    = require('../actions/lara-actions');
+const UndoRedoUIStore = require('../stores/undo-redo-ui-store');
+const UndoRedo = require('../utils/undo-redo');
+const SimulationStore = require('../stores/simulation-store');
+const TimeUnits       = require('../utils/time-units');
+const { escapeRegExp } = (require('../utils/escape-reg-ex'));
 
-module.exports = class LaraConnect
+module.exports = (LaraConnect = (function() {
+  LaraConnect = class LaraConnect {
+    static initClass() {
+  
+      this.instances = {};
+       // map of context -> instance
+    }
 
-  @instances: {} # map of context -> instance
+    static instance(context) {
+      if (LaraConnect.instances[context] == null) { LaraConnect.instances[context] = new LaraConnect(context); }
+      return LaraConnect.instances[context];
+    }
 
-  @instance: (context) ->
-    LaraConnect.instances[context] ?= new LaraConnect context
-    LaraConnect.instances[context]
+    constructor(context) {
+      log.info('LaraConnect: initializing');
+      const GraphStore = require('../stores/graph-store');
+      const PaletteStore  = require('../stores/palette-store');
+      this.undoRedoManager = UndoRedo.instance({debug:false, context});
+      this.loaded = false;
+      this.graphStore = GraphStore.store;
+      this.paletteStore = PaletteStore.store;
+      this.laraPhone = IframePhone.getIFrameEndpoint();
+      this.lastCommandStackPosition = -1;
 
-  constructor: (context) ->
-    log.info 'LaraConnect: initializing'
-    GraphStore = require '../stores/graph-store'
-    PaletteStore  = require '../stores/palette-store'
-    @undoRedoManager = UndoRedo.instance debug:false, context:context
-    @loaded = false
-    @graphStore = GraphStore.store
-    @paletteStore = PaletteStore.store
-    @laraPhone = IframePhone.getIFrameEndpoint()
-    @lastCommandStackPosition = -1
+      // Setup listeners
+      this.laraPhone.addListener('initInteractive', data => {
+        if (!data) {
+          return this.laraPhone.post("response", "init failed!");
+        } else {
+          log.info("Init received from parent", data);
+          this.graphStore.setUsingLara(true);
+          if (typeof data === "string") {
+            data = JSON.parse(data);
+          }
+          if (data.content) {
+            this.graphStore.loadData(data.content);
+          } else {
+            this.graphStore.loadData(data);
+          }
+          const nodeCount = this.graphStore.getNodes().length;
+          const loadResult = `Initialization success! Loaded ${nodeCount} node(s)`;
+          log.info(loadResult);
+          this.laraPhone.post("response", loadResult);
+          return this.loaded = true;
+        }
+      });
 
-    # Setup listeners
-    @laraPhone.addListener 'initInteractive', (data) =>
-      if not data
-        @laraPhone.post "response", "init failed!"
-      else
-        log.info "Init received from parent", data
-        @graphStore.setUsingLara true
-        if typeof data is "string"
-          data = JSON.parse data
-        if data.content
-          @graphStore.loadData data.content
-        else
-          @graphStore.loadData data
-        nodeCount = @graphStore.getNodes().length
-        loadResult = "Initialization success! Loaded " + nodeCount + " node(s)"
-        log.info loadResult
-        @laraPhone.post "response", loadResult
-        @loaded = true
+      this.laraPhone.addListener('getInteractiveState', data => {
+        log.info("Request for interactiveState received from parent Iframe", data);
+        const saveData = this.graphStore.toJsonString(this.paletteStore.palette);
+        return this.laraPhone.post("interactiveState", saveData);
+      });
 
-    @laraPhone.addListener 'getInteractiveState', (data) =>
-      log.info "Request for interactiveState received from parent Iframe", data
-      saveData = @graphStore.toJsonString @paletteStore.palette
-      @laraPhone.post "interactiveState", saveData
+      this.graphStore.addChangeListener(this.onUndoRedoStateChange.bind(this));
 
-    @graphStore.addChangeListener @onUndoRedoStateChange.bind(@)
+      // load any previous data by initializing handshake
+      this.laraPhone.post('initInteractive', 'Sage is ready');
+    }
 
-    # load any previous data by initializing handshake
-    @laraPhone.post 'initInteractive', 'Sage is ready'
-
-  onUndoRedoStateChange: (state) ->
-    lastAction = @undoRedoManager.commands[@undoRedoManager.stackPosition]
-    if lastAction and @loaded
-      if @undoRedoManager.stackPosition < (@undoRedoManager.commands.length - 1) and @lastCommandStackPosition > @undoRedoManager.stackPosition
-        # User clicked Undo
-        @laraPhone.post 'log', {action: "undo"}
-      else
-        @laraPhone.post 'log', {action: lastAction.name}
-    @lastCommandStackPosition = @undoRedoManager.stackPosition
+    onUndoRedoStateChange(state) {
+      const lastAction = this.undoRedoManager.commands[this.undoRedoManager.stackPosition];
+      if (lastAction && this.loaded) {
+        if ((this.undoRedoManager.stackPosition < (this.undoRedoManager.commands.length - 1)) && (this.lastCommandStackPosition > this.undoRedoManager.stackPosition)) {
+          // User clicked Undo
+          this.laraPhone.post('log', {action: "undo"});
+        } else {
+          this.laraPhone.post('log', {action: lastAction.name});
+        }
+      }
+      return this.lastCommandStackPosition = this.undoRedoManager.stackPosition;
+    }
+  };
+  LaraConnect.initClass();
+  return LaraConnect;
+})());

@@ -1,79 +1,106 @@
-{div, ul, li, a} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {div, ul, li, a} = React.DOM;
 
-class TabInfo
-  constructor: (settings={}) ->
-    {@label, @component, @defined} = settings
+class TabInfo {
+  constructor(settings) {
+    if (settings == null) { settings = {}; }
+    ({label: this.label, component: this.component, defined: this.defined} = settings);
+  }
+}
 
-Tab = React.createFactory React.createClass
+const Tab = React.createFactory(React.createClass({
 
-  displayName: 'TabbedPanelTab'
+  displayName: 'TabbedPanelTab',
 
-  clicked: (e) ->
-    e.preventDefault()
-    @props.onSelected @props.index
+  clicked(e) {
+    e.preventDefault();
+    return this.props.onSelected(this.props.index);
+  },
 
-  render: ->
-    classname = if @props.defined then 'tab-link-defined' else ''
-    if @props.selected then classname += ' tab-selected'
-    (li {className: classname, onClick: @clicked}, @props.label)
+  render() {
+    let classname = this.props.defined ? 'tab-link-defined' : '';
+    if (this.props.selected) { classname += ' tab-selected'; }
+    return (li({className: classname, onClick: this.clicked}, this.props.label));
+  }
+})
+);
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'TabbedPanelView'
+  displayName: 'TabbedPanelView',
 
-  getInitialState: ->
-    selectedTabIndex: @props.selectedTabIndex || 0
+  getInitialState() {
+    return {selectedTabIndex: this.props.selectedTabIndex || 0};
+  },
 
-  componentWillReceiveProps: (nextProps) ->
-    if @state.selectedTabIndex isnt nextProps.selectedTabIndex
-      @selectedTab nextProps.selectedTabIndex
+  componentWillReceiveProps(nextProps) {
+    if (this.state.selectedTabIndex !== nextProps.selectedTabIndex) {
+      return this.selectedTab(nextProps.selectedTabIndex);
+    }
+  },
 
-  statics:
-    Tab: (settings) -> new TabInfo settings
+  statics: {
+    Tab(settings) { return new TabInfo(settings); }
+  },
 
-  selectedTab: (index) ->
-    @setState selectedTabIndex: index or 0
+  selectedTab(index) {
+    return this.setState({selectedTabIndex: index || 0});
+  },
 
-  onTabSelected: (index) ->
-    if @props.onTabSelected
-      @props.onTabSelected index
-    else
-      @selectedTab index
+  onTabSelected(index) {
+    if (this.props.onTabSelected) {
+      return this.props.onTabSelected(index);
+    } else {
+      return this.selectedTab(index);
+    }
+  },
 
-  renderTab: (tab, index) ->
-    (Tab
-      label: tab.label
-      key: index
-      index: index
-      defined: tab.defined
-      selected: (index is @state.selectedTabIndex)
-      onSelected: @onTabSelected
-    )
+  renderTab(tab, index) {
+    return (Tab({
+      label: tab.label,
+      key: index,
+      index,
+      defined: tab.defined,
+      selected: (index === this.state.selectedTabIndex),
+      onSelected: this.onTabSelected
+    }));
+  },
 
-  renderTabs: (clientClass) ->
-    (div {className: "workspace-tabs#{clientClass}", key: 'tabs'},
-      (ul {}, (@renderTab(tab,index) for tab, index in @props.tabs))
-    )
+  renderTabs(clientClass) {
+    return (div({className: `workspace-tabs${clientClass}`, key: 'tabs'},
+      (ul({}, (Array.from(this.props.tabs).map((tab, index) => this.renderTab(tab,index)))))
+    ));
+  },
 
 
-  renderSelectedPanel: (clientClass) ->
-    (div {className: "workspace-tab-component#{clientClass}"},
-      for tab, index in @props.tabs
-        (div {
-          key: index
-          style:
-            display: if index is @state.selectedTabIndex then 'block' else 'none'
+  renderSelectedPanel(clientClass) {
+    return (div({className: `workspace-tab-component${clientClass}`},
+      Array.from(this.props.tabs).map((tab, index) =>
+        (div({
+          key: index,
+          style: {
+            display: index === this.state.selectedTabIndex ? 'block' : 'none'
+          }
           },
           tab.component
-        )
-    )
+        )))
+    ));
+  },
 
-  render: ->
-    clientClass = if @props.clientClass then ' ' + @props.clientClass else ''
-    (div {className: "tabbed-panel#{clientClass}"},
-      (div {className: "tabbed-panel-left#{clientClass}"}, [
-        @renderTabs(clientClass)
-        @props.onRenderBelowTabsComponent() if @props.onRenderBelowTabsComponent?
-      ])
-      @renderSelectedPanel(clientClass)
-    )
+  render() {
+    const clientClass = this.props.clientClass ? ` ${this.props.clientClass}` : '';
+    return (div({className: `tabbed-panel${clientClass}`},
+      (div({className: `tabbed-panel-left${clientClass}`}, [
+        this.renderTabs(clientClass),
+        (this.props.onRenderBelowTabsComponent != null) ? this.props.onRenderBelowTabsComponent() : undefined
+      ])),
+      this.renderSelectedPanel(clientClass)
+    ));
+  }
+});

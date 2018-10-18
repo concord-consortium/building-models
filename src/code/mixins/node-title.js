@@ -1,24 +1,36 @@
-tr = require "../utils/translate"
-module.exports =
-  defaultTitle: ->
-    tr "~NODE.UNTITLED"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const tr = require("../utils/translate");
+module.exports = {
+  defaultTitle() {
+    return tr("~NODE.UNTITLED");
+  },
 
-  titlePlaceholder: ->
-    @defaultTitle()
+  titlePlaceholder() {
+    return this.defaultTitle();
+  },
 
-  isDefaultTitle: ->
-    @props.title is @titlePlaceholder()
+  isDefaultTitle() {
+    return this.props.title === this.titlePlaceholder();
+  },
 
-  displayTitleForInput: (proposedTitle) ->
-    # For input fields, use 'placeholder' value @defaultTitle
-    # to work, the 'value' attribute of the input should be blank
-    if proposedTitle is @defaultTitle() then "" else proposedTitle
+  displayTitleForInput(proposedTitle) {
+    // For input fields, use 'placeholder' value @defaultTitle
+    // to work, the 'value' attribute of the input should be blank
+    if (proposedTitle === this.defaultTitle()) { return ""; } else { return proposedTitle; }
+  },
 
-  maxTitleLength: ->
-    35
+  maxTitleLength() {
+    return 35;
+  },
 
-  cleanupTitle: (newTitle, isComplete) ->
-    cleanTitle = if isComplete then _.trim(newTitle) else newTitle
-    cleanTitle = cleanTitle.substr(0, @maxTitleLength())
-    cleanTitle = if isComplete then _.trim(cleanTitle) else cleanTitle
-    cleanTitle = if cleanTitle.length > 0 then cleanTitle else @defaultTitle()
+  cleanupTitle(newTitle, isComplete) {
+    let cleanTitle = isComplete ? _.trim(newTitle) : newTitle;
+    cleanTitle = cleanTitle.substr(0, this.maxTitleLength());
+    cleanTitle = isComplete ? _.trim(cleanTitle) : cleanTitle;
+    return cleanTitle = cleanTitle.length > 0 ? cleanTitle : this.defaultTitle();
+  }
+};

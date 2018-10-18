@@ -1,13 +1,13 @@
-# Initial test data using inherited v 0.1 format
-module.exports =
-  version: 0.1
-  filename: "sample model"
+// Initial test data using inherited v 0.1 format
+module.exports = {
+  version: 0.1,
+  filename: "sample model",
   nodes: [
     {
-      title: "Chicken"
-      x: 200
-      y: 180
-      image: "img/nodes/chicken.png"
+      title: "Chicken",
+      x: 200,
+      y: 180,
+      image: "img/nodes/chicken.png",
       key: "a"
     },
     {
@@ -17,14 +17,15 @@ module.exports =
         "image": "img/nodes/egg.png",
         "key": "b"
     },
-  ]
+  ],
   links:  [
     {
-      title: "Becomes a"
-      color: "#777"
-      sourceNodeKey: "a"
-      sourceTerminal: "a"
-      targetNodeKey: "b"
+      title: "Becomes a",
+      color: "#777",
+      sourceNodeKey: "a",
+      sourceTerminal: "a",
+      targetNodeKey: "b",
       targetTerminal: "b"
     }
   ]
+};

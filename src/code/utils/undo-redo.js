@@ -1,193 +1,278 @@
-# based on https://github.com/jzaefferer/undo/blob/master/undo.js
-CodapConnect = require '../models/codap-connect'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS206: Consider reworking classes to avoid initClass
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+// based on https://github.com/jzaefferer/undo/blob/master/undo.js
+const CodapConnect = require('../models/codap-connect');
 
-DEFAULT_CONTEXT_NAME = 'building-models'
+const DEFAULT_CONTEXT_NAME = 'building-models';
 
-# Note: We use several actions, because they hook into Reflux's dispatching system
-# which puts actions in a stack before calling them. We frequently want to ensure
-# that all other actions have completed before, e.g., we end a commandBatch.
+// Note: We use several actions, because they hook into Reflux's dispatching system
+// which puts actions in a stack before calling them. We frequently want to ensure
+// that all other actions have completed before, e.g., we end a commandBatch.
 
-class Manager
-  constructor: (options = {}) ->
-    {@debug} = options
-    @commands = []
-    @stackPosition = -1
-    @savePosition = -1
-    @changeListeners = []
-    @currentBatch = null
+class Manager {
+  static initClass() {
+  
+    this.prototype.endCommandBatch = Reflux.createAction();
+  
+    this.prototype.undo = Reflux.createAction();
+  
+    this.prototype.redo = Reflux.createAction();
+  }
+  constructor(options) {
+    if (options == null) { options = {}; }
+    ({debug: this.debug} = options);
+    this.commands = [];
+    this.stackPosition = -1;
+    this.savePosition = -1;
+    this.changeListeners = [];
+    this.currentBatch = null;
 
-    # listen to all our actions
-    @endCommandBatch.listen @_endComandBatch, @
-    @undo.listen @_undo, @
-    @redo.listen @_redo, @
+    // listen to all our actions
+    this.endCommandBatch.listen(this._endComandBatch, this);
+    this.undo.listen(this._undo, this);
+    this.redo.listen(this._redo, this);
+  }
 
-  # @param optionName: If we provide an optionalName then any command that is sent to
-  # the undo manager with a different name will automatically end the current batch.
-  # This allows us to group similar commands together and not worry that an unrelated
-  # command might be inserted into this same batch before it is closed.
-  startCommandBatch: (optionalName) ->
-    if @currentBatch and not @currentBatch.matches(optionalName)
-      @_endComandBatch()
-    @currentBatch = new CommandBatch(optionalName) unless @currentBatch
+  // @param optionName: If we provide an optionalName then any command that is sent to
+  // the undo manager with a different name will automatically end the current batch.
+  // This allows us to group similar commands together and not worry that an unrelated
+  // command might be inserted into this same batch before it is closed.
+  startCommandBatch(optionalName) {
+    if (this.currentBatch && !this.currentBatch.matches(optionalName)) {
+      this._endComandBatch();
+    }
+    if (!this.currentBatch) { return this.currentBatch = new CommandBatch(optionalName); }
+  }
 
-  endCommandBatch: Reflux.createAction()
+  _endComandBatch() {
+    if (this.currentBatch) {
+      if (this.currentBatch.commands.length > 0) {
+        this.commands.push(this.currentBatch);
+        this.stackPosition++;
+      }
+      return this.currentBatch = null;
+    }
+  }
 
-  _endComandBatch: ->
-    if @currentBatch
-      if @currentBatch.commands.length > 0
-        @commands.push @currentBatch
-        @stackPosition++
-      @currentBatch = null
+  createAndExecuteCommand(name, methods) {
+    if (this.currentBatch && !this.currentBatch.matches(name)) {
+      this._endComandBatch();
+    }
 
-  createAndExecuteCommand: (name, methods) ->
-    if @currentBatch and not @currentBatch.matches(name)
-      @_endComandBatch()
+    const result = this.execute((new Command(name, methods)));
 
-    result = @execute (new Command name, methods)
+    // Only notify CODAP of an undoable action on the first command of a batched command
+    if ((!this.currentBatch) || (this.currentBatch.commands.length === 1)) {
+      const codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
+      codapConnect.sendUndoableActionPerformed(name);
+    }
 
-    # Only notify CODAP of an undoable action on the first command of a batched command
-    if (not @currentBatch) or (@currentBatch.commands.length is 1)
-      codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
-      codapConnect.sendUndoableActionPerformed(name)
+    return result;
+  }
 
-    result
+  execute(command) {
+    this._clearRedo();
+    const result = command.execute(this.debug);
+    if (this.currentBatch) {
+      this.currentBatch.push(command);
+    } else {
+      this.commands.push(command);
+      this.stackPosition++;
+    }
+    this._changed();
+    if (this.debug) { this.log(); }
+    return result;
+  }
 
-  execute: (command) ->
-    @_clearRedo()
-    result = command.execute @debug
-    if @currentBatch
-      @currentBatch.push command
-    else
-      @commands.push command
-      @stackPosition++
-    @_changed()
-    @log() if @debug
-    result
+  // @param drop: calling undo(true) will clear the redo stack. When called on
+  // the last item, this is equivalent to throwing away the undone action.
+  _undo(drop) {
+    if (this.canUndo()) {
+      const result = this.commands[this.stackPosition].undo(this.debug);
+      this.stackPosition--;
+      if (drop) { this._clearRedo(); }
+      this._changed();
+      if (this.debug) { this.log(); }
+      return result;
+    } else {
+      return false;
+    }
+  }
 
-  undo: Reflux.createAction()
+  canUndo() {
+    return this.stackPosition >= 0;
+  }
 
-  # @param drop: calling undo(true) will clear the redo stack. When called on
-  # the last item, this is equivalent to throwing away the undone action.
-  _undo: (drop) ->
-    if @canUndo()
-      result = @commands[@stackPosition].undo @debug
-      @stackPosition--
-      if drop then @_clearRedo()
-      @_changed()
-      @log() if @debug
-      result
-    else
-      false
+  _redo() {
+    if (this.canRedo()) {
+      this.stackPosition++;
+      const result = this.commands[this.stackPosition].redo(this.debug);
+      this._changed();
+      if (this.debug) { this.log(); }
+      return result;
+    } else {
+      return false;
+    }
+  }
 
-  canUndo: ->
-    return @stackPosition >= 0
+  canRedo() {
+    return this.stackPosition < (this.commands.length - 1);
+  }
 
-  redo: Reflux.createAction()
+  save() {
+    this.savePosition = this.stackPosition;
+    return this._changed();
+  }
 
-  _redo: ->
-    if @canRedo()
-      @stackPosition++
-      result = @commands[@stackPosition].redo @debug
-      @_changed()
-      @log() if @debug
-      result
-    else
-      false
+  clearHistory() {
+    this.commands = [];
+    this.stackPosition = -1;
+    this.savePosition = -1;
+    this._changed();
+    if (this.debug) { return this.log(); }
+  }
 
-  canRedo: ->
-    return @stackPosition < @commands.length - 1
+  dirty() {
+    return this.stackPosition !== this.savePosition;
+  }
 
-  save: ->
-    @savePosition = @stackPosition
-    @_changed()
+  saved() {
+    return this.savePosition !== -1;
+  }
 
-  clearHistory: ->
-    @commands = []
-    @stackPosition = -1
-    @savePosition = -1
-    @_changed()
-    @log() if @debug
+  revertToOriginal() {
+    return (() => {
+      const result = [];
+      while (this.canUndo()) {
+        result.push(this.undo());
+      }
+      return result;
+    })();
+  }
 
-  dirty: ->
-    return @stackPosition isnt @savePosition
+  revertToLastSave() {
+    if (this.stackPosition > this.savePosition) {
+      return (() => {
+        const result = [];
+        while (this.dirty()) {
+          result.push(this.undo());
+        }
+        return result;
+      })();
+    } else if (this.stackPosition < this.savePosition) {
+      return (() => {
+        const result1 = [];
+        while (this.dirty()) {
+          result1.push(this.redo());
+        }
+        return result1;
+      })();
+    }
+  }
 
-  saved: ->
-    @savePosition isnt -1
+  addChangeListener(listener) {
+    return this.changeListeners.push(listener);
+  }
 
-  revertToOriginal: ->
-    @undo() while @canUndo()
+  log() {
+    log.info(`Undo Stack: [${(_.pluck((this.commands.slice(0, this.stackPosition + 1)), 'name')).join(', ')}]`);
+    return log.info(`Redo Stack: [${(_.pluck((this.commands.slice(this.stackPosition + 1)), 'name')).join(', ')}]`);
+  }
 
-  revertToLastSave: ->
-    if @stackPosition > @savePosition
-      @undo() while @dirty()
-    else if @stackPosition < @savePosition
-      @redo() while @dirty()
+  clearRedo() {
+    this._clearRedo();
+    return this._changed();
+  }
 
-  addChangeListener: (listener) ->
-    @changeListeners.push listener
+  _clearRedo() {
+    return this.commands = this.commands.slice(0, this.stackPosition + 1);
+  }
 
-  log: ->
-    log.info "Undo Stack: [#{(_.pluck (@commands.slice 0, @stackPosition + 1), 'name').join ', '}]"
-    log.info "Redo Stack: [#{(_.pluck (@commands.slice @stackPosition + 1), 'name').join ', '}]"
+  _changed() {
+    if (this.changeListeners.length > 0) {
+      const status = {
+        dirty: this.dirty(),
+        canUndo: this.canUndo(),
+        canRedo: this.canRedo(),
+        saved: this.saved()
+      };
+      return Array.from(this.changeListeners).map((listener) =>
+        listener(status));
+    }
+  }
+}
+Manager.initClass();
 
-  clearRedo: ->
-    @_clearRedo()
-    @_changed()
+class Command {
+  constructor(name, methods) { this.name = name; this.methods = methods; undefined; }
 
-  _clearRedo: ->
-    @commands = @commands.slice 0, @stackPosition + 1
+  _call(method, debug, via) {
+    if (debug) {
+      log.info(`Command: ${this.name}.${method}()` + (via ? ` via ${via}` : ''));
+    }
+    if (this.methods.hasOwnProperty(method)) {
+      return this.methods[method]();
+    } else {
+      throw new Error(`Undefined ${method} method for ${this.name} command`);
+    }
+  }
 
-  _changed: ->
-    if @changeListeners.length > 0
-      status =
-        dirty: @dirty()
-        canUndo: @canUndo()
-        canRedo: @canRedo()
-        saved: @saved()
-      for listener in @changeListeners
-        listener status
+  execute(debug) { return this._call('execute', debug); }
+  undo(debug) { return this._call('undo', debug); }
+  redo(debug) { if (this.methods.hasOwnProperty('redo')) { return this._call('redo', debug); 
+                                                     } else { return this._call('execute', debug, 'redo'); } }
+}
 
-class Command
-  constructor: (@name, @methods) -> undefined
+class CommandBatch {
+  constructor(name) {
+    this.name = name;
+    this.commands = [];
+  }
 
-  _call: (method, debug, via) ->
-    if debug
-      log.info("Command: #{@name}.#{method}()" + (if via then " via #{via}" else ''))
-    if @methods.hasOwnProperty method
-      @methods[method]()
-    else
-      throw new Error "Undefined #{method} method for #{@name} command"
+  push(command) {
+    return this.commands.push(command);
+  }
 
-  execute: (debug) -> @_call 'execute', debug
-  undo: (debug) -> @_call 'undo', debug
-  redo: (debug) -> if @methods.hasOwnProperty 'redo' then @_call 'redo', debug \
-                                                     else @_call 'execute', debug, 'redo'
+  undo(debug) {
+    return (() => {
+      const result = [];
+      for (let i = this.commands.length - 1; i >= 0; i--) {
+        const command = this.commands[i];
+        result.push(command.undo(debug));
+      }
+      return result;
+    })();
+  }
+  redo(debug) {
+    return Array.from(this.commands).map((command) => command.redo(debug));
+  }
 
-class CommandBatch
-  constructor: (@name) ->
-    @commands = []
+  matches(name) {
+    if (this.name && (this.name !== name)) {
+      return false;
+    }
+    return true;
+  }
+}
 
-  push: (command) ->
-    @commands.push command
+const instances = {};
+const instance  = function(opts) {
+  if (opts == null) { opts = {}; }
+  let {contextName, debug} = opts;
+  if (!contextName) { contextName = DEFAULT_CONTEXT_NAME; }
+  if (!instances[contextName]) { instances[contextName] = new Manager(opts); }
+  return instances[contextName];
+};
 
-  undo: (debug) ->
-    command.undo(debug) for command in @commands by -1
-  redo: (debug) ->
-    command.redo(debug) for command in @commands
-
-  matches: (name) ->
-    if @name and @name isnt name
-      return false
-    true
-
-instances = {}
-instance  = (opts={}) ->
-  {contextName, debug} = opts
-  contextName ||= DEFAULT_CONTEXT_NAME
-  instances[contextName] ||= new Manager(opts)
-  instances[contextName]
-
-module.exports =
-  instance: instance
-  constructor: Manager
+module.exports = {
+  instance,
+  constructor: Manager,
   command: Command
+};

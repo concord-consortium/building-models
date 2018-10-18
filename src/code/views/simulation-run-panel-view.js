@@ -1,144 +1,166 @@
-SimulationStore = require '../stores/simulation-store'
-AppSettingsStore = require '../stores/app-settings-store'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SimulationStore = require('../stores/simulation-store');
+const AppSettingsStore = require('../stores/app-settings-store');
 
-tr              = require '../utils/translate'
-RecordButton    = React.createFactory require './record-button-view'
-Dropdown        = React.createFactory require './dropdown-view'
-ExperimentPanel = React.createFactory require './experiment-panel-view'
+const tr              = require('../utils/translate');
+const RecordButton    = React.createFactory(require('./record-button-view'));
+const Dropdown        = React.createFactory(require('./dropdown-view'));
+const ExperimentPanel = React.createFactory(require('./experiment-panel-view'));
 
-{div, span, i, input}  = React.DOM
+const {div, span, i, input}  = React.DOM;
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'SimulationRunPanel'
+  displayName: 'SimulationRunPanel',
 
-  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 
 
-  setDuration: (e) ->
-    SimulationStore.actions.setDuration parseInt e.target.value
+  setDuration(e) {
+    return SimulationStore.actions.setDuration(parseInt(e.target.value));
+  },
 
-  toggle: ->
-    if @state.simulationPanelExpanded
-      SimulationStore.actions.collapseSimulationPanel()
-    else
-      SimulationStore.actions.expandSimulationPanel()
-      # -- TBD: There was discussion about automatically showing
-      # -- MiniGraphs when this panel is opened  …  NP 2018-01
-      # if ! @state.showingMinigraphs
-      #   AppSettingsStore.actions.showMinigraphs true
+  toggle() {
+    if (this.state.simulationPanelExpanded) {
+      return SimulationStore.actions.collapseSimulationPanel();
+    } else {
+      return SimulationStore.actions.expandSimulationPanel();
+    }
+  },
+      // -- TBD: There was discussion about automatically showing
+      // -- MiniGraphs when this panel is opened  …  NP 2018-01
+      // if ! @state.showingMinigraphs
+      //   AppSettingsStore.actions.showMinigraphs true
 
-  renderToggleButton: ->
-    iconClass = if @state.simulationPanelExpanded then "inspectorArrow-collapse" else "inspectorArrow-expand"
-    simRefFunc = (elt) => @simulateElt = elt
-    simText = tr "~DOCUMENT.ACTIONS.SIMULATE"
-    simTextWidth = if @simulateElt? then @simulateElt.clientWidth else simText.length * 6
-    simTextLeft = simTextWidth / 2 - 6
-    simStyle = { left: simTextLeft }
-    (div {className: "flow", onClick: @toggle},
-      (div {className: "toggle-title", ref: simRefFunc, style: simStyle }, simText)
-      (i {className: "icon-codap-#{iconClass}"})
-    )
+  renderToggleButton() {
+    const iconClass = this.state.simulationPanelExpanded ? "inspectorArrow-collapse" : "inspectorArrow-expand";
+    const simRefFunc = elt => { return this.simulateElt = elt; };
+    const simText = tr("~DOCUMENT.ACTIONS.SIMULATE");
+    const simTextWidth = (this.simulateElt != null) ? this.simulateElt.clientWidth : simText.length * 6;
+    const simTextLeft = (simTextWidth / 2) - 6;
+    const simStyle = { left: simTextLeft };
+    return (div({className: "flow", onClick: this.toggle},
+      (div({className: "toggle-title", ref: simRefFunc, style: simStyle }, simText)),
+      (i({className: `icon-codap-${iconClass}`}))
+    ));
+  },
 
-  renderControls: ->
-    wrapperClasses = "buttons flow"
-    if !@state.simulationPanelExpanded then wrapperClasses += " closed"
-    disabled = (@state.isRecording && !@state.isRecordingOne) || !@state.modelIsRunnable
-    experimentDisabled = !@state.modelIsRunnable || @state.isRecordingPeriod
-    (div {className: wrapperClasses},
-      (div {className: "vertical" },
-        (ExperimentPanel {disabled: experimentDisabled})
-        if @state.isTimeBased
-          @renderRecordForCollectors()
-        else
-          (div {className: "horizontal"},
-            (RecordButton
-              onClick: SimulationStore.actions.recordOne
-              disabled: disabled
+  renderControls() {
+    let wrapperClasses = "buttons flow";
+    if (!this.state.simulationPanelExpanded) { wrapperClasses += " closed"; }
+    const disabled = (this.state.isRecording && !this.state.isRecordingOne) || !this.state.modelIsRunnable;
+    const experimentDisabled = !this.state.modelIsRunnable || this.state.isRecordingPeriod;
+    return (div({className: wrapperClasses},
+      (div({className: "vertical" },
+        (ExperimentPanel({disabled: experimentDisabled})),
+        this.state.isTimeBased ?
+          this.renderRecordForCollectors()
+        :
+          (div({className: "horizontal"},
+            (RecordButton({
+              onClick: SimulationStore.actions.recordOne,
+              disabled
+            }
               ,
-              (div {className: "horizontal"},
-                (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD-1")
-                (i className: "icon-codap-camera")
-              )
-              (div {className: "horizontal"},
-                (span {}, tr "~DOCUMENT.ACTIONS.DATA.POINT")
-              )
-            )
-            @renderRecordStreamButton()
-          )
-      )
-    )
+              (div({className: "horizontal"},
+                (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD-1"))),
+                (i({className: "icon-codap-camera"}))
+              )),
+              (div({className: "horizontal"},
+                (span({}, tr("~DOCUMENT.ACTIONS.DATA.POINT")))
+              ))
+            )),
+            this.renderRecordStreamButton()
+          ))
+      ))
+    ));
+  },
 
 
-  renderRecordForCollectors: ->
-    recordAction = SimulationStore.actions.recordPeriod
-    if @state.isRecording
-      recordAction = ->
+  renderRecordForCollectors() {
+    let recordAction = SimulationStore.actions.recordPeriod;
+    if (this.state.isRecording) {
+      recordAction = function() {};
+    }
 
-    props =
-      onClick: recordAction
-      includeLight: false
-      recording: @state.isRecording
-      disabled: !@state.modelIsRunnable
-    (div {className:'horizontal'},
-      (RecordButton props,
-        (div {className: 'horizontal'},
-          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD")
-          (i {className: "icon-codap-video-camera"})
-        )
-      )
-      (input {
-        type: "number"
-        min: 1
-        max: 1000
-        style:
-          width: "#{Math.max 3, (@state.duration.toString().length+1)}em"
-        value: @state.duration
-        onChange: @setDuration
-      })
-      (Dropdown
-        isActionMenu: false
-        onSelect: SimulationStore.actions.setStepUnits
-        anchor: @state.stepUnitsName
-        items: @state.timeUnitOptions
-      )
-    )
+    const props = {
+      onClick: recordAction,
+      includeLight: false,
+      recording: this.state.isRecording,
+      disabled: !this.state.modelIsRunnable
+    };
+    return (div({className:'horizontal'},
+      (RecordButton(props,
+        (div({className: 'horizontal'},
+          (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD"))),
+          (i({className: "icon-codap-video-camera"}))
+        ))
+      )),
+      (input({
+        type: "number",
+        min: 1,
+        max: 1000,
+        style: {
+          width: `${Math.max(3, (this.state.duration.toString().length+1))}em`
+        },
+        value: this.state.duration,
+        onChange: this.setDuration
+      })),
+      (Dropdown({
+        isActionMenu: false,
+        onSelect: SimulationStore.actions.setStepUnits,
+        anchor: this.state.stepUnitsName,
+        items: this.state.timeUnitOptions
+      }))
+    ));
+  },
 
 
-  renderRecordStreamButton: ->
-    recordAction = SimulationStore.actions.recordStream
-    if @state.isRecording
-      recordAction = SimulationStore.actions.stopRecording
+  renderRecordStreamButton() {
+    let recordAction = SimulationStore.actions.recordStream;
+    if (this.state.isRecording) {
+      recordAction = SimulationStore.actions.stopRecording;
+    }
 
-    props =
-      onClick: recordAction
-      includeLight: true
-      recording: @state.isRecordingStream
-      disabled: !@state.modelIsRunnable || @state.isRecordingOne
+    const props = {
+      onClick: recordAction,
+      includeLight: true,
+      recording: this.state.isRecordingStream,
+      disabled: !this.state.modelIsRunnable || this.state.isRecordingOne
+    };
 
-    if @state.isRecording
-      (RecordButton props,
-        (div {className: 'horizontal'},
-          (span {}, tr "~DOCUMENT.ACTIONS.DATA.STOP")
-          (i {className: "icon-codap-video-camera"})
-        )
-        (div {className: 'horizontal'},
-          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORDING")
-        )
-      )
-    else
-      (RecordButton props,
-        (div {className: 'horizontal'},
-          (span {}, tr "~DOCUMENT.ACTIONS.DATA.RECORD")
-          (i {className: "icon-codap-video-camera"})
-        )
-        (div {className: 'horizontal'},
-          (span {}, tr "~DOCUMENT.ACTIONS.DATA.STREAM")
-        )
-      )
+    if (this.state.isRecording) {
+      return (RecordButton(props,
+        (div({className: 'horizontal'},
+          (span({}, tr("~DOCUMENT.ACTIONS.DATA.STOP"))),
+          (i({className: "icon-codap-video-camera"}))
+        )),
+        (div({className: 'horizontal'},
+          (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORDING")))
+        ))
+      ));
+    } else {
+      return (RecordButton(props,
+        (div({className: 'horizontal'},
+          (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD"))),
+          (i({className: "icon-codap-video-camera"}))
+        )),
+        (div({className: 'horizontal'},
+          (span({}, tr("~DOCUMENT.ACTIONS.DATA.STREAM")))
+        ))
+      ));
+    }
+  },
 
-  render: ->
-    (div {className: "simulation-run-panel"},
-      @renderToggleButton()
-      @renderControls()
-    )
+  render() {
+    return (div({className: "simulation-run-panel"},
+      this.renderToggleButton(),
+      this.renderControls()
+    ));
+  }
+});

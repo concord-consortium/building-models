@@ -1,342 +1,418 @@
-{br, div, h2, label, span, input, p, i, select, option, textarea} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let LinkRelationView;
+const {br, div, h2, label, span, input, p, i, select, option, textarea} = React.DOM;
 
-RelationFactory  = require "../models/relation-factory"
-SvgGraph         = React.createFactory require "./svg-graph-view"
-tr               = require "../utils/translate"
-autosize         = require "autosize"
-SimulationStore  = require '../stores/simulation-store'
-AppSettingsStore = require '../stores/app-settings-store'
+const RelationFactory  = require("../models/relation-factory");
+const SvgGraph         = React.createFactory(require("./svg-graph-view"));
+const tr               = require("../utils/translate");
+const autosize         = require("autosize");
+const SimulationStore  = require('../stores/simulation-store');
+const AppSettingsStore = require('../stores/app-settings-store');
 
-Graph = React.createFactory React.createClass
-  render: ->
-    (SvgGraph {
-      width: 130
-      height: 130
-      yLabel: @props.yAxis
-      xLabel: @props.xAxis
-      link: @props.link
-      graphStore: @props.graphStore
-    })
+const Graph = React.createFactory(React.createClass({
+  render() {
+    return (SvgGraph({
+      width: 130,
+      height: 130,
+      yLabel: this.props.yAxis,
+      xLabel: this.props.xAxis,
+      link: this.props.link,
+      graphStore: this.props.graphStore
+    }));
+  }
+})
+);
 
-QuantStart = React.createFactory React.createClass
-  render: ->
-    start = tr "~NODE-RELATION-EDIT.SEMI_QUANT_START"
-    (div {style: {width: "95%"}},
-      (span {}, "#{tr "~NODE-RELATION-EDIT.AN_INCREASE_IN"} ")
-      (span {className: "source"}, @props.source)
-      (span {}, " #{tr "~NODE-RELATION-EDIT.CAUSES"} ")
-      (span {className: "target"}, @props.target)
-    )
+const QuantStart = React.createFactory(React.createClass({
+  render() {
+    const start = tr("~NODE-RELATION-EDIT.SEMI_QUANT_START");
+    return (div({style: {width: "95%"}},
+      (span({}, `${tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")} `)),
+      (span({className: "source"}, this.props.source)),
+      (span({}, ` ${tr("~NODE-RELATION-EDIT.CAUSES")} `)),
+      (span({className: "target"}, this.props.target))
+    ));
+  }
+})
+);
 
-module.exports = LinkRelationView = React.createClass
+module.exports = (LinkRelationView = React.createClass({
 
-  displayName: 'LinkRelationView'
+  displayName: 'LinkRelationView',
 
-  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ]
+  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 
-  getDefaultProps: ->
-    link:
-      targetNode:
-        title: "default target node"
-      sourceNode:
-        title: "default source node"
-
-  getInitialState: ->
-    status = @checkStatus(@props.link)
+  getDefaultProps() {
     return {
-      selectedVector: null
-      selectedScalar: null
-      selectedVectorHasChanged: false
-      selectedAccumulator: null
-      selectedTransferModifier: null
-      isAccumulator: status.isAccumulator
-      isDualAccumulator: status.isDualAccumulator
-      isTransfer: status.isTransfer
+      link: {
+        targetNode: {
+          title: "default target node"
+        },
+        sourceNode: {
+          title: "default source node"
+        }
+      }
+    };
+  },
+
+  getInitialState() {
+    const status = this.checkStatus(this.props.link);
+    return {
+      selectedVector: null,
+      selectedScalar: null,
+      selectedVectorHasChanged: false,
+      selectedAccumulator: null,
+      selectedTransferModifier: null,
+      isAccumulator: status.isAccumulator,
+      isDualAccumulator: status.isDualAccumulator,
+      isTransfer: status.isTransfer,
       isTransferModifier: status.isTransferModifier
+    };
+  },
+
+  componentWillMount() {
+    if (this.state.isAccumulator || this.state.isTransferModifier || (this.state.selectedVector == null)) {
+      return this.updateState(this.props);
+    } else if (this.props.link.relation.customData != null) {
+      const selectedVector = RelationFactory.vary;
+      const selectedScalar = RelationFactory.custom;
+      return this.setState({selectedVector, selectedScalar});
+    }
+  },
+
+  componentDidMount() {
+    return autosize(this.refs.reasoning);
+  },
+
+  componentWillReceiveProps(newProps) {
+    if (this.props.link !== newProps.link) {
+      this.updateState(newProps);
+
+      // ensure reasoning value has been set, as onblur not triggered
+      this.props.link.reasoning = this.refs.reasoning.value;
     }
 
-  componentWillMount: ->
-    if @state.isAccumulator or @state.isTransferModifier or not @state.selectedVector?
-      @updateState(@props)
-    else if @props.link.relation.customData?
-      selectedVector = RelationFactory.vary
-      selectedScalar = RelationFactory.custom
-      @setState {selectedVector, selectedScalar}
+    // a hack to update uncontrolled textarea when viewing new links
+    return this.refs.reasoning.value = newProps.link.reasoning;
+  },
 
-  componentDidMount: ->
-    autosize(@refs.reasoning)
+  checkStatus(link) {
+    let status;
+    const {sourceNode, targetNode} = link;
+    return status = {
+      isAccumulator: targetNode.isAccumulator,
+      isDualAccumulator: sourceNode.isAccumulator && targetNode.isAccumulator,
+      isTransferModifier: (targetNode.isTransfer &&
+        ((targetNode.transferLink != null ? targetNode.transferLink.sourceNode : undefined) === sourceNode)) ||
+        ((targetNode.transferLink != null ? targetNode.transferLink.targetNode : undefined) === sourceNode)
+    };
+  },
 
-  componentWillReceiveProps: (newProps) ->
-    if @props.link isnt newProps.link
-      @updateState(newProps)
-
-      # ensure reasoning value has been set, as onblur not triggered
-      @props.link.reasoning = @refs.reasoning.value
-
-    # a hack to update uncontrolled textarea when viewing new links
-    @refs.reasoning.value = newProps.link.reasoning
-
-  checkStatus: (link) ->
-    {sourceNode, targetNode} = link
-    status =
-      isAccumulator: targetNode.isAccumulator
-      isDualAccumulator: sourceNode.isAccumulator and targetNode.isAccumulator
-      isTransferModifier: targetNode.isTransfer and
-        (targetNode.transferLink?.sourceNode is sourceNode) or
-        (targetNode.transferLink?.targetNode is sourceNode)
-
-  updateState: (props) ->
-    status = @checkStatus(props.link)
-    {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation props.link.relation
-    if props.link.relation.customData?
-      vector = RelationFactory.vary
-      scalar = RelationFactory.custom
-    @setState
-      selectedVector: vector
-      selectedScalar: scalar
-      selectedAccumulator: accumulator
-      selectedTransferModifier: transferModifier
-      isAccumulator: status.isAccumulator
-      isDualAccumulator: status.isDualAccumulator
+  updateState(props) {
+    const status = this.checkStatus(props.link);
+    let {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation(props.link.relation);
+    if (props.link.relation.customData != null) {
+      vector = RelationFactory.vary;
+      scalar = RelationFactory.custom;
+    }
+    return this.setState({
+      selectedVector: vector,
+      selectedScalar: scalar,
+      selectedAccumulator: accumulator,
+      selectedTransferModifier: transferModifier,
+      isAccumulator: status.isAccumulator,
+      isDualAccumulator: status.isDualAccumulator,
       isTransferModifier: status.isTransferModifier
+    });
+  },
 
-  updateRelation: ->
-    if @state.isAccumulator
-      selectedAccumulator = @getAccumulator()
-      @setState {selectedAccumulator}
+  updateRelation() {
+    let link, relation;
+    if (this.state.isAccumulator) {
+      const selectedAccumulator = this.getAccumulator();
+      this.setState({selectedAccumulator});
 
-      if selectedAccumulator?
-        link = @props.link
-        relation = RelationFactory.CreateRelation(selectedAccumulator)
-        relation.isDefined = true
-        @props.graphStore.changeLink(link, {relation: relation})
-    else if @state.isTransferModifier
-      selectedTransferModifier = @getTransferModifier()
-      @setState {selectedTransferModifier}
+      if (selectedAccumulator != null) {
+        ({ link } = this.props);
+        relation = RelationFactory.CreateRelation(selectedAccumulator);
+        relation.isDefined = true;
+        return this.props.graphStore.changeLink(link, {relation});
+      }
+    } else if (this.state.isTransferModifier) {
+      const selectedTransferModifier = this.getTransferModifier();
+      this.setState({selectedTransferModifier});
 
-      if selectedTransferModifier?
-        link = @props.link
-        relation = RelationFactory.CreateRelation(selectedTransferModifier)
-        relation.isDefined = true
-        @props.graphStore.changeLink(link, {relation: relation})
-    else
-      selectedVector = @getVector()
-      selectedScalar = @getScalar()
-      if selectedVector? and selectedVector.isCustomRelationship
-        selectedScalar = RelationFactory.custom
-      @setState {selectedVector, selectedScalar}
+      if (selectedTransferModifier != null) {
+        ({ link } = this.props);
+        relation = RelationFactory.CreateRelation(selectedTransferModifier);
+        relation.isDefined = true;
+        return this.props.graphStore.changeLink(link, {relation});
+      }
+    } else {
+      const selectedVector = this.getVector();
+      let selectedScalar = this.getScalar();
+      if ((selectedVector != null) && selectedVector.isCustomRelationship) {
+        selectedScalar = RelationFactory.custom;
+      }
+      this.setState({selectedVector, selectedScalar});
 
-      if selectedVector?
-        link = @props.link
-        existingData = link.relation.customData
-        relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData)
-        relation.isDefined = selectedVector? and selectedScalar?
-        if not selectedVector.isCustomRelationship
-          relation.customData = null
-        else
-          relation.isDefined = link.relation.customData?
-          relation.isCustomRelationship = true
+      if (selectedVector != null) {
+        ({ link } = this.props);
+        const existingData = link.relation.customData;
+        relation = RelationFactory.fromSelections(selectedVector, selectedScalar, existingData);
+        relation.isDefined = (selectedVector != null) && (selectedScalar != null);
+        if (!selectedVector.isCustomRelationship) {
+          relation.customData = null;
+        } else {
+          relation.isDefined = (link.relation.customData != null);
+          relation.isCustomRelationship = true;
+        }
 
-        @props.graphStore.changeLink(link, {relation: relation})
+        return this.props.graphStore.changeLink(link, {relation});
+      }
+    }
+  },
 
-  updateReasoning: ->
-    @props.graphStore.changeLink(@props.link, {reasoning: @refs.reasoning.value})
+  updateReasoning() {
+    return this.props.graphStore.changeLink(this.props.link, {reasoning: this.refs.reasoning.value});
+  },
 
-  getAccumulator: ->
-    RelationFactory.accumulators[@refs.accumulator.value]
+  getAccumulator() {
+    return RelationFactory.accumulators[this.refs.accumulator.value];
+  },
 
-  getTransferModifier: ->
-    RelationFactory.transferModifiers[@refs.transfer.value]
+  getTransferModifier() {
+    return RelationFactory.transferModifiers[this.refs.transfer.value];
+  },
 
-  getVector: ->
-    id = @refs.vector.value
-    newVector = RelationFactory.vectors[id]
+  getVector() {
+    const id = this.refs.vector.value;
+    const newVector = RelationFactory.vectors[id];
 
-    selectedVectorHasChanged = false
-    if @state.selectedVector and id != @state.selectedVector.id
-      selectedVectorHasChanged = true
+    let selectedVectorHasChanged = false;
+    if (this.state.selectedVector && (id !== this.state.selectedVector.id)) {
+      selectedVectorHasChanged = true;
+    }
 
-    @setState { selectedVectorHasChanged }
-    newVector
+    this.setState({ selectedVectorHasChanged });
+    return newVector;
+  },
 
-  getScalar: ->
-    if @state.complexity is AppSettingsStore.store.Complexity.basic
-      RelationFactory.scalars.aboutTheSame
-    else if @refs.scalar
-      RelationFactory.scalars[@refs.scalar.value]
-    else
-      undefined
+  getScalar() {
+    if (this.state.complexity === AppSettingsStore.store.Complexity.basic) {
+      return RelationFactory.scalars.aboutTheSame;
+    } else if (this.refs.scalar) {
+      return RelationFactory.scalars[this.refs.scalar.value];
+    } else {
+      return undefined;
+    }
+  },
 
-  renderVectorPulldown: (vectorSelection)->
-    vectorOptions = if @state.complexity is AppSettingsStore.store.Complexity.basic
+  renderVectorPulldown(vectorSelection){
+    let currentOption;
+    const vectorOptions = this.state.complexity === AppSettingsStore.store.Complexity.basic ?
       RelationFactory.basicVectors
-    else
-      RelationFactory.vectors
-    options = _.map vectorOptions, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.uiText)
+    :
+      RelationFactory.vectors;
+    const options = _.map(vectorOptions, (opt, i) => option({value: opt.id, key: i}, opt.uiText));
 
-    if not vectorSelection?
-      options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
-        tr "~NODE-RELATION-EDIT.UNSELECTED")
-      currentOption = "unselected"
-    else
-      currentOption = vectorSelection.id
+    if ((vectorSelection == null)) {
+      options.unshift((option({key: "placeholder", value: "unselected", disabled: "disabled"},
+        tr("~NODE-RELATION-EDIT.UNSELECTED")))
+      );
+      currentOption = "unselected";
+    } else {
+      currentOption = vectorSelection.id;
+    }
 
-    (div {className: "bb-select"},
-      (span {}, "#{tr "~NODE-RELATION-EDIT.TO"} ")
-      (select {value: currentOption, className:"", ref: "vector", onChange: @updateRelation},
-      options)
-    )
+    return (div({className: "bb-select"},
+      (span({}, `${tr("~NODE-RELATION-EDIT.TO")} `)),
+      (select({value: currentOption, className:"", ref: "vector", onChange: this.updateRelation},
+      options))
+    ));
+  },
 
-  renderScalarPulldown:(scalarSelection) ->
-    options = _.map RelationFactory.scalars, (opt, i) ->
-      (option {value: opt.id, key: i}, opt.uiText)
+  renderScalarPulldown(scalarSelection) {
+    let currentOption;
+    const options = _.map(RelationFactory.scalars, (opt, i) => option({value: opt.id, key: i}, opt.uiText));
 
-    if not scalarSelection?
-      options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
-        tr "~NODE-RELATION-EDIT.UNSELECTED")
-      currentOption = "unselected"
-    else
-      currentOption = scalarSelection.id
+    if ((scalarSelection == null)) {
+      options.unshift((option({key: "placeholder", value: "unselected", disabled: "disabled"},
+        tr("~NODE-RELATION-EDIT.UNSELECTED")))
+      );
+      currentOption = "unselected";
+    } else {
+      currentOption = scalarSelection.id;
+    }
 
-    onlyBasic = @state.complexity is AppSettingsStore.store.Complexity.basic
-    vectorSelected = @state.selectedVector
-    # place dropdown but hide it (to keep spacing) if we haven't selected
-    # the vector or we have only basic complecity settings
-    visible = vectorSelected and not onlyBasic
-    visClass = if visible then ' visible' else ' hidden'
+    const onlyBasic = this.state.complexity === AppSettingsStore.store.Complexity.basic;
+    const vectorSelected = this.state.selectedVector;
+    // place dropdown but hide it (to keep spacing) if we haven't selected
+    // the vector or we have only basic complecity settings
+    const visible = vectorSelected && !onlyBasic;
+    const visClass = visible ? ' visible' : ' hidden';
 
-    if @state.selectedVector?.isCustomRelationship
-      (div {className: "bb-select#{visClass}"},
-        (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM"}")
-      )
-    else
-      (div {className: "bb-select#{visClass}"},
-        (span {}, "#{tr "~NODE-RELATION-EDIT.BY"} ")
-        (select {value: currentOption, className:"", ref: "scalar", onChange: @updateRelation},
+    if ((this.state.selectedVector != null ? this.state.selectedVector.isCustomRelationship : undefined)) {
+      return (div({className: `bb-select${visClass}`},
+        (span({}, `${tr("~NODE-RELATION-EDIT.CUSTOM")}`))
+      ));
+    } else {
+      return (div({className: `bb-select${visClass}`},
+        (span({}, `${tr("~NODE-RELATION-EDIT.BY")} `)),
+        (select({value: currentOption, className:"", ref: "scalar", onChange: this.updateRelation},
           options
-        )
-      )
+        ))
+      ));
+    }
+  },
 
-  renderAccumulator: (source, target) ->
-    options = []
-    _.each RelationFactory.accumulators, (opt, i) =>
-      if (not opt.forDualAccumulator or @state.isDualAccumulator) and
-          (not opt.forSoloAccumulatorOnly or not @state.isDualAccumulator)
-        options.push (option {value: opt.id, key: opt.id}, opt.text)
+  renderAccumulator(source, target) {
+    let currentOption;
+    const options = [];
+    _.each(RelationFactory.accumulators, (opt, i) => {
+      if ((!opt.forDualAccumulator || this.state.isDualAccumulator) &&
+          (!opt.forSoloAccumulatorOnly || !this.state.isDualAccumulator)) {
+        return options.push((option({value: opt.id, key: opt.id}, opt.text)));
+      }
+    });
 
-    if not @state.selectedAccumulator
-      options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
-        tr "~NODE-RELATION-EDIT.UNSELECTED")
-      currentOption = "unselected"
-    else
-      currentOption = @state.selectedAccumulator.id
+    if (!this.state.selectedAccumulator) {
+      options.unshift((option({key: "placeholder", value: "unselected", disabled: "disabled"},
+        tr("~NODE-RELATION-EDIT.UNSELECTED")))
+      );
+      currentOption = "unselected";
+    } else {
+      currentOption = this.state.selectedAccumulator.id;
+    }
 
-    textClass = if @state.selectedAccumulator?.hideAdditionalText then "hidden" else ""
+    const textClass = (this.state.selectedAccumulator != null ? this.state.selectedAccumulator.hideAdditionalText : undefined) ? "hidden" : "";
 
-    (div {className: 'top'},
-      (span {className: "source"}, source)
-      (span {className: textClass}, " #{tr "~NODE-RELATION-EDIT.IS"} ")
-      (div {},
-        (select {value: currentOption, ref: "accumulator", onChange: @updateRelation},
+    return (div({className: 'top'},
+      (span({className: "source"}, source)),
+      (span({className: textClass}, ` ${tr("~NODE-RELATION-EDIT.IS")} `)),
+      (div({},
+        (select({value: currentOption, ref: "accumulator", onChange: this.updateRelation},
           options
-        )
-      )
-      (span {className: "target"}, target)
-      (span {className: textClass}, " #{tr "~NODE-RELATION-EDIT.EACH"} ")
-      (span {className: textClass}, @state.stepUnits.toLowerCase())
-    )
+        ))
+      )),
+      (span({className: "target"}, target)),
+      (span({className: textClass}, ` ${tr("~NODE-RELATION-EDIT.EACH")} `)),
+      (span({className: textClass}, this.state.stepUnits.toLowerCase()))
+    ));
+  },
 
-  renderTransfer: (source, target, isTargetProportional) ->
-    spanWrap = (string,className) -> "<span class='#{className}'>#{string}</span>"
-    options = _.map RelationFactory.transferModifiers, (opt, i) ->
-      (option {value: opt.id, key: opt.id}, opt.text)
-    sourceTitle = @props.link.sourceNode?.title || "NONE"
-    targetTitle = @props.link.targetNode?.transferLink?.targetNode?.title || "NONE"
+  renderTransfer(source, target, isTargetProportional) {
+    let currentOption, line_a, line_b;
+    const spanWrap = (string,className) => `<span class='${className}'>${string}</span>`;
+    const options = _.map(RelationFactory.transferModifiers, (opt, i) => option({value: opt.id, key: opt.id}, opt.text));
+    let sourceTitle = (this.props.link.sourceNode != null ? this.props.link.sourceNode.title : undefined) || "NONE";
+    const targetTitle = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x1 => x1.targetNode), x => x.title) || "NONE";
 
-    if (isTargetProportional)
-      sourceTitle = @props.link.targetNode?.transferLink?.sourceNode?.title || "NONE"
-      line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A",
-        { targetTitle: spanWrap targetTitle, 'target' }
-      line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B",
-        { sourceTitle: spanWrap sourceTitle, 'source' }
+    if (isTargetProportional) {
+      sourceTitle = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x3 => x3.sourceNode), x2 => x2.title) || "NONE";
+      line_a = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A",
+        { targetTitle: spanWrap(targetTitle, 'target') });
+      line_b = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B",
+        { sourceTitle: spanWrap(sourceTitle, 'source') });
 
-    else
-      line_a = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A",
-        { sourceTitle: spanWrap sourceTitle, 'source' }
-      line_b = tr "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B",
-        { targetTitle: spanWrap targetTitle, 'target' }
+    } else {
+      line_a = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A",
+        { sourceTitle: spanWrap(sourceTitle, 'source') });
+      line_b = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B",
+        { targetTitle: spanWrap(targetTitle, 'target') });
+    }
 
-    if not @state.selectedTransferModifier
-      options.unshift (option {key: "placeholder", value: "unselected", disabled: "disabled"},
-        tr "~NODE-RELATION-EDIT.UNSELECTED")
-      currentOption = "unselected"
-    else
-      currentOption = @state.selectedTransferModifier.id
-    (div {className: 'top'},
+    if (!this.state.selectedTransferModifier) {
+      options.unshift((option({key: "placeholder", value: "unselected", disabled: "disabled"},
+        tr("~NODE-RELATION-EDIT.UNSELECTED")))
+      );
+      currentOption = "unselected";
+    } else {
+      currentOption = this.state.selectedTransferModifier.id;
+    }
+    return (div({className: 'top'},
 
 
-      # note that localization will be a problem here due to the hard-coded order
-      # of the elements and because we can't use the string-replacement capabilities
-      # of the translate module since there is special formatting of node titles, etc.
-      (span { dangerouslySetInnerHTML: {__html: line_a} })
-      (select {value: currentOption, ref: "transfer", onChange: @updateRelation},
+      // note that localization will be a problem here due to the hard-coded order
+      // of the elements and because we can't use the string-replacement capabilities
+      // of the translate module since there is special formatting of node titles, etc.
+      (span({ dangerouslySetInnerHTML: {__html: line_a} })),
+      (select({value: currentOption, ref: "transfer", onChange: this.updateRelation},
         options
-      )
-      (span { dangerouslySetInnerHTML: {__html: line_b} })
-      (span {}, "#{@state.stepUnits.toLowerCase()}.")
-    )
+      )),
+      (span({ dangerouslySetInnerHTML: {__html: line_b} })),
+      (span({}, `${this.state.stepUnits.toLowerCase()}.`))
+    ));
+  },
 
-  renderNonAccumulator: (source, target) ->
-    (div {},
-      (div {className: 'top'},
-        (QuantStart {source: source, target: target})
-        (div {className: 'full'},
-          @renderVectorPulldown(@state.selectedVector)
-        )
-        (div {className: 'full'},
-          @renderScalarPulldown(@state.selectedScalar)
-        )
-      )
-      (div {className: 'bottom'},
-        (div {className: 'graph', id:'relation-graph'},
-          (Graph
-            xAxis: source
-            yAxis: target
-            link: @props.link
-            graphStore: @props.graphStore
-          )
-        )
-      )
-    )
+  renderNonAccumulator(source, target) {
+    return (div({},
+      (div({className: 'top'},
+        (QuantStart({source, target})),
+        (div({className: 'full'},
+          this.renderVectorPulldown(this.state.selectedVector)
+        )),
+        (div({className: 'full'},
+          this.renderScalarPulldown(this.state.selectedScalar)
+        ))
+      )),
+      (div({className: 'bottom'},
+        (div({className: 'graph', id:'relation-graph'},
+          (Graph({
+            xAxis: source,
+            yAxis: target,
+            link: this.props.link,
+            graphStore: this.props.graphStore
+          }))
+        ))
+      ))
+    ));
+  },
 
-  render: ->
-    source = @props.link.sourceNode.title
-    target = @props.link.targetNode.title
+  render() {
+    let target;
+    const source = this.props.link.sourceNode.title;
+    target = this.props.link.targetNode.title;
 
-    (div {className: 'link-relation-view'},
-      if @state.isAccumulator
-        @renderAccumulator(source, target)
-      else if @state.isTransferModifier
-        target = @props.link.targetNode?.transferLink?.targetNode?.title
-        isTargetProportional = @props.link.sourceNode == @props.link.targetNode?.transferLink?.targetNode
-        @renderTransfer(source, target, isTargetProportional)
-      else
-        @renderNonAccumulator(source, target)
-      (div {className: 'bottom'},
-        (div {},
-          (span {}, "#{tr "~NODE-RELATION-EDIT.BECAUSE"} ")
+    return (div({className: 'link-relation-view'},
+      (() => {
+      if (this.state.isAccumulator) {
+        return this.renderAccumulator(source, target);
+      } else if (this.state.isTransferModifier) {
+        target = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x1 => x1.targetNode), x => x.title);
+        const isTargetProportional = this.props.link.sourceNode === __guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x2 => x2.targetNode);
+        return this.renderTransfer(source, target, isTargetProportional);
+      } else {
+        return this.renderNonAccumulator(source, target);
+      }
+    })(),
+      (div({className: 'bottom'},
+        (div({},
+          (span({}, `${tr("~NODE-RELATION-EDIT.BECAUSE")} `))
+        )),
+        (textarea({
+          defaultValue: this.props.link.reasoning,
+          placeholder: tr("~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER"),
+          onChange: this.updateReasoning,
+          ref: 'reasoning',
+          className: 'full',
+          rows: 3,
+          style: { overflowY: "scroll", resize: "none"}})
         )
-        (textarea
-          defaultValue: @props.link.reasoning
-          placeholder: tr "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER"
-          onChange: @updateReasoning
-          ref: 'reasoning'
-          className: 'full'
-          rows: 3
-          style: { overflowY: "scroll", resize: "none"}
-        )
-      )
-    )
+      ))
+    ));
+  }
+}));
 
 
+
+function __guard__(value, transform) {
+  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+}

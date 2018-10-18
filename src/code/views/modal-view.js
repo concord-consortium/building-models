@@ -1,21 +1,32 @@
-{div} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {div} = React.DOM;
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'Modal'
+  displayName: 'Modal',
 
-  watchForEscape: (e) ->
-    if e.keyCode is 27
-      @props.close?()
+  watchForEscape(e) {
+    if (e.keyCode === 27) {
+      return (typeof this.props.close === 'function' ? this.props.close() : undefined);
+    }
+  },
 
-  componentDidMount: ->
-    $(window).on 'keyup', @watchForEscape
+  componentDidMount() {
+    return $(window).on('keyup', this.watchForEscape);
+  },
 
-  componentWillUnmount: ->
-    $(window).off 'keyup', @watchForEscape
+  componentWillUnmount() {
+    return $(window).off('keyup', this.watchForEscape);
+  },
 
-  render: ->
-    (div {className: 'modal'},
-      (div {className: 'modal-background'})
-      (div {className: 'modal-content'}, @props.children)
-    )
+  render() {
+    return (div({className: 'modal'},
+      (div({className: 'modal-background'})),
+      (div({className: 'modal-content'}, this.props.children))
+    ));
+  }
+});

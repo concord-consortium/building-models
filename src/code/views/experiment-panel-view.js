@@ -1,35 +1,47 @@
-SimulationStore = require '../stores/simulation-store'
-tr              = require '../utils/translate'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const SimulationStore = require('../stores/simulation-store');
+const tr              = require('../utils/translate');
 
-{div, span, i, input}  = React.DOM
+const {div, span, i, input}  = React.DOM;
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'ExperimentView'
+  displayName: 'ExperimentView',
 
-  mixins: [ SimulationStore.mixin ]
+  mixins: [ SimulationStore.mixin ],
 
 
-  increment: ->
-    unless @props.disabled
-      SimulationStore.actions.createExperiment()
+  increment() {
+    if (!this.props.disabled) {
+      return SimulationStore.actions.createExperiment();
+    }
+  },
 
-  renderLabel: ->
-    experimentLabel = "Experiment #"
-    (span {className: "experiment-label"}, experimentLabel)
+  renderLabel() {
+    const experimentLabel = "Experiment #";
+    return (span({className: "experiment-label"}, experimentLabel));
+  },
 
-  renderCounter: ->
-    count = @state.experimentNumber || 211
-    (div {className: "experiment-counter", onClick: @increment },
-      (div {className: "count"}, count)
-      (div {className: "increment"}, "+")
-    )
+  renderCounter() {
+    const count = this.state.experimentNumber || 211;
+    return (div({className: "experiment-counter", onClick: this.increment },
+      (div({className: "count"}, count)),
+      (div({className: "increment"}, "+"))
+    ));
+  },
 
-  render: ->
-    classes = ["experiment-panel"]
-    if @props.disabled
-      classes.push('disabled')
-    (div {className: classes.join(" ") },
-      @renderLabel()
-      @renderCounter()
-    )
+  render() {
+    const classes = ["experiment-panel"];
+    if (this.props.disabled) {
+      classes.push('disabled');
+    }
+    return (div({className: classes.join(" ") },
+      this.renderLabel(),
+      this.renderCounter()
+    ));
+  }
+});

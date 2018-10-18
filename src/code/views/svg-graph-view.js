@@ -1,294 +1,357 @@
-{svg, path, line, text, div, tspan, span} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS202: Simplify dynamic range loops
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let SvgGraphView;
+const {svg, path, line, text, div, tspan, span} = React.DOM;
 
-tr   = require "../utils/translate"
-math = require 'mathjs'  # For formula parsing...
-module.exports = SvgGraphView = React.createClass
-  displayName: 'SvgGraphView'
-  getDefaultProps: ->
-    width: 200
-    height: 200
-    strokeWidth: 3
-    strokeDasharray: "10,6"
-    fontSize: 16
-    xLabel: "x axis"
-    yLabel: "y axis"
-    link: null
+const tr   = require("../utils/translate");
+const math = require('mathjs');  // For formula parsing...
+module.exports = (SvgGraphView = React.createClass({
+  displayName: 'SvgGraphView',
+  getDefaultProps() {
+    return {
+      width: 200,
+      height: 200,
+      strokeWidth: 3,
+      strokeDasharray: "10,6",
+      fontSize: 16,
+      xLabel: "x axis",
+      yLabel: "y axis",
+      link: null
+    };
+  },
 
-  drawing: false
+  drawing: false,
 
-  getInitialState: ->
-    currentData: null
-    pointPathData: null
-    # control state of the graph rendering
-    canDraw: false
-    definedRelationship: false
-    # rendering style toggle for new custom relationships
-    newCustomData: false
+  getInitialState() {
+    return {
+      currentData: null,
+      pointPathData: null,
+      // control state of the graph rendering
+      canDraw: false,
+      definedRelationship: false,
+      // rendering style toggle for new custom relationships
+      newCustomData: false
+    };
+  },
 
-  componentWillMount: ->
-    canDraw = false
-    currentData = @props.link.relation.customData
-    isDefined = @props.link.relation.isDefined
-    formula = @props.link.relation.formula
-    newCustomData = false
+  componentWillMount() {
+    let canDraw = false;
+    const currentData = this.props.link.relation.customData;
+    const { isDefined } = this.props.link.relation;
+    let { formula } = this.props.link.relation;
+    let newCustomData = false;
 
-    if @props.link.relation.isCustomRelationship or (currentData? and isDefined)
-      canDraw = true
-      formula = null
-      newCustomData = not currentData?
-
-    @setState {
-      currentData: currentData,
-      canDraw: canDraw,
-      newCustomData: newCustomData,
-      definedRelationship: isDefined
+    if (this.props.link.relation.isCustomRelationship || ((currentData != null) && isDefined)) {
+      canDraw = true;
+      formula = null;
+      newCustomData = (currentData == null);
     }
 
-    if not @state.pointPathData? and isDefined
-      if currentData?
-        @updatePointData null, currentData
-      else if formula?
-        @updatePointData formula, null
+    this.setState({
+      currentData,
+      canDraw,
+      newCustomData,
+      definedRelationship: isDefined
+    });
 
-  componentWillReceiveProps: (newProps) ->
-    if newProps
-      canDraw = false
-      currentData = newProps.link.relation.customData
-      isDefined = newProps.link.relation.isDefined
-      formula = newProps.link.relation.formula
+    if ((this.state.pointPathData == null) && isDefined) {
+      if (currentData != null) {
+        return this.updatePointData(null, currentData);
+      } else if (formula != null) {
+        return this.updatePointData(formula, null);
+      }
+    }
+  },
 
-      if newProps.link.relation.isCustomRelationship or (currentData? and isDefined)
-        canDraw = true
-        if not isDefined
-          newCustomData = true
-          formula = "1 * 1"
-        else
-          formula = null
+  componentWillReceiveProps(newProps) {
+    if (newProps) {
+      let newCustomData;
+      let canDraw = false;
+      let currentData = newProps.link.relation.customData;
+      const { isDefined } = newProps.link.relation;
+      let { formula } = newProps.link.relation;
 
-      else if formula?
-        canDraw = false
-        newCustomData = false
-        currentData = null
+      if (newProps.link.relation.isCustomRelationship || ((currentData != null) && isDefined)) {
+        canDraw = true;
+        if (!isDefined) {
+          newCustomData = true;
+          formula = "1 * 1";
+        } else {
+          formula = null;
+        }
 
-      @setState {
-        currentData: currentData,
-        pointPathData: null,
-        canDraw: canDraw,
-        newCustomData: newCustomData,
-        definedRelationship: isDefined
+      } else if (formula != null) {
+        canDraw = false;
+        newCustomData = false;
+        currentData = null;
       }
 
-      @updatePointData formula, currentData
+      this.setState({
+        currentData,
+        pointPathData: null,
+        canDraw,
+        newCustomData,
+        definedRelationship: isDefined
+      });
 
-  updatePointData: (formula, currentData) ->
-    if not currentData? and formula?
-      currentData = @loadCustomDataFromFormula formula
-    else if currentData?
-      @setState { definedRelationship: true }
-    pointPathData = @getPathPoints(currentData)
-    @setState {currentData: currentData, pointPathData: pointPathData}
+      return this.updatePointData(formula, currentData);
+    }
+  },
 
-  marginal: ->
-    @props.fontSize * 0.4
+  updatePointData(formula, currentData) {
+    if ((currentData == null) && (formula != null)) {
+      currentData = this.loadCustomDataFromFormula(formula);
+    } else if (currentData != null) {
+      this.setState({ definedRelationship: true });
+    }
+    const pointPathData = this.getPathPoints(currentData);
+    return this.setState({currentData, pointPathData});
+  },
 
-  margin: ->
-    @props.fontSize + @marginal()
+  marginal() {
+    return this.props.fontSize * 0.4;
+  },
 
-  invertPoint: (point) ->
-    {x: point.x, y: @props.height - point.y}
+  margin() {
+    return this.props.fontSize + this.marginal();
+  },
 
-  graphMapPoint: (point) ->
-    yOffset = @margin()
-    xOffset = @margin()
-    width   = @props.width  - (xOffset + @props.strokeWidth)
-    height  = @props.height - (yOffset + @props.strokeWidth)
-    x = point.x * width + xOffset
-    y = point.y * height + yOffset
-    @invertPoint x:x, y:y
+  invertPoint(point) {
+    return {x: point.x, y: this.props.height - point.y};
+  },
 
-  findClosestPoint:(path, pointX, pointY) ->
-    graphOrigin = @graphMapPoint {x:0, y:0}
-    x = pointX - $(path).offset().left
-    y = pointX - $(path).offset().top
-    p = {x: x, y: y}
-    p
+  graphMapPoint(point) {
+    const yOffset = this.margin();
+    const xOffset = this.margin();
+    const width   = this.props.width  - (xOffset + this.props.strokeWidth);
+    const height  = this.props.height - (yOffset + this.props.strokeWidth);
+    const x = (point.x * width) + xOffset;
+    const y = (point.y * height) + yOffset;
+    return this.invertPoint({x, y});
+  },
 
-  pointsToPath: (points)->
-    data = _.map points, (p) => @graphMapPoint(p)
-    data = _.map data,   (p) -> "#{p.x} #{p.y}"
-    data = data.join " L "
-    "M #{data}"
+  findClosestPoint(path, pointX, pointY) {
+    const graphOrigin = this.graphMapPoint({x:0, y:0});
+    const x = pointX - $(path).offset().left;
+    const y = pointX - $(path).offset().top;
+    const p = {x, y};
+    return p;
+  },
 
-  loadCustomDataFromFormula: (formula) ->
-    rangex = 100
-    data = _.range(0,rangex)
-    miny = Infinity
-    maxy = -Infinity
-    data = _.map data, (x) ->
-      scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex}
-      try
-        y = math.eval formula, scope
-        if y < miny then miny = y
-        if y > maxy then maxy = y
-      catch error
-        console.log "Error: #{error}"
-      [x,y]
+  pointsToPath(points){
+    let data = _.map(points, p => this.graphMapPoint(p));
+    data = _.map(data,   p => `${p.x} ${p.y}`);
+    data = data.join(" L ");
+    return `M ${data}`;
+  },
 
-  getPathPoints: (currentData) ->
-    rangex = 100
-    data = _.range(0,rangex)
-    miny = Infinity
-    maxy = -Infinity
-    if currentData?
-      data = _.map currentData, (point) ->
-        x = _.first point
-        y = _.last point
-        if y < miny then miny = y
-        if y > maxy then maxy = y
-        { y: y, x: x}
+  loadCustomDataFromFormula(formula) {
+    const rangex = 100;
+    let data = _.range(0,rangex);
+    let miny = Infinity;
+    let maxy = -Infinity;
+    return data = _.map(data, function(x) {
+      let y;
+      const scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex};
+      try {
+        y = math.eval(formula, scope);
+        if (y < miny) { miny = y; }
+        if (y > maxy) { maxy = y; }
+      } catch (error) {
+        console.log(`Error: ${error}`);
+      }
+      return [x,y];
+  });
+  },
 
-    data = _.map data, (d) ->
-      {x,y} = d
-      x = x / rangex
-      y = y / rangex
-      {x: x, y: y}
-    data
+  getPathPoints(currentData) {
+    const rangex = 100;
+    let data = _.range(0,rangex);
+    let miny = Infinity;
+    let maxy = -Infinity;
+    if (currentData != null) {
+      data = _.map(currentData, function(point) {
+        const x = _.first(point);
+        const y = _.last(point);
+        if (y < miny) { miny = y; }
+        if (y > maxy) { maxy = y; }
+        return { y, x};
+    });
+    }
 
-  renderXLabel: ->
-    y = @props.height - @props.fontSize + 2 * @marginal()
-    (text {className: "xLabel", x:@margin(), y:y},
-      @props.xLabel
-    )
+    data = _.map(data, function(d) {
+      let {x,y} = d;
+      x = x / rangex;
+      y = y / rangex;
+      return {x, y};
+  });
+    return data;
+  },
 
-  renderYLabel: ->
-    rotate = "rotate(-90 0, #{@props.height})"
-    translate =  "translate(#{@props.fontSize})"
-    transform = "#{rotate}"
-    y = @props.height + @props.fontSize - 3
-    (text {className: "yLabel", x:@margin(), y:y, transform:transform},
-      @props.yLabel
-    )
+  renderXLabel() {
+    const y = (this.props.height - this.props.fontSize) + (2 * this.marginal());
+    return (text({className: "xLabel", x:this.margin(), y},
+      this.props.xLabel
+    ));
+  },
 
-  renderAxisLines: ->
-    data = [ {x:0, y:1}, {x:0, y:0}, {x:1, y:0}]
-    (path {className: 'axisLines', d: @pointsToPath(data)})
+  renderYLabel() {
+    const rotate = `rotate(-90 0, ${this.props.height})`;
+    const translate =  `translate(${this.props.fontSize})`;
+    const transform = `${rotate}`;
+    const y = (this.props.height + this.props.fontSize) - 3;
+    return (text({className: "yLabel", x:this.margin(), y, transform},
+      this.props.yLabel
+    ));
+  },
 
-  renderLineData: ->
-    if @state.definedRelationship
-      data = @pointsToPath(@state.pointPathData)
-      if @state.newCustomData
-        (path {className: 'data', d:data, strokeWidth:@props.strokeWidth, strokeDasharray:@props.strokeDasharray})
-      else
-        (path {className: 'data', d:data, strokeWidth:@props.strokeWidth})
+  renderAxisLines() {
+    const data = [ {x:0, y:1}, {x:0, y:0}, {x:1, y:0}];
+    return (path({className: 'axisLines', d: this.pointsToPath(data)}));
+  },
 
-  startDrawCurve: (evt) ->
-    # can only draw on custom relationships
-    if @state.canDraw
-      document.addEventListener 'mousemove', @drawCurve
-      document.addEventListener 'mouseup', @endDrawCurve
-      @drawing = true
-      if @state.newCustomData
-        scaledCoords = @pointToScaledCoords(evt)
-        starterFunction = '1 * ' + scaledCoords.y
-        @updatePointData starterFunction, null
-        newCustomData = false
-        @setState {newCustomData: newCustomData}
-      @drawCurve(evt)
+  renderLineData() {
+    if (this.state.definedRelationship) {
+      const data = this.pointsToPath(this.state.pointPathData);
+      if (this.state.newCustomData) {
+        return (path({className: 'data', d:data, strokeWidth:this.props.strokeWidth, strokeDasharray:this.props.strokeDasharray}));
+      } else {
+        return (path({className: 'data', d:data, strokeWidth:this.props.strokeWidth}));
+      }
+    }
+  },
 
-  drawCurve: (evt) ->
-    if @drawing and not @state.newCustomData
-      evt.preventDefault()
-      scaledCoords = @pointToScaledCoords(evt)
+  startDrawCurve(evt) {
+    // can only draw on custom relationships
+    if (this.state.canDraw) {
+      document.addEventListener('mousemove', this.drawCurve);
+      document.addEventListener('mouseup', this.endDrawCurve);
+      this.drawing = true;
+      if (this.state.newCustomData) {
+        const scaledCoords = this.pointToScaledCoords(evt);
+        const starterFunction = `1 * ${scaledCoords.y}`;
+        this.updatePointData(starterFunction, null);
+        const newCustomData = false;
+        this.setState({newCustomData});
+      }
+      return this.drawCurve(evt);
+    }
+  },
 
-      x = Math.round scaledCoords.x
-      y = scaledCoords.y
+  drawCurve(evt) {
+    if (this.drawing && !this.state.newCustomData) {
+      evt.preventDefault();
+      const scaledCoords = this.pointToScaledCoords(evt);
 
-      # sanity check, but it shouldn't be possible to be out of bounds with our scaledCoords
-      return if x < 0 || x > 100 || y < 0 || y > 100
+      const x = Math.round(scaledCoords.x);
+      const { y } = scaledCoords;
 
-      # our data is ordered in the format [[0, y], [1, y], [2, y], ...]
-      # so we can set a new x, y simply using data[x] = [x, y]
+      // sanity check, but it shouldn't be possible to be out of bounds with our scaledCoords
+      if ((x < 0) || (x > 100) || (y < 0) || (y > 100)) { return; }
 
-      newData = _.clone @state.currentData
+      // our data is ordered in the format [[0, y], [1, y], [2, y], ...]
+      // so we can set a new x, y simply using data[x] = [x, y]
 
-      currentTime = Date.now()
-      if @_lastPoint && @_lastPoint.x != x && currentTime - @_lastPoint.time < 100
-        # if our last point was < 100ms ago, this is probably the mouse moving across the canvas,
-        # so interpolate all the points between that point and this point
-        minX = Math.min x, @_lastPoint.x
-        maxX = Math.max x, @_lastPoint.x
-        minY = if x < @_lastPoint.x then y else @_lastPoint.y
-        maxY = if x < @_lastPoint.x then @_lastPoint.y else y
-        steps = maxX - minX
-        yStep = (maxY - minY) / steps
-        for i in [0..steps]
-          interpolatedX = minX + i
-          interpolatedY = minY + (yStep * i)
-          newData[interpolatedX] = [interpolatedX, interpolatedY]
-      else
-        # otherwise, just set this point
-        newData[x] = [x, y]
+      const newData = _.clone(this.state.currentData);
 
-      @updatePointData @props.formula, newData
+      const currentTime = Date.now();
+      if (this._lastPoint && (this._lastPoint.x !== x) && ((currentTime - this._lastPoint.time) < 100)) {
+        // if our last point was < 100ms ago, this is probably the mouse moving across the canvas,
+        // so interpolate all the points between that point and this point
+        const minX = Math.min(x, this._lastPoint.x);
+        const maxX = Math.max(x, this._lastPoint.x);
+        const minY = x < this._lastPoint.x ? y : this._lastPoint.y;
+        const maxY = x < this._lastPoint.x ? this._lastPoint.y : y;
+        const steps = maxX - minX;
+        const yStep = (maxY - minY) / steps;
+        for (let i = 0, end = steps, asc = 0 <= end; asc ? i <= end : i >= end; asc ? i++ : i--) {
+          const interpolatedX = minX + i;
+          const interpolatedY = minY + (yStep * i);
+          newData[interpolatedX] = [interpolatedX, interpolatedY];
+        }
+      } else {
+        // otherwise, just set this point
+        newData[x] = [x, y];
+      }
 
-      @_lastPoint = {x: x, y: y, time: currentTime}
+      this.updatePointData(this.props.formula, newData);
 
-  endDrawCurve: (evt) ->
-    if @drawing
-      document.removeEventListener 'mousemove', @drawCurve
-      document.removeEventListener 'mouseup', @endDrawCurve
-      @drawing = false
-      #update relation with custom data
-      @updateRelationCustomData(@state.currentData)
-    delete @_lastPoint
+      return this._lastPoint = {x, y, time: currentTime};
+    }
+  },
 
-  pointToScaledCoords: (evt) ->
-    rect = this.refs.graphBody?.getBoundingClientRect()
-    coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY}
-    coords.x = Math.max(0, Math.min(coords.x, rect.width))
-    coords.y = Math.max(0, Math.min(coords.y, rect.height))
-    scaledCoords = {x: Math.round(coords.x / rect.width * 100), y: Math.round(coords.y / rect.height * 100)}
-    scaledCoords
+  endDrawCurve(evt) {
+    if (this.drawing) {
+      document.removeEventListener('mousemove', this.drawCurve);
+      document.removeEventListener('mouseup', this.endDrawCurve);
+      this.drawing = false;
+      //update relation with custom data
+      this.updateRelationCustomData(this.state.currentData);
+    }
+    return delete this._lastPoint;
+  },
 
-  updateRelationCustomData: (customData) ->
-    link = @props.link
-    link.relation.customData = customData
-    link.relation.isDefined = customData?
-    @props.graphStore.changeLink(link, {relation: link.relation})
+  pointToScaledCoords(evt) {
+    const rect = this.refs.graphBody != null ? this.refs.graphBody.getBoundingClientRect() : undefined;
+    const coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY};
+    coords.x = Math.max(0, Math.min(coords.x, rect.width));
+    coords.y = Math.max(0, Math.min(coords.y, rect.height));
+    const scaledCoords = {x: Math.round((coords.x / rect.width) * 100), y: Math.round((coords.y / rect.height) * 100)};
+    return scaledCoords;
+  },
 
-  render: ->
-    drawClass = 'draw-graph'
-    if @state.canDraw then drawClass += ' drawing'
-    (div {className: 'svgGraphView' },
-      (svg {width: @props.width, height: @props.height },
-        @renderAxisLines()
-        @renderLineData()
-        @renderXLabel()
-        @renderYLabel()
-      )
-      (div
-        className: drawClass
-        onMouseDown: @startDrawCurve
+  updateRelationCustomData(customData) {
+    const { link } = this.props;
+    link.relation.customData = customData;
+    link.relation.isDefined = (customData != null);
+    return this.props.graphStore.changeLink(link, {relation: link.relation});
+  },
+
+  render() {
+    let drawClass = 'draw-graph';
+    if (this.state.canDraw) { drawClass += ' drawing'; }
+    return (div({className: 'svgGraphView' },
+      (svg({width: this.props.width, height: this.props.height },
+        this.renderAxisLines(),
+        this.renderLineData(),
+        this.renderXLabel(),
+        this.renderYLabel()
+      )),
+      (div({
+        className: drawClass,
+        onMouseDown: this.startDrawCurve,
         ref: "graphBody"
+      }
         ,
-        if @state.newCustomData
-          (div {className: 'graph-hint'},
-            (span {}, "#{tr "~NODE-RELATION-EDIT.CUSTOM_HINT"} ")
-          )
-        else unless @state.definedRelationship
-          (div {className: 'unknown-graph'},
+        (() => {
+        if (this.state.newCustomData) {
+          return (div({className: 'graph-hint'},
+            (span({}, `${tr("~NODE-RELATION-EDIT.CUSTOM_HINT")} `))
+          ));
+        } else if (!this.state.definedRelationship) {
+          return (div({className: 'unknown-graph'},
             "?"
-          )
-      )
-    )
+          ));
+        }
+      })()
+      ))
+    ));
+  }
+}));
 
-# TO DEBUG THIS VIEW:
-# RelationFactory = require "../models/relation-factory"
-# myView = React.createFactory SvgGraphView
-# window.testComponent = (domID) ->
-#   ReactDOM.render myView({
-#     width: 200
-#     height: 200
-#     yLabel: "this node"
-#     xLabel: "input a"
-#   }), domID
+// TO DEBUG THIS VIEW:
+// RelationFactory = require "../models/relation-factory"
+// myView = React.createFactory SvgGraphView
+// window.testComponent = (domID) ->
+//   ReactDOM.render myView({
+//     width: 200
+//     height: 200
+//     yLabel: "this node"
+//     xLabel: "input a"
+//   }), domID

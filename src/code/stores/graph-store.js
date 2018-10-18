@@ -1,664 +1,919 @@
-Importer            = require '../utils/importer'
-Link                = require '../models/link'
-NodeModel           = require '../models/node'
-TransferModel       = require '../models/transfer'
-UndoRedo            = require '../utils/undo-redo'
-SelectionManager    = require '../models/selection-manager'
-PaletteStore        = require "../stores/palette-store"
-tr                  = require "../utils/translate"
-Migrations          = require "../data/migrations/migrations"
-PaletteDeleteStore  = require "../stores/palette-delete-dialog-store"
-AppSettingsStore    = require "../stores/app-settings-store"
-SimulationStore     = require "../stores/simulation-store"
-GraphActions        = require "../actions/graph-actions"
-CodapActions        = require '../actions/codap-actions'
-LaraActions         = require "../actions/lara-actions"
-InspectorPanelStore = require "../stores/inspector-panel-store"
-CodapConnect        = require '../models/codap-connect'
-LaraConnect         = require '../models/lara-connect'
-RelationFactory     = require "../models/relation-factory"
-GraphPrimitive      = require '../models/graph-primitive'
-DEFAULT_CONTEXT_NAME = 'building-models'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * DS208: Avoid top-level this
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Importer            = require('../utils/importer');
+const Link                = require('../models/link');
+const NodeModel           = require('../models/node');
+const TransferModel       = require('../models/transfer');
+const UndoRedo            = require('../utils/undo-redo');
+const SelectionManager    = require('../models/selection-manager');
+const PaletteStore        = require("../stores/palette-store");
+const tr                  = require("../utils/translate");
+const Migrations          = require("../data/migrations/migrations");
+const PaletteDeleteStore  = require("../stores/palette-delete-dialog-store");
+const AppSettingsStore    = require("../stores/app-settings-store");
+const SimulationStore     = require("../stores/simulation-store");
+const GraphActions        = require("../actions/graph-actions");
+const CodapActions        = require('../actions/codap-actions');
+const LaraActions         = require("../actions/lara-actions");
+const InspectorPanelStore = require("../stores/inspector-panel-store");
+const CodapConnect        = require('../models/codap-connect');
+const LaraConnect         = require('../models/lara-connect');
+const RelationFactory     = require("../models/relation-factory");
+const GraphPrimitive      = require('../models/graph-primitive');
+const DEFAULT_CONTEXT_NAME = 'building-models';
 
-GraphStore  = Reflux.createStore
-  init: (context) ->
-    @linkKeys           = {}
-    @nodeKeys           = {}
-    @loadListeners      = []
-    @filename           = null
-    @filenameListeners  = []
+const GraphStore  = Reflux.createStore({
+  init(context) {
+    this.linkKeys           = {};
+    this.nodeKeys           = {};
+    this.loadListeners      = [];
+    this.filename           = null;
+    this.filenameListeners  = [];
 
-    @undoRedoManager    = UndoRedo.instance debug:false, context:context
-    @selectionManager   = new SelectionManager()
-    PaletteDeleteStore.store.listen @paletteDelete.bind(@)
+    this.undoRedoManager    = UndoRedo.instance({debug:false, context});
+    this.selectionManager   = new SelectionManager();
+    PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
 
-    SimulationStore.actions.createExperiment.listen        @resetSimulation.bind(@)
-    SimulationStore.actions.setDuration.listen             @resetSimulation.bind(@)
-    SimulationStore.actions.capNodeValues.listen           @resetSimulation.bind(@)
-    SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)
+    SimulationStore.actions.createExperiment.listen(this.resetSimulation.bind(this));
+    SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
+    SimulationStore.actions.capNodeValues.listen(this.resetSimulation.bind(this));
+    SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
 
-    @usingCODAP = false
-    @usingLara = false
-    @codapStandaloneMode = false
+    this.usingCODAP = false;
+    this.usingLara = false;
+    this.codapStandaloneMode = false;
 
-    @lastRunModel = ""   # string description of the model last time we ran simulation
+    return this.lastRunModel = "";
+  },   // string description of the model last time we ran simulation
 
-  resetSimulation: ->
-    for node in @getNodes()
-      node.frames = []
-    @updateListeners()
+  resetSimulation() {
+    for (let node of Array.from(this.getNodes())) {
+      node.frames = [];
+    }
+    return this.updateListeners();
+  },
 
-  _trimSimulation: ->
-    for node in @getNodes()
-      # leaving some excess data reduces flicker during rapid changes
-      excessFrames = node.frames.length - 2 * SimulationStore.store.simulationDuration()
-      if excessFrames > 0
-        node.frames.splice(0, excessFrames)
-    return  # prevent unused default return value
+  _trimSimulation() {
+    for (let node of Array.from(this.getNodes())) {
+      // leaving some excess data reduces flicker during rapid changes
+      const excessFrames = node.frames.length - (2 * SimulationStore.store.simulationDuration());
+      if (excessFrames > 0) {
+        node.frames.splice(0, excessFrames);
+      }
+    }
+    
+  },  // prevent unused default return value
 
-  updateSimulationData: (data) ->
-    nodes = @getNodes()
-    for frame in data
-      for node, i in frame.nodes
-        nodes[i]?.frames.push node.value
-    return  # prevent unused default return value
+  updateSimulationData(data) {
+    const nodes = this.getNodes();
+    for (let frame of Array.from(data)) {
+      for (let i = 0; i < frame.nodes.length; i++) {
+        const node = frame.nodes[i];
+        if (nodes[i] != null) {
+          nodes[i].frames.push(node.value);
+        }
+      }
+    }
+    
+  },  // prevent unused default return value
 
-  paletteDelete: (status) ->
-    {deleted,paletteItem,replacement} = status
-    if deleted and paletteItem and replacement
-      for node in @getNodes()
-        if node.paletteItemIs paletteItem
-          @changeNode({image: replacement.image, paletteItem: replacement.uuid},node)
-    return  # prevent unused default return value
+  paletteDelete(status) {
+    const {deleted,paletteItem,replacement} = status;
+    if (deleted && paletteItem && replacement) {
+      for (let node of Array.from(this.getNodes())) {
+        if (node.paletteItemIs(paletteItem)) {
+          this.changeNode({image: replacement.image, paletteItem: replacement.uuid},node);
+        }
+      }
+    }
+    
+  },  // prevent unused default return value
 
-  # This and redo() can be called from three sources, and we can be in two different
-  # modes. It can be called from the 1) button press, 2) keyboard, and 3) CODAP action.
-  # We can be in CODAP standalone mode or not.
-  #
-  # The undoRedoManager should handle the undo/redo when EITHER we are not running
-  # in CODAP or the undo/redo has been initiated from CODAP
-  #
-  # CODAP should handle the undo/redo when we are running from CODAP in either
-  # standalone or non-standalone mode and CODAP did not initiate the request
-  undo: (fromCODAP) ->
-    if fromCODAP or not @usingCODAP
-      @undoRedoManager.undo()
-    else
-      CodapActions.sendUndoToCODAP()
+  // This and redo() can be called from three sources, and we can be in two different
+  // modes. It can be called from the 1) button press, 2) keyboard, and 3) CODAP action.
+  // We can be in CODAP standalone mode or not.
+  //
+  // The undoRedoManager should handle the undo/redo when EITHER we are not running
+  // in CODAP or the undo/redo has been initiated from CODAP
+  //
+  // CODAP should handle the undo/redo when we are running from CODAP in either
+  // standalone or non-standalone mode and CODAP did not initiate the request
+  undo(fromCODAP) {
+    if (fromCODAP || !this.usingCODAP) {
+      return this.undoRedoManager.undo();
+    } else {
+      return CodapActions.sendUndoToCODAP();
+    }
+  },
 
-  redo: (fromCODAP) ->
-    if fromCODAP or not @usingCODAP
-      @undoRedoManager.redo()
-    else
-      CodapActions.sendRedoToCODAP()
+  redo(fromCODAP) {
+    if (fromCODAP || !this.usingCODAP) {
+      return this.undoRedoManager.redo();
+    } else {
+      return CodapActions.sendRedoToCODAP();
+    }
+  },
 
-  setSaved: ->
-    @undoRedoManager.save()
+  setSaved() {
+    return this.undoRedoManager.save();
+  },
 
-  revertToOriginal: ->
-    @undoRedoManager.revertToOriginal()
+  revertToOriginal() {
+    return this.undoRedoManager.revertToOriginal();
+  },
 
-  revertToLastSave: ->
-    @undoRedoManager.revertToLastSave()
+  revertToLastSave() {
+    return this.undoRedoManager.revertToLastSave();
+  },
 
-  setUsingCODAP: (@usingCODAP) ->
-  setUsingLara: (@usingLara) ->
+  setUsingCODAP(usingCODAP) {
+    this.usingCODAP = usingCODAP;
+  },
+  setUsingLara(usingLara) {
+    this.usingLara = usingLara;
+  },
 
-  setCodapStandaloneMode: (@codapStandaloneMode) ->
+  setCodapStandaloneMode(codapStandaloneMode) {
+    this.codapStandaloneMode = codapStandaloneMode;
+  },
 
-  addChangeListener: (listener) ->
-    log.info("adding change listener")
-    @undoRedoManager.addChangeListener listener
+  addChangeListener(listener) {
+    log.info("adding change listener");
+    return this.undoRedoManager.addChangeListener(listener);
+  },
 
-  addFilenameListener: (listener) ->
-    log.info("adding filename listener #{listener}")
-    @filenameListeners.push listener
+  addFilenameListener(listener) {
+    log.info(`adding filename listener ${listener}`);
+    return this.filenameListeners.push(listener);
+  },
 
-  setFilename: (filename) ->
-    @filename = filename
-    for listener in @filenameListeners
-      listener filename
+  setFilename(filename) {
+    this.filename = filename;
+    return Array.from(this.filenameListeners).map((listener) =>
+      listener(filename));
+  },
 
-  getLinks: ->
-    (value for key, value of @linkKeys)
+  getLinks() {
+    return ((() => {
+      const result = [];
+      for (let key in this.linkKeys) {
+        const value = this.linkKeys[key];
+        result.push(value);
+      }
+      return result;
+    })());
+  },
 
-  getNodes: ->
-    (value for key, value of @nodeKeys)
+  getNodes() {
+    return ((() => {
+      const result = [];
+      for (let key in this.nodeKeys) {
+        const value = this.nodeKeys[key];
+        result.push(value);
+      }
+      return result;
+    })());
+  },
 
-  hasLink: (link) ->
-    @linkKeys[link.terminalKey()]?
+  hasLink(link) {
+    return (this.linkKeys[link.terminalKey()] != null);
+  },
 
-  hasNode: (node) ->
-    @nodeKeys[node.key]?
+  hasNode(node) {
+    return (this.nodeKeys[node.key] != null);
+  },
 
-  importLink: (linkSpec) ->
-    sourceNode = @nodeKeys[linkSpec.sourceNode]
-    targetNode = @nodeKeys[linkSpec.targetNode]
-    transferNode = @nodeKeys[linkSpec.transferNode] if linkSpec.transferNode
-    linkSpec.sourceNode = sourceNode
-    linkSpec.targetNode = targetNode
-    if transferNode
-      linkSpec.transferNode = transferNode
-    else
-      delete linkSpec.transferNode
-    link = new Link(linkSpec)
-    @addLink(link)
-    link
+  importLink(linkSpec) {
+    let transferNode;
+    const sourceNode = this.nodeKeys[linkSpec.sourceNode];
+    const targetNode = this.nodeKeys[linkSpec.targetNode];
+    if (linkSpec.transferNode) { transferNode = this.nodeKeys[linkSpec.transferNode]; }
+    linkSpec.sourceNode = sourceNode;
+    linkSpec.targetNode = targetNode;
+    if (transferNode) {
+      linkSpec.transferNode = transferNode;
+    } else {
+      delete linkSpec.transferNode;
+    }
+    const link = new Link(linkSpec);
+    this.addLink(link);
+    return link;
+  },
 
-  addLink: (link) ->
-    @endNodeEdit()
-    @undoRedoManager.createAndExecuteCommand 'addLink',
-      execute: => @_addLink link
-      undo: => @_removeLink link
+  addLink(link) {
+    this.endNodeEdit();
+    return this.undoRedoManager.createAndExecuteCommand('addLink', {
+      execute: () => this._addLink(link),
+      undo: () => this._removeLink(link)
+    }
+    );
+  },
 
-  _addLink: (link) ->
-    unless link.sourceNode is link.targetNode or @hasLink link
-      @linkKeys[link.terminalKey()] = link
-      @nodeKeys[link.sourceNode.key].addLink(link)
-      @nodeKeys[link.targetNode.key].addLink(link)
-    @_graphUpdated()
-    @updateListeners()
+  _addLink(link) {
+    if ((link.sourceNode !== link.targetNode) && !this.hasLink(link)) {
+      this.linkKeys[link.terminalKey()] = link;
+      this.nodeKeys[link.sourceNode.key].addLink(link);
+      this.nodeKeys[link.targetNode.key].addLink(link);
+    }
+    this._graphUpdated();
+    return this.updateListeners();
+  },
 
 
-  removeLink: (link) ->
-    @endNodeEdit()
-    @undoRedoManager.createAndExecuteCommand 'removeLink',
-      execute: =>
-        @_removeLink link
-        @_removeTransfer link if link.transferNode?
-      undo: =>
-        @_addTransfer link if link.transferNode?
-        @_addLink link
+  removeLink(link) {
+    this.endNodeEdit();
+    return this.undoRedoManager.createAndExecuteCommand('removeLink', {
+      execute: () => {
+        this._removeLink(link);
+        if (link.transferNode != null) { return this._removeTransfer(link); }
+      },
+      undo: () => {
+        if (link.transferNode != null) { this._addTransfer(link); }
+        return this._addLink(link);
+      }
+    }
+    );
+  },
 
-  _removeLink: (link) ->
-    delete @linkKeys[link.terminalKey()]
-    @nodeKeys[link.sourceNode.key]?.removeLink(link)
-    @nodeKeys[link.targetNode.key]?.removeLink(link)
-    @_graphUpdated()
-    @updateListeners()
+  _removeLink(link) {
+    delete this.linkKeys[link.terminalKey()];
+    if (this.nodeKeys[link.sourceNode.key] != null) {
+      this.nodeKeys[link.sourceNode.key].removeLink(link);
+    }
+    if (this.nodeKeys[link.targetNode.key] != null) {
+      this.nodeKeys[link.targetNode.key].removeLink(link);
+    }
+    this._graphUpdated();
+    return this.updateListeners();
+  },
 
-  isUniqueTitle: (title, skipNode, nodes=@getNodes()) ->
-    nonUniqueNode = (otherNode) ->
-      sameTitle = otherNode.title is title
-      if skipNode then sameTitle and otherNode isnt skipNode else sameTitle
-    not _.find nodes, nonUniqueNode
+  isUniqueTitle(title, skipNode, nodes) {
+    if (nodes == null) { nodes = this.getNodes(); }
+    const nonUniqueNode = function(otherNode) {
+      const sameTitle = otherNode.title === title;
+      if (skipNode) { return sameTitle && (otherNode !== skipNode); } else { return sameTitle; }
+    };
+    return !_.find(nodes, nonUniqueNode);
+  },
 
-  ensureUniqueTitle: (node, newTitle=node.title) ->
-    nodes = @getNodes()
-    if not @isUniqueTitle newTitle, node, nodes
-      index = 2
-      endsWithNumber = / (\d+)$/
-      matches = newTitle.match(endsWithNumber)
-      if matches
-        index = parseInt(matches[1], 10) + 1
-        newTitle = newTitle.replace(endsWithNumber, '')
-      template = "#{newTitle} %{index}"
-      loop
-        newTitle = tr template, {index: index++}
-        break if @isUniqueTitle newTitle, node, nodes
-    newTitle
+  ensureUniqueTitle(node, newTitle) {
+    if (newTitle == null) { newTitle = node.title; }
+    const nodes = this.getNodes();
+    if (!this.isUniqueTitle(newTitle, node, nodes)) {
+      let index = 2;
+      const endsWithNumber = / (\d+)$/;
+      const matches = newTitle.match(endsWithNumber);
+      if (matches) {
+        index = parseInt(matches[1], 10) + 1;
+        newTitle = newTitle.replace(endsWithNumber, '');
+      }
+      const template = `${newTitle} %{index}`;
+      while (true) {
+        newTitle = tr(template, {index: index++});
+        if (this.isUniqueTitle(newTitle, node, nodes)) { break; }
+      }
+    }
+    return newTitle;
+  },
 
-  addNode: (node) ->
-    @endNodeEdit()
-    node.title = @ensureUniqueTitle node
-    @undoRedoManager.createAndExecuteCommand 'addNode',
-      execute: => @_addNode node
-      undo: => @_removeNode node
+  addNode(node) {
+    this.endNodeEdit();
+    node.title = this.ensureUniqueTitle(node);
+    return this.undoRedoManager.createAndExecuteCommand('addNode', {
+      execute: () => this._addNode(node),
+      undo: () => this._removeNode(node)
+    }
+    );
+  },
 
-  removeNode: (nodeKey) ->
-    @endNodeEdit()
-    node = @nodeKeys[nodeKey]
-    transferRelation = node.transferLink?.relation
+  removeNode(nodeKey) {
+    this.endNodeEdit();
+    const node = this.nodeKeys[nodeKey];
+    const transferRelation = node.transferLink != null ? node.transferLink.relation : undefined;
 
-    # create a copy of the list of links
-    links = node.links.slice()
-    # identify any transfer nodes that need to be removed as well
-    transferLinks = []
-    _.each(links, (link) ->
-      if link?.transferNode?.key?
-        transferLinks.push link
-    )
+    // create a copy of the list of links
+    const links = node.links.slice();
+    // identify any transfer nodes that need to be removed as well
+    const transferLinks = [];
+    _.each(links, function(link) {
+      if (__guard__(link != null ? link.transferNode : undefined, x => x.key) != null) {
+        return transferLinks.push(link);
+      }
+    });
 
-    @undoRedoManager.createAndExecuteCommand 'removeNode',
-      execute: =>
-        node.transferLink?.relation = node.transferLink.defaultRelation()
-        @_removeLink(link) for link in links
-        @_removeTransfer(link) for link in transferLinks
-        @_removeNode node
-      undo: =>
-        node.transferLink?.relation = transferRelation
-        @_addNode node
-        @_addTransfer(link) for link in transferLinks
-        @_addLink(link) for link in links
+    return this.undoRedoManager.createAndExecuteCommand('removeNode', {
+      execute: () => {
+        if (node.transferLink != null) {
+          node.transferLink.relation = node.transferLink.defaultRelation();
+        }
+        for (var link of Array.from(links)) { this._removeLink(link); }
+        for (link of Array.from(transferLinks)) { this._removeTransfer(link); }
+        return this._removeNode(node);
+      },
+      undo: () => {
+        if (node.transferLink != null) {
+          node.transferLink.relation = transferRelation;
+        }
+        this._addNode(node);
+        for (var link of Array.from(transferLinks)) { this._addTransfer(link); }
+        return (() => {
+          const result = [];
+          for (link of Array.from(links)) {             result.push(this._addLink(link));
+          }
+          return result;
+        })();
+      }
+    }
+    );
+  },
 
-  _addNode: (node) ->
-    unless @hasNode node
-      @nodeKeys[node.key] = node
-      @_graphUpdated()
-      # add variable to CODAP
-      CodapConnect.instance(DEFAULT_CONTEXT_NAME)._createMissingDataAttributes()
-      @updateListeners()
+  _addNode(node) {
+    if (!this.hasNode(node)) {
+      this.nodeKeys[node.key] = node;
+      this._graphUpdated();
+      // add variable to CODAP
+      CodapConnect.instance(DEFAULT_CONTEXT_NAME)._createMissingDataAttributes();
+      return this.updateListeners();
+    }
+  },
 
-  _removeNode: (node) ->
-    delete @nodeKeys[node.key]
-    @_graphUpdated()
-    @updateListeners()
+  _removeNode(node) {
+    delete this.nodeKeys[node.key];
+    this._graphUpdated();
+    return this.updateListeners();
+  },
 
-  _addTransfer: (link) ->
-    unless link.transferNode?
-      source = link.sourceNode
-      target = link.targetNode
-      link.transferNode = new TransferModel
-        x: source.x + ((target.x - source.x) / 2)
+  _addTransfer(link) {
+    if (link.transferNode == null) {
+      const source = link.sourceNode;
+      const target = link.targetNode;
+      link.transferNode = new TransferModel({
+        x: source.x + ((target.x - source.x) / 2),
         y: source.y + ((target.y - source.y) / 2)
-      link.transferNode.setTransferLink link
-    @_addNode link.transferNode
+      });
+      link.transferNode.setTransferLink(link);
+    }
+    return this._addNode(link.transferNode);
+  },
 
-  _removeTransfer: (tLink) ->
-    transfer = tLink.transferNode
-    return unless transfer
+  _removeTransfer(tLink) {
+    const transfer = tLink.transferNode;
+    if (!transfer) { return; }
 
-    links = @getLinks()
-    _.each links, (link) =>
-      if link.sourceNode is transfer or link.targetNode is transfer
-        @removeLink link
-    @_removeNode transfer
+    const links = this.getLinks();
+    _.each(links, link => {
+      if ((link.sourceNode === transfer) || (link.targetNode === transfer)) {
+        return this.removeLink(link);
+      }
+    });
+    return this._removeNode(transfer);
+  },
 
-  _graphUpdated: ->
-    node.checkIsInIndependentCycle() for key, node of @nodeKeys
+  _graphUpdated() {
+    return (() => {
+      const result = [];
+      for (let key in this.nodeKeys) {
+        const node = this.nodeKeys[key];
+        result.push(node.checkIsInIndependentCycle());
+      }
+      return result;
+    })();
+  },
 
-  moveNodeCompleted: (nodeKey, leftDiff, topDiff) ->
-    @endNodeEdit()
-    @undoRedoManager.createAndExecuteCommand 'moveNode',
-      execute: => @moveNode nodeKey, 0, 0
-      undo: => @moveNode nodeKey, -leftDiff, -topDiff
-      redo: => @moveNode nodeKey, leftDiff, topDiff
+  moveNodeCompleted(nodeKey, leftDiff, topDiff) {
+    this.endNodeEdit();
+    return this.undoRedoManager.createAndExecuteCommand('moveNode', {
+      execute: () => this.moveNode(nodeKey, 0, 0),
+      undo: () => this.moveNode(nodeKey, -leftDiff, -topDiff),
+      redo: () => this.moveNode(nodeKey, leftDiff, topDiff)
+    }
+    );
+  },
 
-  moveNode: (nodeKey, leftDiff, topDiff) ->
-    node = @nodeKeys[nodeKey]
-    return unless node
-    # alert "moveNode:" + nodeKey + " " + node.x + " "
-    # console.log "moveNode:", node, leftDiff,  topDiff
-    node.x = node.x + leftDiff
-    node.y = node.y + topDiff
-    @updateListeners()
+  moveNode(nodeKey, leftDiff, topDiff) {
+    const node = this.nodeKeys[nodeKey];
+    if (!node) { return; }
+    // alert "moveNode:" + nodeKey + " " + node.x + " "
+    // console.log "moveNode:", node, leftDiff,  topDiff
+    node.x = node.x + leftDiff;
+    node.y = node.y + topDiff;
+    return this.updateListeners();
+  },
 
-  selectedNodes: ->
-    @selectionManager.getNodeInspection() or [] # add or [] into getNodeInspection() ?
+  selectedNodes() {
+    return this.selectionManager.getNodeInspection() || [];
+  }, // add or [] into getNodeInspection() ?
 
-  selectedLinks: ->
-    @selectionManager.getLinkInspection() or [] # add or [] into getLinkInspection() ?
+  selectedLinks() {
+    return this.selectionManager.getLinkInspection() || [];
+  }, // add or [] into getLinkInspection() ?
 
-  editingNode: ->
-    @selectionManager.selection(SelectionManager.NodeTitleEditing)[0] or null
+  editingNode() {
+    return this.selectionManager.selection(SelectionManager.NodeTitleEditing)[0] || null;
+  },
 
-  editNode: (nodeKey) ->
-    @selectionManager.selectNodeForTitleEditing(@nodeKeys[nodeKey])
+  editNode(nodeKey) {
+    return this.selectionManager.selectNodeForTitleEditing(this.nodeKeys[nodeKey]);
+  },
 
-  selectNode: (nodeKey) ->
-    @endNodeEdit()
-    @selectionManager.selectNodeForInspection(@nodeKeys[nodeKey])
+  selectNode(nodeKey) {
+    this.endNodeEdit();
+    return this.selectionManager.selectNodeForInspection(this.nodeKeys[nodeKey]);
+  },
 
 
-  _notifyNodeChanged: (node) ->
-    @_maybeChangeSelectedItem node
-    @updateListeners()
+  _notifyNodeChanged(node) {
+    this._maybeChangeSelectedItem(node);
+    return this.updateListeners();
+  },
 
-  changeNode: (data, node) ->
-    _node = node or @selectedNodes()
-    nodes = [].concat(_node) # force an array of nodes
-    for node in nodes
-      if node
-        originalData =
-          title: node.title
-          image: node.image
-          paletteItem: node.paletteItem
-          color: node.color
-          initialValue: node.initialValue
-          value: node.value or node.initialValue
-          min: node.min
-          max: node.max
-          isAccumulator: node.isAccumulator
-          allowNegativeValues: node.allowNegativeValues
-          combineMethod: node.combineMethod
-          valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
+  changeNode(data, node) {
+    const _node = node || this.selectedNodes();
+    const nodes = [].concat(_node); // force an array of nodes
+    return (() => {
+      const result = [];
+      for (node of Array.from(nodes)) {
+        if (node) {
+          var originalData = {
+            title: node.title,
+            image: node.image,
+            paletteItem: node.paletteItem,
+            color: node.color,
+            initialValue: node.initialValue,
+            value: node.value || node.initialValue,
+            min: node.min,
+            max: node.max,
+            isAccumulator: node.isAccumulator,
+            allowNegativeValues: node.allowNegativeValues,
+            combineMethod: node.combineMethod,
+            valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
+          };
 
-        nodeChanged = false
-        for key of data
-          if data.hasOwnProperty key
-            if data[key] isnt originalData[key] then nodeChanged = true
+          let nodeChanged = false;
+          for (let key in data) {
+            if (data.hasOwnProperty(key)) {
+              if (data[key] !== originalData[key]) { nodeChanged = true; }
+            }
+          }
 
-        if nodeChanged        # don't do anything unless we've actually changed the node
+          if (nodeChanged) {        // don't do anything unless we've actually changed the node
 
-          accumulatorChanged = data.isAccumulator? and \
-                                (!!data.isAccumulator isnt !!originalData.isAccumulator)
+            var changedLinks, link, originalRelations;
+            var accumulatorChanged = (data.isAccumulator != null) && 
+                                  (!!data.isAccumulator !== !!originalData.isAccumulator);
 
-          if accumulatorChanged
-                            # all inbound links are invalidated
-            changedLinks = [].concat(node.inLinks())
-                            # along with outbound transfer links
-                              .concat(_.filter(node.outLinks(), (link) ->
-                                link.relation.type is 'transfer' or
-                                link.relation.type is 'initial-value'))
-            originalRelations = {}
-            for link in changedLinks
-              originalRelations[link.key] = link.relation
+            if (accumulatorChanged) {
+                              // all inbound links are invalidated
+              changedLinks = [].concat(node.inLinks())
+                              // along with outbound transfer links
+                                .concat(_.filter(node.outLinks(), link =>
+                                  (link.relation.type === 'transfer') ||
+                                  (link.relation.type === 'initial-value')
+                              ));
+              originalRelations = {};
+              for (link of Array.from(changedLinks)) {
+                originalRelations[link.key] = link.relation;
+              }
+            }
 
-          @undoRedoManager.startCommandBatch()
-          @undoRedoManager.createAndExecuteCommand 'changeNode',
-            execute: =>
-              if accumulatorChanged
-                for link in changedLinks
-                  @_changeLink link, { relation: link.defaultRelation() }
-              @_changeNode node, data
-            undo: =>
-              @_changeNode node, originalData
-              if accumulatorChanged
-                for link in changedLinks
-                  @_changeLink link, { relation: originalRelations[link.key] }
-              return
-          @undoRedoManager.endCommandBatch()
+            this.undoRedoManager.startCommandBatch();
+            this.undoRedoManager.createAndExecuteCommand('changeNode', {
+              execute: () => {
+                if (accumulatorChanged) {
+                  for (link of Array.from(changedLinks)) {
+                    this._changeLink(link, { relation: link.defaultRelation() });
+                  }
+                }
+                return this._changeNode(node, data);
+              },
+              undo: () => {
+                this._changeNode(node, originalData);
+                if (accumulatorChanged) {
+                  for (link of Array.from(changedLinks)) {
+                    this._changeLink(link, { relation: originalRelations[link.key] });
+                  }
+                }
+              }
+            }
+            );
+            result.push(this.undoRedoManager.endCommandBatch());
+          } else {
+            result.push(undefined);
+          }
+        } else {
+          result.push(undefined);
+        }
+      }
+      return result;
+    })();
+  },
 
-  _changeNode: (node, data, notifyCodap = true) ->
-    log.info "Change for #{node.title}"
-    for key in NodeModel.fields
-      if data.hasOwnProperty key
-        log.info "Change #{key} for #{node.title}"
-        prev = node[key]
-        node[key] = data[key]
-        if key is 'title'
-          if notifyCodap and @usingCODAP
-            codapConnect = CodapConnect.instance DEFAULT_CONTEXT_NAME
-            codapConnect.sendRenameAttribute node.key, prev
-          @_maybeChangeTransferTitle node
-    node.normalizeValues(_.keys(data))
-    @_notifyNodeChanged(node)
+  _changeNode(node, data, notifyCodap) {
+    if (notifyCodap == null) { notifyCodap = true; }
+    log.info(`Change for ${node.title}`);
+    for (let key of Array.from(NodeModel.fields)) {
+      if (data.hasOwnProperty(key)) {
+        log.info(`Change ${key} for ${node.title}`);
+        const prev = node[key];
+        node[key] = data[key];
+        if (key === 'title') {
+          if (notifyCodap && this.usingCODAP) {
+            const codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
+            codapConnect.sendRenameAttribute(node.key, prev);
+          }
+          this._maybeChangeTransferTitle(node);
+        }
+      }
+    }
+    node.normalizeValues(_.keys(data));
+    return this._notifyNodeChanged(node);
+  },
 
-  changeNodeProperty: (property, value, node) ->
-    data = {}
-    data[property] = value
-    @changeNode(data, node)
+  changeNodeProperty(property, value, node) {
+    const data = {};
+    data[property] = value;
+    return this.changeNode(data, node);
+  },
 
-  changeNodeWithKey: (key, data) ->
-    node = @nodeKeys[ key ]
-    if node
-      @changeNode(data,node)
+  changeNodeWithKey(key, data) {
+    const node = this.nodeKeys[ key ];
+    if (node) {
+      return this.changeNode(data,node);
+    }
+  },
 
-  startNodeEdit: ->
-    @undoRedoManager.startCommandBatch("changeNode")
+  startNodeEdit() {
+    return this.undoRedoManager.startCommandBatch("changeNode");
+  },
 
-  endNodeEdit: ->
-    @undoRedoManager.endCommandBatch()
+  endNodeEdit() {
+    return this.undoRedoManager.endCommandBatch();
+  },
 
-  clickLink: (link, multipleSelectionsAllowed) ->
-    # this is to allow both clicks and double clicks
-    now = (new Date()).getTime()
-    isDoubleClick = now - (@lastClickLinkTime || 0) <= 250
-    @lastClickLinkTime = now
-    clearTimeout @lastClickLinkTimeout
+  clickLink(link, multipleSelectionsAllowed) {
+    // this is to allow both clicks and double clicks
+    const now = (new Date()).getTime();
+    const isDoubleClick = (now - (this.lastClickLinkTime || 0)) <= 250;
+    this.lastClickLinkTime = now;
+    clearTimeout(this.lastClickLinkTimeout);
 
-    if isDoubleClick
-      @selectionManager.selectNodeForInspection(link.targetNode)
-      if AppSettingsStore.store.settings.simulationType != AppSettingsStore.store.SimulationType.diagramOnly
-        InspectorPanelStore.actions.openInspectorPanel('relations', {link: link})
-    else
-      # set single click handler to run 250ms from now so we can wait to see if this is a double click
-      singleClickHandler = =>
-        if @selectionManager.isSelected(link)
-          @selectionManager.selectLinkForTitleEditing(link)
-        else
-          @selectionManager.selectLinkForInspection(link, multipleSelectionsAllowed)
-      @lastClickLinkTimeout = setTimeout singleClickHandler, 250
+    if (isDoubleClick) {
+      this.selectionManager.selectNodeForInspection(link.targetNode);
+      if (AppSettingsStore.store.settings.simulationType !== AppSettingsStore.store.SimulationType.diagramOnly) {
+        return InspectorPanelStore.actions.openInspectorPanel('relations', {link});
+      }
+    } else {
+      // set single click handler to run 250ms from now so we can wait to see if this is a double click
+      const singleClickHandler = () => {
+        if (this.selectionManager.isSelected(link)) {
+          return this.selectionManager.selectLinkForTitleEditing(link);
+        } else {
+          return this.selectionManager.selectLinkForInspection(link, multipleSelectionsAllowed);
+        }
+      };
+      return this.lastClickLinkTimeout = setTimeout(singleClickHandler, 250);
+    }
+  },
 
-  editLink: (link) ->
-    @selectionManager.selectLinkForTitleEditing(link)
+  editLink(link) {
+    return this.selectionManager.selectLinkForTitleEditing(link);
+  },
 
-  changeLink: (link, changes={}) ->
-    if changes.deleted
-      @removeSelectedLinks()
-    else if link
-      originalData =
-        title: link.title
-        color: link.color
-        relation: link.relation
+  changeLink(link, changes) {
+    if (changes == null) { changes = {}; }
+    if (changes.deleted) {
+      return this.removeSelectedLinks();
+    } else if (link) {
+      const originalData = {
+        title: link.title,
+        color: link.color,
+        relation: link.relation,
         reasoning: link.reasoning
-      @undoRedoManager.startCommandBatch()
-      @undoRedoManager.createAndExecuteCommand 'changeLink',
-        execute: => @_changeLink link,  changes
-        undo: => @_changeLink link, originalData
-      @undoRedoManager.endCommandBatch()
+      };
+      this.undoRedoManager.startCommandBatch();
+      this.undoRedoManager.createAndExecuteCommand('changeLink', {
+        execute: () => this._changeLink(link,  changes),
+        undo: () => this._changeLink(link, originalData)
+      }
+      );
+      return this.undoRedoManager.endCommandBatch();
+    }
+  },
 
-  _maybeChangeSelectedItem: (item) ->
-    # TODO: This is kind of hacky:
-    if @selectionManager.isSelected(item)
-      @selectionManager._notifySelectionChange()
+  _maybeChangeSelectedItem(item) {
+    // TODO: This is kind of hacky:
+    if (this.selectionManager.isSelected(item)) {
+      return this.selectionManager._notifySelectionChange();
+    }
+  },
 
-  _maybeChangeRelation: (link, relation) ->
-    if relation and relation.isTransfer
-      @_addTransfer link
-    else
-      @_removeTransfer link
+  _maybeChangeRelation(link, relation) {
+    if (relation && relation.isTransfer) {
+      return this._addTransfer(link);
+    } else {
+      return this._removeTransfer(link);
+    }
+  },
 
-  _maybeChangeTransferTitle: (changedNode) ->
-    for key, node of @nodeKeys
-      transferLink = node.transferLink
-      if transferLink and ((transferLink.sourceNode is changedNode) or (transferLink.targetNode is changedNode))
-        @changeNodeWithKey(key, {title: node.computeTitle()})
+  _maybeChangeTransferTitle(changedNode) {
+    return (() => {
+      const result = [];
+      for (let key in this.nodeKeys) {
+        const node = this.nodeKeys[key];
+        const { transferLink } = node;
+        if (transferLink && ((transferLink.sourceNode === changedNode) || (transferLink.targetNode === changedNode))) {
+          result.push(this.changeNodeWithKey(key, {title: node.computeTitle()}));
+        } else {
+          result.push(undefined);
+        }
+      }
+      return result;
+    })();
+  },
 
-  _changeLink: (link, changes) ->
-    log.info "Change  for #{link.title}"
-    for key in ['title','color', 'relation', 'reasoning']
-      if changes[key]?
-        log.info "Change #{key} for #{link.title}"
-        link[key] = changes[key]
-    @_maybeChangeRelation link, changes.relation
-    @_maybeChangeSelectedItem link
-    @_graphUpdated()
-    @updateListeners()
+  _changeLink(link, changes) {
+    log.info(`Change  for ${link.title}`);
+    for (let key of ['title','color', 'relation', 'reasoning']) {
+      if (changes[key] != null) {
+        log.info(`Change ${key} for ${link.title}`);
+        link[key] = changes[key];
+      }
+    }
+    this._maybeChangeRelation(link, changes.relation);
+    this._maybeChangeSelectedItem(link);
+    this._graphUpdated();
+    return this.updateListeners();
+  },
 
-  _nameForNode: (node) ->
-    @nodeKeys[node]
+  _nameForNode(node) {
+    return this.nodeKeys[node];
+  },
 
-  newLinkFromEvent: (info) ->
-    newLink = {}
-    startKey = $(info.source).data('node-key') or 'undefined'
-    endKey   = $(info.target).data('node-key') or 'undefined'
-    startTerminal = if info.connection.endpoints[0].anchor.type is "Top" then "a" else "b"
-    endTerminal   = if info.connection.endpoints[1].anchor.type is "Top" then "a" else "b"
-    @importLink
+  newLinkFromEvent(info) {
+    const newLink = {};
+    const startKey = $(info.source).data('node-key') || 'undefined';
+    const endKey   = $(info.target).data('node-key') || 'undefined';
+    const startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
+    const endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
+    this.importLink({
       sourceNode:startKey,
       targetNode:endKey,
       sourceTerminal: startTerminal,
       targetTerminal: endTerminal,
       color: info.color,
       title: info.title
-    true
+    });
+    return true;
+  },
 
-  deleteAll: ->
-    for node of @nodeKeys
-      @removeNode node
-    GraphPrimitive.resetCounters()
-    @setFilename 'New Model'
-    @undoRedoManager.clearHistory()
+  deleteAll() {
+    for (let node in this.nodeKeys) {
+      this.removeNode(node);
+    }
+    GraphPrimitive.resetCounters();
+    this.setFilename('New Model');
+    return this.undoRedoManager.clearHistory();
+  },
 
-  removeSelectedNodes: ->
-    selectedNodeKeys = (node.key for node in @selectedNodes())
-    for nodeKey in selectedNodeKeys
-      @removeNode nodeKey
+  removeSelectedNodes() {
+    const selectedNodeKeys = (Array.from(this.selectedNodes()).map((node) => node.key));
+    return Array.from(selectedNodeKeys).map((nodeKey) =>
+      this.removeNode(nodeKey));
+  },
 
-  removeSelectedLinks: ->
-    for selectedLink in @selectedLinks()
-      @removeLink selectedLink
+  removeSelectedLinks() {
+    return Array.from(this.selectedLinks()).map((selectedLink) =>
+      this.removeLink(selectedLink));
+  },
 
-  deleteSelected: ->
-    log.info "Deleting selected items"
-    # deleting multiple links/nodes should be undoable as a single action
-    @undoRedoManager.startCommandBatch()
-    @removeSelectedLinks()
-    @removeSelectedNodes()
-    @undoRedoManager.endCommandBatch()
-    @selectionManager.clearSelection()
+  deleteSelected() {
+    log.info("Deleting selected items");
+    // deleting multiple links/nodes should be undoable as a single action
+    this.undoRedoManager.startCommandBatch();
+    this.removeSelectedLinks();
+    this.removeSelectedNodes();
+    this.undoRedoManager.endCommandBatch();
+    return this.selectionManager.clearSelection();
+  },
 
-  removeLinksForNode: (node) ->
-    @removeLink(link) for link in node.links
+  removeLinksForNode(node) {
+    return Array.from(node.links).map((link) => this.removeLink(link));
+  },
 
-  # getDescription returns one or more easily-comparable descriptions of the graph's
-  # state, customized for different applications (e.g. deciding whether to redraw links),
-  # while only looping through the nodes and links once.
-  #
-  # links: link terminal locations, and link formula (for stroke style), plus number of nodes
-  #         e.g. "10,20;1 * in;50,60|" for each link
-  # model: description of each link relationship and the values of its terminal nodes
-  #         e.g. "node-0:50;1 * in;node-1:50|" for each link
-  #
-  # We pass nodes and links so as not to calculate @getNodes and @getLinks redundantly.
-  getDescription: (nodes, links) ->
-    settings = SimulationStore.store.settings
+  // getDescription returns one or more easily-comparable descriptions of the graph's
+  // state, customized for different applications (e.g. deciding whether to redraw links),
+  // while only looping through the nodes and links once.
+  //
+  // links: link terminal locations, and link formula (for stroke style), plus number of nodes
+  //         e.g. "10,20;1 * in;50,60|" for each link
+  // model: description of each link relationship and the values of its terminal nodes
+  //         e.g. "node-0:50;1 * in;node-1:50|" for each link
+  //
+  // We pass nodes and links so as not to calculate @getNodes and @getLinks redundantly.
+  getDescription(nodes, links) {
+    const { settings } = SimulationStore.store;
 
-    linkDescription = ""
-    modelDescription = "steps:#{settings.duration}|cap:#{settings.capNodeValues}|"
+    let linkDescription = "";
+    let modelDescription = `steps:${settings.duration}|cap:${settings.capNodeValues}|`;
 
-    _.each links, (link) ->
-      return unless (source = link.sourceNode) and (target = link.targetNode)
-      linkDescription += "#{source.x},#{source.y};"
-      linkDescription += link.relation.formula + ";"
-      linkDescription += "#{target.x},#{target.y}|"
-      if link.relation.isDefined
-        isCappedAccumulator = source.isAccumulator and not source.allowNegativeValues
-        capValue = if isCappedAccumulator then ':cap' else ''
-        modelDescription += "#{source.key}:#{source.initialValue}#{capValue};"
-        modelDescription += link.relation.formula + ";"
-        if link.relation.type is 'transfer'
-          transfer = link.transferNode
-          modelDescription += "#{transfer.key}:#{transfer.initialValue}:#{transfer.combineMethod};" if transfer
-        modelDescription += "#{target.key}#{if target.isAccumulator then ':'+(target.value ? target.initialValue) else ''}"
-        modelDescription += ";#{target.combineMethod}|"
-    linkDescription += nodes.length     # we need to redraw targets when new node is added
+    _.each(links, function(link) {
+      let source, target;
+      if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { return; }
+      linkDescription += `${source.x},${source.y};`;
+      linkDescription += link.relation.formula + ";";
+      linkDescription += `${target.x},${target.y}|`;
+      if (link.relation.isDefined) {
+        const isCappedAccumulator = source.isAccumulator && !source.allowNegativeValues;
+        const capValue = isCappedAccumulator ? ':cap' : '';
+        modelDescription += `${source.key}:${source.initialValue}${capValue};`;
+        modelDescription += link.relation.formula + ";";
+        if (link.relation.type === 'transfer') {
+          const transfer = link.transferNode;
+          if (transfer) { modelDescription += `${transfer.key}:${transfer.initialValue}:${transfer.combineMethod};`; }
+        }
+        modelDescription += `${target.key}${target.isAccumulator ? `:${target.value != null ? target.value : target.initialValue}` : ''}`;
+        return modelDescription += `;${target.combineMethod}|`;
+      }
+    });
+    linkDescription += nodes.length;     // we need to redraw targets when new node is added
 
     return {
-      links: linkDescription
+      links: linkDescription,
       model: modelDescription
+    };
+  },
+
+  // Returns the minimum simulation type that the current graph allows.
+  // Returns
+  //   0 (diagramOnly)    if there are no defined relationships
+  //   1 (static)         if there are no collectors
+  //   2 (time)           if there are collectors
+  getMinimumSimulationType() {
+    let minSimulationType = AppSettingsStore.store.SimulationType.diagramOnly;
+
+    const links = this.getLinks();
+    for (let link of Array.from(links)) {
+      var source, target;
+      if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { continue; }
+
+      if (source.isAccumulator || target.isAccumulator) {
+        // we know we have to be time-based
+        return AppSettingsStore.store.SimulationType.time;
+      } else if (link.relation != null ? link.relation.formula : undefined) {
+        // we have a defined relationship, so we know we'll be at least 1
+        minSimulationType = AppSettingsStore.store.SimulationType.static;
+      }
     }
 
-  # Returns the minimum simulation type that the current graph allows.
-  # Returns
-  #   0 (diagramOnly)    if there are no defined relationships
-  #   1 (static)         if there are no collectors
-  #   2 (time)           if there are collectors
-  getMinimumSimulationType: ->
-    minSimulationType = AppSettingsStore.store.SimulationType.diagramOnly
+    return minSimulationType;
+  },
 
-    links = @getLinks()
-    for link in links
-      continue unless (source = link.sourceNode) and (target = link.targetNode)
+  // Returns the minimum complexity that the current graph allows.
+  // Returns
+  //   0 (basic)          if there are no defined relationships, or all scalars are `about the same`
+  //   1 (expanded)       otherwise
+  getMinimumComplexity() {
+    const links = this.getLinks();
+    for (let link of Array.from(links)) {
+      var source, target;
+      if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { continue; }
 
-      if source.isAccumulator or target.isAccumulator
-        # we know we have to be time-based
-        return AppSettingsStore.store.SimulationType.time
-      else if link.relation?.formula
-        # we have a defined relationship, so we know we'll be at least 1
-        minSimulationType = AppSettingsStore.store.SimulationType.static
+      if (link.relation != null ? link.relation.formula : undefined) {
+        const relation = RelationFactory.selectionsFromRelation(link.relation);
+        if (relation.scalar && (relation.scalar.id !== "aboutTheSame")) {
+          return AppSettingsStore.store.Complexity.expanded;
+        }
+      }
+    }
 
-    return minSimulationType
+    return AppSettingsStore.store.Complexity.basic;
+  },
 
-  # Returns the minimum complexity that the current graph allows.
-  # Returns
-  #   0 (basic)          if there are no defined relationships, or all scalars are `about the same`
-  #   1 (expanded)       otherwise
-  getMinimumComplexity: ->
-    links = @getLinks()
-    for link in links
-      continue unless (source = link.sourceNode) and (target = link.targetNode)
+  loadData(data) {
+    log.info("json success");
+    const importer = new Importer(this, AppSettingsStore.store, PaletteStore);
+    importer.importData(data);
+    return this.undoRedoManager.clearHistory();
+  },
 
-      if link.relation?.formula
-        relation = RelationFactory.selectionsFromRelation(link.relation)
-        if relation.scalar and relation.scalar.id isnt "aboutTheSame"
-          return AppSettingsStore.store.Complexity.expanded
-
-    return AppSettingsStore.store.Complexity.basic
-
-  loadData: (data) ->
-    log.info "json success"
-    importer = new Importer(@, AppSettingsStore.store, PaletteStore)
-    importer.importData(data)
-    @undoRedoManager.clearHistory()
-
-  loadDataFromUrl: (url) =>
-    log.info("loading local data")
-    log.info("url " + url)
-    $.ajax
-      url: url,
+  loadDataFromUrl: url => {
+    log.info("loading local data");
+    log.info(`url ${url}`);
+    return $.ajax({
+      url,
       dataType: 'json',
-      success: (data) =>
-        @loadData data
-      error: (xhr, status, err) ->
-        log.error(url, status, err.toString())
+      success: data => {
+        return this.loadData(data);
+      },
+      error(xhr, status, err) {
+        return log.error(url, status, err.toString());
+      }
+    });
+  },
 
-  serialize: (palette) ->
-    nodeExports = for key,node of @nodeKeys
-      node.toExport()
-    linkExports = for key,link of @linkKeys
-      link.toExport()
-    settings = AppSettingsStore.store.serialize()
-    settings.simulation = SimulationStore.store.serialize()
+  serialize(palette) {
+    let key;
+    const nodeExports = (() => {
+      const result = [];
+      for (key in this.nodeKeys) {
+        const node = this.nodeKeys[key];
+        result.push(node.toExport());
+      }
+      return result;
+    })();
+    const linkExports = (() => {
+      const result1 = [];
+      for (key in this.linkKeys) {
+        const link = this.linkKeys[key];
+        result1.push(link.toExport());
+      }
+      return result1;
+    })();
+    const settings = AppSettingsStore.store.serialize();
+    settings.simulation = SimulationStore.store.serialize();
 
-    data =
-      version: Migrations.latestVersion()
-      filename: @filename
-      palette: palette
-      nodes: nodeExports
-      links: linkExports
-      settings: settings
-    return data
+    const data = {
+      version: Migrations.latestVersion(),
+      filename: this.filename,
+      palette,
+      nodes: nodeExports,
+      links: linkExports,
+      settings
+    };
+    return data;
+  },
 
-  toJsonString: (palette) ->
-    JSON.stringify @serialize palette
+  toJsonString(palette) {
+    return JSON.stringify(this.serialize(palette));
+  },
 
-  getGraphState: ->
-    nodes = @getNodes()
-    links = @getLinks()
-    description = @getDescription(nodes, links)
+  getGraphState() {
+    const nodes = this.getNodes();
+    const links = this.getLinks();
+    const description = this.getDescription(nodes, links);
 
-    {
-      nodes
-      links
+    return {
+      nodes,
+      links,
       description
+    };
+  },
+
+  updateListeners() {
+    const graphState = this.getGraphState();
+    GraphActions.graphChanged.trigger(graphState);
+
+    if (this.lastRunModel !== graphState.description.model) {
+      this._trimSimulation();
+      SimulationStore.actions.runSimulation();
+      this.lastRunModel = graphState.description.model;
     }
+  }
+});
 
-  updateListeners: ->
-    graphState = @getGraphState()
-    GraphActions.graphChanged.trigger(graphState)
+const mixin = {
+  getInitialState() {
+    return GraphStore.getGraphState();
+  },
 
-    if @lastRunModel != graphState.description.model
-      @_trimSimulation()
-      SimulationStore.actions.runSimulation()
-      @lastRunModel = graphState.description.model
-    return
+  componentDidMount() {
+    this.subscriptions = [];
+    this.subscriptions.push(GraphActions.graphChanged.listen(this.onGraphChanged));
+    return this.subscriptions.push(GraphActions.resetSimulation.listen(this.onResetSimulation));
+  },
 
-mixin =
-  getInitialState: ->
-    GraphStore.getGraphState()
+  componentWillUnmount() {
+    return Array.from(this.subscriptions).map((unsubscribe) =>
+      unsubscribe());
+  },
 
-  componentDidMount: ->
-    @subscriptions = []
-    @subscriptions.push GraphActions.graphChanged.listen @onGraphChanged
-    @subscriptions.push GraphActions.resetSimulation.listen @onResetSimulation
+  onGraphChanged(state) {
+    this.setState(state);
 
-  componentWillUnmount: ->
-    for unsubscribe in @subscriptions
-      unsubscribe()
+    // TODO: not this:
+    return (this.diagramToolkit != null ? this.diagramToolkit.repaint() : undefined);
+  },
 
-  onGraphChanged: (state) ->
-    @setState state
-
-    # TODO: not this:
-    @diagramToolkit?.repaint()
-
-  onResetSimulation: ->
-    GraphStore.resetSimulation()
+  onResetSimulation() {
+    return GraphStore.resetSimulation();
+  }
+};
 
 
-module.exports =
-  # actions: GraphActions
-  store: GraphStore
-  mixin: mixin
+module.exports = {
+  // actions: GraphActions
+  store: GraphStore,
+  mixin
+};
+
+function __guard__(value, transform) {
+  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+}

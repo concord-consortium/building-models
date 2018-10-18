@@ -1,33 +1,43 @@
-module.exports = (src, callback) ->
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+module.exports = function(src, callback) {
 
-  fail = ->
-    callback src
+  const fail = () => callback(src);
 
-  if document?
-    maxWidth = 100
-    maxHeight = 100
+  if (typeof document !== 'undefined' && document !== null) {
+    const maxWidth = 100;
+    const maxHeight = 100;
 
-    img = document.createElement 'img'
-    img.setAttribute 'crossOrigin', 'anonymous'
-    img.src = src
-    img.onload = ->
-      canvas = document.createElement 'canvas'
-      {width, height} = img
-      if width > height
-        if width > maxWidth
-          height *= maxWidth / width
-          width = maxWidth
-      else
-        if height > maxHeight
-          width *= maxHeight / height
-          height = maxHeight
-      canvas.width = width
-      canvas.height = height
-      canvas.getContext('2d').drawImage img, 0, 0, width, height
+    const img = document.createElement('img');
+    img.setAttribute('crossOrigin', 'anonymous');
+    img.src = src;
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let {width, height} = img;
+      if (width > height) {
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-      callback canvas.toDataURL 'image/png'
+      return callback(canvas.toDataURL('image/png'));
+    };
 
-    img.onerror = (e) ->
-      fail()
-  else
-    fail()
+    return img.onerror = e => fail();
+  } else {
+    return fail();
+  }
+};

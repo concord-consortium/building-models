@@ -1,135 +1,191 @@
-module.exports = class GoogleDriveIO
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS206: Consider reworking classes to avoid initClass
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let GoogleDriveIO;
+module.exports = (GoogleDriveIO = (function() {
+  GoogleDriveIO = class GoogleDriveIO {
+    static initClass() {
+  
+      this.prototype.APP_ID  = '1095918012594';
+      this.prototype.DEVELOPER_KEY = 'AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA';
+      this.prototype.CLIENT_ID = '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com';
+      this.prototype.SCOPES = 'https://www.googleapis.com/auth/drive';
+  
+      this.prototype.authorized = false;
+  
+      this.prototype.token = null;
+    }
 
-  APP_ID : '1095918012594'
-  DEVELOPER_KEY: 'AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA'
-  CLIENT_ID: '1095918012594-svs72eqfalasuc4t1p1ps1m8r9b8psso.apps.googleusercontent.com'
-  SCOPES: 'https://www.googleapis.com/auth/drive'
+    authorize(immediate, callback) {
+      if (this.token) {
+        return callback(null, this.token);
+      } else {
+        const args = {
+          'client_id': this.CLIENT_ID,
+          'scope': this.SCOPES,
+          'immediate': immediate || false
+        };
+        return gapi.auth.authorize(args, token => {
+          if (token && !token.error) {
+            this.token = token;
+          }
+          if (callback) {
+            const err = (!token ?
+              'Unable to authorize'
+            : token.error ?
+              token.error
+            :
+              null
+            );
+            this.authorized = err === null;
+            return callback(err, token);
+          }
+        });
+      }
+    }
 
-  authorized: false
+    makeMultipartBody(parts, boundary) {
+      return ((Array.from(parts).map((part) =>
+        `\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${part}`)
+      ).join('')) + `\r\n--${boundary}--`;
+    }
 
-  token: null
+    sendFile(fileSpec, contents, callback) {
+      const boundary = '-------314159265358979323846';
+      const metadata = JSON.stringify({
+        title: fileSpec.fileName,
+        mimeType: 'application/json'
+      });
 
-  authorize: (immediate, callback) ->
-    if @token
-      callback null, @token
-    else
-      args =
-        'client_id': @CLIENT_ID
-        'scope': @SCOPES
-        'immediate': immediate or false
-      gapi.auth.authorize args, (token) =>
-        if token and not token.error
-          @token = token
-        if callback
-          err = (if not token
-            'Unable to authorize'
-          else if token.error
-            token.error
-          else
-            null
-          )
-          @authorized = err is null
-          callback err, token
+      const [method, path] = Array.from(fileSpec.fileId ?
+        ['PUT', `/upload/drive/v2/files/${fileSpec.fileId}`]
+      :
+        ['POST', '/upload/drive/v2/files']);
 
-  makeMultipartBody: (parts, boundary) ->
-    ((for part in parts
-      "\r\n--#{boundary}\r\nContent-Type: application/json\r\n\r\n#{part}"
-    ).join '') + "\r\n--#{boundary}--"
+      const request = gapi.client.request({
+        path,
+        method,
+        params: {uploadType: 'multipart', alt: 'json'},
+        headers: {'Content-Type': `multipart/mixed; boundary="${boundary}"`},
+        body: this.makeMultipartBody([metadata, contents], boundary)
+      });
 
-  sendFile: (fileSpec, contents, callback) ->
-    boundary = '-------314159265358979323846'
-    metadata = JSON.stringify
-      title: fileSpec.fileName
-      mimeType: 'application/json'
+      return request.execute(function(file) {
+        if (callback) {
+          if (file) {
+            return callback(null, file);
+          } else {
+            return callback('Unabled to upload file');
+          }
+        }
+      });
+    }
 
-    [method, path] = if fileSpec.fileId
-      ['PUT', "/upload/drive/v2/files/#{fileSpec.fileId}"]
-    else
-      ['POST', '/upload/drive/v2/files']
+    upload(fileSpec, contents, callback) {
+      return this.authorize(this.authorized, err => {
+        if (!err) {
+          return gapi.client.load('drive', 'v2', () => this.sendFile(fileSpec, contents, callback));
+        } else {
+          return callback(`No authorization. Upload failed for file: ${fileSpec.fileName}`);
+        }
+      });
+    }
 
-    request = gapi.client.request
-      path: path
-      method: method
-      params: {uploadType: 'multipart', alt: 'json'}
-      headers: {'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'}
-      body: @makeMultipartBody [metadata, contents], boundary
+    makePublic(fileId) {
+      const perms = {
+        'value': '',
+        'type': 'anyone',
+        'role': 'reader'
+      };
 
-    request.execute (file) ->
-      if callback
-        if file
-          callback null, file
-        else
-          callback 'Unabled to upload file'
+      const request = gapi.client.drive.permissions.insert({
+        'fileId': fileId,
+        'resource': perms
+      });
 
-  upload: (fileSpec, contents, callback) ->
-    @authorize @authorized, (err) =>
-      if not err
-        gapi.client.load 'drive', 'v2', => @sendFile fileSpec, contents, callback
-      else
-        callback "No authorization. Upload failed for file: #{fileSpec.fileName}"
+      return request.execute(function(resp) {
+        if (resp.code && (resp.code !== 200)) {
+          return alert("there was a problem sharing your document.");
+        }
+      });
+    }
 
-  makePublic: (fileId) ->
-    perms =
-      'value': ''
-      'type': 'anyone'
-      'role': 'reader'
+    download(fileSpec, callback) {
+      return this.authorize(this.authorized, (err, token) => {
+        if (err) {
+          return callback(err);
+        } else {
+          return gapi.client.load('drive', 'v2', () => {
+            const request = gapi.client.drive.files.get({
+              fileId: fileSpec.id});
+            return request.execute(file => {
+              if ((file != null ? file.downloadUrl : undefined)) {
+                return this._downloadFromUrl(file.downloadUrl, token, callback);
+              } else {
+                return callback("Unable to get download url");
+              }
+            });
+          });
+        }
+      });
+    }
 
-    request = gapi.client.drive.permissions.insert
-      'fileId': fileId
-      'resource': perms
+    downloadFromUrl(url, callback, authorize) {
+      if (authorize == null) { authorize = true; }
+      if (authorize) {
+        return this.authorize(this.authorized, (err, token) => {
+          return this._downloadFromUrl(url, token, callack);
+        });
+      } else {
+        return this._downloadFromUrl(url, null, callback);
+      }
+    }
 
-    request.execute (resp) ->
-      if resp.code and resp.code isnt 200
-        alert "there was a problem sharing your document."
+    _downloadFromUrl(url, token, callback) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      if (token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${token.access_token}`);
+      }
+      xhr.onload = function() {
+        let json;
+        try {
+          json = JSON.parse(xhr.responseText);
+        } catch (e) {
+          callback(e);
+          return;
+        }
+        return callback(null, json);
+      };
+      xhr.onerror = () => callback(`Unable to download ${url}`);
+      return xhr.send();
+    }
 
-  download: (fileSpec, callback) ->
-    @authorize @authorized, (err, token) =>
-      if err
-        callback err
-      else
-        gapi.client.load 'drive', 'v2', =>
-          request = gapi.client.drive.files.get
-            fileId: fileSpec.id
-          request.execute (file) =>
-            if file?.downloadUrl
-              @_downloadFromUrl file.downloadUrl, token, callback
-            else
-              callback "Unable to get download url"
-
-  downloadFromUrl: (url, callback, authorize=true) ->
-    if authorize
-      @authorize @authorized, (err, token) =>
-        @_downloadFromUrl url, token, callack
-    else
-      @_downloadFromUrl(url, null, callback)
-
-  _downloadFromUrl: (url, token, callback) ->
-    xhr = new XMLHttpRequest()
-    xhr.open 'GET', url
-    if token
-      xhr.setRequestHeader 'Authorization', "Bearer #{token.access_token}"
-    xhr.onload = ->
-      try
-        json = JSON.parse xhr.responseText
-      catch e
-        callback e
-        return
-      callback null, json
-    xhr.onerror = ->
-      callback "Unable to download #{url}"
-    xhr.send()
-
-  filePicker: (callback) ->
-    @authorize @authorized, (err, token) ->
-      if err
-        callback err
-      else
-        gapi.load 'picker', callback: ->
-          pickerCallback = (data, etc) ->
-            callback null, if data.action is 'picked' then data.docs[0] else null
-          picker = new google.picker.PickerBuilder()
-            .addView google.picker.ViewId.DOCS
-            .setOAuthToken token.access_token
-            .setCallback pickerCallback
-            .build()
-          picker.setVisible true
+    filePicker(callback) {
+      return this.authorize(this.authorized, function(err, token) {
+        if (err) {
+          return callback(err);
+        } else {
+          return gapi.load('picker', { callback() {
+            const pickerCallback = (data, etc) => callback(null, data.action === 'picked' ? data.docs[0] : null);
+            const picker = new google.picker.PickerBuilder()
+              .addView(google.picker.ViewId.DOCS)
+              .setOAuthToken(token.access_token)
+              .setCallback(pickerCallback)
+              .build();
+            return picker.setVisible(true);
+          }
+        }
+          );
+        }
+      });
+    }
+  };
+  GoogleDriveIO.initClass();
+  return GoogleDriveIO;
+})());

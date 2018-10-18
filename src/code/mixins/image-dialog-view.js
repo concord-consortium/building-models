@@ -1,21 +1,32 @@
-PreviewImage = React.createFactory require '../views/preview-image-dialog-view'
-hasValidImageExtension = require '../utils/has-valid-image-extension'
-ImageDialogStore = require '../stores/image-dialog-store'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const PreviewImage = React.createFactory(require('../views/preview-image-dialog-view'));
+const hasValidImageExtension = require('../utils/has-valid-image-extension');
+const ImageDialogStore = require('../stores/image-dialog-store');
 
 
-module.exports =
+module.exports = {
 
-  getInitialImageDialogViewState: (subState) ->
-    subState
+  getInitialImageDialogViewState(subState) {
+    return subState;
+  },
 
-  imageSelected: (imageInfo) ->
-    ImageDialogStore.actions.update imageInfo
+  imageSelected(imageInfo) {
+    return ImageDialogStore.actions.update(imageInfo);
+  },
 
-  imageDropped: (imageInfo) ->
-    @imageSelected imageInfo
+  imageDropped(imageInfo) {
+    return this.imageSelected(imageInfo);
+  },
 
-  hasValidImageExtension: (imageName) ->
-    hasValidImageExtension imageName
+  hasValidImageExtension(imageName) {
+    return hasValidImageExtension(imageName);
+  },
 
-  renderPreviewImage: ->
-    (PreviewImage {imageInfo: @props.selectedImage })
+  renderPreviewImage() {
+    return (PreviewImage({imageInfo: this.props.selectedImage }));
+  }
+};

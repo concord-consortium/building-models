@@ -1,16 +1,23 @@
-{div, h2, label, input, select, option, optgroup, button} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {div, h2, label, input, select, option, optgroup, button} = React.DOM;
 
-tr = require "../utils/translate"
+const tr = require("../utils/translate");
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'LinkValueInspectorView'
+  displayName: 'LinkValueInspectorView',
 
 
-  render: ->
-    (div {className: 'link-inspector-view'})
-    # TODO: complete this later
-    #   (div {className: 'inspector-content'},
-    #     (h2 {}, "Link Value")
-    #   )
-    # )
+  render() {
+    return (div({className: 'link-inspector-view'}));
+  }
+});
+    // TODO: complete this later
+    //   (div {className: 'inspector-content'},
+    //     (h2 {}, "Link Value")
+    //   )
+    // )

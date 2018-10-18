@@ -1,37 +1,52 @@
-LaraConnect = require '../models/lara-connect'
-LaraActions = require '../actions/lara-actions'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const LaraConnect = require('../models/lara-connect');
+const LaraActions = require('../actions/lara-actions');
 
-laraStore   = Reflux.createStore
-  listenables: [LaraActions]
+const laraStore   = Reflux.createStore({
+  listenables: [LaraActions],
 
-  init: ->
-    laraConnect = LaraConnect.instance 'building-models'
-    @laraHasLoaded = false
+  init() {
+    const laraConnect = LaraConnect.instance('building-models');
+    return this.laraHasLoaded = false;
+  },
 
-  onLaraLoaded: ->
-    @laraHasLoaded = true
-    @notifyChange()
+  onLaraLoaded() {
+    this.laraHasLoaded = true;
+    return this.notifyChange();
+  },
 
-  notifyChange: ->
-    data =
-      laraHasLoaded: @laraHasLoaded
-    @trigger(data)
+  notifyChange() {
+    const data =
+      {laraHasLoaded: this.laraHasLoaded};
+    return this.trigger(data);
+  }
+});
 
-mixin =
-  getInitialState: ->
-    laraHasLoaded: laraStore.laraHasLoaded
+const mixin = {
+  getInitialState() {
+    return {laraHasLoaded: laraStore.laraHasLoaded};
+  },
 
-  componentDidMount: ->
-    @unsubscribe = laraStore.listen @onLaraStateChange
+  componentDidMount() {
+    return this.unsubscribe = laraStore.listen(this.onLaraStateChange);
+  },
 
-  componentWillUnmount: ->
-    @unsubscribe()
+  componentWillUnmount() {
+    return this.unsubscribe();
+  },
 
-  onLaraStateChange: (status) ->
-    @setState
-      laraHasLoaded: status.laraHasLoaded
+  onLaraStateChange(status) {
+    return this.setState({
+      laraHasLoaded: status.laraHasLoaded});
+  }
+};
 
-module.exports =
-  actions: LaraActions
-  store: laraStore
-  mixin: mixin
+module.exports = {
+  actions: LaraActions,
+  store: laraStore,
+  mixin
+};

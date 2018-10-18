@@ -1,8 +1,8 @@
 module.exports = Reflux.createActions(
   [
-    "codapLoaded"
-    "hideUndoRedo"
-    "sendUndoToCODAP"
+    "codapLoaded",
+    "hideUndoRedo",
+    "sendUndoToCODAP",
     "sendRedoToCODAP"
   ]
-)
+);

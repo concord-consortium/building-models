@@ -1,102 +1,128 @@
-{svg, path, line, text, div, tspan, image} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let NodeSvgGraphView;
+const {svg, path, line, text, div, tspan, image} = React.DOM;
 
-SimulationStore = require '../stores/simulation-store'
+const SimulationStore = require('../stores/simulation-store');
 
-module.exports = NodeSvgGraphView = React.createClass
-  displayName: 'NodeSvgGraphView'
-  mixins: [ SimulationStore.mixin ]
+module.exports = (NodeSvgGraphView = React.createClass({
+  displayName: 'NodeSvgGraphView',
+  mixins: [ SimulationStore.mixin ],
 
-  getDefaultProps: ->
-    width: 48
-    height: 48
-    strokeWidth: 3
-    min: 0
-    max: 100
-    data: []
-    color: '#aaa'
+  getDefaultProps() {
+    return {
+      width: 48,
+      height: 48,
+      strokeWidth: 3,
+      min: 0,
+      max: 100,
+      data: [],
+      color: '#aaa'
+    };
+  },
 
-  invertPoint: (point) ->
-    {x: @props.width - point.x, y: @props.height - point.y}
+  invertPoint(point) {
+    return {x: this.props.width - point.x, y: this.props.height - point.y};
+  },
 
-  graphMapPoint: (point) ->
-    x = point.x * @props.width
-    y = (@props.strokeWidth-1) + point.y * (@props.height - (@props.strokeWidth+1))
-    @invertPoint x:x, y:y
+  graphMapPoint(point) {
+    const x = point.x * this.props.width;
+    const y = (this.props.strokeWidth-1) + (point.y * (this.props.height - (this.props.strokeWidth+1)));
+    return this.invertPoint({x, y});
+  },
 
-  pointsToPath: (points) ->
-    data = _.map points, (p) => @graphMapPoint(p)
-    data = _.map data,   (p) -> "#{p.x} #{p.y}"
-    data = data.join " L "
-    "M #{data}"
+  pointsToPath(points) {
+    let data = _.map(points, p => this.graphMapPoint(p));
+    data = _.map(data,   p => `${p.x} ${p.y}`);
+    data = data.join(" L ");
+    return `M ${data}`;
+  },
 
-  getPathPoints: ->
-    max  = @props.max
-    min  = @props.min
-    data = @props.data
+  getPathPoints() {
+    let { max }  = this.props;
+    let { min }  = this.props;
+    let { data } = this.props;
 
-    rangex = SimulationStore.store.simulationDuration()
-    data = _.takeRight(data, rangex).reverse()
+    const rangex = SimulationStore.store.simulationDuration();
+    data = _.takeRight(data, rangex).reverse();
 
-    for point in data
-      if point > max then max = point
-      if point < min then min = point
-    rangey = max - min
+    for (let point of Array.from(data)) {
+      if (point > max) { max = point; }
+      if (point < min) { min = point; }
+    }
+    const rangey = max - min;
 
-    data = _.map data, (d, i) ->
-      x = i / rangex
-      y = d / rangey
-      {x: x, y: y}
-    data
+    data = _.map(data, function(d, i) {
+      const x = i / rangex;
+      const y = d / rangey;
+      return {x, y};
+  });
+    return data;
+  },
 
-  getBarPath: ->
-    max  = @props.max
-    min  = @props.min
-    val = Math.min(max, Math.max(min, @props.currentValue))
-    val = val / (max - min)
+  getBarPath() {
+    const { max }  = this.props;
+    const { min }  = this.props;
+    let val = Math.min(max, Math.max(min, this.props.currentValue));
+    val = val / (max - min);
 
-    left = @props.width * 0.25
-    right = @props.width * 0.75
-    bottom = @props.height
-    top = @props.height - ((@props.strokeWidth-1) + val * (@props.height - (@props.strokeWidth+1)))
+    const left = this.props.width * 0.25;
+    const right = this.props.width * 0.75;
+    const bottom = this.props.height;
+    const top = this.props.height - ((this.props.strokeWidth-1) + (val * (this.props.height - (this.props.strokeWidth+1))));
 
-    data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}]
-    data = _.map data,   (p) -> "#{p.x} #{p.y}"
-    data = data.join " L "
-    "M #{data}"
+    let data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}];
+    data = _.map(data,   p => `${p.x} ${p.y}`);
+    data = data.join(" L ");
+    return `M ${data}`;
+  },
 
-  renderImage: ->
-    imageOffset = 2
-    imageStyle =
-      position: "absolute"
-      top: imageOffset
-      left: imageOffset
-      opacity: 0.25
-      width: @props.width + imageOffset
-      height: @props.height + imageOffset
+  renderImage() {
+    const imageOffset = 2;
+    const imageStyle = {
+      position: "absolute",
+      top: imageOffset,
+      left: imageOffset,
+      opacity: 0.25,
+      width: this.props.width + imageOffset,
+      height: this.props.height + imageOffset
+    };
 
-    (div {style: imageStyle}, @props.image)
+    return (div({style: imageStyle}, this.props.image));
+  },
 
-  renderSVG: ->
-    svgOffset = 3
-    svgStyle =
-      position: "absolute"
-      top: svgOffset
+  renderSVG() {
+    let chart;
+    const svgOffset = 3;
+    const svgStyle = {
+      position: "absolute",
+      top: svgOffset,
       left: svgOffset
+    };
 
-    if @props.data.length > 0
-      if @props.isTimeBased
-        chart = (path {d: @pointsToPath(@getPathPoints()), strokeWidth: @props.strokeWidth, stroke: @props.color, fill: "none"})
-      else
-        chart = (path {d: @getBarPath(), strokeWidth: @props.strokeWidth, stroke: @props.color, fill: @props.innerColor})
-    else
-      chart = null
+    if (this.props.data.length > 0) {
+      if (this.props.isTimeBased) {
+        chart = (path({d: this.pointsToPath(this.getPathPoints()), strokeWidth: this.props.strokeWidth, stroke: this.props.color, fill: "none"}));
+      } else {
+        chart = (path({d: this.getBarPath(), strokeWidth: this.props.strokeWidth, stroke: this.props.color, fill: this.props.innerColor}));
+      }
+    } else {
+      chart = null;
+    }
 
-    (svg {style: svgStyle, width: @props.width, height: @props.height},
+    return (svg({style: svgStyle, width: this.props.width, height: this.props.height},
       chart
-    )
+    ));
+  },
 
-  render: ->
-    (div {},
-      @renderImage()
-      @renderSVG()
-    )
+  render() {
+    return (div({},
+      this.renderImage(),
+      this.renderSVG()
+    ));
+  }
+}));

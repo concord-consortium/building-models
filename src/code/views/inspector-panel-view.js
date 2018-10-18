@@ -1,145 +1,185 @@
-NodeInspectorView = React.createFactory require './node-inspector-view'
-LinkInspectorView = React.createFactory require './link-inspector-view'
-LinkValueInspectorView = React.createFactory require './link-value-inspector-view'
-NodeValueInspectorView = React.createFactory require './node-value-inspector-view'
-LinkRelationInspectorView = React.createFactory require './relation-inspector-view'
-NodeRelationInspectorView = React.createFactory require './relation-inspector-view'
-SimulationInspectorView   = React.createFactory require './simulation-inspector-view'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const NodeInspectorView = React.createFactory(require('./node-inspector-view'));
+const LinkInspectorView = React.createFactory(require('./link-inspector-view'));
+const LinkValueInspectorView = React.createFactory(require('./link-value-inspector-view'));
+const NodeValueInspectorView = React.createFactory(require('./node-value-inspector-view'));
+const LinkRelationInspectorView = React.createFactory(require('./relation-inspector-view'));
+const NodeRelationInspectorView = React.createFactory(require('./relation-inspector-view'));
+const SimulationInspectorView   = React.createFactory(require('./simulation-inspector-view'));
 
-InspectorPanelStore  = require "../stores/inspector-panel-store"
+const InspectorPanelStore  = require("../stores/inspector-panel-store");
 
-{div, i, span} = React.DOM
+const {div, i, span} = React.DOM;
 
-ToolButton = React.createFactory React.createClass
-  displayName: 'toolButton'
-  render: ->
-    name = @props.name
-    onClick = =>
-      @props.onClick(@props.name) if @props.onClick
+const ToolButton = React.createFactory(React.createClass({
+  displayName: 'toolButton',
+  render() {
+    const { name } = this.props;
+    const onClick = () => {
+      if (this.props.onClick) { return this.props.onClick(this.props.name); }
+    };
 
-    classes = "icon-codap-#{name} tool-button"
-    classes = "#{classes} selected" if @props.selected
-    classes = "#{classes} disabled" if @props.disabled
-    (div {className: classes, onClick: onClick})
+    let classes = `icon-codap-${name} tool-button`;
+    if (this.props.selected) { classes = `${classes} selected`; }
+    if (this.props.disabled) { classes = `${classes} disabled`; }
+    return (div({className: classes, onClick}));
+  }
+})
+);
 
-ToolPanel = React.createFactory React.createClass
-  displayName: 'toolPanel'
+const ToolPanel = React.createFactory(React.createClass({
+  displayName: 'toolPanel',
 
   buttonData: [
-      {name: "styles", simple: true, shows: "design",'enabled': ['node','link'] }
-      {name: "values", simple: false, shows: "value", 'enabled': ['node'] }
-      {name: "qualRel", simple: false, shows: "relations",'enabled': ['dependent-node']}
+      {name: "styles", simple: true, shows: "design",'enabled': ['node','link'] },
+      {name: "values", simple: false, shows: "value", 'enabled': ['node'] },
+      {name: "qualRel", simple: false, shows: "relations",'enabled': ['dependent-node']},
       {name: "options",  simple: true, shows: "simulation", 'enabled': ['nothing'] }
-    ]
+    ],
 
-  isDisabled: (button) ->
-    return false if _.includes(button.enabled, 'nothing')
-    return false if _.includes(button.enabled, 'node') and @props.node
-    return false if _.includes(button.enabled, 'dependent-node') and @props.node?.isDependent()
-    return false if _.includes(button.enabled, 'link') and @props.link
-    return true
+  isDisabled(button) {
+    if (_.includes(button.enabled, 'nothing')) { return false; }
+    if (_.includes(button.enabled, 'node') && this.props.node) { return false; }
+    if (_.includes(button.enabled, 'dependent-node') && (this.props.node != null ? this.props.node.isDependent() : undefined)) { return false; }
+    if (_.includes(button.enabled, 'link') && this.props.link) { return false; }
+    return true;
+  },
 
-  buttonProps: (button) ->
-    props =
-      name:     button.name
-      shows:    button.shows
-      selected: false
-      disabled: @isDisabled(button)
+  buttonProps(button) {
+    const props = {
+      name:     button.name,
+      shows:    button.shows,
+      selected: false,
+      disabled: this.isDisabled(button)
+    };
 
-    unless @isDisabled(button)
-      props.onClick = =>
-        @select button.name
-      props.selected = @props.nowShowing is button.shows
+    if (!this.isDisabled(button)) {
+      props.onClick = () => {
+        return this.select(button.name);
+      };
+      props.selected = this.props.nowShowing === button.shows;
+    }
 
-    props
+    return props;
+  },
 
-  select: (name) ->
-    button = _.find @buttonData, {name: name}
-    if button
-      if @props.nowShowing isnt button.shows
-        @props.onNowShowing(button.shows)
-      else
-        @props.onNowShowing(null)
+  select(name) {
+    const button = _.find(this.buttonData, {name});
+    if (button) {
+      if (this.props.nowShowing !== button.shows) {
+        return this.props.onNowShowing(button.shows);
+      } else {
+        return this.props.onNowShowing(null);
+      }
+    }
+  },
 
-  render: ->
-    buttons = @buttonData.slice 0
-    if @props.diagramOnly
-      buttons = _.filter buttons, (button) -> button.simple
-    buttonsView = _.map buttons, (button, i) =>
-      props = @buttonProps(button)
-      props.key = i
-      (ToolButton props)
+  render() {
+    let buttons = this.buttonData.slice(0);
+    if (this.props.diagramOnly) {
+      buttons = _.filter(buttons, button => button.simple);
+    }
+    const buttonsView = _.map(buttons, (button, i) => {
+      const props = this.buttonProps(button);
+      props.key = i;
+      return (ToolButton(props));
+    });
 
-    (div {className: 'tool-panel'}, buttonsView)
+    return (div({className: 'tool-panel'}, buttonsView));
+  }
+})
+);
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'InspectorPanelView'
+  displayName: 'InspectorPanelView',
 
-  mixins: [ InspectorPanelStore.mixin ]
+  mixins: [ InspectorPanelStore.mixin ],
 
-  renderSimulationInspector: ->
-    (SimulationInspectorView {})
+  renderSimulationInspector() {
+    return (SimulationInspectorView({}));
+  },
 
-  renderDesignInspector: ->
-    if @props.node
-      (NodeInspectorView {
-        node: @props.node
-        onNodeChanged: @props.onNodeChanged
-        onNodeDelete: @props.onNodeDelete
-        palette: @props.palette
-      })
-    else if @props.link
-      (LinkInspectorView {link: @props.link,  graphStore: @props.graphStore})
+  renderDesignInspector() {
+    if (this.props.node) {
+      return (NodeInspectorView({
+        node: this.props.node,
+        onNodeChanged: this.props.onNodeChanged,
+        onNodeDelete: this.props.onNodeDelete,
+        palette: this.props.palette
+      }));
+    } else if (this.props.link) {
+      return (LinkInspectorView({link: this.props.link,  graphStore: this.props.graphStore}));
+    }
+  },
 
-  renderValueInspector: ->
-    if @props.node
-      (NodeValueInspectorView {node: @props.node, graphStore: @props.graphStore})
-    else if @props.link
-      (LinkValueInspectorView {link:@props.link})
+  renderValueInspector() {
+    if (this.props.node) {
+      return (NodeValueInspectorView({node: this.props.node, graphStore: this.props.graphStore}));
+    } else if (this.props.link) {
+      return (LinkValueInspectorView({link:this.props.link}));
+    }
+  },
 
-  renderRelationInspector: ->
-    if @props.node?.isDependent()
-      (NodeRelationInspectorView {node:@props.node, graphStore: @props.graphStore})
-    else if @props.link
-      (LinkRelationInspectorView {link:@props.link, graphStore: @props.graphStore})
-    else
-      return null
+  renderRelationInspector() {
+    if (this.props.node != null ? this.props.node.isDependent() : undefined) {
+      return (NodeRelationInspectorView({node:this.props.node, graphStore: this.props.graphStore}));
+    } else if (this.props.link) {
+      return (LinkRelationInspectorView({link:this.props.link, graphStore: this.props.graphStore}));
+    } else {
+      return null;
+    }
+  },
 
-  # 2015-12-09 NP: Deselection makes inpector panel hide http://bit.ly/1ORBBp2
-  # 2016-03-15 SF: Changed this to a function explicitly called when selection changes
-  nodeSelectionChanged: ->
-    unless (@props.node or @props.link)
-      InspectorPanelStore.actions.closeInspectorPanel()
+  // 2015-12-09 NP: Deselection makes inpector panel hide http://bit.ly/1ORBBp2
+  // 2016-03-15 SF: Changed this to a function explicitly called when selection changes
+  nodeSelectionChanged() {
+    if (!this.props.node && !this.props.link) {
+      return InspectorPanelStore.actions.closeInspectorPanel();
+    }
+  },
 
-  renderInspectorPanel: ->
-    view = switch @state.nowShowing
-      when 'simulation' then @renderSimulationInspector()
-      when 'design'     then @renderDesignInspector()
-      when 'value'      then @renderValueInspector()
-      when 'relations'  then @renderRelationInspector()
+  renderInspectorPanel() {
+    const view = (() => { switch (this.state.nowShowing) {
+      case 'simulation': return this.renderSimulationInspector();
+      case 'design':     return this.renderDesignInspector();
+      case 'value':      return this.renderValueInspector();
+      case 'relations':  return this.renderRelationInspector();
+    } })();
 
-    (div {className: "inspector-panel-content"},
+    return (div({className: "inspector-panel-content"},
       view
-    )
+    ));
+  },
 
-  render: ->
-    className = "inspector-panel"
-    if (@props.display != undefined)
-      if @props.display == true
-        className = "inspector-panel"
-      else
-        className = "inspector-panel hidden"
-    unless @state.nowShowing
-      className = "#{className} collapsed"
+  render() {
+    let className = "inspector-panel";
+    if (this.props.display !== undefined) {
+      if (this.props.display === true) {
+        className = "inspector-panel";
+      } else {
+        className = "inspector-panel hidden";
+      }
+    }
+    if (!this.state.nowShowing) {
+      className = `${className} collapsed`;
+    }
 
-    (div {className: className},
-      (ToolPanel
-        node: @props.node
-        link: @props.link
-        nowShowing: @state.nowShowing
-        onNowShowing: InspectorPanelStore.actions.openInspectorPanel
-        diagramOnly: @props.diagramOnly
-      )
-      @renderInspectorPanel()
-    )
+    return (div({className},
+      (ToolPanel({
+        node: this.props.node,
+        link: this.props.link,
+        nowShowing: this.state.nowShowing,
+        onNowShowing: InspectorPanelStore.actions.openInspectorPanel,
+        diagramOnly: this.props.diagramOnly
+      })),
+      this.renderInspectorPanel()
+    ));
+  }
+});

@@ -1,22 +1,32 @@
-migration =
-  version: "1.9.0"
-  description: "Adds simulation speed and capNodeValues settings"
-  date: "2015-10-14"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const migration = {
+  version: "1.9.0",
+  description: "Adds simulation speed and capNodeValues settings",
+  date: "2015-10-14",
 
-  doUpdate: (data) ->
-    data.settings ?= {}
-    data.settings.simulation ?= {}
+  doUpdate(data) {
+    if (data.settings == null) { data.settings = {}; }
+    if (data.settings.simulation == null) { data.settings.simulation = {}; }
 
-    data.settings.simulation.speed ?= 4
+    if (data.settings.simulation.speed == null) { data.settings.simulation.speed = 4; }
 
-    if not data.settings.simulation.capNodeValues?
-      if data.settings.capNodeValues
-        data.settings.simulation.capNodeValues = data.settings.capNodeValues
-      else
-        data.settings.simulation.capNodeValues = false
+    if ((data.settings.simulation.capNodeValues == null)) {
+      if (data.settings.capNodeValues) {
+        data.settings.simulation.capNodeValues = data.settings.capNodeValues;
+      } else {
+        data.settings.simulation.capNodeValues = false;
+      }
+    }
 
-    delete data.settings.capNodeValues
+    return delete data.settings.capNodeValues;
+  }
+};
 
 
 
-module.exports = _.mixin migration, require './migration-mixin'
+module.exports = _.mixin(migration, require('./migration-mixin'));

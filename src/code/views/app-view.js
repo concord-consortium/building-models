@@ -1,100 +1,115 @@
-Reflux = require 'reflux'
-tr                  = require '../utils/translate'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Reflux = require('reflux');
+const tr                  = require('../utils/translate');
 
-Placeholder        = React.createFactory require './placeholder-view'
-GlobalNav          = React.createFactory require './global-nav-view'
-GraphView          = React.createFactory require './graph-view'
-NodeWell           = React.createFactory require './node-well-view'
-InspectorPanel     = React.createFactory require './inspector-panel-view'
-ImageBrowser       = React.createFactory require './image-browser-view'
-DocumentActions    = React.createFactory require './document-actions-view'
-ModalPaletteDelete = React.createFactory require './modal-palette-delete-view'
-BuildInfoView      = React.createFactory require './build-info-view'
+const Placeholder        = React.createFactory(require('./placeholder-view'));
+const GlobalNav          = React.createFactory(require('./global-nav-view'));
+const GraphView          = React.createFactory(require('./graph-view'));
+const NodeWell           = React.createFactory(require('./node-well-view'));
+const InspectorPanel     = React.createFactory(require('./inspector-panel-view'));
+const ImageBrowser       = React.createFactory(require('./image-browser-view'));
+const DocumentActions    = React.createFactory(require('./document-actions-view'));
+const ModalPaletteDelete = React.createFactory(require('./modal-palette-delete-view'));
+const BuildInfoView      = React.createFactory(require('./build-info-view'));
 
-ImageDialogStore    = require '../stores/image-dialog-store'
-AppSettingsStore    = require '../stores/app-settings-store'
+const ImageDialogStore    = require('../stores/image-dialog-store');
+const AppSettingsStore    = require('../stores/app-settings-store');
 
 
-{div, a} = React.DOM
+const {div, a} = React.DOM;
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'WirefameApp'
+  displayName: 'WirefameApp',
 
-  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require '../mixins/app-view']
+  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require('../mixins/app-view')],
 
-  getInitialState: ->
+  getInitialState() {
 
-    try
-      iframed = window.self isnt window.top
-    catch
-      iframed = true
+    let iframed;
+    try {
+      iframed = window.self !== window.top;
+    } catch (error) {
+      iframed = true;
+    }
 
-    @getInitialAppViewState
-      iframed: iframed
-      username: 'Jane Doe'
-      filename: tr "~MENU.UNTITLED_MODEL"
+    return this.getInitialAppViewState({
+      iframed,
+      username: 'Jane Doe',
+      filename: tr("~MENU.UNTITLED_MODEL")
+    });
+  },
 
-  selectionUpdated: ->
-    this.refs.inspectorPanel?.nodeSelectionChanged()
+  selectionUpdated() {
+    return (this.refs.inspectorPanel != null ? this.refs.inspectorPanel.nodeSelectionChanged() : undefined);
+  },
 
-  toggleImageBrowser: ->
-    @setState showImageBrowser: not @state.showImageBrowser
+  toggleImageBrowser() {
+    return this.setState({showImageBrowser: !this.state.showImageBrowser});
+  },
 
-  render: ->
-    actionBarStyle = 'action-bar'
-    if AppSettingsStore.store.settings.uiElements.actionBar is false
-      actionBarStyle += ' hidden'
-    else if AppSettingsStore.store.settings.uiElements.globalNav is false
-      actionBarStyle += ' small'
+  render() {
+    let actionBarStyle = 'action-bar';
+    if (AppSettingsStore.store.settings.uiElements.actionBar === false) {
+      actionBarStyle += ' hidden';
+    } else if (AppSettingsStore.store.settings.uiElements.globalNav === false) {
+      actionBarStyle += ' small';
+    }
 
-    (div {className: 'app'},
-      (div {className: if @state.iframed then 'iframed-workspace' else 'workspace'},
-        if not @state.iframed && AppSettingsStore.store.settings.uiElements.globalNav != false
-          (GlobalNav
-            filename: @state.filename
-            username: @state.username
-            graphStore: @props.graphStore
-            GraphStore: @GraphStore
+    return (div({className: 'app'},
+      (div({className: this.state.iframed ? 'iframed-workspace' : 'workspace'},
+        !this.state.iframed && (AppSettingsStore.store.settings.uiElements.globalNav !== false) ?
+          (GlobalNav({
+            filename: this.state.filename,
+            username: this.state.username,
+            graphStore: this.props.graphStore,
+            GraphStore: this.GraphStore,
             display: AppSettingsStore.store.settings.uiElements.globalNav
-          )
-        (div {className: actionBarStyle},
-          (NodeWell {
-            palette: @state.palette
-            toggleImageBrowser: @toggleImageBrowser
-            graphStore: @props.graphStore
+          })) : undefined,
+        (div({className: actionBarStyle},
+          (NodeWell({
+            palette: this.state.palette,
+            toggleImageBrowser: this.toggleImageBrowser,
+            graphStore: this.props.graphStore,
             uiElements: AppSettingsStore.store.settings.uiElements
-          })
-          (DocumentActions
-            graphStore: @props.graphStore
-            diagramOnly: @state.simulationType is AppSettingsStore.store.SimulationType.diagramOnly
-            iframed: @state.iframed
-          )
-        )
-        (div {className: if AppSettingsStore.store.settings.uiElements.globalNav is false then 'canvas full' else 'canvas'},
-          (GraphView {
-            graphStore: @props.graphStore,
-            selectionManager: @props.graphStore.selectionManager,
-            selectedLink: @state.selectedLink})
-        )
-        (InspectorPanel
-          node: @state.selectedNode
-          link: @state.selectedLink
-          onNodeChanged: @onNodeChanged
-          onNodeDelete: @onNodeDelete
-          palette: @state.palette
-          diagramOnly: @state.simulationType is AppSettingsStore.store.SimulationType.diagramOnly
-          toggleImageBrowser: @toggleImageBrowser
-          graphStore: @props.graphStore
-          ref: "inspectorPanel"
+          })),
+          (DocumentActions({
+            graphStore: this.props.graphStore,
+            diagramOnly: this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly,
+            iframed: this.state.iframed
+          }))
+        )),
+        (div({className: AppSettingsStore.store.settings.uiElements.globalNav === false ? 'canvas full' : 'canvas'},
+          (GraphView({
+            graphStore: this.props.graphStore,
+            selectionManager: this.props.graphStore.selectionManager,
+            selectedLink: this.state.selectedLink}))
+        )),
+        (InspectorPanel({
+          node: this.state.selectedNode,
+          link: this.state.selectedLink,
+          onNodeChanged: this.onNodeChanged,
+          onNodeDelete: this.onNodeDelete,
+          palette: this.state.palette,
+          diagramOnly: this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly,
+          toggleImageBrowser: this.toggleImageBrowser,
+          graphStore: this.props.graphStore,
+          ref: "inspectorPanel",
           display: AppSettingsStore.store.settings.uiElements.inspectorPanel
-        )
-        if @state.showingDialog
-          (ImageBrowser
-            graphStore: @props.graphStore
-          )
-        (ModalPaletteDelete {})
-      )
-      if @state.iframed
-        (BuildInfoView {})
-    )
+        })),
+        this.state.showingDialog ?
+          (ImageBrowser({
+            graphStore: this.props.graphStore})
+          ) : undefined,
+        (ModalPaletteDelete({}))
+      )),
+      this.state.iframed ?
+        (BuildInfoView({})) : undefined
+    ));
+  }
+});

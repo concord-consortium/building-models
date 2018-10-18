@@ -1,44 +1,59 @@
-PaletteInspectorView  = React.createFactory require './palette-inspector-view'
-PaletteStore = require '../stores/palette-store'
-{div} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const PaletteInspectorView  = React.createFactory(require('./palette-inspector-view'));
+const PaletteStore = require('../stores/palette-store');
+const {div} = React.DOM;
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'NodeWell'
+  displayName: 'NodeWell',
 
-  mixins: [ PaletteStore.mixin ]
+  mixins: [ PaletteStore.mixin ],
 
-  getInitialState: ->
-    nodes: []
-    collapsed: true
+  getInitialState() {
+    return {
+      nodes: [],
+      collapsed: true
+    };
+  },
 
-  collapse: ->
-    @setState collapsed: true
+  collapse() {
+    return this.setState({collapsed: true});
+  },
 
-  expand: ->
-    @setState collapsed: false
+  expand() {
+    return this.setState({collapsed: false});
+  },
 
-  toggle: ->
-    if @state.collapsed
-      @expand()
-    else
-      @collapse()
+  toggle() {
+    if (this.state.collapsed) {
+      return this.expand();
+    } else {
+      return this.collapse();
+    }
+  },
 
-  render: ->
-    topNodePaletteClass    = 'top-node-palette-wrapper'
-    topNodeTabPaletteClass = 'top-node-palette-tab'
-    if @state.collapsed
-      topNodePaletteClass    = 'top-node-palette-wrapper collapsed'
-      topNodeTabPaletteClass = 'top-node-palette-tab collapsed'
+  render() {
+    let topNodePaletteClass    = 'top-node-palette-wrapper';
+    let topNodeTabPaletteClass = 'top-node-palette-tab';
+    if (this.state.collapsed) {
+      topNodePaletteClass    = 'top-node-palette-wrapper collapsed';
+      topNodeTabPaletteClass = 'top-node-palette-tab collapsed';
+    }
 
-    (div {className: if @props.uiElements.nodePalette is false then 'wrapperwrapper hidden' else if @props.uiElements.globalNav is false then 'wrapperwrapper top' else 'wrapperwrapper'},
-      (div {className: topNodePaletteClass},
-        (PaletteInspectorView {
-          toggleImageBrowser: @props.toggleImageBrowser,
-          graphStore: @props.graphStore
-        })
-      )
-      (div {className: 'tab-wrapper'},
-        (div {className: topNodeTabPaletteClass, onClick: @toggle})
-      )
-    )
+    return (div({className: this.props.uiElements.nodePalette === false ? 'wrapperwrapper hidden' : this.props.uiElements.globalNav === false ? 'wrapperwrapper top' : 'wrapperwrapper'},
+      (div({className: topNodePaletteClass},
+        (PaletteInspectorView({
+          toggleImageBrowser: this.props.toggleImageBrowser,
+          graphStore: this.props.graphStore
+        }))
+      )),
+      (div({className: 'tab-wrapper'},
+        (div({className: topNodeTabPaletteClass, onClick: this.toggle}))
+      ))
+    ));
+  }
+});

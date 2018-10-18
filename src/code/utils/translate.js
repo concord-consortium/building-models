@@ -1,33 +1,45 @@
-urlParams = require './url-params'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const urlParams = require('./url-params');
 
-languageFiles = {
-  'en-US': require './lang/en-US'
-  'he': require './lang/he'
-  'tr': require './lang/tr'
-  'zh-TW': require './lang/zh-TW'
-  'es': require './lang/es'
-  'et': require './lang/et'
-  'pl': require './lang/pl'
-}
+const languageFiles = {
+  'en-US': require('./lang/en-US'),
+  'he': require('./lang/he'),
+  'tr': require('./lang/tr'),
+  'zh-TW': require('./lang/zh-TW'),
+  'es': require('./lang/es'),
+  'et': require('./lang/et'),
+  'pl': require('./lang/pl')
+};
 
-translations =  {}
-_.each languageFiles, (langContents, langKey) ->
-  translations[langKey] = langContents
-  # accept full key with region code or just the language code
-  if (dashLoc = langKey.indexOf('-')) > 0
-    lang = langKey.substring(0, dashLoc)
-    translations[lang] = langContents
-  return
+const translations =  {};
+_.each(languageFiles, function(langContents, langKey) {
+  let dashLoc;
+  translations[langKey] = langContents;
+  // accept full key with region code or just the language code
+  if ((dashLoc = langKey.indexOf('-')) > 0) {
+    const lang = langKey.substring(0, dashLoc);
+    translations[lang] = langContents;
+  }
+});
 
-# default to English unless the user expresses another preference (via URL param for now)
-defaultLang = if urlParams.lang and translations[urlParams.lang] then urlParams.lang else 'en'
+// default to English unless the user expresses another preference (via URL param for now)
+const defaultLang = urlParams.lang && translations[urlParams.lang] ? urlParams.lang : 'en';
 
-varRegExp = /%\{\s*([^}\s]*)\s*\}/g
+const varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
 
-translate = (key, vars={}, lang=defaultLang) ->
-  translation = translations[lang]?[key]
-  translation = key if not translation?
-  translation.replace varRegExp, (match, key) ->
-    if vars.hasOwnProperty key then vars[key] else "'** UKNOWN KEY: #{key} **"
+const translate = function(key, vars, lang) {
+  if (vars == null) { vars = {}; }
+  if (lang == null) { lang = defaultLang; }
+  let translation = translations[lang] != null ? translations[lang][key] : undefined;
+  if ((translation == null)) { translation = key; }
+  return translation.replace(varRegExp, function(match, key) {
+    if (vars.hasOwnProperty(key)) { return vars[key]; } else { return `'** UKNOWN KEY: ${key} **`; }
+  });
+};
 
-module.exports = translate
+module.exports = translate;

@@ -1,201 +1,258 @@
-resizeImage    = require '../utils/resize-image'
-initialPalette = require '../data/initial-palette'
-initialLibrary = require '../data/internal-library'
-UndoRedo       = require '../utils/undo-redo'
-ImportActions  = require '../actions/import-actions'
-uuid           = require 'uuid'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const resizeImage    = require('../utils/resize-image');
+const initialPalette = require('../data/initial-palette');
+const initialLibrary = require('../data/internal-library');
+const UndoRedo       = require('../utils/undo-redo');
+const ImportActions  = require('../actions/import-actions');
+const uuid           = require('uuid');
 
 
-# TODO: Maybe loadData goes into some other action-set
-paletteActions = Reflux.createActions(
+// TODO: Maybe loadData goes into some other action-set
+const paletteActions = Reflux.createActions(
   [
     "addToPalette", "selectPaletteIndex", "selectPaletteItem",
     "restoreSelection", "itemDropped","update", "delete"
   ]
-)
+);
 
-paletteStore   = Reflux.createStore
-  listenables: [paletteActions, ImportActions]
+const paletteStore   = Reflux.createStore({
+  listenables: [paletteActions, ImportActions],
 
-  init: ->
-    @initializeLibrary()
-    @initializePalette()
-    # prepare a template for new library items
-    @blankMetadata =
-      source: 'external'
-      title: 'blank'
-      link: ''
+  init() {
+    this.initializeLibrary();
+    this.initializePalette();
+    // prepare a template for new library items
+    this.blankMetadata = {
+      source: 'external',
+      title: 'blank',
+      link: '',
       license: ''
-    @imageMetadata = _.clone @blankMetadata, true
-    @undoManger = UndoRedo.instance debug:false
+    };
+    this.imageMetadata = _.clone(this.blankMetadata, true);
+    return this.undoManger = UndoRedo.instance({debug:false});
+  },
 
-  initializeLibrary: ->
-    @library = {}
-    for node in initialLibrary
-      @addToLibrary node
+  initializeLibrary() {
+    this.library = {};
+    return Array.from(initialLibrary).map((node) =>
+      this.addToLibrary(node));
+  },
 
-  initializePalette: ->
-    @palette = []
-    for node in initialPalette
-      @addToPalette node
-    @selectPaletteIndex(0)
-    @updateChanges()
+  initializePalette() {
+    this.palette = [];
+    for (let node of Array.from(initialPalette)) {
+      this.addToPalette(node);
+    }
+    this.selectPaletteIndex(0);
+    return this.updateChanges();
+  },
 
-  makeNodeSignature: (node) ->
-    # 400 chars of a URL *might* be adequately unique,
-    # but data urls are going to be more trouble.
-    node.image.substr(0,400)
-
-
-  standardizeNode: (node) ->
-    node.image    ||= ""
-    node.key      ||= @makeNodeSignature(node)
-    node.uuid     ||= uuid.v4()
-    node.metadata ||= _.clone @blankMetadata, true
-
-  addToLibrary: (node) ->
-    unless @inLibrary(node)
-      @standardizeNode(node)
-      @library[node.key] = node
-      resizeImage node.image, (dataUrl) ->
-        node.image = dataUrl
-      log.info "library: #{@library}"
-
-  onImport: (data) ->
-    # reload the palette
-    @palette = []
-    if data.palette
-      for p_item in data.palette by -1
-        @addToPalette p_item
-    @updateChanges()
-
-  onUpdate: (data) ->
-    if @selectedPaletteItem
-      @selectedPaletteItem = _.merge @selectedPaletteItem, data
-    else
-      @selectedPaletteItem = data
-    @updateChanges()
-
-  onDelete: (paletteItem)->
-    if paletteItem
-      @undoManger.createAndExecuteCommand 'deletePaletteItem',
-        execute: =>
-          @removePaletteItem(paletteItem)
-          @updateChanges()
-        undo: =>
-          @addToPalette(paletteItem)
-          @updateChanges()
-
-  addToPalette: (node) ->
-    # PaletteItems always get added to library first
-    @addToLibrary(node)
-    if not @inPalette node
-      @palette.push node
-      @moveToFront(@palette.length-1)
-      @selectPaletteIndex(0)
-
-  onAddToPalette: (node) ->
-    @undoManger.createAndExecuteCommand 'addPaletteItem',
-      execute: =>
-        @addToPalette(node)
-        @updateChanges()
-      undo:  =>
-        @removePaletteItem(node)
-        @updateChanges()
+  makeNodeSignature(node) {
+    // 400 chars of a URL *might* be adequately unique,
+    // but data urls are going to be more trouble.
+    return node.image.substr(0,400);
+  },
 
 
-  onSelectPaletteIndex: (index) ->
-    # @moveToFront(index) if we want to add the selected item to front
-    @selectPaletteIndex(index)
-    @updateChanges()
+  standardizeNode(node) {
+    if (!node.image) { node.image = ""; }
+    if (!node.key) { node.key = this.makeNodeSignature(node); }
+    if (!node.uuid) { node.uuid = uuid.v4(); }
+    return node.metadata || (node.metadata = _.clone(this.blankMetadata, true));
+  },
 
-  onSelectPaletteItem: (item) ->
-    index = _.indexOf @palette, item
-    @selectPaletteIndex(index)
-    @updateChanges()
+  addToLibrary(node) {
+    if (!this.inLibrary(node)) {
+      this.standardizeNode(node);
+      this.library[node.key] = node;
+      resizeImage(node.image, dataUrl => node.image = dataUrl);
+      return log.info(`library: ${this.library}`);
+    }
+  },
 
-  selectPaletteIndex: (index) ->
-    maxIndex = @palette.length - 1
-    effectiveIndex = Math.min(maxIndex, index)
-    @lastSelection = @selectedIndex = effectiveIndex
-    @selectedPaletteItem  = @palette[effectiveIndex]
-    @selectedPaletteImage = @selectedPaletteItem?.image
+  onImport(data) {
+    // reload the palette
+    this.palette = [];
+    if (data.palette) {
+      for (let i = data.palette.length - 1; i >= 0; i--) {
+        const p_item = data.palette[i];
+        this.addToPalette(p_item);
+      }
+    }
+    return this.updateChanges();
+  },
 
-  onRestoreSelection: ->
-    if @lastSelection > -1
-      @selectPaletteIndex @lastSelection
-    else @selectPaletteIndex 0
-    @updateChanges()
+  onUpdate(data) {
+    if (this.selectedPaletteItem) {
+      this.selectedPaletteItem = _.merge(this.selectedPaletteItem, data);
+    } else {
+      this.selectedPaletteItem = data;
+    }
+    return this.updateChanges();
+  },
 
-  onSetImageMetadata: (image, metadata) ->
-    log.info "Set Image metadata called"
-    @addToLibrary(image)
-    libraryItem = @inLibrary(image)
-    if libraryItem
-      libraryItem.metadata = metadata
-      @imageMetadata = libraryItem.metadata
-      @updateChanges()
-    else
-      alert "cant find library item"
+  onDelete(paletteItem){
+    if (paletteItem) {
+      return this.undoManger.createAndExecuteCommand('deletePaletteItem', {
+        execute: () => {
+          this.removePaletteItem(paletteItem);
+          return this.updateChanges();
+        },
+        undo: () => {
+          this.addToPalette(paletteItem);
+          return this.updateChanges();
+        }
+      }
+      );
+    }
+  },
 
-  removePaletteItem: (item) ->
-    # Try to select the same index as the deleted item
-    i = _.indexOf @palette, item
-    @palette = _.without @palette, item
-    @selectPaletteIndex(i)
+  addToPalette(node) {
+    // PaletteItems always get added to library first
+    this.addToLibrary(node);
+    if (!this.inPalette(node)) {
+      this.palette.push(node);
+      this.moveToFront(this.palette.length-1);
+      return this.selectPaletteIndex(0);
+    }
+  },
 
-  moveToFront: (index) ->
-    @palette.splice(0, 0, @palette.splice(index, 1)[0])
+  onAddToPalette(node) {
+    return this.undoManger.createAndExecuteCommand('addPaletteItem', {
+      execute: () => {
+        this.addToPalette(node);
+        return this.updateChanges();
+      },
+      undo:  () => {
+        this.removePaletteItem(node);
+        return this.updateChanges();
+      }
+    }
+    );
+  },
 
-  inPalette: (node) ->
-    # node in Pallete is standardized, arg node not always
-    _.find @palette, {key: node.key || @makeNodeSignature(node)}
 
-  findByUUID: (uuid) ->
-    _.find @palette, {uuid: uuid}
+  onSelectPaletteIndex(index) {
+    // @moveToFront(index) if we want to add the selected item to front
+    this.selectPaletteIndex(index);
+    return this.updateChanges();
+  },
 
-  inLibrary: (node) ->
-    @library[node.key]
+  onSelectPaletteItem(item) {
+    const index = _.indexOf(this.palette, item);
+    this.selectPaletteIndex(index);
+    return this.updateChanges();
+  },
 
-  updateChanges: ->
-    data =
-      palette: @palette
-      library: @library
-      selectedPaletteIndex: @selectedIndex
-      selectedPaletteItem: @selectedPaletteItem
-      selectedPaletteImage: @selectedPaletteImage
-      imageMetadata: @imageMetadata
+  selectPaletteIndex(index) {
+    const maxIndex = this.palette.length - 1;
+    const effectiveIndex = Math.min(maxIndex, index);
+    this.lastSelection = (this.selectedIndex = effectiveIndex);
+    this.selectedPaletteItem  = this.palette[effectiveIndex];
+    return this.selectedPaletteImage = this.selectedPaletteItem != null ? this.selectedPaletteItem.image : undefined;
+  },
 
-    log.info "Sending changes to listeners: #{JSON.stringify(data)}"
-    @trigger(data)
+  onRestoreSelection() {
+    if (this.lastSelection > -1) {
+      this.selectPaletteIndex(this.lastSelection);
+    } else { this.selectPaletteIndex(0); }
+    return this.updateChanges();
+  },
 
-mixin =
-  getInitialState: ->
-    palette: paletteStore.palette
-    library: paletteStore.library
-    selectedPaletteItem: paletteStore.selectedPaletteItem
-    selectedPaletteIndex: paletteStore.selectedPaletteIndex
-    selectedPaletteImage: paletteStore.selectedPaletteImage
-    imageMetadata: paletteStore.imageMetadata
+  onSetImageMetadata(image, metadata) {
+    log.info("Set Image metadata called");
+    this.addToLibrary(image);
+    const libraryItem = this.inLibrary(image);
+    if (libraryItem) {
+      libraryItem.metadata = metadata;
+      this.imageMetadata = libraryItem.metadata;
+      return this.updateChanges();
+    } else {
+      return alert("cant find library item");
+    }
+  },
 
-  componentDidMount: ->
-    @paletteUnsubscribe = paletteStore.listen @onPaletteChange
+  removePaletteItem(item) {
+    // Try to select the same index as the deleted item
+    const i = _.indexOf(this.palette, item);
+    this.palette = _.without(this.palette, item);
+    return this.selectPaletteIndex(i);
+  },
 
-  componentWillUnmount: ->
-    @paletteUnsubscribe()
+  moveToFront(index) {
+    return this.palette.splice(0, 0, this.palette.splice(index, 1)[0]);
+  },
 
-  onPaletteChange: (status) ->
-    @setState
-      palette: status.palette
-      library: status.library
-      selectedPaletteIndex: status.selectedPaletteIndex
-      selectedPaletteItem: status.selectedPaletteItem
-      selectedPaletteImage: status.selectedPaletteImage
+  inPalette(node) {
+    // node in Pallete is standardized, arg node not always
+    return _.find(this.palette, {key: node.key || this.makeNodeSignature(node)});
+  },
+
+  findByUUID(uuid) {
+    return _.find(this.palette, {uuid});
+  },
+
+  inLibrary(node) {
+    return this.library[node.key];
+  },
+
+  updateChanges() {
+    const data = {
+      palette: this.palette,
+      library: this.library,
+      selectedPaletteIndex: this.selectedIndex,
+      selectedPaletteItem: this.selectedPaletteItem,
+      selectedPaletteImage: this.selectedPaletteImage,
+      imageMetadata: this.imageMetadata
+    };
+
+    log.info(`Sending changes to listeners: ${JSON.stringify(data)}`);
+    return this.trigger(data);
+  }
+});
+
+const mixin = {
+  getInitialState() {
+    return {
+      palette: paletteStore.palette,
+      library: paletteStore.library,
+      selectedPaletteItem: paletteStore.selectedPaletteItem,
+      selectedPaletteIndex: paletteStore.selectedPaletteIndex,
+      selectedPaletteImage: paletteStore.selectedPaletteImage,
+      imageMetadata: paletteStore.imageMetadata
+    };
+  },
+
+  componentDidMount() {
+    return this.paletteUnsubscribe = paletteStore.listen(this.onPaletteChange);
+  },
+
+  componentWillUnmount() {
+    return this.paletteUnsubscribe();
+  },
+
+  onPaletteChange(status) {
+    return this.setState({
+      palette: status.palette,
+      library: status.library,
+      selectedPaletteIndex: status.selectedPaletteIndex,
+      selectedPaletteItem: status.selectedPaletteItem,
+      selectedPaletteImage: status.selectedPaletteImage,
       imageMetadata: status.imageMetadata
+    });
+  }
+};
 
-module.exports =
-  actions: paletteActions
-  store: paletteStore
-  mixin: mixin
+module.exports = {
+  actions: paletteActions,
+  store: paletteStore,
+  mixin
+};
 
-window.PaletteStore = module.exports
+window.PaletteStore = module.exports;

@@ -1,39 +1,49 @@
-ImageMetadata = React.createFactory require './image-metadata-view'
-ImageManger   = require "../stores/image-dialog-store"
-PaletteStore  = require "../stores/palette-store"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const ImageMetadata = React.createFactory(require('./image-metadata-view'));
+const ImageManger   = require("../stores/image-dialog-store");
+const PaletteStore  = require("../stores/palette-store");
 
-tr = require '../utils/translate'
+const tr = require('../utils/translate');
 
-{div, button, img, i, a} = React.DOM
-module.exports = React.createClass
-  displayName: 'ImageSearchResult'
+const {div, button, img, i, a} = React.DOM;
+module.exports = React.createClass({
+  displayName: 'ImageSearchResult',
 
-  cancel: (e) ->
-    e.preventDefault()
-    ImageManger.actions.cancel()
+  cancel(e) {
+    e.preventDefault();
+    return ImageManger.actions.cancel();
+  },
 
-  addImage: ->
-    PaletteStore.actions.addToPalette @props.imageInfo
+  addImage() {
+    return PaletteStore.actions.addToPalette(this.props.imageInfo);
+  },
 
-  render: ->
-    (div {key: @props.key},
-      (div {className: 'header'}, tr '~IMAGE-BROWSER.PREVIEW')
-      (div {className: 'preview-image'},
-        (img {src: @props.imageInfo?.image})
-        (a {href: '#', onClick: @cancel},
-          (i {className: "icon-codap-ex"})
+  render() {
+    return (div({key: this.props.key},
+      (div({className: 'header'}, tr('~IMAGE-BROWSER.PREVIEW'))),
+      (div({className: 'preview-image'},
+        (img({src: (this.props.imageInfo != null ? this.props.imageInfo.image : undefined)})),
+        (a({href: '#', onClick: this.cancel},
+          (i({className: "icon-codap-ex"})),
           'cancel'
-        )
-      )
-      (div {className: 'preview-add-image'},
-        (button {onClick: @addImage}, tr '~IMAGE-BROWSER.ADD_IMAGE')
-      )
-      if @props.imageInfo?.metadata
-        (div {className: 'preview-metadata'},
-          (ImageMetadata
-            metadata: @props.imageInfo.metadata
-            update:  ImageManger.actions.update
+        ))
+      )),
+      (div({className: 'preview-add-image'},
+        (button({onClick: this.addImage}, tr('~IMAGE-BROWSER.ADD_IMAGE')))
+      )),
+      (this.props.imageInfo != null ? this.props.imageInfo.metadata : undefined) ?
+        (div({className: 'preview-metadata'},
+          (ImageMetadata({
+            metadata: this.props.imageInfo.metadata,
+            update:  ImageManger.actions.update,
             className: 'image-browser-preview-metadata'
-          )
-        )
-    )
+          }))
+        )) : undefined
+    ));
+  }
+});

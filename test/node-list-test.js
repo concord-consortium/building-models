@@ -1,97 +1,115 @@
-global._ = require 'lodash'
-global.log = require 'loglevel'
-global.Reflux = require 'reflux'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+global._ = require('lodash');
+global.log = require('loglevel');
+global.Reflux = require('reflux');
 
-global.window = { location: '' }
-
-
-chai = require('chai')
-chai.config.includeStack = true
-
-expect         = chai.expect
-should         = chai.should()
-Sinon          = require('sinon')
-
-requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
-
-GraphPrimitive = requireModel 'graph-primitive'
-Link           = requireModel 'link'
-Node           = requireModel 'node'
-GraphStore    = require "#{__dirname}/../src/code/stores/graph-store"
-Relationship   = requireModel 'relationship'
-CodapHelper    = require './codap-helper'
-
-makeLink = (sourceNode, targetNode, formula) ->
-  new Link
-    title: "function"
-    sourceNode: sourceNode
-    targetNode: targetNode
-    relation: new Relationship
-      formula: formula
-
-LinkNodes = (sourceNode, targetNode, formula) ->
-  link = makeLink(sourceNode, targetNode, formula)
-  sourceNode.addLink(link)
-  targetNode.addLink(link)
+global.window = { location: '' };
 
 
-describe 'NodeList', ->
-  beforeEach ->
-    CodapHelper.Stub()
-  afterEach ->
-    CodapHelper.UnStub()
+const chai = require('chai');
+chai.config.includeStack = true;
 
-  describe 'GraphPrimitive', ->
-    it 'GraphPrimitive should exists', ->
-      GraphPrimitive.should.exist
+const { expect }         = chai;
+const should         = chai.should();
+const Sinon          = require('sinon');
 
-    describe 'the type', ->
-      undertest = new GraphPrimitive()
-      undertest.type.should.equal('GraphPrimitive')
+const requireModel = name => require(`${__dirname}/../src/code/models/${name}`);
 
-    describe 'the id', ->
-      beforeEach ->
-        GraphPrimitive.resetCounters()
+const GraphPrimitive = requireModel('graph-primitive');
+const Link           = requireModel('link');
+const Node           = requireModel('node');
+const GraphStore    = require(`${__dirname}/../src/code/stores/graph-store`);
+const Relationship   = requireModel('relationship');
+const CodapHelper    = require('./codap-helper');
 
-      describe 'of a GraphPrimitive', ->
-        it 'should increment the counter, and use the type name (GraphPrimitive)', ->
-          undertest = new GraphPrimitive()
-          undertest.id.should.equal('GraphPrimitive-1')
+const makeLink = (sourceNode, targetNode, formula) =>
+  new Link({
+    title: "function",
+    sourceNode,
+    targetNode,
+    relation: new Relationship({
+      formula})
+  })
+;
 
-      describe 'of a Link', ->
-        it 'should increment the counter, and use the type name (Link)', ->
-          undertest = new Link()
-          undertest.id.should.equal('Link-1')
-          secondLink = new Link()
-          secondLink.id.should.equal('Link-2')
+const LinkNodes = function(sourceNode, targetNode, formula) {
+  const link = makeLink(sourceNode, targetNode, formula);
+  sourceNode.addLink(link);
+  return targetNode.addLink(link);
+};
 
-      describe 'of a Node', ->
-        it 'should increment the counter, and use the type name (Node)', ->
-          undertest = new Node()
-          undertest.id.should.equal('Node-1')
-          secondNode = new Node()
-          secondNode.id.should.equal('Node-2')
 
-  describe 'Link', ->
-    describe 'terminalKey', ->
-      beforeEach ->
-        @link = new Link(
+describe('NodeList', function() {
+  beforeEach(() => CodapHelper.Stub());
+  afterEach(() => CodapHelper.UnStub());
+
+  describe('GraphPrimitive', function() {
+    it('GraphPrimitive should exists', () => GraphPrimitive.should.exist);
+
+    describe('the type', function() {
+      const undertest = new GraphPrimitive();
+      return undertest.type.should.equal('GraphPrimitive');
+    });
+
+    return describe('the id', function() {
+      beforeEach(() => GraphPrimitive.resetCounters());
+
+      describe('of a GraphPrimitive', () =>
+        it('should increment the counter, and use the type name (GraphPrimitive)', function() {
+          const undertest = new GraphPrimitive();
+          return undertest.id.should.equal('GraphPrimitive-1');
+        })
+      );
+
+      describe('of a Link', () =>
+        it('should increment the counter, and use the type name (Link)', function() {
+          const undertest = new Link();
+          undertest.id.should.equal('Link-1');
+          const secondLink = new Link();
+          return secondLink.id.should.equal('Link-2');
+        })
+      );
+
+      return describe('of a Node', () =>
+        it('should increment the counter, and use the type name (Node)', function() {
+          const undertest = new Node();
+          undertest.id.should.equal('Node-1');
+          const secondNode = new Node();
+          return secondNode.id.should.equal('Node-2');
+        })
+      );
+    });
+  });
+
+  describe('Link', () =>
+    describe('terminalKey', function() {
+      beforeEach(function() {
+        return this.link = new Link({
           sourceNode: {key: 'source'},
           sourceTerminal: 'a',
           targetNode: {key: 'target'},
           targetTerminal: 'b',
           title: 'unkown link'
-        )
-      it "should have a reasonable text based terminalKey", ->
-        @link.terminalKey().should.equal("source ------> target")
+        });
+      });
+      return it("should have a reasonable text based terminalKey", function() {
+        return this.link.terminalKey().should.equal("source ------> target");
+      });
+    })
+  );
 
-  describe 'Node', ->
-    beforeEach ->
-      @node_a = new Node({title: "Node a"},'a')
-      @node_b = new Node({title: "Node b"},'b')
-      @node_c = new Node({title: "Node c"},'c')
+  describe('Node', function() {
+    beforeEach(function() {
+      this.node_a = new Node({title: "Node a"},'a');
+      this.node_b = new Node({title: "Node b"},'b');
+      return this.node_c = new Node({title: "Node c"},'c');
+    });
 
-    ###
+    /*
       Note cyclic graph in A <-> B
                     +---+
             +-------->   |
@@ -103,279 +121,336 @@ describe 'NodeList', ->
           +---+      | C |
                     |   |
                     +---+
-    ###
-    describe 'its links', ->
-      beforeEach ->
-        @link_a = new Link
-          title: "link a"
-          sourceNode: @node_a
-          targetNode: @node_b
+    */
+    describe('its links', function() {
+      beforeEach(function() {
+        this.link_a = new Link({
+          title: "link a",
+          sourceNode: this.node_a,
+          targetNode: this.node_b
+        });
 
-        @link_b = new Link
-          title: "link b"
-          sourceNode: @node_a
-          targetNode: @node_c
+        this.link_b = new Link({
+          title: "link b",
+          sourceNode: this.node_a,
+          targetNode: this.node_c
+        });
 
-        @link_c = new Link
-          title: "link c"
-          sourceNode: @node_b
-          targetNode: @node_a
+        this.link_c = new Link({
+          title: "link c",
+          sourceNode: this.node_b,
+          targetNode: this.node_a
+        });
 
-        @link_without_a = new Link
-          title: "link without a"
-          sourceNode: @node_b
-          targetNode: @node_c
+        return this.link_without_a = new Link({
+          title: "link without a",
+          sourceNode: this.node_b,
+          targetNode: this.node_c
+        });
+      });
 
 
-      describe 'rejecting bad links', ->
-        describe 'links that dont include itself', ->
-          it "it shouldn't add a link it doesn't belong to",  ->
-            fn =  =>
-              @node_a.addLink(@link_without_a)
-            fn.should.throw("Bad link")
+      describe('rejecting bad links', function() {
+        describe('links that dont include itself', () =>
+          it("it shouldn't add a link it doesn't belong to",  function() {
+            const fn =  () => {
+              return this.node_a.addLink(this.link_without_a);
+            };
+            return fn.should.throw("Bad link");
+          })
+        );
 
-        describe 'links that it already has', ->
-          beforeEach ->
-            @node_a.addLink(@link_a)
-          it 'should throw an error when re-linking',  ->
-            fn =  =>
-              @node_a.addLink(@link_a)
-            fn.should.throw("Duplicate link")
+        return describe('links that it already has', function() {
+          beforeEach(function() {
+            return this.node_a.addLink(this.link_a);
+          });
+          return it('should throw an error when re-linking',  function() {
+            const fn =  () => {
+              return this.node_a.addLink(this.link_a);
+            };
+            return fn.should.throw("Duplicate link");
+          });
+        });
+      });
 
-      describe 'sorting links', ->
-        describe "a node with two out links, and one in link", ->
-          beforeEach ->
-            @node_a.addLink(@link_a)
-            @node_a.addLink(@link_b)
-            @node_a.addLink(@link_c)
+      return describe('sorting links', () =>
+        describe("a node with two out links, and one in link", function() {
+          beforeEach(function() {
+            this.node_a.addLink(this.link_a);
+            this.node_a.addLink(this.link_b);
+            return this.node_a.addLink(this.link_c);
+          });
 
-          describe 'In Links', ->
-            it "should have 1 in link", ->
-              @node_a.inLinks().should.have.length(1)
+          describe('In Links', () =>
+            it("should have 1 in link", function() {
+              return this.node_a.inLinks().should.have.length(1);
+            })
+          );
 
-          describe 'outLinks', ->
-            it "should have 2 outlinks", ->
-              @node_a.outLinks().should.have.length(2)
+          describe('outLinks', () =>
+            it("should have 2 outlinks", function() {
+              return this.node_a.outLinks().should.have.length(2);
+            })
+          );
 
-          describe 'inNodes', ->
-            it "should have 1 inNode", ->
-              @node_a.inNodes().should.have.length(1)
-            it "should include node_c", ->
-              @node_a.inNodes().should.include(@node_b)
+          describe('inNodes', function() {
+            it("should have 1 inNode", function() {
+              return this.node_a.inNodes().should.have.length(1);
+            });
+            return it("should include node_c", function() {
+              return this.node_a.inNodes().should.include(this.node_b);
+            });
+          });
 
-          describe 'downstreamNodes', ->
-            it "should have some nodes", ->
-              @node_a.downstreamNodes().should.have.length(2)
+          describe('downstreamNodes', () =>
+            it("should have some nodes", function() {
+              return this.node_a.downstreamNodes().should.have.length(2);
+            })
+          );
 
-          describe '#infoString', ->
-            it "should print a list of nodes its connected to", ->
-              expected = "Node a  --link a-->[Node b], --link b-->[Node c]"
-              @node_a.infoString().should.equal(expected)
+          return describe('#infoString', () =>
+            it("should print a list of nodes its connected to", function() {
+              const expected = "Node a  --link a-->[Node b], --link b-->[Node c]";
+              return this.node_a.infoString().should.equal(expected);
+            })
+          );
+        })
+      );
+    });
 
-    describe "GraphStore", ->
-      beforeEach ->
+    return describe("GraphStore", function() {
+      beforeEach(function() {
 
-        @nodeA = new Node({title: "a", x:10, y:10}, 'a')
-        @nodeB = new Node({title: "b", x:20, y:20}, 'b')
-        @graphStore = GraphStore.store
-        @graphStore.init()
-        @graphStore.addNode @nodeA
-        @graphStore.addNode @nodeB
+        this.nodeA = new Node({title: "a", x:10, y:10}, 'a');
+        this.nodeB = new Node({title: "b", x:20, y:20}, 'b');
+        this.graphStore = GraphStore.store;
+        this.graphStore.init();
+        this.graphStore.addNode(this.nodeA);
+        this.graphStore.addNode(this.nodeB);
 
-        @newLink = new Link({
-          sourceNode: @nodeA
-          targetNode: @nodeB
-          targetTerminal: "a"
+        this.newLink = new Link({
+          sourceNode: this.nodeA,
+          targetNode: this.nodeB,
+          targetTerminal: "a",
           sourceTerminal: "b"
-        })
-        @newLink.terminalKey = ->
-          "newLink"
+        });
+        this.newLink.terminalKey = () => "newLink";
 
-        @otherNewLink = new Link({
-          sourceNode: @nodeB
-          targetNode: @nodeA
-        })
-        @otherNewLink.terminalKey = ->
-          "otherNewLink"
+        this.otherNewLink = new Link({
+          sourceNode: this.nodeB,
+          targetNode: this.nodeA
+        });
+        return this.otherNewLink.terminalKey = () => "otherNewLink";
+      });
 
-      describe "addLink", ->
-        describe "When the link doesn't already exist", ->
-          it "should add a new link", ->
-            should.not.exist @graphStore.linkKeys['newLink']
-            @graphStore.addLink(@newLink)
-            @graphStore.linkKeys['newLink'].should.equal(@newLink)
-            should.not.exist @graphStore.linkKeys['otherNewLink']
-            @graphStore.addLink(@otherNewLink)
-            @graphStore.linkKeys['otherNewLink'].should.equal(@otherNewLink)
+      return describe("addLink", function() {
+        describe("When the link doesn't already exist", () =>
+          it("should add a new link", function() {
+            should.not.exist(this.graphStore.linkKeys['newLink']);
+            this.graphStore.addLink(this.newLink);
+            this.graphStore.linkKeys['newLink'].should.equal(this.newLink);
+            should.not.exist(this.graphStore.linkKeys['otherNewLink']);
+            this.graphStore.addLink(this.otherNewLink);
+            return this.graphStore.linkKeys['otherNewLink'].should.equal(this.otherNewLink);
+          })
+        );
 
-        describe "When the link does already exist", ->
-          beforeEach ->
-            @graphStore.linkKeys['newLink'] = 'oldValue'
-          it "should not add the new link", ->
-            @graphStore.addLink(@newLink)
-            @graphStore.linkKeys['newLink'].should.equal('oldValue')
+        return describe("When the link does already exist", function() {
+          beforeEach(function() {
+            return this.graphStore.linkKeys['newLink'] = 'oldValue';
+          });
+          return it("should not add the new link", function() {
+            this.graphStore.addLink(this.newLink);
+            return this.graphStore.linkKeys['newLink'].should.equal('oldValue');
+          });
+        });
+      });
+    });
+  });
 
-  describe "Graph Topology", ->
+  describe("Graph Topology", function() {
 
-    # A ->  B  -> D
-    # └< C <┘
-    describe "a graph with a totally independent cycle", ->
-      beforeEach ->
-        @nodeA    = new Node()
-        @nodeB    = new Node()
-        @nodeC    = new Node()
-        @nodeD    = new Node()
-        @formula  = "1 * in"
+    // A ->  B  -> D
+    // └< C <┘
+    describe("a graph with a totally independent cycle", function() {
+      beforeEach(function() {
+        this.nodeA    = new Node();
+        this.nodeB    = new Node();
+        this.nodeC    = new Node();
+        this.nodeD    = new Node();
+        this.formula  = "1 * in";
 
-        LinkNodes(@nodeA, @nodeB, @formula)
-        LinkNodes(@nodeB, @nodeC, @formula)
-        LinkNodes(@nodeC, @nodeA, @formula)
-        LinkNodes(@nodeB, @nodeD, @formula)
+        LinkNodes(this.nodeA, this.nodeB, this.formula);
+        LinkNodes(this.nodeB, this.nodeC, this.formula);
+        LinkNodes(this.nodeC, this.nodeA, this.formula);
+        LinkNodes(this.nodeB, this.nodeD, this.formula);
 
-        graphStore = GraphStore.store
-        graphStore.init()
-        graphStore.addNode @nodeA
-        graphStore.addNode @nodeB
-        graphStore.addNode @nodeC
-        graphStore.addNode @nodeD
+        const graphStore = GraphStore.store;
+        graphStore.init();
+        graphStore.addNode(this.nodeA);
+        graphStore.addNode(this.nodeB);
+        graphStore.addNode(this.nodeC);
+        return graphStore.addNode(this.nodeD);
+      });
 
-      it "should mark the nodes that can have initial values edited", ->
-        @nodeA.canEditInitialValue().should.equal true
-        @nodeB.canEditInitialValue().should.equal true
-        @nodeC.canEditInitialValue().should.equal true
-        @nodeD.canEditInitialValue().should.equal false
+      it("should mark the nodes that can have initial values edited", function() {
+        this.nodeA.canEditInitialValue().should.equal(true);
+        this.nodeB.canEditInitialValue().should.equal(true);
+        this.nodeC.canEditInitialValue().should.equal(true);
+        return this.nodeD.canEditInitialValue().should.equal(false);
+      });
 
-      it "should mark the nodes that can have values edited while running", ->
-        @nodeA.canEditValueWhileRunning().should.equal false
-        @nodeB.canEditValueWhileRunning().should.equal false
-        @nodeC.canEditValueWhileRunning().should.equal false
-        @nodeD.canEditValueWhileRunning().should.equal false
-
-
-    # A -> B  -> C -> E
-    #      └< D <┘
-    describe "a graph with cycles with independent inputs", ->
-      beforeEach ->
-        @nodeA    = new Node()
-        @nodeB    = new Node()
-        @nodeC    = new Node()
-        @nodeD    = new Node()
-        @nodeE    = new Node()
-        @formula  = "1 * in"
-
-        LinkNodes(@nodeA, @nodeB, @formula)
-        LinkNodes(@nodeB, @nodeC, @formula)
-        LinkNodes(@nodeC, @nodeD, @formula)
-        LinkNodes(@nodeD, @nodeB, @formula)
-        LinkNodes(@nodeC, @nodeE, @formula)
-
-        graphStore = GraphStore.store
-        graphStore.init()
-        graphStore.addNode @nodeA
-        graphStore.addNode @nodeB
-        graphStore.addNode @nodeC
-        graphStore.addNode @nodeD
-        graphStore.addNode @nodeE
-
-      it "should mark the nodes that can have initial values edited", ->
-        @nodeA.canEditInitialValue().should.equal true
-        @nodeB.canEditInitialValue().should.equal false
-        @nodeC.canEditInitialValue().should.equal false
-        @nodeD.canEditInitialValue().should.equal false
-        @nodeE.canEditInitialValue().should.equal false
-
-      it "should mark the nodes that can have values edited while running", ->
-        @nodeA.canEditValueWhileRunning().should.equal true
-        @nodeB.canEditValueWhileRunning().should.equal false
-        @nodeC.canEditValueWhileRunning().should.equal false
-        @nodeD.canEditValueWhileRunning().should.equal false
-        @nodeE.canEditValueWhileRunning().should.equal false
+      return it("should mark the nodes that can have values edited while running", function() {
+        this.nodeA.canEditValueWhileRunning().should.equal(false);
+        this.nodeB.canEditValueWhileRunning().should.equal(false);
+        this.nodeC.canEditValueWhileRunning().should.equal(false);
+        return this.nodeD.canEditValueWhileRunning().should.equal(false);
+      });
+    });
 
 
-    # A -> B+ -> C
-    describe "a graph with collectors", ->
-      beforeEach ->
-        @nodeA    = new Node()
-        @nodeB    = new Node({isAccumulator: true})
-        @nodeC    = new Node()
-        @formula  = "1 * in"
+    // A -> B  -> C -> E
+    //      └< D <┘
+    describe("a graph with cycles with independent inputs", function() {
+      beforeEach(function() {
+        this.nodeA    = new Node();
+        this.nodeB    = new Node();
+        this.nodeC    = new Node();
+        this.nodeD    = new Node();
+        this.nodeE    = new Node();
+        this.formula  = "1 * in";
 
-        LinkNodes(@nodeA, @nodeB, @formula)
-        LinkNodes(@nodeB, @nodeC, @formula)
+        LinkNodes(this.nodeA, this.nodeB, this.formula);
+        LinkNodes(this.nodeB, this.nodeC, this.formula);
+        LinkNodes(this.nodeC, this.nodeD, this.formula);
+        LinkNodes(this.nodeD, this.nodeB, this.formula);
+        LinkNodes(this.nodeC, this.nodeE, this.formula);
 
-        graphStore = GraphStore.store
-        graphStore.init()
-        graphStore.addNode @nodeA
-        graphStore.addNode @nodeB
-        graphStore.addNode @nodeC
+        const graphStore = GraphStore.store;
+        graphStore.init();
+        graphStore.addNode(this.nodeA);
+        graphStore.addNode(this.nodeB);
+        graphStore.addNode(this.nodeC);
+        graphStore.addNode(this.nodeD);
+        return graphStore.addNode(this.nodeE);
+      });
 
-      it "should mark the nodes that can have initial values edited", ->
-        @nodeA.canEditInitialValue().should.equal true
-        @nodeB.canEditInitialValue().should.equal true
-        @nodeC.canEditInitialValue().should.equal false
+      it("should mark the nodes that can have initial values edited", function() {
+        this.nodeA.canEditInitialValue().should.equal(true);
+        this.nodeB.canEditInitialValue().should.equal(false);
+        this.nodeC.canEditInitialValue().should.equal(false);
+        this.nodeD.canEditInitialValue().should.equal(false);
+        return this.nodeE.canEditInitialValue().should.equal(false);
+      });
 
-      it "should mark the nodes that can have values edited while running", ->
-        @nodeA.canEditValueWhileRunning().should.equal true
-        @nodeB.canEditValueWhileRunning().should.equal false
-        @nodeC.canEditValueWhileRunning().should.equal false
-
-    # A -x-> B -> C
-    describe "a graph with undefined relations", ->
-      beforeEach ->
-        @nodeA    = new Node()
-        @nodeB    = new Node({isAccumulator: true})
-        @nodeC    = new Node()
-        @formula  = "1 * in"
-
-        LinkNodes(@nodeA, @nodeB)
-        LinkNodes(@nodeB, @nodeC, @formula)
-
-        graphStore = GraphStore.store
-        graphStore.init()
-        graphStore.addNode @nodeA
-        graphStore.addNode @nodeB
-        graphStore.addNode @nodeC
-
-      it "should mark the nodes that can have initial values edited", ->
-        @nodeA.canEditInitialValue().should.equal true
-        @nodeB.canEditInitialValue().should.equal true
-        @nodeC.canEditInitialValue().should.equal false
-
-      it "should mark the nodes that can have values edited while running", ->
-        @nodeA.canEditValueWhileRunning().should.equal true
-        @nodeB.canEditValueWhileRunning().should.equal true
-        @nodeC.canEditValueWhileRunning().should.equal false
-
-  describe "Graph Descriptions", ->
-
-    beforeEach ->
-
-      # A -> B+ -> C -x-> D
-      nodeA    = new Node({x: 10, y: 15, initialValue: 10})
-      nodeB    = new Node({x: 20, y: 25, initialValue: 20, isAccumulator: true})
-      nodeC    = new Node({x: 30, y: 35, initialValue: 30, combineMethod: 'average'})
-      nodeD    = new Node({x: 40, y: 45, initialValue: 40})
-      formula  = "1 * in"
-      linkA = makeLink(nodeA, nodeB, formula)
-      linkB = makeLink(nodeB, nodeC, formula)
-      linkC = makeLink(nodeC, nodeD)
-      graphStore = GraphStore.store
-      graphStore.init()
-      graphStore.addNode nodeA
-      graphStore.addNode nodeB
-      graphStore.addNode nodeC
-      graphStore.addNode nodeD
-      graphStore.addLink linkA
-      graphStore.addLink linkB
-      graphStore.addLink linkC
+      return it("should mark the nodes that can have values edited while running", function() {
+        this.nodeA.canEditValueWhileRunning().should.equal(true);
+        this.nodeB.canEditValueWhileRunning().should.equal(false);
+        this.nodeC.canEditValueWhileRunning().should.equal(false);
+        this.nodeD.canEditValueWhileRunning().should.equal(false);
+        return this.nodeE.canEditValueWhileRunning().should.equal(false);
+      });
+    });
 
 
-    it "should describe the visual links correctly", ->
-      graphStore = GraphStore.store
-      desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks())
-      desc.links.should.equal "10,15;1 * in;20,25|20,25;1 * in;30,35|30,35;undefined;40,45|4"
+    // A -> B+ -> C
+    describe("a graph with collectors", function() {
+      beforeEach(function() {
+        this.nodeA    = new Node();
+        this.nodeB    = new Node({isAccumulator: true});
+        this.nodeC    = new Node();
+        this.formula  = "1 * in";
 
-    it "should describe the model graph correctly", ->
-      graphStore = GraphStore.store
-      desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks())
-      desc.model.should.equal "steps:10|cap:false|Node-71:10;1 * in;Node-72:20;average|Node-72:20:cap;1 * in;Node-73;average|"
+        LinkNodes(this.nodeA, this.nodeB, this.formula);
+        LinkNodes(this.nodeB, this.nodeC, this.formula);
+
+        const graphStore = GraphStore.store;
+        graphStore.init();
+        graphStore.addNode(this.nodeA);
+        graphStore.addNode(this.nodeB);
+        return graphStore.addNode(this.nodeC);
+      });
+
+      it("should mark the nodes that can have initial values edited", function() {
+        this.nodeA.canEditInitialValue().should.equal(true);
+        this.nodeB.canEditInitialValue().should.equal(true);
+        return this.nodeC.canEditInitialValue().should.equal(false);
+      });
+
+      return it("should mark the nodes that can have values edited while running", function() {
+        this.nodeA.canEditValueWhileRunning().should.equal(true);
+        this.nodeB.canEditValueWhileRunning().should.equal(false);
+        return this.nodeC.canEditValueWhileRunning().should.equal(false);
+      });
+    });
+
+    // A -x-> B -> C
+    return describe("a graph with undefined relations", function() {
+      beforeEach(function() {
+        this.nodeA    = new Node();
+        this.nodeB    = new Node({isAccumulator: true});
+        this.nodeC    = new Node();
+        this.formula  = "1 * in";
+
+        LinkNodes(this.nodeA, this.nodeB);
+        LinkNodes(this.nodeB, this.nodeC, this.formula);
+
+        const graphStore = GraphStore.store;
+        graphStore.init();
+        graphStore.addNode(this.nodeA);
+        graphStore.addNode(this.nodeB);
+        return graphStore.addNode(this.nodeC);
+      });
+
+      it("should mark the nodes that can have initial values edited", function() {
+        this.nodeA.canEditInitialValue().should.equal(true);
+        this.nodeB.canEditInitialValue().should.equal(true);
+        return this.nodeC.canEditInitialValue().should.equal(false);
+      });
+
+      return it("should mark the nodes that can have values edited while running", function() {
+        this.nodeA.canEditValueWhileRunning().should.equal(true);
+        this.nodeB.canEditValueWhileRunning().should.equal(true);
+        return this.nodeC.canEditValueWhileRunning().should.equal(false);
+      });
+    });
+  });
+
+  return describe("Graph Descriptions", function() {
+
+    beforeEach(function() {
+
+      // A -> B+ -> C -x-> D
+      const nodeA    = new Node({x: 10, y: 15, initialValue: 10});
+      const nodeB    = new Node({x: 20, y: 25, initialValue: 20, isAccumulator: true});
+      const nodeC    = new Node({x: 30, y: 35, initialValue: 30, combineMethod: 'average'});
+      const nodeD    = new Node({x: 40, y: 45, initialValue: 40});
+      const formula  = "1 * in";
+      const linkA = makeLink(nodeA, nodeB, formula);
+      const linkB = makeLink(nodeB, nodeC, formula);
+      const linkC = makeLink(nodeC, nodeD);
+      const graphStore = GraphStore.store;
+      graphStore.init();
+      graphStore.addNode(nodeA);
+      graphStore.addNode(nodeB);
+      graphStore.addNode(nodeC);
+      graphStore.addNode(nodeD);
+      graphStore.addLink(linkA);
+      graphStore.addLink(linkB);
+      return graphStore.addLink(linkC);
+    });
+
+
+    it("should describe the visual links correctly", function() {
+      const graphStore = GraphStore.store;
+      const desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks());
+      return desc.links.should.equal("10,15;1 * in;20,25|20,25;1 * in;30,35|30,35;undefined;40,45|4");
+    });
+
+    return it("should describe the model graph correctly", function() {
+      const graphStore = GraphStore.store;
+      const desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks());
+      return desc.model.should.equal("steps:10|cap:false|Node-71:10;1 * in;Node-72:20;average|Node-72:20:cap;1 * in;Node-73;average|");
+    });
+  });
+});

@@ -1,73 +1,87 @@
-xlat       = require '../utils/translate'
-licenses   = require '../data/licenses'
-ImageDialogStore = require '../stores/image-dialog-store'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const xlat       = require('../utils/translate');
+const licenses   = require('../data/licenses');
+const ImageDialogStore = require('../stores/image-dialog-store');
 
-{div, table, tbody, tr, td, a, input, select, radio, p} = React.DOM
+const {div, table, tbody, tr, td, a, input, select, radio, p} = React.DOM;
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'ImageMetadata'
+  displayName: 'ImageMetadata',
 
 
-  getInitialState: ->
-    hostname: null
+  getInitialState() {
+    return {hostname: null};
+  },
 
-  hostname: ->
-    # instead of using a regexp to extract the hostname use the dom
-    link = document.createElement 'a'
-    link.setAttribute 'href', @props.metadata?.link
-    link.hostname
+  hostname() {
+    // instead of using a regexp to extract the hostname use the dom
+    const link = document.createElement('a');
+    link.setAttribute('href', this.props.metadata != null ? this.props.metadata.link : undefined);
+    return link.hostname;
+  },
 
-  changed: ->
-    newMetaData =
-      title: @refs.title.value
-      link: @refs.link.value
-      license: @refs.license.value
+  changed() {
+    const newMetaData = {
+      title: this.refs.title.value,
+      link: this.refs.link.value,
+      license: this.refs.license.value,
       source: 'external'
+    };
 
-    @props.update {metadata: newMetaData}
+    return this.props.update({metadata: newMetaData});
+  },
 
-  render: ->
-    (div {className: 'image-metadata'},
-      if @props.metadata
-        @renderMetadata()
-    )
+  render() {
+    return (div({className: 'image-metadata'},
+      this.props.metadata ?
+        this.renderMetadata() : undefined
+    ));
+  },
 
-  renderMetadata: ->
-    licenseName = @props.metadata.license or 'public domain'
-    licenseData = licenses.getLicense licenseName
-    title   = @props.metadata.title
-    link    = @props.metadata.link
+  renderMetadata() {
+    const licenseName = this.props.metadata.license || 'public domain';
+    const licenseData = licenses.getLicense(licenseName);
+    const { title }   = this.props.metadata;
+    const { link }    = this.props.metadata;
 
-    if @props.metadata.source is 'external'
-      (div {key: 'external'},
-        (table {},
-          (tbody {},
-            (tr {}, (td {}, xlat '~METADATA.TITLE'),
-              (td {},
-                (input {ref: 'title', value: title, onChange: @changed})))
+    if (this.props.metadata.source === 'external') {
+      return (div({key: 'external'},
+        (table({},
+          (tbody({},
+            (tr({}, (td({}, xlat('~METADATA.TITLE'))),
+              (td({},
+                (input({ref: 'title', value: title, onChange: this.changed})))))),
 
-            (tr {}, (td {}, xlat '~METADATA.LINK'),
-              (td {},
-                (input {ref: 'link', value: link, onChange: @changed})))
-            (tr {}, (td {}, xlat '~METADATA.CREDIT'),
-              (td {},
-                (select {ref: 'license', value: licenseName, onChange: @changed},
-                  licenses.getRenderOptions licenseName
-            )))
-          )
-        )
-        (p {className: 'learn-more'}, (a {href: licenseData.link, target: '_blank'}, "Learn more about #{licenseData.fullLabel}"))
-      )
-    else
-      (div {key: 'internal'},
-        (p {})
-        (div {}, "\"#{title}\"")
-        if link
-          (div {key: 'hostname'}, (a {href: link, target: '_blank'}, "See it on #{@hostname()}"))
-        (p {})
-        (div {}, 'License')
-        (div {key: 'license'},
-          (a {href: licenseData.link, target: '_blank'}, licenseData.label)
-        )
-      )
+            (tr({}, (td({}, xlat('~METADATA.LINK'))),
+              (td({},
+                (input({ref: 'link', value: link, onChange: this.changed})))))),
+            (tr({}, (td({}, xlat('~METADATA.CREDIT'))),
+              (td({},
+                (select({ref: 'license', value: licenseName, onChange: this.changed},
+                  licenses.getRenderOptions(licenseName)
+            ))))))
+          ))
+        )),
+        (p({className: 'learn-more'}, (a({href: licenseData.link, target: '_blank'}, `Learn more about ${licenseData.fullLabel}`))))
+      ));
+    } else {
+      return (div({key: 'internal'},
+        (p({})),
+        (div({}, `\"${title}\"`)),
+        link ?
+          (div({key: 'hostname'}, (a({href: link, target: '_blank'}, `See it on ${this.hostname()}`)))) : undefined,
+        (p({})),
+        (div({}, 'License')),
+        (div({key: 'license'},
+          (a({href: licenseData.link, target: '_blank'}, licenseData.label))
+        ))
+      ));
+    }
+  }
+});

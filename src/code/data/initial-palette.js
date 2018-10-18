@@ -1,8 +1,8 @@
 module.exports = [
   {
     "id": "1",
-    "title": ""
-    "image": "img/nodes/blank.png"
+    "title": "",
+    "image": "img/nodes/blank.png",
     "metadata": {
       "source": "internal",
       "title": "Blank",
@@ -10,4 +10,4 @@ module.exports = [
       "license": "public domain"
     }
   }
-]
+];

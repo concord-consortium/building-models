@@ -1,71 +1,81 @@
-PaletteItemView    = React.createFactory require './palette-item-view'
-PaletteAddView     = React.createFactory require './palette-add-view'
-ImageMetadata      = React.createFactory require './image-metadata-view'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const PaletteItemView    = React.createFactory(require('./palette-item-view'));
+const PaletteAddView     = React.createFactory(require('./palette-add-view'));
+const ImageMetadata      = React.createFactory(require('./image-metadata-view'));
 
-PaletteStore       = require "../stores/palette-store"
-PaletteDialogStore = require "../stores/palette-delete-dialog-store"
-NodesStore         = require "../stores/nodes-store"
+const PaletteStore       = require("../stores/palette-store");
+const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
+const NodesStore         = require("../stores/nodes-store");
 
-tr                 = require "../utils/translate"
+const tr                 = require("../utils/translate");
 
-{label, div, img, i, span} = React.DOM
+const {label, div, img, i, span} = React.DOM;
 
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'PaletteInspector'
-  mixins: [ PaletteStore.mixin, NodesStore.mixin ]
+  displayName: 'PaletteInspector',
+  mixins: [ PaletteStore.mixin, NodesStore.mixin ],
 
-  imageSelected: (index) ->
-    PaletteStore.actions.selectPaletteIndex(index)
+  imageSelected(index) {
+    return PaletteStore.actions.selectPaletteIndex(index);
+  },
 
-  delete: ->
-    PaletteDialogStore.actions.open()
+  delete() {
+    return PaletteDialogStore.actions.open();
+  },
 
-  render: ->
-    index = 0
-    (div {className: 'palette-inspector'},
-      (div {className: 'palette', ref: 'palette'},
-        (div {},
-          (PaletteAddView {})
+  render() {
+    const index = 0;
+    return (div({className: 'palette-inspector'},
+      (div({className: 'palette', ref: 'palette'},
+        (div({},
+          (PaletteAddView({})),
 
-          # _.forEach @state.palette, (node,index) =>
-          _.map @state.palette, (node, index) =>
-            (PaletteItemView {
-              key: index
-              index: index
-              node: node
-              image: node.image
-              selected: index is @state.selectedPaletteIndex
-              onSelect: @imageSelected
-            })
-        )
-      )
-      if @state.selectedPaletteItem
-        (div {className: 'palette-about-image'},
-          (div {className: 'palette-about-image-title'},
-            (i {className: "icon-codap-info"})
-            (span {}, tr '~PALETTE-INSPECTOR.ABOUT_IMAGE')
-            (img {src: @state.selectedPaletteImage})
-          )
-          unless @state.palette.length is 1 and @state.paletteItemHasNodes
-            (div {className: 'palette-delete', onClick: @delete},
-              if @state.paletteItemHasNodes
-                (span {},
-                  (i {className: "icon-codap-swapAxis"})
-                  (label {}, tr '~PALETTE-INSPECTOR.REPLACE')
-                )
-              else
-                (span {},
-                  (i {className: "icon-codap-trash"})
-                  (label {}, tr '~PALETTE-INSPECTOR.DELETE')
-                )
-            )
-          (div {className: 'palette-about-image-info'},
-            if @state.selectedPaletteItem.metadata
-              (ImageMetadata {
-                metadata: @state.selectedPaletteItem.metadata,
-                update: PaletteStore.actions.update})
-          )
-      )
-    )
+          // _.forEach @state.palette, (node,index) =>
+          _.map(this.state.palette, (node, index) => {
+            return (PaletteItemView({
+              key: index,
+              index,
+              node,
+              image: node.image,
+              selected: index === this.state.selectedPaletteIndex,
+              onSelect: this.imageSelected
+            }));
+        })
+        ))
+      )),
+      this.state.selectedPaletteItem ?
+        (div({className: 'palette-about-image'},
+          (div({className: 'palette-about-image-title'},
+            (i({className: "icon-codap-info"})),
+            (span({}, tr('~PALETTE-INSPECTOR.ABOUT_IMAGE'))),
+            (img({src: this.state.selectedPaletteImage}))
+          )),
+          (this.state.palette.length !== 1) || !this.state.paletteItemHasNodes ?
+            (div({className: 'palette-delete', onClick: this.delete},
+              this.state.paletteItemHasNodes ?
+                (span({},
+                  (i({className: "icon-codap-swapAxis"})),
+                  (label({}, tr('~PALETTE-INSPECTOR.REPLACE')))
+                ))
+              :
+                (span({},
+                  (i({className: "icon-codap-trash"})),
+                  (label({}, tr('~PALETTE-INSPECTOR.DELETE')))
+                ))
+            )) : undefined,
+          (div({className: 'palette-about-image-info'},
+            this.state.selectedPaletteItem.metadata ?
+              (ImageMetadata({
+                metadata: this.state.selectedPaletteItem.metadata,
+                update: PaletteStore.actions.update})) : undefined
+          ))
+      )) : undefined
+    ));
+  }
+});

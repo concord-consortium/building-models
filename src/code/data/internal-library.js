@@ -12,7 +12,7 @@ module.exports = [
   },
   {
     "id": "3",
-    "title": "Chick"
+    "title": "Chick",
     "image": "img/nodes/chick.png",
     "metadata": {
       "source": "internal",
@@ -23,7 +23,7 @@ module.exports = [
   },
   {
     "id": "4",
-    "title": "Chicken"
+    "title": "Chicken",
     "image": "img/nodes/chicken.png",
     "metadata": {
       "source": "internal",
@@ -34,7 +34,7 @@ module.exports = [
   },
   {
     "id": "5",
-    "title": "Tree"
+    "title": "Tree",
     "image": "img/nodes/tree.png",
     "metadata": {
       "source": "internal",
@@ -45,7 +45,7 @@ module.exports = [
   },
   {
     "id": "6",
-    "title": "Cloud"
+    "title": "Cloud",
     "image": "img/nodes/cloud.png",
     "metadata": {
       "source": "internal",
@@ -56,7 +56,7 @@ module.exports = [
   },
   {
     "id": "7",
-    "title": "Raindrops"
+    "title": "Raindrops",
     "image": "img/nodes/raindrops.png",
     "metadata": {
       "source": "internal",
@@ -67,7 +67,7 @@ module.exports = [
   },
   {
     "id": "8",
-    "title": "Hill"
+    "title": "Hill",
     "image": "img/nodes/hill.png",
     "metadata": {
       "source": "internal",
@@ -252,4 +252,4 @@ module.exports = [
       "license": "public domain"
     }
   }
-]
+];

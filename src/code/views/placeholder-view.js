@@ -1,10 +1,17 @@
-{div} = React.DOM
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {div} = React.DOM;
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'Placeholder'
+  displayName: 'Placeholder',
 
-  render: ->
-    (div {className: "placeholder #{@props.className}"},
-      (div {className: 'placeholder-content'}, @props.label)
-    )
+  render() {
+    return (div({className: `placeholder ${this.props.className}`},
+      (div({className: 'placeholder-content'}, this.props.label))
+    ));
+  }
+});

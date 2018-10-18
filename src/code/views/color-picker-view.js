@@ -1,47 +1,65 @@
-{div} = React.DOM
-tr = require '../utils/translate'
-Color = require '../utils/colors'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {div} = React.DOM;
+const tr = require('../utils/translate');
+const Color = require('../utils/colors');
 
-ColorChoice = React.createFactory React.createClass
-  displayName: 'ColorChoice'
+const ColorChoice = React.createFactory(React.createClass({
+  displayName: 'ColorChoice',
 
-  selectColor: ->
-    @props.onChange @props.color
+  selectColor() {
+    return this.props.onChange(this.props.color);
+  },
 
-  render: ->
-    name = @props.color.name
-    value = @props.color.value
-    className = 'color-choice'
-    if @props.selected is value
-      className = 'color-choice selected'
+  render() {
+    const { name } = this.props.color;
+    const { value } = this.props.color;
+    let className = 'color-choice';
+    if (this.props.selected === value) {
+      className = 'color-choice selected';
+    }
 
-    (div {className: className, onClick: @selectColor},
-      (div {className: 'color-swatch', style: {'backgroundColor': value}})
-      (div {className: 'color-label'}, name)
-    )
+    return (div({className, onClick: this.selectColor},
+      (div({className: 'color-swatch', style: {'backgroundColor': value}})),
+      (div({className: 'color-label'}, name))
+    ));
+  }
+})
+);
 
-module.exports = React.createClass
+module.exports = React.createClass({
 
-  displayName: 'ColorPickerView'
+  displayName: 'ColorPickerView',
 
-  getInitialState: ->
-    opened: false
+  getInitialState() {
+    return {opened: false};
+  },
 
-  select: (color) ->
-    @props.onChange(color.value)
+  select(color) {
+    return this.props.onChange(color.value);
+  },
 
-  toggleOpen: ->
-    @setState
-      opened: (not @state.opened)
+  toggleOpen() {
+    return this.setState({
+      opened: (!this.state.opened)});
+  },
 
-  className: ->
-    if @state.opened
-      "color-picker opened"
-    else
-      "color-picker closed"
+  className() {
+    if (this.state.opened) {
+      return "color-picker opened";
+    } else {
+      return "color-picker closed";
+    }
+  },
 
-  render: ->
-    (div {className: @className(), onClick: @toggleOpen},
-      for color in Color.choices
-        (ColorChoice {key: color.name, color: color, selected: @props.selected, onChange: @select})
-    )
+  render() {
+    return (div({className: this.className(), onClick: this.toggleOpen},
+      Array.from(Color.choices).map((color) =>
+        (ColorChoice({key: color.name, color, selected: this.props.selected, onChange: this.select})))
+    ));
+  }
+});

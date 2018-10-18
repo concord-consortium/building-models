@@ -1,58 +1,79 @@
-global._   = require 'lodash'
-global.log = require 'loglevel'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+global._   = require('lodash');
+global.log = require('loglevel');
 
-chai = require('chai')
-chai.config.includeStack = true
+const chai = require('chai');
+chai.config.includeStack = true;
 
-expect         = chai.expect
-should         = chai.should()
-Sinon          = require('sinon')
+const { expect }         = chai;
+const should         = chai.should();
+const Sinon          = require('sinon');
 
-requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
+const requireModel = name => require(`${__dirname}/../src/code/models/${name}`);
 
-RelationFactory = requireModel("relation-factory")
-Relationship    = requireModel("relationship")
+const RelationFactory = requireModel("relation-factory");
+const Relationship    = requireModel("relationship");
 
-describe "RelationFactory", ->
-  beforeEach ->
-    @vector = RelationFactory.increase
-    @scalar = RelationFactory.aboutTheSame
+describe("RelationFactory", function() {
+  beforeEach(function() {
+    this.vector = RelationFactory.increase;
+    return this.scalar = RelationFactory.aboutTheSame;
+  });
 
-  it "should exists", ->
-    RelationFactory.should.exist
+  it("should exists", () => RelationFactory.should.exist);
 
 
-  describe "fromSelections", ->
-    describe "increase aboutTheSame", ->
-      beforeEach ->
-        @underTest = RelationFactory.fromSelections(@vector,@scalar)
+  describe("fromSelections", () =>
+    describe("increase aboutTheSame", function() {
+      beforeEach(function() {
+        return this.underTest = RelationFactory.fromSelections(this.vector,this.scalar);
+      });
 
-      it "should make a working relationship", ->
-        @underTest.hasError.should.be.false
+      it("should make a working relationship", function() {
+        return this.underTest.hasError.should.be.false;
+      });
 
-      describe "the function", ->
-        it "should be `out + in`", ->
-          @underTest.formula.should.equal '1 * in'
+      describe("the function", () =>
+        it("should be `out + in`", function() {
+          return this.underTest.formula.should.equal('1 * in');
+        })
+      );
 
-      describe "evaluating the function for out=1 and in=6", ->
-        it "should evaluate to 7", ->
-          @underTest.evaluate(6,1).should.equal 6
+      return describe("evaluating the function for out=1 and in=6", () =>
+        it("should evaluate to 7", function() {
+          return this.underTest.evaluate(6,1).should.equal(6);
+        })
+      );
+    })
+  );
 
-  describe "selectionsFromRelation", ->
-    describe "with an instanace of increase aboutTheSame", ->
-      beforeEach ->
-        @relation = RelationFactory.fromSelections(@vector, @scalar)
+  return describe("selectionsFromRelation", function() {
+    describe("with an instanace of increase aboutTheSame", function() {
+      beforeEach(function() {
+        return this.relation = RelationFactory.fromSelections(this.vector, this.scalar);
+      });
 
-      it "should return the correct selectors", ->
-        selections = RelationFactory.selectionsFromRelation(@relation)
-        selections.vector.should.equal RelationFactory.increase
-        selections.scalar.should.equal RelationFactory.aboutTheSame
+      return it("should return the correct selectors", function() {
+        const selections = RelationFactory.selectionsFromRelation(this.relation);
+        selections.vector.should.equal(RelationFactory.increase);
+        return selections.scalar.should.equal(RelationFactory.aboutTheSame);
+      });
+    });
 
-    describe "with a randomish formula", ->
-      beforeEach ->
-        @relation = new Relationship({formula: "5 * in + 0.5 * out"})
+    return describe("with a randomish formula", function() {
+      beforeEach(function() {
+        return this.relation = new Relationship({formula: "5 * in + 0.5 * out"});
+      });
 
-      it "should return the correct selectors", ->
-        selections = RelationFactory.selectionsFromRelation(@relation)
-        should.not.exist(selections.vector)
-        should.not.exist(selections.scalar)
+      return it("should return the correct selectors", function() {
+        const selections = RelationFactory.selectionsFromRelation(this.relation);
+        should.not.exist(selections.vector);
+        return should.not.exist(selections.scalar);
+      });
+    });
+  });
+});

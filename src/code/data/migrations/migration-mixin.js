@@ -1,33 +1,45 @@
-# Implement version: xx and doUpdate: (data) ->  in your migrations.
-# and mixin this module
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+// Implement version: xx and doUpdate: (data) ->  in your migrations.
+// and mixin this module
 
-semver = require "semver"
+const semver = require("semver");
 
-module.exports =
-  needsUpdate: (data) ->
-    version = data.version || "0.0.0"
+module.exports = {
+  needsUpdate(data) {
+    let version = data.version || "0.0.0";
 
-    if typeof version is "number" then version = @_semverize(version)
+    if (typeof version === "number") { version = this._semverize(version); }
 
-    semver.gt(@version, version)
+    return semver.gt(this.version, version);
+  },
 
-  name: ->
-    "#{@version} – #{@date} : #{@description}"
+  name() {
+    return `${this.version} – ${this.date} : ${this.description}`;
+  },
 
-  update: (data) ->
-    if @needsUpdate(data)
-      @doUpdate(data)
-      log.info "✔ upgradded #{@name()}"
-      data.version = @version
-    else
-      log.info "  skipped : #{@name()}"
-    data
+  update(data) {
+    if (this.needsUpdate(data)) {
+      this.doUpdate(data);
+      log.info(`✔ upgradded ${this.name()}`);
+      data.version = this.version;
+    } else {
+      log.info(`  skipped : ${this.name()}`);
+    }
+    return data;
+  },
 
-  # Change x.y to "x.y.0". The only annoyance is we have to special-case 1.95,
-  # as this was supposed to be < 1.10.0
-  _semverize: (v) ->
-    if (v is 1.95)
-      return "1.9.5"
-    else
-      return v + ".0"
+  // Change x.y to "x.y.0". The only annoyance is we have to special-case 1.95,
+  // as this was supposed to be < 1.10.0
+  _semverize(v) {
+    if (v === 1.95) {
+      return "1.9.5";
+    } else {
+      return v + ".0";
+    }
+  }
+};
 

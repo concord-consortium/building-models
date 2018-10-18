@@ -1,286 +1,349 @@
-AppSettingsStore   = require './app-settings-store'
-ImportActions      = require '../actions/import-actions'
-GraphActions       = require '../actions/graph-actions'
-Simulation         = require "../models/simulation"
-TimeUnits          = require '../utils/time-units'
-tr                 = require '../utils/translate'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const AppSettingsStore   = require('./app-settings-store');
+const ImportActions      = require('../actions/import-actions');
+const GraphActions       = require('../actions/graph-actions');
+const Simulation         = require("../models/simulation");
+const TimeUnits          = require('../utils/time-units');
+const tr                 = require('../utils/translate');
 
-DEFAULT_SIMULATION_STEPS = 20
-SimulationActions = Reflux.createActions(
+const DEFAULT_SIMULATION_STEPS = 20;
+const SimulationActions = Reflux.createActions(
   [
-    "expandSimulationPanel"
-    "collapseSimulationPanel"
-    "runSimulation"
-    "setDuration"
-    "setStepUnits"
-    "simulationStarted"
-    "simulationFramesCreated"
-    "recordingFramesCreated"
-    "simulationEnded"
-    "capNodeValues"
-    "recordStream"
-    "recordOne"
-    "recordPeriod"
-    "stopRecording"
-    "recordingDidStart"
-    "recordingDidEnd"
-    "createExperiment"
-    "toggledCollectorTo"
+    "expandSimulationPanel",
+    "collapseSimulationPanel",
+    "runSimulation",
+    "setDuration",
+    "setStepUnits",
+    "simulationStarted",
+    "simulationFramesCreated",
+    "recordingFramesCreated",
+    "simulationEnded",
+    "capNodeValues",
+    "recordStream",
+    "recordOne",
+    "recordPeriod",
+    "stopRecording",
+    "recordingDidStart",
+    "recordingDidEnd",
+    "createExperiment",
+    "toggledCollectorTo",
     "setExperimentNumber"
   ]
-)
-SimulationActions.runSimulation = Reflux.createAction({sync: true})
+);
+SimulationActions.runSimulation = Reflux.createAction({sync: true});
 
-SimulationStore   = Reflux.createStore
+const SimulationStore   = Reflux.createStore({
   listenables: [
     SimulationActions, AppSettingsStore.actions,
-    ImportActions, GraphActions]
+    ImportActions, GraphActions],
 
-  init: ->
-    @defaultUnit = TimeUnits.defaultUnit
-    @unitName    = TimeUnits.toString(@defaultUnit,true)
-    @defaultCollectorUnit = TimeUnits.defaultCollectorUnit
-    timeUnitOptions = ({name: TimeUnits.toString(unit, true), unit: unit} for unit in TimeUnits.units)
+  init() {
+    this.defaultUnit = TimeUnits.defaultUnit;
+    this.unitName    = TimeUnits.toString(this.defaultUnit,true);
+    this.defaultCollectorUnit = TimeUnits.defaultCollectorUnit;
+    const timeUnitOptions = (Array.from(TimeUnits.units).map((unit) => ({name: TimeUnits.toString(unit, true), unit})));
 
-    @nodes = []
-    @currentSimulation = null
+    this.nodes = [];
+    this.currentSimulation = null;
 
-    @settings =
-      simulationPanelExpanded: false
-      duration: DEFAULT_SIMULATION_STEPS
-      experimentNumber: 1
-      experimentFrame: 0
-      stepUnits: @defaultUnit
-      stepUnitsName: @unitName
-      timeUnitOptions: timeUnitOptions
-      capNodeValues: false
-      modelIsRunning: false
-      modelIsRunnable: false
-      isTimeBased: false
-      isRecording: false            # sending data to codap?
-      isRecordingOne: false         # record-1 pressed?
-      isRecordingStream: false      # record stream pressed?
-      isRecordingPeriod: false      # record n units' pressed?
+    this.settings = {
+      simulationPanelExpanded: false,
+      duration: DEFAULT_SIMULATION_STEPS,
+      experimentNumber: 1,
+      experimentFrame: 0,
+      stepUnits: this.defaultUnit,
+      stepUnitsName: this.unitName,
+      timeUnitOptions,
+      capNodeValues: false,
+      modelIsRunning: false,
+      modelIsRunnable: false,
+      isTimeBased: false,
+      isRecording: false,            // sending data to codap?
+      isRecordingOne: false,         // record-1 pressed?
+      isRecordingStream: false,      // record stream pressed?
+      isRecordingPeriod: false      // record n units' pressed?
+    };
 
-    @_updateModelIsRunnable()
+    return this._updateModelIsRunnable();
+  },
 
-  onSetExperimentNumber: (nextExperimentNumber) ->
-    @settings.experimentNumber = nextExperimentNumber
-    @notifyChange()
+  onSetExperimentNumber(nextExperimentNumber) {
+    this.settings.experimentNumber = nextExperimentNumber;
+    return this.notifyChange();
+  },
 
-  onSetSimulationType: (simulationType) ->
-    GraphActions.resetSimulation.trigger()
+  onSetSimulationType(simulationType) {
+    GraphActions.resetSimulation.trigger();
 
-    @settings.isTimeBased = simulationType is AppSettingsStore.store.SimulationType.time
+    this.settings.isTimeBased = simulationType === AppSettingsStore.store.SimulationType.time;
 
-    @_runSimulation()
+    this._runSimulation();
 
-    if simulationType is AppSettingsStore.store.SimulationType.diagramOnly
-      SimulationActions.collapseSimulationPanel()
+    if (simulationType === AppSettingsStore.store.SimulationType.diagramOnly) {
+      return SimulationActions.collapseSimulationPanel();
+    }
+  },
 
-  onExpandSimulationPanel: ->
-    @settings.simulationPanelExpanded = true
-    @settings.modelIsRunning = true
-    @_updateModelIsRunnable()
-    @_runSimulation()
-    @notifyChange()
+  onExpandSimulationPanel() {
+    this.settings.simulationPanelExpanded = true;
+    this.settings.modelIsRunning = true;
+    this._updateModelIsRunnable();
+    this._runSimulation();
+    return this.notifyChange();
+  },
 
-  onCollapseSimulationPanel: ->
-    @settings.simulationPanelExpanded = false
-    @settings.modelIsRunning = false
-    @_stopRecording()
-    GraphActions.resetSimulation.trigger()
-    @notifyChange()
+  onCollapseSimulationPanel() {
+    this.settings.simulationPanelExpanded = false;
+    this.settings.modelIsRunning = false;
+    this._stopRecording();
+    GraphActions.resetSimulation.trigger();
+    return this.notifyChange();
+  },
 
-  onGraphChanged: (data)->
-    @nodes = data.nodes
-    @_updateModelIsRunnable()
-    @notifyChange()
+  onGraphChanged(data){
+    this.nodes = data.nodes;
+    this._updateModelIsRunnable();
+    return this.notifyChange();
+  },
 
-  _updateUnitNames: ->
-    pluralize = @settings.duration isnt 1
-    @settings.timeUnitOptions = ({name: TimeUnits.toString(unit, pluralize), unit: unit} for unit in TimeUnits.units)
-    @settings.stepUnitsName = TimeUnits.toString(@settings.stepUnits, pluralize)
-
-
-  onSetDuration: (n) ->
-    @settings.duration = Math.max 1, Math.min n, 5000
-    @_updateUnitNames()
-    @notifyChange()
-
-  onSetStepUnits: (unit, hasCollectors=false) ->
-    @settings.stepUnits = unit.unit
-    @defaultCollectorUnit = unit.unit if hasCollectors or @_hasCollectors()
-    @_updateUnitNames()
-    @notifyChange()
-
-  onImport: (data) ->
-    _.merge @settings, data.settings.simulation
-    @settings.isTimeBased = data.settings.simulationType is AppSettingsStore.store.SimulationType.time
-    hasCollectors = _.filter(data.nodes, (node) -> node.data.isAccumulator).length > 0
-    @onSetStepUnits(unit: data.settings.simulation.stepUnits, hasCollectors)
-    @notifyChange()
+  _updateUnitNames() {
+    const pluralize = this.settings.duration !== 1;
+    this.settings.timeUnitOptions = (Array.from(TimeUnits.units).map((unit) => ({name: TimeUnits.toString(unit, pluralize), unit})));
+    return this.settings.stepUnitsName = TimeUnits.toString(this.settings.stepUnits, pluralize);
+  },
 
 
-  onCapNodeValues: (cap) ->
-    @settings.capNodeValues = cap
-    @notifyChange()
+  onSetDuration(n) {
+    this.settings.duration = Math.max(1, Math.min(n, 5000));
+    this._updateUnitNames();
+    return this.notifyChange();
+  },
 
-  onRunSimulation: ->
-    @_runSimulation()
+  onSetStepUnits(unit, hasCollectors) {
+    if (hasCollectors == null) { hasCollectors = false; }
+    this.settings.stepUnits = unit.unit;
+    if (hasCollectors || this._hasCollectors()) { this.defaultCollectorUnit = unit.unit; }
+    this._updateUnitNames();
+    return this.notifyChange();
+  },
 
-  stepUnits: ->
-    if @settings.isTimeBased
-      @settings.stepUnits
-    else
-      @defaultUnit
-
-  simulationDuration: ->
-    @settings.duration + (if @settings.isTimeBased then 1 else 0)
-
-  simulationStepCount: ->
-    return @settings.duration + 1 if @settings.isTimeBased
-    return @settings.duration if @settings.isRecordingPeriod
-    1
-
-  _runSimulation: ->
-    if @settings.modelIsRunnable
-      # graph-store listens and will reset the simulation when
-      # it is run to clear pre-saved data after first load
-      @settings.modelIsRunning = true
-      @notifyChange()
-      @currentSimulation = new Simulation
-        nodes: @nodes
-        duration: @simulationStepCount()
-        capNodeValues: @settings.capNodeValues
-
-        # Simulation events get triggered as Actions here, and are
-        # available to anyone who listens to this store
-        onFrames: (frames) =>
-          SimulationActions.simulationFramesCreated(frames)
-          if @settings.isRecording
-            framesNoTime = _.map frames, (frame) =>
-              frame.time = @settings.experimentFrame++
-              # without collectors, start steps at 1
-              ++frame.time unless @settings.isTimeBased
-              return frame
-            SimulationActions.recordingFramesCreated(framesNoTime)
-
-        onStart: (nodeNames) =>
-          SimulationActions.simulationStarted(nodeNames)
-          if @settings.isRecording
-            SimulationActions.recordingDidStart(nodeNames)
-
-        onEnd: ->
-          SimulationActions.simulationEnded()
-
-      @currentSimulation.run()
+  onImport(data) {
+    _.merge(this.settings, data.settings.simulation);
+    this.settings.isTimeBased = data.settings.simulationType === AppSettingsStore.store.SimulationType.time;
+    const hasCollectors = _.filter(data.nodes, node => node.data.isAccumulator).length > 0;
+    this.onSetStepUnits({unit: data.settings.simulation.stepUnits}, hasCollectors);
+    return this.notifyChange();
+  },
 
 
-  onSimulationStarted: ->
-    @notifyChange()
+  onCapNodeValues(cap) {
+    this.settings.capNodeValues = cap;
+    return this.notifyChange();
+  },
 
-  onSimulationEnded: ->
-    @settings.modelIsRunning = false
-    @notifyChange()
+  onRunSimulation() {
+    return this._runSimulation();
+  },
 
-  _startRecording: ->
-    @settings.isRecording = true
+  stepUnits() {
+    if (this.settings.isTimeBased) {
+      return this.settings.stepUnits;
+    } else {
+      return this.defaultUnit;
+    }
+  },
 
-  _stopRecording: ->
-    @settings.isRecording = false
-    @settings.isRecordingOne = false
-    @settings.isRecordingStream = false
-    @settings.isRecordingPeriod = false
-    SimulationActions.recordingDidEnd()
+  simulationDuration() {
+    return this.settings.duration + (this.settings.isTimeBased ? 1 : 0);
+  },
 
-  onCreateExperiment: ->
-    @settings.experimentNumber++
-    @settings.experimentFrame = 0
-    @notifyChange()
+  simulationStepCount() {
+    if (this.settings.isTimeBased) { return this.settings.duration + 1; }
+    if (this.settings.isRecordingPeriod) { return this.settings.duration; }
+    return 1;
+  },
 
-  onStopRecording: ->
-    @_stopRecording()
-    @notifyChange()
+  _runSimulation() {
+    if (this.settings.modelIsRunnable) {
+      // graph-store listens and will reset the simulation when
+      // it is run to clear pre-saved data after first load
+      this.settings.modelIsRunning = true;
+      this.notifyChange();
+      this.currentSimulation = new Simulation({
+        nodes: this.nodes,
+        duration: this.simulationStepCount(),
+        capNodeValues: this.settings.capNodeValues,
 
-  onRecordOne: ->
-    @_startRecording()
-    @settings.isRecordingOne = true
-    @_runSimulation()
-    stopRecording = ->
-      SimulationActions.stopRecording()
-    @timeout = setTimeout(stopRecording, 500)
-    @notifyChange()
+        // Simulation events get triggered as Actions here, and are
+        // available to anyone who listens to this store
+        onFrames: frames => {
+          SimulationActions.simulationFramesCreated(frames);
+          if (this.settings.isRecording) {
+            const framesNoTime = _.map(frames, frame => {
+              frame.time = this.settings.experimentFrame++;
+              // without collectors, start steps at 1
+              if (!this.settings.isTimeBased) { ++frame.time; }
+              return frame;
+            });
+            return SimulationActions.recordingFramesCreated(framesNoTime);
+          }
+        },
 
-  onRecordStream: ->
-    @_startRecording()
-    @settings.isRecordingStream = true
-    @notifyChange()
+        onStart: nodeNames => {
+          SimulationActions.simulationStarted(nodeNames);
+          if (this.settings.isRecording) {
+            return SimulationActions.recordingDidStart(nodeNames);
+          }
+        },
 
-  onRecordPeriod: ->
-    @_startRecording()
-    @settings.isRecordingPeriod = true
-    @_runSimulation()
-    stopRecording = ->
-      SimulationActions.stopRecording()
-    @timeout = setTimeout(stopRecording, 500)
-    @notifyChange()
+        onEnd() {
+          return SimulationActions.simulationEnded();
+        }
+      });
 
-  onToggledCollectorTo: (checked) ->
-    # only change the units automatically when we transition from 0 to 1 or 1 to 0 collector nodes
-    numCollectors = (node for node in @nodes when node.isAccumulator).length
-    if checked and numCollectors is 1
-      @onSetStepUnits unit: @defaultCollectorUnit
-    else if not checked and numCollectors is 0
-      @onSetStepUnits unit: @defaultUnit
+      return this.currentSimulation.run();
+    }
+  },
 
-  _isModelRunnable: ->
-    return false unless @settings.simulationPanelExpanded
-    for node in @nodes
-      for link in node.links
-        return true if link.relation.isDefined
-    return false
 
-  _updateModelIsRunnable: ->
-    @settings.modelIsRunnable = @_isModelRunnable()
+  onSimulationStarted() {
+    return this.notifyChange();
+  },
 
-  _hasCollectors: (nodes) ->
-    for node in @nodes
-      if node.isAccumulator then return true
-    return false
+  onSimulationEnded() {
+    this.settings.modelIsRunning = false;
+    return this.notifyChange();
+  },
 
-  _getErrorMessage: ->
-    # we just have the one error state right now
-    tr "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS"
+  _startRecording() {
+    return this.settings.isRecording = true;
+  },
 
-  notifyChange: ->
-    @trigger _.clone @settings
+  _stopRecording() {
+    this.settings.isRecording = false;
+    this.settings.isRecordingOne = false;
+    this.settings.isRecordingStream = false;
+    this.settings.isRecordingPeriod = false;
+    return SimulationActions.recordingDidEnd();
+  },
 
-  importSettings: (data) ->
-    _.merge @settings, data
-    @notifyChange()
+  onCreateExperiment() {
+    this.settings.experimentNumber++;
+    this.settings.experimentFrame = 0;
+    return this.notifyChange();
+  },
 
-  serialize: ->
-    duration:         @settings.duration
-    stepUnits:        @settings.stepUnits
-    capNodeValues:    @settings.capNodeValues
+  onStopRecording() {
+    this._stopRecording();
+    return this.notifyChange();
+  },
 
-mixin =
-  getInitialState: ->
-    _.clone SimulationStore.settings
+  onRecordOne() {
+    this._startRecording();
+    this.settings.isRecordingOne = true;
+    this._runSimulation();
+    const stopRecording = () => SimulationActions.stopRecording();
+    this.timeout = setTimeout(stopRecording, 500);
+    return this.notifyChange();
+  },
 
-  componentDidMount: ->
-    @simulationUnsubscribe = SimulationStore.listen @onSimulationStoreChange
+  onRecordStream() {
+    this._startRecording();
+    this.settings.isRecordingStream = true;
+    return this.notifyChange();
+  },
 
-  componentWillUnmount: ->
-    # this one named explicitly as we have views that mixin both simulationStore
-    # and appSettingsStore
-    @simulationUnsubscribe()
+  onRecordPeriod() {
+    this._startRecording();
+    this.settings.isRecordingPeriod = true;
+    this._runSimulation();
+    const stopRecording = () => SimulationActions.stopRecording();
+    this.timeout = setTimeout(stopRecording, 500);
+    return this.notifyChange();
+  },
 
-  onSimulationStoreChange: (newData) ->
-    @setState _.clone newData
+  onToggledCollectorTo(checked) {
+    // only change the units automatically when we transition from 0 to 1 or 1 to 0 collector nodes
+    const numCollectors = (Array.from(this.nodes).filter((node) => node.isAccumulator)).length;
+    if (checked && (numCollectors === 1)) {
+      return this.onSetStepUnits({unit: this.defaultCollectorUnit});
+    } else if (!checked && (numCollectors === 0)) {
+      return this.onSetStepUnits({unit: this.defaultUnit});
+    }
+  },
 
-module.exports =
-  actions: SimulationActions
-  store: SimulationStore
-  mixin: mixin
+  _isModelRunnable() {
+    if (!this.settings.simulationPanelExpanded) { return false; }
+    for (let node of Array.from(this.nodes)) {
+      for (let link of Array.from(node.links)) {
+        if (link.relation.isDefined) { return true; }
+      }
+    }
+    return false;
+  },
+
+  _updateModelIsRunnable() {
+    return this.settings.modelIsRunnable = this._isModelRunnable();
+  },
+
+  _hasCollectors(nodes) {
+    for (let node of Array.from(this.nodes)) {
+      if (node.isAccumulator) { return true; }
+    }
+    return false;
+  },
+
+  _getErrorMessage() {
+    // we just have the one error state right now
+    return tr("~DOCUMENT.ACTIONS.NO_DEFINED_LINKS");
+  },
+
+  notifyChange() {
+    return this.trigger(_.clone(this.settings));
+  },
+
+  importSettings(data) {
+    _.merge(this.settings, data);
+    return this.notifyChange();
+  },
+
+  serialize() {
+    return {
+      duration:         this.settings.duration,
+      stepUnits:        this.settings.stepUnits,
+      capNodeValues:    this.settings.capNodeValues
+    };
+  }
+});
+
+const mixin = {
+  getInitialState() {
+    return _.clone(SimulationStore.settings);
+  },
+
+  componentDidMount() {
+    return this.simulationUnsubscribe = SimulationStore.listen(this.onSimulationStoreChange);
+  },
+
+  componentWillUnmount() {
+    // this one named explicitly as we have views that mixin both simulationStore
+    // and appSettingsStore
+    return this.simulationUnsubscribe();
+  },
+
+  onSimulationStoreChange(newData) {
+    return this.setState(_.clone(newData));
+  }
+};
+
+module.exports = {
+  actions: SimulationActions,
+  store: SimulationStore,
+  mixin
+};

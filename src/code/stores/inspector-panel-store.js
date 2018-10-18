@@ -1,45 +1,63 @@
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
 
-InspectorPanelActions = Reflux.createActions(
+const InspectorPanelActions = Reflux.createActions(
   [
-    "openInspectorPanel"
+    "openInspectorPanel",
     "closeInspectorPanel"
   ]
-)
+);
 
-InspectorPanelStore = Reflux.createStore
-  listenables: [InspectorPanelActions]
+const InspectorPanelStore = Reflux.createStore({
+  listenables: [InspectorPanelActions],
 
-  init: ->
-    @settings =
-      nowShowing: null
+  init() {
+    return this.settings = {
+      nowShowing: null,
       selectedLink: null
+    };
+  },
 
-  onOpenInspectorPanel: (nowShowing, options) ->
-    @settings.nowShowing = nowShowing
-    @settings.selectedLink = options.link if options?.link?
-    @notifyChange()
+  onOpenInspectorPanel(nowShowing, options) {
+    this.settings.nowShowing = nowShowing;
+    if ((options != null ? options.link : undefined) != null) { this.settings.selectedLink = options.link; }
+    return this.notifyChange();
+  },
 
-  onCloseInspectorPanel: ->
-    @settings.nowShowing = null
-    @notifyChange()
+  onCloseInspectorPanel() {
+    this.settings.nowShowing = null;
+    return this.notifyChange();
+  },
 
-  notifyChange: ->
-    @trigger _.clone @settings
+  notifyChange() {
+    return this.trigger(_.clone(this.settings));
+  }
+});
 
-mixin =
-  getInitialState: ->
-    _.clone InspectorPanelStore.settings
+const mixin = {
+  getInitialState() {
+    return _.clone(InspectorPanelStore.settings);
+  },
 
-  componentDidMount: ->
-    @inspectorPanelUnsubscribe = InspectorPanelStore.listen @onInspectorPanelStoreChange
+  componentDidMount() {
+    return this.inspectorPanelUnsubscribe = InspectorPanelStore.listen(this.onInspectorPanelStoreChange);
+  },
 
-  componentWillUnmount: ->
-    @inspectorPanelUnsubscribe()
+  componentWillUnmount() {
+    return this.inspectorPanelUnsubscribe();
+  },
 
-  onInspectorPanelStoreChange: (newData) ->
-    @setState _.clone newData
+  onInspectorPanelStoreChange(newData) {
+    return this.setState(_.clone(newData));
+  }
+};
 
-module.exports =
-  actions: InspectorPanelActions
-  store: InspectorPanelStore
-  mixin: mixin
+module.exports = {
+  actions: InspectorPanelActions,
+  store: InspectorPanelStore,
+  mixin
+};

@@ -1,119 +1,145 @@
-HashParams      = require '../utils/hash-parameters'
-ImportActions   = require '../actions/import-actions'
-urlParams       = require '../utils/url-params'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const HashParams      = require('../utils/hash-parameters');
+const ImportActions   = require('../actions/import-actions');
+const urlParams       = require('../utils/url-params');
 
-AppSettingsActions = Reflux.createActions(
+const AppSettingsActions = Reflux.createActions(
   [
-    "setComplexity"
-    "setSimulationType"
-    "showMinigraphs"
-    "relationshipSymbols"
+    "setComplexity",
+    "setSimulationType",
+    "showMinigraphs",
+    "relationshipSymbols",
     "setTouchDevice"
   ]
-)
+);
 
-Complexity = {
-  basic: 0
-  expanded: 1
+const Complexity = {
+  basic: 0,
+  expanded: 1,
   DEFAULT: 1
-}
+};
 
-SimulationType = {
-  diagramOnly: 0
-  static: 1
-  time: 2
+const SimulationType = {
+  diagramOnly: 0,
+  static: 1,
+  time: 2,
   DEFAULT: 1
-}
+};
 
-AppSettingsStore   = Reflux.createStore
-  listenables: [AppSettingsActions, ImportActions]
+const AppSettingsStore   = Reflux.createStore({
+  listenables: [AppSettingsActions, ImportActions],
 
-  init: ->
-    simulationType = if HashParams.getParam('simplified') || urlParams['simplified']
+  init() {
+    const simulationType = HashParams.getParam('simplified') || urlParams['simplified'] ?
       SimulationType.diagramOnly
-    else
-      SimulationType.DEFAULT
+    :
+      SimulationType.DEFAULT;
 
-    uiElements = {
+    const uiElements = {
       globalNav: true,
       actionBar: true,
       inspectorPanel: true,
       nodePalette: true
+    };
+    const uiParams = HashParams.getParam('hide') || urlParams['hide'];
+    // For situations where some ui elements need to be hidden, this parameter can be specified.
+    // If this parameter is present, Any specified elements are disabled or hidden.
+    // Example usage: hide=globalNav,inspectorPanel
+    if (uiParams) {
+      uiElements.globalNav = uiParams.indexOf("globalNav") === -1;
+      uiElements.actionBar = uiParams.indexOf("actionBar") === -1;
+      uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") === -1;
+      uiElements.nodePalette = uiParams.indexOf("nodePalette") === -1;
     }
-    uiParams = HashParams.getParam('hide') || urlParams['hide']
-    # For situations where some ui elements need to be hidden, this parameter can be specified.
-    # If this parameter is present, Any specified elements are disabled or hidden.
-    # Example usage: hide=globalNav,inspectorPanel
-    if uiParams
-      uiElements.globalNav = uiParams.indexOf("globalNav") == -1
-      uiElements.actionBar = uiParams.indexOf("actionBar") == -1
-      uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") == -1
-      uiElements.nodePalette = uiParams.indexOf("nodePalette") == -1
 
-    lockdown = HashParams.getParam('lockdown') == "true" || urlParams['lockdown']
+    const lockdown = (HashParams.getParam('lockdown') === "true") || urlParams['lockdown'];
 
-    @settings =
-      showingSettingsDialog: false
-      complexity: Complexity.DEFAULT
-      simulationType: simulationType
-      showingMinigraphs: false
-      relationshipSymbols: false
-      uiElements: uiElements
-      lockdown: lockdown,
+    return this.settings = {
+      showingSettingsDialog: false,
+      complexity: Complexity.DEFAULT,
+      simulationType,
+      showingMinigraphs: false,
+      relationshipSymbols: false,
+      uiElements,
+      lockdown,
       touchDevice: false
+    };
+  },
 
-  onShowMinigraphs: (show) ->
-    @settings.showingMinigraphs = show
-    @notifyChange()
+  onShowMinigraphs(show) {
+    this.settings.showingMinigraphs = show;
+    return this.notifyChange();
+  },
 
-  onSetComplexity: (val) ->
-    @settings.complexity = val
-    if val is 0
-      @settings.showingMinigraphs = false
-    @notifyChange()
+  onSetComplexity(val) {
+    this.settings.complexity = val;
+    if (val === 0) {
+      this.settings.showingMinigraphs = false;
+    }
+    return this.notifyChange();
+  },
 
-  onSetTouchDevice: (val) ->
-    @settings.touchDevice = val
-    @notifyChange()
+  onSetTouchDevice(val) {
+    this.settings.touchDevice = val;
+    return this.notifyChange();
+  },
 
-  onSetSimulationType: (val) ->
-    @settings.simulationType = val
-    @notifyChange()
+  onSetSimulationType(val) {
+    this.settings.simulationType = val;
+    return this.notifyChange();
+  },
 
-  onRelationshipSymbols: (show) ->
-    @settings.relationshipSymbols = show
-    @notifyChange()
+  onRelationshipSymbols(show) {
+    this.settings.relationshipSymbols = show;
+    return this.notifyChange();
+  },
 
-  notifyChange: ->
-    @trigger _.clone @settings
+  notifyChange() {
+    return this.trigger(_.clone(this.settings));
+  },
 
-  onImport: (data) ->
-    _.merge @settings, data.settings
-    @notifyChange()
+  onImport(data) {
+    _.merge(this.settings, data.settings);
+    return this.notifyChange();
+  },
 
-  serialize: ->
-    complexity: @settings.complexity
-    simulationType: @settings.simulationType
-    showingMinigraphs: @settings.showingMinigraphs
-    relationshipSymbols: @settings.relationshipSymbols
+  serialize() {
+    return {
+      complexity: this.settings.complexity,
+      simulationType: this.settings.simulationType,
+      showingMinigraphs: this.settings.showingMinigraphs,
+      relationshipSymbols: this.settings.relationshipSymbols
+    };
+  }
+});
 
-AppSettingsStore.Complexity = Complexity
-AppSettingsStore.SimulationType = SimulationType
+AppSettingsStore.Complexity = Complexity;
+AppSettingsStore.SimulationType = SimulationType;
 
-mixin =
-  getInitialState: ->
-    _.clone AppSettingsStore.settings
+const mixin = {
+  getInitialState() {
+    return _.clone(AppSettingsStore.settings);
+  },
 
-  componentDidMount: ->
-    @unsubscribe = AppSettingsStore.listen @onAppSettingsChange
+  componentDidMount() {
+    return this.unsubscribe = AppSettingsStore.listen(this.onAppSettingsChange);
+  },
 
-  componentWillUnmount: ->
-    @unsubscribe()
+  componentWillUnmount() {
+    return this.unsubscribe();
+  },
 
-  onAppSettingsChange: (newData) ->
-    @setState _.clone newData
+  onAppSettingsChange(newData) {
+    return this.setState(_.clone(newData));
+  }
+};
 
-module.exports =
-  actions: AppSettingsActions
-  store: AppSettingsStore
-  mixin: mixin
+module.exports = {
+  actions: AppSettingsActions,
+  store: AppSettingsStore,
+  mixin
+};

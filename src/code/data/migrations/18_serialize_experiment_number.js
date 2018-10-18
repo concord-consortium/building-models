@@ -1,10 +1,20 @@
-migration =
-  version: "1.17.0"
-  description: "Adds experiment number to serialization"
-  date: "2017-01-09"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const migration = {
+  version: "1.17.0",
+  description: "Adds experiment number to serialization",
+  date: "2017-01-09",
 
-  doUpdate: (data) ->
-    data.settings.simulation?.experimentNumber ||= 0
-    data.settings.simulation?.experimentFrame ||= 0
+  doUpdate(data) {
+    if (data.settings.simulation != null) {
+      data.settings.simulation.experimentNumber || (data.settings.simulation.experimentNumber = 0);
+    }
+    return (data.settings.simulation != null ? data.settings.simulation.experimentFrame || (data.settings.simulation.experimentFrame = 0) : undefined);
+  }
+};
 
-module.exports = _.mixin migration, require './migration-mixin'
+module.exports = _.mixin(migration, require('./migration-mixin'));

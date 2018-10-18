@@ -1,254 +1,355 @@
-GraphPrimitive = require './graph-primitive'
-Colors = require '../utils/colors'
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
+ * DS201: Simplify complex destructure assignments
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS206: Consider reworking classes to avoid initClass
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let Node;
+const GraphPrimitive = require('./graph-primitive');
+const Colors = require('../utils/colors');
 
-tr = require '../utils/translate'
-urlParams = require '../utils/url-params'
+const tr = require('../utils/translate');
+const urlParams = require('../utils/url-params');
 
-SEMIQUANT_MIN = 0
-SEMIQUANT_MAX = 100
-SEMIQUANT_ACCUMULATOR_MAX = 1000
+const SEMIQUANT_MIN = 0;
+const SEMIQUANT_MAX = 100;
+const SEMIQUANT_ACCUMULATOR_MAX = 1000;
 
-# Enable ES5 getters and setters
-Function::property = (prop, desc) ->
-  Object.defineProperty @prototype, prop, desc
+// Enable ES5 getters and setters
+Function.prototype.property = function(prop, desc) {
+  return Object.defineProperty(this.prototype, prop, desc);
+};
 
-module.exports = class Node extends GraphPrimitive
-  # Properties that can be changed.
-  @fields: [
-    'title', 'image', 'color', 'paletteItem',
-    'initialValue', 'min', 'max',
-    'isAccumulator', 'allowNegativeValues', 'combineMethod',
-    'valueDefinedSemiQuantitatively', 'frames'
-  ]
-  @SEMIQUANT_MIN: SEMIQUANT_MIN
-  @SEMIQUANT_MAX: SEMIQUANT_MAX
-  @SEMIQUANT_ACCUMULATOR_MAX: SEMIQUANT_ACCUMULATOR_MAX
+module.exports = (Node = (function() {
+  Node = class Node extends GraphPrimitive {
+    static initClass() {
+      // Properties that can be changed.
+      this.fields = [
+        'title', 'image', 'color', 'paletteItem',
+        'initialValue', 'min', 'max',
+        'isAccumulator', 'allowNegativeValues', 'combineMethod',
+        'valueDefinedSemiQuantitatively', 'frames'
+      ];
+      this.SEMIQUANT_MIN = SEMIQUANT_MIN;
+      this.SEMIQUANT_MAX = SEMIQUANT_MAX;
+      this.SEMIQUANT_ACCUMULATOR_MAX = SEMIQUANT_ACCUMULATOR_MAX;
+  
+      // Scale the value of initialValue such that, if we are in semi-quantitative mode,
+      // we always return a value between 0 and 100. Likewise, if we try to set a value while
+      // we are in SQ mode, we set the actual internal value to the same proportion between
+      // the internal min and max
+      this.property('initialValue', {
+        get() {
+          if (!this.valueDefinedSemiQuantitatively) {
+            return this._initialValue;
+          } else {
+            return this.mapQuantToSemiquant(this._initialValue);
+          }
+        },
+        set(val) {
+          if (!this.valueDefinedSemiQuantitatively) {
+            return this._initialValue = val;
+          } else {
+            return this._initialValue = this.mapSemiquantToQuant(val);
+          }
+        }
+      }
+      );
+  
+      this.property('min', {
+        get() {
+          if (!this.valueDefinedSemiQuantitatively) {
+            if (this.isAccumulator && !this.allowNegativeValues) { return Math.max(0, this._min); } else { return this._min; }
+          } else {
+            return SEMIQUANT_MIN;
+          }
+        },
+        set(val) {
+          if (!this.valueDefinedSemiQuantitatively) { return this._min = val; }
+        }
+      }
+      );
+  
+      this.property('max', {
+        get() {
+          if (!this.valueDefinedSemiQuantitatively) {
+            return this._max;
+          } else {
+            if (this.isAccumulator) { return SEMIQUANT_ACCUMULATOR_MAX; } else { return SEMIQUANT_MAX; }
+          }
+        },
+        set(val) {
+          if (!this.valueDefinedSemiQuantitatively) { return this._max = val; }
+        }
+      }
+      );
+  
+      this.property('isAccumulator', {
+        get() {
+          return this._isAccumulator;
+        },
+        set(val) {
+          this._isAccumulator = val;
+          if(val && (this._max === SEMIQUANT_MAX)) {
+            return this._max = SEMIQUANT_ACCUMULATOR_MAX;
+          } else {
+            if(this._max === SEMIQUANT_ACCUMULATOR_MAX) {
+              return this._max = SEMIQUANT_MAX;
+            }
+          }
+        }
+      }
+      );
+  
+      this.prototype.type = 'Node';
+      this.prototype.isTransfer = false;
+    }
 
-  constructor: (nodeSpec={}, key) ->
-    super()
-    if key
-      @key = key
-    @links = []
+    constructor(nodeSpec, key) {
+      let val, val1, val10, val2, val3, val4, val5, val6, val7, val8, val9;
+      if (nodeSpec == null) { nodeSpec = {}; }
+      super();
+      if (key) {
+        this.key = key;
+      }
+      this.links = [];
 
-    # Set the nodes instance variables from `nodespec` constructor param
-    # Specify default values using key = <defaultValue>
-    # see https://halfdecent.net/2013/12/02/coffeescript-constructor-options-with-defaults/
-    {
-      @x=0
-      @y=0
-      @title= tr "~NODE.UNTITLED"
-      @codapID = null
-      @codapName = null
-      @image
-      @isAccumulator=false
-      @allowNegativeValues = false
-      @valueDefinedSemiQuantitatively=true
-      @paletteItem
-      @frames=[]
-      @addedThisSession=false
-      @combineMethod = 'average'
-    } = nodeSpec
+      // Set the nodes instance variables from `nodespec` constructor param
+      // Specify default values using key = <defaultValue>
+      // see https://halfdecent.net/2013/12/02/coffeescript-constructor-options-with-defaults/
+      val = nodeSpec.x,
+        this.x = val != null ? val : 0,
+        val1 = nodeSpec.y,
+        this.y = val1 != null ? val1 : 0,
+        val2 = nodeSpec.title,
+        this.title = val2 != null ? val2 : tr("~NODE.UNTITLED"),
+        val3 = nodeSpec.codapID,
+        this.codapID = val3 != null ? val3 : null,
+        val4 = nodeSpec.codapName,
+        this.codapName = val4 != null ? val4 : null,
+        this.image = nodeSpec.image,
+        val5 = nodeSpec.isAccumulator,
+        this.isAccumulator = val5 != null ? val5 : false,
+        val6 = nodeSpec.allowNegativeValues,
+        this.allowNegativeValues = val6 != null ? val6 : false,
+        val7 = nodeSpec.valueDefinedSemiQuantitatively,
+        this.valueDefinedSemiQuantitatively = val7 != null ? val7 : true,
+        this.paletteItem = nodeSpec.paletteItem,
+        val8 = nodeSpec.frames,
+        this.frames = val8 != null ? val8 : [],
+        val9 = nodeSpec.addedThisSession,
+        this.addedThisSession = val9 != null ? val9 : false,
+        val10 = nodeSpec.combineMethod,
+        this.combineMethod = val10 != null ? val10 : 'average';
 
-    accumulatorScaleUrlParam = (urlParams.collectorScale and Number(urlParams.collectorScale)) or 1
-    @accumulatorInputScale = if accumulatorScaleUrlParam > 0 then accumulatorScaleUrlParam else 1
+      const accumulatorScaleUrlParam = (urlParams.collectorScale && Number(urlParams.collectorScale)) || 1;
+      this.accumulatorInputScale = accumulatorScaleUrlParam > 0 ? accumulatorScaleUrlParam : 1;
 
-    # Save internal values of min, max and initialValues. Actual values retreived
-    # using @min or node.min will depend on whether we are in quantitative or
-    # semi-quantitative mode. (See getters and setters below).
-    @_min = nodeSpec.min ? SEMIQUANT_MIN
-    @_max = nodeSpec.max ? if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
-    @_initialValue = nodeSpec.initialValue ? Math.round(SEMIQUANT_MAX/2)
+      // Save internal values of min, max and initialValues. Actual values retreived
+      // using @min or node.min will depend on whether we are in quantitative or
+      // semi-quantitative mode. (See getters and setters below).
+      this._min = nodeSpec.min != null ? nodeSpec.min : SEMIQUANT_MIN;
+      this._max = nodeSpec.max != null ? nodeSpec.max : this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
+      this._initialValue = nodeSpec.initialValue != null ? nodeSpec.initialValue : Math.round(SEMIQUANT_MAX/2);
 
-    @color ?= Colors.choices[0].value
+      if (this.color == null) { this.color = Colors.choices[0].value; }
 
-    @isInDependentCycle = false   # we always initalize with no links, so we can't be in cycle
+      this.isInDependentCycle = false;   // we always initalize with no links, so we can't be in cycle
 
-    @_collectorImageProps = null
+      this._collectorImageProps = null;
+    }
 
-  # Scale the value of initialValue such that, if we are in semi-quantitative mode,
-  # we always return a value between 0 and 100. Likewise, if we try to set a value while
-  # we are in SQ mode, we set the actual internal value to the same proportion between
-  # the internal min and max
-  @property 'initialValue',
-    get: ->
-      if not @valueDefinedSemiQuantitatively
-        @_initialValue
-      else
-        @mapQuantToSemiquant(@_initialValue)
-    set: (val) ->
-      if not @valueDefinedSemiQuantitatively
-        @_initialValue = val
-      else
-        @_initialValue = @mapSemiquantToQuant(val)
+    addLink(link) {
+      if ((link.sourceNode === this) || (link.targetNode === this)) {
+        if (_.contains(this.links, link)) {
+          throw new Error(`Duplicate link for Node:${this.id}`);
+        } else {
+          return this.links.push(link);
+        }
+      } else {
+        throw new Error(`Bad link for Node:${this.id}`);
+      }
+    }
 
-  @property 'min',
-    get: ->
-      if not @valueDefinedSemiQuantitatively
-        if @isAccumulator and not @allowNegativeValues then Math.max(0, @_min) else @_min
-      else
-        SEMIQUANT_MIN
-    set: (val) ->
-      if not @valueDefinedSemiQuantitatively then @_min = val
+    removeLink(link) {
+      if ((link.sourceNode === this) || (link.targetNode === this)) {
+        return _.remove(this.links, testLink => testLink === link);
+      } else {
+        throw new Error(`Bad link for Node:${this.id}`);
+      }
+    }
 
-  @property 'max',
-    get: ->
-      if not @valueDefinedSemiQuantitatively
-        @_max
-      else
-        if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
-    set: (val) ->
-      if not @valueDefinedSemiQuantitatively then @_max = val
+    outLinks(relationType = null) {
+      return _.filter(this.links, link => (link.sourceNode === this) && ((relationType === null) || (relationType === link.relation.type)));
+    }
 
-  @property 'isAccumulator',
-    get: ->
-      @_isAccumulator
-    set: (val) ->
-      @_isAccumulator = val
-      if(val && (@_max is SEMIQUANT_MAX))
-        @_max = SEMIQUANT_ACCUMULATOR_MAX
-      else
-        if(@_max is SEMIQUANT_ACCUMULATOR_MAX)
-          @_max = SEMIQUANT_MAX
+    inLinks(relationType = null) {
+      return _.filter(this.links, link => (link.targetNode === this) && ((relationType === null) || (relationType === link.relation.type)));
+    }
 
-  type: 'Node'
-  isTransfer: false
+    inNodes() {
+      return _.map(this.inLinks(), link => link.sourceNode);
+    }
 
-  addLink: (link) ->
-    if link.sourceNode is @ or link.targetNode is @
-      if _.contains @links, link
-        throw new Error "Duplicate link for Node:#{@.id}"
-      else
-        @links.push link
-    else
-      throw new Error "Bad link for Node:#{@.id}"
+    isDependent(onlyConsiderDefinedRelations) {
+      if (onlyConsiderDefinedRelations) {
+        for (let link of Array.from(this.inLinks())) {
+          if (link.relation && link.relation.isDefined) {
+            return true;
+          }
+        }
+        return false;
+      } else {
+        return __guard__(this.inLinks(), x => x.length) > 0;
+      }
+    }
 
-  removeLink: (link) ->
-    if link.sourceNode is @ or link.targetNode is @
-      _.remove @links, (testLink) ->
-        return testLink is link
-    else
-      throw new Error "Bad link for Node:#{@.id}"
+    checkIsInIndependentCycle() {
+      const visitedNodes = [];
+      const original = this;
+      let isOwnGrandpa = false;
 
-  outLinks: (relationType = null) ->
-    _.filter @links, (link) => (link.sourceNode is @) and (relationType is null or relationType is link.relation.type)
+      var visit = function(node) {
+        visitedNodes.push(node);
+        for (let link of Array.from(node.inLinks())) {
+          if ((link.relation != null ? link.relation.isDefined : undefined)) {
+            const upstreamNode = link.sourceNode;
+            if (upstreamNode.isAccumulator) { return true; }         // fast exit if we have a collector ancestor
+            if (!upstreamNode.isDependent(true)) { return true; } // or an independent ancestor
+            if (upstreamNode === original) { isOwnGrandpa = true; }
+            if (!_.contains(visitedNodes, upstreamNode)) {
+              if (visit(upstreamNode)) { return true; }
+            }
+          }
+        }
+      };
 
-  inLinks: (relationType = null) ->
-    _.filter @links, (link) => (link.targetNode is @) and (relationType is null or relationType is link.relation.type)
+      const hasIndependentAncestor = visit(this);
 
-  inNodes: ->
-    _.map @inLinks(), (link) -> link.sourceNode
+      return this.isInDependentCycle = !hasIndependentAncestor && isOwnGrandpa;
+    }
 
-  isDependent: (onlyConsiderDefinedRelations) ->
-    if onlyConsiderDefinedRelations
-      for link in @inLinks()
-        if link.relation and link.relation.isDefined
-          return true
-      return false
-    else
-      @inLinks()?.length > 0
+    infoString() {
+      let link;
+      const linkNamer = link => ` --${link.title}-->[${link.targetNode.title}]`;
+      const outs = ((() => {
+        const result = [];
+        for (link of Array.from(this.outLinks())) {           result.push(linkNamer(link));
+        }
+        return result;
+      })());
+      return `${this.title} ${outs}`;
+    }
 
-  checkIsInIndependentCycle: ->
-    visitedNodes = []
-    original = this
-    isOwnGrandpa = false
+    downstreamNodes() {
+      const visitedNodes = [];
 
-    visit = (node) ->
-      visitedNodes.push node
-      for link in node.inLinks() when link.relation?.isDefined
-        upstreamNode = link.sourceNode
-        return true if upstreamNode.isAccumulator         # fast exit if we have a collector ancestor
-        return true unless upstreamNode.isDependent(true) # or an independent ancestor
-        if upstreamNode is original then isOwnGrandpa = true
-        unless _.contains visitedNodes, upstreamNode
-          return true if visit upstreamNode
+      var visit = function(node) {
+        log.info(`visiting node: ${node.id}`);
+        visitedNodes.push(node);
+        return _.each(node.outLinks(), function(link) {
+          const downstreamNode = link.targetNode;
+          if (!_.contains(visitedNodes, downstreamNode)) {
+            return visit(downstreamNode);
+          }
+        });
+      };
+      visit(this);
+      return _.without(visitedNodes, this); // remove ourself from the results.
+    }
 
-    hasIndependentAncestor = visit @
+    // ensures min, max and initialValue are all consistent.
+    // @keys (optional) currently changed keys, so we can prioritize a user setting min or max
+    normalizeValues(keys) {
+      if (isNaN(this.min)) { this.min = 0; }
+      if (isNaN(this.max)) { this.max = 0; }
+      if (_.contains(keys, "max")) {
+        this.min = Math.min(this.min, this.max);
+      } else {
+        this.max = Math.max(this.max, this.min);
+      }
+      this.initialValue = Math.max(this.min, Math.min(this.max, this.initialValue));
 
-    @isInDependentCycle = not hasIndependentAncestor and isOwnGrandpa
+      // clear collector images when @isAccumulator -> false
+      if (!this.isAccumulator) {
+        return this._collectorImageProps = null;
+      }
+    }
 
-  infoString: ->
-    linkNamer = (link) ->
-      " --#{link.title}-->[#{link.targetNode.title}]"
-    outs = (linkNamer link for link in @outLinks())
-    "#{@title} #{outs}"
+    collectorImageProps() {
+      // preserve collector images unless explicitly cleared
+      if (!this._collectorImageProps) {
+        this._collectorImageProps = [];
+        for (let i = 0; i <= 8; i += 2) {
+          const row = Math.trunc(i/3);
+          const col = i - (row * 3);
+          this._collectorImageProps.push({
+            left: (Math.random() * 10) + (col * 20),   // [0, 10) [20, 30) [40, 50)
+            top: (Math.random() * 10) + (row * 20),    // [0, 10) [20, 30) [40, 50)
+            rotation: (Math.random() * 60) - 30
+          });
+        }     // [-30, 30) [-30, 30) [-30, 30)
+      }
+      return this._collectorImageProps;
+    }
 
-  downstreamNodes: ->
-    visitedNodes = []
+    // Given a value between _min and _max, calculate the SQ proportion
+    mapQuantToSemiquant(val) {
+      const max = this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
+      return SEMIQUANT_MIN + (((val - this._min) / (this._max - this._min)) * (max - SEMIQUANT_MIN));
+    }
 
-    visit = (node) ->
-      log.info("visiting node: #{node.id}")
-      visitedNodes.push node
-      _.each node.outLinks(), (link) ->
-        downstreamNode = link.targetNode
-        unless _.contains visitedNodes, downstreamNode
-          visit downstreamNode
-    visit @
-    _.without visitedNodes, @ # remove ourself from the results.
+    // Given an SQ value (i.e. between 0 and 100), calculate quantatative value
+    // (i.e. between _min and _max)
+    mapSemiquantToQuant(val) {
+      const max = this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
+      return this._min + (((val - SEMIQUANT_MIN) / (max - SEMIQUANT_MIN)) * (this._max - this._min));
+    }
 
-  # ensures min, max and initialValue are all consistent.
-  # @keys (optional) currently changed keys, so we can prioritize a user setting min or max
-  normalizeValues: (keys) ->
-    if isNaN(@min) then @min = 0
-    if isNaN(@max) then @max = 0
-    if _.contains keys, "max"
-      @min = Math.min @min, @max
-    else
-      @max = Math.max @max, @min
-    @initialValue = Math.max @min, Math.min @max, @initialValue
+    toExport() {
+      const result = {
+        key: this.key,
+        data: {
+          title: this.title,
+          codapName: this.codapName,
+          codapID: this.codapID,
+          x: this.x,
+          y: this.y,
+          paletteItem: this.paletteItem,
+          initialValue: this.initialValue,
+          min: this._min,
+          max: this._max,
+          isAccumulator: this.isAccumulator,
+          allowNegativeValues: this.allowNegativeValues,
+          valueDefinedSemiQuantitatively: this.valueDefinedSemiQuantitatively,
+          frames: _.clone(this.frames),
+          combineMethod: this.combineMethod
+        }
+      };
+      return result;
+    }
 
-    # clear collector images when @isAccumulator -> false
-    if (not @isAccumulator)
-      @_collectorImageProps = null
+    canEditInitialValue() {
+      return !this.isDependent(true) || this.isAccumulator || this.isInDependentCycle;
+    }
 
-  collectorImageProps: ->
-    # preserve collector images unless explicitly cleared
-    if not @_collectorImageProps
-      @_collectorImageProps = []
-      for i in [0..8] by 2
-        row = Math.trunc(i/3)
-        col = i - row * 3
-        @_collectorImageProps.push
-          left: Math.random() * 10 + col * 20   # [0, 10) [20, 30) [40, 50)
-          top: Math.random() * 10 + row * 20    # [0, 10) [20, 30) [40, 50)
-          rotation: Math.random() * 60 - 30     # [-30, 30) [-30, 30) [-30, 30)
-    @_collectorImageProps
+    canEditValueWhileRunning() {
+      return !this.isDependent(true);
+    }
 
-  # Given a value between _min and _max, calculate the SQ proportion
-  mapQuantToSemiquant: (val) ->
-    max = if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
-    SEMIQUANT_MIN + (val - @_min) / (@_max - @_min) * (max - SEMIQUANT_MIN)
+    paletteItemIs(paletteItem) {
+      return paletteItem.uuid === this.paletteItem;
+    }
+  };
+  Node.initClass();
+  return Node;
+})());
 
-  # Given an SQ value (i.e. between 0 and 100), calculate quantatative value
-  # (i.e. between _min and _max)
-  mapSemiquantToQuant: (val) ->
-    max = if @isAccumulator then SEMIQUANT_ACCUMULATOR_MAX else SEMIQUANT_MAX
-    @_min + (val - SEMIQUANT_MIN) / (max - SEMIQUANT_MIN) * (@_max - @_min)
-
-  toExport: ->
-    result =
-      key: @key
-      data:
-        title: @title
-        codapName: @codapName
-        codapID: @codapID
-        x: @x
-        y: @y
-        paletteItem: @paletteItem
-        initialValue: @initialValue
-        min: @_min
-        max: @_max
-        isAccumulator: @isAccumulator
-        allowNegativeValues: @allowNegativeValues
-        valueDefinedSemiQuantitatively: @valueDefinedSemiQuantitatively
-        frames: _.clone @frames
-        combineMethod: @combineMethod
-    result
-
-  canEditInitialValue: ->
-    not @isDependent(true) or @isAccumulator or @isInDependentCycle
-
-  canEditValueWhileRunning: ->
-    not @isDependent(true)
-
-  paletteItemIs: (paletteItem) ->
-    paletteItem.uuid is @paletteItem
+function __guard__(value, transform) {
+  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
+}

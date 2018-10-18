@@ -1,34 +1,47 @@
-dropImageHandler = require '../utils/drop-image-handler'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const dropImageHandler = require('../utils/drop-image-handler');
 
-tr = require '../utils/translate'
+const tr = require('../utils/translate');
 
-{div, p} = React.DOM
+const {div, p} = React.DOM;
 
-module.exports = React.createClass
-  displayName: 'DropZone'
+module.exports = React.createClass({
+  displayName: 'DropZone',
 
-  getInitialState: ->
-    canDrop: false
+  getInitialState() {
+    return {canDrop: false};
+  },
 
-  onDragOver: (e) ->
-    if not @state.canDrop
-      @setState canDrop: true
-    e.preventDefault()
+  onDragOver(e) {
+    if (!this.state.canDrop) {
+      this.setState({canDrop: true});
+    }
+    return e.preventDefault();
+  },
 
-  onDragLeave: (e) ->
-    @setState canDrop: false
-    e.preventDefault()
+  onDragLeave(e) {
+    this.setState({canDrop: false});
+    return e.preventDefault();
+  },
 
-  onDrop: (e) ->
-    @setState canDrop: false
-    e.preventDefault()
+  onDrop(e) {
+    this.setState({canDrop: false});
+    e.preventDefault();
 
-    # get the files
-    dropImageHandler e, (file) =>
-      @props.dropped file
+    // get the files
+    return dropImageHandler(e, file => {
+      return this.props.dropped(file);
+    });
+  },
 
-  render: ->
-    (div {className: "dropzone #{if @state.canDrop then 'can-drop' else ''}", onDragOver: @onDragOver, onDrop: @onDrop, onDragLeave: @onDragLeave},
-      (p {className: 'header'}, @props.header or (tr "~DROPZONE.DROP_IMAGES_HERE"))
-      (p {}, (tr "~DROPZONE.SQUARES_LOOK_BEST"))
-    )
+  render() {
+    return (div({className: `dropzone ${this.state.canDrop ? 'can-drop' : ''}`, onDragOver: this.onDragOver, onDrop: this.onDrop, onDragLeave: this.onDragLeave},
+      (p({className: 'header'}, this.props.header || (tr("~DROPZONE.DROP_IMAGES_HERE")))),
+      (p({}, (tr("~DROPZONE.SQUARES_LOOK_BEST"))))
+    ));
+  }
+});

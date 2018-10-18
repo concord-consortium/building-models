@@ -1,31 +1,38 @@
-tr = require './translate'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const tr = require('./translate');
 
-units =
-      STEP: 1
-units.SECOND =  1
-units.MINUTE = 60 * units.SECOND
-units.HOUR   = 60 * units.MINUTE
-units.DAY    = 24 * units.HOUR
-units.WEEK   = 7 * units.DAY
-units.MONTH  = 30 * units.DAY
-units.YEAR   = 365 * units.DAY
+const units =
+      {STEP: 1};
+units.SECOND =  1;
+units.MINUTE = 60 * units.SECOND;
+units.HOUR   = 60 * units.MINUTE;
+units.DAY    = 24 * units.HOUR;
+units.WEEK   = 7 * units.DAY;
+units.MONTH  = 30 * units.DAY;
+units.YEAR   = 365 * units.DAY;
 
-toSeconds = (n, unit) ->
-  n * units[unit]
+const toSeconds = (n, unit) => n * units[unit];
 
-module.exports =
+module.exports = {
 
-  units: _.keys(units)
+  units: _.keys(units),
 
-  defaultUnit: "STEP"
+  defaultUnit: "STEP",
 
-  defaultCollectorUnit: "STEP"
+  defaultCollectorUnit: "STEP",
 
-  toString: (unit, plural) ->
-    number = if plural then ".PLURAL" else ""
-    tr "~TIME.#{unit}#{number}"
+  toString(unit, plural) {
+    const number = plural ? ".PLURAL" : "";
+    return tr(`~TIME.${unit}${number}`);
+  },
 
-  stepsInTime: (stepSize, stepUnit, period, periodUnit) ->
-    stepSizeInSeconds = toSeconds stepSize, stepUnit
-    periodInSeconds   = toSeconds period, periodUnit
-    Math.floor periodInSeconds / stepSizeInSeconds
+  stepsInTime(stepSize, stepUnit, period, periodUnit) {
+    const stepSizeInSeconds = toSeconds(stepSize, stepUnit);
+    const periodInSeconds   = toSeconds(period, periodUnit);
+    return Math.floor(periodInSeconds / stepSizeInSeconds);
+  }
+};

@@ -1,67 +1,82 @@
-global._      = require 'lodash'
-global.log    = require 'loglevel'
-global.Reflux = require 'reflux'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+global._      = require('lodash');
+global.log    = require('loglevel');
+global.Reflux = require('reflux');
 
-global.window = { location: '' }
+global.window = { location: '' };
 
-chai = require('chai')
-chai.config.includeStack = true
+const chai = require('chai');
+chai.config.includeStack = true;
 
-expect         = chai.expect
-should         = chai.should()
-Sinon          = require('sinon')
+const { expect }         = chai;
+const should         = chai.should();
+const Sinon          = require('sinon');
 
-ImageDialogStore = require "../src/code/stores/image-dialog-store"
+const ImageDialogStore = require("../src/code/stores/image-dialog-store");
 
-describe 'ImageDialogStore', ->
+describe('ImageDialogStore', function() {
 
-  beforeEach ->
-    @clock = Sinon.useFakeTimers()
-    @mock = Sinon.mock(ImageDialogStore.store)
+  beforeEach(function() {
+    this.clock = Sinon.useFakeTimers();
+    return this.mock = Sinon.mock(ImageDialogStore.store);
+  });
 
-  afterEach ->
-    @clock.restore()
-    @mock.restore()
+  afterEach(function() {
+    this.clock.restore();
+    return this.mock.restore();
+  });
 
-  it 'GraphPrimitive should exists', ->
-    ImageDialogStore.should.exist
+  it('GraphPrimitive should exists', () => ImageDialogStore.should.exist);
 
-  describe 'the ImageDialogStore Actions', ->
-    beforeEach ->
-      @actions = ImageDialogStore.actions
+  return describe('the ImageDialogStore Actions', function() {
+    beforeEach(function() {
+      return this.actions = ImageDialogStore.actions;
+    });
 
-    describe 'open', ->
-      describe 'with no callback', ->
-        beforeEach ->
-          @actions.open false
-          @clock.tick(1)
+    return describe('open', function() {
+      describe('with no callback', function() {
+        beforeEach(function() {
+          this.actions.open(false);
+          return this.clock.tick(1);
+        });
 
-        it "should try to keep the dialog open", ->
-          ImageDialogStore.store.keepShowing.should.equal true
+        it("should try to keep the dialog open", () => ImageDialogStore.store.keepShowing.should.equal(true));
 
-        it "shouldn't call 'close' when finishing", ->
-          @mock.expects("close").never()
-          @actions.cancel()
-          @clock.tick 1
-          @mock.verify()
+        return it("shouldn't call 'close' when finishing", function() {
+          this.mock.expects("close").never();
+          this.actions.cancel();
+          this.clock.tick(1);
+          return this.mock.verify();
+        });
+      });
 
 
-      describe "when opened with a callback function", ->
-        beforeEach ->
-          @callbackF = Sinon.spy()
-          @actions.open @callbackF
-          @clock.tick 1
+      return describe("when opened with a callback function", function() {
+        beforeEach(function() {
+          this.callbackF = Sinon.spy();
+          this.actions.open(this.callbackF);
+          return this.clock.tick(1);
+        });
 
-        it "shouldn't keep the dialog open", ->
-          ImageDialogStore.store.keepShowing.should.equal false
+        it("shouldn't keep the dialog open", () => ImageDialogStore.store.keepShowing.should.equal(false));
 
-        it "should call 'close' when finishing", ->
-          @mock.expects "close"
-          @actions.cancel()
-          @clock.tick 1
-          @mock.verify()
+        it("should call 'close' when finishing", function() {
+          this.mock.expects("close");
+          this.actions.cancel();
+          this.clock.tick(1);
+          return this.mock.verify();
+        });
 
-        it "should call the callback when finishing", ->
-          @actions.cancel()
-          @clock.tick 1
-          @callbackF.called.should.be.true
+        return it("should call the callback when finishing", function() {
+          this.actions.cancel();
+          this.clock.tick(1);
+          return this.callbackF.called.should.be.true;
+        });
+      });
+    });
+  });
+});

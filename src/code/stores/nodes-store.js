@@ -1,66 +1,89 @@
-PaletteStore       = require './palette-store'
-GraphActions       = require '../actions/graph-actions'
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const PaletteStore       = require('./palette-store');
+const GraphActions       = require('../actions/graph-actions');
 
-nodeActions = Reflux.createActions(
+const nodeActions = Reflux.createActions(
   [
     "nodesChanged"
   ]
-)
+);
 
-nodeStore   = Reflux.createStore
-  listenables: [nodeActions]
+const nodeStore   = Reflux.createStore({
+  listenables: [nodeActions],
 
-  init: ->
-    @nodes               = []
-    @paletteItemHasNodes = false
-    @selectedPaletteItem = null
+  init() {
+    this.nodes               = [];
+    this.paletteItemHasNodes = false;
+    this.selectedPaletteItem = null;
 
-    PaletteStore.store.listen @paletteChanged
-    GraphActions.graphChanged.listen  @graphChanged
+    PaletteStore.store.listen(this.paletteChanged);
+    return GraphActions.graphChanged.listen(this.graphChanged);
+  },
 
-  onNodesChanged: (nodes) ->
-    @nodes = nodes
-    @internalUpdate()
+  onNodesChanged(nodes) {
+    this.nodes = nodes;
+    return this.internalUpdate();
+  },
 
-  graphChanged: (status) ->
-    @nodes = status.nodes
-    @internalUpdate()
+  graphChanged(status) {
+    this.nodes = status.nodes;
+    return this.internalUpdate();
+  },
 
-  paletteChanged: ->
-    @selectedPaletteItem = PaletteStore.store.selectedPaletteItem
-    @internalUpdate()
+  paletteChanged() {
+    this.selectedPaletteItem = PaletteStore.store.selectedPaletteItem;
+    return this.internalUpdate();
+  },
 
-  internalUpdate: ->
-    @paletteItemHasNodes = false
-    return unless @selectedPaletteItem
-    _.each @nodes, (node) =>
-      if node.paletteItemIs @selectedPaletteItem
-        @paletteItemHasNodes = true
-    @notifyChange()
+  internalUpdate() {
+    this.paletteItemHasNodes = false;
+    if (!this.selectedPaletteItem) { return; }
+    _.each(this.nodes, node => {
+      if (node.paletteItemIs(this.selectedPaletteItem)) {
+        return this.paletteItemHasNodes = true;
+      }
+    });
+    return this.notifyChange();
+  },
 
-  notifyChange: ->
-    data =
-      nodes: @nodes
-      paletteItemHasNodes: @paletteItemHasNodes
-    @trigger(data)
+  notifyChange() {
+    const data = {
+      nodes: this.nodes,
+      paletteItemHasNodes: this.paletteItemHasNodes
+    };
+    return this.trigger(data);
+  }
+});
 
-mixin =
-  getInitialState: ->
-    nodes: nodeStore.nodes
-    paletteItemHasNodes: nodeStore.paletteItemHasNodes
+const mixin = {
+  getInitialState() {
+    return {
+      nodes: nodeStore.nodes,
+      paletteItemHasNodes: nodeStore.paletteItemHasNodes
+    };
+  },
 
-  componentDidMount: ->
-    @unsubscribe = nodeStore.listen @onNodesChange
+  componentDidMount() {
+    return this.unsubscribe = nodeStore.listen(this.onNodesChange);
+  },
 
-  componentWillUnmount: ->
-    @unsubscribe()
+  componentWillUnmount() {
+    return this.unsubscribe();
+  },
 
-  onNodesChange: (status) ->
-    @setState
-      # nodes: status.nodes
-      paletteItemHasNodes: status.paletteItemHasNodes
+  onNodesChange(status) {
+    return this.setState({
+      // nodes: status.nodes
+      paletteItemHasNodes: status.paletteItemHasNodes});
+  }
+};
 
-module.exports =
-  actions: nodeActions
-  store: nodeStore
-  mixin: mixin
+module.exports = {
+  actions: nodeActions,
+  store: nodeStore,
+  mixin
+};
