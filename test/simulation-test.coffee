@@ -97,9 +97,12 @@ describe "Simulation", ->
           @nodeB.currentValue.should.equal 1
 
     # We can describe each scenario as an object:
-    # Each single-letter key is a node. Values can be a number (the initial value
-    #   for independent variables), a string "x+" (the initial value for collectors),
-    #   or null (dependent variables).
+    # Each single-letter key is a node.
+    # Values can be:
+    #  * `20` (number for independent variables)
+    #  * `x+` (string for initial value for collectors)
+    #  * `x*` (string for initial value when nodes uses`product` for `combineMethod`)
+    #  * null (dependent variables).
     # Each two-letter node is a link, with the formula for the link.
     # Results is an array of arbitrary length, describing the expected result for each
     # node on each step.
@@ -173,7 +176,7 @@ describe "Simulation", ->
         ]}
 
         # 9: four-node graph with collector (>-[D]) and scaled product combination
-        {A: 50, B: 50, C: 0, D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in"
+        {A: 50, B: 50, C: "0*", D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in"
         results: [
           [50, 50, 25, 0]
           [50, 50, 25, 25]
@@ -241,7 +244,9 @@ describe "Simulation", ->
           for key, value of scenario
             if key.length == 1
               isAccumulator = typeof value is "string" and ~value.indexOf('+')
-              nodes[key] = new Node({title: key, initialValue: parseInt(value), isAccumulator})
+              isProduct = typeof value is "string" and ~value.indexOf('*')
+              combineMethod = if isProduct then 'product' else 'average'
+              nodes[key] = new Node({title: key, initialValue: parseInt(value), combineMethod: combineMethod, isAccumulator})
             else if key.length == 2
               node1 = nodes[key[0]]
               node2 = nodes[key[1]]
