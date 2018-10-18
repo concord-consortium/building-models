@@ -38,15 +38,16 @@ module.exports = {
   },
   browserify: {
     app: {
-      watch: [src + '/code/**/*.*', '!' + src + '/code/globals.js'],
-      src: src + '/code/app.js',
+      watch: [src + '/code/**/*.*', '!' + src + '/code/globals.ts'],
+      src: src + '/code/app.ts',
       dest: dest + '/js/'
     },
     globals: {
-      watch: src + '/code/globals.js',
-      src: src + '/code/globals.js',
+      watch: src + '/code/globals.ts',
+      src: src + '/code/globals.ts',
       dest: dest + '/js/'
-    }
+    },
+    defs: src + '/code/globals.d.ts'
   },
   eslint: {
     watch: src + '/code/**/*.js',
