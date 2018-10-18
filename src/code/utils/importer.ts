@@ -5,20 +5,25 @@
  * DS103: Rewrite code to no longer use __guard__
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let MySystemImporter;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const Migrations          = require("../data/migrations/migrations");
 const DiagramNode         = require("../models/node");
 const TransferNode        = require("../models/transfer");
 const ImportActions       = require("../actions/import-actions");
 const GraphPrimitive      = require("../models/graph-primitive");
 
-module.exports = (MySystemImporter = class MySystemImporter {
+class MySystemImporter {
+  private graphStore: any;
+  private settings: any;
+  private paletteStore: any;
 
   constructor(graphStore, settings, paletteStore) {
     this.graphStore = graphStore;
     this.settings = settings;
     this.paletteStore = paletteStore;
-    undefined;
   }
 
   importData(data) {
@@ -46,7 +51,7 @@ module.exports = (MySystemImporter = class MySystemImporter {
   }
 
   importNodes(importNodes) {
-    for (let nodespec of Array.from(importNodes)) {
+    for (let nodespec of importNodes) {
       const node = this.importNode(nodespec);
       // ensure id matches key for imported documents
       node.id = node.key;
@@ -56,14 +61,16 @@ module.exports = (MySystemImporter = class MySystemImporter {
   }
 
   importLinks(links) {
-    for (let link of Array.from(links)) {
+    for (let link of links) {
       this.graphStore.importLink(link);
       // ensure id matches key for imported documents
       link.id = link.key;
     }
     // prevent unused default return value
   }
-});
+}
+
+module.exports = MySystemImporter;
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

@@ -4,6 +4,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const migration = {
   version: "1.4.0",
   description: "Adds settings object and cap default.",

@@ -3,6 +3,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const LaraConnect = require("../models/lara-connect");
 const LaraActions = require("../actions/lara-actions");
 

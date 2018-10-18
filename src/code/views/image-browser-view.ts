@@ -3,6 +3,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const ModalTabbedDialog = require("./modal-tabbed-dialog-view");
 const TabbedPanel = require("./tabbed-panel-view");
 const ModalTabbedDialogFactory = React.createFactory(ModalTabbedDialog);

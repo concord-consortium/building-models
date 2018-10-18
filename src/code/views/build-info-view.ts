@@ -5,11 +5,14 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let BuildInfoView;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {div, a, table, tbody, tr, td, i} = React.DOM;
 const Migration = require("../data/migrations/migrations");
 
-module.exports = (BuildInfoView = React.createClass({
+module.exports = React.createClass({
 
   displayName: "BuildInfoView",
 
@@ -94,7 +97,7 @@ module.exports = (BuildInfoView = React.createClass({
       })()
     ));
   }
-}));
+});
 
 //
 // myView = React.createFactory BuildInfoView

@@ -8,6 +8,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const NodeView         = require("./node-view");
 const Node             = React.createFactory(NodeView);
 const NodeModel        = require("../models/node");
@@ -188,8 +192,8 @@ module.exports = React.createClass({
     const { selectedNodes } = this.state;
     if (selectedNodes.length > 0) {
       return this.handleEvent(function() {
-        if (Array.from(selectedNodes).includes(theNode)) {
-          return Array.from(selectedNodes).map((node) =>
+        if (selectedNodes.includes(theNode)) {
+          return selectedNodes.map((node) =>
             GraphStore.store.moveNode(node.key, leftDiff, topDiff));
         } else { // when node is unselected, but we drag it, only it should be dragged
           return (GraphStore.store.moveNode(theNode.key, leftDiff, topDiff));
@@ -208,7 +212,7 @@ module.exports = React.createClass({
     const { selectedNodes } = this.state;
     if (selectedNodes.length > 0) {
       return this.handleEvent(() =>
-        Array.from(selectedNodes).map((node) =>
+        selectedNodes.map((node) =>
           GraphStore.store.moveNodeCompleted(node.key, leftDiff, topDiff))
       );
     } else {
@@ -237,7 +241,7 @@ module.exports = React.createClass({
 
   _updateNodeValue(name, key, value) {
     let changed = 0;
-    for (let node of Array.from(this.state.nodes)) {
+    for (let node of this.state.nodes) {
       if (node.key === name) {
         node[key] = value;
         changed++;
@@ -295,7 +299,7 @@ module.exports = React.createClass({
   },
 
   _redrawLinks() {
-    return Array.from(this.state.links).map((link) =>
+    return this.state.links.map((link) =>
       (link.relation != null ? link.relation.isTransfer : undefined) ?
         this._redrawTransferLinks(link)
         :
@@ -323,7 +327,7 @@ module.exports = React.createClass({
     const useGradient = false;
     const useVariableThickness = true;
     if (source && target) {
-      const opts = {
+      const opts:any = {
         source,
         target,
         label: link.title,
@@ -464,8 +468,8 @@ module.exports = React.createClass({
 
   checkSelectBoxLinkCollisions() {
     return (() => {
-      const result = [];
-      for (let link of Array.from(this.state.links)) {
+      const result: any[] = [];
+      for (let link of this.state.links) {
         if (!(link.relation != null ? link.relation.isTransfer : undefined) && this.checkBoxLinkCollision(link)) {
           result.push(this.props.selectionManager.selectLinkForInspection(link, true));
         } else {
@@ -478,8 +482,8 @@ module.exports = React.createClass({
 
   checkSelectBoxCollisions() {
     return (() => {
-      const result = [];
-      for (let node of Array.from(this.state.nodes)) {
+      const result: any[] = [];
+      for (let node of this.state.nodes) {
         if (this.checkSelectBoxCollision(node)) {
           result.push(this.props.selectionManager.selectNodeForInspection(node, true));
         } else {
@@ -577,13 +581,13 @@ module.exports = React.createClass({
             return (div({className: "selectionBox", ref: "selectionBox", style: {width: Math.abs(this.state.selectBox.x-this.state.selectBox.startX), height: Math.abs(this.state.selectBox.y-this.state.selectBox.startY), left, top, border: "1px dotted #CCC", position: "absolute", backgroundColor: "#FFFFFF"}}));
           }
         })(),
-        Array.from(this.state.nodes).map((node) =>
+        this.state.nodes.map((node) =>
           (Node({
             key: node.key,
             data: node,
             dataColor,
             innerColor,
-            selected: Array.from(this.state.selectedNodes).includes(node),
+            selected: this.state.selectedNodes.includes(node),
             simulating: this.state.simulationPanelExpanded,
             running: this.state.modelIsRunning,
             editTitle: this.state.editingNode === node,

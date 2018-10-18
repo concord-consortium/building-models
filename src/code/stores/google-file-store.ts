@@ -5,6 +5,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+ // TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const GoogleDriveIO = require("../utils/google-drive-io");
 const GraphStore    = require("./graph-store");
 const PaletteStore  = require("./palette-store");

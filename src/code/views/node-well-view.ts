@@ -3,6 +3,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const PaletteInspectorView  = React.createFactory(require("./palette-inspector-view"));
 const PaletteStore = require("../stores/palette-store");
 const {div} = React.DOM;

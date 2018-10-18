@@ -3,6 +3,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {a, span} = React.DOM;
 const tr = require("../utils/translate");
 
@@ -29,7 +33,7 @@ module.exports = React.createClass({
   },
 
   render() {
-    const opts = { href: this.link() };
+    const opts:any = { href: this.link() };
 
     if (this.props.openInNewWindow) {
       opts.target = "_blank";

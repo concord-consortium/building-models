@@ -5,6 +5,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const resizeImage    = require("../utils/resize-image");
 const initialPalette = require("../data/initial-palette");
 const initialLibrary = require("../data/internal-library");
@@ -255,4 +259,4 @@ module.exports = {
   mixin
 };
 
-window.PaletteStore = module.exports;
+(window as any).PaletteStore = module.exports;

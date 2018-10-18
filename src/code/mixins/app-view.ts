@@ -4,6 +4,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const PaletteStore    = require("../stores/palette-store");
 const CodapStore      = require("../stores/codap-store");
 const LaraStore       = require("../stores/lara-store");
@@ -56,7 +60,7 @@ module.exports = {
 
       return $(window).on("keydown", function(e) {
         // 8 is backspace, 46 is delete
-        if ([8, 46].includes(e.which) && !$(e.target).is("input, textarea")) {
+        if (_.includes([8, 46], e.which) && !$(e.target).is("input, textarea")) {
           e.preventDefault();
           return deleteFunction();
         }

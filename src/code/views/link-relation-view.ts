@@ -6,7 +6,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let LinkRelationView;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {br, div, h2, label, span, input, p, i, select, option, textarea} = React.DOM;
 
 const RelationFactory  = require("../models/relation-factory");
@@ -43,7 +46,7 @@ const QuantStart = React.createFactory(React.createClass({
 })
 );
 
-module.exports = (LinkRelationView = React.createClass({
+module.exports = React.createClass({
 
   displayName: "LinkRelationView",
 
@@ -275,7 +278,7 @@ module.exports = (LinkRelationView = React.createClass({
 
   renderAccumulator(source, target) {
     let currentOption;
-    const options = [];
+    const options: any[] = [];
     _.each(RelationFactory.accumulators, (opt, i) => {
       if ((!opt.forDualAccumulator || this.state.isDualAccumulator) &&
           (!opt.forSoloAccumulatorOnly || !this.state.isDualAccumulator)) {
@@ -409,9 +412,7 @@ module.exports = (LinkRelationView = React.createClass({
       ))
     ));
   }
-}));
-
-
+});
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

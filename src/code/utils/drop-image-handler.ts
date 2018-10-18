@@ -5,18 +5,22 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const resizeImage = require("./resize-image");
 const hasValidImageExtension = require("../utils/has-valid-image-extension");
 
 module.exports = function(e, callback) {
   if (e.dataTransfer.files.length > 0) {
     return (() => {
-      const result = [];
-      for (var file of Array.from(e.dataTransfer.files)) {
+      const result:any = [];
+      for (var file of e.dataTransfer.files) {
         if (hasValidImageExtension(file.name)) {
           const reader = new FileReader();
-          reader.addEventListener("loadend", e =>
-            resizeImage(e.target.result, dataUrl =>
+          reader.addEventListener("load", e => {
+            resizeImage(reader.result, dataUrl =>
               callback({
                 name: file.name,
                 title: (file.name.split("."))[0],
@@ -26,7 +30,7 @@ module.exports = function(e, callback) {
                   title: (file.name.split("."))[0]
                 }})
             )
-          );
+          });
           result.push(reader.readAsDataURL(file));
         } else {
           result.push(undefined);

@@ -5,7 +5,10 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let DropDown;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {div, i, span, ul, li} = React.DOM;
 
 const DropdownItem = React.createFactory(React.createClass({
@@ -24,7 +27,7 @@ const DropdownItem = React.createFactory(React.createClass({
 })
 );
 
-module.exports = (DropDown = React.createClass({
+const DropDown = React.createClass({
 
   displayName: "Dropdown",
 
@@ -82,8 +85,9 @@ module.exports = (DropDown = React.createClass({
       (div({className: menuClass, onMouseLeave: this.blur, onMouseEnter: this.unblur},
         (ul({},
           (() => {
-            const result = [];
-            for (item of Array.from(this.props.items)) {             result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
+            const result:any = [];
+            for (item of Array.from(this.props.items)) {
+              result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
             }
             return result;
           })()
@@ -91,10 +95,10 @@ module.exports = (DropDown = React.createClass({
       ))
     ));
   }
-}));
-
+});
 
 const DemoDropDown = React.createFactory(DropDown);
+
 const Demo = React.createClass({
   getInitialState() {
     return {nonActionMenuSelection: "Selection menu"};
@@ -128,5 +132,7 @@ const Demo = React.createClass({
     ));
   }
 });
+
+module.exports = DropDown;
 
 // window.testComponent = (domID) -> ReactDOM.render React.createElement(Demo,{}), domID

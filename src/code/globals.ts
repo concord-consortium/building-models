@@ -1,13 +1,15 @@
 // global vars
 
+const g = (global as any);
+
 // Kinda hard to get all jquery plugins to load …
-global.jQuery = (global.$ = require("jquery"));
+g.jQuery = (g.$ = require("jquery"));
 require("jquery-ui-dist/jquery-ui.js");
 const Touchpunch = require("./vendor/touchpunch.js");
-Touchpunch(global.jQuery);
+Touchpunch(g.jQuery);
 
-global.React = require("react");
-global.ReactDOM = require("react-dom");
-global._ = require("lodash");
-global.log = require("loglevel");
-global.Reflux = require("reflux");
+g.React = require("react");
+g.ReactDOM = require("react-dom");
+g._ = require("lodash");
+g.log = require("loglevel");
+g.Reflux = require("reflux");

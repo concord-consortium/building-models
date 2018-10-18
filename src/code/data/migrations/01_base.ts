@@ -6,6 +6,9 @@
 // FORMAT BEFORE THIS TRANSFORM: in serialized-test-data-0.1.js
 // FORMAT AFTER THIS TRANSFORM:  in serialized-test-data-1.0.js
 
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const migration = {
   version: "1.0.0",
   description: "The initial migrations from old mysystem style file format.",

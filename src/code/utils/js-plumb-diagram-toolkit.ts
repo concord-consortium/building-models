@@ -5,10 +5,25 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 // Purpose of this class: Provide an abstraction over our chosen diagramming toolkit.
-let DiagramToolkit;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const LinkColors = require("../utils/link-colors");
 
-module.exports = (DiagramToolkit = class DiagramToolkit {
+class DiagramToolkit {
+  private domContext: any;
+  private options: any;
+  private type: string;
+  private color: string;
+  private lineWidth: number;
+  private lineWidthVariation: number;
+  private kit: any;
+  private flowNodeModifierAnchors: any[];
+  private flowNodeFlowAnchors: any[];
+  private flowNodeLinkAnchors: any[];
+  private standardAnchors: any[];
+  private $currentSource: any;
 
   constructor(domContext, options) {
     this.domContext = domContext;
@@ -147,7 +162,7 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     }
   }
 
-  _paintStyle(color) {
+  _paintStyle(color): any {
     return {
       strokeStyle: color || this.color,
       lineWidth: this.lineWidth,
@@ -158,7 +173,7 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
 
   _overlays(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) {
     if (editingLabel == null) { editingLabel = true; }
-    const results = [];
+    const results:any[] = [];
     if (!hideArrow) {
       results.push(["Arrow", {
         location: 1.0,
@@ -198,7 +213,7 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     return results;
   }
 
-  _gradient(startColor, endColor, offset) {
+  _gradient(startColor, endColor) {
     const result = {stops: [[0.0,startColor], [1.0,endColor]]};
     return result;
   }
@@ -234,7 +249,7 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     let finalColor = LinkColors.default;
     let fixedColor = LinkColors.default;
     let fadedColor = LinkColors.defaultFaded;
-    let changeIndicator = "";
+    let changeIndicator: string|null = "";
 
     let thickness = Math.abs(opts.magnitude);
     if (!thickness) {
@@ -319,8 +334,8 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
     const isTransferToFlowNode = opts.isTransfer && opts.fromSource;
     const isTransferFromFlowNode = opts.isTransfer && !opts.fromSource;
     const sourceAnchors = isTransferFromFlowNode ? this.flowNodeFlowAnchors : this.standardAnchors;
-    const targetAnchors = isTransferToFlowNode ? this.flowNodeFlowAnchors : 
-      isModifierToFlowNode ? this.flowNodeModifierAnchors : 
+    const targetAnchors = isTransferToFlowNode ? this.flowNodeFlowAnchors :
+      isModifierToFlowNode ? this.flowNodeModifierAnchors :
         isLinkToFlowNode ? this.flowNodeLinkAnchors : this.standardAnchors;
 
     const connection = this.kit.connect({
@@ -355,4 +370,6 @@ module.exports = (DiagramToolkit = class DiagramToolkit {
   resumeDrawing() {
     return this.setSuspendDrawing(false);
   }
-});
+}
+
+module.exports = DiagramToolkit;

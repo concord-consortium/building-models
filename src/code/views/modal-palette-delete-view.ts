@@ -4,6 +4,10 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const ModalDialog         = React.createFactory(require("./modal-dialog-view"));
 const PaletteDeleteView   = React.createFactory(require("./palette-delete-view"));
 const PaletteDialogStore  = require("../stores/palette-delete-dialog-store");

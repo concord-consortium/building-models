@@ -3,6 +3,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const DropZone = React.createFactory(require("./dropzone-view"));
 const ImageDialogStore = require("../stores/image-dialog-store");
 
@@ -25,7 +29,7 @@ module.exports = React.createClass({
       const reader = new FileReader();
       reader.onload = e => {
         return this.imageSelected({
-          image: e.target.result,
+          image: reader.result,
           title,
           metadata: {
             title,

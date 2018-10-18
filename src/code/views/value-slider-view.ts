@@ -6,6 +6,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 let {div, i, label, span, input, svg, circle, path, rect, g} = React.DOM;
 const tr = require("../utils/translate");
 
@@ -133,7 +137,7 @@ const ValueSlider = React.createClass({
   },
 
   renderNumber() {
-    const style =
+    const style: any =
       {bottom: `${this.props.handleSize}px`};
 
     if (this.state.dragging && this.props.renderValueTooltip) {
@@ -222,7 +226,7 @@ const ValueSlider = React.createClass({
     const width = (height = `${handleSize}px`);
     const centerOfDiv = `${this.sliderPercent()}%`;
     const outerEdge = Math.round((this.thickness() - handleSize)/ 2.0 );
-    const style = {
+    const style: any = {
       "width": width,
       "height": height,
       "fontSize": `${handleSize / 2}px`
@@ -327,7 +331,7 @@ const ValueSlider = React.createClass({
     const numTicks = ((max - min) / stepSize);
     const tickDistance = this.length() / numTicks;
     const tickHeight = circleRadius * 1.5;
-    const ticks = [];
+    const ticks: any[] = [];
     for (let j = 1, end = numTicks, asc = 1 <= end; asc ? j < end : j > end; asc ? j++ : j--) {
       if (orientation === "horizontal") {
         ticks.push((path({key: j, d:`M${j*tickDistance} ${center-tickHeight} l 0 ${tickHeight * 2}`, className:"slider-line"})));
@@ -340,7 +344,7 @@ const ValueSlider = React.createClass({
 
   renderLine() {
     let filled, height, orientation, width;
-    ({ filled, orientation, width, height, filled } = this.props);
+    ({ filled, orientation, width, height } = this.props);
     const center = this.thickness() / 2;
     let inset = circleRadius;
     if (filled) { inset += 1; }
@@ -521,7 +525,7 @@ const Demo = React.createClass({
   }
 });
 
-window.testComponent = domID => ReactDOM.render(React.createElement(Demo,{}), domID);
+(window as any).testComponent = domID => ReactDOM.render(React.createElement(Demo,{}), domID);
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

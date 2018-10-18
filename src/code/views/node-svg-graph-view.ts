@@ -4,12 +4,15 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let NodeSvgGraphView;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {svg, path, line, text, div, tspan, image} = React.DOM;
 
 const SimulationStore = require("../stores/simulation-store");
 
-module.exports = (NodeSvgGraphView = React.createClass({
+module.exports = React.createClass({
   displayName: "NodeSvgGraphView",
   mixins: [ SimulationStore.mixin ],
 
@@ -77,8 +80,7 @@ module.exports = (NodeSvgGraphView = React.createClass({
 
     let data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}];
     data = _.map(data,   p => `${p.x} ${p.y}`);
-    data = data.join(" L ");
-    return `M ${data}`;
+    return `M ${data.join(" L ")}`;
   },
 
   renderImage() {
@@ -125,4 +127,4 @@ module.exports = (NodeSvgGraphView = React.createClass({
       this.renderSVG()
     ));
   }
-}));
+});

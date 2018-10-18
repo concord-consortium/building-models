@@ -1,3 +1,7 @@
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const tr = require("./translate");
 
 const colors = {

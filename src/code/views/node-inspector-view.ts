@@ -4,6 +4,10 @@
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {div, h2, label, input, select, option, optgroup, button, i} = React.DOM;
 const tr = require("../utils/translate");
 const ColorPicker = React.createFactory(require("./color-picker-view"));

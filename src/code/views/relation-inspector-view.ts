@@ -6,7 +6,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let RelationInspectorView;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const LinkRelationView = React.createFactory(require("./link-relation-view"));
 const RelationFactory = require("../models/relation-factory");
 const TabbedPanel = React.createFactory(require("./tabbed-panel-view"));
@@ -18,7 +21,7 @@ const graphStore = require("../stores/graph-store");
 
 let {div, h2, label, span, input, p, i, select, option} = React.DOM;
 
-module.exports = (RelationInspectorView = React.createClass({
+module.exports = React.createClass({
 
   displayName: "RelationInspectorView",
 
@@ -87,7 +90,7 @@ module.exports = (RelationInspectorView = React.createClass({
       return this.renderLinkRelationInspector();
     }
   }
-}));
+});
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

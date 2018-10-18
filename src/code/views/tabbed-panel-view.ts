@@ -5,9 +5,17 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {div, ul, li, a} = React.DOM;
 
 class TabInfo {
+  private label: string;
+  private component: any;
+  private defined: boolean;
+
   constructor(settings) {
     if (settings == null) { settings = {}; }
     ({label: this.label, component: this.component, defined: this.defined} = settings);
@@ -81,7 +89,7 @@ module.exports = React.createClass({
 
   renderSelectedPanel(clientClass) {
     return (div({className: `workspace-tab-component${clientClass}`},
-      Array.from(this.props.tabs).map((tab, index) =>
+      this.props.tabs.map((tab, index) =>
         (div({
           key: index,
           style: {

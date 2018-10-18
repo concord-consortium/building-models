@@ -7,7 +7,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-// based on https://github.com/jzaefferer/undo/blob/master/undo.js
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
+ // based on https://github.com/jzaefferer/undo/blob/master/undo.js
 const CodapConnect = require("../models/codap-connect");
 
 const DEFAULT_CONTEXT_NAME = "building-models";
@@ -17,15 +21,21 @@ const DEFAULT_CONTEXT_NAME = "building-models";
 // that all other actions have completed before, e.g., we end a commandBatch.
 
 class Manager {
-  static initClass() {
-  
-    this.prototype.endCommandBatch = Reflux.createAction();
-  
-    this.prototype.undo = Reflux.createAction();
-  
-    this.prototype.redo = Reflux.createAction();
-  }
+  private endCommandBatch: any;
+  private undo: any;
+  private redo: any;
+  private commands: any[];
+  private stackPosition: number;
+  private savePosition: number;
+  private changeListeners: any[];
+  private currentBatch: any;
+  private debug: boolean;
+
   constructor(options) {
+    this.endCommandBatch = Reflux.createAction();
+    this.undo = Reflux.createAction();
+    this.redo = Reflux.createAction();
+
     if (options == null) { options = {}; }
     ({debug: this.debug} = options);
     this.commands = [];
@@ -149,7 +159,7 @@ class Manager {
 
   revertToOriginal() {
     return (() => {
-      const result = [];
+      const result:any[] = [];
       while (this.canUndo()) {
         result.push(this.undo());
       }
@@ -160,7 +170,7 @@ class Manager {
   revertToLastSave() {
     if (this.stackPosition > this.savePosition) {
       return (() => {
-        const result = [];
+        const result:any[] = [];
         while (this.dirty()) {
           result.push(this.undo());
         }
@@ -168,7 +178,7 @@ class Manager {
       })();
     } else if (this.stackPosition < this.savePosition) {
       return (() => {
-        const result1 = [];
+        const result1:any[] = [];
         while (this.dirty()) {
           result1.push(this.redo());
         }
@@ -208,12 +218,17 @@ class Manager {
     }
   }
 }
-Manager.initClass();
 
 class Command {
-  constructor(name, methods) { this.name = name; this.methods = methods; undefined; }
+  private name: string;
+  private methods: any;
 
-  _call(method, debug, via) {
+  constructor(name, methods) {
+    this.name = name;
+    this.methods = methods;
+  }
+
+  _call(method, debug, via?) {
     if (debug) {
       log.info(`Command: ${this.name}.${method}()` + (via ? ` via ${via}` : ""));
     }
@@ -226,11 +241,14 @@ class Command {
 
   execute(debug) { return this._call("execute", debug); }
   undo(debug) { return this._call("undo", debug); }
-  redo(debug) { if (this.methods.hasOwnProperty("redo")) { return this._call("redo", debug); 
+  redo(debug) { if (this.methods.hasOwnProperty("redo")) { return this._call("redo", debug);
   } else { return this._call("execute", debug, "redo"); } }
 }
 
 class CommandBatch {
+  private name: string;
+  private commands: any[];
+
   constructor(name) {
     this.name = name;
     this.commands = [];
@@ -242,7 +260,7 @@ class CommandBatch {
 
   undo(debug) {
     return (() => {
-      const result = [];
+      const result:any[] = [];
       for (let i = this.commands.length - 1; i >= 0; i--) {
         const command = this.commands[i];
         result.push(command.undo(debug));

@@ -16,7 +16,7 @@ gulp.task('browserify-app', function(){
   return browserify({
     basedir: '.',
     debug: !production,
-    //entries: [config.app.src],
+    entries: [config.app.src],
     cache: {},
     packageCache: {},
   })
@@ -31,7 +31,7 @@ gulp.task('browserify-globals', function(){
   return browserify({
     basedir: '.',
     debug: !production,
-    //entries: [config.globals.src],
+    entries: [config.globals.src],
     cache: {},
     packageCache: {},
   })

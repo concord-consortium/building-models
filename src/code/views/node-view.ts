@@ -4,8 +4,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 let div, i, img, input, label, NodeView, span;
-({input, div, i, img, span, label, img} = React.DOM);
+({input, div, i, img, span, label} = React.DOM);
 const tr = require("../utils/translate");
 
 const AppSettingsStore    = require("../stores/app-settings-store");
@@ -72,7 +76,7 @@ const NodeTitle = React.createFactory(React.createClass({
 
   handleKeyUp(e) {
     // 8 is backspace, 46 is delete
-    if ([8, 46].includes(e.which) && !this.titleUpdated) {
+    if (_.includes([8, 46], e.which) && !this.titleUpdated) {
       const canDeleteWhenEmpty = this.props.node.addedThisSession && !this.titleUpdated;
       if (canDeleteWhenEmpty) {
         return this.props.graphStore.removeNode(this.props.nodeKey);

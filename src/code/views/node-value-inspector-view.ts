@@ -4,6 +4,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {div, h2, label, span, input, p, i} = React.DOM;
 
 const SimulationStore  = require("../stores/simulation-store");
@@ -135,10 +139,10 @@ module.exports = React.createClass({
     }
 
     const isChecked = !this.state.capNodeValues && node.allowNegativeValues;
-    const tooltip = this.state.capNodeValues 
-      ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP") 
-      : (isChecked 
-        ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP") 
+    const tooltip = this.state.capNodeValues
+      ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_DISABLED_TOOLTIP")
+      : (isChecked
+        ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP")
         : tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP"));
     const positiveCheckbox = (
       label({

@@ -6,6 +6,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const ImageDialogStore = require("../stores/image-dialog-store");
 
 const OpenClipart = require("../utils/open-clipart");
@@ -88,7 +92,7 @@ const ImageSearchPrevNextLink = React.createFactory(React.createClass({
 module.exports = React.createClass({
   displayName: "ImageSearch",
 
-  mixins: [require("../mixins/image-dialog-view", ImageDialogStore.mixin)],
+  mixins: [require("../mixins/image-dialog-view"), ImageDialogStore.mixin],
 
   getInitialState() {
     return this.getInitialImageDialogViewState({
@@ -160,7 +164,7 @@ module.exports = React.createClass({
         (ImageSearchPrevNextLink({key: "prev", page: this.state.page - 1, label: (tr("~IMAGE-BROWSER.PREVIOUS")), selectPage: this.selectPage, enabled: this.state.page > 1})),
         ((() => {
           let asc, end;
-          const result = [];
+          const result:any[] = [];
           for (page = 1, end = this.state.numPages, asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
             result.push(ImageSearchPageLink({key: `page${page}`, page, currentPage: this.state.page, selectPage: this.selectPage}));
           }
@@ -200,7 +204,7 @@ module.exports = React.createClass({
               (div({key: "image-search-section", className: "image-search-section", style: {height: "100%"}},[
                 (div({key:"image-search-results", className: "image-search-dialog-results show-all"},
                   (() => {
-                    const result = [];
+                    const result: any[] = [];
                     const iterable = _.map(this.props.internalLibrary);
                     for (index = 0; index < iterable.length; index++) {
                       node = iterable[index];
@@ -232,7 +236,7 @@ module.exports = React.createClass({
                       tr("~IMAGE-BROWSER.NO_EXTERNAL_FOUND", {query: this.state.query})
                       :
                       (() => {
-                        const result1 = [];
+                        const result1: any[] = [];
                         for (index = 0; index < this.state.results.length; index++) {
                           node = this.state.results[index];
                           result1.push((ImageSearchResult({key: index, imageInfo: node, clicked: this.imageSelected, isDisabled: this.isDisabledInExternalSearch})));

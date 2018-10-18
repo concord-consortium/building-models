@@ -1,10 +1,13 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const Relationship = require("../../models/relationship");
 
 const migration = {
@@ -20,8 +23,8 @@ const migration = {
   // Add initialValue if it doesn't exist
   updateNodes(data) {
     return (() => {
-      const result = [];
-      for (let node of Array.from(data.nodes)) {
+      const result:any = [];
+      for (let node of data.nodes) {
         if (!node.data) { node.data = {}; } // should never happen
         node.data.initialValue = 50;
         result.push(node.data.isAccumulator = false);
@@ -37,7 +40,7 @@ const migration = {
       formula     : Relationship.defaultFormula
     };
 
-    return Array.from(data.links).map((link) =>
+    return data.links.map((link: any) =>
       (link.relation = _.clone(defaultRelation)));
   }
 };

@@ -2,6 +2,6 @@
 --require lodash
 --require jquery
 --reporter spec
---compilers js:babel-register
+--compilers ts:ts-node/register
 --ui bdd
 --recursive

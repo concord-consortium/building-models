@@ -4,6 +4,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {div} = React.DOM;
 const tr = require("../utils/translate");
 const Color = require("../utils/colors");
@@ -58,7 +62,7 @@ module.exports = React.createClass({
 
   render() {
     return (div({className: this.className(), onClick: this.toggleOpen},
-      Array.from(Color.choices).map((color) =>
+      Color.choices.map((color) =>
         (ColorChoice({key: color.name, color, selected: this.props.selected, onChange: this.select})))
     ));
   }

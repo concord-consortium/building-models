@@ -1,3 +1,7 @@
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const migration = {
   version: "1.21.0",
   description: "Add optional `combineMethod` param to nodes. NO-OP",

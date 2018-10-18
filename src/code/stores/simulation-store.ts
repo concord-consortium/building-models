@@ -5,6 +5,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const AppSettingsStore   = require("./app-settings-store");
 const ImportActions      = require("../actions/import-actions");
 const GraphActions       = require("../actions/graph-actions");
@@ -270,7 +274,7 @@ const SimulationStore   = Reflux.createStore({
 
   onToggledCollectorTo(checked) {
     // only change the units automatically when we transition from 0 to 1 or 1 to 0 collector nodes
-    const numCollectors = (Array.from(this.nodes).filter((node) => node.isAccumulator)).length;
+    const numCollectors = (this.nodes.filter((node) => node.isAccumulator)).length;
     if (checked && (numCollectors === 1)) {
       return this.onSetStepUnits({unit: this.defaultCollectorUnit});
     } else if (!checked && (numCollectors === 0)) {
@@ -280,8 +284,8 @@ const SimulationStore   = Reflux.createStore({
 
   _isModelRunnable() {
     if (!this.settings.simulationPanelExpanded) { return false; }
-    for (let node of Array.from(this.nodes)) {
-      for (let link of Array.from(node.links)) {
+    for (let node of this.nodes) {
+      for (let link of node.links) {
         if (link.relation.isDefined) { return true; }
       }
     }
@@ -293,7 +297,7 @@ const SimulationStore   = Reflux.createStore({
   },
 
   _hasCollectors(nodes) {
-    for (let node of Array.from(this.nodes)) {
+    for (let node of this.nodes) {
       if (node.isAccumulator) { return true; }
     }
     return false;

@@ -31,7 +31,10 @@ module.exports = function(src, callback) {
       }
       canvas.width = width;
       canvas.height = height;
-      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.drawImage(img, 0, 0, width, height);
+      }
 
       return callback(canvas.toDataURL("image/png"));
     };

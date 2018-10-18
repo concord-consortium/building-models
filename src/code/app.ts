@@ -10,10 +10,10 @@ const GraphStore   = require("./stores/graph-store");
 const PaletteStore = require("./stores/palette-store");
 const HashParams   = require("./utils/hash-parameters");
 
-let appView = null;
+let appView;
 
 // App API
-window.Sage = {
+(window as any).Sage = {
   initApp() {
     const opts = {
       // Valid opts are:

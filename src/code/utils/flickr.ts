@@ -6,14 +6,18 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const FLICKR_API_KEY = "1082174cc952ccc6a97412e9e14aaf88";
 
 module.exports = {
   search(query, callback) {
     const url = `https://api.flickr.com/services/rest?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&tags=${encodeURIComponent(query)}&is_commons=1&safe_search=1&format=json&jsoncallback=?`;
     return $.getJSON(url, function(data, textStatus, jqXHR) {
-      const results = [];
-      for (let photo of Array.from(__guard__(data != null ? data.photos : undefined, x => x.photo))) {
+      const results:any = [];
+      for (let photo of __guard__(data != null ? data.photos : undefined, x => x.photo)) {
         results.push({
           title: photo.title,
           image: `https://farm${photo.farm}.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_q.jpg`

@@ -3,6 +3,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {div, span, i, br} = React.DOM;
 const AboutView        = React.createFactory(require("./about-view"));
 const AppSettingsStore = require("../stores/app-settings-store");

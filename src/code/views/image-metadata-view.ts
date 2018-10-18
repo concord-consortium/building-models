@@ -4,6 +4,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const xlat       = require("../utils/translate");
 const licenses   = require("../data/licenses");
 const ImageDialogStore = require("../stores/image-dialog-store");

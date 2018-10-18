@@ -3,10 +3,13 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const tr = require("./translate");
 
-const units =
-      {STEP: 1};
+const units: any = {STEP: 1};
 units.SECOND =  1;
 units.MINUTE = 60 * units.SECOND;
 units.HOUR   = 60 * units.MINUTE;

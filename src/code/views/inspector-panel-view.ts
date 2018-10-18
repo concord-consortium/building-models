@@ -5,6 +5,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const NodeInspectorView = React.createFactory(require("./node-inspector-view"));
 const LinkInspectorView = React.createFactory(require("./link-inspector-view"));
 const LinkValueInspectorView = React.createFactory(require("./link-value-inspector-view"));
@@ -52,7 +56,7 @@ const ToolPanel = React.createFactory(React.createClass({
   },
 
   buttonProps(button) {
-    const props = {
+    const props:any = {
       name:     button.name,
       shows:    button.shows,
       selected: false,

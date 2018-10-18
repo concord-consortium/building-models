@@ -1,13 +1,15 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 // transfer values are scaled if they have no modifier and
 // their source is an independent node (has no inputs)
-let Simulation;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const isScaledTransferNode = function(node) {
   if (!node.isTransfer) { return false; }
   if (node.inLinks("transfer-modifier").length) { return false; }
@@ -30,7 +32,7 @@ const scaleInput = function(val, nodeIn, nodeOut) {
   }
 };
 
-const combineInputs = function(inValues, useScaledProduct) {
+const combineInputs = function(inValues, useScaledProduct?) {
   let denominator, numerator;
   if (!(inValues != null ? inValues.length : undefined)) { return null; }
   if (inValues.length === 1) { return inValues[0]; }
@@ -74,7 +76,7 @@ const RangeIntegrationFunction = function(incrementAccumulators) {
   // regular nodes and flow nodes only have 'range' and 'transfer-modifier' links
   const links = this.inLinks("range").concat(this.inLinks("transfer-modifier"));
 
-  const inValues = [];
+  const inValues:any = [];
   _.each(links, link => {
     if (!link.relation.isDefined) { return; }
     const { sourceNode } = link;
@@ -106,7 +108,7 @@ const RangeIntegrationFunction = function(incrementAccumulators) {
 // source nodes (no calculations needed) and average them.
 const SetInitialAccumulatorValueFunction = function() {
   const initialValueLinks = this.inLinks("initial-value");
-  const inValues = [];
+  const inValues:any = [];
   _.each(initialValueLinks, function(link) {
     if (!link.relation.isDefined) { return; }
     const { sourceNode } = link;
@@ -125,7 +127,7 @@ const SetAccumulatorValueFunction = function(nodeValues) {
   if (!(links.length > 0)) { return startValue; }
 
   let deltaValue = 0;
-  for (let link of Array.from(links)) {
+  for (let link of links) {
     const {sourceNode, targetNode, relation, transferNode} = link;
     const inV = nodeValues[sourceNode.key];
     const outV = startValue;
@@ -136,7 +138,7 @@ const SetAccumulatorValueFunction = function(nodeValues) {
 
     case "transfer":
       var transferValue = nodeValues[transferNode.key];
-        
+
       // can't overdraw non-negative collectors
       if (this.capNodeValues || (sourceNode.isAccumulator && !sourceNode.allowNegativeValues)) {
         transferValue = Math.min(transferValue, getTransferLimit(transferNode));
@@ -157,7 +159,17 @@ const SetAccumulatorValueFunction = function(nodeValues) {
   return this.currentValue = this.filterFinalValue(startValue + deltaValue);
 };
 
-module.exports = (Simulation = class Simulation {
+class Simulation {
+  private opts: any;
+  private nodes: any[];
+  private duration: number;
+  private capNodeValues: boolean;
+  private onStart: any;
+  private onFrames: any;
+  private onEnd: any;
+  private recalculateDesiredSteps: boolean;
+  private stopRun: boolean;
+  private framesBundle: any[];
 
   constructor(opts) {
     if (opts == null) { opts = {}; }
@@ -202,7 +214,7 @@ module.exports = (Simulation = class Simulation {
     return node.currentValue = null;
   }
 
-  evaluateNode(node, firstTime) {
+  evaluateNode(node, firstTime?) {
     return node.currentValue = node.getCurrentValue(firstTime);
   }
 
@@ -309,5 +321,6 @@ module.exports = (Simulation = class Simulation {
     this.onFrames(this.framesBundle);    // send all at once
     return this.onEnd();
   }
-});
+}
 
+module.exports = Simulation;

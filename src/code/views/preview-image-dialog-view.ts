@@ -4,6 +4,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const ImageMetadata = React.createFactory(require("./image-metadata-view"));
 const ImageManger   = require("../stores/image-dialog-store");
 const PaletteStore  = require("../stores/palette-store");

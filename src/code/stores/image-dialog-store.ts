@@ -6,6 +6,9 @@
  */
 // TODO:  This should be split up into and ImageDialogStore and a DialogStore…
 
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const PaletteStore = require("./palette-store");
 
 const imageDialogActions = Reflux.createActions([

@@ -6,12 +6,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let SvgGraphView;
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const {svg, path, line, text, div, tspan, span} = React.DOM;
 
 const tr   = require("../utils/translate");
 const math = require("mathjs");  // For formula parsing...
-module.exports = (SvgGraphView = React.createClass({
+module.exports = React.createClass({
   displayName: "SvgGraphView",
   getDefaultProps() {
     return {
@@ -343,7 +346,7 @@ module.exports = (SvgGraphView = React.createClass({
       ))
     ));
   }
-}));
+});
 
 // TO DEBUG THIS VIEW:
 // RelationFactory = require "../models/relation-factory"

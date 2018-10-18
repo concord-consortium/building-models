@@ -1,10 +1,13 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+// TODO: remove when modules are converted to TypeScript style modules
+export {}
+
 const uuid = require("uuid");
 
 const imageToUUIDMap= {};
@@ -29,8 +32,8 @@ const migration = {
   // Add initialValue if it doesn't exist
   updateNodes(data) {
     return (() => {
-      const result = [];
-      for (let node of Array.from(data.nodes)) {
+      const result:any = [];
+      for (let node of data.nodes) {
         if (node.data.image) {
           result.push(node.data.paletteItem = imageToUUIDMap[node.data.image]);
         } else {
