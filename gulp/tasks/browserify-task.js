@@ -1,7 +1,7 @@
 var gulp        = require('gulp');
 var browserify  = require('browserify');
 var source      = require("vinyl-source-stream");
-var coffeeify   = require('coffeeify');
+var babelify    = require('babelify');
 var production  = require('../config').production;
 var config      = require('../config').browserify;
 var beep        = require('beepbeep');
@@ -15,9 +15,9 @@ var errorHandler = function (error) {
 gulp.task('browserify-app', function(){
   var b = browserify({
     debug: !production,
-    extensions: ['.coffee']
+    extensions: ['.js']
   });
-  b.transform(coffeeify);
+  b.transform(babelify);
   b.add(config.app.src);
   return b.bundle()
     .on('error', errorHandler)
@@ -25,24 +25,11 @@ gulp.task('browserify-app', function(){
     .pipe(gulp.dest(config.app.dest));
 });
 
-gulp.task('browserify-wireframe', function(){
-  var b = browserify({
-    debug: !production,
-    extensions: ['.coffee']
-  });
-  b.transform(coffeeify);
-  b.add(config.wireframe.src);
-  return b.bundle()
-    .on('error', errorHandler)
-    .pipe(source('wireframe.js'))
-    .pipe(gulp.dest(config.wireframe.dest));
-});
-
 gulp.task('browserify-globals', function(){
   var b = browserify({
     debug: !production
   });
-  b.transform(coffeeify);
+  b.transform(babelify);
   b.add(config.globals.src);
   return b.bundle()
     .on('error', errorHandler)
@@ -50,4 +37,4 @@ gulp.task('browserify-globals', function(){
     .pipe(gulp.dest(config.globals.dest));
 });
 
-gulp.task('browserify', ['browserify-app', 'browserify-wireframe', 'browserify-globals']);
+gulp.task('browserify', ['browserify-app', 'browserify-globals']);

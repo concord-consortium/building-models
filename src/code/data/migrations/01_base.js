@@ -3,8 +3,8 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-// FORMAT BEFORE THIS TRANSFORM: in serialized-test-data-0.1.coffee
-// FORMAT AFTER THIS TRANSFORM:  in serialized-test-data-1.0.coffee
+// FORMAT BEFORE THIS TRANSFORM: in serialized-test-data-0.1.js
+// FORMAT AFTER THIS TRANSFORM:  in serialized-test-data-1.0.js
 
 const migration = {
   version: "1.0.0",

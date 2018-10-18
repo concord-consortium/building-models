@@ -38,13 +38,13 @@ module.exports = {
   },
   browserify: {
     app: {
-      watch: [src + '/code/**/*.*', '!' + src + '/code/globals.coffee'],
-      src: src + '/code/app.coffee',
+      watch: [src + '/code/**/*.*', '!' + src + '/code/globals.js'],
+      src: src + '/code/app.js',
       dest: dest + '/js/'
     },
     globals: {
-      watch: src + '/code/globals.coffee',
-      src: src + '/code/globals.coffee',
+      watch: src + '/code/globals.js',
+      src: src + '/code/globals.js',
       dest: dest + '/js/'
     }
   },

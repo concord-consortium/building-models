@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "autosize": "^3.0.18",
+    "babelify": "^8.0.0",
     "iframe-phone": "1.1.3",
     "jquery": "^3.2.1",
     "jquery-ui-dist": "1.12.1",
@@ -39,11 +40,12 @@
     "uuid": "2.0.1"
   },
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.26.0",
     "beepbeep": "^1.2.0",
     "browserify": "^15.0.0",
     "chai": "^2.0.0",
-    "coffeeify": "^3.0.1",
-    "coffeescript": "^1.9.1",
     "enzyme": "^2.8.0",
     "event-stream": "^3.3.0",
     "gulp": "^3.9.1",
