@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const LaraConnect = require("../models/lara-connect");
 const LaraActions = require("../actions/lara-actions");
@@ -24,8 +24,7 @@ const laraStore   = Reflux.createStore({
   },
 
   notifyChange() {
-    const data =
-      {laraHasLoaded: this.laraHasLoaded};
+    const data = {laraHasLoaded: this.laraHasLoaded};
     return this.trigger(data);
   }
 });

@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, a, i, h2, p, br} = React.DOM;
 
@@ -41,7 +41,7 @@ module.exports = React.createClass({
       )),
       this.state.showing ?
         (div({className: "BuildInfoView", onClick: this.close },
-          (div({className: "content", onClick(e){ return e.stopPropagation(); } },
+          (div({className: "content", onClick(e) { return e.stopPropagation(); } },
             (div({className: "top", style: {textAlign: "right"}},
               (i({className: "icon-codap-ex", style: {padding: 0, cursor: "pointer"}, onClick: this.close })))),
             (div({className: "inner", style: {paddingTop: 0, textAlign: "center"}},

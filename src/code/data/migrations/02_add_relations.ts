@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const Relationship = require("../../models/relationship");
 
@@ -23,8 +23,8 @@ const migration = {
   // Add initialValue if it doesn't exist
   updateNodes(data) {
     return (() => {
-      const result:any = [];
-      for (let node of data.nodes) {
+      const result: any = [];
+      for (const node of data.nodes) {
         if (!node.data) { node.data = {}; } // should never happen
         node.data.initialValue = 50;
         result.push(node.data.isAccumulator = false);

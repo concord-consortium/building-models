@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const ModalDialog         = React.createFactory(require("./modal-dialog-view"));
 const PaletteDeleteView   = React.createFactory(require("./palette-delete-view"));
@@ -22,7 +22,7 @@ module.exports = React.createClass({
   mixins: [PaletteDialogStore.mixin],
 
   render() {
-    return (div({key:"ModalPaletteDelete"},
+    return (div({key: "ModalPaletteDelete"},
       (() => {
         if (this.state.showing) {
           const title = tr("~PALETTE-DIALOG.TITLE");

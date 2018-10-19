@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, h2, label, input, select, option, optgroup, button} = React.DOM;
 

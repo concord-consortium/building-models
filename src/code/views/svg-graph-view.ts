@@ -8,7 +8,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {svg, path, line, text, div, tspan, span} = React.DOM;
 
@@ -140,14 +140,14 @@ module.exports = React.createClass({
   },
 
   findClosestPoint(path, pointX, pointY) {
-    const graphOrigin = this.graphMapPoint({x:0, y:0});
+    const graphOrigin = this.graphMapPoint({x: 0, y: 0});
     const x = pointX - $(path).offset().left;
     const y = pointX - $(path).offset().top;
     const p = {x, y};
     return p;
   },
 
-  pointsToPath(points){
+  pointsToPath(points) {
     let data = _.map(points, p => this.graphMapPoint(p));
     data = _.map(data,   p => `${p.x} ${p.y}`);
     data = data.join(" L ");
@@ -156,10 +156,10 @@ module.exports = React.createClass({
 
   loadCustomDataFromFormula(formula) {
     const rangex = 100;
-    let data = _.range(0,rangex);
+    let data = _.range(0, rangex);
     let miny = Infinity;
     let maxy = -Infinity;
-    return data = _.map(data, function(x) {
+    return data = _.map(data, (x) => {
       let y;
       const scope = {in: x, out: 0, maxIn: rangex, maxOut: rangex};
       try {
@@ -167,19 +167,19 @@ module.exports = React.createClass({
         if (y < miny) { miny = y; }
         if (y > maxy) { maxy = y; }
       } catch (error) {
-        console.error(`Error: ${error}`); // eslint-disable-line no-console
+        console.error(`Error: ${error}`); // tslint:disable-line:no-console
       }
-      return [x,y];
+      return [x, y];
     });
   },
 
   getPathPoints(currentData) {
     const rangex = 100;
-    let data = _.range(0,rangex);
+    let data = _.range(0, rangex);
     let miny = Infinity;
     let maxy = -Infinity;
     if (currentData != null) {
-      data = _.map(currentData, function(point) {
+      data = _.map(currentData, (point) => {
         const x = _.first(point);
         const y = _.last(point);
         if (y < miny) { miny = y; }
@@ -188,8 +188,8 @@ module.exports = React.createClass({
       });
     }
 
-    data = _.map(data, function(d) {
-      let {x,y} = d;
+    data = _.map(data, (d) => {
+      let {x, y} = d;
       x = x / rangex;
       y = y / rangex;
       return {x, y};
@@ -199,7 +199,7 @@ module.exports = React.createClass({
 
   renderXLabel() {
     const y = (this.props.height - this.props.fontSize) + (2 * this.marginal());
-    return (text({className: "xLabel", x:this.margin(), y},
+    return (text({className: "xLabel", x: this.margin(), y},
       this.props.xLabel
     ));
   },
@@ -209,13 +209,13 @@ module.exports = React.createClass({
     const translate =  `translate(${this.props.fontSize})`;
     const transform = `${rotate}`;
     const y = (this.props.height + this.props.fontSize) - 3;
-    return (text({className: "yLabel", x:this.margin(), y, transform},
+    return (text({className: "yLabel", x: this.margin(), y, transform},
       this.props.yLabel
     ));
   },
 
   renderAxisLines() {
-    const data = [ {x:0, y:1}, {x:0, y:0}, {x:1, y:0}];
+    const data = [ {x: 0, y: 1}, {x: 0, y: 0}, {x: 1, y: 0}];
     return (path({className: "axisLines", d: this.pointsToPath(data)}));
   },
 
@@ -223,9 +223,9 @@ module.exports = React.createClass({
     if (this.state.definedRelationship) {
       const data = this.pointsToPath(this.state.pointPathData);
       if (this.state.newCustomData) {
-        return (path({className: "data", d:data, strokeWidth:this.props.strokeWidth, strokeDasharray:this.props.strokeDasharray}));
+        return (path({className: "data", d: data, strokeWidth: this.props.strokeWidth, strokeDasharray: this.props.strokeDasharray}));
       } else {
-        return (path({className: "data", d:data, strokeWidth:this.props.strokeWidth}));
+        return (path({className: "data", d: data, strokeWidth: this.props.strokeWidth}));
       }
     }
   },
@@ -294,7 +294,7 @@ module.exports = React.createClass({
       document.removeEventListener("mousemove", this.drawCurve);
       document.removeEventListener("mouseup", this.endDrawCurve);
       this.drawing = false;
-      //update relation with custom data
+      // update relation with custom data
       this.updateRelationCustomData(this.state.currentData);
     }
     return delete this._lastPoint;
@@ -302,7 +302,7 @@ module.exports = React.createClass({
 
   pointToScaledCoords(evt) {
     const rect = this.refs.graphBody != null ? this.refs.graphBody.getBoundingClientRect() : undefined;
-    const coords = {x: rect.width - (rect.right-evt.clientX), y: rect.bottom - evt.clientY};
+    const coords = {x: rect.width - (rect.right - evt.clientX), y: rect.bottom - evt.clientY};
     coords.x = Math.max(0, Math.min(coords.x, rect.width));
     coords.y = Math.max(0, Math.min(coords.y, rect.height));
     const scaledCoords = {x: Math.round((coords.x / rect.width) * 100), y: Math.round((coords.y / rect.height) * 100)};

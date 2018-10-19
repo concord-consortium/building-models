@@ -7,7 +7,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const MAX_NUMBER_OF_PAGES = 20;
 
@@ -23,12 +23,12 @@ const OpenClipArt = {
 
     const url = `https://openclipart.org/search/json/?query=${encodeURIComponent(query)}&sort=downloads&page=${options.page}&amount=24`;
 
-    jqXHR = $.getJSON(url, function(data) {
-      const results:any[] = [];
+    jqXHR = $.getJSON(url, (data) => {
+      const results: any[] = [];
       const page = Math.min(__guard__(data != null ? data.info : undefined, x => x.current_page) || 0, MAX_NUMBER_OF_PAGES);
       const numPages = Math.min(__guard__(data != null ? data.info : undefined, x1 => x1.pages) || 0, MAX_NUMBER_OF_PAGES);
       if (data.payload) {
-        for (let item of data.payload) {
+        for (const item of data.payload) {
           results.push({
             image: item.svg.png_thumb,
             metadata: {
@@ -43,7 +43,7 @@ const OpenClipArt = {
       return callback(results, page, numPages);
     });
   }
-}
+};
 
 module.exports = OpenClipArt;
 

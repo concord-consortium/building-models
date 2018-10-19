@@ -7,7 +7,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 class GoogleDriveIO {
 
@@ -18,7 +18,7 @@ class GoogleDriveIO {
   private authorized = false;
   private token = null;
 
-  authorize(immediate, callback) {
+  public authorize(immediate, callback) {
     if (this.token) {
       return callback(null, this.token);
     } else {
@@ -46,13 +46,13 @@ class GoogleDriveIO {
     }
   }
 
-  makeMultipartBody(parts, boundary) {
+  public makeMultipartBody(parts, boundary) {
     return (parts.map((part) =>
       `\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${part}`)
     ).join("") + `\r\n--${boundary}--`;
   }
 
-  sendFile(fileSpec, contents, callback) {
+  public sendFile(fileSpec, contents, callback) {
     const boundary = "-------314159265358979323846";
     const metadata = JSON.stringify({
       title: fileSpec.fileName,
@@ -72,7 +72,7 @@ class GoogleDriveIO {
       body: this.makeMultipartBody([metadata, contents], boundary)
     });
 
-    return request.execute(function(file) {
+    return request.execute((file) => {
       if (callback) {
         if (file) {
           return callback(null, file);
@@ -83,7 +83,7 @@ class GoogleDriveIO {
     });
   }
 
-  upload(fileSpec, contents, callback) {
+  public upload(fileSpec, contents, callback) {
     return this.authorize(this.authorized, err => {
       if (!err) {
         return gapi.client.load("drive", "v2", () => this.sendFile(fileSpec, contents, callback));
@@ -93,7 +93,7 @@ class GoogleDriveIO {
     });
   }
 
-  makePublic(fileId) {
+  public makePublic(fileId) {
     const perms = {
       "value": "",
       "type": "anyone",
@@ -105,14 +105,14 @@ class GoogleDriveIO {
       "resource": perms
     });
 
-    return request.execute(function(resp) {
+    return request.execute((resp) => {
       if (resp.code && (resp.code !== 200)) {
         return alert("there was a problem sharing your document.");
       }
     });
   }
 
-  download(fileSpec, callback) {
+  public download(fileSpec, callback) {
     return this.authorize(this.authorized, (err, token) => {
       if (err) {
         return callback(err);
@@ -132,7 +132,7 @@ class GoogleDriveIO {
     });
   }
 
-  downloadFromUrl(url, callback, authorize) {
+  public downloadFromUrl(url, callback, authorize) {
     if (authorize == null) { authorize = true; }
     if (authorize) {
       return this.authorize(this.authorized, (err, token) => {
@@ -143,13 +143,13 @@ class GoogleDriveIO {
     }
   }
 
-  _downloadFromUrl(url, token, callback) {
+  public _downloadFromUrl(url, token, callback) {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url);
     if (token) {
       xhr.setRequestHeader("Authorization", `Bearer ${token.access_token}`);
     }
-    xhr.onload = function() {
+    xhr.onload = () => {
       let json;
       try {
         json = JSON.parse(xhr.responseText);
@@ -163,8 +163,8 @@ class GoogleDriveIO {
     return xhr.send();
   }
 
-  filePicker(callback) {
-    return this.authorize(this.authorized, function(err, token) {
+  public filePicker(callback) {
+    return this.authorize(this.authorized, (err, token) => {
       if (err) {
         return callback(err);
       } else {

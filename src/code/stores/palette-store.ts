@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const resizeImage    = require("../utils/resize-image");
 const initialPalette = require("../data/initial-palette");
@@ -20,7 +20,7 @@ const uuid           = require("uuid");
 const paletteActions = Reflux.createActions(
   [
     "addToPalette", "selectPaletteIndex", "selectPaletteItem",
-    "restoreSelection", "itemDropped","update", "delete"
+    "restoreSelection", "itemDropped", "update", "delete"
   ]
 );
 
@@ -38,7 +38,7 @@ const paletteStore   = Reflux.createStore({
       license: ""
     };
     this.imageMetadata = _.clone(this.blankMetadata, true);
-    return this.undoManger = UndoRedo.instance({debug:false});
+    return this.undoManger = UndoRedo.instance({debug: false});
   },
 
   initializeLibrary() {
@@ -49,7 +49,7 @@ const paletteStore   = Reflux.createStore({
 
   initializePalette() {
     this.palette = [];
-    for (let node of initialPalette) {
+    for (const node of initialPalette) {
       this.addToPalette(node);
     }
     this.selectPaletteIndex(0);
@@ -59,7 +59,7 @@ const paletteStore   = Reflux.createStore({
   makeNodeSignature(node) {
     // 400 chars of a URL *might* be adequately unique,
     // but data urls are going to be more trouble.
-    return node.image.substr(0,400);
+    return node.image.substr(0, 400);
   },
 
 
@@ -100,7 +100,7 @@ const paletteStore   = Reflux.createStore({
     return this.updateChanges();
   },
 
-  onDelete(paletteItem){
+  onDelete(paletteItem) {
     if (paletteItem) {
       return this.undoManger.createAndExecuteCommand("deletePaletteItem", {
         execute: () => {
@@ -121,7 +121,7 @@ const paletteStore   = Reflux.createStore({
     this.addToLibrary(node);
     if (!this.inPalette(node)) {
       this.palette.push(node);
-      this.moveToFront(this.palette.length-1);
+      this.moveToFront(this.palette.length - 1);
       return this.selectPaletteIndex(0);
     }
   },

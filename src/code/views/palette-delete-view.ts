@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const tr = require("../utils/translate");
 const PaletteDialogStore = require("../stores/palette-delete-dialog-store");

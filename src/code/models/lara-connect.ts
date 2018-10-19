@@ -7,7 +7,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const IframePhone = (require("iframe-phone"));
 const tr = require("../utils/translate");
@@ -23,7 +23,16 @@ interface LaraConnectMap {
 }
 
 class LaraConnect {
-  static instances: LaraConnectMap;
+  public static instances: LaraConnectMap;
+
+  public static initialize() {
+    LaraConnect.instances = {};
+  }
+
+  public static instance(context) {
+    if (LaraConnect.instances[context] == null) { LaraConnect.instances[context] = new LaraConnect(context); }
+    return LaraConnect.instances[context];
+  }
   private undoRedoManager: any;
   private loaded: boolean;
   private graphStore: any;
@@ -31,20 +40,11 @@ class LaraConnect {
   private laraPhone: any;
   private lastCommandStackPosition: number;
 
-  static initialize() {
-    LaraConnect.instances = {};
-  }
-
-  static instance(context) {
-    if (LaraConnect.instances[context] == null) { LaraConnect.instances[context] = new LaraConnect(context); }
-    return LaraConnect.instances[context];
-  }
-
   constructor(context) {
     log.info("LaraConnect: initializing");
     const GraphStore = require("../stores/graph-store");
     const PaletteStore  = require("../stores/palette-store");
-    this.undoRedoManager = UndoRedo.instance({debug:false, context});
+    this.undoRedoManager = UndoRedo.instance({debug: false, context});
     this.loaded = false;
     this.graphStore = GraphStore.store;
     this.paletteStore = PaletteStore.store;
@@ -86,7 +86,7 @@ class LaraConnect {
     this.laraPhone.post("initInteractive", "Sage is ready");
   }
 
-  onUndoRedoStateChange(state) {
+  public onUndoRedoStateChange(state) {
     const lastAction = this.undoRedoManager.commands[this.undoRedoManager.stackPosition];
     if (lastAction && this.loaded) {
       if ((this.undoRedoManager.stackPosition < (this.undoRedoManager.commands.length - 1)) && (this.lastCommandStackPosition > this.undoRedoManager.stackPosition)) {

@@ -6,34 +6,34 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const tr           = require("../utils/translate");
 const Relationship = require("./relationship");
 
 class RelationFactory {
-  static increase: any;
-  static decrease: any;
-  static vary: any;
-  static aboutTheSame: any;
-  static aLot: any;
-  static aLittle: any;
-  static moreAndMore: any;
-  static lessAndLess: any;
-  static custom: any;
-  static added: any;
-  static subtracted: any;
-  static setInitialValue: any;
-  static transferred: any;
-  static proportionalSourceMore: any;
-  static basicVectors: any;
-  static vectors: any;
-  static scalars: any;
-  static accumulators: any;
-  static transferModifiers: any;
-  static proportionalSourceLess: any;
+  public static increase: any;
+  public static decrease: any;
+  public static vary: any;
+  public static aboutTheSame: any;
+  public static aLot: any;
+  public static aLittle: any;
+  public static moreAndMore: any;
+  public static lessAndLess: any;
+  public static custom: any;
+  public static added: any;
+  public static subtracted: any;
+  public static setInitialValue: any;
+  public static transferred: any;
+  public static proportionalSourceMore: any;
+  public static basicVectors: any;
+  public static vectors: any;
+  public static scalars: any;
+  public static accumulators: any;
+  public static transferModifiers: any;
+  public static proportionalSourceLess: any;
 
-  static initialize() {
+  public static initialize() {
     RelationFactory.increase = {
       type: "range",
       id: "increase",
@@ -114,7 +114,7 @@ class RelationFactory {
       magnitude: 1,
       gradual: false,
       func(scope) {
-        return (scope.in + (scope.maxOut/2)) / 2;
+        return (scope.in + (scope.maxOut / 2)) / 2;
       }
     };
 
@@ -128,7 +128,7 @@ class RelationFactory {
       magnitude: 2,
       gradual: 1,
       func(scope) {
-        return Math.min(Math.exp(scope.in / 21.7)-1, scope.maxOut);
+        return Math.min(Math.exp(scope.in / 21.7) - 1, scope.maxOut);
       }
     };
 
@@ -142,7 +142,7 @@ class RelationFactory {
       magnitude: 2,
       gradual: -1,
       func(scope) {
-        return 21.7 * Math.log(Math.max(1,scope.in));
+        return 21.7 * Math.log(Math.max(1, scope.in));
       }
     };
 
@@ -156,6 +156,7 @@ class RelationFactory {
       magnitude: 0,
       gradual: 0,
       func(scope) {
+        return;
       }
     };
 
@@ -196,6 +197,7 @@ class RelationFactory {
       magnitude: 0,
       gradual: 0,
       func(scope) {
+        return;
       },
       forDualAccumulator: false,
       forSoloAccumulatorOnly: true,      // not allowed for dual accumulator
@@ -274,15 +276,15 @@ class RelationFactory {
     };
   }
 
-  static iconName(incdec,amount){
+  public static iconName(incdec, amount) {
     return `icon-${incdec.prefixIco}-${amount.postfixIco}`;
   }
 
-  static CreateRelation(options) {
+  public static CreateRelation(options) {
     return new Relationship(options);
   }
 
-  static fromSelections(vector,scalar,existingData) {
+  public static fromSelections(vector, scalar, existingData) {
     let formula, func, magnitude, name;
     if ((vector != null) && vector.isCustomRelationship) {
       scalar = this.custom;
@@ -299,7 +301,7 @@ class RelationFactory {
     return new Relationship({type: "range", text: name, formula, func, magnitude, customData: existingData});
   }
 
-  static selectionsFromRelation(relation) {
+  public static selectionsFromRelation(relation) {
     const vector = _.find(this.vectors, v => _.startsWith(relation.formula, v.formulaFrag));
     let scalar = _.find(this.scalars, s => _.endsWith(relation.formula, s.formulaFrag));
     const accumulator = _.find(this.accumulators, s => relation.formula === s.formula);
@@ -322,7 +324,7 @@ class RelationFactory {
     return {vector, scalar, accumulator, transferModifier, magnitude, gradual};
   }
 
-  static thicknessFromRelation(relation) {
+  public static thicknessFromRelation(relation) {
     const dt = 1;
     switch (relation.formula) {
     case this.proportionalSourceMore.formula: return 1 + (1 * dt);

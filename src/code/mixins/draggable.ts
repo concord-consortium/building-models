@@ -18,7 +18,7 @@ module.exports = {
       _.each(removeClasses, classToRemove => clone.removeClass(classToRemove));
       _.each(addClasses, classToAdd => clone.addClass(classToAdd));
       clone.attr("data-reactid", null);
-      clone.find("*").each((i,v) => $(v).attr("data-reactid", null));
+      clone.find("*").each((i, v) => $(v).attr("data-reactid", null));
       return clone;
     };
 

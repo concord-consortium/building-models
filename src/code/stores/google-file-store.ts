@@ -7,7 +7,7 @@
  */
 
  // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const GoogleDriveIO = require("../utils/google-drive-io");
 const GraphStore    = require("./graph-store");
@@ -165,7 +165,7 @@ const GoogleFileStore = Reflux.createStore({
   // non-authorized request
   loadPublicUrl(url) {
     const authorized = false;
-    const callback = (ignored,json) => GraphStore.store.loadData(json);
+    const callback = (ignored, json) => GraphStore.store.loadData(json);
 
     return GoogleDrive.downloadFromUrl(url, callback, authorized);
   },
@@ -190,10 +190,10 @@ const GoogleFileStore = Reflux.createStore({
   }
 });
 
-var GoogleDrive = new GoogleDriveIO();
+const GoogleDrive = new GoogleDriveIO();
 
 // wait for gapi to finish initing
-var waitForAuthCheck = function() {
+const waitForAuthCheck = () => {
   if (__guard__(typeof gapi !== "undefined" && gapi !== null ? gapi.auth : undefined, x => x.authorize)) {
     return GoogleDrive.authorize(true, () => GoogleFileActions.connectToApi());
   } else {

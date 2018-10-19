@@ -7,7 +7,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const NodeInspectorView = React.createFactory(require("./node-inspector-view"));
 const LinkInspectorView = React.createFactory(require("./link-inspector-view"));
@@ -41,9 +41,9 @@ const ToolPanel = React.createFactory(React.createClass({
   displayName: "toolPanel",
 
   buttonData: [
-    {name: "styles", simple: true, shows: "design","enabled": ["node","link"] },
+    {name: "styles", simple: true, shows: "design", "enabled": ["node", "link"] },
     {name: "values", simple: false, shows: "value", "enabled": ["node"] },
-    {name: "qualRel", simple: false, shows: "relations","enabled": ["dependent-node"]},
+    {name: "qualRel", simple: false, shows: "relations", "enabled": ["dependent-node"]},
     {name: "options",  simple: true, shows: "simulation", "enabled": ["nothing"] }
   ],
 
@@ -56,7 +56,7 @@ const ToolPanel = React.createFactory(React.createClass({
   },
 
   buttonProps(button) {
-    const props:any = {
+    const props: any = {
       name:     button.name,
       shows:    button.shows,
       selected: false,
@@ -127,15 +127,15 @@ module.exports = React.createClass({
     if (this.props.node) {
       return (NodeValueInspectorView({node: this.props.node, graphStore: this.props.graphStore}));
     } else if (this.props.link) {
-      return (LinkValueInspectorView({link:this.props.link}));
+      return (LinkValueInspectorView({link: this.props.link}));
     }
   },
 
   renderRelationInspector() {
     if (this.props.node != null ? this.props.node.isDependent() : undefined) {
-      return (NodeRelationInspectorView({node:this.props.node, graphStore: this.props.graphStore}));
+      return (NodeRelationInspectorView({node: this.props.node, graphStore: this.props.graphStore}));
     } else if (this.props.link) {
-      return (LinkRelationInspectorView({link:this.props.link, graphStore: this.props.graphStore}));
+      return (LinkRelationInspectorView({link: this.props.link, graphStore: this.props.graphStore}));
     } else {
       return null;
     }

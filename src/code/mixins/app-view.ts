@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PaletteStore    = require("../stores/palette-store");
 const CodapStore      = require("../stores/codap-store");
@@ -39,7 +39,7 @@ module.exports = {
     if (isMobileDevice) {
       return AppSettingsStore.actions.setTouchDevice(true);
     } else if (add) {
-      return $(window).on("touchstart", function(e) {
+      return $(window).on("touchstart", (e) => {
         AppSettingsStore.actions.setTouchDevice(true);
         return $(window).off("touchstart");
       });
@@ -58,7 +58,7 @@ module.exports = {
         deleteFunction = this.props.graphStore.deleteSelected.bind(this.props.graphStore);
       }
 
-      return $(window).on("keydown", function(e) {
+      return $(window).on("keydown", (e) => {
         // 8 is backspace, 46 is delete
         if (_.includes([8, 46], e.which) && !$(e.target).is("input, textarea")) {
           e.preventDefault();
@@ -154,7 +154,8 @@ module.exports = {
   // cross platform undo/redo key-binding ctr-z ctr-y
   _registerUndoRedoKeys() {
     return ($(window)).on("keydown", e => {
-      let redo, undo;
+      let redo;
+      let undo;
       const y = (e.keyCode === 89) || (e.keyCode === 121);
       const z = (e.keyCode === 90) || (e.keyCode === 122);
       if (!(y || z)) { return; }

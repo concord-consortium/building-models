@@ -6,16 +6,16 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const resizeImage = require("./resize-image");
 const hasValidImageExtension = require("../utils/has-valid-image-extension");
 
-module.exports = function(e, callback) {
+module.exports = (e, callback) => {
   if (e.dataTransfer.files.length > 0) {
     return (() => {
-      const result:any = [];
-      for (var file of e.dataTransfer.files) {
+      const result: any = [];
+      for (const file of e.dataTransfer.files) {
         if (hasValidImageExtension(file.name)) {
           const reader = new FileReader();
           reader.addEventListener("load", e => {
@@ -28,7 +28,7 @@ module.exports = function(e, callback) {
                   source: "external",
                   title: (file.name.split("."))[0]
                 }})
-            )
+            );
           });
           result.push(reader.readAsDataURL(file));
         } else {

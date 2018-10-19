@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PaletteInspectorView  = React.createFactory(require("./palette-inspector-view"));
 const PaletteStore = require("../stores/palette-store");

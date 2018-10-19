@@ -6,11 +6,11 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const uuid = require("uuid");
 
-const imageToUUIDMap= {};
+const imageToUUIDMap = {};
 
 const migration = {
   version: "1.5.0",
@@ -23,7 +23,7 @@ const migration = {
   },
 
   updatePalette(data) {
-    return _.each(data.palette, function(paletteItem) {
+    return _.each(data.palette, (paletteItem) => {
       if (!paletteItem.uuid) { paletteItem.uuid = uuid.v4(); }
       return imageToUUIDMap[paletteItem.image] = paletteItem.uuid;
     });
@@ -32,8 +32,8 @@ const migration = {
   // Add initialValue if it doesn't exist
   updateNodes(data) {
     return (() => {
-      const result:any = [];
-      for (let node of data.nodes) {
+      const result: any = [];
+      for (const node of data.nodes) {
         if (node.data.image) {
           result.push(node.data.paletteItem = imageToUUIDMap[node.data.image]);
         } else {

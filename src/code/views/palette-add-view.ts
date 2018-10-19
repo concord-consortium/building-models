@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const ImageDialogStore   = require("../stores/image-dialog-store");
 const Draggable          = require("../mixins/draggable");

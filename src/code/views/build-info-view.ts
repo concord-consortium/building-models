@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, a, table, tbody, tr, td, i} = React.DOM;
 const Migration = require("../data/migrations/migrations");
@@ -17,7 +17,7 @@ module.exports = React.createClass({
 
   componentWillMount() {
     const build_info = $("html").find("meta[name='build-info']").attr("content");
-    const [date,tag,commit,commiter]= build_info.split(" ");
+    const [date, tag, commit, commiter] = build_info.split(" ");
     return this.setState({
       commit,
       date,
@@ -56,12 +56,12 @@ module.exports = React.createClass({
   render() {
     let className;
     return (div({className: "build-info-bottom-bar"},
-      (div({className: "build-info-button", onClick:this.open}, `built on ${this.state.date}`)),
+      (div({className: "build-info-button", onClick: this.open}, `built on ${this.state.date}`)),
       (() => {
         if (this.state.showing) {
           className = "BuildInfoView";
           return (div({className: "BuildInfoView", onClick: this.close },
-            (div({className: "content", onClick(e){ return e.stopPropagation(); } },
+            (div({className: "content", onClick(e) { return e.stopPropagation(); } },
               (div({className: "top", style: {textAlign: "right"}},
                 (i({className: "icon-codap-ex", style: {padding: 0, cursor: "pointer"}, onClick: this.close })))),
               (table({},

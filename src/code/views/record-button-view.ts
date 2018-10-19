@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const tr              = require("../utils/translate");
 const {div, span, i}  = React.DOM;
@@ -55,7 +55,7 @@ module.exports = React.createClass({
     let onClick;
     let verticalStyle = {};
     if (this.props.includeLight) {
-      verticalStyle = {"paddingRight":"0.5em"};
+      verticalStyle = {"paddingRight": "0.5em"};
     }
     if (this.props.disabled) {
       onClick = () => null;

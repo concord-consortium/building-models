@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const AppSettingsStore   = require("./app-settings-store");
 const ImportActions      = require("../actions/import-actions");
@@ -48,7 +48,7 @@ const SimulationStore   = Reflux.createStore({
 
   init() {
     this.defaultUnit = TimeUnits.defaultUnit;
-    this.unitName    = TimeUnits.toString(this.defaultUnit,true);
+    this.unitName    = TimeUnits.toString(this.defaultUnit, true);
     this.defaultCollectorUnit = TimeUnits.defaultCollectorUnit;
     const timeUnitOptions = TimeUnits.units.map((unit) => ({name: TimeUnits.toString(unit, true), unit}));
 
@@ -109,7 +109,7 @@ const SimulationStore   = Reflux.createStore({
     return this.notifyChange();
   },
 
-  onGraphChanged(data){
+  onGraphChanged(data) {
     this.nodes = data.nodes;
     this._updateModelIsRunnable();
     return this.notifyChange();
@@ -283,8 +283,8 @@ const SimulationStore   = Reflux.createStore({
 
   _isModelRunnable() {
     if (!this.settings.simulationPanelExpanded) { return false; }
-    for (let node of this.nodes) {
-      for (let link of node.links) {
+    for (const node of this.nodes) {
+      for (const link of node.links) {
         if (link.relation.isDefined) { return true; }
       }
     }
@@ -296,7 +296,7 @@ const SimulationStore   = Reflux.createStore({
   },
 
   _hasCollectors(nodes) {
-    for (let node of this.nodes) {
+    for (const node of this.nodes) {
       if (node.isAccumulator) { return true; }
     }
     return false;

@@ -10,7 +10,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const GraphPrimitive = require("./graph-primitive");
 const Colors = require("../utils/colors");
@@ -24,7 +24,7 @@ const SEMIQUANT_ACCUMULATOR_MAX = 1000;
 
 class Node extends GraphPrimitive {
 
-  static initialize() {
+  public static initialize() {
     Node.fields = [
       "title", "image", "color", "paletteItem",
       "initialValue", "min", "max",
@@ -81,7 +81,7 @@ class Node extends GraphPrimitive {
     // semi-quantitative mode. (See getters and setters below).
     this._min = nodeSpec.min != null ? nodeSpec.min : SEMIQUANT_MIN;
     this._max = nodeSpec.max != null ? nodeSpec.max : this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
-    this._initialValue = nodeSpec.initialValue != null ? nodeSpec.initialValue : Math.round(SEMIQUANT_MAX/2);
+    this._initialValue = nodeSpec.initialValue != null ? nodeSpec.initialValue : Math.round(SEMIQUANT_MAX / 2);
 
     if (this.color == null) { this.color = Colors.choices[0].value; }
 
@@ -148,7 +148,7 @@ class Node extends GraphPrimitive {
     }
   }
 
-  addLink(link) {
+  public addLink(link) {
     if ((link.sourceNode === this) || (link.targetNode === this)) {
       if (_.contains(this.links, link)) {
         throw new Error(`Duplicate link for Node:${this.id}`);
@@ -160,7 +160,7 @@ class Node extends GraphPrimitive {
     }
   }
 
-  removeLink(link) {
+  public removeLink(link) {
     if ((link.sourceNode === this) || (link.targetNode === this)) {
       return _.remove(this.links, testLink => testLink === link);
     } else {
@@ -168,21 +168,21 @@ class Node extends GraphPrimitive {
     }
   }
 
-  outLinks(relationType = null) {
+  public outLinks(relationType = null) {
     return _.filter(this.links, link => (link.sourceNode === this) && ((relationType === null) || (relationType === link.relation.type)));
   }
 
-  inLinks(relationType = null) {
+  public inLinks(relationType = null) {
     return _.filter(this.links, link => (link.targetNode === this) && ((relationType === null) || (relationType === link.relation.type)));
   }
 
-  inNodes() {
+  public inNodes() {
     return _.map(this.inLinks(), link => link.sourceNode);
   }
 
-  isDependent(onlyConsiderDefinedRelations) {
+  public isDependent(onlyConsiderDefinedRelations) {
     if (onlyConsiderDefinedRelations) {
-      for (let link of this.inLinks()) {
+      for (const link of this.inLinks()) {
         if (link.relation && link.relation.isDefined) {
           return true;
         }
@@ -193,14 +193,14 @@ class Node extends GraphPrimitive {
     }
   }
 
-  checkIsInIndependentCycle() {
-    const visitedNodes:any = [];
+  public checkIsInIndependentCycle() {
+    const visitedNodes: any = [];
     const original = this;
     let isOwnGrandpa = false;
 
-    var visit = function(node) {
+    const visit = (node) => {
       visitedNodes.push(node);
-      for (let link of node.inLinks()) {
+      for (const link of node.inLinks()) {
         if ((link.relation != null ? link.relation.isDefined : undefined)) {
           const upstreamNode = link.sourceNode;
           if (upstreamNode.isAccumulator) { return true; }         // fast exit if we have a collector ancestor
@@ -218,11 +218,11 @@ class Node extends GraphPrimitive {
     return this.isInDependentCycle = !hasIndependentAncestor && isOwnGrandpa;
   }
 
-  infoString() {
+  public infoString() {
     let link;
     const linkNamer = link => ` --${link.title}-->[${link.targetNode.title}]`;
     const outs = ((() => {
-      const result:any = [];
+      const result: any = [];
       for (link of this.outLinks()) {
         result.push(linkNamer(link));
       }
@@ -231,13 +231,13 @@ class Node extends GraphPrimitive {
     return `${this.title} ${outs}`;
   }
 
-  downstreamNodes() {
-    const visitedNodes:any = [];
+  public downstreamNodes() {
+    const visitedNodes: any = [];
 
-    var visit = function(node) {
+    const visit = (node) => {
       log.info(`visiting node: ${node.id}`);
       visitedNodes.push(node);
-      return _.each(node.outLinks(), function(link) {
+      return _.each(node.outLinks(), (link) => {
         const downstreamNode = link.targetNode;
         if (!_.contains(visitedNodes, downstreamNode)) {
           return visit(downstreamNode);
@@ -250,7 +250,7 @@ class Node extends GraphPrimitive {
 
   // ensures min, max and initialValue are all consistent.
   // @keys (optional) currently changed keys, so we can prioritize a user setting min or max
-  normalizeValues(keys) {
+  public normalizeValues(keys) {
     if (isNaN(this.min)) { this.min = 0; }
     if (isNaN(this.max)) { this.max = 0; }
     if (_.contains(keys, "max")) {
@@ -266,12 +266,12 @@ class Node extends GraphPrimitive {
     }
   }
 
-  collectorImageProps() {
+  public collectorImageProps() {
     // preserve collector images unless explicitly cleared
     if (!this._collectorImageProps) {
       this._collectorImageProps = [];
       for (let i = 0; i <= 8; i += 2) {
-        const row = Math.trunc(i/3);
+        const row = Math.trunc(i / 3);
         const col = i - (row * 3);
         this._collectorImageProps.push({
           left: (Math.random() * 10) + (col * 20),   // [0, 10) [20, 30) [40, 50)
@@ -284,19 +284,19 @@ class Node extends GraphPrimitive {
   }
 
   // Given a value between _min and _max, calculate the SQ proportion
-  mapQuantToSemiquant(val) {
+  public mapQuantToSemiquant(val) {
     const max = this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
     return SEMIQUANT_MIN + (((val - this._min) / (this._max - this._min)) * (max - SEMIQUANT_MIN));
   }
 
   // Given an SQ value (i.e. between 0 and 100), calculate quantatative value
   // (i.e. between _min and _max)
-  mapSemiquantToQuant(val) {
+  public mapSemiquantToQuant(val) {
     const max = this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
     return this._min + (((val - SEMIQUANT_MIN) / (max - SEMIQUANT_MIN)) * (this._max - this._min));
   }
 
-  toExport() {
+  public toExport() {
     const result = {
       key: this.key,
       data: {
@@ -319,22 +319,22 @@ class Node extends GraphPrimitive {
     return result;
   }
 
-  canEditInitialValue() {
+  public canEditInitialValue() {
     return !this.isDependent(true) || this.isAccumulator || this.isInDependentCycle;
   }
 
-  canEditValueWhileRunning() {
+  public canEditValueWhileRunning() {
     return !this.isDependent(true);
   }
 
-  paletteItemIs(paletteItem) {
+  public paletteItemIs(paletteItem) {
     return paletteItem.uuid === this.paletteItem;
   }
 }
 
 Node.initialize();
 
-module.exports = Node
+module.exports = Node;
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

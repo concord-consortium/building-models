@@ -8,7 +8,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {br, div, h2, label, span, input, p, i, select, option, textarea} = React.DOM;
 
@@ -120,7 +120,9 @@ module.exports = React.createClass({
 
   updateState(props) {
     const status = this.checkStatus(props.link);
-    let {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation(props.link.relation);
+    const selections =  RelationFactory.selectionsFromRelation(props.link.relation);
+    const {accumulator, transferModifier} = selections;
+    let {vector, scalar} = selections;
     if (props.link.relation.customData != null) {
       vector = RelationFactory.vary;
       scalar = RelationFactory.custom;
@@ -218,7 +220,7 @@ module.exports = React.createClass({
     }
   },
 
-  renderVectorPulldown(vectorSelection){
+  renderVectorPulldown(vectorSelection) {
     let currentOption;
     const vectorOptions = this.state.complexity === AppSettingsStore.store.Complexity.basic ?
       RelationFactory.basicVectors
@@ -237,7 +239,7 @@ module.exports = React.createClass({
 
     return (div({className: "bb-select"},
       (span({}, `${tr("~NODE-RELATION-EDIT.TO")} `)),
-      (select({value: currentOption, className:"", ref: "vector", onChange: this.updateRelation},
+      (select({value: currentOption, className: "", ref: "vector", onChange: this.updateRelation},
         options))
     ));
   },
@@ -269,7 +271,7 @@ module.exports = React.createClass({
     } else {
       return (div({className: `bb-select${visClass}`},
         (span({}, `${tr("~NODE-RELATION-EDIT.BY")} `)),
-        (select({value: currentOption, className:"", ref: "scalar", onChange: this.updateRelation},
+        (select({value: currentOption, className: "", ref: "scalar", onChange: this.updateRelation},
           options
         ))
       ));
@@ -313,7 +315,7 @@ module.exports = React.createClass({
 
   renderTransfer(source, target, isTargetProportional) {
     let currentOption, line_a, line_b;
-    const spanWrap = (string,className) => `<span class='${className}'>${string}</span>`;
+    const spanWrap = (string, className) => `<span class='${className}'>${string}</span>`;
     const options = _.map(RelationFactory.transferModifiers, (opt, i) => option({value: opt.id, key: opt.id}, opt.text));
     let sourceTitle = (this.props.link.sourceNode != null ? this.props.link.sourceNode.title : undefined) || "NONE";
     const targetTitle = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x1 => x1.targetNode), x => x.title) || "NONE";
@@ -367,7 +369,7 @@ module.exports = React.createClass({
         ))
       )),
       (div({className: "bottom"},
-        (div({className: "graph", id:"relation-graph"},
+        (div({className: "graph", id: "relation-graph"},
           (Graph({
             xAxis: source,
             yAxis: target,

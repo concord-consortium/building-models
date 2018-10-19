@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PreviewImage = React.createFactory(require("../views/preview-image-dialog-view"));
 const hasValidImageExtension = require("../utils/has-valid-image-extension");

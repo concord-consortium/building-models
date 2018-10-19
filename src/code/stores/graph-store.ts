@@ -9,7 +9,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const Importer            = require("../utils/importer");
 const Link                = require("../models/link");
@@ -41,7 +41,7 @@ const GraphStore  = Reflux.createStore({
     this.filename           = null;
     this.filenameListeners  = [];
 
-    this.undoRedoManager    = UndoRedo.instance({debug:false, context});
+    this.undoRedoManager    = UndoRedo.instance({debug: false, context});
     this.selectionManager   = new SelectionManager();
     PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
 
@@ -58,14 +58,14 @@ const GraphStore  = Reflux.createStore({
   },   // string description of the model last time we ran simulation
 
   resetSimulation() {
-    for (let node of this.getNodes()) {
+    for (const node of this.getNodes()) {
       node.frames = [];
     }
     return this.updateListeners();
   },
 
   _trimSimulation() {
-    for (let node of this.getNodes()) {
+    for (const node of this.getNodes()) {
       // leaving some excess data reduces flicker during rapid changes
       const excessFrames = node.frames.length - (2 * SimulationStore.store.simulationDuration());
       if (excessFrames > 0) {
@@ -77,7 +77,7 @@ const GraphStore  = Reflux.createStore({
 
   updateSimulationData(data) {
     const nodes = this.getNodes();
-    for (let frame of data) {
+    for (const frame of data) {
       for (let i = 0; i < frame.nodes.length; i++) {
         const node = frame.nodes[i];
         if (nodes[i] != null) {
@@ -89,11 +89,11 @@ const GraphStore  = Reflux.createStore({
   },  // prevent unused default return value
 
   paletteDelete(status) {
-    const {deleted,paletteItem,replacement} = status;
+    const {deleted, paletteItem, replacement} = status;
     if (deleted && paletteItem && replacement) {
-      for (let node of this.getNodes()) {
+      for (const node of this.getNodes()) {
         if (node.paletteItemIs(paletteItem)) {
-          this.changeNode({image: replacement.image, paletteItem: replacement.uuid},node);
+          this.changeNode({image: replacement.image, paletteItem: replacement.uuid}, node);
         }
       }
     }
@@ -166,8 +166,8 @@ const GraphStore  = Reflux.createStore({
 
   getLinks() {
     return ((() => {
-      const result:any = [];
-      for (let key in this.linkKeys) {
+      const result: any = [];
+      for (const key in this.linkKeys) {
         const value = this.linkKeys[key];
         result.push(value);
       }
@@ -177,8 +177,8 @@ const GraphStore  = Reflux.createStore({
 
   getNodes() {
     return ((() => {
-      const result:any = [];
-      for (let key in this.nodeKeys) {
+      const result: any = [];
+      for (const key in this.nodeKeys) {
         const value = this.nodeKeys[key];
         result.push(value);
       }
@@ -260,7 +260,7 @@ const GraphStore  = Reflux.createStore({
 
   isUniqueTitle(title, skipNode, nodes) {
     if (nodes == null) { nodes = this.getNodes(); }
-    const nonUniqueNode = function(otherNode) {
+    const nonUniqueNode = (otherNode) => {
       const sameTitle = otherNode.title === title;
       if (skipNode) { return sameTitle && (otherNode !== skipNode); } else { return sameTitle; }
     };
@@ -305,8 +305,8 @@ const GraphStore  = Reflux.createStore({
     // create a copy of the list of links
     const links = node.links.slice();
     // identify any transfer nodes that need to be removed as well
-    const transferLinks:any = [];
-    _.each(links, function(link) {
+    const transferLinks: any = [];
+    _.each(links, (link) => {
       if (__guard__(link != null ? link.transferNode : undefined, x => x.key) != null) {
         return transferLinks.push(link);
       }
@@ -317,8 +317,8 @@ const GraphStore  = Reflux.createStore({
         if (node.transferLink != null) {
           node.transferLink.relation = node.transferLink.defaultRelation();
         }
-        for (var link of links) { this._removeLink(link); }
-        for (link of transferLinks) { this._removeTransfer(link); }
+        for (const link of links) { this._removeLink(link); }
+        for (const link of transferLinks) { this._removeTransfer(link); }
         return this._removeNode(node);
       },
       undo: () => {
@@ -326,8 +326,8 @@ const GraphStore  = Reflux.createStore({
           node.transferLink.relation = transferRelation;
         }
         this._addNode(node);
-        for (var link of transferLinks) { this._addTransfer(link); }
-        for (var link of links) { this._addLink(link); }
+        for (const link of transferLinks) { this._addTransfer(link); }
+        for (const link of links) { this._addLink(link); }
       }
     }
     );
@@ -377,8 +377,8 @@ const GraphStore  = Reflux.createStore({
 
   _graphUpdated() {
     return (() => {
-      const result:any = [];
-      for (let key in this.nodeKeys) {
+      const result: any = [];
+      for (const key in this.nodeKeys) {
         const node = this.nodeKeys[key];
         result.push(node.checkIsInIndependentCycle());
       }
@@ -437,10 +437,10 @@ const GraphStore  = Reflux.createStore({
     const _node = node || this.selectedNodes();
     const nodes = [].concat(_node); // force an array of nodes
     return (() => {
-      const result:any = [];
+      const result: any = [];
       for (node of nodes) {
         if (node) {
-          var originalData = {
+          const originalData = {
             title: node.title,
             image: node.image,
             paletteItem: node.paletteItem,
@@ -456,7 +456,7 @@ const GraphStore  = Reflux.createStore({
           };
 
           let nodeChanged = false;
-          for (let key in data) {
+          for (const key in data) {
             if (data.hasOwnProperty(key)) {
               if (data[key] !== originalData[key]) { nodeChanged = true; }
             }
@@ -464,8 +464,8 @@ const GraphStore  = Reflux.createStore({
 
           if (nodeChanged) {        // don't do anything unless we've actually changed the node
 
-            var changedLinks, link, originalRelations;
-            var accumulatorChanged = (data.isAccumulator != null) &&
+            let changedLinks, link, originalRelations;
+            const accumulatorChanged = (data.isAccumulator != null) &&
                                   (!!data.isAccumulator !== !!originalData.isAccumulator);
 
             if (accumulatorChanged) {
@@ -517,7 +517,7 @@ const GraphStore  = Reflux.createStore({
   _changeNode(node, data, notifyCodap) {
     if (notifyCodap == null) { notifyCodap = true; }
     log.info(`Change for ${node.title}`);
-    for (let key of NodeModel.fields) {
+    for (const key of NodeModel.fields) {
       if (data.hasOwnProperty(key)) {
         log.info(`Change ${key} for ${node.title}`);
         const prev = node[key];
@@ -544,7 +544,7 @@ const GraphStore  = Reflux.createStore({
   changeNodeWithKey(key, data) {
     const node = this.nodeKeys[ key ];
     if (node) {
-      return this.changeNode(data,node);
+      return this.changeNode(data, node);
     }
   },
 
@@ -623,8 +623,8 @@ const GraphStore  = Reflux.createStore({
 
   _maybeChangeTransferTitle(changedNode) {
     return (() => {
-      const result:any = [];
-      for (let key in this.nodeKeys) {
+      const result: any = [];
+      for (const key in this.nodeKeys) {
         const node = this.nodeKeys[key];
         const { transferLink } = node;
         if (transferLink && ((transferLink.sourceNode === changedNode) || (transferLink.targetNode === changedNode))) {
@@ -639,7 +639,7 @@ const GraphStore  = Reflux.createStore({
 
   _changeLink(link, changes) {
     log.info(`Change  for ${link.title}`);
-    for (let key of ["title","color", "relation", "reasoning"]) {
+    for (const key of ["title", "color", "relation", "reasoning"]) {
       if (changes[key] != null) {
         log.info(`Change ${key} for ${link.title}`);
         link[key] = changes[key];
@@ -662,8 +662,8 @@ const GraphStore  = Reflux.createStore({
     const startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
     const endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
     this.importLink({
-      sourceNode:startKey,
-      targetNode:endKey,
+      sourceNode: startKey,
+      targetNode: endKey,
       sourceTerminal: startTerminal,
       targetTerminal: endTerminal,
       color: info.color,
@@ -673,7 +673,7 @@ const GraphStore  = Reflux.createStore({
   },
 
   deleteAll() {
-    for (let node in this.nodeKeys) {
+    for (const node in this.nodeKeys) {
       this.removeNode(node);
     }
     GraphPrimitive.resetCounters();
@@ -720,7 +720,7 @@ const GraphStore  = Reflux.createStore({
     let linkDescription = "";
     let modelDescription = `steps:${settings.duration}|cap:${settings.capNodeValues}|`;
 
-    _.each(links, function(link) {
+    _.each(links, (link) => {
       let source, target;
       if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { return; }
       linkDescription += `${source.x},${source.y};`;
@@ -756,8 +756,8 @@ const GraphStore  = Reflux.createStore({
     let minSimulationType = AppSettingsStore.store.SimulationType.diagramOnly;
 
     const links = this.getLinks();
-    for (let link of links) {
-      var source, target;
+    for (const link of links) {
+      let source, target;
       if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { continue; }
 
       if (source.isAccumulator || target.isAccumulator) {
@@ -778,8 +778,8 @@ const GraphStore  = Reflux.createStore({
   //   1 (expanded)       otherwise
   getMinimumComplexity() {
     const links = this.getLinks();
-    for (let link of links) {
-      var source, target;
+    for (const link of links) {
+      let source, target;
       if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { continue; }
 
       if (link.relation != null ? link.relation.formula : undefined) {
@@ -818,7 +818,7 @@ const GraphStore  = Reflux.createStore({
   serialize(palette) {
     let key;
     const nodeExports = (() => {
-      const result:any = [];
+      const result: any = [];
       for (key in this.nodeKeys) {
         const node = this.nodeKeys[key];
         result.push(node.toExport());
@@ -826,7 +826,7 @@ const GraphStore  = Reflux.createStore({
       return result;
     })();
     const linkExports = (() => {
-      const result1:any = [];
+      const result1: any = [];
       for (key in this.linkKeys) {
         const link = this.linkKeys[key];
         result1.push(link.toExport());

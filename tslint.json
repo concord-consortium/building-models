@@ -2,6 +2,18 @@
   "extends": ["tslint:recommended", "tslint-react"],
   "rules": {
     "trailing-comma": false,
-    "object-literal-sort-keys": false
+    "object-literal-sort-keys": false,
+    "no-var-requires": false,
+    "object-literal-key-quotes": false,
+    "forin": false,
+    "arrow-parens": false,
+    "max-line-length": false,
+    "no-consecutive-blank-lines": false,
+    "interface-name": false,
+    "variable-name": false,
+    "no-conditional-assignment": false,
+    "no-shadowed-variable": false,
+    "one-variable-per-declaration": false,
+    "max-classes-per-file": false
   }
 }

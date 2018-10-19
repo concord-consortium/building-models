@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const ImageMetadata = React.createFactory(require("./image-metadata-view"));
 const ImageManger   = require("../stores/image-dialog-store");

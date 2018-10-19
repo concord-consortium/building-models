@@ -6,22 +6,22 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const GraphPrimitive = require("./graph-primitive");
 const Relation       = require("./relationship");
 const LinkColors     = require("../utils/link-colors");
 
 class Link extends GraphPrimitive {
-  static defaultColor;
-  static defaultRelation;
+  public static defaultColor;
+  public static defaultRelation;
 
-  public transferNode: any;
-
-  static initialize() {
+  public static initialize() {
     Link.defaultColor = LinkColors.default;
     Link.defaultRelation = new Relation({formula: "1 * in"});
   }
+
+  public transferNode: any;
 
   constructor(options) {
     super();
@@ -44,7 +44,7 @@ class Link extends GraphPrimitive {
     this.jsPlumbConnection = null; // place to keep underlaying connection
   }
 
-  _makeRelation(relationObj) {
+  public _makeRelation(relationObj) {
     let relation;
     if (!(relationObj instanceof Relation)) {
       relation = new Relation((relationObj || {}));
@@ -54,28 +54,28 @@ class Link extends GraphPrimitive {
     return relation;
   }
 
-  defaultRelation() {
+  public defaultRelation() {
     return new Relation({});
   }
 
-  terminalKey() {
+  public terminalKey() {
     return `${this.sourceNode.key} ------> ${this.targetNode.key}`;
   }
 
-  nodeKey() {
+  public nodeKey() {
     return `${this.sourceNode} ---${this.key}---> ${this.targetNode}`;
   }
 
-  outs() {
+  public outs() {
     return [this.targetNode];
   }
 
-  ins() {
+  public ins() {
     return [this.sourceNode];
   }
 
-  toExport() {
-    const link:any = {
+  public toExport() {
+    const link: any = {
       "title": this.title,
       "color": this.color,
       "sourceNode": this.sourceNode.key,

@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, img} = React.DOM;
 const tr = require("../utils/translate");

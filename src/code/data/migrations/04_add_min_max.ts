@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const migration = {
   version: "1.3.0",
@@ -20,8 +20,8 @@ const migration = {
   // Add initialValue if it doesn't exist
   updateNodes(data) {
     return (() => {
-      const result:any = [];
-      for (let node of data.nodes) {
+      const result: any = [];
+      for (const node of data.nodes) {
         if (!node.data) { node.data = {}; } // should never happen
         node.data.min = 0;
         result.push(node.data.max = 100);

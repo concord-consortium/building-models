@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const Modal = React.createFactory(require("./modal-view"));
 const {div, i} = React.DOM;

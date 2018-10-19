@@ -5,7 +5,7 @@
  */
 
  // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const HashParams      = require("../utils/hash-parameters");
 const ImportActions   = require("../actions/import-actions");
@@ -38,7 +38,7 @@ const AppSettingsStore   = Reflux.createStore({
   listenables: [AppSettingsActions, ImportActions],
 
   init() {
-    const simulationType = HashParams.getParam("simplified") || urlParams["simplified"] ?
+    const simulationType = HashParams.getParam("simplified") || urlParams.simplified ?
       SimulationType.diagramOnly
       :
       SimulationType.DEFAULT;
@@ -49,7 +49,7 @@ const AppSettingsStore   = Reflux.createStore({
       inspectorPanel: true,
       nodePalette: true
     };
-    const uiParams = HashParams.getParam("hide") || urlParams["hide"];
+    const uiParams = HashParams.getParam("hide") || urlParams.hide;
     // For situations where some ui elements need to be hidden, this parameter can be specified.
     // If this parameter is present, Any specified elements are disabled or hidden.
     // Example usage: hide=globalNav,inspectorPanel
@@ -60,7 +60,7 @@ const AppSettingsStore   = Reflux.createStore({
       uiElements.nodePalette = uiParams.indexOf("nodePalette") === -1;
     }
 
-    const lockdown = (HashParams.getParam("lockdown") === "true") || urlParams["lockdown"];
+    const lockdown = (HashParams.getParam("lockdown") === "true") || urlParams.lockdown;
 
     return this.settings = {
       showingSettingsDialog: false,

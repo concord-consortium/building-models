@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const xlat       = require("../utils/translate");
 const licenses   = require("../data/licenses");

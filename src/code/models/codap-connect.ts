@@ -7,7 +7,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const { IframePhoneRpcEndpoint } = (require("iframe-phone"));
 const tr = require("../utils/translate");
@@ -23,7 +23,16 @@ interface CodapConnectMap {
 }
 
 class CodapConnect {
-  static instances: CodapConnectMap;
+  public static instances: CodapConnectMap;
+
+  public static initialize() {
+    CodapConnect.instances = {};
+  }
+
+  public static instance(context) {
+    if (CodapConnect.instances[context] == null) { CodapConnect.instances[context] = new CodapConnect(context); }
+    return CodapConnect.instances[context];
+  }
 
   private standaloneMode: boolean;
   private queue: any[];
@@ -39,15 +48,6 @@ class CodapConnect {
   private tableCreated: boolean;
   private _attrsToSync: any;
   private _attrsAreLoaded: boolean;
-
-  static initialize() {
-    CodapConnect.instances = {};
-  }
-
-  static instance(context) {
-    if (CodapConnect.instances[context] == null) { CodapConnect.instances[context] = new CodapConnect(context); }
-    return CodapConnect.instances[context];
-  }
 
   constructor(context) {
     this.codapRequestHandler = this.codapRequestHandler.bind(this);
@@ -145,7 +145,7 @@ class CodapConnect {
   }
 
   // initial synchronization; primarily used for synchronizing legacy documents
-  _initialSyncAttributeProperties(attrs, isLoaded = false) {
+  public _initialSyncAttributeProperties(attrs, isLoaded = false) {
     if (attrs) { this._attrsToSync = attrs; }
     if (isLoaded) { this._attrsAreLoaded = isLoaded; }
     if (this._attrsToSync && this._attrsAreLoaded) {
@@ -154,7 +154,7 @@ class CodapConnect {
     }
   }
 
-  _createDataContext() {
+  public _createDataContext() {
     const sampleDataAttrs = this._getSampleAttributes();
     const message = {
       action: "create",
@@ -162,7 +162,7 @@ class CodapConnect {
       values: {
         name: this.dataContextName,
         title: this.dataContextName,
-        collections:[
+        collections: [
           {
             name: this.simulationCollectionName,
             title: "Sage Simulation",
@@ -195,7 +195,7 @@ class CodapConnect {
 
 
   // Return the column headings and types for our samples. (steps, NodeA, nodeB, nodeC)
-  _getSampleAttributes() {
+  public _getSampleAttributes() {
     const nodes = this.graphStore.getNodes();
 
     // First column definition is the time index
@@ -207,7 +207,7 @@ class CodapConnect {
       }
     ];
 
-    const addNodeAttr = function(node) {
+    const addNodeAttr = (node) => {
       const type = node.valueDefinedSemiQuantitatively ? "qualitative" : "numeric";
       return sampleDataAttrs.push({
         name: node.codapName || node.title,
@@ -222,17 +222,17 @@ class CodapConnect {
 
 
   // If CODAPs Samples collection doesn't have all our data attributes add the new ones.
-  _createMissingDataAttributes(callback?) {
+  public _createMissingDataAttributes(callback?) {
     // TODO: Computing this every time is expensive. Use a flag set from GraphChange event?
     const currentAttributes = _.sortBy(this._getSampleAttributes(), "name");
-    const attributesKey = _.pluck(currentAttributes,"name").join("|");
+    const attributesKey = _.pluck(currentAttributes, "name").join("|");
     if (this.attributesKey === attributesKey) {
       if (callback) { return callback(); }
     } else {
       const doResolve = listAttributeResponse => {
         if (listAttributeResponse != null ? listAttributeResponse.success : undefined) {
           const { values } = listAttributeResponse;
-          const newAttributes = _.select(currentAttributes, a => !_.includes(values,a.name));
+          const newAttributes = _.select(currentAttributes, a => !_.includes(values, a.name));
           const message = {
             action: "create",
             resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute`,
@@ -263,7 +263,7 @@ class CodapConnect {
     }
   }
 
-  _syncAttributeProperties(attrProps, initialSync?) {
+  public _syncAttributeProperties(attrProps, initialSync?) {
     const nodesToSync = initialSync
       ? _.filter(this.graphStore.nodeKeys, node => !node.codapID || !node.codapName)
       : _.map(this.graphStore.nodeKeys, node => node); // map nodeKeys to array of nodes
@@ -309,7 +309,7 @@ class CodapConnect {
     }
   }
 
-  sendRenameAttribute(nodeKey, prevTitle) {
+  public sendRenameAttribute(nodeKey, prevTitle) {
     const node = this.graphStore.nodeKeys[nodeKey];
     const codapKey = node.codapID || node.codapName || prevTitle;
     if (codapKey) {
@@ -347,7 +347,7 @@ class CodapConnect {
   // then rename the column from the default to that user's language.
   // We could partially avoid this if data CODAP table attributes
   // supported `titles` for localized names.
-  updateExperimentColumn() {
+  public updateExperimentColumn() {
     const experimentNumberLabel = tr("~CODAP.SIMULATION.EXPERIMENT");
     const handleSimulationAttributes = listAttributeResponse => {
       if (listAttributeResponse != null ? listAttributeResponse.success : undefined) {
@@ -371,7 +371,7 @@ class CodapConnect {
     return this.codapPhone.call(getListing, handleSimulationAttributes);
   }
 
-  createExperimentNumberColumn(label) {
+  public createExperimentNumberColumn(label) {
     const experimentAttributes = {
       name: label,
       type: "categorical"
@@ -381,7 +381,7 @@ class CodapConnect {
       resource: `dataContext[${this.dataContextName}].collection[${this.simulationCollectionName}].attribute`,
       values: [ experimentAttributes ]
     };
-    return this.codapPhone.call(message, function(response) {
+    return this.codapPhone.call(message, (response) => {
       if (response.success) {
         return log.info(`created attribute ${label}`);
       } else {
@@ -390,11 +390,11 @@ class CodapConnect {
     });
   }
 
-  renameExperimentNumberColumn(label) {
+  public renameExperimentNumberColumn(label) {
     return this.renameSimulationProperty(this.defaultExperimentName, label);
   }
 
-  renameSimulationProperty(oldValue, newValue) {
+  public renameSimulationProperty(oldValue, newValue) {
     const message = {
       action: "update",
       resource: `dataContext[${this.dataContextName}].collection[${this.simulationCollectionName}].attribute[${oldValue}]`,
@@ -403,7 +403,7 @@ class CodapConnect {
         dirtyDocument: false
       }
     };
-    return this.codapPhone.call(message, function(response) {
+    return this.codapPhone.call(message, (response) => {
       if (response.success) {
         return log.info(`Renamed Simulation attribute: ${oldValue} → ${newValue}`);
       } else {
@@ -412,19 +412,19 @@ class CodapConnect {
     });
   }
 
-  _timeStamp() {
+  public _timeStamp() {
     return new Date().getTime();
   }
 
 
-  _shouldSend() {
+  public _shouldSend() {
     const currentTime = this._timeStamp();
     const elapsedTime = currentTime - this.lastTimeSent;
     return elapsedTime > this.sendThrottleMs;
   }
 
 
-  _sendSimulationData() {
+  public _sendSimulationData() {
     // drain the queue synchronously. Re-add pending data in case of error.
     const sampleData = this.queue;
     this.queue = [];
@@ -454,35 +454,35 @@ class CodapConnect {
   }
 
 
-  _sendUndoToCODAP() {
+  public _sendUndoToCODAP() {
     return this.codapPhone.call({
       action: "notify",
       resource: "undoChangeNotice",
       values: {
         operation: this.standaloneMode ? "undoButtonPress" : "undoAction"
       }
-    }, function(response) {
+    }, (response) => {
       if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
         return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
   }
 
-  _sendRedoToCODAP() {
+  public _sendRedoToCODAP() {
     return this.codapPhone.call({
       action: "notify",
       resource: "undoChangeNotice",
       values: {
         operation: this.standaloneMode ? "redoButtonPress" : "redoAction"
       }
-    }, function(response) {
+    }, (response) => {
       if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
         return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
   }
 
-  sendUndoableActionPerformed(logMessage) {
+  public sendUndoableActionPerformed(logMessage) {
     return this.codapPhone.call({
       action: "notify",
       resource: "undoChangeNotice",
@@ -490,17 +490,17 @@ class CodapConnect {
         operation: "undoableActionPerformed",
         logMessage
       }
-    }, function(response) {
+    }, (response) => {
       if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
         return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
   }
 
-  addData(data) {
+  public addData(data) {
     const timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
     // Create the sample data values (node values array)
-    const sampleData = _.map(data, function(frame) {
+    const sampleData = _.map(data, (frame) => {
       const sample = {};
       sample[tr("~CODAP.SIMULATION.EXPERIMENT")] = SimulationStore.store.settings.experimentNumber;
       sample[timeUnit] = frame.time;
@@ -516,7 +516,7 @@ class CodapConnect {
     }
   }
 
-  createGraph(yAttributeName) {
+  public createGraph(yAttributeName) {
     this._createMissingDataAttributes();
     const timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
 
@@ -535,7 +535,7 @@ class CodapConnect {
     });
   }
 
-  createTable() {
+  public createTable() {
     if (!this.tableCreated) {
       this.codapPhone.call({
         action: "create",
@@ -549,7 +549,7 @@ class CodapConnect {
     }
   }
 
-  codapRequestHandler(cmd, callback) {
+  public codapRequestHandler(cmd, callback) {
     let successes;
     const { resource } = cmd;
     const { action } = cmd;
@@ -608,9 +608,9 @@ class CodapConnect {
 
   // undo/redo events can return an array of successes
   // this reduces that array to true iff every element is not explicitly false
-  reduceSuccesses(successes) {
+  public reduceSuccesses(successes) {
     if (!(successes != null ? successes.length : undefined)) { return successes; }        // return successes unless it's a non-zero length array
-    for (let s of successes) {
+    for (const s of successes) {
       if (s === false) { return false; }   // return false if we encounter *any* explicit false values in the array
     }
     return true;
@@ -619,7 +619,7 @@ class CodapConnect {
   // Get the experiment-number of the last case in CODAP, and set the simulation store
   // to the next experiment number. This is only called in the case where we found an
   // existing data context in CODAP.
-  _getExperimentNumber() {
+  public _getExperimentNumber() {
     const runsCollection = `dataContext[${this.dataContextName}].collection[${this.simulationCollectionName}]`;
     // find out how many cases there are
     return this.codapPhone.call({
@@ -633,11 +633,11 @@ class CodapConnect {
           // get last case, and find its number
           this.codapPhone.call({
             action: "get",
-            resource: `${runsCollection}.caseByIndex[${caseCount-1}]`
+            resource: `${runsCollection}.caseByIndex[${caseCount - 1}]`
           }
-          , function(ret2) {
+          , (ret2) => {
             if (ret2 != null ? ret2.success : undefined) {
-              const lastCase = ret2.values["case"];
+              const lastCase = ret2.values.case;
               const lastExperimentNumber = parseInt(lastCase.values[tr("~CODAP.SIMULATION.EXPERIMENT")], 10) || 0;
               return SimulationStore.actions.setExperimentNumber(lastExperimentNumber + 1);
             }
@@ -649,7 +649,7 @@ class CodapConnect {
     });
   }
 
-  initGameHandler(result) {
+  public initGameHandler(result) {
     if (result && result.success) {
       return CodapActions.codapLoaded();
     }
@@ -669,9 +669,9 @@ class CodapConnect {
   //     log.info 'received log reply!'
   //
 
-  request(action, args, callback) {
+  public request(action, args, callback) {
     const promise = new Promise((resolve, reject) => {
-      return this.codapPhone.call({ action, args }, function(reply) {
+      return this.codapPhone.call({ action, args }, (reply) => {
         if (callback) {
           callback(reply);
         }
@@ -684,7 +684,7 @@ class CodapConnect {
     });
     return promise;
   }
-};
+}
 
 CodapConnect.initialize();
 

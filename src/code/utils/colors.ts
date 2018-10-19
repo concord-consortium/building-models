@@ -1,6 +1,6 @@
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const tr = require("./translate");
 

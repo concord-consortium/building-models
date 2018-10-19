@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const urlParams = require("./url-params");
 
@@ -21,7 +21,7 @@ const languageFiles = {
 };
 
 const translations =  {};
-_.each(languageFiles, function(langContents, langKey) {
+_.each(languageFiles, (langContents, langKey) => {
   let dashLoc;
   translations[langKey] = langContents;
   // accept full key with region code or just the language code
@@ -36,12 +36,12 @@ const defaultLang = urlParams.lang && translations[urlParams.lang] ? urlParams.l
 
 const varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
 
-const translate = function(key, vars, lang) {
+const translate = (key, vars, lang) => {
   if (vars == null) { vars = {}; }
   if (lang == null) { lang = defaultLang; }
   let translation = translations[lang] != null ? translations[lang][key] : undefined;
   if ((translation == null)) { translation = key; }
-  return translation.replace(varRegExp, function(match, key) {
+  return translation.replace(varRegExp, (match, key) => {
     if (vars.hasOwnProperty(key)) { return vars[key]; } else { return `'** UKNOWN KEY: ${key} **`; }
   });
 };

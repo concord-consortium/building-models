@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, i, span, ul, li} = React.DOM;
 
@@ -84,7 +84,7 @@ const DropDown = React.createClass({
       (div({className: menuClass, onMouseLeave: this.blur, onMouseEnter: this.unblur},
         (ul({},
           (() => {
-            const result:any = [];
+            const result: any = [];
             for (item of this.props.items) {
               result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
             }

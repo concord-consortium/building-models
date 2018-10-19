@@ -8,7 +8,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const LinkRelationView = React.createFactory(require("./link-relation-view"));
 const RelationFactory = require("../models/relation-factory");
@@ -19,7 +19,7 @@ const tr = require("../utils/translate");
 const inspectorPanelStore = require("../stores/inspector-panel-store");
 const graphStore = require("../stores/graph-store");
 
-let {div, h2, label, span, input, p, i, select, option} = React.DOM;
+const {div, h2, label, span, input, p, i, select, option} = React.DOM;
 
 module.exports = React.createClass({
 
@@ -31,7 +31,7 @@ module.exports = React.createClass({
 
   renderTabforLink(link) {
     const relationView = (LinkRelationView({link, graphStore: this.props.graphStore}));
-    label = link.sourceNode.title;
+    const label = link.sourceNode.title;
     const {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation(link.relation);
     const isFullyDefined = (link.relation.isDefined && (vector != null) && (scalar != null)) || (link.relation.customData != null) || (accumulator != null) || (transferModifier != null);
 
@@ -69,7 +69,7 @@ module.exports = React.createClass({
       if (this.state.selectedLink === link) { selectedTabIndex = i; }
       return this.renderTabforLink(link);
     });
-    return (div({className:"relation-inspector"},
+    return (div({className: "relation-inspector"},
       (TabbedPanel({
         tabs,
         selectedTabIndex,
@@ -80,7 +80,7 @@ module.exports = React.createClass({
   },
 
   renderLinkRelationInspector() {
-    return (div({className:"relation-inspector"}));
+    return (div({className: "relation-inspector"}));
   },
 
   render() {

@@ -7,7 +7,7 @@
 // TODO:  This should be split up into and ImageDialogStore and a DialogStore…
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PaletteStore = require("./palette-store");
 
@@ -41,7 +41,7 @@ const store = Reflux.createStore({
     return PaletteStore.store.listen(this.onPaletteSelect);
   },
 
-  onOpen(callback){
+  onOpen(callback) {
     if (callback == null) { callback = false; }
     this.keepShowing = true;
     this.resetPaletteItem();
@@ -66,7 +66,7 @@ const store = Reflux.createStore({
   },
 
   onClose() {
-    this.callback=null;
+    this.callback = null;
     this.close();
     return this._updateChanges();
   },
@@ -74,9 +74,9 @@ const store = Reflux.createStore({
   onUpdate(data) {
     if (this.paletteItem) {
       this.paletteItem = _.merge(this.paletteItem, data);
+    } else {
+      this.paletteItem = data;
     }
-    else {}
-    if (!this.paletteItem) { this.paletteItem = data; }
     return this._updateChanges();
   },
 

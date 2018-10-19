@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, h2, label, span, input, p, i} = React.DOM;
 
@@ -35,7 +35,7 @@ module.exports = React.createClass({
     };
   },
 
-  componentWillReceiveProps(nextProps){
+  componentWillReceiveProps(nextProps) {
     // min and max are copied to state to disconnect the state and property, so
     // that we can set the text field and only update the model when the input field
     // is blured. This way we don't perform min/max validation while user is typing
@@ -57,20 +57,20 @@ module.exports = React.createClass({
     }
 
     if (value = evt.target.value) {
-      value = this.trim(parseInt(value));
-      return this.props.graphStore.changeNode({initialValue:value});
+      value = this.trim(parseInt(value, 10));
+      return this.props.graphStore.changeNode({initialValue: value});
     }
   },
 
   updateAccumulatorChecked(evt) {
     const value = evt.target.checked;
-    this.props.graphStore.changeNode({isAccumulator:value});
+    this.props.graphStore.changeNode({isAccumulator: value});
     return SimulationStore.actions.toggledCollectorTo(value);
   },
 
   updateNegativeValuesAllowed(evt) {
     const value = evt.target.checked;
-    return this.props.graphStore.changeNode({allowNegativeValues:value});
+    return this.props.graphStore.changeNode({allowNegativeValues: value});
   },
 
   updateDefiningType() {
@@ -94,11 +94,11 @@ module.exports = React.createClass({
 
     const updateProperty = evt => {
       // just update internal state while typing
-      const value = parseInt(evt.target.value);
+      const value = parseInt(evt.target.value, 10);
       if (value != null) { return this.setState({[`${property}-value`]: value}); }
     };
 
-    const keyDown = function(evt) {
+    const keyDown = (evt) => {
       if (evt.key === "Enter") {
         return swapState();
       }

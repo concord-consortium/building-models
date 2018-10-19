@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const ModalDialog = React.createFactory(require("./modal-dialog-view"));
 const TabbedPanel = React.createFactory(require("./tabbed-panel-view"));

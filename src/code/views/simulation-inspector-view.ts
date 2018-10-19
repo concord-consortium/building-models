@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {RadioGroup, Radio}  = require("react-radio-group");
 const RadioGroupF     = React.createFactory(RadioGroup);
@@ -27,7 +27,7 @@ module.exports = React.createClass({
   mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 
   setDuration(e) {
-    return SimulationStore.actions.setDuration(parseInt(e.target.value));
+    return SimulationStore.actions.setDuration(parseInt(e.target.value, 10));
   },
 
   setCapNodeValues(e) {
@@ -106,7 +106,7 @@ module.exports = React.createClass({
             (RadioF({value: SimulationType.time})),
             (span({}, tr("~SIMULATION.COMPLEXITY.TIME")))
           )),
-          (div({key: "time-complexity",className: `expanding-submenu${this.state.simulationType === SimulationType.time ? " expanded" : ""}`},
+          (div({key: "time-complexity", className: `expanding-submenu${this.state.simulationType === SimulationType.time ? " expanded" : ""}`},
             this.state.simulationType === SimulationType.time ?
               complexityRadioButtons : undefined
           ))

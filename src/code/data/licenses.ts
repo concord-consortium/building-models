@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {option, optgroup} = React.DOM;
 
@@ -60,12 +60,11 @@ module.exports = {
   },
 
   getRenderOptions(slug) {
-    var slug;
     return [
       (option({key: `${slug}-public-domain`, value: "public domain"}, (this.getLicenseLabel("public domain")))),
       (optgroup({key: `${slug}-opt-group`, label: "Creative Commons"},
         (() => {
-          const result:any = [];
+          const result: any = [];
           for (slug in this.map["creative commons"]) {
             const license = this.map["creative commons"][slug];
             result.push(option({key: slug, value: slug}, license.label));

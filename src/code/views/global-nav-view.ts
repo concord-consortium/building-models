@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, i, span} = React.DOM;
 const tr = require("../utils/translate");
@@ -72,7 +72,7 @@ module.exports = React.createClass({
 
     return (div({className: "global-nav"},
       (div({},
-        (Dropdown({anchor: this.props.filename, items: options, className:"global-nav-content-filename"})),
+        (Dropdown({anchor: this.props.filename, items: options, className: "global-nav-content-filename"})),
         this.state.dirty ?
           (span({className: "global-nav-file-status"}, "Unsaved")) : undefined
       )),

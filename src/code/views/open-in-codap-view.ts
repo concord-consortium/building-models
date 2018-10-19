@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {a, span} = React.DOM;
 const tr = require("../utils/translate");
@@ -33,7 +33,7 @@ module.exports = React.createClass({
   },
 
   render() {
-    const opts:any = { href: this.link() };
+    const opts: any = { href: this.link() };
 
     if (this.props.openInNewWindow) {
       opts.target = "_blank";
@@ -42,7 +42,7 @@ module.exports = React.createClass({
     if (this.props.disabled) {
       opts.className = "disabled";
       opts.disabled = true;
-      opts.onClick = function(e) {
+      opts.onClick = (e) => {
         e.preventDefault();
         return alert(tr("~OPEN_IN_CODAP.DISABLED"));
       };

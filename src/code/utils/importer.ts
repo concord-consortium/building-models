@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const Migrations          = require("../data/migrations/migrations");
 const DiagramNode         = require("../models/node");
@@ -25,7 +25,7 @@ class MySystemImporter {
     this.paletteStore = paletteStore;
   }
 
-  importData(data) {
+  public importData(data) {
     Migrations.update(data);
     // Synchronous invocation of actions / w trigger
     ImportActions.import.trigger(data);
@@ -36,7 +36,7 @@ class MySystemImporter {
     return this.graphStore.setFilename(data.filename || "New Model");
   }
 
-  importNode(nodeSpec) {
+  public importNode(nodeSpec) {
     const { data } = nodeSpec;
     const { key } = nodeSpec;
     if (data.paletteItem) {
@@ -49,8 +49,8 @@ class MySystemImporter {
     }
   }
 
-  importNodes(importNodes) {
-    for (let nodespec of importNodes) {
+  public importNodes(importNodes) {
+    for (const nodespec of importNodes) {
       const node = this.importNode(nodespec);
       // ensure id matches key for imported documents
       node.id = node.key;
@@ -59,8 +59,8 @@ class MySystemImporter {
     // prevent unused default return value
   }
 
-  importLinks(links) {
-    for (let link of links) {
+  public importLinks(links) {
+    for (const link of links) {
       this.graphStore.importLink(link);
       // ensure id matches key for imported documents
       link.id = link.key;

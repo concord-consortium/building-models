@@ -13,6 +13,7 @@
     "build:webpack": "webpack --mode production --devtool false",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json 'src/code/**/*.{ts,tsx}",
+    "lint:fix": "tslint -c tslint.json --fix 'src/code/**/*.{ts,tsx}",
     "strings:build": "./node_modules/.bin/strip-json-comments src/code/utils/lang/en-US-master.json > src/code/utils/lang/en-US.json",
     "strings:pull:usage": "echo Usage: `npm run strings:pull -- -a <poeditor_api_key>`",
     "strings:pull": "./bin/strings-pull-project.sh",

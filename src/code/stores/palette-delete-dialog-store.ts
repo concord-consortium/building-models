@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PaletteStore = require("./palette-store");
 const UndoRedo     = require("../utils/undo-redo");
@@ -20,7 +20,7 @@ const store = Reflux.createStore({
 
   init() {
     this.initValues();
-    return this.undoManger = UndoRedo.instance({debug:false});
+    return this.undoManger = UndoRedo.instance({debug: false});
   },
 
   initValues() {

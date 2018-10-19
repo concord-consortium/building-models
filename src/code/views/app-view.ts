@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const Reflux = require("reflux");
 const tr                  = require("../utils/translate");

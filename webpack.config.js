@@ -41,16 +41,19 @@ module.exports = (env, argv) => {
     performance: { hints: false },
     module: {
       rules: [
-        // {
-        //   test: /\.tsx?$/,
-        //   enforce: 'pre',
-        //   use: [
-        //     {
-        //       loader: 'tslint-loader',
-        //       options: {}
-        //     }
-        //   ]
-        // },
+        {
+          test: /\.tsx?$/,
+          enforce: 'pre',
+          use: [
+            {
+              loader: 'tslint-loader',
+              options: {
+                configFile: 'tslint.json',
+                failOnHint: true
+              }
+            }
+          ]
+        },
         {
           test: /\.tsx?$/,
           loader: 'ts-loader',

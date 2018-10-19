@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const migration = {
   version: "1.14.0",
@@ -16,8 +16,8 @@ const migration = {
   doUpdate(data) {
 
     return (() => {
-      const result:any = [];
-      for (let link of data.links) {
+      const result: any = [];
+      for (const link of data.links) {
         if (link.relation.formula === "maxIn - 21.7 * log(in+1)") {
           link.relation.formula = "maxIn - 21.7 * log(max(1,in))";
         }

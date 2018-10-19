@@ -5,15 +5,15 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, h2, button, label, input} = React.DOM;
 const tr = require("../utils/translate");
 
 const palettes = [
-  ["#4D6A6D","#798478", "#A0A083", "#C9ADA1", "#EAE0CC"],
-  ["#351431","#775253", "#BDC696", "#D1D3C4", "#DFE0DC"],
-  ["#D6F49D","#EAD637", "#CBA328", "#230C0F", "#A2D3C2"]
+  ["#4D6A6D", "#798478", "#A0A083", "#C9ADA1", "#EAE0CC"],
+  ["#351431", "#775253", "#BDC696", "#D1D3C4", "#DFE0DC"],
+  ["#D6F49D", "#EAD637", "#CBA328", "#230C0F", "#A2D3C2"]
 ];
 const palette = palettes[2];
 

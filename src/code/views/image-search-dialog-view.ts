@@ -8,7 +8,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const ImageDialogStore = require("../stores/image-dialog-store");
 
@@ -164,7 +164,7 @@ module.exports = React.createClass({
         (ImageSearchPrevNextLink({key: "prev", page: this.state.page - 1, label: (tr("~IMAGE-BROWSER.PREVIOUS")), selectPage: this.selectPage, enabled: this.state.page > 1})),
         ((() => {
           let asc, end;
-          const result:any[] = [];
+          const result: any[] = [];
           for (page = 1, end = this.state.numPages, asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
             result.push(ImageSearchPageLink({key: `page${page}`, page, currentPage: this.state.page, selectPage: this.selectPage}));
           }
@@ -199,10 +199,10 @@ module.exports = React.createClass({
               tr("~IMAGE-BROWSER.TRY_ANOTHER_SEARCH")
             )) : undefined,
 
-          (div({className: `image-search-main-results${noResultsClass}`},[
+          (div({className: `image-search-main-results${noResultsClass}`}, [
             showNoResultsAlert ?
-              (div({key: "image-search-section", className: "image-search-section", style: {height: "100%"}},[
-                (div({key:"image-search-results", className: "image-search-dialog-results show-all"},
+              (div({key: "image-search-section", className: "image-search-section", style: {height: "100%"}}, [
+                (div({key: "image-search-results", className: "image-search-dialog-results show-all"},
                   (() => {
                     const result: any[] = [];
                     const iterable = _.map(this.props.internalLibrary);
@@ -221,7 +221,7 @@ module.exports = React.createClass({
                 ))
               ]))
               :
-              (div({key: "image-search-section-post-search", className: "image-search-section", style: {height: "100%"}},[
+              (div({key: "image-search-section-post-search", className: "image-search-section", style: {height: "100%"}}, [
                 (div({key: "results", className: "image-search-dialog-results"},
                   this.state.searching ?
                     (div({},

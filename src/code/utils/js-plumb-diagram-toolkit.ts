@@ -7,7 +7,7 @@
 // Purpose of this class: Provide an abstraction over our chosen diagramming toolkit.
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const LinkColors = require("../utils/link-colors");
 
@@ -37,8 +37,8 @@ class DiagramToolkit {
     this.kit       = jsPlumb.getInstance({Container: this.domContext});
     this.kit.importDefaults({
       Connector:        ["Bezier", {curviness: 80}],
-      Anchor:           ["Continuous", { faces:["top","left","right"] }],
-      DragOptions :     {cursor: "pointer", zIndex:2000},
+      Anchor:           ["Continuous", { faces: ["top", "left", "right"] }],
+      DragOptions :     {cursor: "pointer", zIndex: 2000},
       ConnectionsDetachable: true,
       DoNotThrowErrors: false
     });
@@ -55,10 +55,10 @@ class DiagramToolkit {
       [0.3, 1, 0, 1, 0, 0], [0.5, 1, 0, 1, 0, 0], [0.7, 1, 0, 1, 0, 0],       // bottom
       [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]];   // right
     // links to non-flow nodes link to locations assigned by jsPlumb on the left, top, or right faces
-    this.standardAnchors = ["Continuous", { faces:["top","left","right"] }];
+    this.standardAnchors = ["Continuous", { faces: ["top", "left", "right"] }];
   }
 
-  registerListeners() {
+  public registerListeners() {
     this.kit.bind("connection", this.handleConnect.bind(this));
     this.kit.bind("beforeDrag", source => {
       this.$currentSource = $(source.source);
@@ -71,34 +71,34 @@ class DiagramToolkit {
     });
   }
 
-  handleConnect(info, evnt)  {
+  public handleConnect(info, evnt)  {
     if (typeof this.options.handleConnect === "function") {
       this.options.handleConnect(info, evnt);
     }
     return true;
   }
 
-  handleClick(connection, evnt) {
+  public handleClick(connection, evnt) {
     return (typeof this.options.handleClick === "function" ? this.options.handleClick(connection, evnt) : undefined);
   }
 
-  handleDoubleClick(connection, evnt) {
+  public handleDoubleClick(connection, evnt) {
     return (typeof this.options.handleDoubleClick === "function" ? this.options.handleDoubleClick(connection, evnt) : undefined);
   }
 
-  handleLabelClick(label, evnt) {
+  public handleLabelClick(label, evnt) {
     return (typeof this.options.handleDoubleClick === "function" ? this.options.handleDoubleClick(label.component, evnt) : undefined);
   }
 
-  handleDisconnect(info, evnt) {
+  public handleDisconnect(info, evnt) {
     return (typeof this.options.handleDisconnect === "function" ? this.options.handleDisconnect(info, evnt) : undefined) || true;
   }
 
-  repaint() {
+  public repaint() {
     return this.kit.repaintEverything();
   }
 
-  _endpointOptions(style, size, cssClass) {
+  public _endpointOptions(style, size, cssClass) {
     const results = [ style, {
       width: size,
       height: size,
@@ -108,7 +108,7 @@ class DiagramToolkit {
     return results;
   }
 
-  makeSource(div, clientClasses) {
+  public makeSource(div, clientClasses) {
     const classes = `node-link-button${clientClasses ? ` ${clientClasses}` : ""}`;
     const endpoints = this.kit.addEndpoint(div, {
       isSource: true,
@@ -116,14 +116,14 @@ class DiagramToolkit {
         activeClass: "dragActive"
       },
       anchor: "Bottom",
-      connectorStyle : { strokeStyle:"#666" },
+      connectorStyle : { strokeStyle: "#666" },
       endpoint: this._endpointOptions("Rectangle", 26, classes),
-      connectorOverlays: [["Arrow", {location:1.0, width:10, length:10}]],
+      connectorOverlays: [["Arrow", {location: 1.0, width: 10, length: 10}]],
       maxConnections: -1
     }
     );
 
-    const addHoverState = function(endpoint) {
+    const addHoverState = (endpoint) => {
       endpoint.bind("mouseover", () => $(endpoint.element).parent().addClass("show-hover"));
       return endpoint.bind("mouseout", () => $(endpoint.element).parent().removeClass("show-hover"));
     };
@@ -135,7 +135,7 @@ class DiagramToolkit {
     }
   }
 
-  makeTarget(div, style) {
+  public makeTarget(div, style) {
     const size = 55;
     return this.kit.addEndpoint(div, {
       isTarget: true,
@@ -152,7 +152,7 @@ class DiagramToolkit {
     );
   }
 
-  clear() {
+  public clear() {
     if (this.kit) {
       this.kit.deleteEveryEndpoint();
       this.kit.reset();
@@ -162,7 +162,7 @@ class DiagramToolkit {
     }
   }
 
-  _paintStyle(color): any {
+  public _paintStyle(color): any {
     return {
       strokeStyle: color || this.color,
       lineWidth: this.lineWidth,
@@ -171,9 +171,9 @@ class DiagramToolkit {
     };
   }
 
-  _overlays(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) {
+  public _overlays(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) {
     if (editingLabel == null) { editingLabel = true; }
-    const results:any[] = [];
+    const results: any[] = [];
     if (!hideArrow) {
       results.push(["Arrow", {
         location: 1.0,
@@ -200,7 +200,7 @@ class DiagramToolkit {
       results.push(["Custom", {
         create: this._createEditLabel(link, label),
         location: 0.5,
-        id:"customOverlay"
+        id: "customOverlay"
       }]);
     } else if ((label != null ? label.length : undefined) > 0) {
       results.push(["Label", {
@@ -213,12 +213,12 @@ class DiagramToolkit {
     return results;
   }
 
-  _gradient(startColor, endColor) {
-    const result = {stops: [[0.0,startColor], [1.0,endColor]]};
+  public _gradient(startColor, endColor) {
+    const result = {stops: [[0.0, startColor], [1.0, endColor]]};
     return result;
   }
 
-  _createEditLabel(link, label) {
+  public _createEditLabel(link, label) {
     const width =
       label.length < 13 ? 90
         : label.length < 19 ? 130
@@ -228,19 +228,19 @@ class DiagramToolkit {
       const _self = this;
       return $("<input>").val(label).css(style)
         .show(function() {
-          return $(this).focus();}).change(function() {
+          return $(this).focus(); }).change(function() {
           return (typeof _self.options.handleLabelEdit === "function" ? _self.options.handleLabelEdit(link, this.value) : undefined);
         });
     };
   }
 
 
-  _clean_borked_endpoints() {
+  public _clean_borked_endpoints() {
     return $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
   }
 
 
-  addLink(opts) {
+  public addLink(opts) {
     const paintStyle = this._paintStyle(LinkColors.default);
     paintStyle.outlineColor = "none";
     paintStyle.outlineWidth = 4;
@@ -356,18 +356,18 @@ class DiagramToolkit {
       Connector: ["Bezier", {curviness: 60, variableWidth: null}]});
   }
 
-  setSuspendDrawing(shouldwestop) {
+  public setSuspendDrawing(shouldwestop) {
     if (!shouldwestop) {
       this._clean_borked_endpoints();
     }
     return this.kit.setSuspendDrawing(shouldwestop, !shouldwestop);
   }
 
-  suspendDrawing() {
+  public suspendDrawing() {
     return this.setSuspendDrawing(true);
   }
 
-  resumeDrawing() {
+  public resumeDrawing() {
     return this.setSuspendDrawing(false);
   }
 }

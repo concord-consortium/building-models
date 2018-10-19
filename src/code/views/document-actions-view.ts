@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, span, i, br} = React.DOM;
 const AboutView        = React.createFactory(require("./about-view"));
@@ -63,7 +63,7 @@ module.exports = React.createClass({
 
   render() {
     const showDeleteUI = !this.state.uiElements.inspectorPanel && (this.state.touchDevice || this.props.graphStore.usingLara);
-    const buttonClass = function(enabled) { if (!enabled) { return "disabled"; } else { return ""; } };
+    const buttonClass = (enabled) => { if (!enabled) { return "disabled"; } else { return ""; } };
     return (div({className: "document-actions"},
       (div({className: "misc-actions"},
         this.renderRunPanel()

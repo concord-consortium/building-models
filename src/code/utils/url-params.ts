@@ -1,14 +1,15 @@
 // http://stackoverflow.com/a/2880929
-var urlParams = {};
+let urlParams = {};
 if (window && window.location && window.location.search) {
-  var match,
-    pl     = /\+/g,  // Regex for replacing addition symbol with a space
-    search = /([^&=]+)=?([^&]*)/g,
-    decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
-    query  = window.location.search.substring(1);
+  let match;
+  const pl = /\+/g;  // Regex for replacing addition symbol with a space
+  const search = /([^&=]+)=?([^&]*)/g;
+  const decode = (s) => decodeURIComponent(s.replace(pl, " "));
+  const query  = window.location.search.substring(1);
 
-  while ((match = search.exec(query)))
+  while ((match = search.exec(query))) {
     urlParams[decode(match[1])] = decode(match[2]);
+  }
 }
 
 module.exports = urlParams;

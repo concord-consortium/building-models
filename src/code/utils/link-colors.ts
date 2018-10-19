@@ -6,12 +6,12 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const RelationFactory  = require("../models/relation-factory");
 
-var linkColors = (module.exports = {
-  default             :"#777",
+const linkColors = (module.exports = {
+  default             : "#777",
   defaultFaded        : "rgba(120,120,120,0)",
   increase            : "rgba(232,93,100,1)",
   decrease            : "rgba(142,162,225,1)",

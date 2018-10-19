@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const DropZone = React.createFactory(require("./dropzone-view"));
 const ImageDialogStore = require("../stores/image-dialog-store");

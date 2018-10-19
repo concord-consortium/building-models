@@ -9,7 +9,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const NodeView         = require("./node-view");
 const Node             = React.createFactory(NodeView);
@@ -108,16 +108,16 @@ module.exports = React.createClass({
     let paletteItem;
     const data = ui.draggable.data();
     if (data.droptype === "new") {
-      return paletteItem = this.addNewPaletteNode(e,ui);
+      return paletteItem = this.addNewPaletteNode(e, ui);
 
     } else if (data.droptype === "paletteItem") {
       paletteItem = PaletteStore.store.palette[data.index];
       PaletteStore.actions.selectPaletteIndex(data.index);
-      return this.addPaletteNode(ui,paletteItem);
+      return this.addPaletteNode(ui, paletteItem);
     }
   },
 
-  addNewPaletteNode(e,ui) {
+  addNewPaletteNode(e, ui) {
     return ImageDialogStore.actions.open(savedPaletteItem => {
       if (savedPaletteItem) {
         return this.addPaletteNode(ui, savedPaletteItem);
@@ -190,7 +190,7 @@ module.exports = React.createClass({
     const topDiff = top - theNode.y;
     const { selectedNodes } = this.state;
     if (selectedNodes.length > 0) {
-      return this.handleEvent(function() {
+      return this.handleEvent(() => {
         if (selectedNodes.includes(theNode)) {
           return selectedNodes.map((node) =>
             GraphStore.store.moveNode(node.key, leftDiff, topDiff));
@@ -240,7 +240,7 @@ module.exports = React.createClass({
 
   _updateNodeValue(name, key, value) {
     let changed = 0;
-    for (let node of this.state.nodes) {
+    for (const node of this.state.nodes) {
       if (node.key === name) {
         node[key] = value;
         changed++;
@@ -326,7 +326,7 @@ module.exports = React.createClass({
     const useGradient = false;
     const useVariableThickness = true;
     if (source && target) {
-      const opts:any = {
+      const opts: any = {
         source,
         target,
         label: link.title,
@@ -394,7 +394,7 @@ module.exports = React.createClass({
   onDrop(e) {
     this.setState({canDrop: false});
     e.preventDefault();
-    try { //not sure any of the code inside this block is used?
+    try { // not sure any of the code inside this block is used?
       // figure out where to drop files
       const offset = $(this.refs.linkView).offset();
       const dropPos = {
@@ -404,7 +404,7 @@ module.exports = React.createClass({
 
       // get the files
       return dropImageHandler(e, file => {
-        //@props.graphStore.setImageMetadata file.image, file.metadata   #there is no setImageMetadata?
+        // @props.graphStore.setImageMetadata file.image, file.metadata   #there is no setImageMetadata?
         const node = this.props.graphStore.importNode({
           data: {
             x: dropPos.x,
@@ -418,7 +418,7 @@ module.exports = React.createClass({
     } catch (ex) {
       // user could have selected elements on the page and dragged those instead
       // of valid application items like connections or images
-      return console.error("Invalid drag/drop operation", ex); // eslint-disable-line no-console
+      return console.error("Invalid drag/drop operation", ex); // tslint:disable-line:no-console
     }
   },
 
@@ -468,7 +468,7 @@ module.exports = React.createClass({
   checkSelectBoxLinkCollisions() {
     return (() => {
       const result: any[] = [];
-      for (let link of this.state.links) {
+      for (const link of this.state.links) {
         if (!(link.relation != null ? link.relation.isTransfer : undefined) && this.checkBoxLinkCollision(link)) {
           result.push(this.props.selectionManager.selectLinkForInspection(link, true));
         } else {
@@ -482,7 +482,7 @@ module.exports = React.createClass({
   checkSelectBoxCollisions() {
     return (() => {
       const result: any[] = [];
-      for (let node of this.state.nodes) {
+      for (const node of this.state.nodes) {
         if (this.checkSelectBoxCollision(node)) {
           result.push(this.props.selectionManager.selectNodeForInspection(node, true));
         } else {
@@ -516,8 +516,8 @@ module.exports = React.createClass({
     const x1 = destination.x;
     const y1 = destination.y;
 
-    const p = [x0-x1, x1-x0,  y0-y1, y1-y0];
-    const q = [x0-sX, x-x0, y0 - sY, y-y0];
+    const p = [x0 - x1, x1 - x0,  y0 - y1, y1 - y0];
+    const q = [x0 - sX, x - x0, y0 - sY, y - y0];
     let u1 = Number.MIN_VALUE;
     let u2 = Number.MAX_VALUE;
 
@@ -577,7 +577,7 @@ module.exports = React.createClass({
           if (this.state.drawingMarquee) {
             const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
             const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
-            return (div({className: "selectionBox", ref: "selectionBox", style: {width: Math.abs(this.state.selectBox.x-this.state.selectBox.startX), height: Math.abs(this.state.selectBox.y-this.state.selectBox.startY), left, top, border: "1px dotted #CCC", position: "absolute", backgroundColor: "#FFFFFF"}}));
+            return (div({className: "selectionBox", ref: "selectionBox", style: {width: Math.abs(this.state.selectBox.x - this.state.selectBox.startX), height: Math.abs(this.state.selectBox.y - this.state.selectBox.startY), left, top, border: "1px dotted #CCC", position: "absolute", backgroundColor: "#FFFFFF"}}));
           }
         })(),
         this.state.nodes.map((node) =>

@@ -8,7 +8,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
  // based on https://github.com/jzaefferer/undo/blob/master/undo.js
 const CodapConnect = require("../models/codap-connect");
@@ -53,14 +53,14 @@ class Manager {
   // the undo manager with a different name will automatically end the current batch.
   // This allows us to group similar commands together and not worry that an unrelated
   // command might be inserted into this same batch before it is closed.
-  startCommandBatch(optionalName) {
+  public startCommandBatch(optionalName) {
     if (this.currentBatch && !this.currentBatch.matches(optionalName)) {
       this._endComandBatch();
     }
     if (!this.currentBatch) { return this.currentBatch = new CommandBatch(optionalName); }
   }
 
-  _endComandBatch() {
+  public _endComandBatch() {
     if (this.currentBatch) {
       if (this.currentBatch.commands.length > 0) {
         this.commands.push(this.currentBatch);
@@ -70,7 +70,7 @@ class Manager {
     }
   }
 
-  createAndExecuteCommand(name, methods) {
+  public createAndExecuteCommand(name, methods) {
     if (this.currentBatch && !this.currentBatch.matches(name)) {
       this._endComandBatch();
     }
@@ -86,7 +86,7 @@ class Manager {
     return result;
   }
 
-  execute(command) {
+  public execute(command) {
     this._clearRedo();
     const result = command.execute(this.debug);
     if (this.currentBatch) {
@@ -102,7 +102,7 @@ class Manager {
 
   // @param drop: calling undo(true) will clear the redo stack. When called on
   // the last item, this is equivalent to throwing away the undone action.
-  _undo(drop) {
+  public _undo(drop) {
     if (this.canUndo()) {
       const result = this.commands[this.stackPosition].undo(this.debug);
       this.stackPosition--;
@@ -115,11 +115,11 @@ class Manager {
     }
   }
 
-  canUndo() {
+  public canUndo() {
     return this.stackPosition >= 0;
   }
 
-  _redo() {
+  public _redo() {
     if (this.canRedo()) {
       this.stackPosition++;
       const result = this.commands[this.stackPosition].redo(this.debug);
@@ -131,16 +131,16 @@ class Manager {
     }
   }
 
-  canRedo() {
+  public canRedo() {
     return this.stackPosition < (this.commands.length - 1);
   }
 
-  save() {
+  public save() {
     this.savePosition = this.stackPosition;
     return this._changed();
   }
 
-  clearHistory() {
+  public clearHistory() {
     this.commands = [];
     this.stackPosition = -1;
     this.savePosition = -1;
@@ -148,17 +148,17 @@ class Manager {
     if (this.debug) { return this.log(); }
   }
 
-  dirty() {
+  public dirty() {
     return this.stackPosition !== this.savePosition;
   }
 
-  saved() {
+  public saved() {
     return this.savePosition !== -1;
   }
 
-  revertToOriginal() {
+  public revertToOriginal() {
     return (() => {
-      const result:any[] = [];
+      const result: any[] = [];
       while (this.canUndo()) {
         result.push(this.undo());
       }
@@ -166,10 +166,10 @@ class Manager {
     })();
   }
 
-  revertToLastSave() {
+  public revertToLastSave() {
     if (this.stackPosition > this.savePosition) {
       return (() => {
-        const result:any[] = [];
+        const result: any[] = [];
         while (this.dirty()) {
           result.push(this.undo());
         }
@@ -177,7 +177,7 @@ class Manager {
       })();
     } else if (this.stackPosition < this.savePosition) {
       return (() => {
-        const result1:any[] = [];
+        const result1: any[] = [];
         while (this.dirty()) {
           result1.push(this.redo());
         }
@@ -186,25 +186,25 @@ class Manager {
     }
   }
 
-  addChangeListener(listener) {
+  public addChangeListener(listener) {
     return this.changeListeners.push(listener);
   }
 
-  log() {
+  public log() {
     log.info(`Undo Stack: [${(_.pluck((this.commands.slice(0, this.stackPosition + 1)), "name")).join(", ")}]`);
     return log.info(`Redo Stack: [${(_.pluck((this.commands.slice(this.stackPosition + 1)), "name")).join(", ")}]`);
   }
 
-  clearRedo() {
+  public clearRedo() {
     this._clearRedo();
     return this._changed();
   }
 
-  _clearRedo() {
+  public _clearRedo() {
     return this.commands = this.commands.slice(0, this.stackPosition + 1);
   }
 
-  _changed() {
+  public _changed() {
     if (this.changeListeners.length > 0) {
       const status = {
         dirty: this.dirty(),
@@ -227,7 +227,7 @@ class Command {
     this.methods = methods;
   }
 
-  _call(method, debug, via?) {
+  public _call(method, debug, via?) {
     if (debug) {
       log.info(`Command: ${this.name}.${method}()` + (via ? ` via ${via}` : ""));
     }
@@ -238,9 +238,9 @@ class Command {
     }
   }
 
-  execute(debug) { return this._call("execute", debug); }
-  undo(debug) { return this._call("undo", debug); }
-  redo(debug) { if (this.methods.hasOwnProperty("redo")) { return this._call("redo", debug);
+  public execute(debug) { return this._call("execute", debug); }
+  public undo(debug) { return this._call("undo", debug); }
+  public redo(debug) { if (this.methods.hasOwnProperty("redo")) { return this._call("redo", debug);
   } else { return this._call("execute", debug, "redo"); } }
 }
 
@@ -253,13 +253,13 @@ class CommandBatch {
     this.commands = [];
   }
 
-  push(command) {
+  public push(command) {
     return this.commands.push(command);
   }
 
-  undo(debug) {
+  public undo(debug) {
     return (() => {
-      const result:any[] = [];
+      const result: any[] = [];
       for (let i = this.commands.length - 1; i >= 0; i--) {
         const command = this.commands[i];
         result.push(command.undo(debug));
@@ -267,11 +267,11 @@ class CommandBatch {
       return result;
     })();
   }
-  redo(debug) {
+  public redo(debug) {
     return this.commands.map((command) => command.redo(debug));
   }
 
-  matches(name) {
+  public matches(name) {
     if (this.name && (this.name !== name)) {
       return false;
     }
@@ -280,9 +280,9 @@ class CommandBatch {
 }
 
 const instances = {};
-const instance  = function(opts) {
+const instance  = (opts) => {
   if (opts == null) { opts = {}; }
-  let {contextName, debug} = opts;
+  let {contextName} = opts;
   if (!contextName) { contextName = DEFAULT_CONTEXT_NAME; }
   if (!instances[contextName]) { instances[contextName] = new Manager(opts); }
   return instances[contextName];

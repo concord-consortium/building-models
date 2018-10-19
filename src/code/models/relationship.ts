@@ -7,13 +7,27 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const math = require("mathjs");  // For formula parsing...
 const tr   = require("../utils/translate");
 
 class Relationship {
-  static errValue;
+  public static errValue;
+
+  public static initialize() {
+    Relationship.errValue = -1;
+  }
+
+  public static defaultFunc(scope) {
+    return scope.in;
+  }
+
+  public static defaultErrHandler(error, expr, vars) {
+    log.error(`Error in eval: ${Error}`);
+    log.error(`Expression:    ${expr}`);
+    return log.error(`vars=${vars}`);
+  }
   private opts: any;
   private type: string;
   private text: string;
@@ -26,24 +40,9 @@ class Relationship {
   private isTransfer: boolean;
   private isTransferModifier: boolean;
   private hasError: boolean;
-  private dataPoints: any;
   private customData: any;
   private isCustomRelationship: boolean;
   private formula: any;
-
-  static initialize() {
-    Relationship.errValue = -1;
-  }
-
-  static defaultFunc(scope) {
-    return scope.in;
-  }
-
-  static defaultErrHandler(error,expr,vars){
-    log.error(`Error in eval: ${Error}`);
-    log.error(`Expression:    ${expr}`);
-    return log.error(`vars=${vars}`);
-  }
 
   constructor(opts) {
     if (opts == null) { opts = {}; }
@@ -61,26 +60,25 @@ class Relationship {
     this.isTransferModifier = this.type === "transfer-modifier";
     this.hasError    = false;
     this.setFormula(formula);
-    this.dataPoints;
     this.customData  = this.opts.customData;
     this.isCustomRelationship = false;
   }
 
-  setFormula(newf) {
+  public setFormula(newf) {
     this.formula = newf;
     return this.checkFormula();
   }
 
-  checkFormula() {
+  public checkFormula() {
     if (this.isDefined) {
-      this.evaluate(1, 1); //sets the @hasError flag if there is a problem
+      this.evaluate(1, 1); // sets the @hasError flag if there is a problem
       if (!this.hasError && (this.func == null)) {
         return this.func = (math.compile(this.formula)).eval;
       }
     }
   }
 
-  evaluate(inV,outV, maxIn?, maxOut?) {
+  public evaluate(inV, outV, maxIn?, maxOut?) {
     if (maxIn == null) { maxIn = 100; }
     if (maxOut == null) { maxOut = 100; }
     let result = Relationship.errValue;
@@ -92,8 +90,8 @@ class Relationship {
     };
     if (this.customData) {
       let roundedInV = Math.round(inV);
-      if (roundedInV > (maxIn-1)) {
-        roundedInV = (maxIn-1);
+      if (roundedInV > (maxIn - 1)) {
+        roundedInV = (maxIn - 1);
       }
       // @customData is in the form [[0,y], [1,y], [2,y], ...]
       if (this.customData[roundedInV] != null) {
@@ -112,7 +110,7 @@ class Relationship {
     return result;
   }
 
-  toExport() {
+  public toExport() {
     return {
       type        : this.type,
       text        : this.text,

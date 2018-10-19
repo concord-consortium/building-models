@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const SimulationStore = require("../stores/simulation-store");
 const tr              = require("../utils/translate");

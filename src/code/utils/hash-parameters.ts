@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PARAM_TOKEN = /[?|&]/g;
 const VALUE_TOKEN = "=";
@@ -17,15 +17,15 @@ class HashParameters {
     this.parameters = {};
   }
 
-  decode(string) {
+  public decode(string) {
     return decodeURIComponent(string);
   }
 
-  encode(string) {
+  public encode(string) {
     return encodeURIComponent(string);
   }
 
-  fromLocationHash() {
+  public fromLocationHash() {
     this.parameters = {};
     const hash = this.readHash();
 
@@ -38,7 +38,7 @@ class HashParameters {
     });
   }
 
-  updateLocationhash() {
+  public updateLocationhash() {
     const keys = _.keys(this.parameters);
     const strings = _.map(keys, key => {
       const value = this.parameters[key];
@@ -47,22 +47,22 @@ class HashParameters {
     return this.writeHash(strings.join("&"));
   }
 
-  setParam(key,value) {
+  public setParam(key, value) {
     this.parameters[key] = value;
     return this.updateLocationhash();
   }
 
-  getParam(key) {
+  public getParam(key) {
     this.fromLocationHash();
     return this.parameters[key];
   }
 
-  clearParam(key) {
+  public clearParam(key) {
     delete this.parameters[key];
     return this.updateLocationhash();
   }
 
-  writeHash(string) {
+  public writeHash(string) {
     if (window && window.location) {
       if (string.length < 1) {
         return window.location.hash = "";
@@ -72,7 +72,7 @@ class HashParameters {
     }
   }
 
-  readHash() {
+  public readHash() {
     let hash;
     try {
       if (window && window.top.location) {

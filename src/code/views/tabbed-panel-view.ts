@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {div, ul, li, a} = React.DOM;
 
@@ -81,7 +81,7 @@ module.exports = React.createClass({
 
   renderTabs(clientClass) {
     return (div({className: `workspace-tabs${clientClass}`, key: "tabs"},
-      (ul({}, this.props.tabs.map((tab, index) => this.renderTab(tab,index))))
+      (ul({}, this.props.tabs.map((tab, index) => this.renderTab(tab, index))))
     ));
   },
 

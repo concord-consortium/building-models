@@ -8,9 +8,9 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
-let {div, i, label, span, input, svg, circle, path, rect, g} = React.DOM;
+const {div, i, label, span, input, svg, circle, path, rect, g} = React.DOM;
 const tr = require("../utils/translate");
 
 const circleRadius = 2;
@@ -81,7 +81,7 @@ const ValueSlider = React.createClass({
     };
     range[property] = value;
 
-    //normalize
+    // normalize
     if (property === "max") {
       range.min = Math.min(range.min, range.max);
     } else {
@@ -137,8 +137,7 @@ const ValueSlider = React.createClass({
   },
 
   renderNumber() {
-    const style: any =
-      {bottom: `${this.props.handleSize}px`};
+    const style: any = {bottom: `${this.props.handleSize}px`};
 
     if (this.state.dragging && this.props.renderValueTooltip) {
       style.display = "block";
@@ -225,7 +224,7 @@ const ValueSlider = React.createClass({
     const { orientation, handleSize, displaySemiQuant } = this.props;
     const width = (height = `${handleSize}px`);
     const centerOfDiv = `${this.sliderPercent()}%`;
-    const outerEdge = Math.round((this.thickness() - handleSize)/ 2.0 );
+    const outerEdge = Math.round((this.thickness() - handleSize) / 2.0 );
     const style: any = {
       "width": width,
       "height": height,
@@ -235,18 +234,16 @@ const ValueSlider = React.createClass({
     if (orientation === "horizontal") {
       style.top  = `${outerEdge}px`;
       style.left = centerOfDiv; // margin will take care of the rest?
-      style.marginLeft = `-${handleSize/2}px`;
-      style.marginRight = `-${handleSize/2}px`;
+      style.marginLeft = `-${handleSize / 2}px`;
+      style.marginRight = `-${handleSize / 2}px`;
     } else {
       style.left  = `${outerEdge}px`;
       style.top = centerOfDiv;
-      style.marginTop = `-${handleSize/2}px`;
-      style.marginBottom = `-${handleSize/2}px`;
+      style.marginTop = `-${handleSize / 2}px`;
+      style.marginBottom = `-${handleSize / 2}px`;
     }
 
-    if (!displaySemiQuant) {
-      label = this.renderNumber();
-    } else { label = null; }
+    const label = !displaySemiQuant ? this.renderNumber() : null;
 
     let classNames = "icon-codap-smallSliderLines";
     if (orientation !== "horizontal") { classNames += " rotated"; }
@@ -254,7 +251,7 @@ const ValueSlider = React.createClass({
     return (div({
       className: "value-slider-handle",
       style,
-      ref: s => { return this.handle = s; },
+      ref: s => this.handle = s,
       onMouseDown: this.handleStart,
       onTouchEnd: this.handleNoop,
       onTouchMove: this.handleDrag
@@ -273,7 +270,7 @@ const ValueSlider = React.createClass({
       if (!isEditable) { return; }
       // first copy state value to model if we were editing
       if (this.state[`editing-${property}`]) {
-        const newValue = parseInt(__guard__(ReactDOM.findDOMNode(this.refs.focusable), x => x.value));
+        const newValue = parseInt(__guard__(ReactDOM.findDOMNode(this.refs.focusable), x => x.value), 10);
         if (newValue != null) { this.updateRange(property, newValue); }
       }
       return this.setState({[`editing-${property}`]: !this.state[`editing-${property}`]}, function() {
@@ -281,7 +278,7 @@ const ValueSlider = React.createClass({
       });
     };
 
-    const keyDown = function(evt) {
+    const keyDown = (evt) => {
       if (evt.key === "Enter") {
         return swapState();
       }
@@ -313,11 +310,11 @@ const ValueSlider = React.createClass({
       (displaySemiQuant ? tr("~NODE-VALUE-EDIT.HIGH") : this.renderEditableProperty("max"));
 
     if (orientation === "horizontal") {
-      return (div({className:"legend"},
+      return (div({className: "legend"},
         min, max
       ));
     } else {
-      return (div({className:"legend", style: {left: width/1.7}},
+      return (div({className: "legend", style: {left: width / 1.7}},
         max, min
       ));
     }
@@ -334,9 +331,9 @@ const ValueSlider = React.createClass({
     const ticks: any[] = [];
     for (let j = 1, end = numTicks, asc = 1 <= end; asc ? j < end : j > end; asc ? j++ : j--) {
       if (orientation === "horizontal") {
-        ticks.push((path({key: j, d:`M${j*tickDistance} ${center-tickHeight} l 0 ${tickHeight * 2}`, className:"slider-line"})));
+        ticks.push((path({key: j, d: `M${j * tickDistance} ${center - tickHeight} l 0 ${tickHeight * 2}`, className: "slider-line"})));
       } else {
-        ticks.push((path({key: j, d:`M${center-tickHeight} ${j*tickDistance} l ${tickHeight * 2} 0`, className:"slider-line"})));
+        ticks.push((path({key: j, d: `M${center - tickHeight} ${j * tickDistance} l ${tickHeight * 2} 0`, className: "slider-line"})));
       }
     }
     return ticks;
@@ -350,21 +347,21 @@ const ValueSlider = React.createClass({
     if (filled) { inset += 1; }
     if (orientation === "horizontal") {
       return (g({},
-        (path({d:`M${inset} ${center} l ${width - (inset*2)} 0`, className:"slider-line", stroke:"#ccc"})),
+        (path({d: `M${inset} ${center} l ${width - (inset * 2)} 0`, className: "slider-line", stroke: "#ccc"})),
         !filled ?
           (g({},
-            (circle({cx:circleRadius, cy:center, r:circleRadius, className:"slider-shape", stroke:"#ccc"})),
-            (circle({cx:width - circleRadius, cy:center, r:circleRadius, className:"slider-shape"}))
+            (circle({cx: circleRadius, cy: center, r: circleRadius, className: "slider-shape", stroke: "#ccc"})),
+            (circle({cx: width - circleRadius, cy: center, r: circleRadius, className: "slider-shape"}))
           )) : undefined,
         this.renderTicks()
       ));
     } else {
       return (g({},
-        (path({d:`M${center} ${inset} l 0 ${height - (inset*2)}`, className:"slider-line", stroke:"#ccc"})),
+        (path({d: `M${center} ${inset} l 0 ${height - (inset * 2)}`, className: "slider-line", stroke: "#ccc"})),
         !filled ?
           (g({},
-            (circle({cx:center, cy:circleRadius, r:circleRadius, className:"slider-shape", stroke:"#ccc"})),
-            (circle({cx:center, cy:height - circleRadius, r:circleRadius, className:"slider-shape"}))
+            (circle({cx: center, cy: circleRadius, r: circleRadius, className: "slider-shape", stroke: "#ccc"})),
+            (circle({cx: center, cy: height - circleRadius, r: circleRadius, className: "slider-shape"}))
           )) : undefined,
         this.renderTicks()
       ));
@@ -372,19 +369,20 @@ const ValueSlider = React.createClass({
   },
 
   renderFill() {
-    let { orientation, color, width, height } = this.props;
+    let { height } = this.props;
+    const { orientation, color, width } = this.props;
     const center = this.thickness() / 2;
     const inset = circleRadius + 1;
     if (orientation === "horizontal") {
       return (path({
-        d: `M${inset} ${center} l ${width - (inset*2)} 0`,
+        d: `M${inset} ${center} l ${width - (inset * 2)} 0`,
         className: "slider-line fill-line",
         stroke: color
       }));
     } else {
       const totalHeight = height - (inset * 2);
       const top = inset + (totalHeight * (1 - this.sliderLocation()));
-      height = totalHeight-top;
+      height = totalHeight - top;
       if (height > 0) {
         return (g({},
           (path({ // flat top
@@ -418,12 +416,12 @@ const ValueSlider = React.createClass({
     return (div({
       className: classNames,
       style,
-      ref: s => { return this.slider = s; },
+      ref: s => this.slider = s,
       onMouseDown: showHandle ? this.handleJumpAndDrag : this.handleNoop,
       onTouchStart: showHandle ? this.handleJumpAndDrag : this.handleNoop,
       onTouchEnd: this.handleNoop
     },
-    (svg({className: "svg-background", width: `${width}px`, height:`${height}px`, viewBox: `0 0 ${width} ${height}`},
+    (svg({className: "svg-background", width: `${width}px`, height: `${height}px`, viewBox: `0 0 ${width} ${height}`},
       this.renderLine(),
       filled ?
         this.renderFill() : undefined
@@ -525,7 +523,7 @@ const Demo = React.createClass({
   }
 });
 
-(window as any).testComponent = domID => ReactDOM.render(React.createElement(Demo,{}), domID);
+(window as any).testComponent = domID => ReactDOM.render(React.createElement(Demo, {}), domID);
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

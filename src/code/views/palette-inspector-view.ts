@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PaletteItemView    = React.createFactory(require("./palette-item-view"));
 const PaletteAddView     = React.createFactory(require("./palette-add-view"));

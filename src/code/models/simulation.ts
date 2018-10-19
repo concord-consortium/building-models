@@ -8,9 +8,9 @@
 // their source is an independent node (has no inputs)
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
-const isScaledTransferNode = function(node) {
+const isScaledTransferNode = (node) => {
   if (!node.isTransfer) { return false; }
   if (node.inLinks("transfer-modifier").length) { return false; }
   const sourceNode = node.transferLink != null ? node.transferLink.sourceNode : undefined;
@@ -20,7 +20,7 @@ const isScaledTransferNode = function(node) {
 
 const isUnscaledTransferNode = node => node.isTransfer && !isScaledTransferNode(node);
 
-const scaleInput = function(val, nodeIn, nodeOut) {
+const scaleInput = (val, nodeIn, nodeOut) => {
   if (nodeIn.valueDefinedSemiQuantitatively !== nodeOut.valueDefinedSemiQuantitatively) {
     if (nodeIn.valueDefinedSemiQuantitatively) {
       return nodeOut.mapSemiquantToQuant(val);
@@ -32,7 +32,7 @@ const scaleInput = function(val, nodeIn, nodeOut) {
   }
 };
 
-const combineInputs = function(inValues, useScaledProduct?) {
+const combineInputs = (inValues, useScaledProduct?) => {
   let denominator, numerator;
   if (!(inValues != null ? inValues.length : undefined)) { return null; }
   if (inValues.length === 1) { return inValues[0]; }
@@ -50,12 +50,12 @@ const combineInputs = function(inValues, useScaledProduct?) {
   return numerator / denominator;
 };
 
-const getTransferLimit = function(transferNode) {
+const getTransferLimit = (transferNode) => {
   const {sourceNode} = transferNode != null ? transferNode.transferLink : undefined;
   if (sourceNode) { return sourceNode.previousValue != null ? sourceNode.previousValue : sourceNode.initialValue; } else { return 0; }
 };
 
-const filterFinalValue = function(value) {
+const filterFinalValue = (value) => {
   // limit max value
   value = this.capNodeValues ? Math.min(this.max, value) : value;
   // limit min value
@@ -63,7 +63,7 @@ const filterFinalValue = function(value) {
   if (shouldLimitMinValue) { return Math.max(this.min, value); } else { return value; }
 };
 
-const RangeIntegrationFunction = function(incrementAccumulators) {
+const RangeIntegrationFunction = (incrementAccumulators) => {
 
   // if we've already calculated a currentValue for ourselves this step, return it
   if (this.currentValue != null) { return this.currentValue; }
@@ -76,7 +76,7 @@ const RangeIntegrationFunction = function(incrementAccumulators) {
   // regular nodes and flow nodes only have 'range' and 'transfer-modifier' links
   const links = this.inLinks("range").concat(this.inLinks("transfer-modifier"));
 
-  const inValues:any = [];
+  const inValues: any = [];
   _.each(links, link => {
     if (!link.relation.isDefined) { return; }
     const { sourceNode } = link;
@@ -106,10 +106,10 @@ const RangeIntegrationFunction = function(incrementAccumulators) {
 // Sets the value of node.initialValue before the simulations starts. If there
 // are inbound `initial-value` links, we request the initial values of the
 // source nodes (no calculations needed) and average them.
-const SetInitialAccumulatorValueFunction = function() {
+const SetInitialAccumulatorValueFunction = () => {
   const initialValueLinks = this.inLinks("initial-value");
-  const inValues:any = [];
-  _.each(initialValueLinks, function(link) {
+  const inValues: any = [];
+  _.each(initialValueLinks, (link) => {
     if (!link.relation.isDefined) { return; }
     const { sourceNode } = link;
     return inValues.push(sourceNode.initialValue);
@@ -119,7 +119,7 @@ const SetInitialAccumulatorValueFunction = function() {
   }
 };
 
-const SetAccumulatorValueFunction = function(nodeValues) {
+const SetAccumulatorValueFunction = (nodeValues) => {
   // collectors only have accumulator and transfer links
   const links = this.inLinks("accumulator").concat(this.inLinks("transfer")).concat(this.outLinks("transfer"));
 
@@ -127,7 +127,7 @@ const SetAccumulatorValueFunction = function(nodeValues) {
   if (!(links.length > 0)) { return startValue; }
 
   let deltaValue = 0;
-  for (let link of links) {
+  for (const link of links) {
     const {sourceNode, targetNode, relation, transferNode} = link;
     const inV = nodeValues[sourceNode.key];
     const outV = startValue;
@@ -137,7 +137,7 @@ const SetAccumulatorValueFunction = function(nodeValues) {
       break;
 
     case "transfer":
-      var transferValue = nodeValues[transferNode.key];
+      let transferValue = nodeValues[transferNode.key];
 
       // can't overdraw non-negative collectors
       if (this.capNodeValues || (sourceNode.isAccumulator && !sourceNode.allowNegativeValues)) {
@@ -189,7 +189,7 @@ class Simulation {
     this.stopRun = false;
   }
 
-  decorateNodes() {
+  public decorateNodes() {
     return _.each(this.nodes, node => {
       // make this a local node property (it may eventually be different per node)
       node.capNodeValues = this.capNodeValues;
@@ -204,23 +204,23 @@ class Simulation {
     });
   }
 
-  initializeValues(node) {
+  public initializeValues(node) {
     node.currentValue = null;
     return node.previousValue = null;
   }
 
-  nextStep(node) {
+  public nextStep(node) {
     node.previousValue = node.currentValue;
     return node.currentValue = null;
   }
 
-  evaluateNode(node, firstTime?) {
+  public evaluateNode(node, firstTime?) {
     return node.currentValue = node.getCurrentValue(firstTime);
   }
 
   // create an object representation of the current timeStep and add
   // it to the current bundle of frames.
-  generateFrame(time) {
+  public generateFrame(time) {
     const nodes = _.map(this.nodes, node =>
       ({
         title: node.title,
@@ -235,12 +235,12 @@ class Simulation {
     return this.framesBundle.push(frame);
   }
 
-  stop() {
+  public stop() {
     return this.stopRun = true;
   }
 
 
-  run() {
+  public run() {
     this.stopRun = false;
     let time = 0;
     this.framesBundle = [];
@@ -304,7 +304,7 @@ class Simulation {
       }
 
       // calculate average and capture the instantaneous node values
-      _.each(this.nodes, function(node) {
+      _.each(this.nodes, (node) => {
         nodeValues[node.key] = (node.currentValue = node._cumulativeValue / 20);
         return node._cumulativeValue = 0;
       });

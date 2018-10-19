@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const Importer    = require("../utils/importer");
 const Link        = require("./link");
@@ -15,80 +15,80 @@ const tr          = require("../utils/translate");
 
 class SelectionManager {
 
-  static NodeTitleEditing;
-  static NodeInspection;
-  static LinkTitleEditing;
-  static LinkInspection;
+  public static NodeTitleEditing;
+  public static NodeInspection;
+  public static LinkTitleEditing;
+  public static LinkInspection;
 
-  private selections: any[];
-  private selectionListeners: any[];
-
-  static initialize() {
+  public static initialize() {
     SelectionManager.NodeTitleEditing   = "NodeTitleEditing";
     SelectionManager.NodeInspection     = "NodeInspection";
     SelectionManager.LinkTitleEditing   = "LinkTitleEditing";
     SelectionManager.LinkInspection     = "LinkInspection";
   }
 
+  private selections: any[];
+  private selectionListeners: any[];
+
   constructor() {
     this.selections = [];
     this.selectionListeners = [];
   }
 
-  addSelectionListener(listener) {
+  public addSelectionListener(listener) {
     log.info(`adding selection listener ${listener}`);
     return this.selectionListeners.push(listener);
   }
 
 
-  _notifySelectionChange() {
+  public _notifySelectionChange() {
     log.info("notifiying listeners");
     return this.selectionListeners.map((listener) =>
       listener(this));
   }
 
-  addToSelection(graphprimitive, context) {
+  public addToSelection(graphprimitive, context) {
     const entry = {graphprimitive, context, key: graphprimitive.key};
     if (!this.isSelected(graphprimitive, context)) {
       return this.selections.push(entry);
     }
   }
 
-  selectOnly(graphprimitive, context, multipleSelectionsAllowed?) {
+  public selectOnly(graphprimitive, context, multipleSelectionsAllowed?) {
     if (!this.isSelected(graphprimitive, context)) {
       if (!multipleSelectionsAllowed) { this._clearSelection(context); }
       return this.addToSelection(graphprimitive, context);
     }
   }
 
-  selection(context) {
-    const where:any = {};
+  public selection(context) {
+    const where: any = {};
     if (context) { where.context = context; }
     return _.chain(this.selections)
       .where(where)
       .map(obj => obj.graphprimitive).value();
   }
 
-  _clearSelection(context?) {
+  public _clearSelection(context?) {
     this._deselect({context});
     return this._notifySelectionChange();
   }
 
-  clearSelection(context?) {
+  public clearSelection(context?) {
     this._clearSelection(context);
     return this._notifySelectionChange();
   }
 
-  clearLinkInspection() {
+  public clearLinkInspection() {
     return this._clearSelection(SelectionManager.LinkInspection);
   }
 
-  clearSelectionFor(graphprimitive, context?) {
-    return this._deselect({key:graphprimitive.key, context});
+  public clearSelectionFor(graphprimitive, context?) {
+    return this._deselect({key: graphprimitive.key, context});
   }
 
-  isSelected(graphprimitive, context) {
-    const where:any = {key: graphprimitive.key};
+  public isSelected(graphprimitive, context) {
+    const where: any = {key: graphprimitive.key};
     if (context) { where.context = context; }
     const found = _.chain(this.selections)
       .where(where)
@@ -96,19 +96,19 @@ class SelectionManager {
     return found.length > 0;
   }
 
-  selectNodeForTitleEditing(graphprimitive) {
+  public selectNodeForTitleEditing(graphprimitive) {
     this._selectForTitleEditing(graphprimitive, SelectionManager.NodeTitleEditing);
     this._clearSelection(SelectionManager.LinkTitleEditing);
     return this._notifySelectionChange();
   }
 
-  selectLinkForTitleEditing(graphprimitive) {
+  public selectLinkForTitleEditing(graphprimitive) {
     this._selectForTitleEditing(graphprimitive, SelectionManager.LinkTitleEditing);
     this._clearSelection(SelectionManager.NodeTitleEditing);
     return this._notifySelectionChange();
   }
 
-  _selectForTitleEditing(graphprimitive, context) {
+  public _selectForTitleEditing(graphprimitive, context) {
     this.selectOnly(graphprimitive, context);
     // unselect the inspection selection, unless its this same graphprimitive.
     if (!this.isSelectedForInspection(graphprimitive)) {
@@ -116,26 +116,26 @@ class SelectionManager {
     }
   }
 
-  clearInspection() {
+  public clearInspection() {
     this.clearNodeInspection();
     return this.clearLinkInspection();
   }
 
-  clearTitleEditing() {
+  public clearTitleEditing() {
     this._clearSelection(SelectionManager.NodeTitleEditing);
     return this._clearSelection(SelectionManager.LinkTitleEditing);
   }
 
-  isSelectedForTitleEditing(graphprimitive){
-    return this.isSelected(graphprimitive,SelectionManager.NodeTitleEditing) ||
-      this.isSelected(graphprimitive,SelectionManager.LinkTitleEditing);
+  public isSelectedForTitleEditing(graphprimitive) {
+    return this.isSelected(graphprimitive, SelectionManager.NodeTitleEditing) ||
+      this.isSelected(graphprimitive, SelectionManager.LinkTitleEditing);
   }
 
-  getNodeTitleEditing() {
+  public getNodeTitleEditing() {
     return this.selection(SelectionManager.NodeTitleEditing);
   }
 
-  selectNodeForInspection(graphprimitive, multipleSelectionsAllowed) {
+  public selectNodeForInspection(graphprimitive, multipleSelectionsAllowed) {
     // when clicking with eg. ctrl key, multipleSelectionsAllowed is true, so we dont unselect other nodes.
     this.selectOnly(graphprimitive, SelectionManager.NodeInspection, multipleSelectionsAllowed);
     if (!multipleSelectionsAllowed) { this.clearLinkInspection(); }
@@ -148,28 +148,28 @@ class SelectionManager {
     return this._notifySelectionChange();
   }
 
-  clearNodeInspection() {
+  public clearNodeInspection() {
     return this._clearSelection(SelectionManager.NodeInspection);
   }
 
-  isSelectedForInspection(graphprimitive) {
-    return this.isSelected(graphprimitive,SelectionManager.NodeInspection) ||
-      this.isSelected(graphprimitive,SelectionManager.LinkInspection);
+  public isSelectedForInspection(graphprimitive) {
+    return this.isSelected(graphprimitive, SelectionManager.NodeInspection) ||
+      this.isSelected(graphprimitive, SelectionManager.LinkInspection);
   }
 
-  getNodeInspection() {
+  public getNodeInspection() {
     return this.selection(SelectionManager.NodeInspection);
   }
 
-  getLinkInspection() {
+  public getLinkInspection() {
     return this.selection(SelectionManager.LinkInspection);
   }
 
-  getLinkTitleEditing() {
+  public getLinkTitleEditing() {
     return this.selection(SelectionManager.LinkTitleEditing);
   }
 
-  selectLinkForInspection(graphprimitive, multipleSelectionsAllowed){
+  public selectLinkForInspection(graphprimitive, multipleSelectionsAllowed) {
     this.selectOnly(graphprimitive, SelectionManager.LinkInspection, multipleSelectionsAllowed);
     if (!multipleSelectionsAllowed) { this.clearNodeInspection(); }
 
@@ -181,7 +181,7 @@ class SelectionManager {
     return this._notifySelectionChange();
   }
 
-  _deselect(opts){
+  public _deselect(opts) {
     const pickNonEmpty    = _.partial(_.pick, _, _.identity);
     const removeCritereon = pickNonEmpty(opts);
     log.info(removeCritereon);

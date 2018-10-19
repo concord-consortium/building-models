@@ -22,7 +22,7 @@ module.exports = React.createClass({
 
 
   setDuration(e) {
-    return SimulationStore.actions.setDuration(parseInt(e.target.value));
+    return SimulationStore.actions.setDuration(parseInt(e.target.value, 10));
   },
 
   toggle() {
@@ -39,7 +39,7 @@ module.exports = React.createClass({
 
   renderToggleButton() {
     const iconClass = this.state.simulationPanelExpanded ? "inspectorArrow-collapse" : "inspectorArrow-expand";
-    const simRefFunc = elt => { return this.simulateElt = elt; };
+    const simRefFunc = elt => this.simulateElt = elt;
     const simText = tr("~DOCUMENT.ACTIONS.SIMULATE");
     const simTextWidth = (this.simulateElt != null) ? this.simulateElt.clientWidth : simText.length * 6;
     const simTextLeft = (simTextWidth / 2) - 6;
@@ -85,7 +85,7 @@ module.exports = React.createClass({
   renderRecordForCollectors() {
     let recordAction = SimulationStore.actions.recordPeriod;
     if (this.state.isRecording) {
-      recordAction = function() {};
+      recordAction = () => undefined;
     }
 
     const props = {
@@ -94,7 +94,7 @@ module.exports = React.createClass({
       recording: this.state.isRecording,
       disabled: !this.state.modelIsRunnable
     };
-    return (div({className:"horizontal"},
+    return (div({className: "horizontal"},
       (RecordButton(props,
         (div({className: "horizontal"},
           (span({}, tr("~DOCUMENT.ACTIONS.DATA.RECORD"))),
@@ -106,7 +106,7 @@ module.exports = React.createClass({
         min: 1,
         max: 1000,
         style: {
-          width: `${Math.max(3, (this.state.duration.toString().length+1))}em`
+          width: `${Math.max(3, (this.state.duration.toString().length + 1))}em`
         },
         value: this.state.duration,
         onChange: this.setDuration

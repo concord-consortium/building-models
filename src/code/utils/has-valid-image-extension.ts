@@ -6,11 +6,11 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const tr = require("./translate");
 
-module.exports = function(imageName) {
+module.exports = (imageName) => {
   const link = document.createElement("a");
   link.setAttribute("href", imageName);
   const array = link.pathname.split("."), extension = array[array.length - 1];

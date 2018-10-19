@@ -5,7 +5,7 @@
  */
 
  // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const CodapConnect = require("../models/codap-connect");
 const CodapActions = require("../actions/codap-actions");

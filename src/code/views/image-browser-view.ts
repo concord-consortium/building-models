@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const ModalTabbedDialog = require("./modal-tabbed-dialog-view");
 const TabbedPanel = require("./tabbed-panel-view");
@@ -32,7 +32,7 @@ module.exports = React.createClass({
       internalLibrary: this.state.library,
       inPalette: store.inPalette,
       inLibrary: store.inLibrary,
-      selectedImage: this.state.paletteItem //from ImageDialogStore mixin
+      selectedImage: this.state.paletteItem // from ImageDialogStore mixin
     };
 
     return (ModalTabbedDialogFactory({

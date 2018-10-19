@@ -36,7 +36,7 @@ const migrations = [
 module.exports = {
   migrations,
   update(data) {
-    for (let m of migrations) {
+    for (const m of migrations) {
       if (m.update) {
         data = m.update(data);
       }
@@ -49,6 +49,6 @@ module.exports = {
   },
 
   lastMigration() {
-    return migrations[migrations.length-1];
+    return migrations[migrations.length - 1];
   }
 };

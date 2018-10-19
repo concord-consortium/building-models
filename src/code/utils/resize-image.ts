@@ -4,7 +4,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-module.exports = function(src, callback) {
+module.exports = (src, callback) => {
 
   const fail = () => callback(src);
 
@@ -15,7 +15,7 @@ module.exports = function(src, callback) {
     const img = document.createElement("img");
     img.setAttribute("crossOrigin", "anonymous");
     img.src = src;
-    img.onload = function() {
+    img.onload = () => {
       const canvas = document.createElement("canvas");
       let {width, height} = img;
       if (width > height) {

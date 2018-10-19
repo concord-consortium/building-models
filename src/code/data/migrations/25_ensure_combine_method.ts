@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const AppSettingsStore = require("../../stores/app-settings-store").store;
 
@@ -30,7 +30,7 @@ const migration = {
     const accumulatorNodesNames = _.map(accumulatorNodes, n => n.key);
     const linksToAccumulators = _.select(links, l => _.includes(accumulatorNodesNames, l.targetNode));
     const productNodeNames = _.uniq(_.map(linksToAccumulators, l => l.sourceNode));
-    return _.each(nodes, function(n) {
+    return _.each(nodes, (n) => {
       if (n.data.combineMethod === undefined) {
         if (_.include(productNodeNames, n.key)) {
           return n.data.combineMethod = "product";

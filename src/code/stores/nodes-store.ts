@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const PaletteStore       = require("./palette-store");
 const GraphActions       = require("../actions/graph-actions");

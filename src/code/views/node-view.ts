@@ -6,7 +6,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 let div, i, img, input, label, NodeView, span;
 ({input, div, i, img, span, label} = React.DOM);
@@ -250,14 +250,14 @@ module.exports = (NodeView = React.createClass({
   },
 
   changeValue(newValue) {
-    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {initialValue:newValue});
+    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {initialValue: newValue});
   },
 
   changeTitle(newTitle, isComplete) {
     if (isComplete) { newTitle = this.props.graphStore.ensureUniqueTitle(this.props.data, newTitle); }
     this.props.graphStore.startNodeEdit();
     log.info(`Title is changing to ${newTitle}`);
-    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {title:newTitle});
+    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {title: newTitle});
   },
 
   startEditing() {
@@ -356,7 +356,7 @@ module.exports = (NodeView = React.createClass({
   },
 
   renderNodeInternal() {
-    const getNodeImage = function(node) {
+    const getNodeImage = (node) => {
       if (node.isAccumulator) {
         return (StackedImage({
           image: node.image,
@@ -397,7 +397,7 @@ module.exports = (NodeView = React.createClass({
 
     return (div({ className: this.nodeClasses(), ref: "node", style},
       (div({className: this.linkTargetClasses(), "data-node-key": this.props.nodeKey},
-        (div({className: "slider" ,"data-node-key": this.props.nodeKey},
+        (div({className: "slider" , "data-node-key": this.props.nodeKey},
           this.props.simulating ?
             (div({},
               // if not @props.data.valueDefinedSemiQuantitatively
@@ -450,7 +450,7 @@ module.exports = (NodeView = React.createClass({
 }));
 
 // synchronized with corresponding CSS values
-NodeView.nodeImageOffset = function() {
+NodeView.nodeImageOffset = () => {
   const linkTargetTopMargin = 6;   // .link-target
   const elementTopMargin = 6;      // .elm .top
   return { left: 0, top: linkTargetTopMargin + elementTopMargin };

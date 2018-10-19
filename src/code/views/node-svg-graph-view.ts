@@ -5,7 +5,7 @@
  */
 
 // TODO: remove when modules are converted to TypeScript style modules
-export {}
+export {};
 
 const {svg, path, line, text, div, tspan, image} = React.DOM;
 
@@ -33,7 +33,7 @@ module.exports = React.createClass({
 
   graphMapPoint(point) {
     const x = point.x * this.props.width;
-    const y = (this.props.strokeWidth-1) + (point.y * (this.props.height - (this.props.strokeWidth+1)));
+    const y = (this.props.strokeWidth - 1) + (point.y * (this.props.height - (this.props.strokeWidth + 1)));
     return this.invertPoint({x, y});
   },
 
@@ -52,13 +52,13 @@ module.exports = React.createClass({
     const rangex = SimulationStore.store.simulationDuration();
     data = _.takeRight(data, rangex).reverse();
 
-    for (let point of data) {
+    for (const point of data) {
       if (point > max) { max = point; }
       if (point < min) { min = point; }
     }
     const rangey = max - min;
 
-    data = _.map(data, function(d, i) {
+    data = _.map(data, (d, i) => {
       const x = i / rangex;
       const y = d / rangey;
       return {x, y};
@@ -75,7 +75,7 @@ module.exports = React.createClass({
     const left = this.props.width * 0.25;
     const right = this.props.width * 0.75;
     const bottom = this.props.height;
-    const top = this.props.height - ((this.props.strokeWidth-1) + (val * (this.props.height - (this.props.strokeWidth+1))));
+    const top = this.props.height - ((this.props.strokeWidth - 1) + (val * (this.props.height - (this.props.strokeWidth + 1))));
 
     let data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}];
     data = _.map(data,   p => `${p.x} ${p.y}`);
