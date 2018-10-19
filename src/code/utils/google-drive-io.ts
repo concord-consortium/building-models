@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS206: Consider reworking classes to avoid initClass
  * DS207: Consider shorter variations of null checks
@@ -48,9 +47,9 @@ class GoogleDriveIO {
   }
 
   makeMultipartBody(parts, boundary) {
-    return ((Array.from(parts).map((part) =>
+    return (parts.map((part) =>
       `\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${part}`)
-    ).join("")) + `\r\n--${boundary}--`;
+    ).join("") + `\r\n--${boundary}--`;
   }
 
   sendFile(fileSpec, contents, callback) {
@@ -60,10 +59,10 @@ class GoogleDriveIO {
       mimeType: "application/json"
     });
 
-    const [method, path] = Array.from(fileSpec.fileId ?
+    const [method, path] = fileSpec.fileId ?
       ["PUT", `/upload/drive/v2/files/${fileSpec.fileId}`]
       :
-      ["POST", "/upload/drive/v2/files"]);
+      ["POST", "/upload/drive/v2/files"];
 
     const request = gapi.client.request({
       path,

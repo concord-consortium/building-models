@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS206: Consider reworking classes to avoid initClass
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -44,7 +43,7 @@ class SelectionManager {
 
   _notifySelectionChange() {
     log.info("notifiying listeners");
-    return Array.from(this.selectionListeners).map((listener) =>
+    return this.selectionListeners.map((listener) =>
       listener(this));
   }
 

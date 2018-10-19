@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -37,7 +36,7 @@ const migrations = [
 module.exports = {
   migrations,
   update(data) {
-    for (let m of Array.from(migrations)) {
+    for (let m of migrations) {
       if (m.update) {
         data = m.update(data);
       }

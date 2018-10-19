@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -18,7 +17,7 @@ module.exports = React.createClass({
 
   componentWillMount() {
     const build_info = $("html").find("meta[name='build-info']").attr("content");
-    const [date,tag,commit,commiter]= Array.from(build_info.split(" "));
+    const [date,tag,commit,commiter]= build_info.split(" ");
     return this.setState({
       commit,
       date,

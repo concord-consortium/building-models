@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS205: Consider reworking code to avoid use of IIFEs
@@ -439,7 +438,7 @@ const GraphStore  = Reflux.createStore({
     const nodes = [].concat(_node); // force an array of nodes
     return (() => {
       const result:any = [];
-      for (node of Array.from(nodes)) {
+      for (node of nodes) {
         if (node) {
           var originalData = {
             title: node.title,
@@ -478,7 +477,7 @@ const GraphStore  = Reflux.createStore({
                                   (link.relation.type === "initial-value")
                 ));
               originalRelations = {};
-              for (link of Array.from(changedLinks)) {
+              for (link of changedLinks) {
                 originalRelations[link.key] = link.relation;
               }
             }
@@ -487,7 +486,7 @@ const GraphStore  = Reflux.createStore({
             this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
                 if (accumulatorChanged) {
-                  for (link of Array.from(changedLinks)) {
+                  for (link of changedLinks) {
                     this._changeLink(link, { relation: link.defaultRelation() });
                   }
                 }
@@ -496,7 +495,7 @@ const GraphStore  = Reflux.createStore({
               undo: () => {
                 this._changeNode(node, originalData);
                 if (accumulatorChanged) {
-                  for (link of Array.from(changedLinks)) {
+                  for (link of changedLinks) {
                     this._changeLink(link, { relation: originalRelations[link.key] });
                   }
                 }
@@ -702,7 +701,7 @@ const GraphStore  = Reflux.createStore({
   },
 
   removeLinksForNode(node) {
-    return Array.from(node.links).map((link) => this.removeLink(link));
+    return node.links.map((link) => this.removeLink(link));
   },
 
   // getDescription returns one or more easily-comparable descriptions of the graph's

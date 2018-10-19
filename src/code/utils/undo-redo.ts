@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS205: Consider reworking code to avoid use of IIFEs
  * DS206: Consider reworking classes to avoid initClass
@@ -213,7 +212,7 @@ class Manager {
         canRedo: this.canRedo(),
         saved: this.saved()
       };
-      return Array.from(this.changeListeners).map((listener) =>
+      return this.changeListeners.map((listener) =>
         listener(status));
     }
   }
@@ -269,7 +268,7 @@ class CommandBatch {
     })();
   }
   redo(debug) {
-    return Array.from(this.commands).map((command) => command.redo(debug));
+    return this.commands.map((command) => command.redo(debug));
   }
 
   matches(name) {

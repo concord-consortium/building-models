@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
@@ -611,7 +610,9 @@ class CodapConnect {
   // this reduces that array to true iff every element is not explicitly false
   reduceSuccesses(successes) {
     if (!(successes != null ? successes.length : undefined)) { return successes; }        // return successes unless it's a non-zero length array
-    for (let s of Array.from(successes)) { if (s === false) { return false; } }  // return false if we encounter *any* explicit false values in the array
+    for (let s of successes) {
+      if (s === false) { return false; }   // return false if we encounter *any* explicit false values in the array
+    }
     return true;
   }
 

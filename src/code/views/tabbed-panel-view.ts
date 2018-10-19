@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -82,7 +81,7 @@ module.exports = React.createClass({
 
   renderTabs(clientClass) {
     return (div({className: `workspace-tabs${clientClass}`, key: "tabs"},
-      (ul({}, (Array.from(this.props.tabs).map((tab, index) => this.renderTab(tab,index)))))
+      (ul({}, this.props.tabs.map((tab, index) => this.renderTab(tab,index))))
     ));
   },
 

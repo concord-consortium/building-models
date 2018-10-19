@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -53,7 +52,7 @@ module.exports = React.createClass({
     const rangex = SimulationStore.store.simulationDuration();
     data = _.takeRight(data, rangex).reverse();
 
-    for (let point of Array.from(data)) {
+    for (let point of data) {
       if (point > max) { max = point; }
       if (point < min) { min = point; }
     }

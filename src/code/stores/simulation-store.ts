@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -51,7 +50,7 @@ const SimulationStore   = Reflux.createStore({
     this.defaultUnit = TimeUnits.defaultUnit;
     this.unitName    = TimeUnits.toString(this.defaultUnit,true);
     this.defaultCollectorUnit = TimeUnits.defaultCollectorUnit;
-    const timeUnitOptions = (Array.from(TimeUnits.units).map((unit) => ({name: TimeUnits.toString(unit, true), unit})));
+    const timeUnitOptions = TimeUnits.units.map((unit) => ({name: TimeUnits.toString(unit, true), unit}));
 
     this.nodes = [];
     this.currentSimulation = null;
@@ -118,7 +117,7 @@ const SimulationStore   = Reflux.createStore({
 
   _updateUnitNames() {
     const pluralize = this.settings.duration !== 1;
-    this.settings.timeUnitOptions = (Array.from(TimeUnits.units).map((unit) => ({name: TimeUnits.toString(unit, pluralize), unit})));
+    this.settings.timeUnitOptions = TimeUnits.units.map((unit) => ({name: TimeUnits.toString(unit, pluralize), unit}));
     return this.settings.stepUnitsName = TimeUnits.toString(this.settings.stepUnits, pluralize);
   },
 

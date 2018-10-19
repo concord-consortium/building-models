@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -86,7 +85,7 @@ const DropDown = React.createClass({
         (ul({},
           (() => {
             const result:any = [];
-            for (item of Array.from(this.props.items)) {
+            for (item of this.props.items) {
               result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
             }
             return result;

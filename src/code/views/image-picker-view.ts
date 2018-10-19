@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -65,7 +64,7 @@ module.exports = React.createClass({
             label: tr("~PALETTE-INSPECTOR.ADD_IMAGE_SHORT")
           }))
         )),
-        Array.from(this.state.palette).map((node, i) =>
+        this.state.palette.map((node, i) =>
           (ImgChoice({key: i, node, selected: this.props.selected, onChange: this.props.onChange})))
       ))
     ));

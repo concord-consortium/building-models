@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -33,7 +32,7 @@ class HashParameters {
     const keyPairs = hash.split(PARAM_TOKEN);
     return _.each(keyPairs, pair => {
       if (pair.match(VALUE_TOKEN)) {
-        const [key, value] = Array.from(pair.split(VALUE_TOKEN));
+        const [key, value] = pair.split(VALUE_TOKEN);
         return this.parameters[key] = this.decode(value);
       }
     });

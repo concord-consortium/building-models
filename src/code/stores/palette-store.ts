@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -44,13 +43,13 @@ const paletteStore   = Reflux.createStore({
 
   initializeLibrary() {
     this.library = {};
-    return Array.from(initialLibrary).map((node) =>
+    return initialLibrary.map((node) =>
       this.addToLibrary(node));
   },
 
   initializePalette() {
     this.palette = [];
-    for (let node of Array.from(initialPalette)) {
+    for (let node of initialPalette) {
       this.addToPalette(node);
     }
     this.selectPaletteIndex(0);
