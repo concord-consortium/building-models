@@ -4,7 +4,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 // Add new migrations here.
-// I wasn't able to get automatic path globed `require` to work with gulp.
+// I wasn't able to get automatic path globed `require` to work.
 const migrations = [
   require("./01_base"),
   require("./02_add_relations"),

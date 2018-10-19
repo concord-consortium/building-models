@@ -11,9 +11,8 @@ DATE=`date +"%Y-%m-%d"`
 SHA=`git rev-parse --short=8 HEAD`
 
 echo "Rebuilding app"
-BUILD_INFO="$SHA built on $DATE"
 ENVIRONMENT=$DEPLOY_ENV
-gulp build-all --production --buildInfo "$SHA | $DATE"
+npm run build
 
 rm -rf _site
 

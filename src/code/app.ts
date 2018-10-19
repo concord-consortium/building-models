@@ -4,6 +4,9 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+import "../stylus/app.styl";
+
 const AppView     = React.createFactory(require("./views/app-view"));
 
 const GraphStore   = require("./stores/graph-store");

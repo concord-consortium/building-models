@@ -11,13 +11,13 @@ export {}
 const urlParams = require("./url-params");
 
 const languageFiles = {
-  "en-US": require("./lang/en-US"),
-  "he": require("./lang/he"),
-  "tr": require("./lang/tr"),
-  "zh-TW": require("./lang/zh-TW"),
-  "es": require("./lang/es"),
-  "et": require("./lang/et"),
-  "pl": require("./lang/pl")
+  "en-US": require("./lang/en-US.json"),
+  "he": require("./lang/he.json"),
+  "tr": require("./lang/tr.json"),
+  "zh-TW": require("./lang/zh-TW.json"),
+  "es": require("./lang/es.json"),
+  "et": require("./lang/et.json"),
+  "pl": require("./lang/pl.json")
 };
 
 const translations =  {};
