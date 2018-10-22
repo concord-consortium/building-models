@@ -39,6 +39,38 @@ module.exports = (env, argv) => {
       filename: 'js/app.js'
     },
     performance: { hints: false },
+    /*
+    externals: {
+      jquery1: {
+        commonjs: "jquery",
+        root: "jQuery"
+      },
+      jquery2: {
+        commonjs: "jquery",
+        root: "$"
+      },
+      react: {
+        commonjs: "react",
+        root: "React"
+      },
+      reactDOM: {
+        commonjs: "react-dom",
+        root: "ReactDOM"
+      },
+      lodash: {
+        commonjs: "lodash",
+        root: "_"
+      },
+      log: {
+        commonjs: "loglevel",
+        root: "log"
+      },
+      reflux: {
+        commonjs: "reflux",
+        root: "Reflux"
+      }
+    },
+    */
     module: {
       rules: [
         {

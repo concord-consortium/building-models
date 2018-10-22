@@ -13,7 +13,8 @@ export {};
 const {br, div, h2, label, span, input, p, i, select, option, textarea} = React.DOM;
 
 const RelationFactory  = require("../models/relation-factory");
-const SvgGraph         = React.createFactory(require("./svg-graph-view"));
+import { SvgGraphView as SvgGraphViewClass } from "./svg-graph-view";
+const SvgGraph         = React.createFactory(SvgGraphViewClass);
 const tr               = require("../utils/translate");
 const autosize         = require("autosize");
 const SimulationStore  = require("../stores/simulation-store");

@@ -1,34 +1,35 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { ModalView } from "./modal-view";
 
-const Modal = React.createFactory(require("./modal-view"));
-const {div, i} = React.DOM;
+interface ModalDialogViewProps {
+  title?: string;
+  close?: () => void;
+}
 
-module.exports = React.createClass({
+export class ModalDialogView extends React.Component<ModalDialogViewProps, {}> {
 
-  displayName: "ModalDialog",
+  public static displayName = "ModalDialogView";
 
-  close() {
-    return (typeof this.props.close === "function" ? this.props.close() : undefined);
-  },
-
-  render() {
-    return (Modal({close: this.props.close},
-      (div({className: "modal-dialog"},
-        (div({className: "modal-dialog-wrapper"},
-          (div({className: "modal-dialog-title"},
-            (i({className: "modal-dialog-title-close icon-codap-ex", onClick: this.close})),
-            this.props.title || "Untitled Dialog"
-          )),
-          (div({className: "modal-dialog-workspace"}, this.props.children))
-        ))
-      ))
-    ));
+  public render() {
+    return (
+      <ModalView close={this.props.close}>
+        <div className="modal-dialog">
+          <div className="modal-dialog-wrapper">
+            <div className="modal-dialog-title">
+              <i className="modal-dialog-title-close icon-codap-ex" onClick={this.handleClose} />
+              {this.props.title || "Untitled Dialog"}
+            </div>
+            <div className="modal-dialog-workspace">{this.props.children}</div>
+          </div>
+        </div>
+      </ModalView>
+    );
   }
-});
+
+  private handleClose = () => {
+    if (this.props.close) {
+      this.props.close();
+    }
+  }
+}

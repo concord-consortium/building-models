@@ -1,24 +1,21 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import * as React from "react";
 
 const {div} = React.DOM;
 const tr = require("../utils/translate");
-const Color = require("../utils/colors");
 
-const ColorChoice = React.createFactory(React.createClass({
-  displayName: "ColorChoice",
+import {Color, ColorChoices} from "../utils/colors";
 
-  selectColor() {
-    return this.props.onChange(this.props.color);
-  },
+interface ColorChoiceProps {
+  selected: string;
+  color: Color;
+  onChange: (Color) => void;
+}
 
-  render() {
+class ColorChoice extends React.Component<ColorChoiceProps, {}> {
+
+  public static displayName = "ColorChoice";
+
+  public render() {
     const { name } = this.props.color;
     const { value } = this.props.color;
     let className = "color-choice";
@@ -26,43 +23,49 @@ const ColorChoice = React.createFactory(React.createClass({
       className = "color-choice selected";
     }
 
-    return (div({className, onClick: this.selectColor},
+    return (div({className, onClick: this.handleSelectColor},
       (div({className: "color-swatch", style: {"backgroundColor": value}})),
       (div({className: "color-label"}, name))
     ));
   }
-})
-);
 
-module.exports = React.createClass({
-
-  displayName: "ColorPickerView",
-
-  getInitialState() {
-    return {opened: false};
-  },
-
-  select(color) {
-    return this.props.onChange(color.value);
-  },
-
-  toggleOpen() {
-    return this.setState({
-      opened: (!this.state.opened)});
-  },
-
-  className() {
-    if (this.state.opened) {
-      return "color-picker opened";
-    } else {
-      return "color-picker closed";
-    }
-  },
-
-  render() {
-    return (div({className: this.className(), onClick: this.toggleOpen},
-      Color.choices.map((color) =>
-        (ColorChoice({key: color.name, color, selected: this.props.selected, onChange: this.select})))
-    ));
+  private handleSelectColor = () => {
+    this.props.onChange(this.props.color);
   }
-});
+}
+
+interface ColorPickerViewProps {
+  selected: string;
+  onChange: (string) => void;
+}
+
+interface ColorPickerViewState {
+  opened: boolean;
+}
+
+export class ColorPickerView extends React.Component<ColorPickerViewProps, ColorPickerViewState> {
+
+  public static displayName = "ColorPickerView";
+
+  public state: ColorPickerViewState = {opened: false};
+
+  public render() {
+    const className = `color-picker ${this.state.opened ? "opened" : "closed"}`;
+    const choices = ColorChoices.map((color) => {
+      return <ColorChoice key={color.name} color={color} selected={this.props.selected} onChange={this.handleSelect} />;
+    });
+    return (
+      <div className={className} onClick={this.handleToggleOpen}>
+        {choices}
+      </div>
+    );
+  }
+
+  private handleSelect = (color) => {
+    this.props.onChange(color.value);
+  }
+
+  private handleToggleOpen = () => {
+    this.setState({opened: !this.state.opened});
+  }
+}

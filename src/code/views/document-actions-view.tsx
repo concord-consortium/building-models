@@ -8,12 +8,13 @@
 export {};
 
 const {div, span, i, br} = React.DOM;
-const AboutView        = React.createFactory(require("./about-view"));
 const AppSettingsStore = require("../stores/app-settings-store");
 const CodapStore       = require("../stores/codap-store");
 const UndoRedoUIStore  = require("../stores/undo-redo-ui-store");
 const tr               = require("../utils/translate");
 
+import { AboutView as AboutViewClass } from "./about-view";
+const AboutView = React.createFactory(AboutViewClass);
 const SimulationRunPanel = React.createFactory(require("./simulation-run-panel-view"));
 
 module.exports = React.createClass({

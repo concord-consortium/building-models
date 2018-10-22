@@ -1,80 +1,90 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { ModalDialogView } from "./modal-dialog-view";
+const tr = require("../utils/translate");
 
-const ModalDialog         = React.createFactory(require("./modal-dialog-view"));
-const tr                  = require("../utils/translate");
+interface ModalGoogleSaveViewProps {
+  filename: string;
+  isPublic: boolean;
+  onRename?: (filename: string) => void;
+  setIsPublic?: (isPublic: boolean) => void;
+  onSave: () => void;
+  onClose: () => void;
+  showing: boolean;
+}
 
-const {div, ul, li, a, input, label, span, button} = React.DOM;
+interface ModalGoogleSaveViewState {
+  filename: string;
+  isPublic: boolean;
+}
 
-module.exports = React.createClass({
+export class ModalGoogleSaveView extends React.Component<ModalGoogleSaveViewProps, ModalGoogleSaveViewState> {
 
-  displayName: "ModalGoogleSave",
+  public static displayName = "ModalGoogleSave";
 
-  onSave() {
-    if (typeof this.props.onRename === "function") {
+  constructor(props: ModalGoogleSaveViewProps) {
+    super(props);
+    this.setState({
+      filename: this.props.filename,
+      isPublic: this.props.isPublic
+    });
+  }
+
+  public render() {
+    return (
+      <div className="modal-simple-popup">
+        {this.props.showing ? this.renderShowing() : null}
+      </div>
+    );
+  }
+
+  private renderShowing() {
+    const title = tr("~GOOGLE_SAVE.TITLE");
+    return (
+      <ModalDialogView title={title} close={this.props.onClose}>
+        <div className="simple-popup-panel label-text">
+          <div className="filename">
+            <label htmlFor="filename">Name</label>
+            <input
+              name="fileName"
+              ref="fileName"
+              value={this.state.filename}
+              type="text"
+              placeholder={tr("~MENU.UNTITLED_MODEL")}
+              onChange={this.handleFilenameChange}
+            />
+          </div>
+          <div className="make-public">
+            <label>
+              <input type="checkbox" value="public" checked={this.state.isPublic} onChange={this.handlePublicChange} />
+              {tr("~GOOGLE_SAVE.MAKE_PUBLIC")}
+            </label>
+          </div>
+          <div className="buttons">
+            <button name="cancel" value="Cancel" onClick={this.props.onClose}>Cancel</button>
+            <button name="save" value="Save" onClick={this.handleSave}>Save</button>
+          </div>
+        </div>
+      </ModalDialogView>
+    );
+  }
+
+  private handleSave = () => {
+    if (this.props.onRename) {
       this.props.onRename(this.state.filename);
     }
-    if (typeof this.props.setIsPublic === "function") {
+    if (this.props.setIsPublic) {
       this.props.setIsPublic(this.state.isPublic);
     }
     this.props.onSave();
-    return this.props.onClose();
-  },
-
-  getInitialState() {
-    return {
-      filename: this.props.filename,
-      isPublic: this.props.isPublic
-    };
-  },
-
-  handleFilenameChange(e) {
-    return this.setState({filename: e.target.value});
-  },
-
-  handlePublicChange(e) {
-    return this.setState({isPublic: e.target.checked});
-  },
-
-  render() {
-    return (div({className: "modal-simple-popup"},
-      (() => {
-        if (this.props.showing) {
-          const title = tr("~GOOGLE_SAVE.TITLE");
-          return (ModalDialog({title, close: this.props.onClose},
-            (div({className: "simple-popup-panel label-text"},
-              (div({className: "filename"},
-                (label({}, "Name")),
-                (input({
-                  name: "fileName",
-                  ref: "fileName",
-                  value: this.state.filename,
-                  type: "text",
-                  placeholder: tr("~MENU.UNTITLED_MODEL"),
-                  onChange: this.handleFilenameChange
-                }))
-              )),
-              (div({className: "make-public"},
-                (label({}, [
-                  input({type: "checkbox", value: "public", checked: this.state.isPublic, onChange: this.handlePublicChange}),
-                  tr("~GOOGLE_SAVE.MAKE_PUBLIC")
-                ]))
-              )),
-              (div({className: "buttons"},
-                (button({name: "cancel", value: "Cancel", onClick: this.props.onClose}, "Cancel")),
-                (button({name: "save", value: "Save", onClick: this.onSave}, "Save"))
-              ))
-            ))
-          ));
-        }
-      })()
-    ));
+    this.props.onClose();
   }
-});
+
+  private handleFilenameChange = (e) => {
+    this.setState({filename: e.target.value});
+  }
+
+  private handlePublicChange = (e) => {
+    this.setState({isPublic: e.target.checked});
+  }
+}

@@ -17,6 +17,9 @@
     "max-classes-per-file": false,
     "ordered-imports": false,
     "no-debugger": false,
-    "no-console": false
+    "no-console": false,
+    "jsx-no-multiline-js": false,
+    "jsx-no-string-ref": false,
+    "jsx-wrap-multiline": false
   }
 }

@@ -10,10 +10,14 @@ export {};
 const {div, i, span} = React.DOM;
 const tr = require("../utils/translate");
 
-const Dropdown           = React.createFactory(require("./dropdown-view"));
-const OpenInCodap        = React.createFactory(require("./open-in-codap-view"));
-const ModalGoogleSave    = React.createFactory(require("./modal-google-save-view"));
-const BuildInfoView      = React.createFactory(require("./build-info-view"));
+import { DropDownView as DropDownViewClass } from "./dropdown-view";
+const Dropdown           = React.createFactory(DropDownViewClass);
+
+import { OpenInCodapView as OpenInCodapViewClass } from "./open-in-codap-view";
+const OpenInCodap        = React.createFactory(OpenInCodapViewClass);
+import { ModalGoogleSaveView as ModalGoogleSaveViewClass } from "./modal-google-save-view";
+const ModalGoogleSave    = React.createFactory(ModalGoogleSaveViewClass);
+const BuildInfoView      = require("./build-info-view");
 const GoogleFileStore    = require("../stores/google-file-store");
 const UndoRedoUIStore    = require("../stores/undo-redo-ui-store");
 const AppSettingsActions = require("../stores/app-settings-store").actions;

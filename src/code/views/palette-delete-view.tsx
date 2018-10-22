@@ -1,83 +1,94 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import * as React from "react";
 
 const tr = require("../utils/translate");
 const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
-const ImagePickerView = React.createFactory(require("./image-picker-view"));
+const ImagePickerView = require("./image-picker-view");
 
-const {div, span, i, img, button, a} = React.DOM;
+interface PaletteDeleteViewProps {
+  showReplacement: boolean;
+  replacement: any; // TODO: get concrete type
+  paletteItem?: any; // TODO: get concrete type
+  cancel?: () => void;
+  ok?: () => void;
+}
 
-module.exports = React.createClass({
+export class PaletteDeleteView extends React.Component<PaletteDeleteViewProps, {}> {
 
-  displayName: "PaletteDeleteView",
-  changePalette(args) {
-    return PaletteDialogStore.actions.select(args);
-  },
+  public static displayName = "PaletteDeleteView";
 
-  cancel() {
-    return (typeof this.props.cancel === "function" ? this.props.cancel() : undefined);
-  },
-
-  ok() {
-    return (typeof this.props.ok === "function" ? this.props.ok() : undefined);
-  },
-
-
-  renderArrow() {
-    if (this.props.showReplacement) {
-      return (div({className: "vertical-content"},
-        (i({className: "arrow-div icon-codap-right-arrow"}))
-      ));
-    }
-  },
-
-  renderReplacement() {
-    if (this.props.showReplacement) {
-      return (div({className: "vertical-content"},
-        (div({className: "label"}, tr("~PALETTE-DIALOG.REPLACE"))),
-        (ImagePickerView({
-          selected: this.props.replacement,
-          onChange: this.changePalette
-        }))
-      ));
-    }
-  },
-
-  renderPaletteItem() {
-    const oldImage   = this.props.paletteItem != null ? this.props.paletteItem.image : undefined;
-    return (div({className: "vertical-content"},
-      (div({className: "label"}, tr("~PALETTE-DIALOG.DELETE"))),
-      oldImage ?
-        (img({src: oldImage})) : undefined
-    ));
-  },
-
-  renderButtons() {
-    return (div({className: "vertical-content buttons"},
-      (div({},
-        (button({className: "button ok", onClick: this.ok}, tr("~PALETTE-DIALOG.OK")))
-      )),
-      (div({className: "cancel"},
-        (a({onClick: this.cancel}, tr("~PALETTE-DIALOG.CANCEL")))
-      ))
-    ));
-  },
-
-  render() {
-    return (div({className: "palette-delete-view"},
-      (div({className: "horizontal-content"},
-        this.renderPaletteItem(),
-        this.renderArrow(),
-        this.renderReplacement(),
-        this.renderButtons()
-      ))
-    ));
+  public render() {
+    return (
+      <div className="palette-delete-view">
+        <div className="horizontal-content">
+          {this.renderPaletteItem()}
+          {this.renderArrow()}
+          {this.renderReplacement()}
+          {this.renderButtons()}
+        </div>
+      </div>
+    );
   }
-});
+
+  public renderArrow() {
+    if (this.props.showReplacement) {
+      return (
+        <div className="vertical-content">
+          <i className="arrow-div icon-codap-right-arrow" />
+        </div>
+      );
+    }
+  }
+
+  private renderReplacement() {
+    if (this.props.showReplacement) {
+      return (
+        <div className="vertical-content">
+          <div className="label">{tr("~PALETTE-DIALOG.REPLACE")}</div>
+          <ImagePickerView
+            selected={this.props.replacement}
+            onChange={this.handleChangePalette}
+          />
+        </div>
+      );
+    }
+  }
+
+  private renderPaletteItem() {
+    const oldImage = this.props.paletteItem != null ? this.props.paletteItem.image : undefined;
+    return (
+      <div className="vertical-content">
+        <div className="label">{tr("~PALETTE-DIALOG.DELETE")}</div>
+        {oldImage ? <img src={oldImage} /> : undefined}
+      </div>
+    );
+  }
+
+  private renderButtons() {
+    return (
+      <div className="vertical-content buttons">
+        <div>
+          <button className="button ok" onClick={this.handleOk}>{tr("~PALETTE-DIALOG.OK")}</button>
+        </div>
+        <div className="cancel">
+          <a onClick={this.handleCancel}>{tr("~PALETTE-DIALOG.CANCEL")}</a>
+        </div>
+      </div>
+    );
+  }
+
+  private handleChangePalette = (args) => {
+    return PaletteDialogStore.actions.select(args);
+  }
+
+  private handleCancel = () => {
+    if (this.props.cancel) {
+      this.props.cancel();
+    }
+  }
+
+  private handleOk = () => {
+    if (this.props.ok) {
+      this.props.ok();
+    }
+  }
+}

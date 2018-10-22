@@ -7,7 +7,9 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const PreviewImage = React.createFactory(require("../views/preview-image-dialog-view"));
+import { PreviewImageDialogView as PreviewImageDialogViewClass } from "../views/preview-image-dialog-view";
+
+const PreviewImage = React.createFactory(PreviewImageDialogViewClass);
 const hasValidImageExtension = require("../utils/has-valid-image-extension");
 const ImageDialogStore = require("../stores/image-dialog-store");
 

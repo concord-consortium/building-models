@@ -1,33 +1,27 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+interface SquareImageViewProps {
+  image?: string;
+}
 
-const {div} = React.DOM;
-const {img} = React.DOM;
+export class SquareImageView extends React.Component<SquareImageViewProps, {}> {
 
-module.exports = React.createClass({
+  public static displayName = "SquareImageView";
 
-  displayName: "SquareImage",
+  public render() {
+    return <div style={this.css()} />;
+  }
 
-  image() {
-    if (((this.props.image != null ? this.props.image.length : undefined) > 0) && (this.props.image !== "#remote")) {
-      return `url(${this.props.image})`;
+  private image() {
+    const {image} = this.props;
+    if (image && (image.length > 0) && image !== "#remote") {
+      return `url(${image})`;
     } else {
       return "none";
     }
-  },
+  }
 
-  renderImage() {
-    return (img({src: this.props.image}));
-  },
-
-  css() {
+  private css() {
     return {
       "backgroundImage": this.image(),
       "backgroundSize": "contain",
@@ -38,9 +32,5 @@ module.exports = React.createClass({
       "height": "100%",
       "width": "100%"
     };
-  },
-
-  render() {
-    return (div({style: this.css() }));
   }
-});
+}

@@ -1,21 +1,19 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+interface PlaceholderViewProps {
+  className: string;
+  label: string;
+}
 
-const {div} = React.DOM;
+export class PlaceholderView extends React.Component<PlaceholderViewProps, {}> {
 
-module.exports = React.createClass({
+  public static displayName = "PlaceholderView";
 
-  displayName: "Placeholder",
-
-  render() {
-    return (div({className: `placeholder ${this.props.className}`},
-      (div({className: "placeholder-content"}, this.props.label))
-    ));
+  public render() {
+    return (
+      <div className={`placeholder ${this.props.className}`}>
+        <div className="placeholder-content">{this.props.label}</div>
+      </div>
+    );
   }
-});
+}

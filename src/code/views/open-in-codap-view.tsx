@@ -1,55 +1,38 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const {a, span} = React.DOM;
 const tr = require("../utils/translate");
 
-const Dropdown = React.createFactory(require("./dropdown-view"));
-module.exports = React.createClass({
+interface OpenInCodapViewProps {
+  disabled: boolean;
+}
 
-  displayName: "OpenInCodap",
+export class OpenInCodapView extends React.Component<OpenInCodapViewProps, {}> {
 
-  getDefaultProps() {
-    return {
-      linkTitle: tr("~OPEN_IN_CODAP.TITLE"),
-      codapUrl: "http://codap.concord.org/releases/latest/static/dg/en/cert/index.html",
-      documentServer: "http://document-store.herokuapp.com/",
-      openInNewWindow: true
-    };
-  },
+  public static displayName = "OpenInCodapView";
 
-  thisEncodedUrl() {
-    return encodeURIComponent(window.location.toString());
-  },
+  public render() {
+    const {disabled} = this.props;
 
-  link() {
-    return `${this.props.codapUrl}?documentServer=${this.props.documentServer}&di=${this.thisEncodedUrl()}`;
-  },
-
-  render() {
-    const opts: any = { href: this.link() };
-
-    if (this.props.openInNewWindow) {
-      opts.target = "_blank";
-    }
-
-    if (this.props.disabled) {
-      opts.className = "disabled";
-      opts.disabled = true;
-      opts.onClick = (e) => {
-        e.preventDefault();
-        return alert(tr("~OPEN_IN_CODAP.DISABLED"));
-      };
-    }
-
-    return (span({className: "link"},
-      (a(opts, this.props.linkTitle))
-    ));
+    return (
+      <span className="link">
+        <a
+          href={this.link()}
+          className={disabled ? "disabled" : undefined}
+          onClick={disabled ? this.handleDisabledLink : undefined}
+        >
+          {tr("~OPEN_IN_CODAP.TITLE")}
+        </a>
+      </span>
+    );
   }
-});
+
+  private link() {
+    const encodedUrl = encodeURIComponent(window.location.toString());
+    return `http://codap.concord.org/releases/latest/static/dg/en/cert/index.html?documentServer=http://document-store.herokuapp.com/&di=${encodedUrl}`;
+  }
+
+  private handleDisabledLink = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    alert(tr("~OPEN_IN_CODAP.DISABLED"));
+  }
+}

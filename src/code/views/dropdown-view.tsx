@@ -1,137 +1,100 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+interface DropdownItemViewProps {
+  isActionMenu: boolean;
+  item: any; // TODO: set concrete type
+  select: (item: any) => void; // TODO: set concrete type
+}
 
-const {div, i, span, ul, li} = React.DOM;
+class DropdownItemView extends React.Component<DropdownItemViewProps, {}> {
 
-const DropdownItem = React.createFactory(React.createClass({
+  public static displayName = "DropdownItem";
 
-  displayName: "DropdownItem",
-
-  clicked() {
-    return this.props.select(this.props.item);
-  },
-
-  render() {
+  public render() {
     const className = `menuItem ${this.props.isActionMenu && !this.props.item.action ? "disabled" : ""}`;
     const name = this.props.item.name || this.props.item;
-    return (li({className, onClick: this.clicked }, name));
+    return <li className={className} onClick={this.handleClicked}>{name}</li>;
   }
-})
-);
 
-const DropDown = React.createClass({
+  private handleClicked = () => {
+    return this.props.select(this.props.item);
+  }
+}
 
-  displayName: "Dropdown",
+interface DropDownViewProps {
+  items: any[]; // TODO: get concrete type
+  isActionMenu: boolean;
+  anchor: string;
+  onSelect: (item: any) => void; // TODO: get concrete type
+}
 
-  getDefaultProps() {
-    return {
-      isActionMenu: true,              // Whether each item contains its own action
-      onSelect(item) {             // If not, @props.onSelect is called
-        return log.info(`Selected ${item}`);
-      }
-    };
-  },
+interface DropDownViewState {
+  showingMenu: boolean;
+  timeout: number | null;
+}
 
-  getInitialState() {
-    return {
-      showingMenu: false,
-      timeout: null
-    };
-  },
+export class DropDownView extends React.Component<DropDownViewProps, DropDownViewState> {
 
-  blur() {
-    this.unblur();
-    const timeout = setTimeout(( () => this.setState({showingMenu: false}) ), 500);
-    return this.setState({timeout});
-  },
+  public static displayName = "Dropdown";
 
-  unblur() {
+  public state: DropDownViewState = {
+    showingMenu: false,
+    timeout: null
+  };
+
+  public render() {
+    let item;
+    const menuClass = this.state.showingMenu ? "menu-showing" : "menu-hidden";
+    const items: JSX.Element[] = [];
+    for (item of this.props.items) {
+      items.push(<DropdownItemView
+        key={item.name || item}
+        item={item}
+        select={this.handleSelect}
+        isActionMenu={this.props.isActionMenu}
+      />);
+    }
+
+    return (
+      <div className="menu">
+        <span className="menu-anchor" onClick={this.handleSelectNone}>
+          {this.props.anchor}
+          <i className="icon-codap-arrow-expand"/>
+        </span>
+        <div className={menuClass} onMouseLeave={this.handleBlur} onMouseEnter={this.handleUnblur}>
+          <ul>{items}</ul>
+        </div>
+      </div>
+    );
+  }
+
+  private handleBlur = () => {
+    this.handleUnblur();
+    const timeout = window.setTimeout(( () => this.setState({showingMenu: false}) ), 500);
+    this.setState({timeout});
+  }
+
+  private handleUnblur = () => {
     if (this.state.timeout) {
       clearTimeout(this.state.timeout);
     }
-    return this.setState({timeout: null});
-  },
+    this.setState({timeout: null});
+  }
 
-  select(item) {
+  private handleSelect = (item) => {
     const nextState = (!this.state.showingMenu);
     this.setState({showingMenu: nextState});
     if (!item) { return; }
     if (this.props.isActionMenu && item.action) {
-      return item.action();
+      item.action();
     } else {
-      return this.props.onSelect(item);
+      this.props.onSelect(item);
     }
-  },
-
-  render() {
-    let item;
-    const menuClass = this.state.showingMenu ? "menu-showing" : "menu-hidden";
-    const select = item => {
-      return ( () => this.select(item));
-    };
-    return (div({className: "menu"},
-      (span({className: "menu-anchor", onClick: () => this.select(null)},
-        this.props.anchor,
-        (i({className: "icon-codap-arrow-expand"}))
-      )),
-      (div({className: menuClass, onMouseLeave: this.blur, onMouseEnter: this.unblur},
-        (ul({},
-          (() => {
-            const result: any = [];
-            for (item of this.props.items) {
-              result.push((DropdownItem({key: item.name || item, item, select: this.select, isActionMenu: this.props.isActionMenu})));
-            }
-            return result;
-          })()
-        ))
-      ))
-    ));
   }
-});
 
-const DemoDropDown = React.createFactory(DropDown);
-
-const Demo = React.createClass({
-  getInitialState() {
-    return {nonActionMenuSelection: "Selection menu"};
-  },
-  onNonActionMenuSelect(item) {
-    return this.setState({nonActionMenuSelection: item});
-  },
-  render() {
-    return (div({},
-      (div({},
-        (DemoDropDown({
-          anchor: "Action Menu",
-          items: [
-            {name: "Action 1", action() { return alert("Action 1"); }},
-            {name: "Action 2", action() { return alert("Action 2"); }},
-            {name: "Disabled action"}
-          ]
-        }))
-      )),
-      (div({},
-        (DemoDropDown({
-          isActionMenu: false,
-          onSelect: this.onNonActionMenuSelect,
-          anchor: this.state.nonActionMenuSelection,
-          items: [
-            "Option 1",
-            "Option 2"
-          ]
-        }))
-      ))
-    ));
+  private handleSelectNone = () => {
+    this.handleSelect(null);
   }
-});
+}
 
-module.exports = DropDown;
 
-// window.testComponent = (domID) -> ReactDOM.render React.createElement(Demo,{}), domID

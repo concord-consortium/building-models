@@ -8,8 +8,10 @@ const SimulationStore = require("../stores/simulation-store");
 const AppSettingsStore = require("../stores/app-settings-store");
 
 const tr              = require("../utils/translate");
-const RecordButton    = React.createFactory(require("./record-button-view"));
-const Dropdown        = React.createFactory(require("./dropdown-view"));
+import { RecordButtonView as RecordButtonViewClass } from "./record-button-view";
+const RecordButton    = React.createFactory(RecordButtonViewClass);
+import { DropDownView as DropDownViewClass } from "./dropdown-view";
+const Dropdown        = React.createFactory(DropDownViewClass);
 const ExperimentPanel = React.createFactory(require("./experiment-panel-view"));
 
 const {div, span, i, input}  = React.DOM;

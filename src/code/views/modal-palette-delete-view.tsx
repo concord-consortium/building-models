@@ -8,8 +8,10 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const ModalDialog         = React.createFactory(require("./modal-dialog-view"));
-const PaletteDeleteView   = React.createFactory(require("./palette-delete-view"));
+import { ModalDialogView as ModalDialogViewClass } from "./modal-dialog-view";
+const ModalDialog         = React.createFactory(ModalDialogViewClass);
+import { PaletteDeleteView as PaletteDeleteViewClass } from "./palette-delete-view";
+const PaletteDeleteView   = React.createFactory(PaletteDeleteViewClass);
 const PaletteDialogStore  = require("../stores/palette-delete-dialog-store");
 const NodesStore          = require("../stores/nodes-store");
 const tr                  = require("../utils/translate");

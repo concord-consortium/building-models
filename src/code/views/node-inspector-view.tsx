@@ -10,7 +10,9 @@ export {};
 
 const {div, h2, label, input, select, option, optgroup, button, i} = React.DOM;
 const tr = require("../utils/translate");
-const ColorPicker = React.createFactory(require("./color-picker-view"));
+
+import {ColorPickerView as ColorPickerViewClass} from "./color-picker-view";
+const ColorPicker = React.createFactory(ColorPickerViewClass);
 const ImagePickerView = React.createFactory(require("./image-picker-view"));
 module.exports = React.createClass({
 

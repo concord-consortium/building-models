@@ -1,36 +1,33 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+interface ModalViewProps {
+  close?: () => void;
+}
 
-const {div} = React.DOM;
+export class ModalView extends React.Component<ModalViewProps, {}> {
 
-module.exports = React.createClass({
+  public static displayName = "ModalView";
 
-  displayName: "Modal",
-
-  watchForEscape(e) {
-    if (e.keyCode === 27) {
-      return (typeof this.props.close === "function" ? this.props.close() : undefined);
-    }
-  },
-
-  componentDidMount() {
+  public componentDidMount() {
     return $(window).on("keyup", this.watchForEscape);
-  },
-
-  componentWillUnmount() {
-    return $(window).off("keyup", this.watchForEscape);
-  },
-
-  render() {
-    return (div({className: "modal"},
-      (div({className: "modal-background"})),
-      (div({className: "modal-content"}, this.props.children))
-    ));
   }
-});
+
+  public componentWillUnmount() {
+    return $(window).off("keyup", this.watchForEscape);
+  }
+
+  public render() {
+    return (
+      <div className="modal">
+        <div className="modal-background" />
+        <div className="modal-content">{this.props.children}</div>
+      </div>
+    );
+  }
+
+  private watchForEscape = (e) => {
+    if ((e.keyCode === 27) && this.props.close) {
+      this.props.close();
+    }
+  }
+}

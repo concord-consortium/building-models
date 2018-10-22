@@ -12,7 +12,8 @@ export {};
 
 const LinkRelationView = React.createFactory(require("./link-relation-view"));
 const RelationFactory = require("../models/relation-factory");
-const TabbedPanel = React.createFactory(require("./tabbed-panel-view"));
+import { TabbedPanelView as TabbedPanelViewClass } from "./tabbed-panel-view";
+const TabbedPanel = React.createFactory(TabbedPanelViewClass);
 const Tabber = require("./tabbed-panel-view");
 const tr = require("../utils/translate");
 

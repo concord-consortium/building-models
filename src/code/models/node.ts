@@ -13,7 +13,8 @@
 export {};
 
 const GraphPrimitive = require("./graph-primitive");
-const Colors = require("../utils/colors");
+
+import {ColorChoices} from "../utils/colors";
 
 const tr = require("../utils/translate");
 const urlParams = require("../utils/url-params");
@@ -83,7 +84,7 @@ class Node extends GraphPrimitive {
     this._max = nodeSpec.max != null ? nodeSpec.max : this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
     this._initialValue = nodeSpec.initialValue != null ? nodeSpec.initialValue : Math.round(SEMIQUANT_MAX / 2);
 
-    if (this.color == null) { this.color = Colors.choices[0].value; }
+    if (this.color == null) { this.color = ColorChoices[0].value; }
 
     this.isInDependentCycle = false;   // we always initalize with no links, so we can't be in cycle
 

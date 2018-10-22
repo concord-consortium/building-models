@@ -10,7 +10,8 @@ export {};
 
 const {div, img} = React.DOM;
 const Draggable = require("../mixins/draggable");
-const SquareImage = React.createFactory(require("./square-image-view"));
+import { SquareImageView as SquareImageViewClass } from "./square-image-view";
+const SquareImage = React.createFactory(SquareImageViewClass);
 module.exports = React.createClass({
 
   displayName: "ProtoNode",

@@ -9,7 +9,8 @@ export {};
 
 const PaletteItemView    = React.createFactory(require("./palette-item-view"));
 const PaletteAddView     = React.createFactory(require("./palette-add-view"));
-const ImageMetadata      = React.createFactory(require("./image-metadata-view"));
+import { ImageMetadataView as ImageMetadataViewClass } from "./image-metadata-view";
+const ImageMetadata      = React.createFactory(ImageMetadataViewClass);
 
 const PaletteStore       = require("../stores/palette-store");
 const PaletteDialogStore = require("../stores/palette-delete-dialog-store");

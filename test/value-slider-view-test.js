@@ -16,9 +16,8 @@ const { shallow, mount, render } = Enzyme;
 
 const { expect }         = chai;
 
-const requireView = name => require(`${__dirname}/../src/code/views/${name}`);
-
-const Slider        = React.createFactory(requireView('value-slider-view'));
+import { SVGSliderView as SVGSliderViewClass } from "../src/code/views/value-slider-view";
+const Slider = React.createFactory(SVGSliderViewClass);
 
 describe("The Value Slider", function() {
   it("contains a div with the value-slider class", function() {

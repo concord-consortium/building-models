@@ -1,18 +1,20 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+interface RecordButtonViewProps {
+  recording: boolean;
+  includeLight: boolean;
+  enabled: boolean;
+  icon: string;
+  disabled: boolean;
+  cantRecord: boolean;
+  onClick: (e: any) => void; // TODO: get concrete type
+}
 
-const tr              = require("../utils/translate");
-const {div, span, i}  = React.DOM;
+export class RecordButtonView extends React.Component<RecordButtonViewProps, {}> {
 
-module.exports = React.createClass({
-  displayName: "RecordButton",
+  public static displayName = "RecordButtonView";
 
+  /*
   getDefaultProps() {
     return {
       recording: false,
@@ -21,20 +23,37 @@ module.exports = React.createClass({
       icon: "icon-codap-video-camera"
     };
   },
+  */
 
-  renderRecordingLight() {
+  public render() {
+    const verticalStyle = this.props.includeLight ? {paddingRight: "0.5em"} : {};
+    return (
+      <div className={this.classNames()} onClick={this.handleOnClick}>
+        <div className="horizontal">
+          <div className="vertical" style={verticalStyle}>
+            {this.props.children}
+          </div>
+          {this.renderRecordingLight()}
+        </div>
+      </div>
+    );
+  }
+
+  private renderRecordingLight() {
     if (this.props.includeLight) {
       const classNames = ["recording-light"];
       if (this.props.recording) {
         classNames.push("recording");
       }
-      return (div({className: "recording-box vertical"},
-        (div({className: classNames.join(" ")}))
-      ));
+      return (
+        <div className="recording-box vertical">
+          <div className={classNames.join(" ")} />
+        </div>
+      );
     }
-  },
+  }
 
-  classNames() {
+  private classNames() {
     const classes = ["button"];
     if (this.props.disabled) {
       classes.push("disabled");
@@ -49,26 +68,11 @@ module.exports = React.createClass({
       classes.push("bigger");
     }
     return classes.join(" ");
-  },
-
-  render() {
-    let onClick;
-    let verticalStyle = {};
-    if (this.props.includeLight) {
-      verticalStyle = {"paddingRight": "0.5em"};
-    }
-    if (this.props.disabled) {
-      onClick = () => null;
-    } else {
-      ({ onClick } = this.props);
-    }
-    return (div({className: this.classNames(), onClick},
-      (div({className: "horizontal"},
-        (div({className: "vertical", style: verticalStyle},
-          this.props.children
-        )),
-        this.renderRecordingLight()
-      ))
-    ));
   }
-});
+
+  private handleOnClick = (e) => {
+    if (!this.props.disabled && this.props.onClick) {
+      this.props.onClick(e);
+    }
+  }
+}

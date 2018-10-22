@@ -1,10 +1,11 @@
-
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const tr = require("./translate");
 
-const colors = {
+export interface Color {
+  name: string;
+  value: string;
+}
+
+export const Colors = {
   yellow: {
     name: tr("~COLOR.YELLOW"),
     value: "#f7be33"
@@ -43,7 +44,4 @@ const colors = {
   }
 };
 
-module.exports = {
-  colors,
-  choices: [colors.yellow, colors.darkBlue, colors.medBlue]
-};
+export const ColorChoices = [Colors.yellow, Colors.darkBlue, Colors.medBlue];

@@ -1,22 +1,24 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { ModalDialogView } from "./modal-dialog-view";
+import { TabbedPanelView } from "./tabbed-panel-view";
 
-const ModalDialog = React.createFactory(require("./modal-dialog-view"));
-const TabbedPanel = React.createFactory(require("./tabbed-panel-view"));
+interface ModalTabbedDialogViewProps {
+  title: string;
+  close: () => void;
+  clientClass: any; // TODO: get concrete type
+  tabs: any; // TODO: get concrete type
+}
 
-module.exports = React.createClass({
+export class ModalTabbedDialogView extends React.Component<ModalTabbedDialogViewProps, {}> {
 
-  displayName: "ModalTabbedDialogView",
+  public static displayName = "ModalTabbedDialogView";
 
-  render() {
-    return (ModalDialog({title: this.props.title, close: this.props.close},
-      (TabbedPanel({clientClass: this.props.clientClass, tabs: this.props.tabs}))
-    ));
+  public render() {
+    return (
+      <ModalDialogView title={this.props.title} close={this.props.close}>
+        <TabbedPanelView clientClass={this.props.clientClass} tabs={this.props.tabs} />
+      </ModalDialogView>
+    );
   }
-});
+}

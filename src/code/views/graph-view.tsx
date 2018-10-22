@@ -15,7 +15,7 @@ const NodeView         = require("./node-view");
 const Node             = React.createFactory(NodeView);
 const NodeModel        = require("../models/node");
 const Importer         = require("../utils/importer");
-const Color            = require("../utils/colors");
+import {Colors} from "../utils/colors";
 const DiagramToolkit   = require("../utils/js-plumb-diagram-toolkit");
 const dropImageHandler = require("../utils/drop-image-handler");
 const tr               = require("../utils/translate");
@@ -563,11 +563,11 @@ module.exports = React.createClass({
   },
 
   render() {
-    let dataColor = Color.colors.mediumGray.value;
-    let innerColor = Color.colors.mediumGrayInner.value;
+    let dataColor = Colors.mediumGray.value;
+    let innerColor = Colors.mediumGrayInner.value;
     if (this.state.isRecording) {
-      dataColor = Color.colors.data.value;
-      innerColor = Color.colors.dataInner.value;
+      dataColor = Colors.data.value;
+      innerColor = Colors.dataInner.value;
     }
     const diagramOnly = this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly;
 

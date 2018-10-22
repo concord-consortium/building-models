@@ -10,8 +10,10 @@
 export {};
 
 const NodeInspectorView = React.createFactory(require("./node-inspector-view"));
-const LinkInspectorView = React.createFactory(require("./link-inspector-view"));
-const LinkValueInspectorView = React.createFactory(require("./link-value-inspector-view"));
+import { LinkInspectorView as LinkInspectorViewClass } from "./link-inspector-view";
+const LinkInspectorView = React.createFactory(LinkInspectorViewClass);
+import { LinkValueInspectorView as LinkRelationInspectorViewClass } from "./link-value-inspector-view";
+const LinkValueInspectorView = React.createFactory(LinkRelationInspectorViewClass);
 const NodeValueInspectorView = React.createFactory(require("./node-value-inspector-view"));
 const LinkRelationInspectorView = React.createFactory(require("./relation-inspector-view"));
 const NodeRelationInspectorView = React.createFactory(require("./relation-inspector-view"));

@@ -1,28 +1,42 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+interface StackedImageViewProps {
+  image?: string;
+  imageProps: any[]; // TODO: get concrete type
+}
 
-const {div} = React.DOM;
+export class StackedImageView extends React.Component<StackedImageViewProps, {}> {
 
-module.exports = React.createClass({
+  public static displayName = "StackedImageView";
 
-  displayName: "StackedImage",
+  public render() {
+    const styles = this.props.imageProps.map(imgProps =>
+      ({
+        top: `${imgProps.top}%`,
+        left: `${imgProps.left}%`,
+        transform: `rotate(${imgProps.rotation}deg)`
+      })
+    );
+    return (
+      <div style={{position: "relative", width: "100%", height: "100%"}}>
+        {_.map(this.props.imageProps, (imgProps, index) => {
+          const style = _.assign({}, this.css(index), styles[index]);
+          return <div style={style} key={index} />;
+        })}
+      </div>
+    );
+  }
 
-  image() {
-    if (((this.props.image != null ? this.props.image.length : undefined) > 0) && (this.props.image !== "#remote")) {
-      return `url(${this.props.image})`;
+  private image() {
+    const {image} = this.props;
+    if (image && (image.length > 0) && image !== "#remote") {
+      return `url(${image})`;
     } else {
       return "none";
     }
-  },
+  }
 
-  css(index) {
+  private css(index) {
     return {
       position: "absolute",
       backgroundImage: this.image(),
@@ -34,20 +48,5 @@ module.exports = React.createClass({
       height: "50%",
       width: "50%"
     };
-  },
-
-  render() {
-    const styles = this.props.imageProps.map(imgProps =>
-      ({
-        top: `${imgProps.top}%`,
-        left: `${imgProps.left}%`,
-        transform: `rotate(${imgProps.rotation}deg)`
-      })
-    );
-    return div({ style: { position: "relative", width: "100%", height: "100%" } },
-      _.map(this.props.imageProps, (imgProps, index) => {
-        return div({ style: _.assign({}, this.css(index), styles[index]), key: index });
-      })
-    );
   }
-});
+}

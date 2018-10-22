@@ -1,51 +1,52 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import * as React from "react";
 
 const dropImageHandler = require("../utils/drop-image-handler");
 
 const tr = require("../utils/translate");
 
-const {div, p} = React.DOM;
+interface DropZoneViewProps {
+  header: string;
+  dropped: (file: any) => void; // TODO: get concrete type
+}
 
-module.exports = React.createClass({
-  displayName: "DropZone",
+interface DropZoneViewState {
+  canDrop: boolean;
+}
 
-  getInitialState() {
-    return {canDrop: false};
-  },
+export class DropZoneView extends React.Component<DropZoneViewProps, DropZoneViewState> {
+  public static displayName = "DropZone";
 
-  onDragOver(e) {
+  public state: DropZoneViewState = {canDrop: false};
+
+  public render() {
+    const className = `dropzone ${this.state.canDrop ? "can-drop" : ""}`;
+    return (
+      <div className={className} onDragOver={this.handleOnDragOver} onDrop={this.handleOnDrop} onDragLeave={this.handleOnDragLeave}>
+        <p className="header">{this.props.header || tr("~DROPZONE.DROP_IMAGES_HERE")}</p>
+        <p>{tr("~DROPZONE.SQUARES_LOOK_BEST")}</p>
+      </div>
+    );
+  }
+
+  private handleOnDragOver = (e) => {
     if (!this.state.canDrop) {
       this.setState({canDrop: true});
     }
-    return e.preventDefault();
-  },
+    e.preventDefault();
+  }
 
-  onDragLeave(e) {
+  private handleOnDragLeave = (e) => {
     this.setState({canDrop: false});
-    return e.preventDefault();
-  },
+    e.preventDefault();
+  }
 
-  onDrop(e) {
+  private handleOnDrop = (e) => {
     this.setState({canDrop: false});
     e.preventDefault();
 
     // get the files
-    return dropImageHandler(e, file => {
-      return this.props.dropped(file);
+    dropImageHandler(e, file => {
+      this.props.dropped(file);
     });
-  },
-
-  render() {
-    return (div({className: `dropzone ${this.state.canDrop ? "can-drop" : ""}`, onDragOver: this.onDragOver, onDrop: this.onDrop, onDragLeave: this.onDragLeave},
-      (p({className: "header"}, this.props.header || (tr("~DROPZONE.DROP_IMAGES_HERE")))),
-      (p({}, (tr("~DROPZONE.SQUARES_LOOK_BEST"))))
-    ));
   }
-});
+}

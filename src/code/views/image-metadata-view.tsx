@@ -1,91 +1,107 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import * as React from "react";
 
 const xlat       = require("../utils/translate");
 const licenses   = require("../data/licenses");
 const ImageDialogStore = require("../stores/image-dialog-store");
 
-const {div, table, tbody, tr, td, a, input, select, radio, p} = React.DOM;
+interface ImageMetadataViewProps {
+  metadata: any; // TODO: get concrete type
+  update: (data: any) => void; // TODO: get concrete type
+}
 
-module.exports = React.createClass({
+interface ImageMetadataViewState {
+  hostname: string | null;
+}
 
-  displayName: "ImageMetadata",
+export class ImageMetadataView extends React.Component<ImageMetadataViewProps, ImageMetadataViewState> {
 
+  public static displayName = "ImageMetadata";
 
-  getInitialState() {
-    return {hostname: null};
-  },
+  public state: ImageMetadataViewState = {hostname: null};
 
-  hostname() {
-    // instead of using a regexp to extract the hostname use the dom
-    const link = document.createElement("a");
-    link.setAttribute("href", this.props.metadata != null ? this.props.metadata.link : undefined);
-    return link.hostname;
-  },
+  private title: HTMLInputElement | null;
+  private link: HTMLInputElement | null;
+  private license: HTMLSelectElement | null;
 
-  changed() {
-    const newMetaData = {
-      title: this.refs.title.value,
-      link: this.refs.link.value,
-      license: this.refs.license.value,
-      source: "external"
-    };
+  public render() {
+    return (
+      <div className="image-metadata">
+        {this.props.metadata ? this.renderMetadata() : undefined}
+      </div>
+    );
+  }
 
-    return this.props.update({metadata: newMetaData});
-  },
-
-  render() {
-    return (div({className: "image-metadata"},
-      this.props.metadata ?
-        this.renderMetadata() : undefined
-    ));
-  },
-
-  renderMetadata() {
+  private renderMetadata() {
     const licenseName = this.props.metadata.license || "public domain";
     const licenseData = licenses.getLicense(licenseName);
     const { title }   = this.props.metadata;
     const { link }    = this.props.metadata;
 
     if (this.props.metadata.source === "external") {
-      return (div({key: "external"},
-        (table({},
-          (tbody({},
-            (tr({}, (td({}, xlat("~METADATA.TITLE"))),
-              (td({},
-                (input({ref: "title", value: title, onChange: this.changed})))))),
+      return (
+        <div key="external">
+          <table>
+            <tbody>
+              <tr>
+                <td>{xlat("~METADATA.TITLE")}</td>
+                <td>
+                  <input ref={(el) => this.title = el} value={title} onChange={this.handleChanged} />
+                </td>
+              </tr>
 
-            (tr({}, (td({}, xlat("~METADATA.LINK"))),
-              (td({},
-                (input({ref: "link", value: link, onChange: this.changed})))))),
-            (tr({}, (td({}, xlat("~METADATA.CREDIT"))),
-              (td({},
-                (select({ref: "license", value: licenseName, onChange: this.changed},
-                  licenses.getRenderOptions(licenseName)
-                ))))))
-          ))
-        )),
-        (p({className: "learn-more"}, (a({href: licenseData.link, target: "_blank"}, `Learn more about ${licenseData.fullLabel}`))))
-      ));
+              <tr>
+                <td>{xlat("~METADATA.LINK")}</td>
+                <td>
+                  <input ref={(el) => this.link = el} value={link} onChange={this.handleChanged} />
+                </td>
+              </tr>
+
+              <tr>
+                <td>{xlat("~METADATA.CREDIT")}</td>
+                <td>
+                  <select ref={(el) => this.license = el} value={licenseName} onChange={this.handleChanged}>
+                    {licenses.getRenderOptions(licenseName)}
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="learn-more">
+            <a href={licenseData.link} target="_blank">{`Learn more about ${licenseData.fullLabel}`}</a>
+          </p>
+        </div>
+      );
     } else {
-      return (div({key: "internal"},
-        (p({})),
-        (div({}, `\"${title}\"`)),
-        link ?
-          (div({key: "hostname"}, (a({href: link, target: "_blank"}, `See it on ${this.hostname()}`)))) : undefined,
-        (p({})),
-        (div({}, "License")),
-        (div({key: "license"},
-          (a({href: licenseData.link, target: "_blank"}, licenseData.label))
-        ))
-      ));
+      return (
+        <div key="internal">
+          <p />
+          <div>{`\"${title}\"`}</div>
+          {link ? <div key="hostname"><a href={link} target="_blank">{`See it on ${this.hostname()}`}</a></div> : undefined}
+          <p />
+          <div>License</div>
+          <div key="license">
+            <a href={licenseData.link} target="_blank">{licenseData.label}</a>
+          </div>
+        </div>
+      );
     }
   }
-});
+
+  private hostname() {
+    // instead of using a regexp to extract the hostname use the dom
+    const link = document.createElement("a");
+    link.setAttribute("href", this.props.metadata != null ? this.props.metadata.link : undefined);
+    return link.hostname;
+  }
+
+  private handleChanged = () => {
+    const newMetaData = {
+      title: this.title && this.title.value,
+      link: this.link && this.link.value,
+      license: this.license && this.license.value,
+      source: "external"
+    };
+
+    this.props.update({metadata: newMetaData});
+  }
+}

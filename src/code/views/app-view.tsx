@@ -5,31 +5,24 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+const tr                 = require("../utils/translate");
 
-const Reflux = require("reflux");
-const tr                  = require("../utils/translate");
+const GlobalNav          = require("./global-nav-view");
+const GraphView          = require("./graph-view");
+const NodeWell           = require("./node-well-view");
+const InspectorPanel     = require("./inspector-panel-view");
+const ImageBrowser       = require("./image-browser-view");
+const DocumentActions    = require("./document-actions-view");
+const ModalPaletteDelete = require("./modal-palette-delete-view");
 
-const Placeholder        = React.createFactory(require("./placeholder-view"));
-const GlobalNav          = React.createFactory(require("./global-nav-view"));
-const GraphView          = React.createFactory(require("./graph-view"));
-const NodeWell           = React.createFactory(require("./node-well-view"));
-const InspectorPanel     = React.createFactory(require("./inspector-panel-view"));
-const ImageBrowser       = React.createFactory(require("./image-browser-view"));
-const DocumentActions    = React.createFactory(require("./document-actions-view"));
-const ModalPaletteDelete = React.createFactory(require("./modal-palette-delete-view"));
-const BuildInfoView      = React.createFactory(require("./build-info-view"));
+import { BuildInfoView } from "./build-info-view";
 
 const ImageDialogStore    = require("../stores/image-dialog-store");
 const AppSettingsStore    = require("../stores/app-settings-store");
 
-
-const {div, a} = React.DOM;
-
 module.exports = React.createClass({
 
-  displayName: "WirefameApp",
+  displayName: "App",
 
   mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require("../mixins/app-view")],
 
@@ -64,56 +57,56 @@ module.exports = React.createClass({
     } else if (AppSettingsStore.store.settings.uiElements.globalNav === false) {
       actionBarStyle += " small";
     }
+    const renderGlobalNav = !this.state.iframed && (AppSettingsStore.store.settings.uiElements.globalNav !== false);
 
-    return (div({className: "app"},
-      (div({className: this.state.iframed ? "iframed-workspace" : "workspace"},
-        !this.state.iframed && (AppSettingsStore.store.settings.uiElements.globalNav !== false) ?
-          (GlobalNav({
-            filename: this.state.filename,
-            username: this.state.username,
-            graphStore: this.props.graphStore,
-            GraphStore: this.GraphStore,
-            display: AppSettingsStore.store.settings.uiElements.globalNav
-          })) : undefined,
-        (div({className: actionBarStyle},
-          (NodeWell({
-            palette: this.state.palette,
-            toggleImageBrowser: this.toggleImageBrowser,
-            graphStore: this.props.graphStore,
-            uiElements: AppSettingsStore.store.settings.uiElements
-          })),
-          (DocumentActions({
-            graphStore: this.props.graphStore,
-            diagramOnly: this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly,
-            iframed: this.state.iframed
-          }))
-        )),
-        (div({className: AppSettingsStore.store.settings.uiElements.globalNav === false ? "canvas full" : "canvas"},
-          (GraphView({
-            graphStore: this.props.graphStore,
-            selectionManager: this.props.graphStore.selectionManager,
-            selectedLink: this.state.selectedLink}))
-        )),
-        (InspectorPanel({
-          node: this.state.selectedNode,
-          link: this.state.selectedLink,
-          onNodeChanged: this.onNodeChanged,
-          onNodeDelete: this.onNodeDelete,
-          palette: this.state.palette,
-          diagramOnly: this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly,
-          toggleImageBrowser: this.toggleImageBrowser,
-          graphStore: this.props.graphStore,
-          ref: "inspectorPanel",
-          display: AppSettingsStore.store.settings.uiElements.inspectorPanel
-        })),
-        this.state.showingDialog ?
-          (ImageBrowser({
-            graphStore: this.props.graphStore})
-          ) : undefined,
-        (ModalPaletteDelete({}))
-      )),
-      this.state.iframed ?
-        (BuildInfoView({})) : undefined
-    ));
+    return (
+      <div className="app">
+        <div className={this.state.iframed ? "iframed-workspace" : "workspace"}>
+          {renderGlobalNav ?
+            <GlobalNav
+              filename={this.state.filename}
+              username={this.state.username}
+              graphStore={this.props.graphStore}
+              GraphStore={this.GraphStore}
+              display={AppSettingsStore.store.settings.uiElements.globalNav}
+            /> : undefined}
+          <div className={actionBarStyle}>
+            <NodeWell
+              palette={this.state.palette}
+              toggleImageBrowser={this.toggleImageBrowser}
+              graphStore={this.props.graphStore}
+              uiElements={AppSettingsStore.store.settings.uiElements}
+            />
+            <DocumentActions
+              graphStore={this.props.graphStore}
+              diagramOnly={this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly}
+              iframed={this.state.iframed}
+            />
+          </div>
+          <div className={AppSettingsStore.store.settings.uiElements.globalNav === false ? "canvas full" : "canvas"}>
+            <GraphView
+              graphStore={this.props.graphStore}
+              selectionManager={this.props.graphStore.selectionManager}
+              selectedLink={this.state.selectedLink}
+            />
+          </div>
+          <InspectorPanel
+            node={this.state.selectedNode}
+            link={this.state.selectedLink}
+            onNodeChanged={this.onNodeChanged}
+            onNodeDelete={this.onNodeDelete}
+            palette={this.state.palette}
+            diagramOnly={this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly}
+            toggleImageBrowser={this.toggleImageBrowser}
+            graphStore={this.props.graphStore}
+            ref="inspectorPanel"
+            display={AppSettingsStore.store.settings.uiElements.inspectorPanel}
+          />
+          {this.state.showingDialog ? <ImageBrowser graphStore={this.props.graphStore} /> : null}
+          <ModalPaletteDelete />
+        </div>
+        {this.state.iframed ? <BuildInfoView /> : null}
+      </div>
+    );
   }
 });

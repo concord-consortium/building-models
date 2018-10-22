@@ -14,9 +14,12 @@ const tr = require("../utils/translate");
 
 const AppSettingsStore    = require("../stores/app-settings-store");
 const SimulationActions = require("../stores/simulation-store").actions;
-const SquareImage = React.createFactory(require("./square-image-view"));
-const StackedImage = React.createFactory(require("./stacked-image-view"));
-const SliderView  = React.createFactory(require("./value-slider-view"));
+import { SquareImageView as SquareImageViewClass } from "./square-image-view";
+const SquareImage = React.createFactory(SquareImageViewClass);
+import { StackedImageView as StackedImageViewClass } from "./stacked-image-view";
+const StackedImage = React.createFactory(StackedImageViewClass);
+import { SVGSliderView as SVGSliderViewClass } from "./value-slider-view";
+const SliderView  = React.createFactory(SVGSliderViewClass);
 const GraphView   = React.createFactory(require("./node-svg-graph-view"));
 const CodapConnect = require("../models/codap-connect");
 const DEFAULT_CONTEXT_NAME = "building-models";
