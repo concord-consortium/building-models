@@ -6,13 +6,12 @@ import { CSSProperties } from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const SimulationStore = require("../stores/simulation-store");
 
-module.exports = React.createClass({
+export const NodeSvgGraphView = React.createClass({
+
   displayName: "NodeSvgGraphView",
+
   mixins: [ SimulationStore.mixin ],
 
   getDefaultProps() {

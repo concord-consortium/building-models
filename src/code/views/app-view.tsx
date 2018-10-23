@@ -1,21 +1,20 @@
 const tr                 = require("../utils/translate");
 
-const GlobalNav          = require("./global-nav-view");
-const GraphView          = require("./graph-view");
-const NodeWell           = require("./node-well-view");
-const InspectorPanel     = require("./inspector-panel-view");
-const ImageBrowser       = require("./image-browser-view");
-const DocumentActions    = require("./document-actions-view");
-const ModalPaletteDelete = require("./modal-palette-delete-view");
-
+import { GlobalNavView } from "./global-nav-view";
+import { GraphView } from "./graph-view";
+import { NodeWellView } from "./node-well-view";
+import { InspectorPanelView } from "./inspector-panel-view";
+import { ImageBrowserView } from "./image-browser-view";
+import { DocumentActionsView } from "./document-actions-view";
+import { ModalPaletteDeleteView } from "./modal-palette-delete-view";
 import { BuildInfoView } from "./build-info-view";
 
 const ImageDialogStore    = require("../stores/image-dialog-store");
 const AppSettingsStore    = require("../stores/app-settings-store");
 
-module.exports = React.createClass({
+export const AppView = React.createClass({
 
-  displayName: "App",
+  displayName: "AppView",
 
   mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require("../mixins/app-view")],
 
@@ -58,7 +57,7 @@ module.exports = React.createClass({
       <div className="app">
         <div className={this.state.iframed ? "iframed-workspace" : "workspace"}>
           {renderGlobalNav ?
-            <GlobalNav
+            <GlobalNavView
               filename={this.state.filename}
               username={this.state.username}
               graphStore={this.props.graphStore}
@@ -66,13 +65,13 @@ module.exports = React.createClass({
               display={AppSettingsStore.store.settings.uiElements.globalNav}
             /> : undefined}
           <div className={actionBarStyle}>
-            <NodeWell
+            <NodeWellView
               palette={this.state.palette}
               toggleImageBrowser={this.toggleImageBrowser}
               graphStore={this.props.graphStore}
               uiElements={AppSettingsStore.store.settings.uiElements}
             />
-            <DocumentActions
+            <DocumentActionsView
               graphStore={this.props.graphStore}
               diagramOnly={this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly}
               iframed={this.state.iframed}
@@ -85,7 +84,7 @@ module.exports = React.createClass({
               selectedLink={this.state.selectedLink}
             />
           </div>
-          <InspectorPanel
+          <InspectorPanelView
             node={this.state.selectedNode}
             link={this.state.selectedLink}
             onNodeChanged={this.onNodeChanged}
@@ -97,8 +96,8 @@ module.exports = React.createClass({
             ref="inspectorPanel"
             display={AppSettingsStore.store.settings.uiElements.inspectorPanel}
           />
-          {this.state.showingDialog ? <ImageBrowser graphStore={this.props.graphStore} /> : null}
-          <ModalPaletteDelete />
+          {this.state.showingDialog ? <ImageBrowserView graphStore={this.props.graphStore} /> : null}
+          <ModalPaletteDeleteView />
         </div>
         {this.state.iframed ? <BuildInfoView /> : null}
       </div>

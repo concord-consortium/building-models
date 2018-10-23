@@ -8,7 +8,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const NodeView         = require("./node-view");
+import { NodeView } from "./node-view";
+
 const NodeModel        = require("../models/node");
 const Importer         = require("../utils/importer");
 import {Colors} from "../utils/colors";
@@ -26,9 +27,10 @@ const CodapStore       = require("../stores/codap-store");
 const LaraStore        = require("../stores/lara-store");
 const LinkColors       = require("../utils/link-colors");
 
-module.exports = React.createClass({
+export const GraphView = React.createClass({
 
-  displayName: "LinkView",
+  displayName: "GraphView",
+
   mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin, LaraStore.mixin ],
 
   getDefaultProps() {

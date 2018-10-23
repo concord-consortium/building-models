@@ -10,11 +10,11 @@ const AppSettingsStore = require("../stores/app-settings-store");
 const tr              = require("../utils/translate");
 import { RecordButtonView  } from "./record-button-view";
 import { DropDownView } from "./dropdown-view";
-const ExperimentPanel = require("./experiment-panel-view");
+import { ExperimentPanelView } from "./experiment-panel-view";
 
-module.exports = React.createClass({
+export const SimulationRunPanelView = React.createClass({
 
-  displayName: "SimulationRunPanel",
+  displayName: "SimulationRunPanelView",
 
   mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 
@@ -58,7 +58,7 @@ module.exports = React.createClass({
     return (
       <div className={wrapperClasses}>
         <div className="vertical">
-          <ExperimentPanel disabled={experimentDisabled} />
+          <ExperimentPanelView disabled={experimentDisabled} />
           {this.state.isTimeBased
             ? this.renderRecordForCollectors()
             : <div className="horizontal">

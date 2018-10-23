@@ -4,9 +4,10 @@ const PaletteDialogStore  = require("../stores/palette-delete-dialog-store");
 const NodesStore          = require("../stores/nodes-store");
 const tr                  = require("../utils/translate");
 
-module.exports = React.createClass({
+export const ModalPaletteDeleteView = React.createClass({
 
-  displayName: "ModalPaletteDelete",
+  displayName: "ModalPaletteDeleteView",
+
   mixins: [PaletteDialogStore.mixin],
 
   deleteItem() {

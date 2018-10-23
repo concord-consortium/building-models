@@ -7,7 +7,8 @@
 
 import "../stylus/app.styl";
 
-const AppView     = React.createFactory(require("./views/app-view"));
+import { AppView as AppViewClass } from "./views/app-view";
+const AppView     = React.createFactory(AppViewClass);
 
 const GraphStore   = require("./stores/graph-store");
 const PaletteStore = require("./stores/palette-store");

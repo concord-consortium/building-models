@@ -12,7 +12,7 @@ const SimulationActions = require("../stores/simulation-store").actions;
 import { SquareImageView } from "./square-image-view";
 import { StackedImageView } from "./stacked-image-view";
 import { SVGSliderView } from "./value-slider-view";
-const GraphView = require("./node-svg-graph-view");
+import { NodeSvgGraphView } from "./node-svg-graph-view";
 const CodapConnect = require("../models/codap-connect");
 const DEFAULT_CONTEXT_NAME = "building-models";
 
@@ -151,8 +151,7 @@ const NodeTitle = React.createFactory(React.createClass({
 })
 );
 
-let NodeView;
-module.exports = NodeView = React.createClass({
+export const NodeView = React.createClass({
 
   displayName: "NodeView",
 
@@ -395,16 +394,18 @@ module.exports = NodeView = React.createClass({
     const nodeImage = getNodeImage(this.props.data);
 
     if (this.props.showMinigraph) {
-      return (GraphView({
-        isTimeBased: this.props.isTimeBased,
-        min: this.props.data.min,
-        max: this.props.data.max,
-        data: this.props.data.frames,
-        currentValue: this.props.data.currentValue,
-        color: this.props.dataColor,
-        innerColor: this.props.innerColor,
-        image: nodeImage
-      }));
+      return (
+        <NodeSvgGraphView
+          isTimeBased={this.props.isTimeBased}
+          min={this.props.data.min}
+          max={this.props.data.max}
+          data={this.props.data.frames}
+          currentValue={this.props.data.currentValue}
+          color={this.props.dataColor}
+          innerColor={this.props.innerColor}
+          image={nodeImage}
+        />
+      );
     } else {
       return nodeImage;
     }

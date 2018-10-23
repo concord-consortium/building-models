@@ -7,10 +7,10 @@
 
 const tr = require("../utils/translate");
 
-import {ColorPickerView} from "./color-picker-view";
-const ImagePickerView = require("./image-picker-view");
+import { ColorPickerView } from "./color-picker-view";
+import { ImagePickerView } from "./image-picker-view";
 
-module.exports = React.createClass({
+export const NodeInspectorView = React.createClass({
 
   displayName: "NodeInspectorView",
 

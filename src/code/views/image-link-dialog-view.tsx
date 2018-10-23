@@ -2,8 +2,9 @@ import { DropZoneView } from "./dropzone-view";
 const ImageDialogStore = require("../stores/image-dialog-store");
 const tr = require("../utils/translate");
 
-module.exports = React.createClass({
-  displayName: "Link",
+export const ImageLinkDialogView = React.createClass({
+
+  displayName: "ImageLinkDialogView",
 
   mixins: [ ImageDialogStore.mixin, require("../mixins/image-dialog-view")],
 

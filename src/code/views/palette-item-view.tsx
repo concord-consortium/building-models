@@ -8,9 +8,9 @@
 const Draggable = require("../mixins/draggable");
 import { SquareImageView } from "./square-image-view";
 
-module.exports = React.createClass({
+export const PaletteItemView = React.createClass({
 
-  displayName: "ProtoNode",
+  displayName: "PaletteItemView",
 
   mixins: [Draggable],
 

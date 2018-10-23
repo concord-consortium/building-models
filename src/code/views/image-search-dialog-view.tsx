@@ -7,9 +7,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const ImageDialogStore = require("../stores/image-dialog-store");
 
 const OpenClipart = require("../utils/open-clipart");
@@ -84,8 +81,8 @@ const ImageSearchPrevNextLink = React.createClass({
   }
 });
 
-module.exports = React.createClass({
-  displayName: "ImageSearch",
+export const ImageSearchDialogView = React.createClass({
+  displayName: "ImageSearchDialogView",
 
   mixins: [require("../mixins/image-dialog-view"), ImageDialogStore.mixin],
 

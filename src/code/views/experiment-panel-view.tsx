@@ -1,9 +1,9 @@
 const SimulationStore = require("../stores/simulation-store");
 const tr              = require("../utils/translate");
 
-module.exports = React.createClass({
+export const ExperimentPanelView = React.createClass({
 
-  displayName: "ExperimentView",
+  displayName: "ExperimentPanelView",
 
   mixins: [ SimulationStore.mixin ],
 

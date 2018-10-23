@@ -4,12 +4,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const PaletteInspectorView = require("./palette-inspector-view");
+import { PaletteInspectorView } from "./palette-inspector-view";
 const PaletteStore = require("../stores/palette-store");
 
-module.exports = React.createClass({
+export const NodeWellView = React.createClass({
 
-  displayName: "NodeWell",
+  displayName: "NodeWellView",
 
   mixins: [ PaletteStore.mixin ],
 

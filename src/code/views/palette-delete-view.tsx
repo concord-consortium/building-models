@@ -2,7 +2,7 @@ import * as React from "react";
 
 const tr = require("../utils/translate");
 const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
-const ImagePickerView = require("./image-picker-view");
+import { ImagePickerView } from "./image-picker-view";
 
 interface PaletteDeleteViewProps {
   showReplacement: boolean;

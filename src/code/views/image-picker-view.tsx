@@ -1,7 +1,5 @@
-export {};
-
 const tr = require("../utils/translate");
-const PaletteAddView = require("./palette-add-view");
+import { PaletteAddView } from "./palette-add-view";
 const PaletteStore = require("../stores/palette-store");
 
 const ImgChoice = React.createClass({
@@ -24,7 +22,7 @@ const ImgChoice = React.createClass({
   }
 });
 
-module.exports = React.createClass({
+export const ImagePickerView = React.createClass({
 
   displayName: "ImagePickerView",
 

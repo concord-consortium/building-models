@@ -14,7 +14,7 @@ const autosize         = require("autosize");
 const SimulationStore  = require("../stores/simulation-store");
 const AppSettingsStore = require("../stores/app-settings-store");
 
-const Graph = React.createFactory(React.createClass({
+const Graph = React.createClass({
   render() {
     return (
       <SvgGraphView
@@ -30,8 +30,7 @@ const Graph = React.createFactory(React.createClass({
       />
     );
   }
-})
-);
+});
 
 const QuantStart = React.createClass({
   render() {
@@ -47,7 +46,7 @@ const QuantStart = React.createClass({
   }
 });
 
-module.exports = React.createClass({
+export const LinkRelationView = React.createClass({
 
   displayName: "LinkRelationView",
 

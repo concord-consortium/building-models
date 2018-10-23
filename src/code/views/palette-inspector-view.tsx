@@ -1,5 +1,5 @@
-const PaletteItemView    = require("./palette-item-view");
-const PaletteAddView     = require("./palette-add-view");
+import { PaletteItemView } from "./palette-item-view";
+import { PaletteAddView } from "./palette-add-view";
 import { ImageMetadataView } from "./image-metadata-view";
 
 const PaletteStore       = require("../stores/palette-store");
@@ -8,9 +8,9 @@ const NodesStore         = require("../stores/nodes-store");
 
 const tr                 = require("../utils/translate");
 
-module.exports = React.createClass({
+export const PaletteInspectorView = React.createClass({
 
-  displayName: "PaletteInspector",
+  displayName: "PaletteInspectorView",
 
   mixins: [ PaletteStore.mixin, NodesStore.mixin ],
 

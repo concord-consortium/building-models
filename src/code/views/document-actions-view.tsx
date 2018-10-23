@@ -4,13 +4,13 @@ const UndoRedoUIStore  = require("../stores/undo-redo-ui-store");
 const tr               = require("../utils/translate");
 
 import { AboutView } from "./about-view";
-const SimulationRunPanel = React.createFactory(require("./simulation-run-panel-view"));
+import { SimulationRunPanelView } from "./simulation-run-panel-view";
 
-module.exports = React.createClass({
+export const DocumentActionsView = React.createClass({
 
   mixins: [ CodapStore.mixin, UndoRedoUIStore.mixin, AppSettingsStore.mixin ],
 
-  displayName: "DocumentActions",
+  displayName: "DocumentActionsView",
 
   componentDidMount() {
     const deleteFunction = this.props.graphStore.deleteSelected.bind(this.props.graphStore);
@@ -47,7 +47,7 @@ module.exports = React.createClass({
 
   renderRunPanel() {
     if (!this.props.diagramOnly) {
-      return <SimulationRunPanel />;
+      return <SimulationRunPanelView />;
     }
   },
 

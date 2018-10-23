@@ -5,14 +5,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const SimulationStore  = require("../stores/simulation-store");
 const AppSettingsStore = require("../stores/app-settings-store");
 const tr = require("../utils/translate");
 
-module.exports = React.createClass({
+export const NodeValueInspectorView = React.createClass({
 
   displayName: "NodeValueInspectorView",
 

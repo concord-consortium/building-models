@@ -14,9 +14,9 @@ const tr              = require("../utils/translate");
 const { SimulationType } = AppSettingsStore.store;
 const { Complexity } = AppSettingsStore.store;
 
-module.exports = React.createClass({
+export const SimulationInspectorView = React.createClass({
 
-  displayName: "SimulationInspector",
+  displayName: "SimulationInspectorView",
 
   mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
 

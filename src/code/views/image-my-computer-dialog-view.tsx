@@ -3,8 +3,9 @@ const ImageDialogStore = require("../stores/image-dialog-store");
 
 const tr = require("../utils/translate");
 
-module.exports = React.createClass({
-  displayName: "MyComputer",
+export const ImageMyComputerDialogView = React.createClass({
+
+  displayName: "ImageMyComputerDialogView",
 
   mixins: [ ImageDialogStore.mixin, require("../mixins/image-dialog-view")],
 

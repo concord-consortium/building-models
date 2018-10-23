@@ -7,15 +7,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const LinkRelationView = require("./link-relation-view");
-const RelationFactory = require("../models/relation-factory");
+import { LinkRelationView } from "./link-relation-view";
 import { TabbedPanelView } from "./tabbed-panel-view";
+
+const RelationFactory = require("../models/relation-factory");
 const tr = require("../utils/translate");
 
 const inspectorPanelStore = require("../stores/inspector-panel-store");
 const graphStore = require("../stores/graph-store");
 
-module.exports = React.createClass({
+export const RelationInspectorView = React.createClass({
 
   displayName: "RelationInspectorView",
 

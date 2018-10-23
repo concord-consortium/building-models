@@ -6,13 +6,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const NodeInspectorView = require("./node-inspector-view");
+import { NodeInspectorView } from "./node-inspector-view";
 import { LinkInspectorView } from "./link-inspector-view";
 import { LinkValueInspectorView } from "./link-value-inspector-view";
-const NodeValueInspectorView = require("./node-value-inspector-view");
-const LinkRelationInspectorView = require("./relation-inspector-view");
-const NodeRelationInspectorView = require("./relation-inspector-view");
-const SimulationInspectorView   = require("./simulation-inspector-view");
+import { NodeValueInspectorView } from "./node-value-inspector-view";
+import { RelationInspectorView } from "./relation-inspector-view";
+import { SimulationInspectorView } from "./simulation-inspector-view";
 
 const InspectorPanelStore  = require("../stores/inspector-panel-store");
 
@@ -96,7 +95,7 @@ const ToolPanel = React.createClass({
   }
 });
 
-module.exports = React.createClass({
+export const InspectorPanelView = React.createClass({
 
   displayName: "InspectorPanelView",
 
@@ -131,9 +130,9 @@ module.exports = React.createClass({
 
   renderRelationInspector() {
     if (this.props.node != null ? this.props.node.isDependent() : undefined) {
-      return <NodeRelationInspectorView node={this.props.node} graphStore={this.props.graphStore} />;
+      return <RelationInspectorView node={this.props.node} graphStore={this.props.graphStore} />;
     } else if (this.props.link) {
-      return <LinkRelationInspectorView link={this.props.link} graphStore={this.props.graphStore} />;
+      return <RelationInspectorView link={this.props.link} graphStore={this.props.graphStore} />;
     } else {
       return null;
     }

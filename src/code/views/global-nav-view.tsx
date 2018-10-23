@@ -8,9 +8,9 @@ const GoogleFileStore    = require("../stores/google-file-store");
 const UndoRedoUIStore    = require("../stores/undo-redo-ui-store");
 const AppSettingsActions = require("../stores/app-settings-store").actions;
 
-module.exports = React.createClass({
+export const GlobalNavView = React.createClass({
 
-  displayName: "GlobalNav",
+  displayName: "GlobalNavView",
 
   mixins: [ GoogleFileStore.mixin, UndoRedoUIStore.mixin ],
 
