@@ -10,14 +10,11 @@ export {};
 const SimulationStore = require("../stores/simulation-store");
 const tr              = require("../utils/translate");
 
-const {div, span, i, input}  = React.DOM;
-
 module.exports = React.createClass({
 
   displayName: "ExperimentView",
 
   mixins: [ SimulationStore.mixin ],
-
 
   increment() {
     if (!this.props.disabled) {
@@ -27,15 +24,17 @@ module.exports = React.createClass({
 
   renderLabel() {
     const experimentLabel = "Experiment #";
-    return (span({className: "experiment-label"}, experimentLabel));
+    return <span className="experiment-label">{experimentLabel}</span>;
   },
 
   renderCounter() {
     const count = this.state.experimentNumber || 211;
-    return (div({className: "experiment-counter", onClick: this.increment },
-      (div({className: "count"}, count)),
-      (div({className: "increment"}, "+"))
-    ));
+    return (
+      <div className="experiment-counter" onClick={this.increment}>
+        <div className="count">{count}</div>
+        <div className="increment">+</div>
+      </div>
+    );
   },
 
   render() {
@@ -43,9 +42,11 @@ module.exports = React.createClass({
     if (this.props.disabled) {
       classes.push("disabled");
     }
-    return (div({className: classes.join(" ") },
-      this.renderLabel(),
-      this.renderCounter()
-    ));
+    return (
+      <div className={classes.join(" ")}>
+        {this.renderLabel()}
+        {this.renderCounter()}
+      </div>
+    );
   }
 });
