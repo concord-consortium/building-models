@@ -6,7 +6,7 @@
 
 const ImageDialogStore   = require("../stores/image-dialog-store");
 const Draggable          = require("../mixins/draggable");
-const tr                 = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 export const PaletteAddView = React.createClass({
 

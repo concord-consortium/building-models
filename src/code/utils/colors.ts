@@ -1,4 +1,4 @@
-const tr = require("./translate");
+import { tr } from "../utils/translate";
 
 export interface Color {
   name: string;

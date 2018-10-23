@@ -7,7 +7,7 @@
 const SimulationStore = require("../stores/simulation-store");
 const AppSettingsStore = require("../stores/app-settings-store");
 
-const tr              = require("../utils/translate");
+import { tr } from "../utils/translate";
 import { RecordButtonView  } from "./record-button-view";
 import { DropDownView } from "./dropdown-view";
 import { ExperimentPanelView } from "./experiment-panel-view";

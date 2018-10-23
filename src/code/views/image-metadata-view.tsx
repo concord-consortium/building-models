@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const xlat       = require("../utils/translate");
+import { tr } from "../utils/translate";
 const licenses   = require("../data/licenses");
 const ImageDialogStore = require("../stores/image-dialog-store");
 
@@ -43,21 +43,21 @@ export class ImageMetadataView extends React.Component<ImageMetadataViewProps, I
           <table>
             <tbody>
               <tr>
-                <td>{xlat("~METADATA.TITLE")}</td>
+                <td>{tr("~METADATA.TITLE")}</td>
                 <td>
                   <input ref={(el) => this.title = el} value={title} onChange={this.handleChanged} />
                 </td>
               </tr>
 
               <tr>
-                <td>{xlat("~METADATA.LINK")}</td>
+                <td>{tr("~METADATA.LINK")}</td>
                 <td>
                   <input ref={(el) => this.link = el} value={link} onChange={this.handleChanged} />
                 </td>
               </tr>
 
               <tr>
-                <td>{xlat("~METADATA.CREDIT")}</td>
+                <td>{tr("~METADATA.CREDIT")}</td>
                 <td>
                   <select ref={(el) => this.license = el} value={licenseName} onChange={this.handleChanged}>
                     {licenses.getRenderOptions(licenseName)}

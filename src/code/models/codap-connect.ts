@@ -10,7 +10,7 @@
 export {};
 
 const { IframePhoneRpcEndpoint } = (require("iframe-phone"));
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 const CodapActions    = require("../actions/codap-actions");
 const undoRedoUIActions = (require("../stores/undo-redo-ui-store")).actions;
 const SimulationStore = require("../stores/simulation-store");

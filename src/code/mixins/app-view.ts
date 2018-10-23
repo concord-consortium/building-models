@@ -13,7 +13,6 @@ const CodapStore      = require("../stores/codap-store");
 const LaraStore       = require("../stores/lara-store");
 const GoogleFileStore = require("../stores/google-file-store");
 const HashParams      = require("../utils/hash-parameters");
-const tr              = require("../utils/translate");
 const AppSettingsStore = require("../stores/app-settings-store");
 
 module.exports = {

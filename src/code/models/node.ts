@@ -16,7 +16,7 @@ const GraphPrimitive = require("./graph-primitive");
 
 import {ColorChoices} from "../utils/colors";
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 const urlParams = require("../utils/url-params");
 
 const SEMIQUANT_MIN = 0;

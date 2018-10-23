@@ -14,7 +14,7 @@ const GraphStore    = require("./graph-store");
 const PaletteStore  = require("./palette-store");
 const HashParams    = require("../utils/hash-parameters");
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const GoogleFileActions = Reflux.createActions([
   "showSaveDialog", "newFile", "openFile",

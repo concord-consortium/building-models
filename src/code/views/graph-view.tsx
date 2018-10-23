@@ -15,7 +15,7 @@ const Importer         = require("../utils/importer");
 import {Colors} from "../utils/colors";
 const DiagramToolkit   = require("../utils/js-plumb-diagram-toolkit");
 const dropImageHandler = require("../utils/drop-image-handler");
-const tr               = require("../utils/translate");
+import { tr } from "../utils/translate";
 const PaletteStore     = require("../stores/palette-store");
 const GraphStore       = require("../stores/graph-store");
 const ImageDialogStore = require("../stores/image-dialog-store");

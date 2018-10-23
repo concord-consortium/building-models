@@ -10,7 +10,6 @@
 export {};
 
 const math = require("mathjs");  // For formula parsing...
-const tr   = require("../utils/translate");
 
 class Relationship {
   public static errValue;

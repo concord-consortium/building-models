@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const palettes = [
   ["#4D6A6D", "#798478", "#A0A083", "#C9ADA1", "#EAE0CC"],

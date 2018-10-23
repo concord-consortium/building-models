@@ -8,7 +8,7 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const tr = require("./translate");
+import { tr } from "../utils/translate";
 
 module.exports = (imageName) => {
   const link = document.createElement("a");

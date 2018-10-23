@@ -1,4 +1,5 @@
-const tr                 = require("../utils/translate");
+
+import { tr } from "../utils/translate";
 
 import { GlobalNavView } from "./global-nav-view";
 import { GraphView } from "./graph-view";

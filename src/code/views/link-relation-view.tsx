@@ -9,7 +9,8 @@
 
 const RelationFactory  = require("../models/relation-factory");
 import { SvgGraphView } from "./svg-graph-view";
-const tr               = require("../utils/translate");
+import { tr } from "../utils/translate";
+
 const autosize         = require("autosize");
 const SimulationStore  = require("../stores/simulation-store");
 const AppSettingsStore = require("../stores/app-settings-store");

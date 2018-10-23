@@ -8,7 +8,7 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const tr           = require("../utils/translate");
+import { tr } from "../utils/translate";
 const Relationship = require("./relationship");
 
 class RelationFactory {

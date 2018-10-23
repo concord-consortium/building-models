@@ -1,5 +1,5 @@
 const SimulationStore = require("../stores/simulation-store");
-const tr              = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 export const ExperimentPanelView = React.createClass({
 

@@ -10,7 +10,7 @@
 const ImageDialogStore = require("../stores/image-dialog-store");
 
 const OpenClipart = require("../utils/open-clipart");
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const ImageSearchResult = React.createClass({
   displayName: "ImageSearchResult",

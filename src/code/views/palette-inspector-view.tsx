@@ -6,7 +6,7 @@ const PaletteStore       = require("../stores/palette-store");
 const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
 const NodesStore         = require("../stores/nodes-store");
 
-const tr                 = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 export const PaletteInspectorView = React.createClass({
 

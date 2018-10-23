@@ -1,4 +1,5 @@
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
+
 import { PaletteAddView } from "./palette-add-view";
 const PaletteStore = require("../stores/palette-store");
 

@@ -1,7 +1,6 @@
 const AppSettingsStore = require("../stores/app-settings-store");
 const CodapStore       = require("../stores/codap-store");
 const UndoRedoUIStore  = require("../stores/undo-redo-ui-store");
-const tr               = require("../utils/translate");
 
 import { AboutView } from "./about-view";
 import { SimulationRunPanelView } from "./simulation-run-panel-view";

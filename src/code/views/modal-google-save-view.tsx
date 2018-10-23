@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { ModalDialogView } from "./modal-dialog-view";
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 interface ModalGoogleSaveViewProps {
   filename: string;

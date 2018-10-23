@@ -9,7 +9,7 @@ import { DropDownView } from "./dropdown-view";
 const SimulationStore = require("../stores/simulation-store");
 const AppSettingsStore = require("../stores/app-settings-store");
 const GraphStore      = require("../stores/graph-store").store;
-const tr              = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const { SimulationType } = AppSettingsStore.store;
 const { Complexity } = AppSettingsStore.store;

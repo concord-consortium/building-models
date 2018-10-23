@@ -7,7 +7,7 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const tr = require("./translate");
+import { tr } from "../utils/translate";
 
 const units: any = {STEP: 1};
 units.SECOND =  1;

@@ -10,7 +10,6 @@
 export {};
 
 const IframePhone = (require("iframe-phone"));
-const tr = require("../utils/translate");
 const LaraActions    = require("../actions/lara-actions");
 const UndoRedoUIStore = require("../stores/undo-redo-ui-store");
 const UndoRedo = require("../utils/undo-redo");

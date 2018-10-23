@@ -7,7 +7,7 @@ import { ImageLinkDialogView } from "./image-link-dialog-view";
 const PaletteStore = require("../stores/palette-store");
 const ImageDialogStore = require("../stores/image-dialog-store");
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 export const ImageBrowserView = React.createClass({
 

@@ -5,8 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const tr = require("../utils/translate");
-
+import { tr } from "../utils/translate";
 import { ColorPickerView } from "./color-picker-view";
 import { ImagePickerView } from "./image-picker-view";
 

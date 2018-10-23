@@ -1,4 +1,4 @@
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 import { DropDownView } from "./dropdown-view";
 import { OpenInCodapView } from "./open-in-codap-view";

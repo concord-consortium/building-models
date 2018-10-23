@@ -2,7 +2,7 @@ import * as React from "react";
 
 const dropImageHandler = require("../utils/drop-image-handler");
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 interface DropZoneViewProps {
   header: string;

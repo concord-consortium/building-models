@@ -9,7 +9,7 @@
 export {};
 
 const Node = require("./node");
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const DEFAULT_COMBINE_METHOD = "product";
 

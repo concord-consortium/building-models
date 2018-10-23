@@ -13,7 +13,7 @@ const ImportActions      = require("../actions/import-actions");
 const GraphActions       = require("../actions/graph-actions");
 const Simulation         = require("../models/simulation");
 const TimeUnits          = require("../utils/time-units");
-const tr                 = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const DEFAULT_SIMULATION_STEPS = 20;
 const SimulationActions = Reflux.createActions(

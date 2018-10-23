@@ -4,7 +4,7 @@ import { ImageMetadataView } from "./image-metadata-view";
 const ImageManger   = require("../stores/image-dialog-store");
 const PaletteStore  = require("../stores/palette-store");
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 interface PreviewImageDialogViewProps {
   key: string;

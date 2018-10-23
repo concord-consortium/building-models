@@ -8,11 +8,6 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const Importer    = require("../utils/importer");
-const Link        = require("./link");
-const DiagramNode = require("./node");
-const tr          = require("../utils/translate");
-
 class SelectionManager {
 
   public static NodeTitleEditing;

@@ -5,7 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const AppSettingsStore    = require("../stores/app-settings-store");
 const SimulationActions = require("../stores/simulation-store").actions;

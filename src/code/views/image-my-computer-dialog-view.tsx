@@ -1,7 +1,7 @@
 import { DropZoneView } from "./dropzone-view";
 const ImageDialogStore = require("../stores/image-dialog-store");
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 export const ImageMyComputerDialogView = React.createClass({
 

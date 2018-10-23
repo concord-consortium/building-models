@@ -11,7 +11,7 @@ import { LinkRelationView } from "./link-relation-view";
 import { TabbedPanelView } from "./tabbed-panel-view";
 
 const RelationFactory = require("../models/relation-factory");
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 const inspectorPanelStore = require("../stores/inspector-panel-store");
 const graphStore = require("../stores/graph-store");

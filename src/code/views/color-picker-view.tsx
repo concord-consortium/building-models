@@ -1,8 +1,5 @@
 import * as React from "react";
 
-const {div} = React.DOM;
-const tr = require("../utils/translate");
-
 import {Color, ColorChoices} from "../utils/colors";
 
 interface ColorChoiceProps {
@@ -23,10 +20,12 @@ class ColorChoice extends React.Component<ColorChoiceProps, {}> {
       className = "color-choice selected";
     }
 
-    return (div({className, onClick: this.handleSelectColor},
-      (div({className: "color-swatch", style: {"backgroundColor": value}})),
-      (div({className: "color-label"}, name))
-    ));
+    return (
+      <div className={className} onClick={this.handleSelectColor}>
+        <div className="color-swatch" style={{backgroundColor: value}} />
+        <div className="color-label">{name}</div>
+      </div>
+    );
   }
 
   private handleSelectColor = () => {

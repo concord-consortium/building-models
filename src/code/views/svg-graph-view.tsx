@@ -9,7 +9,7 @@ import * as React from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const tr   = require("../utils/translate");
+import { tr } from "../utils/translate";
 const math = require("mathjs");  // For formula parsing...
 
 interface SvgGraphViewProps {

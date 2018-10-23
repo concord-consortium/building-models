@@ -18,7 +18,7 @@ const TransferModel       = require("../models/transfer");
 const UndoRedo            = require("../utils/undo-redo");
 const SelectionManager    = require("../models/selection-manager");
 const PaletteStore        = require("../stores/palette-store");
-const tr                  = require("../utils/translate");
+import { tr } from "../utils/translate";
 const Migrations          = require("../data/migrations/migrations");
 const PaletteDeleteStore  = require("../stores/palette-delete-dialog-store");
 const AppSettingsStore    = require("../stores/app-settings-store");

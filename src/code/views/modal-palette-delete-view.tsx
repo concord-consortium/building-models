@@ -1,8 +1,7 @@
 import { ModalDialogView } from "./modal-dialog-view";
 import { PaletteDeleteView } from "./palette-delete-view";
 const PaletteDialogStore  = require("../stores/palette-delete-dialog-store");
-const NodesStore          = require("../stores/nodes-store");
-const tr                  = require("../utils/translate");
+import { tr } from "../utils/translate";
 
 export const ModalPaletteDeleteView = React.createClass({
 
