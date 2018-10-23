@@ -22,8 +22,8 @@ interface SVGSliderViewProps {
   min: number;
   max: number;
   value: number;
-  onValueChange: (value: number) => void;
-  onRangeChange: (range: any) => void; // TODO: get concrete type
+  onValueChange?: (value: number) => void;
+  onRangeChange?: (range: any) => void; // TODO: get concrete type
   orientation: any; // TODO: get concrete type
   width: number;
   height: number;
@@ -34,8 +34,8 @@ interface SVGSliderViewProps {
   onSliderDragEnd?: () => void;
   stepSize: number;
   displaySemiQuant: boolean;
-  minLabel: string;
-  maxLabel: string;
+  minLabel: string | null;
+  maxLabel: string | null;
   showTicks: boolean;
   filled: boolean;
   color: string;
@@ -157,9 +157,13 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     }
     if ((this.props.value < range.min) || (this.props.value > range.max)) {
       value = Math.max(range.min, Math.min(range.max, this.props.value));
-      this.props.onValueChange(value);
+      if (this.props.onValueChange) {
+        this.props.onValueChange(value);
+      }
     }
-    return this.props.onRangeChange(range);
+    if (this.props.onRangeChange) {
+      this.props.onRangeChange(range);
+    }
   }
 
   private handleUpdate = () => {

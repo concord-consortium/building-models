@@ -1,3 +1,5 @@
+import { CSSProperties } from "react";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -6,8 +8,6 @@
 
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
-
-const {svg, path, line, text, div, tspan, image} = React.DOM;
 
 const SimulationStore = require("../stores/simulation-store");
 
@@ -84,7 +84,7 @@ module.exports = React.createClass({
 
   renderImage() {
     const imageOffset = 2;
-    const imageStyle = {
+    const imageStyle: CSSProperties = {
       position: "absolute",
       top: imageOffset,
       left: imageOffset,
@@ -93,13 +93,13 @@ module.exports = React.createClass({
       height: this.props.height + imageOffset
     };
 
-    return (div({style: imageStyle}, this.props.image));
+    return <div style={imageStyle}>{this.props.image}</div>;
   },
 
   renderSVG() {
     let chart;
     const svgOffset = 3;
-    const svgStyle = {
+    const svgStyle: CSSProperties = {
       position: "absolute",
       top: svgOffset,
       left: svgOffset
@@ -107,23 +107,27 @@ module.exports = React.createClass({
 
     if (this.props.data.length > 0) {
       if (this.props.isTimeBased) {
-        chart = (path({d: this.pointsToPath(this.getPathPoints()), strokeWidth: this.props.strokeWidth, stroke: this.props.color, fill: "none"}));
+        chart = <path d={this.pointsToPath(this.getPathPoints())} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill="none" />;
       } else {
-        chart = (path({d: this.getBarPath(), strokeWidth: this.props.strokeWidth, stroke: this.props.color, fill: this.props.innerColor}));
+        chart = <path d={this.getBarPath()} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill={this.props.innerColor} />;
       }
     } else {
       chart = null;
     }
 
-    return (svg({style: svgStyle, width: this.props.width, height: this.props.height},
-      chart
-    ));
+    return (
+      <svg style={svgStyle} width={this.props.width} height={this.props.height}>
+        {chart}
+      </svg>
+    );
   },
 
   render() {
-    return (div({},
-      this.renderImage(),
-      this.renderSVG()
-    ));
+    return (
+      <div>
+        {this.renderImage()}
+        {this.renderSVG()}
+      </div>
+    );
   }
 });

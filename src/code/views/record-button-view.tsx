@@ -3,10 +3,8 @@ import * as React from "react";
 interface RecordButtonViewProps {
   recording: boolean;
   includeLight: boolean;
-  enabled: boolean;
-  icon: string;
   disabled: boolean;
-  cantRecord: boolean;
+  // cantRecord: boolean; TODO: was not used in caller
   onClick: (e: any) => void; // TODO: get concrete type
 }
 
@@ -19,8 +17,6 @@ export class RecordButtonView extends React.Component<RecordButtonViewProps, {}>
     return {
       recording: false,
       includeLight: false,
-      enabled: true,
-      icon: "icon-codap-video-camera"
     };
   },
   */
@@ -58,9 +54,12 @@ export class RecordButtonView extends React.Component<RecordButtonViewProps, {}>
     if (this.props.disabled) {
       classes.push("disabled");
     }
+    /*
+    TODO: was not used in caller
     if (this.props.cantRecord) {
       classes.push("error");
     }
+    */
     if (this.props.recording) {
       classes.push("recording");
     }

@@ -25,7 +25,7 @@ interface DropDownViewProps {
   items: any[]; // TODO: get concrete type
   isActionMenu: boolean;
   anchor: string;
-  onSelect: (item: any) => void; // TODO: get concrete type
+  onSelect?: (item: any) => void; // TODO: get concrete type
 }
 
 interface DropDownViewState {
@@ -87,7 +87,7 @@ export class DropDownView extends React.Component<DropDownViewProps, DropDownVie
     if (!item) { return; }
     if (this.props.isActionMenu && item.action) {
       item.action();
-    } else {
+    } else if (this.props.onSelect) {
       this.props.onSelect(item);
     }
   }

@@ -19,7 +19,6 @@ interface SvgGraphViewProps {
   fontSize: number;
   strokeWidth: number;
   graphStore: any; // TODO: get concrete type
-  formula: any; // TODO: get concrete type
   strokeDasharray: any; // TODO: get concrete type
   xLabel: string;
   yLabel: string;
@@ -345,7 +344,7 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
         newData[x] = [x, y];
       }
 
-      this.updatePointData(this.props.formula, newData);
+      this.updatePointData(this.props.link.relation.formula, newData);
 
       return this._lastPoint = {x, y, time: currentTime};
     }

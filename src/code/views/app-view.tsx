@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const tr                 = require("../utils/translate");
 
 const GlobalNav          = require("./global-nav-view");
@@ -43,11 +36,13 @@ module.exports = React.createClass({
   },
 
   selectionUpdated() {
-    return (this.refs.inspectorPanel != null ? this.refs.inspectorPanel.nodeSelectionChanged() : undefined);
+    if (this.refs.inspectorPanel != null) {
+      this.refs.inspectorPanel.nodeSelectionChanged();
+    }
   },
 
   toggleImageBrowser() {
-    return this.setState({showImageBrowser: !this.state.showImageBrowser});
+    this.setState({showImageBrowser: !this.state.showImageBrowser});
   },
 
   render() {

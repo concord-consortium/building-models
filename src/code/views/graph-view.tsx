@@ -8,11 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const NodeView         = require("./node-view");
-const Node             = React.createFactory(NodeView);
 const NodeModel        = require("../models/node");
 const Importer         = require("../utils/importer");
 import {Colors} from "../utils/colors";
@@ -29,8 +25,6 @@ const AppSettingsStore = require("../stores/app-settings-store");
 const CodapStore       = require("../stores/codap-store");
 const LaraStore        = require("../stores/lara-store");
 const LinkColors       = require("../utils/link-colors");
-
-const {div} = React.DOM;
 
 module.exports = React.createClass({
 
@@ -168,7 +162,9 @@ module.exports = React.createClass({
         (prevState.selectedLink !== this.state.selectedLink) ||
         (prevState.relationshipSymbols !== this.state.relationshipSymbols) ||
         this.forceRedrawLinks) {
-      __guardMethod__(this.diagramToolkit, "clear", o => o.clear());
+      if (this.diagramToolkit && this.diagramToolkit.clear) {
+        this.diagramToolkit.clear();
+      }
       this._updateToolkit();
       return this.forceRedrawLinks = false;
     }
@@ -570,46 +566,42 @@ module.exports = React.createClass({
       innerColor = Colors.dataInner.value;
     }
     const diagramOnly = this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly;
+    const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
+    const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
+    const marqueeStyle: any = {
+      width: Math.abs(this.state.selectBox.x - this.state.selectBox.startX),
+      height: Math.abs(this.state.selectBox.y - this.state.selectBox.startY),
+      left,
+      top
+    };
 
-    return (div({className: `graph-view ${this.state.canDrop ? "can-drop" : ""}`, ref: "linkView", onDragOver: this.onDragOver, onDrop: this.onDrop, onDragLeave: this.onDragLeave},
-      (div({className: "container", ref: "container", onMouseDown: this.onMouseDown, onMouseUp: this.onMouseUp, onMouseMove: this.onMouseMove},
-        (() => {
-          if (this.state.drawingMarquee) {
-            const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
-            const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
-            return (div({className: "selectionBox", ref: "selectionBox", style: {width: Math.abs(this.state.selectBox.x - this.state.selectBox.startX), height: Math.abs(this.state.selectBox.y - this.state.selectBox.startY), left, top, border: "1px dotted #CCC", position: "absolute", backgroundColor: "#FFFFFF"}}));
-          }
-        })(),
-        this.state.nodes.map((node) =>
-          (Node({
-            key: node.key,
-            data: node,
-            dataColor,
-            innerColor,
-            selected: this.state.selectedNodes.includes(node),
-            simulating: this.state.simulationPanelExpanded,
-            running: this.state.modelIsRunning,
-            editTitle: this.state.editingNode === node,
-            nodeKey: node.key,
-            ref: node.key,
-            onMove: this.onNodeMoved,
-            onMoveComplete: this.onNodeMoveComplete,
-            onDelete: this.onNodeDeleted,
-            graphStore: this.props.graphStore,
-            selectionManager: this.props.selectionManager,
-            showMinigraph: this.state.showingMinigraphs,
-            isTimeBased: this.state.isTimeBased,
-            showGraphButton: this.state.codapHasLoaded && !diagramOnly
-          })))
-      ))
-    ));
+    return (
+      <div className={`graph-view ${this.state.canDrop ? "can-drop" : ""}`} ref="linkView" onDragOver={this.onDragOver} onDrop={this.onDrop} onDragLeave={this.onDragLeave}>
+        <div className="container" ref="container" onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp} onMouseMove={this.onMouseMove}>
+          {this.state.drawingMarquee ? <div className="selectionBox" ref="selectionBox" style={marqueeStyle} /> : undefined}
+          {this.state.nodes.map((node) =>
+            <NodeView
+              key={node.key}
+              data={node}
+              dataColor={dataColor}
+              innerColor={innerColor}
+              selected={this.state.selectedNodes.includes(node)}
+              simulating={this.state.simulationPanelExpanded}
+              running={this.state.modelIsRunning}
+              editTitle={this.state.editingNode === node}
+              nodeKey={node.key}
+              ref={node.key}
+              onMove={this.onNodeMoved}
+              onMoveComplete={this.onNodeMoveComplete}
+              onDelete={this.onNodeDeleted}
+              graphStore={this.props.graphStore}
+              selectionManager={this.props.selectionManager}
+              showMinigraph={this.state.showingMinigraphs}
+              isTimeBased={this.state.isTimeBased}
+              showGraphButton={this.state.codapHasLoaded && !diagramOnly}
+            />)}
+        </div>
+      </div>
+    );
   }
 });
-
-function __guardMethod__(obj, methodName, transform) {
-  if (typeof obj !== "undefined" && obj !== null && typeof obj[methodName] === "function") {
-    return transform(obj, methodName);
-  } else {
-    return undefined;
-  }
-}

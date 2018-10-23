@@ -4,12 +4,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const PaletteInspectorView  = React.createFactory(require("./palette-inspector-view"));
+const PaletteInspectorView = require("./palette-inspector-view");
 const PaletteStore = require("../stores/palette-store");
-const {div} = React.DOM;
 
 module.exports = React.createClass({
 
@@ -48,16 +44,18 @@ module.exports = React.createClass({
       topNodeTabPaletteClass = "top-node-palette-tab collapsed";
     }
 
-    return (div({className: this.props.uiElements.nodePalette === false ? "wrapperwrapper hidden" : this.props.uiElements.globalNav === false ? "wrapperwrapper top" : "wrapperwrapper"},
-      (div({className: topNodePaletteClass},
-        (PaletteInspectorView({
-          toggleImageBrowser: this.props.toggleImageBrowser,
-          graphStore: this.props.graphStore
-        }))
-      )),
-      (div({className: "tab-wrapper"},
-        (div({className: topNodeTabPaletteClass, onClick: this.toggle}))
-      ))
-    ));
+    return (
+      <div className={this.props.uiElements.nodePalette === false ? "wrapperwrapper hidden" : this.props.uiElements.globalNav === false ? "wrapperwrapper top" : "wrapperwrapper"}>
+        <div className={topNodePaletteClass}>
+          <PaletteInspectorView
+            toggleImageBrowser={this.props.toggleImageBrowser}
+            graphStore={this.props.graphStore}
+          />
+        </div>
+        <div className="tab-wrapper">
+          <div className={topNodeTabPaletteClass} onClick={this.toggle} />
+        </div>
+      </div>
+    );
   }
 });

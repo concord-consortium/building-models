@@ -1,12 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const AppSettingsStore = require("../stores/app-settings-store");
 const CodapStore       = require("../stores/codap-store");
 const UndoRedoUIStore  = require("../stores/undo-redo-ui-store");
@@ -23,11 +14,11 @@ module.exports = React.createClass({
 
   componentDidMount() {
     const deleteFunction = this.props.graphStore.deleteSelected.bind(this.props.graphStore);
-    return this.props.graphStore.selectionManager.addSelectionListener(manager => {
+    this.props.graphStore.selectionManager.addSelectionListener(manager => {
       const selectedNodes     = manager.getNodeInspection() || [];
       const selectedLinks      = manager.getLinkInspection() || [];
 
-      return this.setState({
+      this.setState({
         selectedNodes,
         selectedLinks,
         selectedItems: selectedNodes.concat(selectedLinks)
@@ -36,11 +27,11 @@ module.exports = React.createClass({
   },
 
   undoClicked() {
-    return this.props.graphStore.undo();
+    this.props.graphStore.undo();
   },
 
   redoClicked() {
-    return this.props.graphStore.redo();
+    this.props.graphStore.redo();
   },
 
   deleteClicked() {
@@ -51,12 +42,12 @@ module.exports = React.createClass({
       this.props.graphStore.deleteSelected();
     }
     // Clear stored selections after delete
-    return this.props.graphStore.selectionManager.clearSelection();
+    this.props.graphStore.selectionManager.clearSelection();
   },
 
   renderRunPanel() {
     if (!this.props.diagramOnly) {
-      return (SimulationRunPanel({}));
+      return <SimulationRunPanel />;
     }
   },
 

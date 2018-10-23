@@ -15,9 +15,7 @@ const ImageDialogStore = require("../stores/image-dialog-store");
 const OpenClipart = require("../utils/open-clipart");
 const tr = require("../utils/translate");
 
-const {div, input, button, img, i, a, form, br, span} = React.DOM;
-
-const ImageSearchResult = React.createFactory(React.createClass({
+const ImageSearchResult = React.createClass({
   displayName: "ImageSearchResult",
 
   getInitialState() {
@@ -27,67 +25,64 @@ const ImageSearchResult = React.createFactory(React.createClass({
   componentDidMount() {
     const image = new Image();
     image.src = this.props.imageInfo.image;
-    return image.onload = () => {
+    image.onload = () => {
       if (!this.unmounted) { return this.setState({loaded: true}); }
     };
   },
 
   componentWillUnmount() {
-    return this.unmounted = true;
+    this.unmounted = true;
   },
 
   clicked() {
-    return ImageDialogStore.actions.update(this.props.imageInfo);
+    ImageDialogStore.actions.update(this.props.imageInfo);
   },
 
   render() {
     const src = this.state.loaded ? this.props.imageInfo.image : "img/bb-chrome/spin.svg";
     if (!this.props.isDisabled(this.props.imageInfo)) {
-      return (img({src, onClick: this.clicked, title: this.props.imageInfo.metadata.title}));
+      return <img src={src} onClick={this.clicked} title={this.props.imageInfo.metadata.title} />;
     } else {
       return null;
     }
   }
-})
-);
+});
 
-const ImageSearchPageLink = React.createFactory(React.createClass({
+const ImageSearchPageLink = React.createClass({
   displayName: "ImageSearchPageLink",
 
   selectPage(e) {
     e.preventDefault();
     e.stopPropagation();
-    return this.props.selectPage(this.props.page);
+    this.props.selectPage(this.props.page);
   },
 
   render() {
     if (this.props.currentPage === this.props.page) {
-      return (span({className: "image-search-page-link"}, this.props.page));
+      return <span className="image-search-page-link">{this.props.page}</span>;
     } else {
-      return (a({className: "image-search-page-link", href: "#", onClick: this.selectPage}, this.props.page));
+      return <a className="image-search-page-link" href="#" onClick={this.selectPage}>{this.props.page}</a>;
     }
   }
-})
-);
+});
 
-const ImageSearchPrevNextLink = React.createFactory(React.createClass({
+const ImageSearchPrevNextLink = React.createClass({
   displayName: "ImageSearchPrevNextLink",
 
   selectPage(e) {
     e.preventDefault();
     e.stopPropagation();
-    return this.props.selectPage(this.props.page);
+    this.props.selectPage(this.props.page);
   },
 
   render() {
     if (this.props.enabled) {
-      return (a({className: "image-search-prev-next-link", href: "#", onClick: this.selectPage}, this.props.label));
+      return <a className="image-search-prev-next-link" href="#" onClick={this.selectPage}>{this.props.label}</a>;
     } else {
-      return (span({className: "image-search-prev-next-link", style: {color: "#777"}}, this.props.label));
+      return <span className="image-search-prev-next-link" style={{color: "#777"}}>{this.props.label}</span>;
     }
   }
-})
-);
+});
 
 module.exports = React.createClass({
   displayName: "ImageSearch",
@@ -106,14 +101,14 @@ module.exports = React.createClass({
 
   searchClicked(e) {
     e.preventDefault();
-    return this.search({
+    this.search({
       page: 1,
       newSearch: true
     });
   },
 
   selectPage(page) {
-    return this.search({
+    this.search({
       page,
       newSearch: false
     });
@@ -133,8 +128,8 @@ module.exports = React.createClass({
     });
 
     if (validQuery) {
-      return OpenClipart.search(query, options, (results, page, numPages) => {
-        return this.setState({
+      OpenClipart.search(query, options, (results, page, numPages) => {
+        this.setState({
           searching: false,
           searched: true,
           results,
@@ -146,7 +141,7 @@ module.exports = React.createClass({
   },
 
   componentDidMount() {
-    return this.refs.search.focus();
+    this.refs.search.focus();
   },
 
   isDisabledInInternalLibrary(node) {
@@ -160,94 +155,98 @@ module.exports = React.createClass({
   renderPagination() {
     let page;
     if (this.state.numPages > 0) {
-      return (div({key: "pagination", className: "image-search-dialog-pagination"},
-        (ImageSearchPrevNextLink({key: "prev", page: this.state.page - 1, label: (tr("~IMAGE-BROWSER.PREVIOUS")), selectPage: this.selectPage, enabled: this.state.page > 1})),
-        ((() => {
-          let asc, end;
-          const result: any[] = [];
-          for (page = 1, end = this.state.numPages, asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
-            result.push(ImageSearchPageLink({key: `page${page}`, page, currentPage: this.state.page, selectPage: this.selectPage}));
-          }
-          return result;
-        })()),
-        (ImageSearchPrevNextLink({key: "next", page: this.state.page + 1, label: (tr("~IMAGE-BROWSER.NEXT")), selectPage: this.selectPage, enabled: this.state.page < this.state.numPages}))
-      ));
+      let asc, end;
+      const links: JSX.Element[] = [];
+      for (page = 1, end = this.state.numPages, asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
+        links.push(<ImageSearchPageLink key={`page${page}`} page={page} currentPage={this.state.page} selectPage={this.selectPage} />);
+      }
+
+      return (
+        <div key="pagination" className="image-search-dialog-pagination">
+          <ImageSearchPrevNextLink key="prev" page={this.state.page - 1} label={tr("~IMAGE-BROWSER.PREVIOUS")} selectPage={this.selectPage} enabled={this.state.page > 1} />
+          {links}
+          <ImageSearchPrevNextLink key="next" page={this.state.page + 1} label={tr("~IMAGE-BROWSER.NEXT")} selectPage={this.selectPage} enabled={this.state.page < this.state.numPages} />
+        </div>
+      );
     }
   },
 
-  render() {
+  renderDialogForm() {
     let index, node;
     const showNoResultsAlert = this.state.searchable && this.state.searched && (this.state.results.length === 0);
     const noResultsClass = showNoResultsAlert ? " no-results" : "";
+    const noResultsItems: JSX.Element[] = [];
+    const searchResultItems: JSX.Element[] = [];
 
-    return (div({className: "image-search-dialog"},
-      (this.props.selectedImage != null ? this.props.selectedImage.image : undefined) ?
-        this.renderPreviewImage()
-        :
-        (div({},
-          (div({className: "image-search-dialog-form"},
-            (form({},
-              (input({type: "text", ref: "search", defaultValue: this.state.query, placeholder: tr("~IMAGE-BROWSER.SEARCH_HEADER")})),
-              (input({type: "submit", value: (tr("~IMAGE-BROWSER.SEARCH_BUTTON_LABEL")), onClick: this.searchClicked}))
-            ))
-          )),
+    if (showNoResultsAlert) {
+      const iterable = _.map(this.props.internalLibrary);
+      for (index = 0; index < iterable.length; index++) {
+        node = iterable[index];
+        if (node.image) {
+          if (node.image) {
+            noResultsItems.push(<ImageSearchResult key={index} imageInfo={node} clicked={this.imageSelected} isDisabled={this.isDisabledInInternalLibrary} />);
+          }
+        }
+      }
+    }
 
-          showNoResultsAlert ?
-            (div({className: "modal-dialog-alert"},
-              tr("~IMAGE-BROWSER.NO_IMAGES_FOUND"),
-              (br({})),
-              tr("~IMAGE-BROWSER.TRY_ANOTHER_SEARCH")
-            )) : undefined,
+    if (this.state.searched) {
+      for (index = 0; index < this.state.results.length; index++) {
+        node = this.state.results[index];
+        searchResultItems.push(<ImageSearchResult key={index} imageInfo={node} clicked={this.imageSelected} isDisabled={this.isDisabledInExternalSearch} />);
+      }
+    }
 
-          (div({className: `image-search-main-results${noResultsClass}`}, [
-            showNoResultsAlert ?
-              (div({key: "image-search-section", className: "image-search-section", style: {height: "100%"}}, [
-                (div({key: "image-search-results", className: "image-search-dialog-results show-all"},
-                  (() => {
-                    const result: any[] = [];
-                    const iterable = _.map(this.props.internalLibrary);
-                    for (index = 0; index < iterable.length; index++) {
-                      node = iterable[index];
-                      if (node.image) {
-                        if (node.image) { result.push((ImageSearchResult({key: index, imageInfo: node, clicked: this.imageSelected, isDisabled: this.isDisabledInInternalLibrary}))); } else {
-                          result.push(undefined);
-                        }
-                      } else {
-                        result.push(undefined);
-                      }
-                    }
-                    return result;
-                  })()
-                ))
-              ]))
-              :
-              (div({key: "image-search-section-post-search", className: "image-search-section", style: {height: "100%"}}, [
-                (div({key: "results", className: "image-search-dialog-results"},
-                  this.state.searching ?
-                    (div({},
-                      (i({className: "icon-codap-options spin"})),
-                      " ",
-                      tr("~IMAGE-BROWSER.SEARCHING", {
-                        page: this.state.page === 1 ? (tr("~IMAGE-BROWSER.SEARCHING_FIRST_PAGE")) : (tr("~IMAGE-BROWSER.SEARCHING_PAGE", {page: this.state.page})),
-                        query: this.state.query
-                      })
-                    ))
-                    : this.state.searched && (this.state.results.length === 0) ?
-                      tr("~IMAGE-BROWSER.NO_EXTERNAL_FOUND", {query: this.state.query})
-                      :
-                      (() => {
-                        const result1: any[] = [];
-                        for (index = 0; index < this.state.results.length; index++) {
-                          node = this.state.results[index];
-                          result1.push((ImageSearchResult({key: index, imageInfo: node, clicked: this.imageSelected, isDisabled: this.isDisabledInExternalSearch})));
-                        }
-                        return result1;
-                      })()
-                )),
-                this.renderPagination()
-              ]))
-          ]))
-        ))
-    ));
+    return (
+      <div>
+        <div className="image-search-dialog-form">
+          <form>
+            <input type="text" ref="search" defaultValue={this.state.query} placeholder={tr("~IMAGE-BROWSER.SEARCH_HEADER")} />
+            <input type="submit" value={tr("~IMAGE-BROWSER.SEARCH_BUTTON_LABEL")} onClick={this.searchClicked} />
+          </form>
+        </div>
+
+        {showNoResultsAlert ?
+          <div className="modal-dialog-alert">
+            {tr("~IMAGE-BROWSER.NO_IMAGES_FOUND")}
+            <br />
+            {tr("~IMAGE-BROWSER.TRY_ANOTHER_SEARCH")}
+          </div> : undefined}
+
+        <div className={`image-search-main-results${noResultsClass}`}>
+          {showNoResultsAlert ?
+            <div key="image-search-section" className="image-search-section" style={{height: "100%"}}>
+              <div key="image-search-results" className="image-search-dialog-results show-all">
+                {noResultsItems}
+              </div>
+            </div>
+            :
+            <div key="image-search-section-post-search" className="image-search-section" style={{height: "100%"}}>
+              <div key="results" className="image-search-dialog-results">
+                {this.state.searching ?
+                  <div>
+                    <i className="icon-codap-options spin" /> {tr("~IMAGE-BROWSER.SEARCHING", {
+                      page: this.state.page === 1 ? (tr("~IMAGE-BROWSER.SEARCHING_FIRST_PAGE")) : (tr("~IMAGE-BROWSER.SEARCHING_PAGE", {page: this.state.page})),
+                      query: this.state.query
+                    })}
+                  </div>
+                  : this.state.searched && (this.state.results.length === 0)
+                    ? tr("~IMAGE-BROWSER.NO_EXTERNAL_FOUND", {query: this.state.query})
+                    : searchResultItems}
+              </div>
+              {this.renderPagination()}
+            </div>}
+        </div>
+      </div>
+    );
+  },
+
+  render() {
+    const havePreviewImage = !!(this.props.selectedImage && this.props.selectedImage.image);
+    return (
+      <div className="image-search-dialog">
+        {havePreviewImage ? this.renderPreviewImage() : this.renderDialogForm()}
+      </div>
+    );
   }
 });

@@ -11,12 +11,12 @@ const ImageDialogStore   = require("../stores/image-dialog-store");
 const Draggable          = require("../mixins/draggable");
 const tr                 = require("../utils/translate");
 
-const {div} = React.DOM;
-
 module.exports = React.createClass({
 
   displayName: "PaletteAddView",
+
   mixins: [Draggable],
+
   getDefaultProps() {
     return {
       callback: false,
@@ -24,13 +24,17 @@ module.exports = React.createClass({
     };
   },
 
+  onClick() {
+    ImageDialogStore.actions.open.trigger(this.props.callback);
+  },
+
   render() {
-    return (div({className: "palette-image", "data-droptype": "new"},
-      (div({
-        className: "palette-add-image",
-        onClick: () => ImageDialogStore.actions.open.trigger(this.props.callback)
-      },
-      this.props.label ))
-    ));
+    return (
+      <div className="palette-image" data-droptype="new">
+        <div className="palette-add-image" onClick={this.onClick}>
+          {this.props.label}
+        </div>
+      </div>
+    );
   }
 });

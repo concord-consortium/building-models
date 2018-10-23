@@ -5,22 +5,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-let div, i, img, input, label, NodeView, span;
-({input, div, i, img, span, label} = React.DOM);
 const tr = require("../utils/translate");
 
 const AppSettingsStore    = require("../stores/app-settings-store");
 const SimulationActions = require("../stores/simulation-store").actions;
-import { SquareImageView as SquareImageViewClass } from "./square-image-view";
-const SquareImage = React.createFactory(SquareImageViewClass);
-import { StackedImageView as StackedImageViewClass } from "./stacked-image-view";
-const StackedImage = React.createFactory(StackedImageViewClass);
-import { SVGSliderView as SVGSliderViewClass } from "./value-slider-view";
-const SliderView  = React.createFactory(SVGSliderViewClass);
-const GraphView   = React.createFactory(require("./node-svg-graph-view"));
+import { SquareImageView } from "./square-image-view";
+import { StackedImageView } from "./stacked-image-view";
+import { SVGSliderView } from "./value-slider-view";
+const GraphView = require("./node-svg-graph-view");
 const CodapConnect = require("../models/codap-connect");
 const DEFAULT_CONTEXT_NAME = "building-models";
 
@@ -93,6 +85,10 @@ const NodeTitle = React.createFactory(React.createClass({
     }
   },
 
+  handleChange() {
+    this.updateTitle();
+  },
+
   updateTitle(isComplete, callback) {
     this.titleUpdated = true;
     const title = this.state.isCancelled ? this.props.node.title : this.inputValue();
@@ -112,42 +108,51 @@ const NodeTitle = React.createFactory(React.createClass({
   },
 
   renderTitle() {
-    return (div({
-      className: `node-title${this.isDefaultTitle ? " untitled" : ""}`,
-      key: "display",
-      style: { display: this.props.isEditing ? "none" : "block" },
-      onClick: this.props.onStartEditing
-    }, this.props.title));
+    return (
+      <div
+        className={`node-title${this.isDefaultTitle ? " untitled" : ""}`}
+        key="display"
+        style={{display: this.props.isEditing ? "none" : "block" }}
+        onClick={this.props.onStartEditing}
+      >
+        {this.props.title}
+      </div>
+    );
   },
 
   renderTitleInput() {
     const displayTitle = this.displayTitleForInput(this.state.title);
     const className = `node-title${!this.state.isUniqueTitle ? " non-unique-title" : ""}`;
-    return (input({
-      type: "text",
-      ref: "input",
-      key: "edit",
-      style: { display: this.props.isEditing ? "block" : "none" },
-      className,
-      onKeyUp: this.props.isEditing ? this.handleKeyUp : null,
-      onChange: () => this.updateTitle(),
-      value: displayTitle,
-      maxLength: this.maxTitleLength(),
-      placeholder: this.titlePlaceholder(),
-      onBlur: () => this.finishEditing()
-    }));
+    return (
+      <input
+        type="text"
+        ref="input"
+        key="edit"
+        style={{ display: this.props.isEditing ? "block" : "none" }}
+        className={className}
+        onKeyUp={this.props.isEditing ? this.handleKeyUp : null}
+        onChange={this.handleChange}
+        value={displayTitle}
+        maxLength={this.maxTitleLength()}
+        placeholder={this.titlePlaceholder()}
+        onBlur={this.finishEditing}
+      />
+    );
   },
 
   render() {
-    return (div({className: "node-title-box"}, [
-      this.renderTitle(),
-      this.renderTitleInput()
-    ]));
+    return (
+      <div className="node-title-box">
+        {this.renderTitle()}
+        {this.renderTitleInput()}
+      </div>
+    );
   }
 })
 );
 
-module.exports = (NodeView = React.createClass({
+let NodeView;
+module.exports = NodeView = React.createClass({
 
   displayName: "NodeView",
 
@@ -282,10 +287,12 @@ module.exports = (NodeView = React.createClass({
   renderValue() {
     let value = this.props.data.value || this.props.data.initialValue;
     value = Math.round(value);
-    return (div({className: "value"},
-      (label({}, tr("~NODE.SIMULATION.VALUE"))),
-      (input({type: "text", className: "value", value}))
-    ));
+    return (
+      <div className="value">
+        <label>{tr("~NODE.SIMULATION.VALUE")}</label>
+        <input type="text" className="value" value={value} />
+      </div>
+    );
   },
 
   handleSliderDragStart() {
@@ -304,22 +311,31 @@ module.exports = (NodeView = React.createClass({
       value = this.props.data.initialValue;
     }
 
-    return (SliderView({
-      orientation: "vertical",
-      filled: true,
-      height: 44,
-      width: 15,
-      showHandle,
-      showLabels: false,
-      onValueChange: this.changeValue,
-      value,
-      displaySemiQuant: this.props.data.valueDefinedSemiQuantitatively,
-      max: this.props.data.max,
-      min: this.props.data.min,
-      onSliderDragStart: this.handleSliderDragStart,
-      onSliderDragEnd: this.handleSliderDragEnd,
-      color: this.props.dataColor
-    }));
+    return (
+      <SVGSliderView
+        orientation="vertical"
+        filled={true}
+        height={44}
+        width={15}
+        showHandle={showHandle}
+        showLabels={false}
+        onValueChange={this.changeValue}
+        value={value}
+        displaySemiQuant={this.props.data.valueDefinedSemiQuantitatively}
+        max={this.props.data.max}
+        min={this.props.data.min}
+        onSliderDragStart={this.handleSliderDragStart}
+        onSliderDragEnd={this.handleSliderDragEnd}
+        color={this.props.dataColor}
+        handleSize={16}
+        stepSize={1}
+        showTicks={false}
+        displayPrecision={0}
+        renderValueTooltip={true}
+        minLabel={null}
+        maxLabel={null}
+      />
+    );
   },
 
   handleGraphClick(attributeName) {
@@ -361,14 +377,18 @@ module.exports = (NodeView = React.createClass({
   renderNodeInternal() {
     const getNodeImage = (node) => {
       if (node.isAccumulator) {
-        return (StackedImage({
-          image: node.image,
-          imageProps: node.collectorImageProps()
-        }));
+        return (
+          <StackedImageView
+            image={node.image}
+            imageProps={node.collectorImageProps()}
+          />
+        );
       } else {
-        return (SquareImage({
-          image: node.isTransfer ? "img/nodes/transfer.png" : node.image
-        }));
+        return (
+          <SquareImageView
+            image={node.isTransfer ? "img/nodes/transfer.png" : node.image}
+          />
+        );
       }
     };
 
@@ -394,63 +414,61 @@ module.exports = (NodeView = React.createClass({
     const style = {
       top: this.props.data.y,
       left: this.props.data.x,
-      "color": this.props.data.color
+      color: this.props.data.color
     };
     const fullWidthBackgroundClass = this.props.data.isTransfer ? "full-width" : "";
 
-    return (div({ className: this.nodeClasses(), ref: "node", style},
-      (div({className: this.linkTargetClasses(), "data-node-key": this.props.nodeKey},
-        (div({className: "slider" , "data-node-key": this.props.nodeKey},
-          this.props.simulating ?
-            (div({},
-              // if not @props.data.valueDefinedSemiQuantitatively
-              //   @renderValue()     # not sure if we plan to render value
-              this.renderSliderView()
-            )) : undefined
-        )),
-        (div({},
-          (div({className: "actions"},
-            (div({className: "connection-source action-circle icon-codap-link", "data-node-key": this.props.nodeKey})),
-            this.props.showGraphButton ?
-              (div({
-                className: "graph-source action-circle icon-codap-graph",
-                draggable: true,
-                onDragStart: (evt => this.handleCODAPAttributeDrag(evt, this.props.data.codapID)),
-                onClick: (() => this.handleGraphClick(this.props.data.title))
-              })) : undefined
-          )),
-          (div({className: this.topClasses(), "data-node-key": this.props.nodeKey},
-            (div({
-              className: `img-background transfer-target ${fullWidthBackgroundClass}`,
-              onClick: (evt => this.handleSelected(true, evt)),
-              onTouchEnd: (() => this.handleSelected(true))
-            },
-            this.renderNodeInternal()
-            )),
-            this.props.data.isTransfer ?
-              (div({className: "node-title"})) // empty title to set node width the same
-              :
-              (div({
-                draggable: this.props.showGraphButton,
-                onDragStart: (evt => this.handleCODAPAttributeDrag(evt, this.props.data.codapID))
-              },
-              (NodeTitle({
-                isEditing: this.props.editTitle,
-                title: this.props.data.title,
-                onChange: this.changeTitle,
-                onStopEditing: this.stopEditing,
-                onStartEditing: this.startEditing,
-                node: this.props.data,
-                nodeKey: this.props.nodeKey,
-                graphStore: this.props.graphStore
-              }))
-              ))
-          ))
-        ))
-      ))
-    ));
+    const onDragStart = evt => this.handleCODAPAttributeDrag(evt, this.props.data.codapID);
+    const onGraphButtonClick = () => this.handleGraphClick(this.props.data.title);
+    const onBackgroundClick = evt => this.handleSelected(true, evt);
+    const onBackgroundTouchEnd = () => this.handleSelected(true);
+
+    return (
+      <div className={this.nodeClasses()} ref="node" style={style}>
+        <div className={this.linkTargetClasses()} data-node-key={this.props.nodeKey}>
+          <div className="slider" data-node-key={this.props.nodeKey}>
+            {this.props.simulating ? <div>{this.renderSliderView()}</div> : undefined}
+          </div>
+          <div>
+            <div className="actions">
+              <div className="connection-source action-circle icon-codap-link" data-node-key={this.props.nodeKey} />
+              {this.props.showGraphButton ?
+                <div
+                  className="graph-source action-circle icon-codap-graph"
+                  draggable={true}
+                  onDragStart={onDragStart}
+                  onClick={onGraphButtonClick}
+                /> : undefined}
+            </div>
+            <div className={this.topClasses()} data-node-key={this.props.nodeKey}>
+              <div
+                className={`img-background transfer-target ${fullWidthBackgroundClass}`}
+                onClick={onBackgroundClick}
+                onTouchEnd={onBackgroundTouchEnd}
+              >
+                {this.renderNodeInternal()}
+              </div>
+              {this.props.data.isTransfer
+                ? <div className="node-title" />
+                : <div draggable={this.props.showGraphButton} onDragStart={onDragStart}>
+                    <NodeTitle
+                      isEditing={this.props.editTitle}
+                      title={this.props.data.title}
+                      onChange={this.changeTitle}
+                      onStopEditing={this.stopEditing}
+                      onStartEditing={this.startEditing}
+                      node={this.props.data}
+                      nodeKey={this.props.nodeKey}
+                      graphStore={this.props.graphStore}
+                    />
+                  </div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
-}));
+});
 
 // synchronized with corresponding CSS values
 NodeView.nodeImageOffset = () => {
@@ -486,12 +504,14 @@ const groupView = React.createFactory(React.createClass({
     unselected.selected = false;
     unselected.data.x = 800;
     unselected.data.title = "unselected";
-    return (div({className: "group"},
-      (myView(selectSimulated)),
-      (myView(simulated)),
-      (myView(selected)),
-      (myView(unselected))
-    ));
+    return (
+      <div className="group">
+        {myView(selectSimulated)}
+        {myView(simulated)}
+        {myView(selected)}
+        {myView(unselected)}
+      </div>
+    );
   }
 })
 );

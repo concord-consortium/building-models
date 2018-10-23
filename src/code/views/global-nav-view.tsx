@@ -1,23 +1,9 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const {div, i, span} = React.DOM;
 const tr = require("../utils/translate");
 
-import { DropDownView as DropDownViewClass } from "./dropdown-view";
-const Dropdown           = React.createFactory(DropDownViewClass);
-
-import { OpenInCodapView as OpenInCodapViewClass } from "./open-in-codap-view";
-const OpenInCodap        = React.createFactory(OpenInCodapViewClass);
-import { ModalGoogleSaveView as ModalGoogleSaveViewClass } from "./modal-google-save-view";
-const ModalGoogleSave    = React.createFactory(ModalGoogleSaveViewClass);
-const BuildInfoView      = require("./build-info-view");
+import { DropDownView } from "./dropdown-view";
+import { OpenInCodapView } from "./open-in-codap-view";
+import { ModalGoogleSaveView } from "./modal-google-save-view";
+import { BuildInfoView } from "./build-info-view";
 const GoogleFileStore    = require("../stores/google-file-store");
 const UndoRedoUIStore    = require("../stores/undo-redo-ui-store");
 const AppSettingsActions = require("../stores/app-settings-store").actions;
@@ -36,11 +22,11 @@ module.exports = React.createClass({
   },
 
   componentDidMount() {
-    return this.props.graphStore.addChangeListener(this.modelChanged);
+    this.props.graphStore.addChangeListener(this.modelChanged);
   },
 
   modelChanged(status) {
-    return this.setState({
+    this.setState({
       dirty: status.dirty,
       canUndo: status.canUndo,
       saved: status.saved
@@ -74,34 +60,31 @@ module.exports = React.createClass({
     }
     ];
 
-    return (div({className: "global-nav"},
-      (div({},
-        (Dropdown({anchor: this.props.filename, items: options, className: "global-nav-content-filename"})),
-        this.state.dirty ?
-          (span({className: "global-nav-file-status"}, "Unsaved")) : undefined
-      )),
-      this.state.action ?
-        (div({},
-          (i({className: "icon-codap-options spin"})),
-          this.state.action
-        )) : undefined,
-      (ModalGoogleSave({
-        showing: this.state.showingSaveDialog,
-        onSave: GoogleFileStore.actions.saveFile,
-        filename: this.props.filename,
-        isPublic: this.state.isPublic,
-        onRename(newName) {
-          return GoogleFileStore.actions.rename(newName);
-        },
-        onClose() {
-          return GoogleFileStore.actions.close();
-        },
-        setIsPublic: GoogleFileStore.actions.setIsPublic
-      })),
-      (BuildInfoView({})),
-      (div({className: "global-nav-name-and-help"},
-        (OpenInCodap({ disabled: this.state.dirty }))
-      ))
-    ));
+    return (
+      <div className="global-nav">
+        <div>
+          <DropDownView anchor={this.props.filename} items={options} isActionMenu={true} />
+          {this.state.dirty ? <span className="global-nav-file-status">Unsaved</span> : undefined}
+        </div>
+        {this.state.action ?
+          <div>
+            <i className="icon-codap-options spin" />
+            {this.state.action}
+          </div> : undefined}
+        <ModalGoogleSaveView
+          showing={this.state.showingSaveDialog}
+          onSave={GoogleFileStore.actions.saveFile}
+          filename={this.props.filename}
+          isPublic={this.state.isPublic}
+          onRename={GoogleFileStore.actions.rename}
+          onClose={GoogleFileStore.actions.close}
+          setIsPublic={GoogleFileStore.actions.setIsPublic}
+        />
+        <BuildInfoView />
+        <div className="global-nav-name-and-help">
+          <OpenInCodapView disabled={this.state.dirty} />
+        </div>
+      </div>
+    );
   }
 });

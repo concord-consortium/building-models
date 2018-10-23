@@ -7,20 +7,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const LinkRelationView = React.createFactory(require("./link-relation-view"));
+const LinkRelationView = require("./link-relation-view");
 const RelationFactory = require("../models/relation-factory");
-import { TabbedPanelView as TabbedPanelViewClass } from "./tabbed-panel-view";
-const TabbedPanel = React.createFactory(TabbedPanelViewClass);
-const Tabber = require("./tabbed-panel-view");
+import { TabbedPanelView } from "./tabbed-panel-view";
 const tr = require("../utils/translate");
 
 const inspectorPanelStore = require("../stores/inspector-panel-store");
 const graphStore = require("../stores/graph-store");
-
-const {div, h2, label, span, input, p, i, select, option} = React.DOM;
 
 module.exports = React.createClass({
 
@@ -36,15 +29,15 @@ module.exports = React.createClass({
     const {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation(link.relation);
     const isFullyDefined = (link.relation.isDefined && (vector != null) && (scalar != null)) || (link.relation.customData != null) || (accumulator != null) || (transferModifier != null);
 
-    return (Tabber.Tab({label, component: relationView, defined: isFullyDefined}));
+    return TabbedPanelView.Tab({label, component: relationView, defined: isFullyDefined});
   },
 
   onTabSelected(index) {
-    return inspectorPanelStore.actions.openInspectorPanel("relations", {link: __guard__(this.props.node.inLinks(), x => x[index])});
+    inspectorPanelStore.actions.openInspectorPanel("relations", {link: __guard__(this.props.node.inLinks(), x => x[index])});
   },
 
   onMethodSelected(evt) {
-    return graphStore.store.changeNode({ combineMethod: evt.target.value }, this.props.node);
+    graphStore.store.changeNode({ combineMethod: evt.target.value }, this.props.node);
   },
 
   renderNodeDetailsInspector() {
@@ -53,15 +46,15 @@ module.exports = React.createClass({
     if (!(inputCount > 1)) { return null; }
 
     const method = this.props.node.combineMethod != null ? this.props.node.combineMethod : "average";
-    return (div({ className: "node-details-inspector", key: "details" }, [
-      tr("~NODE-RELATION-EDIT.COMBINATION_METHOD"),
-      (select({ key: 0, value: method, onChange: this.onMethodSelected }, [
-        (option({value: "average", key: 1},
-          tr("~NODE-RELATION-EDIT.ARITHMETIC_MEAN"))),
-        (option({value: "product", key: 2},
-          tr("~NODE-RELATION-EDIT.SCALED_PRODUCT")))
-      ]))
-    ]));
+    return (
+      <div className="node-details-inspector" key="details">
+        {tr("~NODE-RELATION-EDIT.COMBINATION_METHOD")}
+        <select key={0} value={method} onChange={this.onMethodSelected}>
+          <option value="average" key={1}>{tr("~NODE-RELATION-EDIT.ARITHMETIC_MEAN")}</option>
+          <option value="product" key={2}>{tr("~NODE-RELATION-EDIT.SCALED_PRODUCT")}</option>
+        </select>
+      </div>
+    );
   },
 
   renderNodeRelationInspector() {
@@ -70,18 +63,20 @@ module.exports = React.createClass({
       if (this.state.selectedLink === link) { selectedTabIndex = i; }
       return this.renderTabforLink(link);
     });
-    return (div({className: "relation-inspector"},
-      (TabbedPanel({
-        tabs,
-        selectedTabIndex,
-        onTabSelected: this.onTabSelected,
-        onRenderBelowTabsComponent: this.renderNodeDetailsInspector
-      }))
-    ));
+    return (
+      <div className="relation-inspector">
+        <TabbedPanelView
+          tabs={tabs}
+          selectedTabIndex={selectedTabIndex}
+          onTabSelected={this.onTabSelected}
+          onRenderBelowTabsComponent={this.renderNodeDetailsInspector}
+        />
+      </div>
+    );
   },
 
   renderLinkRelationInspector() {
-    return (div({className: "relation-inspector"}));
+    return <div className="relation-inspector" />;
   },
 
   render() {
