@@ -46,7 +46,8 @@ module.exports = class CodapConnect
         resource: 'interactiveFrame'
         values: {
           title: tr "~CODAP.INTERACTIVE_FRAME.TITLE"
-          preventBringToFront: true
+          preventBringToFront: true,
+          cannotClose: true
         }
       },
       {
