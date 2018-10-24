@@ -6,8 +6,14 @@
 
 import { CodapConnect } from "../models/codap-connect";
 import { CodapActions } from "../actions/codap-actions";
+import { StoreClass } from "./store-class";
 
-export const CodapStore = Reflux.createStore({
+export declare class CodapStoreClass extends StoreClass {
+  public codapHasLoaded: boolean;
+  public hideUndoRedo: boolean;
+}
+
+export const CodapStore: CodapStoreClass = Reflux.createStore({
   listenables: [CodapActions],
 
   init() {

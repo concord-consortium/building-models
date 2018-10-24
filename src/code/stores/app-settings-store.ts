@@ -7,8 +7,23 @@
 import { HashParams } from "../utils/hash-parameters";
 import { ImportActions } from "../actions/import-actions";
 import { urlParams } from "../utils/url-params";
+import { StoreClass } from "./store-class";
 
-export const AppSettingsActions = Reflux.createActions(
+export declare class AppSettingsActionsClass {
+  public setComplexity(val: any): void;  // TODO: get concrete class
+  public setSimulationType(val: any): void;  // TODO: get concrete class
+  public showMinigraphs(show: boolean): void;
+  public relationshipSymbols(show: boolean): void;
+  public setTouchDevice(val: any): void;  // TODO: get concrete class
+}
+
+export declare class AppSettingsStoreClass extends StoreClass {
+  public Complexity: ComplexityType;
+  public SimulationType: SimulationTypeType;
+  public settings: any;  // TODO: get concrete class
+}
+
+export const AppSettingsActions: AppSettingsActionsClass = Reflux.createActions(
   [
     "setComplexity",
     "setSimulationType",
@@ -18,20 +33,31 @@ export const AppSettingsActions = Reflux.createActions(
   ]
 );
 
-const Complexity = {
+interface ComplexityType {
+  basic: 0;
+  expanded: 1;
+  DEFAULT: 1;
+}
+const Complexity: ComplexityType = {
   basic: 0,
   expanded: 1,
   DEFAULT: 1
 };
 
-const SimulationType = {
+interface SimulationTypeType {
+  diagramOnly: 0;
+  static: 1;
+  time: 2;
+  DEFAULT: 1;
+}
+const SimulationType: SimulationTypeType = {
   diagramOnly: 0,
   static: 1,
   time: 2,
   DEFAULT: 1
 };
 
-export const AppSettingsStore = Reflux.createStore({
+export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
   listenables: [AppSettingsActions, ImportActions],
 
   init() {
