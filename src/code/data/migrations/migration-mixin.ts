@@ -8,7 +8,8 @@
 
 const semver = require("semver");
 
-module.exports = {
+export const MigrationMixin = {
+
   needsUpdate(data) {
     let version = data.version || "0.0.0";
 

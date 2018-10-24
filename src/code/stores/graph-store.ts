@@ -16,7 +16,7 @@ import { UndoRedo } from "../utils/undo-redo";
 import { SelectionManager } from "../models/selection-manager";
 import { PaletteStore } from "../stores/palette-store";
 import { tr } from "../utils/translate";
-const Migrations          = require("../data/migrations/migrations");
+import { latestVersion } from "../data/migrations/migrations";
 import { PaletteDeleteDialogStore } from "../stores/palette-delete-dialog-store";
 import { AppSettingsStore } from "../stores/app-settings-store";
 import { SimulationStore, SimulationActions } from "../stores/simulation-store";
@@ -832,7 +832,7 @@ export const GraphStore  = Reflux.createStore({
     settings.simulation = SimulationStore.serialize();
 
     const data = {
-      version: Migrations.latestVersion(),
+      version: latestVersion(),
       filename: this.filename,
       palette,
       nodes: nodeExports,

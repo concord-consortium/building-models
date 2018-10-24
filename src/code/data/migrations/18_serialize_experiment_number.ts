@@ -1,5 +1,4 @@
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { MigrationMixin } from "./migration-mixin";
 
 const migration = {
   version: "1.17.0",
@@ -14,4 +13,4 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require("./migration-mixin"));
+export const migration_18 = _.mixin(migration, MigrationMixin);

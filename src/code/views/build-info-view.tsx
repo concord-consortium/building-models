@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const Migration = require("../data/migrations/migrations");
+import { latestVersion } from "../data/migrations/migrations";
 
 interface BuildInfoViewState {
   date: string;
@@ -24,7 +24,7 @@ export class BuildInfoView extends React.Component<{}, BuildInfoViewState> {
       commit,
       tag,
       commiter,
-      dataVersion: Migration.latestVersion()
+      dataVersion: latestVersion()
     });
   }
 

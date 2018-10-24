@@ -5,7 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const Migrations          = require("../data/migrations/migrations");
+import { migrationUpdate } from "../data/migrations/migrations";
 import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
 import { ImportActions } from "../actions/import-actions";
@@ -23,7 +23,7 @@ export class Importer {
   }
 
   public importData(data) {
-    Migrations.update(data);
+    migrationUpdate(data);
     // Synchronous invocation of actions / w trigger
     ImportActions.import.trigger(data);
     this.importNodes(data.nodes);

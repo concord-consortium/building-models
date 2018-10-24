@@ -5,10 +5,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const uuid = require("uuid");
+import { MigrationMixin } from "./migration-mixin";
 
 const imageToUUIDMap = {};
 
@@ -45,4 +43,4 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require("./migration-mixin"));
+export const migration_06 = _.mixin(migration, MigrationMixin);

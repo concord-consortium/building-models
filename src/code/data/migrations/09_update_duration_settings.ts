@@ -5,8 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { MigrationMixin } from "./migration-mixin";
 
 const migration = {
   version: "1.8.0",
@@ -33,4 +32,4 @@ const migration = {
   }
 };
 
-module.exports = _.mixin(migration, require("./migration-mixin"));
+export const migration_09 = _.mixin(migration, MigrationMixin);
