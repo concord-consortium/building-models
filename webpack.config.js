@@ -110,7 +110,7 @@ module.exports = (env, argv) => {
             name: 'fonts/[name].[ext]',
             publicPath: function(url) {
               // cf. https://github.com/webpack-contrib/file-loader/issues/160#issuecomment-349771544
-              return devMode ? url : url.replace(/fonts/, '../fonts');
+              return url.replace(/fonts/, '../fonts');
             }
           }
         },
@@ -122,7 +122,7 @@ module.exports = (env, argv) => {
             name: 'img/[name].[ext]',
             publicPath: function(url) {
               // cf. https://github.com/webpack-contrib/file-loader/issues/160#issuecomment-349771544
-              return devMode ? url : url.replace(/img/, '../img');
+              return url.replace(/img/, '../img');
             }
           }
         },
