@@ -6,18 +6,14 @@
  */
 // TODO:  This should be split up into and ImageDialogStore and a DialogStore…
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { PaletteStore } from "./palette-store";
 
-const PaletteStore = require("./palette-store");
-
-const imageDialogActions = Reflux.createActions([
+export const ImageDialogActions = Reflux.createActions([
   "open", "close", "update", "cancel"
 ]);
 
-
-const store = Reflux.createStore({
-  listenables: [ imageDialogActions ],
+export const ImageDialogStore = Reflux.createStore({
+  listenables: [ ImageDialogActions ],
 
   init() {
     this.enableListening();
@@ -38,7 +34,7 @@ const store = Reflux.createStore({
   },
 
   enableListening() {
-    return PaletteStore.store.listen(this.onPaletteSelect);
+    return PaletteStore.listen(this.onPaletteSelect);
   },
 
   onOpen(callback) {
@@ -99,7 +95,7 @@ const store = Reflux.createStore({
     this.resetPaletteItem();
     this._updateChanges();
     if (!this.keepShowing) {
-      return imageDialogActions.close.trigger();
+      return ImageDialogActions.close.trigger();
     }
   },
 
@@ -115,21 +111,20 @@ const store = Reflux.createStore({
   }
 });
 
-
-const listenerMixin = {
-  actions: imageDialogActions,
+export const ImageDialogMixin = {
+  actions: ImageDialogActions,
 
   getInitialState() {
     return {
-      showingDialog: store.showingDialog,
-      keepShowing: store.keepShowing,
-      paletteItem: store.paletteItem,
-      selectedImage: store.paletteItem
+      showingDialog: ImageDialogStore.showingDialog,
+      keepShowing: ImageDialogStore.keepShowing,
+      paletteItem: ImageDialogStore.paletteItem,
+      selectedImage: ImageDialogStore.paletteItem
     };
   },
 
   componentDidMount() {
-    return this.unsubscribe = store.listen(this.onChange);
+    return this.unsubscribe = ImageDialogStore.listen(this.onChange);
   },
 
   componentWillUnmount() {
@@ -144,10 +139,4 @@ const listenerMixin = {
       selectedImage: status.paletteItem
     });
   }
-};
-
-module.exports = {
-  store,
-  actions: imageDialogActions,
-  mixin: listenerMixin
 };

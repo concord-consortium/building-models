@@ -9,10 +9,13 @@
 const { IframePhoneRpcEndpoint } = require("iframe-phone");
 import { tr } from "../utils/translate";
 import { CodapActions } from "../actions/codap-actions";
-const undoRedoUIActions = (require("../stores/undo-redo-ui-store")).actions;
-const SimulationStore = require("../stores/simulation-store");
+import { UndoRedoUIActions } from "../stores/undo-redo-ui-store";
+import { SimulationStore, SimulationActions } from "../stores/simulation-store";
+import { PaletteStore } from "../stores/palette-store";
 import { TimeUnits } from "../utils/time-units";
 import { escapeRegExp } from "../utils/escape-reg-ex";
+import { GraphStore } from "../stores/graph-store";
+
 // log -- see loglevel in package.json
 
 interface CodapConnectMap {
@@ -49,10 +52,9 @@ export class CodapConnect {
   constructor(context) {
     this.codapRequestHandler = this.codapRequestHandler.bind(this);
     log.info("CodapConnect: initializing");
-    const GraphStore = require("../stores/graph-store");
     this.standaloneMode = false;
     this.queue = [];
-    this.graphStore = GraphStore.store;
+    this.graphStore = GraphStore;
     this.lastTimeSent = this._timeStamp();
     this.sendThrottleMs = 300;
 
@@ -61,7 +63,7 @@ export class CodapConnect {
     this.samplesCollectionName = "Samples";
 
     this.defaultExperimentName = "ExpNo";
-    SimulationStore.actions.recordingFramesCreated.listen(this.addData.bind(this));
+    SimulationActions.recordingFramesCreated.listen(this.addData.bind(this));
 
     CodapActions.sendUndoToCODAP.listen(this._sendUndoToCODAP.bind(this));
     CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
@@ -196,7 +198,7 @@ export class CodapConnect {
     const nodes = this.graphStore.getNodes();
 
     // First column definition is the time index
-    const timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
+    const timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
     const sampleDataAttrs = [
       {
         name: timeUnit,
@@ -460,7 +462,7 @@ export class CodapConnect {
       }
     }, (response) => {
       if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
-        return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
+        return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
   }
@@ -474,7 +476,7 @@ export class CodapConnect {
       }
     }, (response) => {
       if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
-        return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
+        return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
   }
@@ -489,17 +491,17 @@ export class CodapConnect {
       }
     }, (response) => {
       if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
-        return undoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
+        return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
   }
 
   public addData(data) {
-    const timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
+    const timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
     // Create the sample data values (node values array)
     const sampleData = _.map(data, (frame) => {
       const sample = {};
-      sample[tr("~CODAP.SIMULATION.EXPERIMENT")] = SimulationStore.store.settings.experimentNumber;
+      sample[tr("~CODAP.SIMULATION.EXPERIMENT")] = SimulationStore.settings.experimentNumber;
       sample[timeUnit] = frame.time;
       _.each(frame.nodes, n => sample[n.title] = n.value);
       return sample;
@@ -515,7 +517,7 @@ export class CodapConnect {
 
   public createGraph(yAttributeName) {
     this._createMissingDataAttributes();
-    const timeUnit = TimeUnits.toString(SimulationStore.store.stepUnits(), true);
+    const timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
 
     return this.codapPhone.call({
       action: "create",
@@ -553,7 +555,6 @@ export class CodapConnect {
     // if we have an array of changes, for now just extract the first one
     const change = Array.isArray(cmd.values) ? cmd.values[0] : cmd.values;
     const operation = change != null ? change.operation : undefined;
-    const paletteManager = require("../stores/palette-store");
 
     switch (resource) {
     case "interactiveState":
@@ -561,7 +562,7 @@ export class CodapConnect {
         log.info("Received saveState request from CODAP.");
         return callback({
           success: true,
-          state: this.graphStore.serialize(paletteManager.store.palette)
+          state: this.graphStore.serialize(PaletteStore.palette)
         });
       }
       break;
@@ -588,7 +589,7 @@ export class CodapConnect {
       }
       // update undo/redo UI state based on CODAP undo/redo UI state
       if (((cmd.values != null ? cmd.values.canUndo : undefined) != null) && ((cmd.values != null ? cmd.values.canRedo : undefined) != null)) {
-        return undoRedoUIActions.setCanUndoRedo(cmd.values != null ? cmd.values.canUndo : undefined, cmd.values != null ? cmd.values.canRedo : undefined);
+        return UndoRedoUIActions.setCanUndoRedo(cmd.values != null ? cmd.values.canUndo : undefined, cmd.values != null ? cmd.values.canRedo : undefined);
       }
       break;
     case "dataContextChangeNotice[Sage Simulation]":
@@ -636,7 +637,7 @@ export class CodapConnect {
             if (ret2 != null ? ret2.success : undefined) {
               const lastCase = ret2.values.case;
               const lastExperimentNumber = parseInt(lastCase.values[tr("~CODAP.SIMULATION.EXPERIMENT")], 10) || 0;
-              return SimulationStore.actions.setExperimentNumber(lastExperimentNumber + 1);
+              return SimulationActions.setExperimentNumber(lastExperimentNumber + 1);
             }
           });
         }

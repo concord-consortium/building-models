@@ -5,17 +5,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const InspectorPanelActions = Reflux.createActions(
+export const InspectorPanelActions = Reflux.createActions(
   [
     "openInspectorPanel",
     "closeInspectorPanel"
   ]
 );
 
-const InspectorPanelStore = Reflux.createStore({
+export const InspectorPanelStore = Reflux.createStore({
   listenables: [InspectorPanelActions],
 
   init() {
@@ -41,7 +38,7 @@ const InspectorPanelStore = Reflux.createStore({
   }
 });
 
-const mixin = {
+export const InspectorPanelMixin = {
   getInitialState() {
     return _.clone(InspectorPanelStore.settings);
   },
@@ -57,10 +54,4 @@ const mixin = {
   onInspectorPanelStoreChange(newData) {
     return this.setState(_.clone(newData));
   }
-};
-
-module.exports = {
-  actions: InspectorPanelActions,
-  store: InspectorPanelStore,
-  mixin
 };

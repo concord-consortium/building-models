@@ -5,9 +5,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { resizeImage } from "../utils/resize-image";
 import { initialPalette } from "../data/initial-palette";
 import { internalLibrary } from "../data/internal-library";
@@ -15,17 +12,16 @@ import { UndoRedo } from "../utils/undo-redo";
 import { ImportActions } from "../actions/import-actions";
 const uuid           = require("uuid");
 
-
 // TODO: Maybe loadData goes into some other action-set
-const paletteActions = Reflux.createActions(
+export const PaletteActions = Reflux.createActions(
   [
     "addToPalette", "selectPaletteIndex", "selectPaletteItem",
     "restoreSelection", "itemDropped", "update", "delete"
   ]
 );
 
-const paletteStore   = Reflux.createStore({
-  listenables: [paletteActions, ImportActions],
+export const PaletteStore = Reflux.createStore({
+  listenables: [PaletteActions, ImportActions],
 
   init() {
     this.initializeLibrary();
@@ -38,7 +34,11 @@ const paletteStore   = Reflux.createStore({
       license: ""
     };
     this.imageMetadata = _.clone(this.blankMetadata, true);
-    return this.undoManger = UndoRedo.instance({debug: false});
+
+    // due to import order issues wait to resolve UndoRedo
+    setTimeout(() => {
+      this.undoManger = UndoRedo.instance({debug: false});
+    }, 1);
   },
 
   initializeLibrary() {
@@ -220,20 +220,20 @@ const paletteStore   = Reflux.createStore({
   }
 });
 
-const mixin = {
+export const PaletteMixin = {
   getInitialState() {
     return {
-      palette: paletteStore.palette,
-      library: paletteStore.library,
-      selectedPaletteItem: paletteStore.selectedPaletteItem,
-      selectedPaletteIndex: paletteStore.selectedPaletteIndex,
-      selectedPaletteImage: paletteStore.selectedPaletteImage,
-      imageMetadata: paletteStore.imageMetadata
+      palette: PaletteStore.palette,
+      library: PaletteStore.library,
+      selectedPaletteItem: PaletteStore.selectedPaletteItem,
+      selectedPaletteIndex: PaletteStore.selectedPaletteIndex,
+      selectedPaletteImage: PaletteStore.selectedPaletteImage,
+      imageMetadata: PaletteStore.imageMetadata
     };
   },
 
   componentDidMount() {
-    return this.paletteUnsubscribe = paletteStore.listen(this.onPaletteChange);
+    return this.paletteUnsubscribe = PaletteStore.listen(this.onPaletteChange);
   },
 
   componentWillUnmount() {
@@ -252,10 +252,3 @@ const mixin = {
   }
 };
 
-module.exports = {
-  actions: paletteActions,
-  store: paletteStore,
-  mixin
-};
-
-(window as any).PaletteStore = module.exports;

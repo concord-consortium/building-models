@@ -6,17 +6,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { GraphStore } from "./graph-store";
 
-const undoRedoUIActions = Reflux.createActions(
+export const UndoRedoUIActions = Reflux.createActions(
   [
     "setCanUndoRedo"
   ]
 );
 
-const undoRedoUIStore = Reflux.createStore({
-  listenables: [undoRedoUIActions],
+export const UndoRedoUIStore = Reflux.createStore({
+  listenables: [UndoRedoUIActions],
 
   init(context) {
     this.canUndo = false;
@@ -38,19 +37,18 @@ const undoRedoUIStore = Reflux.createStore({
   }
 });
 
-const undoRedoUIMixin = {
+export const UndoRedoUIMixin = {
   getInitialState() {
     return {
-      canUndo: undoRedoUIStore.canUndo,
-      canRedo: undoRedoUIStore.canRedo
+      canUndo: UndoRedoUIStore.canUndo,
+      canRedo: UndoRedoUIStore.canRedo
     };
   },
 
   componentDidMount() {
-    this.unsubscribe = undoRedoUIStore.listen(this.onUndoRedoUIStateChange);
+    this.unsubscribe = UndoRedoUIStore.listen(this.onUndoRedoUIStateChange);
     // can't add listener in init due to order-of-initialization issues
-    const GraphStore = require("./graph-store");
-    return __guard__(__guard__(GraphStore != null ? GraphStore.store : undefined, x1 => x1.undoRedoManager), x => x.addChangeListener(this.onUndoRedoUIStateChange));
+    GraphStore.addChangeListener(this.onUndoRedoUIStateChange);
   },
 
   componentWillUnmount() {
@@ -64,13 +62,3 @@ const undoRedoUIMixin = {
     });
   }
 };
-
-module.exports = {
-  actions: undoRedoUIActions,
-  store: undoRedoUIStore,
-  mixin: undoRedoUIMixin
-};
-
-function __guard__(value, transform) {
-  return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;
-}

@@ -4,27 +4,24 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const PaletteStore       = require("./palette-store");
+import { PaletteStore } from "./palette-store";
 import { GraphActions } from "../actions/graph-actions";
 
-const nodeActions = Reflux.createActions(
+export const NodesActions = Reflux.createActions(
   [
     "nodesChanged"
   ]
 );
 
-const nodeStore   = Reflux.createStore({
-  listenables: [nodeActions],
+export const NodesStore   = Reflux.createStore({
+  listenables: [NodesActions],
 
   init() {
     this.nodes               = [];
     this.paletteItemHasNodes = false;
     this.selectedPaletteItem = null;
 
-    PaletteStore.store.listen(this.paletteChanged);
+    PaletteStore.listen(this.paletteChanged);
     return GraphActions.graphChanged.listen(this.graphChanged);
   },
 
@@ -39,7 +36,7 @@ const nodeStore   = Reflux.createStore({
   },
 
   paletteChanged() {
-    this.selectedPaletteItem = PaletteStore.store.selectedPaletteItem;
+    this.selectedPaletteItem = PaletteStore.selectedPaletteItem;
     return this.internalUpdate();
   },
 
@@ -63,16 +60,16 @@ const nodeStore   = Reflux.createStore({
   }
 });
 
-const mixin = {
+export const NodesMixin = {
   getInitialState() {
     return {
-      nodes: nodeStore.nodes,
-      paletteItemHasNodes: nodeStore.paletteItemHasNodes
+      nodes: NodesStore.nodes,
+      paletteItemHasNodes: NodesStore.paletteItemHasNodes
     };
   },
 
   componentDidMount() {
-    return this.unsubscribe = nodeStore.listen(this.onNodesChange);
+    return this.unsubscribe = NodesStore.listen(this.onNodesChange);
   },
 
   componentWillUnmount() {
@@ -84,10 +81,4 @@ const mixin = {
       // nodes: status.nodes
       paletteItemHasNodes: status.paletteItemHasNodes});
   }
-};
-
-module.exports = {
-  actions: nodeActions,
-  store: nodeStore,
-  mixin
 };

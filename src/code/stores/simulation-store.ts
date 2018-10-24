@@ -5,10 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const AppSettingsStore   = require("./app-settings-store");
+import { AppSettingsStore, AppSettingsActions } from "./app-settings-store";
 import { ImportActions } from "../actions/import-actions";
 import { GraphActions } from "../actions/graph-actions";
 import { Simulation } from "../models/simulation";
@@ -16,7 +13,8 @@ import { TimeUnits } from "../utils/time-units";
 import { tr } from "../utils/translate";
 
 const DEFAULT_SIMULATION_STEPS = 20;
-const SimulationActions = Reflux.createActions(
+
+export const SimulationActions = Reflux.createActions(
   [
     "expandSimulationPanel",
     "collapseSimulationPanel",
@@ -41,9 +39,9 @@ const SimulationActions = Reflux.createActions(
 );
 SimulationActions.runSimulation = Reflux.createAction({sync: true});
 
-const SimulationStore   = Reflux.createStore({
+export const SimulationStore = Reflux.createStore({
   listenables: [
-    SimulationActions, AppSettingsStore.actions,
+    SimulationActions, AppSettingsActions,
     ImportActions, GraphActions],
 
   init() {
@@ -84,11 +82,11 @@ const SimulationStore   = Reflux.createStore({
   onSetSimulationType(simulationType) {
     GraphActions.resetSimulation.trigger();
 
-    this.settings.isTimeBased = simulationType === AppSettingsStore.store.SimulationType.time;
+    this.settings.isTimeBased = simulationType === AppSettingsStore.SimulationType.time;
 
     this._runSimulation();
 
-    if (simulationType === AppSettingsStore.store.SimulationType.diagramOnly) {
+    if (simulationType === AppSettingsStore.SimulationType.diagramOnly) {
       return SimulationActions.collapseSimulationPanel();
     }
   },
@@ -138,7 +136,7 @@ const SimulationStore   = Reflux.createStore({
 
   onImport(data) {
     _.merge(this.settings, data.settings.simulation);
-    this.settings.isTimeBased = data.settings.simulationType === AppSettingsStore.store.SimulationType.time;
+    this.settings.isTimeBased = data.settings.simulationType === AppSettingsStore.SimulationType.time;
     const hasCollectors = _.filter(data.nodes, node => node.data.isAccumulator).length > 0;
     this.onSetStepUnits({unit: data.settings.simulation.stepUnits}, hasCollectors);
     return this.notifyChange();
@@ -325,7 +323,7 @@ const SimulationStore   = Reflux.createStore({
   }
 });
 
-const mixin = {
+export const SimulationMixin = {
   getInitialState() {
     return _.clone(SimulationStore.settings);
   },
@@ -345,8 +343,3 @@ const mixin = {
   }
 };
 
-module.exports = {
-  actions: SimulationActions,
-  store: SimulationStore,
-  mixin
-};

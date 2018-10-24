@@ -6,24 +6,21 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
- // TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { GoogleDriveIO } from "../utils/google-drive-io";
-const GraphStore    = require("./graph-store");
-const PaletteStore  = require("./palette-store");
+import { GraphStore } from "./graph-store";
+import { PaletteStore } from "./palette-store";
 import { HashParams } from "../utils/hash-parameters";
 
 import { tr } from "../utils/translate";
 
-const GoogleFileActions = Reflux.createActions([
+export const GoogleFileActions = Reflux.createActions([
   "showSaveDialog", "newFile", "openFile",
   "rename", "setIsPublic", "saveFile", "close",
   "revertToOriginal", "revertToLastSave", "connectToApi",
   "addAfterAuthHandler"
 ]);
 
-const GoogleFileStore = Reflux.createStore({
+export const GoogleFileStore = Reflux.createStore({
   listenables: [GoogleFileActions],
 
   init() {
@@ -56,7 +53,7 @@ const GoogleFileStore = Reflux.createStore({
 
   onNewFile() {
     if (confirm(tr("~FILE.CONFIRM"))) {
-      GraphStore.store.deleteAll();
+      GraphStore.deleteAll();
       HashParams.clearParam("googleDoc");
       HashParams.clearParam("publicUrl");
       this.fileId = null;
@@ -82,7 +79,7 @@ const GoogleFileStore = Reflux.createStore({
 
   onRename(filename) {
     if (filename.length > 0) {
-      GraphStore.store.setFilename(filename);
+      GraphStore.setFilename(filename);
       HashParams.clearParam("publicUrl");
       HashParams.clearParam("googleDoc");
       this.notifyChange();
@@ -99,14 +96,14 @@ const GoogleFileStore = Reflux.createStore({
   },
 
   onSaveFile() {
-    const { filename } = GraphStore.store;
+    const { filename } = GraphStore;
     if (filename.length > 0) {
       this.action = tr("~FILE.UPLOADING");
 
       // if this is a save of an existing file with the same name use the fileid
       this.fileId = this.lastFilename === filename ? this.fileId : null;
       this.lastFilename = filename;
-      const data = GraphStore.store.toJsonString(PaletteStore.store.palette);
+      const data = GraphStore.toJsonString(PaletteStore.palette);
 
       return GoogleDrive.upload({fileName: filename, fileId: this.fileId}, data, (err, fileSpec) => {
         if (err) {
@@ -124,7 +121,7 @@ const GoogleFileStore = Reflux.createStore({
           } else {
             HashParams.setParam("googleDoc", this.fileId);
           }
-          GraphStore.store.setSaved();
+          GraphStore.setSaved();
         }
         this.showingSaveDialog = false;
         return this.notifyChange();
@@ -134,14 +131,14 @@ const GoogleFileStore = Reflux.createStore({
 
   onRevertToOriginal() {
     if (confirm(tr("~FILE.CONFIRM_ORIGINAL_REVERT"))) {
-      GraphStore.store.revertToOriginal();
+      GraphStore.revertToOriginal();
       return this.notifyChange();
     }
   },
 
   onRevertToLastSave() {
     if (confirm(tr("~FILE.CONFIRM_LAST_SAVE_REVERT"))) {
-      GraphStore.store.revertToLastSave();
+      GraphStore.revertToLastSave();
       return this.notifyChange();
     }
   },
@@ -165,7 +162,7 @@ const GoogleFileStore = Reflux.createStore({
   // non-authorized request
   loadPublicUrl(url) {
     const authorized = false;
-    const callback = (ignored, json) => GraphStore.store.loadData(json);
+    const callback = (ignored, json) => GraphStore.loadData(json);
 
     return GoogleDrive.downloadFromUrl(url, callback, authorized);
   },
@@ -180,9 +177,9 @@ const GoogleFileStore = Reflux.createStore({
         this.fileId = fileSpec.id;
         this.action = null;
         this.lastFilename = data.filename;
-        GraphStore.store.deleteAll();
-        GraphStore.store.loadData(data);
-        GraphStore.store.setFilename(data.filename);
+        GraphStore.deleteAll();
+        GraphStore.loadData(data);
+        GraphStore.setFilename(data.filename);
         HashParams.setParam("googleDoc", this.fileId);
       }
       return this.notifyChange();
@@ -202,7 +199,7 @@ const waitForAuthCheck = () => {
 };
 waitForAuthCheck();
 
-const mixin = {
+export const GoogleFileMixin = {
   getInitialState() {
     return {
       gapiLoaded:        false,
@@ -226,12 +223,6 @@ const mixin = {
   onGoogleChange(newData) {
     return this.setState(_.clone(newData));
   }
-};
-
-module.exports = {
-  actions: GoogleFileActions,
-  store: GoogleFileStore,
-  mixin
 };
 
 function __guard__(value, transform) {

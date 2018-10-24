@@ -4,44 +4,42 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const {RadioGroup, Radio}  = require("react-radio-group");
-import { DropDownView } from "./dropdown-view";
-const SimulationStore = require("../stores/simulation-store");
-const AppSettingsStore = require("../stores/app-settings-store");
-const GraphStore      = require("../stores/graph-store").store;
+const { RadioGroup, Radio } = require("react-radio-group");
+import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsActions, AppSettingsMixin } from "../stores/app-settings-store";
+import { GraphStore } from "../stores/graph-store";
 import { tr } from "../utils/translate";
 
-const { SimulationType } = AppSettingsStore.store;
-const { Complexity } = AppSettingsStore.store;
+const { SimulationType, Complexity } = AppSettingsStore;
 
 export const SimulationInspectorView = React.createClass({
 
   displayName: "SimulationInspectorView",
 
-  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
+  mixins: [ SimulationMixin, AppSettingsMixin ],
 
   setDuration(e) {
-    SimulationStore.actions.setDuration(parseInt(e.target.value, 10));
+    SimulationActions.setDuration(parseInt(e.target.value, 10));
   },
 
   setCapNodeValues(e) {
-    SimulationStore.actions.capNodeValues(e.target.checked);
+    SimulationActions.capNodeValues(e.target.checked);
   },
 
   setShowingMinigraphs(e) {
-    AppSettingsStore.actions.showMinigraphs(e.target.checked);
+    AppSettingsActions.showMinigraphs(e.target.checked);
   },
 
   setRelationshipSymbols(e) {
-    AppSettingsStore.actions.relationshipSymbols(e.target.checked);
+    AppSettingsActions.relationshipSymbols(e.target.checked);
   },
 
   setSimulationType(val) {
-    AppSettingsStore.actions.setSimulationType(val);
+    AppSettingsActions.setSimulationType(val);
   },
 
   setComplexity(val) {
-    AppSettingsStore.actions.setComplexity(val);
+    AppSettingsActions.setComplexity(val);
   },
 
   render() {

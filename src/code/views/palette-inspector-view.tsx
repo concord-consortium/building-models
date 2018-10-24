@@ -2,9 +2,9 @@ import { PaletteItemView } from "./palette-item-view";
 import { PaletteAddView } from "./palette-add-view";
 import { ImageMetadataView } from "./image-metadata-view";
 
-const PaletteStore       = require("../stores/palette-store");
-const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
-const NodesStore         = require("../stores/nodes-store");
+import { PaletteActions, PaletteMixin } from "../stores/palette-store";
+import { PaletteDeleteDialogActions } from "../stores/palette-delete-dialog-store";
+import { NodesMixin } from "../stores/nodes-store";
 
 import { tr } from "../utils/translate";
 
@@ -12,14 +12,14 @@ export const PaletteInspectorView = React.createClass({
 
   displayName: "PaletteInspectorView",
 
-  mixins: [ PaletteStore.mixin, NodesStore.mixin ],
+  mixins: [ PaletteMixin, NodesMixin ],
 
   imageSelected(index) {
-    PaletteStore.actions.selectPaletteIndex(index);
+    PaletteActions.selectPaletteIndex(index);
   },
 
   delete() {
-    PaletteDialogStore.actions.open();
+    PaletteDeleteDialogActions.open();
   },
 
   render() {
@@ -63,7 +63,7 @@ export const PaletteInspectorView = React.createClass({
               </div> : undefined}
             <div className="palette-about-image-info">
               {this.state.selectedPaletteItem.metadata
-                ? <ImageMetadataView metadata={this.state.selectedPaletteItem.metadata} update={PaletteStore.actions.update} />
+                ? <ImageMetadataView metadata={this.state.selectedPaletteItem.metadata} update={PaletteActions.update} />
                 : undefined}
             </div>
           </div> : undefined}

@@ -4,13 +4,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
- // TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { CodapConnect } from "../models/codap-connect";
 import { CodapActions } from "../actions/codap-actions";
 
-const codapStore = Reflux.createStore({
+export const CodapStore = Reflux.createStore({
   listenables: [CodapActions],
 
   init() {
@@ -38,16 +35,16 @@ const codapStore = Reflux.createStore({
   }
 });
 
-const mixin = {
+export const CodapMixin = {
   getInitialState() {
     return {
-      codapHasLoaded: codapStore.codapHasLoaded,
-      hideUndoRedo:   codapStore.hideUndoRedo
+      codapHasLoaded: CodapStore.codapHasLoaded,
+      hideUndoRedo:   CodapStore.hideUndoRedo
     };
   },
 
   componentDidMount() {
-    return this.unsubscribe = codapStore.listen(this.onCodapStateChange);
+    return this.unsubscribe = CodapStore.listen(this.onCodapStateChange);
   },
 
   componentWillUnmount() {
@@ -60,10 +57,4 @@ const mixin = {
       hideUndoRedo:   status.hideUndoRedo
     });
   }
-};
-
-module.exports = {
-  actions: CodapActions,
-  store: codapStore,
-  mixin
 };

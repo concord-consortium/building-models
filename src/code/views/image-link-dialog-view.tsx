@@ -1,5 +1,5 @@
 import { DropZoneView } from "./dropzone-view";
-const ImageDialogStore = require("../stores/image-dialog-store");
+import { ImageDialogMixin } from "../stores/image-dialog-store";
 import { tr } from "../utils/translate";
 import { ImageDialogViewMixin } from "../mixins/image-dialog-view";
 
@@ -7,7 +7,7 @@ export const ImageLinkDialogView = React.createClass({
 
   displayName: "ImageLinkDialogView",
 
-  mixins: [ ImageDialogStore.mixin, ImageDialogViewMixin ],
+  mixins: [ ImageDialogMixin, ImageDialogViewMixin ],
 
   previewImage(e) {
     e.preventDefault();

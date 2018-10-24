@@ -13,8 +13,8 @@ import { TabbedPanelView } from "./tabbed-panel-view";
 import { RelationFactory } from "../models/relation-factory";
 import { tr } from "../utils/translate";
 
-const inspectorPanelStore = require("../stores/inspector-panel-store");
-const graphStore = require("../stores/graph-store");
+import { InspectorPanelActions, InspectorPanelMixin } from "../stores/inspector-panel-store";
+import { GraphStore, GraphMixin } from "../stores/graph-store";
 
 export const RelationInspectorView = React.createClass({
 
@@ -22,7 +22,7 @@ export const RelationInspectorView = React.createClass({
 
   // listen to graphStore so that the tab for the link will re-render when the link is fully defined
   // (link-relation-view uses @props.graphStore.changeLink() to update the link)
-  mixins: [ inspectorPanelStore.mixin, graphStore.mixin ],
+  mixins: [ InspectorPanelMixin, GraphMixin ],
 
   renderTabforLink(link) {
     const relationView = (LinkRelationView({link, graphStore: this.props.graphStore}));
@@ -34,11 +34,11 @@ export const RelationInspectorView = React.createClass({
   },
 
   onTabSelected(index) {
-    inspectorPanelStore.actions.openInspectorPanel("relations", {link: __guard__(this.props.node.inLinks(), x => x[index])});
+    InspectorPanelActions.openInspectorPanel("relations", {link: __guard__(this.props.node.inLinks(), x => x[index])});
   },
 
   onMethodSelected(evt) {
-    graphStore.store.changeNode({ combineMethod: evt.target.value }, this.props.node);
+    GraphStore.changeNode({ combineMethod: evt.target.value }, this.props.node);
   },
 
   renderNodeDetailsInspector() {

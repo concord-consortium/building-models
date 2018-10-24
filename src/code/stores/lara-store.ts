@@ -4,13 +4,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { LaraConnect } from "../models/lara-connect";
 import { LaraActions } from "../actions/lara-actions";
 
-const laraStore   = Reflux.createStore({
+export const LaraStore = Reflux.createStore({
   listenables: [LaraActions],
 
   init() {
@@ -29,13 +26,13 @@ const laraStore   = Reflux.createStore({
   }
 });
 
-const mixin = {
+export const LaraMixin = {
   getInitialState() {
-    return {laraHasLoaded: laraStore.laraHasLoaded};
+    return {laraHasLoaded: LaraStore.laraHasLoaded};
   },
 
   componentDidMount() {
-    return this.unsubscribe = laraStore.listen(this.onLaraStateChange);
+    return this.unsubscribe = LaraStore.listen(this.onLaraStateChange);
   },
 
   componentWillUnmount() {
@@ -46,10 +43,4 @@ const mixin = {
     return this.setState({
       laraHasLoaded: status.laraHasLoaded});
   }
-};
-
-module.exports = {
-  actions: LaraActions,
-  store: laraStore,
-  mixin
 };

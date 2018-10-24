@@ -4,15 +4,14 @@ import { DropDownView } from "./dropdown-view";
 import { OpenInCodapView } from "./open-in-codap-view";
 import { ModalGoogleSaveView } from "./modal-google-save-view";
 import { BuildInfoView } from "./build-info-view";
-const GoogleFileStore    = require("../stores/google-file-store");
-const UndoRedoUIStore    = require("../stores/undo-redo-ui-store");
-const AppSettingsActions = require("../stores/app-settings-store").actions;
+import { GoogleFileActions, GoogleFileMixin } from "../stores/google-file-store";
+import { UndoRedoUIMixin } from "../stores/undo-redo-ui-store";
 
 export const GlobalNavView = React.createClass({
 
   displayName: "GlobalNavView",
 
-  mixins: [ GoogleFileStore.mixin, UndoRedoUIStore.mixin ],
+  mixins: [ GoogleFileMixin, UndoRedoUIMixin ],
 
   getInitialState() {
     return {
@@ -36,15 +35,15 @@ export const GlobalNavView = React.createClass({
   render() {
     const options = [{
       name: tr("~MENU.NEW"),
-      action: GoogleFileStore.actions.newFile
+      action: GoogleFileActions.newFile
     }
     , {
       name: tr("~MENU.OPEN"),
-      action: GoogleFileStore.actions.openFile
+      action: GoogleFileActions.openFile
     }
     , {
       name: tr("~MENU.SAVE"),
-      action: GoogleFileStore.actions.showSaveDialog
+      action: GoogleFileActions.showSaveDialog
     }
     , {
       name: tr("~MENU.SAVE_AS"),
@@ -52,11 +51,11 @@ export const GlobalNavView = React.createClass({
     }
     , {
       name: tr("~MENU.REVERT_TO_ORIGINAL"),
-      action: this.state.canUndo ? GoogleFileStore.actions.revertToOriginal : false
+      action: this.state.canUndo ? GoogleFileActions.revertToOriginal : false
     }
     , {
       name: tr("~MENU.REVERT_TO_LAST_SAVE"),
-      action: this.state.saved && this.state.dirty ? GoogleFileStore.actions.revertToLastSave : false
+      action: this.state.saved && this.state.dirty ? GoogleFileActions.revertToLastSave : false
     }
     ];
 
@@ -73,12 +72,12 @@ export const GlobalNavView = React.createClass({
           </div> : undefined}
         <ModalGoogleSaveView
           showing={this.state.showingSaveDialog}
-          onSave={GoogleFileStore.actions.saveFile}
+          onSave={GoogleFileActions.saveFile}
           filename={this.props.filename}
           isPublic={this.state.isPublic}
-          onRename={GoogleFileStore.actions.rename}
-          onClose={GoogleFileStore.actions.close}
-          setIsPublic={GoogleFileStore.actions.setIsPublic}
+          onRename={GoogleFileActions.rename}
+          onClose={GoogleFileActions.close}
+          setIsPublic={GoogleFileActions.setIsPublic}
         />
         <BuildInfoView />
         <div className="global-nav-name-and-help">

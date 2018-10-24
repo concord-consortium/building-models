@@ -8,30 +8,27 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { Importer } from "../utils/importer";
 import { Link } from "../models/link";
 import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
 import { UndoRedo } from "../utils/undo-redo";
 import { SelectionManager } from "../models/selection-manager";
-const PaletteStore        = require("../stores/palette-store");
+import { PaletteStore } from "../stores/palette-store";
 import { tr } from "../utils/translate";
 const Migrations          = require("../data/migrations/migrations");
-const PaletteDeleteStore  = require("../stores/palette-delete-dialog-store");
-const AppSettingsStore    = require("../stores/app-settings-store");
-const SimulationStore     = require("../stores/simulation-store");
+import { PaletteDeleteDialogStore } from "../stores/palette-delete-dialog-store";
+import { AppSettingsStore } from "../stores/app-settings-store";
+import { SimulationStore, SimulationActions } from "../stores/simulation-store";
 import { GraphActions } from "../actions/graph-actions";
 import { CodapActions } from "../actions/codap-actions";
-const InspectorPanelStore = require("../stores/inspector-panel-store");
+import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { CodapConnect } from "../models/codap-connect";
 import { RelationFactory } from "../models/relation-factory";
 import { GraphPrimitive } from "../models/graph-primitive";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
-const GraphStore  = Reflux.createStore({
+export const GraphStore  = Reflux.createStore({
   init(context) {
     this.linkKeys           = {};
     this.nodeKeys           = {};
@@ -41,12 +38,12 @@ const GraphStore  = Reflux.createStore({
 
     this.undoRedoManager    = UndoRedo.instance({debug: false, context});
     this.selectionManager   = new SelectionManager();
-    PaletteDeleteStore.store.listen(this.paletteDelete.bind(this));
+    PaletteDeleteDialogStore.listen(this.paletteDelete.bind(this));
 
-    SimulationStore.actions.createExperiment.listen(this.resetSimulation.bind(this));
-    SimulationStore.actions.setDuration.listen(this.resetSimulation.bind(this));
-    SimulationStore.actions.capNodeValues.listen(this.resetSimulation.bind(this));
-    SimulationStore.actions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
+    SimulationActions.createExperiment.listen(this.resetSimulation.bind(this));
+    SimulationActions.setDuration.listen(this.resetSimulation.bind(this));
+    SimulationActions.capNodeValues.listen(this.resetSimulation.bind(this));
+    SimulationActions.simulationFramesCreated.listen(this.updateSimulationData.bind(this));
 
     this.usingCODAP = false;
     this.usingLara = false;
@@ -65,7 +62,7 @@ const GraphStore  = Reflux.createStore({
   _trimSimulation() {
     for (const node of this.getNodes()) {
       // leaving some excess data reduces flicker during rapid changes
-      const excessFrames = node.frames.length - (2 * SimulationStore.store.simulationDuration());
+      const excessFrames = node.frames.length - (2 * SimulationStore.simulationDuration());
       if (excessFrames > 0) {
         node.frames.splice(0, excessFrames);
       }
@@ -563,8 +560,8 @@ const GraphStore  = Reflux.createStore({
 
     if (isDoubleClick) {
       this.selectionManager.selectNodeForInspection(link.targetNode);
-      if (AppSettingsStore.store.settings.simulationType !== AppSettingsStore.store.SimulationType.diagramOnly) {
-        return InspectorPanelStore.actions.openInspectorPanel("relations", {link});
+      if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
+        return InspectorPanelActions.openInspectorPanel("relations", {link});
       }
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click
@@ -713,7 +710,7 @@ const GraphStore  = Reflux.createStore({
   //
   // We pass nodes and links so as not to calculate @getNodes and @getLinks redundantly.
   getDescription(nodes, links) {
-    const { settings } = SimulationStore.store;
+    const { settings } = SimulationStore;
 
     let linkDescription = "";
     let modelDescription = `steps:${settings.duration}|cap:${settings.capNodeValues}|`;
@@ -832,7 +829,7 @@ const GraphStore  = Reflux.createStore({
       return result1;
     })();
     const settings = AppSettingsStore.store.serialize();
-    settings.simulation = SimulationStore.store.serialize();
+    settings.simulation = SimulationStore.serialize();
 
     const data = {
       version: Migrations.latestVersion(),
@@ -867,13 +864,13 @@ const GraphStore  = Reflux.createStore({
 
     if (this.lastRunModel !== graphState.description.model) {
       this._trimSimulation();
-      SimulationStore.actions.runSimulation();
+      SimulationActions.runSimulation();
       this.lastRunModel = graphState.description.model;
     }
   }
 });
 
-const mixin = {
+export const GraphMixin = {
   getInitialState() {
     return GraphStore.getGraphState();
   },
@@ -900,11 +897,6 @@ const mixin = {
   }
 };
 
-module.exports = {
-  // actions: GraphActions
-  store: GraphStore,
-  mixin
-};
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

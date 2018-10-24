@@ -4,14 +4,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
- // TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { HashParams } from "../utils/hash-parameters";
 import { ImportActions } from "../actions/import-actions";
 import { urlParams } from "../utils/url-params";
 
-const AppSettingsActions = Reflux.createActions(
+export const AppSettingsActions = Reflux.createActions(
   [
     "setComplexity",
     "setSimulationType",
@@ -34,7 +31,7 @@ const SimulationType = {
   DEFAULT: 1
 };
 
-const AppSettingsStore   = Reflux.createStore({
+export const AppSettingsStore = Reflux.createStore({
   listenables: [AppSettingsActions, ImportActions],
 
   init() {
@@ -124,7 +121,7 @@ const AppSettingsStore   = Reflux.createStore({
 AppSettingsStore.Complexity = Complexity;
 AppSettingsStore.SimulationType = SimulationType;
 
-const mixin = {
+export const AppSettingsMixin = {
   getInitialState() {
     return _.clone(AppSettingsStore.settings);
   },
@@ -140,10 +137,4 @@ const mixin = {
   onAppSettingsChange(newData) {
     return this.setState(_.clone(newData));
   }
-};
-
-module.exports = {
-  actions: AppSettingsActions,
-  store: AppSettingsStore,
-  mixin
 };

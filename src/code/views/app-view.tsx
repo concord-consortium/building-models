@@ -12,14 +12,14 @@ import { BuildInfoView } from "./build-info-view";
 
 import { AppViewMixin } from "../mixins/app-view";
 
-const ImageDialogStore    = require("../stores/image-dialog-store");
-const AppSettingsStore    = require("../stores/app-settings-store");
+import { ImageDialogMixin } from "../stores/image-dialog-store";
+import { AppSettingsStore, AppSettingsActions, AppSettingsMixin } from "../stores/app-settings-store";
 
 export const AppView = React.createClass({
 
   displayName: "AppView",
 
-  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, AppViewMixin],
+  mixins: [ImageDialogMixin, AppSettingsMixin, AppViewMixin],
 
   getInitialState() {
 
@@ -49,12 +49,12 @@ export const AppView = React.createClass({
 
   render() {
     let actionBarStyle = "action-bar";
-    if (AppSettingsStore.store.settings.uiElements.actionBar === false) {
+    if (AppSettingsStore.settings.uiElements.actionBar === false) {
       actionBarStyle += " hidden";
-    } else if (AppSettingsStore.store.settings.uiElements.globalNav === false) {
+    } else if (AppSettingsStore.settings.uiElements.globalNav === false) {
       actionBarStyle += " small";
     }
-    const renderGlobalNav = !this.state.iframed && (AppSettingsStore.store.settings.uiElements.globalNav !== false);
+    const renderGlobalNav = !this.state.iframed && (AppSettingsStore.settings.uiElements.globalNav !== false);
 
     return (
       <div className="app">
@@ -65,22 +65,22 @@ export const AppView = React.createClass({
               username={this.state.username}
               graphStore={this.props.graphStore}
               GraphStore={this.GraphStore}
-              display={AppSettingsStore.store.settings.uiElements.globalNav}
+              display={AppSettingsStore.settings.uiElements.globalNav}
             /> : undefined}
           <div className={actionBarStyle}>
             <NodeWellView
               palette={this.state.palette}
               toggleImageBrowser={this.toggleImageBrowser}
               graphStore={this.props.graphStore}
-              uiElements={AppSettingsStore.store.settings.uiElements}
+              uiElements={AppSettingsStore.settings.uiElements}
             />
             <DocumentActionsView
               graphStore={this.props.graphStore}
-              diagramOnly={this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly}
+              diagramOnly={this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly}
               iframed={this.state.iframed}
             />
           </div>
-          <div className={AppSettingsStore.store.settings.uiElements.globalNav === false ? "canvas full" : "canvas"}>
+          <div className={AppSettingsStore.settings.uiElements.globalNav === false ? "canvas full" : "canvas"}>
             <GraphView
               graphStore={this.props.graphStore}
               selectionManager={this.props.graphStore.selectionManager}
@@ -93,11 +93,11 @@ export const AppView = React.createClass({
             onNodeChanged={this.onNodeChanged}
             onNodeDelete={this.onNodeDelete}
             palette={this.state.palette}
-            diagramOnly={this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly}
+            diagramOnly={this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly}
             toggleImageBrowser={this.toggleImageBrowser}
             graphStore={this.props.graphStore}
             ref="inspectorPanel"
-            display={AppSettingsStore.store.settings.uiElements.inspectorPanel}
+            display={AppSettingsStore.settings.uiElements.inspectorPanel}
           />
           {this.state.showingDialog ? <ImageBrowserView graphStore={this.props.graphStore} /> : null}
           <ModalPaletteDeleteView />

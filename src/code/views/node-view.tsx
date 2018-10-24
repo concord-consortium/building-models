@@ -7,8 +7,7 @@
 
 import { tr } from "../utils/translate";
 
-const AppSettingsStore    = require("../stores/app-settings-store");
-const SimulationActions = require("../stores/simulation-store").actions;
+import { AppSettingsStore } from "../stores/app-settings-store";
 import { SquareImageView } from "./square-image-view";
 import { StackedImageView } from "./stacked-image-view";
 import { SVGSliderView } from "./value-slider-view";
@@ -18,7 +17,7 @@ const DEFAULT_CONTEXT_NAME = "building-models";
 
 import { NodeTitleMixin } from "../mixins/node-title";
 
-const InspectorPanelStore = require("../stores/inspector-panel-store");
+import { InspectorPanelActions } from "../stores/inspector-panel-store";
 
 const NodeTitle = React.createFactory(React.createClass({
 
@@ -194,8 +193,8 @@ export const NodeView = React.createClass({
       const now = (new Date()).getTime();
       if ((now - (this.lastClickLinkTime || 0)) <= 250) {
         // Only open inspector if we're not in diagram-only mode
-        if (AppSettingsStore.store.settings.simulationType !== AppSettingsStore.store.SimulationType.diagramOnly) {
-          InspectorPanelStore.actions.openInspectorPanel("relations");
+        if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
+          InspectorPanelActions.openInspectorPanel("relations");
         }
       }
       return this.lastClickLinkTime = now;
@@ -272,7 +271,7 @@ export const NodeView = React.createClass({
   },
 
   startEditing() {
-    if (!AppSettingsStore.store.settings.lockdown) {
+    if (!AppSettingsStore.settings.lockdown) {
       this.initialTitle = this.props.graphStore.nodeKeys[this.props.nodeKey].title;
       return this.props.selectionManager.selectNodeForTitleEditing(this.props.data);
     }

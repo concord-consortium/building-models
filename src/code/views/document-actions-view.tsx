@@ -1,13 +1,13 @@
-const AppSettingsStore = require("../stores/app-settings-store");
-const CodapStore       = require("../stores/codap-store");
-const UndoRedoUIStore  = require("../stores/undo-redo-ui-store");
+import { AppSettingsMixin } from "../stores/app-settings-store";
+import { CodapMixin } from "../stores/codap-store";
+import { UndoRedoUIMixin } from "../stores/undo-redo-ui-store";
 
 import { AboutView } from "./about-view";
 import { SimulationRunPanelView } from "./simulation-run-panel-view";
 
 export const DocumentActionsView = React.createClass({
 
-  mixins: [ CodapStore.mixin, UndoRedoUIStore.mixin, AppSettingsStore.mixin ],
+  mixins: [ CodapMixin, UndoRedoUIMixin, AppSettingsMixin ],
 
   displayName: "DocumentActionsView",
 

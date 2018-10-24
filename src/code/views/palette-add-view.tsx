@@ -4,7 +4,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const ImageDialogStore   = require("../stores/image-dialog-store");
+import { ImageDialogActions } from "../stores/image-dialog-store";
 import { Draggable } from "../mixins/draggable";
 import { tr } from "../utils/translate";
 
@@ -22,7 +22,7 @@ export const PaletteAddView = React.createClass({
   },
 
   onClick() {
-    ImageDialogStore.actions.open.trigger(this.props.callback);
+    ImageDialogActions.open.trigger(this.props.callback);
   },
 
   render() {

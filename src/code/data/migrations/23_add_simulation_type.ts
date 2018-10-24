@@ -8,7 +8,7 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const AppSettingsStore = require("../../stores/app-settings-store").store;
+import { AppSettingsStore } from "../../stores/app-settings-store";
 
 const migration = {
   version: "1.22.0",

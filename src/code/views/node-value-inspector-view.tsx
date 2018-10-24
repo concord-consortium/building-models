@@ -5,15 +5,15 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const SimulationStore  = require("../stores/simulation-store");
-const AppSettingsStore = require("../stores/app-settings-store");
+import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin } from "../stores/app-settings-store";
 import { tr } from "../utils/translate";
 
 export const NodeValueInspectorView = React.createClass({
 
   displayName: "NodeValueInspectorView",
 
-  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
+  mixins: [ SimulationMixin, AppSettingsMixin ],
 
   propTypes: {
     max: React.PropTypes.number,
@@ -60,7 +60,7 @@ export const NodeValueInspectorView = React.createClass({
   updateAccumulatorChecked(evt) {
     const value = evt.target.checked;
     this.props.graphStore.changeNode({isAccumulator: value});
-    return SimulationStore.actions.toggledCollectorTo(value);
+    return SimulationActions.toggledCollectorTo(value);
   },
 
   updateNegativeValuesAllowed(evt) {
@@ -135,7 +135,7 @@ export const NodeValueInspectorView = React.createClass({
   },
 
   renderCollectorOptions(node) {
-    if (this.state.simulationType !== AppSettingsStore.store.SimulationType.time) {
+    if (this.state.simulationType !== AppSettingsStore.SimulationType.time) {
       return null;
     }
 

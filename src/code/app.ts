@@ -10,8 +10,8 @@ import "../stylus/app.styl";
 import { AppView as AppViewClass } from "./views/app-view";
 const AppView     = React.createFactory(AppViewClass);
 
-const GraphStore   = require("./stores/graph-store");
-const PaletteStore = require("./stores/palette-store");
+import { GraphStore } from "./stores/graph-store";
+import { PaletteStore } from "./stores/palette-store";
 import { HashParams } from "./utils/hash-parameters";
 
 let appView;
@@ -25,7 +25,7 @@ let appView;
       // publicUrl: Where to load json e.g.'json/serialized.json'
       // googleDoc: try to load a googledoc from the url
       // data: the json to load (compare with publicUrl above)
-      graphStore: GraphStore.store,
+      graphStore: GraphStore,
       publicUrl: HashParams.getParam("publicUrl"),
       data: HashParams.getParam("data"),
       googleDoc: HashParams.getParam("googleDoc")
@@ -42,8 +42,7 @@ let appView;
   },
 
   serializeModel() {
-    // console.log(JSON.stringify(appView?.props.graphStore.serialize(PaletteStore.store.palette), null, 2))
-    return (appView != null ? appView.props.graphStore.toJsonString(PaletteStore.store.palette) : undefined);
+    return (appView != null ? appView.props.graphStore.toJsonString(PaletteStore.palette) : undefined);
   },
 
   loadModel(data) {

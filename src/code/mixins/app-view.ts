@@ -5,12 +5,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const PaletteStore    = require("../stores/palette-store");
-const CodapStore      = require("../stores/codap-store");
-const LaraStore       = require("../stores/lara-store");
-const GoogleFileStore = require("../stores/google-file-store");
+import { PaletteStore } from "../stores/palette-store";
+import { CodapStore } from "../stores/codap-store";
+import { LaraStore } from "../stores/lara-store";
+import { GoogleFileActions } from "../stores/google-file-store";
 import { HashParams } from "../utils/hash-parameters";
-const AppSettingsStore = require("../stores/app-settings-store");
+import { AppSettingsStore, AppSettingsActions } from "../stores/app-settings-store";
 
 export const AppViewMixin = {
 
@@ -33,10 +33,10 @@ export const AppViewMixin = {
   addTouchDeviceHandler(add) {
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent);
     if (isMobileDevice) {
-      return AppSettingsStore.actions.setTouchDevice(true);
+      return AppSettingsActions.setTouchDevice(true);
     } else if (add) {
       return $(window).on("touchstart", (e) => {
-        AppSettingsStore.actions.setTouchDevice(true);
+        AppSettingsActions.setTouchDevice(true);
         return $(window).off("touchstart");
       });
     } else {
@@ -47,7 +47,7 @@ export const AppViewMixin = {
   addDeleteKeyHandler(add) {
     if (add) {
       let deleteFunction;
-      if (AppSettingsStore.store.settings.lockdown) {
+      if (AppSettingsStore.settings.lockdown) {
         // In Lockdown mode users can only remove relationships between links
         deleteFunction = this.props.graphStore.removeSelectedLinks.bind(this.props.graphStore);
       } else {
@@ -77,9 +77,9 @@ export const AppViewMixin = {
 
     this._loadInitialData();
     this._registerUndoRedoKeys();
-    PaletteStore.store.listen(this.onPaletteChange);
-    CodapStore.store.listen(this.onCodapStateChange);
-    return LaraStore.store.listen(this.onLaraStateChange);
+    PaletteStore.listen(this.onPaletteChange);
+    CodapStore.listen(this.onCodapStateChange);
+    return LaraStore.listen(this.onLaraStateChange);
   },
 
   componentWillUnmount() {
@@ -128,12 +128,12 @@ export const AppViewMixin = {
 
     } else if ((this.props.publicUrl != null ? this.props.publicUrl.length : undefined) > 0) {
       const { publicUrl } = this.props;
-      GoogleFileStore.actions.addAfterAuthHandler(context => context.loadPublicUrl(publicUrl));
+      GoogleFileActions.addAfterAuthHandler(context => context.loadPublicUrl(publicUrl));
       return HashParams.clearParam("publicUrl");
 
     } else if ((this.props.googleDoc != null ? this.props.googleDoc.length : undefined) > 0) {
       const { googleDoc } = this.props;
-      return GoogleFileStore.actions.addAfterAuthHandler(context => context.loadFile({id: googleDoc}));
+      return GoogleFileActions.addAfterAuthHandler(context => context.loadFile({id: googleDoc}));
     }
   },
 

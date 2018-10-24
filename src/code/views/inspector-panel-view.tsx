@@ -13,7 +13,7 @@ import { NodeValueInspectorView } from "./node-value-inspector-view";
 import { RelationInspectorView } from "./relation-inspector-view";
 import { SimulationInspectorView } from "./simulation-inspector-view";
 
-const InspectorPanelStore  = require("../stores/inspector-panel-store");
+import { InspectorPanelActions, InspectorPanelMixin } from "../stores/inspector-panel-store";
 
 const ToolButton = React.createClass({
   displayName: "toolButton",
@@ -99,7 +99,7 @@ export const InspectorPanelView = React.createClass({
 
   displayName: "InspectorPanelView",
 
-  mixins: [ InspectorPanelStore.mixin ],
+  mixins: [ InspectorPanelMixin ],
 
   renderSimulationInspector() {
     return <SimulationInspectorView />;
@@ -142,7 +142,7 @@ export const InspectorPanelView = React.createClass({
   // 2016-03-15 SF: Changed this to a function explicitly called when selection changes
   nodeSelectionChanged() {
     if (!this.props.node && !this.props.link) {
-      return InspectorPanelStore.actions.closeInspectorPanel();
+      return InspectorPanelActions.closeInspectorPanel();
     }
   },
 
@@ -184,7 +184,7 @@ export const InspectorPanelView = React.createClass({
           node={this.props.node}
           link={this.props.link}
           nowShowing={this.state.nowShowing}
-          onNowShowing={InspectorPanelStore.actions.openInspectorPanel}
+          onNowShowing={InspectorPanelActions.openInspectorPanel}
           diagramOnly={this.props.diagramOnly}
         />
         {this.renderInspectorPanel()}

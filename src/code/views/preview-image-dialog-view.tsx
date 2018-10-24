@@ -1,8 +1,8 @@
 import * as React from "react";
 
 import { ImageMetadataView } from "./image-metadata-view";
-const ImageManger   = require("../stores/image-dialog-store");
-const PaletteStore  = require("../stores/palette-store");
+import { ImageDialogActions } from "../stores/image-dialog-store";
+import { PaletteActions } from "../stores/palette-store";
 
 import { tr } from "../utils/translate";
 
@@ -33,7 +33,7 @@ export class PreviewImageDialogView extends React.Component<PreviewImageDialogVi
           <div className="preview-metadata">
             <ImageMetadataView
               metadata={this.props.imageInfo.metadata}
-              update={ImageManger.actions.update}
+              update={ImageDialogActions.update}
             />
           </div> : undefined}
       </div>
@@ -42,10 +42,10 @@ export class PreviewImageDialogView extends React.Component<PreviewImageDialogVi
 
   private handleCancel = (e) => {
     e.preventDefault();
-    ImageManger.actions.cancel();
+    ImageDialogActions.cancel();
   }
 
   private handleAddImage = () => {
-    PaletteStore.actions.addToPalette(this.props.imageInfo);
+    PaletteActions.addToPalette(this.props.imageInfo);
   }
 }

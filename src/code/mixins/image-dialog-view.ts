@@ -8,7 +8,7 @@ import { PreviewImageDialogView as PreviewImageDialogViewClass } from "../views/
 
 const PreviewImage = React.createFactory(PreviewImageDialogViewClass);
 import { hasValidImageExtension } from "../utils/has-valid-image-extension";
-const ImageDialogStore = require("../stores/image-dialog-store");
+import { ImageDialogActions } from "../stores/image-dialog-store";
 
 export const ImageDialogViewMixin = {
 
@@ -17,7 +17,7 @@ export const ImageDialogViewMixin = {
   },
 
   imageSelected(imageInfo) {
-    return ImageDialogStore.actions.update(imageInfo);
+    return ImageDialogActions.update(imageInfo);
   },
 
   imageDropped(imageInfo) {

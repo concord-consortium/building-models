@@ -8,8 +8,6 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const AppSettingsStore = require("../../stores/app-settings-store").store;
-
 const migration = {
   version: "1.24.0",
   description: "Ensure that every node serializes a `combineMethod` value",

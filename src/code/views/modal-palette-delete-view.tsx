@@ -1,27 +1,27 @@
 import { ModalDialogView } from "./modal-dialog-view";
 import { PaletteDeleteView } from "./palette-delete-view";
-const PaletteDialogStore  = require("../stores/palette-delete-dialog-store");
+import { PaletteDeleteDialogActions, PaletteDeleteDialogMixin } from "../stores/palette-delete-dialog-store";
 import { tr } from "../utils/translate";
 
 export const ModalPaletteDeleteView = React.createClass({
 
   displayName: "ModalPaletteDeleteView",
 
-  mixins: [PaletteDialogStore.mixin],
+  mixins: [PaletteDeleteDialogMixin],
 
   deleteItem() {
-    PaletteDialogStore.actions.delete(this.state.paletteItem);
+    PaletteDeleteDialogActions.delete(this.state.paletteItem);
   },
 
   renderShowing() {
     const title = tr("~PALETTE-DIALOG.TITLE");
     return (
-      <ModalDialogView title={title} close={PaletteDialogStore.actions.close}>
+      <ModalDialogView title={title} close={PaletteDeleteDialogActions.close}>
         <PaletteDeleteView
           paletteItem={this.state.paletteItem}
           replacement={this.state.replacement}
           showReplacement={this.state.showReplacement}
-          cancel={PaletteDialogStore.actions.close}
+          cancel={PaletteDeleteDialogActions.close}
           ok={this.deleteItem}
         />
       </ModalDialogView>

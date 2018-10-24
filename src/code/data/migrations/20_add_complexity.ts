@@ -8,8 +8,6 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const AppSettingsStore = require("../../stores/app-settings-store").store;
-
 const migration = {
   version: "1.19.0",
   description: "Adds complexity setting, based on old diagramOnly. Removes diagramOnly",

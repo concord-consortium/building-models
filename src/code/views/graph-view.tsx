@@ -15,22 +15,22 @@ import { Colors } from "../utils/colors";
 import { DiagramToolkit } from "../utils/js-plumb-diagram-toolkit";
 import { dropImageHandler } from "../utils/drop-image-handler";
 import { tr } from "../utils/translate";
-const PaletteStore     = require("../stores/palette-store");
-const GraphStore       = require("../stores/graph-store");
-const ImageDialogStore = require("../stores/image-dialog-store");
+import { PaletteStore, PaletteActions } from "../stores/palette-store";
+import { GraphStore, GraphMixin } from "../stores/graph-store";
+import { ImageDialogActions } from "../stores/image-dialog-store";
 import { RelationFactory } from "../models/relation-factory";
 
-const SimulationStore  = require("../stores/simulation-store");
-const AppSettingsStore = require("../stores/app-settings-store");
-const CodapStore       = require("../stores/codap-store");
-const LaraStore        = require("../stores/lara-store");
+import { SimulationMixin } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin } from "../stores/app-settings-store";
+import { CodapMixin } from "../stores/codap-store";
+import { LaraMixin } from "../stores/lara-store";
 import { LinkColors } from "../utils/link-colors";
 
 export const GraphView = React.createClass({
 
   displayName: "GraphView",
 
-  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin, LaraStore.mixin ],
+  mixins: [ GraphMixin, SimulationMixin, AppSettingsMixin, CodapMixin, LaraMixin ],
 
   getDefaultProps() {
     return {
@@ -60,7 +60,7 @@ export const GraphView = React.createClass({
       const editingNode       = manager.getNodeTitleEditing()[0] || null;
       const selectedLink      = manager.getLinkInspection() || [];
       // only allow link labels if simulation is not in lockdown mode
-      const editingLink       = !AppSettingsStore.store.settings.lockdown ? manager.getLinkTitleEditing()[0] || null : false;
+      const editingLink       = !AppSettingsStore.settings.lockdown ? manager.getLinkTitleEditing()[0] || null : false;
 
       this.setState({
         selectedNodes,
@@ -106,14 +106,14 @@ export const GraphView = React.createClass({
       return paletteItem = this.addNewPaletteNode(e, ui);
 
     } else if (data.droptype === "paletteItem") {
-      paletteItem = PaletteStore.store.palette[data.index];
-      PaletteStore.actions.selectPaletteIndex(data.index);
+      paletteItem = PaletteStore.palette[data.index];
+      PaletteActions.selectPaletteIndex(data.index);
       return this.addPaletteNode(ui, paletteItem);
     }
   },
 
   addNewPaletteNode(e, ui) {
-    return ImageDialogStore.actions.open(savedPaletteItem => {
+    return ImageDialogActions.open(savedPaletteItem => {
       if (savedPaletteItem) {
         return this.addPaletteNode(ui, savedPaletteItem);
       }
@@ -182,7 +182,7 @@ export const GraphView = React.createClass({
 
   onNodeMoved(node_event) {
     const {left, top} = node_event.extra.position;
-    const theNode = GraphStore.store.nodeKeys[node_event.nodeKey];
+    const theNode = GraphStore.nodeKeys[node_event.nodeKey];
     const leftDiff = left - theNode.x;
     const topDiff = top - theNode.y;
     const { selectedNodes } = this.state;
@@ -190,14 +190,14 @@ export const GraphView = React.createClass({
       return this.handleEvent(() => {
         if (selectedNodes.includes(theNode)) {
           return selectedNodes.map((node) =>
-            GraphStore.store.moveNode(node.key, leftDiff, topDiff));
+            GraphStore.moveNode(node.key, leftDiff, topDiff));
         } else { // when node is unselected, but we drag it, only it should be dragged
-          return (GraphStore.store.moveNode(theNode.key, leftDiff, topDiff));
+          return (GraphStore.moveNode(theNode.key, leftDiff, topDiff));
         }
       });
     } else {
       // alert "leftDiff 2" + leftDiff
-      return this.handleEvent(() => GraphStore.store.moveNode(node_event.nodeKey, leftDiff, topDiff));
+      return this.handleEvent(() => GraphStore.moveNode(node_event.nodeKey, leftDiff, topDiff));
     }
   },
 
@@ -209,21 +209,21 @@ export const GraphView = React.createClass({
     if (selectedNodes.length > 0) {
       return this.handleEvent(() =>
         selectedNodes.map((node) =>
-          GraphStore.store.moveNodeCompleted(node.key, leftDiff, topDiff))
+          GraphStore.moveNodeCompleted(node.key, leftDiff, topDiff))
       );
     } else {
-      return this.handleEvent(() => GraphStore.store.moveNodeCompleted(node_event.nodeKey, leftDiff, topDiff));
+      return this.handleEvent(() => GraphStore.moveNodeCompleted(node_event.nodeKey, leftDiff, topDiff));
     }
   },
 
   onNodeDeleted(node_event) {
-    return this.handleEvent(() => GraphStore.store.removeNode(node_event.nodeKey));
+    return this.handleEvent(() => GraphStore.removeNode(node_event.nodeKey));
   },
 
   handleConnect(info, evnt) {
     return this.handleEvent(() => {
       this.forceRedrawLinks = true;
-      return GraphStore.store.newLinkFromEvent(info, evnt);
+      return GraphStore.newLinkFromEvent(info, evnt);
     });
   },
 
@@ -231,7 +231,7 @@ export const GraphView = React.createClass({
     return this.handleEvent(() => {
       const multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey;
       this.forceRedrawLinks = true;
-      return GraphStore.store.clickLink(connection.linkModel, multipleSelections);
+      return GraphStore.clickLink(connection.linkModel, multipleSelections);
     });
   },
 
@@ -566,7 +566,7 @@ export const GraphView = React.createClass({
       dataColor = Colors.data.value;
       innerColor = Colors.dataInner.value;
     }
-    const diagramOnly = this.state.simulationType === AppSettingsStore.store.SimulationType.diagramOnly;
+    const diagramOnly = this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly;
     const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
     const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
     const marqueeStyle: any = {

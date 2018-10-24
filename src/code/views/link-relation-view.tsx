@@ -12,8 +12,8 @@ import { SvgGraphView } from "./svg-graph-view";
 import { tr } from "../utils/translate";
 
 const autosize         = require("autosize");
-const SimulationStore  = require("../stores/simulation-store");
-const AppSettingsStore = require("../stores/app-settings-store");
+import { SimulationMixin } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin } from "../stores/app-settings-store";
 
 const Graph = React.createClass({
   render() {
@@ -51,7 +51,7 @@ export const LinkRelationView = React.createClass({
 
   displayName: "LinkRelationView",
 
-  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
+  mixins: [ SimulationMixin, AppSettingsMixin ],
 
   getDefaultProps() {
     return {
@@ -212,7 +212,7 @@ export const LinkRelationView = React.createClass({
   },
 
   getScalar() {
-    if (this.state.complexity === AppSettingsStore.store.Complexity.basic) {
+    if (this.state.complexity === AppSettingsStore.Complexity.basic) {
       return RelationFactory.scalars.aboutTheSame;
     } else if (this.refs.scalar) {
       return RelationFactory.scalars[this.refs.scalar.value];
@@ -223,7 +223,7 @@ export const LinkRelationView = React.createClass({
 
   renderVectorPulldown(vectorSelection) {
     let currentOption;
-    const vectorOptions = this.state.complexity === AppSettingsStore.store.Complexity.basic ?
+    const vectorOptions = this.state.complexity === AppSettingsStore.Complexity.basic ?
       RelationFactory.basicVectors
       :
       RelationFactory.vectors;
@@ -257,7 +257,7 @@ export const LinkRelationView = React.createClass({
       currentOption = scalarSelection.id;
     }
 
-    const onlyBasic = this.state.complexity === AppSettingsStore.store.Complexity.basic;
+    const onlyBasic = this.state.complexity === AppSettingsStore.Complexity.basic;
     const vectorSelected = this.state.selectedVector;
     // place dropdown but hide it (to keep spacing) if we haven't selected
     // the vector or we have only basic complecity settings

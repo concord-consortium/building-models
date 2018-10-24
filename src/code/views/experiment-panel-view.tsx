@@ -1,15 +1,15 @@
-const SimulationStore = require("../stores/simulation-store");
+import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
 import { tr } from "../utils/translate";
 
 export const ExperimentPanelView = React.createClass({
 
   displayName: "ExperimentPanelView",
 
-  mixins: [ SimulationStore.mixin ],
+  mixins: [ SimulationMixin ],
 
   increment() {
     if (!this.props.disabled) {
-      SimulationStore.actions.createExperiment();
+      SimulationActions.createExperiment();
     }
   },
 

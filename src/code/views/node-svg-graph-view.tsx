@@ -6,13 +6,13 @@ import { CSSProperties } from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const SimulationStore = require("../stores/simulation-store");
+import { SimulationStore, SimulationMixin } from "../stores/simulation-store";
 
 export const NodeSvgGraphView = React.createClass({
 
   displayName: "NodeSvgGraphView",
 
-  mixins: [ SimulationStore.mixin ],
+  mixins: [ SimulationMixin ],
 
   getDefaultProps() {
     return {
@@ -48,7 +48,7 @@ export const NodeSvgGraphView = React.createClass({
     let { min }  = this.props;
     let { data } = this.props;
 
-    const rangex = SimulationStore.store.simulationDuration();
+    const rangex = SimulationStore.simulationDuration();
     data = _.takeRight(data, rangex).reverse();
 
     for (const point of data) {

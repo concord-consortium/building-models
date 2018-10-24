@@ -4,8 +4,8 @@ import { ImageSearchDialogView } from "./image-search-dialog-view";
 import { ImageMyComputerDialogView } from "./image-my-computer-dialog-view";
 import { ImageLinkDialogView } from "./image-link-dialog-view";
 
-const PaletteStore = require("../stores/palette-store");
-const ImageDialogStore = require("../stores/image-dialog-store");
+import { PaletteStore, PaletteMixin } from "../stores/palette-store";
+import { ImageDialogMixin } from "../stores/image-dialog-store";
 
 import { tr } from "../utils/translate";
 
@@ -13,16 +13,14 @@ export const ImageBrowserView = React.createClass({
 
   displayName: "ImageBrowserView",
 
-  mixins: [ImageDialogStore.mixin, PaletteStore.mixin],
+  mixins: [ImageDialogMixin, PaletteMixin],
 
   render() {
-    const { store } = PaletteStore;
-
     const props = {
       palette: this.state.palette,
       internalLibrary: this.state.library,
-      inPalette: store.inPalette,
-      inLibrary: store.inLibrary,
+      inPalette: PaletteStore.inPalette,
+      inLibrary: PaletteStore.inLibrary,
       selectedImage: this.state.paletteItem // from ImageDialogStore mixin
     };
 

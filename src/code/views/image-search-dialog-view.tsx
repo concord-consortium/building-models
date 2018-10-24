@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const ImageDialogStore = require("../stores/image-dialog-store");
+import { ImageDialogActions, ImageDialogMixin } from "../stores/image-dialog-store";
 
 import { OpenClipArt } from "../utils/open-clipart";
 import { tr } from "../utils/translate";
@@ -33,7 +33,7 @@ const ImageSearchResult = React.createClass({
   },
 
   clicked() {
-    ImageDialogStore.actions.update(this.props.imageInfo);
+    ImageDialogActions.update(this.props.imageInfo);
   },
 
   render() {
@@ -85,7 +85,7 @@ const ImageSearchPrevNextLink = React.createClass({
 export const ImageSearchDialogView = React.createClass({
   displayName: "ImageSearchDialogView",
 
-  mixins: [ImageDialogViewMixin, ImageDialogStore.mixin],
+  mixins: [ImageDialogViewMixin, ImageDialogMixin],
 
   getInitialState() {
     return this.getInitialImageDialogViewState({

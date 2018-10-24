@@ -37,7 +37,7 @@ export class Importer {
     const { data } = nodeSpec;
     const { key } = nodeSpec;
     if (data.paletteItem) {
-      data.image = __guard__(this.paletteStore.store.findByUUID(data.paletteItem), x => x.image);
+      data.image = __guard__(this.paletteStore.findByUUID(data.paletteItem), x => x.image);
     }
     if (/^Transfer/.test(nodeSpec.key)) {
       return new TransferModel(data, key);

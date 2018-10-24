@@ -1,7 +1,7 @@
 import { tr } from "../utils/translate";
 
 import { PaletteAddView } from "./palette-add-view";
-const PaletteStore = require("../stores/palette-store");
+import { PaletteMixin } from "../stores/palette-store";
 
 const ImgChoice = React.createClass({
   displayName: "ImgChoice",
@@ -31,7 +31,7 @@ export const ImagePickerView = React.createClass({
     return {opened: false};
   },
 
-  mixins: [PaletteStore.mixin],
+  mixins: [PaletteMixin],
 
   toggleOpen() {
     this.setState({opened: (!this.state.opened)});

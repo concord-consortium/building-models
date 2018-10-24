@@ -4,19 +4,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const PaletteStore = require("./palette-store");
+import { PaletteStore, PaletteActions } from "./palette-store";
 import { UndoRedo } from "../utils/undo-redo";
+import { NodesStore } from "./nodes-store";
 
-const paletteDialogActions = Reflux.createActions([
+export const PaletteDeleteDialogActions = Reflux.createActions([
   "open", "close", "delete", "cancel", "select"
 ]);
 
-
-const store = Reflux.createStore({
-  listenables: [ paletteDialogActions ],
+export const PaletteDeleteDialogStore = Reflux.createStore({
+  listenables: [ PaletteDeleteDialogActions ],
 
   init() {
     this.initValues();
@@ -33,13 +30,13 @@ const store = Reflux.createStore({
 
   onOpen() {
     this.showing         = true;
-    this.paletteItem     = PaletteStore.store.selectedPaletteItem;
-    this.options         = _.without(PaletteStore.store.palette, this.paletteItem);
+    this.paletteItem     = PaletteStore.selectedPaletteItem;
+    this.options         = _.without(PaletteStore.palette, this.paletteItem);
     this.showReplacement = false;
     this.deleted         = false;
     this.replacement     = null;
 
-    _.each((require("./nodes-store")).store.nodes, node => {
+    _.each(NodesStore.nodes, node => {
       if (node.paletteItemIs(this.paletteItem)) {
         return this.showReplacement = true;
       }
@@ -69,7 +66,7 @@ const store = Reflux.createStore({
 
   onDelete(item) {
     this.deleted = true;
-    PaletteStore.actions.delete(item);
+    PaletteActions.delete(item);
     return this.close();
   },
 
@@ -78,10 +75,10 @@ const store = Reflux.createStore({
     this._notifyChanges();
     this.undoManger.endCommandBatch();
     if (this.replacement && this.deleted) {
-      return PaletteStore.actions.selectPaletteItem(this.replacement);
+      return PaletteActions.selectPaletteItem(this.replacement);
     } else if (!this.deleted) {
       this.undoManger.undo(true);
-      return PaletteStore.actions.restoreSelection();
+      return PaletteActions.restoreSelection();
     }
   },
 
@@ -100,23 +97,23 @@ const store = Reflux.createStore({
   }
 });
 
+export const PaletteDeleteDialogMixin = {
 
-const listenerMixin = {
-  actions: paletteDialogActions,
+  actions: PaletteDeleteDialogActions,
 
   getInitialState() {
     return {
-      showing:         store.showing,
-      paletteItem:     store.paletteItem,
-      options:         store.options,
-      replacement:     store.replacement,
-      deleted:         store.deleted,
-      showReplacement: store.showReplacement
+      showing:         PaletteDeleteDialogStore.showing,
+      paletteItem:     PaletteDeleteDialogStore.paletteItem,
+      options:         PaletteDeleteDialogStore.options,
+      replacement:     PaletteDeleteDialogStore.replacement,
+      deleted:         PaletteDeleteDialogStore.deleted,
+      showReplacement: PaletteDeleteDialogStore.showReplacement
     };
   },
 
   componentDidMount() {
-    return this.unsubscribe = store.listen(this.onChange);
+    return this.unsubscribe = PaletteDeleteDialogStore.listen(this.onChange);
   },
 
   componentWillUnmount() {
@@ -133,10 +130,4 @@ const listenerMixin = {
       showReplacement: status.showReplacement
     });
   }
-};
-
-module.exports = {
-  store,
-  actions: paletteDialogActions,
-  mixin: listenerMixin
 };

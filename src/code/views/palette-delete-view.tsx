@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { tr } from "../utils/translate";
-const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
+import { PaletteDeleteDialogActions } from "../stores/palette-delete-dialog-store";
 import { ImagePickerView } from "./image-picker-view";
 
 interface PaletteDeleteViewProps {
@@ -77,7 +77,7 @@ export class PaletteDeleteView extends React.Component<PaletteDeleteViewProps, {
   }
 
   private handleChangePalette = (args) => {
-    return PaletteDialogStore.actions.select(args);
+    return PaletteDeleteDialogActions.select(args);
   }
 
   private handleCancel = () => {

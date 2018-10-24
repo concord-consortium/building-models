@@ -4,8 +4,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const SimulationStore = require("../stores/simulation-store");
-const AppSettingsStore = require("../stores/app-settings-store");
+import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
+import { AppSettingsMixin } from "../stores/app-settings-store";
 
 import { tr } from "../utils/translate";
 import { RecordButtonView  } from "./record-button-view";
@@ -16,18 +16,18 @@ export const SimulationRunPanelView = React.createClass({
 
   displayName: "SimulationRunPanelView",
 
-  mixins: [ SimulationStore.mixin, AppSettingsStore.mixin ],
+  mixins: [ SimulationMixin, AppSettingsMixin ],
 
 
   setDuration(e) {
-    return SimulationStore.actions.setDuration(parseInt(e.target.value, 10));
+    return SimulationActions.setDuration(parseInt(e.target.value, 10));
   },
 
   toggle() {
     if (this.state.simulationPanelExpanded) {
-      return SimulationStore.actions.collapseSimulationPanel();
+      return SimulationActions.collapseSimulationPanel();
     } else {
-      return SimulationStore.actions.expandSimulationPanel();
+      return SimulationActions.expandSimulationPanel();
     }
   },
   // -- TBD: There was discussion about automatically showing
@@ -63,7 +63,7 @@ export const SimulationRunPanelView = React.createClass({
             ? this.renderRecordForCollectors()
             : <div className="horizontal">
                 <RecordButtonView
-                  onClick={SimulationStore.actions.recordOne}
+                  onClick={SimulationActions.recordOne}
                   disabled={disabled}
                   recording={false}
                   includeLight={false}
@@ -85,7 +85,7 @@ export const SimulationRunPanelView = React.createClass({
 
 
   renderRecordForCollectors() {
-    let recordAction = SimulationStore.actions.recordPeriod;
+    let recordAction = SimulationActions.recordPeriod;
     if (this.state.isRecording) {
       recordAction = () => undefined;
     }
@@ -116,7 +116,7 @@ export const SimulationRunPanelView = React.createClass({
         />
         <DropDownView
           isActionMenu={false}
-          onSelect={SimulationStore.actions.setStepUnits}
+          onSelect={SimulationActions.setStepUnits}
           anchor={this.state.stepUnitsName}
           items={this.state.timeUnitOptions}
         />
@@ -126,9 +126,9 @@ export const SimulationRunPanelView = React.createClass({
 
 
   renderRecordStreamButton() {
-    let recordAction = SimulationStore.actions.recordStream;
+    let recordAction = SimulationActions.recordStream;
     if (this.state.isRecording) {
-      recordAction = SimulationStore.actions.stopRecording;
+      recordAction = SimulationActions.stopRecording;
     }
 
     const props = {

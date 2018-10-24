@@ -8,6 +8,8 @@
 
 const IframePhone = require("iframe-phone");
 import { UndoRedo } from "../utils/undo-redo";
+import { PaletteStore } from "../stores/palette-store";
+import { GraphStore } from "../stores/graph-store";
 
 interface LaraConnectMap {
   [key: string]: LaraConnect;
@@ -33,12 +35,10 @@ export class LaraConnect {
 
   constructor(context) {
     log.info("LaraConnect: initializing");
-    const GraphStore = require("../stores/graph-store");
-    const PaletteStore  = require("../stores/palette-store");
     this.undoRedoManager = UndoRedo.instance({debug: false, context});
     this.loaded = false;
-    this.graphStore = GraphStore.store;
-    this.paletteStore = PaletteStore.store;
+    this.graphStore = GraphStore;
+    this.paletteStore = PaletteStore;
     this.laraPhone = IframePhone.getIFrameEndpoint();
     this.lastCommandStackPosition = -1;
 

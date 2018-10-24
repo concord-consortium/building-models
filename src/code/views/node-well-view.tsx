@@ -5,13 +5,13 @@
  */
 
 import { PaletteInspectorView } from "./palette-inspector-view";
-const PaletteStore = require("../stores/palette-store");
+import { PaletteMixin } from "../stores/palette-store";
 
 export const NodeWellView = React.createClass({
 
   displayName: "NodeWellView",
 
-  mixins: [ PaletteStore.mixin ],
+  mixins: [ PaletteMixin ],
 
   getInitialState() {
     return {
