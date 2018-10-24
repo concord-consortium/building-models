@@ -748,7 +748,7 @@ export const GraphStore  = Reflux.createStore({
   //   1 (static)         if there are no collectors
   //   2 (time)           if there are collectors
   getMinimumSimulationType() {
-    let minSimulationType = AppSettingsStore.store.SimulationType.diagramOnly;
+    let minSimulationType = AppSettingsStore.SimulationType.diagramOnly;
 
     const links = this.getLinks();
     for (const link of links) {
@@ -757,10 +757,10 @@ export const GraphStore  = Reflux.createStore({
 
       if (source.isAccumulator || target.isAccumulator) {
         // we know we have to be time-based
-        return AppSettingsStore.store.SimulationType.time;
+        return AppSettingsStore.SimulationType.time;
       } else if (link.relation != null ? link.relation.formula : undefined) {
         // we have a defined relationship, so we know we'll be at least 1
-        minSimulationType = AppSettingsStore.store.SimulationType.static;
+        minSimulationType = AppSettingsStore.SimulationType.static;
       }
     }
 
@@ -780,17 +780,17 @@ export const GraphStore  = Reflux.createStore({
       if (link.relation != null ? link.relation.formula : undefined) {
         const relation = RelationFactory.selectionsFromRelation(link.relation);
         if (relation.scalar && (relation.scalar.id !== "aboutTheSame")) {
-          return AppSettingsStore.store.Complexity.expanded;
+          return AppSettingsStore.Complexity.expanded;
         }
       }
     }
 
-    return AppSettingsStore.store.Complexity.basic;
+    return AppSettingsStore.Complexity.basic;
   },
 
   loadData(data) {
     log.info("json success");
-    const importer = new Importer(this, AppSettingsStore.store, PaletteStore);
+    const importer = new Importer(this, AppSettingsStore, PaletteStore);
     importer.importData(data);
     return this.undoRedoManager.clearHistory();
   },
@@ -828,7 +828,7 @@ export const GraphStore  = Reflux.createStore({
       }
       return result1;
     })();
-    const settings = AppSettingsStore.store.serialize();
+    const settings = AppSettingsStore.serialize();
     settings.simulation = SimulationStore.serialize();
 
     const data = {

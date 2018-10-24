@@ -34,9 +34,9 @@ export const AppSettingsActions: AppSettingsActionsClass = Reflux.createActions(
 );
 
 interface ComplexityType {
-  basic: 0;
-  expanded: 1;
-  DEFAULT: 1;
+  basic: number;
+  expanded: number;
+  DEFAULT: number;
 }
 const Complexity: ComplexityType = {
   basic: 0,
@@ -45,10 +45,10 @@ const Complexity: ComplexityType = {
 };
 
 interface SimulationTypeType {
-  diagramOnly: 0;
-  static: 1;
-  time: 2;
-  DEFAULT: 1;
+  diagramOnly: number;
+  static: number;
+  time: number;
+  DEFAULT: number;
 }
 const SimulationType: SimulationTypeType = {
   diagramOnly: 0,
