@@ -10,6 +10,8 @@ import { DocumentActionsView } from "./document-actions-view";
 import { ModalPaletteDeleteView } from "./modal-palette-delete-view";
 import { BuildInfoView } from "./build-info-view";
 
+import { AppViewMixin } from "../mixins/app-view";
+
 const ImageDialogStore    = require("../stores/image-dialog-store");
 const AppSettingsStore    = require("../stores/app-settings-store");
 
@@ -17,7 +19,7 @@ export const AppView = React.createClass({
 
   displayName: "AppView",
 
-  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, require("../mixins/app-view")],
+  mixins: [ImageDialogStore.mixin, AppSettingsStore.mixin, AppViewMixin],
 
   getInitialState() {
 

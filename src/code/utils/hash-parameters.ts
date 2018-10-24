@@ -4,9 +4,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const PARAM_TOKEN = /[?|&]/g;
 const VALUE_TOKEN = "=";
 
@@ -88,5 +85,4 @@ class HashParameters {
   }
 }
 
-
-module.exports = new HashParameters();
+export const HashParams = new HashParameters();

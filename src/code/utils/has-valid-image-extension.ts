@@ -5,12 +5,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { tr } from "../utils/translate";
 
-module.exports = (imageName) => {
+export const hasValidImageExtension = (imageName) => {
   const link = document.createElement("a");
   link.setAttribute("href", imageName);
   const array = link.pathname.split("."), extension = array[array.length - 1];

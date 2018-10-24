@@ -13,14 +13,18 @@ import { SquareImageView } from "./square-image-view";
 import { StackedImageView } from "./stacked-image-view";
 import { SVGSliderView } from "./value-slider-view";
 import { NodeSvgGraphView } from "./node-svg-graph-view";
-const CodapConnect = require("../models/codap-connect");
+import { CodapConnect } from "../models/codap-connect";
 const DEFAULT_CONTEXT_NAME = "building-models";
+
+import { NodeTitleMixin } from "../mixins/node-title";
 
 const InspectorPanelStore = require("../stores/inspector-panel-store");
 
 const NodeTitle = React.createFactory(React.createClass({
+
   displayName: "NodeTitle",
-  mixins: [require("../mixins/node-title")],
+
+  mixins: [NodeTitleMixin],
 
   getInitialState() {
     return this.getStateFromProps(this.props);

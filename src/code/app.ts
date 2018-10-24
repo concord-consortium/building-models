@@ -12,7 +12,7 @@ const AppView     = React.createFactory(AppViewClass);
 
 const GraphStore   = require("./stores/graph-store");
 const PaletteStore = require("./stores/palette-store");
-const HashParams   = require("./utils/hash-parameters");
+import { HashParams } from "./utils/hash-parameters";
 
 let appView;
 

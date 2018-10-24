@@ -10,22 +10,21 @@
 
 import { NodeView } from "./node-view";
 
-const NodeModel        = require("../models/node");
-const Importer         = require("../utils/importer");
-import {Colors} from "../utils/colors";
-const DiagramToolkit   = require("../utils/js-plumb-diagram-toolkit");
-const dropImageHandler = require("../utils/drop-image-handler");
+import { Node } from "../models/node";
+import { Colors } from "../utils/colors";
+import { DiagramToolkit } from "../utils/js-plumb-diagram-toolkit";
+import { dropImageHandler } from "../utils/drop-image-handler";
 import { tr } from "../utils/translate";
 const PaletteStore     = require("../stores/palette-store");
 const GraphStore       = require("../stores/graph-store");
 const ImageDialogStore = require("../stores/image-dialog-store");
-const RelationFactory  = require("../models/relation-factory");
+import { RelationFactory } from "../models/relation-factory";
 
 const SimulationStore  = require("../stores/simulation-store");
 const AppSettingsStore = require("../stores/app-settings-store");
 const CodapStore       = require("../stores/codap-store");
 const LaraStore        = require("../stores/lara-store");
-const LinkColors       = require("../utils/link-colors");
+import { LinkColors } from "../utils/link-colors";
 
 export const GraphView = React.createClass({
 
@@ -126,7 +125,7 @@ export const GraphView = React.createClass({
     const title = tr("~NODE.UNTITLED");
     const linkOffset = $(this.refs.linkView).offset();
     const imageOffset = NodeView.nodeImageOffset();
-    const newNode = new NodeModel({
+    const newNode = new Node({
       x: ui.offset.left - linkOffset.left - imageOffset.left,
       y: ui.offset.top - linkOffset.top - imageOffset.top,
       title,

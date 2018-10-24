@@ -7,11 +7,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
  // based on https://github.com/jzaefferer/undo/blob/master/undo.js
-const CodapConnect = require("../models/codap-connect");
+import { CodapConnect } from "../models/codap-connect";
 
 const DEFAULT_CONTEXT_NAME = "building-models";
 
@@ -288,7 +285,7 @@ const instance  = (opts) => {
   return instances[contextName];
 };
 
-module.exports = {
+export const UndoRedo = {
   instance,
   constructor: Manager,
   command: Command

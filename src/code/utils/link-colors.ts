@@ -5,12 +5,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { RelationFactory } from "../models/relation-factory";
 
-const RelationFactory  = require("../models/relation-factory");
-
-const linkColors = (module.exports = {
+export const LinkColors = {
   default             : "#777",
   defaultFaded        : "rgba(120,120,120,0)",
   increase            : "rgba(232,93,100,1)",
@@ -24,13 +21,13 @@ const linkColors = (module.exports = {
   customRelationship  : "#778",
   defaultLight        : "#233",
   fromLink(link) {
-    if (((link.relation != null ? link.relation.formula : undefined) == null)) { return linkColors.default; }
+    if (((link.relation != null ? link.relation.formula : undefined) == null)) { return LinkColors.default; }
     switch (link.relation.formula) {
-    case RelationFactory.added.formula: return linkColors.increase;
-    case RelationFactory.subtracted.formula: return linkColors.decrease;
-    case RelationFactory.proportionalSourceLess.formula: return linkColors.decrease;
-    case RelationFactory.proportionalSourceMore.formula: return linkColors.increase;
-    default: return linkColors.default;
+    case RelationFactory.added.formula: return LinkColors.increase;
+    case RelationFactory.subtracted.formula: return LinkColors.decrease;
+    case RelationFactory.proportionalSourceLess.formula: return LinkColors.decrease;
+    case RelationFactory.proportionalSourceMore.formula: return LinkColors.increase;
+    default: return LinkColors.default;
     }
   }
-});
+};

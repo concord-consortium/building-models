@@ -8,7 +8,7 @@
 export {};
 
 const PaletteStore       = require("./palette-store");
-const GraphActions       = require("../actions/graph-actions");
+import { GraphActions } from "../actions/graph-actions";
 
 const nodeActions = Reflux.createActions(
   [

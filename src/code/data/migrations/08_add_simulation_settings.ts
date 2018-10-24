@@ -8,7 +8,7 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const TimeUnits = require("../../utils/time-units");
+import { TimeUnits } from "../../utils/time-units";
 
 const migration = {
   version: "1.7.0",

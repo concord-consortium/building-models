@@ -5,7 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const Draggable = require("../mixins/draggable");
+import { Draggable } from "../mixins/draggable";
 import { SquareImageView } from "./square-image-view";
 
 export const PaletteItemView = React.createClass({

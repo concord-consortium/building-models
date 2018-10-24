@@ -20,7 +20,7 @@ units.YEAR   = 365 * units.DAY;
 
 const toSeconds = (n, unit) => n * units[unit];
 
-module.exports = {
+export const TimeUnits = {
 
   units: _.keys(units),
 

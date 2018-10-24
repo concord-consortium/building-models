@@ -1,9 +1,6 @@
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 // GraphPrimitive is the basis for the Node and Link classes.
 // They share a common ID generation mechanism mostly.
-class GraphPrimitive {
+export class GraphPrimitive {
   public static counters;
 
   public static initialize() {
@@ -53,5 +50,3 @@ class GraphPrimitive {
 }
 
 GraphPrimitive.initialize();
-
-module.exports = GraphPrimitive;

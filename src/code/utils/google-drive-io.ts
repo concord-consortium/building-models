@@ -6,10 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-class GoogleDriveIO {
+export class GoogleDriveIO {
 
   private APP_ID  = "1095918012594";
   private DEVELOPER_KEY = "AIzaSyAUobrEXqtbZHBvr24tamdE6JxmPYTRPEA";
@@ -183,5 +180,3 @@ class GoogleDriveIO {
     });
   }
 }
-
-module.exports = GoogleDriveIO;

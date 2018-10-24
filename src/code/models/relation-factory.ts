@@ -5,13 +5,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { tr } from "../utils/translate";
-const Relationship = require("./relationship");
+import { Relationship } from "./relationship";
 
-class RelationFactory {
+export class RelationFactory {
   public static increase: any;
   public static decrease: any;
   public static vary: any;
@@ -335,11 +332,3 @@ class RelationFactory {
 }
 
 RelationFactory.initialize();
-
-module.exports = RelationFactory;
-
-// @isCustomRelationship: (vector) ->
-//  customRelationship = false
-//  if vector? and vector.id == @vary.id
-//    customRelationship = true
-//  customRelationship

@@ -5,23 +5,31 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { GraphPrimitive } from "./graph-primitive";
+import { Relationship } from "./relationship";
+import { LinkColors } from "../utils/link-colors";
 
-const GraphPrimitive = require("./graph-primitive");
-const Relation       = require("./relationship");
-const LinkColors     = require("../utils/link-colors");
-
-class Link extends GraphPrimitive {
+export class Link extends GraphPrimitive {
   public static defaultColor;
   public static defaultRelation;
 
   public static initialize() {
     Link.defaultColor = LinkColors.default;
-    Link.defaultRelation = new Relation({formula: "1 * in"});
+    Link.defaultRelation = new Relationship({formula: "1 * in"});
   }
 
   public transferNode: any;
+
+  private options: any; // TODO: get concrete type
+  private sourceNode: any; // TODO: get concrete type
+  private sourceTerminal: any; // TODO: get concrete type
+  private targetNode: any; // TODO: get concrete type
+  private targetTerminal: any; // TODO: get concrete type
+  private color: any; // TODO: get concrete type
+  private title: any; // TODO: get concrete type
+  private relation: any; // TODO: get concrete type
+  private reasoning: any; // TODO: get concrete type
+  private jsPlumbConnection: any; // TODO: get concrete type
 
   constructor(options) {
     super();
@@ -46,8 +54,8 @@ class Link extends GraphPrimitive {
 
   public _makeRelation(relationObj) {
     let relation;
-    if (!(relationObj instanceof Relation)) {
-      relation = new Relation((relationObj || {}));
+    if (!(relationObj instanceof Relationship)) {
+      relation = new Relationship((relationObj || {}));
     } else {
       relation = relationObj;
     }
@@ -55,7 +63,7 @@ class Link extends GraphPrimitive {
   }
 
   public defaultRelation() {
-    return new Relation({});
+    return new Relationship({});
   }
 
   public terminalKey() {
@@ -91,5 +99,3 @@ class Link extends GraphPrimitive {
 }
 
 Link.initialize();
-
-module.exports = Link;

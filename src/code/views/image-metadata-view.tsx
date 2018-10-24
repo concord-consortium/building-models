@@ -1,8 +1,7 @@
 import * as React from "react";
 
 import { tr } from "../utils/translate";
-const licenses   = require("../data/licenses");
-const ImageDialogStore = require("../stores/image-dialog-store");
+import { licenses } from "../data/licenses";
 
 interface ImageMetadataViewProps {
   metadata: any; // TODO: get concrete type

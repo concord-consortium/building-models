@@ -5,16 +5,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const Migrations          = require("../data/migrations/migrations");
-const DiagramNode         = require("../models/node");
-const TransferNode        = require("../models/transfer");
-const ImportActions       = require("../actions/import-actions");
-const GraphPrimitive      = require("../models/graph-primitive");
+import { Node } from "../models/node";
+import { TransferModel } from "../models/transfer";
+import { ImportActions } from "../actions/import-actions";
+import { GraphPrimitive } from "../models/graph-primitive";
 
-class MySystemImporter {
+export class Importer {
   private graphStore: any;
   private settings: any;
   private paletteStore: any;
@@ -43,9 +40,9 @@ class MySystemImporter {
       data.image = __guard__(this.paletteStore.store.findByUUID(data.paletteItem), x => x.image);
     }
     if (/^Transfer/.test(nodeSpec.key)) {
-      return new TransferNode(data, key);
+      return new TransferModel(data, key);
     } else {
-      return new DiagramNode(data, key);
+      return new Node(data, key);
     }
   }
 
@@ -68,8 +65,6 @@ class MySystemImporter {
     // prevent unused default return value
   }
 }
-
-module.exports = MySystemImporter;
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

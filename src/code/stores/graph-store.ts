@@ -11,26 +11,24 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const Importer            = require("../utils/importer");
-const Link                = require("../models/link");
-const NodeModel           = require("../models/node");
-const TransferModel       = require("../models/transfer");
-const UndoRedo            = require("../utils/undo-redo");
-const SelectionManager    = require("../models/selection-manager");
+import { Importer } from "../utils/importer";
+import { Link } from "../models/link";
+import { Node } from "../models/node";
+import { TransferModel } from "../models/transfer";
+import { UndoRedo } from "../utils/undo-redo";
+import { SelectionManager } from "../models/selection-manager";
 const PaletteStore        = require("../stores/palette-store");
 import { tr } from "../utils/translate";
 const Migrations          = require("../data/migrations/migrations");
 const PaletteDeleteStore  = require("../stores/palette-delete-dialog-store");
 const AppSettingsStore    = require("../stores/app-settings-store");
 const SimulationStore     = require("../stores/simulation-store");
-const GraphActions        = require("../actions/graph-actions");
-const CodapActions        = require("../actions/codap-actions");
-const LaraActions         = require("../actions/lara-actions");
+import { GraphActions } from "../actions/graph-actions";
+import { CodapActions } from "../actions/codap-actions";
 const InspectorPanelStore = require("../stores/inspector-panel-store");
-const CodapConnect        = require("../models/codap-connect");
-const LaraConnect         = require("../models/lara-connect");
-const RelationFactory     = require("../models/relation-factory");
-const GraphPrimitive      = require("../models/graph-primitive");
+import { CodapConnect } from "../models/codap-connect";
+import { RelationFactory } from "../models/relation-factory";
+import { GraphPrimitive } from "../models/graph-primitive";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 const GraphStore  = Reflux.createStore({
@@ -517,7 +515,7 @@ const GraphStore  = Reflux.createStore({
   _changeNode(node, data, notifyCodap) {
     if (notifyCodap == null) { notifyCodap = true; }
     log.info(`Change for ${node.title}`);
-    for (const key of NodeModel.fields) {
+    for (const key of Node.fields) {
       if (data.hasOwnProperty(key)) {
         log.info(`Change ${key} for ${node.title}`);
         const prev = node[key];

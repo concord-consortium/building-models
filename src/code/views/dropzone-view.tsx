@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const dropImageHandler = require("../utils/drop-image-handler");
+import { dropImageHandler } from "../utils/drop-image-handler";
 
 import { tr } from "../utils/translate";
 

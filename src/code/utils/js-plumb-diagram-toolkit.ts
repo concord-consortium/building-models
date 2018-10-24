@@ -6,12 +6,9 @@
  */
 // Purpose of this class: Provide an abstraction over our chosen diagramming toolkit.
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { LinkColors } from "../utils/link-colors";
 
-const LinkColors = require("../utils/link-colors");
-
-class DiagramToolkit {
+export class DiagramToolkit {
   private domContext: any;
   private options: any;
   private type: string;
@@ -371,5 +368,3 @@ class DiagramToolkit {
     return this.setSuspendDrawing(false);
   }
 }
-
-module.exports = DiagramToolkit;

@@ -11,7 +11,7 @@ export {};
 
 const FLICKR_API_KEY = "1082174cc952ccc6a97412e9e14aaf88";
 
-module.exports = {
+export const Flickr = {
   search(query, callback) {
     const url = `https://api.flickr.com/services/rest?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&tags=${encodeURIComponent(query)}&is_commons=1&safe_search=1&format=json&jsoncallback=?`;
     return $.getJSON(url, (data, textStatus, jqXHR) => {

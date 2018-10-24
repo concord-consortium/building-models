@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const tr = require("../utils/translate");
+import { tr } from "../utils/translate";
 const PaletteDialogStore = require("../stores/palette-delete-dialog-store");
 import { ImagePickerView } from "./image-picker-view";
 

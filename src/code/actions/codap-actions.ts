@@ -1,4 +1,4 @@
-module.exports = Reflux.createActions(
+export const CodapActions = Reflux.createActions(
   [
     "codapLoaded",
     "hideUndoRedo",

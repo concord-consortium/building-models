@@ -8,11 +8,11 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const resizeImage    = require("../utils/resize-image");
-const initialPalette = require("../data/initial-palette");
-const initialLibrary = require("../data/internal-library");
-const UndoRedo       = require("../utils/undo-redo");
-const ImportActions  = require("../actions/import-actions");
+import { resizeImage } from "../utils/resize-image";
+import { initialPalette } from "../data/initial-palette";
+import { internalLibrary } from "../data/internal-library";
+import { UndoRedo } from "../utils/undo-redo";
+import { ImportActions } from "../actions/import-actions";
 const uuid           = require("uuid");
 
 
@@ -43,7 +43,7 @@ const paletteStore   = Reflux.createStore({
 
   initializeLibrary() {
     this.library = {};
-    return initialLibrary.map((node) =>
+    return internalLibrary.map((node) =>
       this.addToLibrary(node));
   },
 

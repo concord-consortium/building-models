@@ -9,21 +9,21 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const GraphPrimitive = require("./graph-primitive");
-
-import {ColorChoices} from "../utils/colors";
-
+import { GraphPrimitive } from "./graph-primitive";
+import { ColorChoices } from "../utils/colors";
 import { tr } from "../utils/translate";
-const urlParams = require("../utils/url-params");
+import { urlParams } from "../utils/url-params";
 
 const SEMIQUANT_MIN = 0;
 const SEMIQUANT_MAX = 100;
 const SEMIQUANT_ACCUMULATOR_MAX = 1000;
 
-class Node extends GraphPrimitive {
+export class Node extends GraphPrimitive {
+
+  public static fields: any;  // TODO: get concrete type
+  public static SEMIQUANT_MIN: any;  // TODO: get concrete type
+  public static SEMIQUANT_MAX: any;  // TODO: get concrete type
+  public static SEMIQUANT_ACCUMULATOR_MAX: any;  // TODO: get concrete type
 
   public static initialize() {
     Node.fields = [
@@ -37,7 +37,30 @@ class Node extends GraphPrimitive {
     Node.SEMIQUANT_ACCUMULATOR_MAX = SEMIQUANT_ACCUMULATOR_MAX;
   }
 
-  constructor(nodeSpec, key) {
+  protected links: any; // TODO: get concrete type
+  protected x: any; // TODO: get concrete type
+  protected y: any; // TODO: get concrete type
+  protected title: any; // TODO: get concrete type
+  protected codapID: any; // TODO: get concrete type
+  protected codapName: any; // TODO: get concrete type
+  protected allowNegativeValues: any; // TODO: get concrete type
+  protected valueDefinedSemiQuantitatively: any; // TODO: get concrete type
+  protected paletteItem: any; // TODO: get concrete type
+  protected frames: any; // TODO: get concrete type
+  protected addedThisSession: any; // TODO: get concrete type
+  protected combineMethod: any; // TODO: get concrete type
+  protected image: any; // TODO: get concrete type
+  protected _min: any; // TODO: get concrete type
+  protected _max: any; // TODO: get concrete type
+  protected _initialValue: any; // TODO: get concrete type
+  protected color: any; // TODO: get concrete type
+  protected accumulatorInputScale: any; // TODO: get concrete type
+  protected isInDependentCycle: any; // TODO: get concrete type
+  protected _collectorImageProps: any; // TODO: get concrete type
+  protected isTransfer: any; // TODO: get concrete type
+  protected _isAccumulator: any; // TODO: get concrete type
+
+  constructor(nodeSpec, key?) {
     let val, val1, val10, val2, val3, val4, val5, val6, val7, val8, val9;
     if (nodeSpec == null) { nodeSpec = {}; }
     super();
@@ -334,8 +357,6 @@ class Node extends GraphPrimitive {
 }
 
 Node.initialize();
-
-module.exports = Node;
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

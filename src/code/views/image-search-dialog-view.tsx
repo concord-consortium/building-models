@@ -9,8 +9,9 @@
 
 const ImageDialogStore = require("../stores/image-dialog-store");
 
-const OpenClipart = require("../utils/open-clipart");
+import { OpenClipArt } from "../utils/open-clipart";
 import { tr } from "../utils/translate";
+import { ImageDialogViewMixin } from "../mixins/image-dialog-view";
 
 const ImageSearchResult = React.createClass({
   displayName: "ImageSearchResult",
@@ -84,7 +85,7 @@ const ImageSearchPrevNextLink = React.createClass({
 export const ImageSearchDialogView = React.createClass({
   displayName: "ImageSearchDialogView",
 
-  mixins: [require("../mixins/image-dialog-view"), ImageDialogStore.mixin],
+  mixins: [ImageDialogViewMixin, ImageDialogStore.mixin],
 
   getInitialState() {
     return this.getInitialImageDialogViewState({
@@ -125,7 +126,7 @@ export const ImageSearchDialogView = React.createClass({
     });
 
     if (validQuery) {
-      OpenClipart.search(query, options, (results, page, numPages) => {
+      OpenClipArt.search(query, options, (results, page, numPages) => {
         this.setState({
           searching: false,
           searched: true,

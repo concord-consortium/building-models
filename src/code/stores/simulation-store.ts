@@ -9,10 +9,10 @@
 export {};
 
 const AppSettingsStore   = require("./app-settings-store");
-const ImportActions      = require("../actions/import-actions");
-const GraphActions       = require("../actions/graph-actions");
-const Simulation         = require("../models/simulation");
-const TimeUnits          = require("../utils/time-units");
+import { ImportActions } from "../actions/import-actions";
+import { GraphActions } from "../actions/graph-actions";
+import { Simulation } from "../models/simulation";
+import { TimeUnits } from "../utils/time-units";
 import { tr } from "../utils/translate";
 
 const DEFAULT_SIMULATION_STEPS = 20;

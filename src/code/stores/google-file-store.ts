@@ -9,10 +9,10 @@
  // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const GoogleDriveIO = require("../utils/google-drive-io");
+import { GoogleDriveIO } from "../utils/google-drive-io";
 const GraphStore    = require("./graph-store");
 const PaletteStore  = require("./palette-store");
-const HashParams    = require("../utils/hash-parameters");
+import { HashParams } from "../utils/hash-parameters";
 
 import { tr } from "../utils/translate";
 

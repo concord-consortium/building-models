@@ -5,13 +5,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
+import { resizeImage } from "./resize-image";
+import { hasValidImageExtension } from "../utils/has-valid-image-extension";
 
-const resizeImage = require("./resize-image");
-const hasValidImageExtension = require("../utils/has-valid-image-extension");
-
-module.exports = (e, callback) => {
+export const dropImageHandler = (e, callback) => {
   if (e.dataTransfer.files.length > 0) {
     return (() => {
       const result: any = [];

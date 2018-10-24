@@ -5,7 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const urlParams = require("./url-params");
+import { urlParams } from "./url-params";
 
 const languageFiles = {
   "en-US": require("./lang/en-US.json"),

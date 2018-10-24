@@ -7,8 +7,8 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const LaraConnect = require("../models/lara-connect");
-const LaraActions = require("../actions/lara-actions");
+import { LaraConnect } from "../models/lara-connect";
+import { LaraActions } from "../actions/lara-actions";
 
 const laraStore   = Reflux.createStore({
   listenables: [LaraActions],

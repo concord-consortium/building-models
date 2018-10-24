@@ -8,7 +8,7 @@
 export {};
 
 const PaletteStore = require("./palette-store");
-const UndoRedo     = require("../utils/undo-redo");
+import { UndoRedo } from "../utils/undo-redo";
 
 const paletteDialogActions = Reflux.createActions([
   "open", "close", "delete", "cancel", "select"

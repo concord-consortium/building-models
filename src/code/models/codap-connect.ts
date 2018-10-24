@@ -6,23 +6,20 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const { IframePhoneRpcEndpoint } = (require("iframe-phone"));
+const { IframePhoneRpcEndpoint } = require("iframe-phone");
 import { tr } from "../utils/translate";
-const CodapActions    = require("../actions/codap-actions");
+import { CodapActions } from "../actions/codap-actions";
 const undoRedoUIActions = (require("../stores/undo-redo-ui-store")).actions;
 const SimulationStore = require("../stores/simulation-store");
-const TimeUnits       = require("../utils/time-units");
-const { escapeRegExp } = (require("../utils/escape-reg-ex"));
+import { TimeUnits } from "../utils/time-units";
+import { escapeRegExp } from "../utils/escape-reg-ex";
 // log -- see loglevel in package.json
 
 interface CodapConnectMap {
   [key: string]: CodapConnect;
 }
 
-class CodapConnect {
+export class CodapConnect {
   public static instances: CodapConnectMap;
 
   public static initialize() {
@@ -687,8 +684,6 @@ class CodapConnect {
 }
 
 CodapConnect.initialize();
-
-module.exports = CodapConnect;
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

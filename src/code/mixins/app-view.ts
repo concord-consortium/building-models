@@ -5,17 +5,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const PaletteStore    = require("../stores/palette-store");
 const CodapStore      = require("../stores/codap-store");
 const LaraStore       = require("../stores/lara-store");
 const GoogleFileStore = require("../stores/google-file-store");
-const HashParams      = require("../utils/hash-parameters");
+import { HashParams } from "../utils/hash-parameters";
 const AppSettingsStore = require("../stores/app-settings-store");
 
-module.exports = {
+export const AppViewMixin = {
 
   getInitialAppViewState(subState) {
     const mixinState = {

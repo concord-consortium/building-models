@@ -5,12 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const {option, optgroup} = React.DOM;
-
-module.exports = {
+export const licenses = {
   map: {
     "public domain": {
       label: "Public Domain",
@@ -60,18 +55,16 @@ module.exports = {
   },
 
   getRenderOptions(slug) {
+    const licenses: JSX.Element[] = [];
+    for (slug in this.map["creative commons"]) {
+      const license = this.map["creative commons"][slug];
+      licenses.push(<option key={slug} value={slug}>{license.label}</option>);
+    }
     return [
-      (option({key: `${slug}-public-domain`, value: "public domain"}, (this.getLicenseLabel("public domain")))),
-      (optgroup({key: `${slug}-opt-group`, label: "Creative Commons"},
-        (() => {
-          const result: any = [];
-          for (slug in this.map["creative commons"]) {
-            const license = this.map["creative commons"][slug];
-            result.push(option({key: slug, value: slug}, license.label));
-          }
-          return result;
-        })())
-      )
+      <option key={`${slug}-public-domain`} value="public domain">{this.getLicenseLabel("public domain")}</option>,
+      <optgroup key={`${slug}-opt-group`} label="Creative Commons">
+        {licenses}
+      </optgroup>
     ];
   }
 };

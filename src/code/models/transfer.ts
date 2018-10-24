@@ -5,18 +5,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const Node = require("./node");
+import { Node } from "./node";
 import { tr } from "../utils/translate";
 
 const DEFAULT_COMBINE_METHOD = "product";
 
-class Transfer extends Node {
-  private type = "Transfer";
-  private isTransfer = true;
-  private combineMethod = DEFAULT_COMBINE_METHOD;
+export class TransferModel extends Node {
+  public type = "Transfer";
+  protected transferLink: any; // TODO: get concrete type
 
   public setTransferLink(link) {
     this.transferLink = link;
@@ -32,5 +28,3 @@ class Transfer extends Node {
     }
   }
 }
-
-module.exports = Transfer;

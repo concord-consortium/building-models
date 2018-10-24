@@ -4,17 +4,13 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { PreviewImageDialogView as PreviewImageDialogViewClass } from "../views/preview-image-dialog-view";
 
 const PreviewImage = React.createFactory(PreviewImageDialogViewClass);
-const hasValidImageExtension = require("../utils/has-valid-image-extension");
+import { hasValidImageExtension } from "../utils/has-valid-image-extension";
 const ImageDialogStore = require("../stores/image-dialog-store");
 
-
-module.exports = {
+export const ImageDialogViewMixin = {
 
   getInitialImageDialogViewState(subState) {
     return subState;

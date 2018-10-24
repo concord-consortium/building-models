@@ -10,7 +10,7 @@
 import { LinkRelationView } from "./link-relation-view";
 import { TabbedPanelView } from "./tabbed-panel-view";
 
-const RelationFactory = require("../models/relation-factory");
+import { RelationFactory } from "../models/relation-factory";
 import { tr } from "../utils/translate";
 
 const inspectorPanelStore = require("../stores/inspector-panel-store");

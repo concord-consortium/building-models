@@ -4,12 +4,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 import { tr } from "../utils/translate";
 
-module.exports = {
+export const NodeTitleMixin = {
   defaultTitle() {
     return tr("~NODE.UNTITLED");
   },

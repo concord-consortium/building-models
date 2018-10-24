@@ -8,12 +8,13 @@
 import { tr } from "../utils/translate";
 import { ColorPickerView } from "./color-picker-view";
 import { ImagePickerView } from "./image-picker-view";
+import { NodeTitleMixin } from "../mixins/node-title";
 
 export const NodeInspectorView = React.createClass({
 
   displayName: "NodeInspectorView",
 
-  mixins: [require("../mixins/node-title")],
+  mixins: [NodeTitleMixin],
 
   changeTitle(e) {
     const newTitle = this.cleanupTitle(e.target.value);

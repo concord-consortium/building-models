@@ -1,4 +1,4 @@
-module.exports = [
+export const internalLibrary = [
   {
     "id": "2",
     "title": "Egg",

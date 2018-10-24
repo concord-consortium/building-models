@@ -7,9 +7,9 @@
  // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const HashParams      = require("../utils/hash-parameters");
-const ImportActions   = require("../actions/import-actions");
-const urlParams       = require("../utils/url-params");
+import { HashParams } from "../utils/hash-parameters";
+import { ImportActions } from "../actions/import-actions";
+import { urlParams } from "../utils/url-params";
 
 const AppSettingsActions = Reflux.createActions(
   [

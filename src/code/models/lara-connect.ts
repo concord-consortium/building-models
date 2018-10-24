@@ -6,22 +6,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-const IframePhone = (require("iframe-phone"));
-const LaraActions    = require("../actions/lara-actions");
-const UndoRedoUIStore = require("../stores/undo-redo-ui-store");
-const UndoRedo = require("../utils/undo-redo");
-const SimulationStore = require("../stores/simulation-store");
-const TimeUnits       = require("../utils/time-units");
-const { escapeRegExp } = (require("../utils/escape-reg-ex"));
+const IframePhone = require("iframe-phone");
+import { UndoRedo } from "../utils/undo-redo";
 
 interface LaraConnectMap {
   [key: string]: LaraConnect;
 }
 
-class LaraConnect {
+export class LaraConnect {
   public static instances: LaraConnectMap;
 
   public static initialize() {
@@ -100,5 +92,3 @@ class LaraConnect {
 }
 
 LaraConnect.initialize();
-
-module.exports = LaraConnect;

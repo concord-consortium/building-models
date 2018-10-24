@@ -7,9 +7,6 @@
 // transfer values are scaled if they have no modifier and
 // their source is an independent node (has no inputs)
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const isScaledTransferNode = (node) => {
   if (!node.isTransfer) { return false; }
   if (node.inLinks("transfer-modifier").length) { return false; }
@@ -159,7 +156,7 @@ const SetAccumulatorValueFunction = (nodeValues) => {
   return this.currentValue = this.filterFinalValue(startValue + deltaValue);
 };
 
-class Simulation {
+export class Simulation {
   private opts: any;
   private nodes: any[];
   private duration: number;
@@ -322,5 +319,3 @@ class Simulation {
     return this.onEnd();
   }
 }
-
-module.exports = Simulation;

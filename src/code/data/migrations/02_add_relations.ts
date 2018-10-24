@@ -8,7 +8,7 @@
 // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const Relationship = require("../../models/relationship");
+import { Relationship } from "../../models/relationship";
 
 const migration = {
   version: "1.1.0",

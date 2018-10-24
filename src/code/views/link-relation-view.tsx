@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-const RelationFactory  = require("../models/relation-factory");
+import { RelationFactory } from "../models/relation-factory";
 import { SvgGraphView } from "./svg-graph-view";
 import { tr } from "../utils/translate";
 

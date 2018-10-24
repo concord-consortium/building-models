@@ -5,10 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
-class SelectionManager {
+export class SelectionManager {
 
   public static NodeTitleEditing;
   public static NodeInspection;
@@ -192,5 +189,3 @@ class SelectionManager {
 }
 
 SelectionManager.initialize();
-
-module.exports = SelectionManager;

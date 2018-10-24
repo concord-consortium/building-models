@@ -1,1 +1,1 @@
-module.exports = Reflux.createActions([ "import" ]);
+export const ImportActions = Reflux.createActions([ "import" ]);

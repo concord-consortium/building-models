@@ -7,10 +7,10 @@
  // TODO: remove when modules are converted to TypeScript style modules
 export {};
 
-const CodapConnect = require("../models/codap-connect");
-const CodapActions = require("../actions/codap-actions");
+import { CodapConnect } from "../models/codap-connect";
+import { CodapActions } from "../actions/codap-actions";
 
-const codapStore   = Reflux.createStore({
+const codapStore = Reflux.createStore({
   listenables: [CodapActions],
 
   init() {

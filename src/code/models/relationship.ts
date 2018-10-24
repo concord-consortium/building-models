@@ -6,16 +6,19 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const math = require("mathjs");  // For formula parsing...
 
-class Relationship {
+export class Relationship {
   public static errValue;
+  public static defaultText;
+  public static defaultFormula;
 
   public static initialize() {
     Relationship.errValue = -1;
+
+    // TODO: these statics are referenced in 02_add_relations migtation but they did not exist, setting them to undefined for now
+    Relationship.defaultText = undefined;
+    Relationship.defaultFormula = undefined;
   }
 
   public static defaultFunc(scope) {
@@ -120,5 +123,3 @@ class Relationship {
 }
 
 Relationship.initialize();
-
-module.exports = Relationship;

@@ -1,4 +1,4 @@
-module.exports = Reflux.createActions(
+export const LaraActions = Reflux.createActions(
   [
     "laraLoaded"
   ]
