@@ -2,6 +2,7 @@ const g = global as any;
 
 g.window = { location: "" };
 
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const Sinon = require("sinon");

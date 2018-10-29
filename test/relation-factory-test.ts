@@ -1,3 +1,4 @@
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const should = chai.should();

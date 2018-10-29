@@ -8,6 +8,7 @@ g.window.performance = {
 };
 g.requestAnimationFrame = callback => setTimeout(callback, 1);
 
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 import { Link } from "../src/code/models/link";

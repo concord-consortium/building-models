@@ -1,9 +1,4 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const { expect } = chai;
@@ -21,8 +16,10 @@ describe("relationship", () => {
       it("should make an undefined relationship", () => {
         const undertest = new Relationship(this.arguments);
         undertest.isDefined.should.equal(false);
-        expect(undertest.text).to.be.undefined();
-        expect(undertest.formula).to.be.undefined();
+        // WAS: expect(undertest.text).to.be.undefined();
+        expect(undertest.text).to.equal(undefined);
+        // WAS: expect(undertest.formula).to.be.undefined();
+        expect(undertest.formula).to.equal(undefined);
       })
     );
   });

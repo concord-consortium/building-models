@@ -2,6 +2,7 @@ const g = global as any;
 
 g.window = { location: "" };
 
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const { expect }         = chai;
@@ -119,11 +120,13 @@ describe("Serialization and Loading", () => {
         nodeA.data.max.should.equal(100);
         nodeA.data.isAccumulator.should.equal(false);
         nodeA.data.valueDefinedSemiQuantitatively.should.equal(true);
-        expect(nodeA.data.image).to.not.exist();
+        // WAS: expect(nodeA.data.image).to.not.exist()
+        expect(nodeA.data.image).to.equal(undefined);
         expect(nodeA.data.paletteItem).to.equal("uuid-dingo");
         expect(nodeB.data.paletteItem).to.equal("uuid-bee");
         expect(nodeA.data.frames.length, "nodeA.data.frames.length").to.equal(0);
-        expect(nodeB.data.frames, "nodeB.data.frames").to.exist();
+        // WAS: expect(nodeB.data.frames, "nodeB.data.frames").to.exist();
+        expect(nodeB.data.frames, "nodeB.data.frames").to.not.equal(undefined);
         expect(nodeB.data.frames.length, "nodeB.data.frames.length").to.equal(1);
         expect(nodeB.data.frames[0], "nodeB.data.frames[0]").to.equal(50);
         expect(nodeC.data.combineMethod).to.equal("product");

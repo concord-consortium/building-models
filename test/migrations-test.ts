@@ -1,16 +1,22 @@
 const _ = require("lodash");
 
-const Migrations     = require("../src/code/data/migrations/migrations");
-const TimeUnits      = require("../src/code/utils/time-units");
+import { migrationUpdate } from "../src/code/data/migrations/migrations";
+import { TimeUnits } from "../src/code/utils/time-units";
 const originalData   = require("./serialized-test-data/v-0.1");
+
+import * as chai from "chai";
 
 const { expect } = chai;
 chai.config.includeStack = true;
 
+const should = chai.should();
+
+export {};
+
 describe("Migrations",  () =>
   describe("update", () => {
     beforeEach(() => {
-      this.result = Migrations.update(originalData);
+      this.result = migrationUpdate(originalData);
     });
 
     describe("the final version number", () =>
@@ -60,8 +66,10 @@ describe("Migrations",  () =>
       it("should have valid relationship values", () => {
         for (const link of this.result.links) {
           link.relation.should.exist();
-          expect(link.relation.text).to.be.undefined();
-          expect(link.relation.formula).to.be.undefined();
+          // WAS expect(link.relation.text).to.be.undefined();
+          expect(link.relation.text).to.equal(undefined);
+          // WAS expect(link.relation.formula).to.be.undefined();
+          expect(link.relation.formula).to.equal(undefined);
         }
       });
     });
@@ -195,7 +203,7 @@ describe("Migrations",  () =>
         expect(brokenExample.version).to.equal("1.22.0");
         expect(brokenExample.settings.simulationType).to.equal(1); // wrong value!
         // Now migrate & test for corrected migration.
-        Migrations.update(brokenExample);
+        migrationUpdate(brokenExample);
         expect(brokenExample.settings.simulationType).to.equal(2);
       })
     );
@@ -206,10 +214,11 @@ describe("Migrations",  () =>
         const brokenExample = require("./serialized-test-data/v-1.22.0-missing-combine-method");
         // Pre-test our broken json is our expected version of 1.22.0
         expect(brokenExample.version).to.equal("1.22.0");
-        // expect to not find any `comineMethod` for our nodes.
-        _.each(brokenExample.nodes, n => expect(n.data.combineMethod).to.not_exist);
+        // expect to not find any `combineMethod` for our nodes.
+        // WAS _.each(brokenExample.nodes, n => expect(n.data.combineMethod).to.not_exist);
+        _.each(brokenExample.nodes, n => expect(n.data.combineMethod).to.equal(undefined));
         // Now migrate & test for corrected migration.
-        Migrations.update(brokenExample);
+        migrationUpdate(brokenExample);
         // Now we want all 4 nodes to have combineMethod
         _.each(brokenExample.nodes, n => expect(n.data.combineMethod).to.exist);
       })

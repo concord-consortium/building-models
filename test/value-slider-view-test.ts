@@ -1,6 +1,6 @@
-
 import * as React from "react";
 
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const Enzyme = require("enzyme");
@@ -18,15 +18,15 @@ describe("The Value Slider", () => {
       filled: true,
       height: 44,
       width: 15,
-      showHandle: null,
+      showHandle: false,
       showLabels: false,
-      onValueChange: null,
+      onValueChange: (value) => undefined,
       value: 50,
       displaySemiQuant: false,
       max: 100,
       min: 1,
-      onSliderDragStart: null,
-      onSliderDragEnd: null,
+      onSliderDragStart: () => undefined,
+      onSliderDragEnd: () => undefined,
       color: "#f00",
       handleSize: 16,
       stepSize: 1,

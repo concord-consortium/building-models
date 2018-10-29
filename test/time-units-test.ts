@@ -1,3 +1,4 @@
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 import { TimeUnits } from "../src/code/utils/time-units";

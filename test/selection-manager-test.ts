@@ -1,10 +1,11 @@
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 import { GraphPrimitive } from "../src/code/models/graph-primitive";
 import { SelectionManager } from "../src/code/models/selection-manager";
 
 describe("SelectionManager", () => {
-  let selectionMngr = null;
+  let selectionMngr;
 
   beforeEach(() => selectionMngr = new SelectionManager());
 
@@ -15,7 +16,7 @@ describe("SelectionManager", () => {
   );
 
   describe("addToSelection", () => {
-    let toAdd = null;
+    let toAdd;
     beforeEach(() => toAdd = new GraphPrimitive());
 
     describe("with nothing selected", () =>
@@ -36,7 +37,7 @@ describe("SelectionManager", () => {
     );
 
     describe("when a previous item is selected", () => {
-      let anotherItem = null;
+      let anotherItem;
       beforeEach(() => {
         anotherItem = new GraphPrimitive();
         selectionMngr.addToSelection(anotherItem);
@@ -84,7 +85,7 @@ describe("SelectionManager", () => {
 
   describe("isSelected", () =>
     describe("when something is selected", () => {
-      let toAdd = null;
+      let toAdd;
       beforeEach(() => {
         toAdd = new GraphPrimitive();
         selectionMngr.addToSelection(toAdd, "context");
@@ -105,10 +106,10 @@ describe("SelectionManager", () => {
   );
 
   describe("Multiple selectOnly", () => {
-    let a = null;
-    let b = null;
-    let c = null;
-    let context = null;
+    let a;
+    let b;
+    let c;
+    let context;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();
@@ -155,9 +156,9 @@ describe("SelectionManager", () => {
   });
 
   describe("selectOnly", () => {
-    let a = null;
-    let b = null;
-    let context = null;
+    let a;
+    let b;
+    let context;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();
@@ -210,8 +211,8 @@ describe("SelectionManager", () => {
 
 
   describe("Selecting node 'a' for title editing", () => {
-    let a = null;
-    let b = null;
+    let a;
+    let b;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();
@@ -286,8 +287,8 @@ describe("SelectionManager", () => {
   });
 
   describe("Selecting link 'a' for title editing", () => {
-    let a = null;
-    let b = null;
+    let a;
+    let b;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();
@@ -363,8 +364,8 @@ describe("SelectionManager", () => {
 
 
   describe("Selecting node 'a' for inspection", () => {
-    let a = null;
-    let b = null;
+    let a;
+    let b;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();
@@ -435,8 +436,8 @@ describe("SelectionManager", () => {
   });
 
   describe("Selecting link 'a' for inspection", () => {
-    let a = null;
-    let b = null;
+    let a;
+    let b;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();
@@ -507,9 +508,9 @@ describe("SelectionManager", () => {
   });
 
   describe("Selecting multiple links for inspection", () => {
-    let a = null;
-    let b = null;
-    let c = null;
+    let a;
+    let b;
+    let c;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();
@@ -570,9 +571,8 @@ describe("SelectionManager", () => {
   });
 
   describe("clearSelectionFor", () => {
-    let a = null;
-    let b = null;
-    const context = null;
+    let a;
+    let b;
     beforeEach(() => {
       a = new GraphPrimitive();
       b = new GraphPrimitive();

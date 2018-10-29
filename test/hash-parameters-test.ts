@@ -2,6 +2,7 @@ const g = global as any;
 
 import { HashParams } from "../src/code/utils/hash-parameters";
 
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const { expect } = chai;

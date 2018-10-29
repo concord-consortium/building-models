@@ -1,3 +1,6 @@
+const g = global as any;
+g.window = { location: "" };
+
 const Sinon          = require("sinon");
 import { CodapConnect } from "../src/code/models/codap-connect";
 

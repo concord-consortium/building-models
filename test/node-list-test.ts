@@ -1,6 +1,7 @@
 const g = global as any;
 g.window = { location: "" };
 
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const { expect } = chai;
@@ -37,12 +38,6 @@ describe("NodeList", () => {
   afterEach(() => UnStub());
 
   describe("GraphPrimitive", () => {
-    it("GraphPrimitive should exists", () => GraphPrimitive.should.exist());
-
-    describe("the type", () => {
-      const undertest = new GraphPrimitive();
-      undertest.type.should.equal("GraphPrimitive");
-    });
 
     describe("the id", () => {
       beforeEach(() => GraphPrimitive.resetCounters());

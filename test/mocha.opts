@@ -1,6 +1,4 @@
 --require chai
---require lodash
---require jquery
 --reporter spec
 --compilers ts:ts-node/register
 --ui bdd

@@ -10,6 +10,7 @@ g.window.performance = {
 };
 g.requestAnimationFrame = callback => setTimeout(callback, 1);
 
+import * as chai from "chai";
 chai.config.includeStack = true;
 
 const { expect }         = chai;
@@ -43,7 +44,7 @@ const LinkNodes = (sourceNode, targetNode, relationSpec) => {
 };
 
 const asyncListenTest = (done, action, func) => {
-  const stopListening = action.listen((args) => {
+  const stopListening = action.listen(function(args) { // tslint:disable-line:only-arrow-functions
     try {
       func.apply(null, arguments);
       done();
@@ -62,7 +63,6 @@ describe("Simulation", () => {
       duration: 5
     };
   });
-  it("the class should exist", () => Simulation.should.be.defined());
 
   describe("the constructor", () => {
     beforeEach(() => {
@@ -260,7 +260,7 @@ describe("Simulation", () => {
               let type;
               const node1 = nodes[key[0]];
               const node2 = nodes[key[1]];
-              let func = null;
+              let func;
               if (node2.isAccumulator) {
                 type = value === "initial-value" ? value : "accumulator";
                 if (type === "initial-value") { func = () => ({}); }
@@ -272,7 +272,7 @@ describe("Simulation", () => {
           }
           for (let j = 0; j < scenario.results.length; j++) {
             const result = scenario.results[j];
-            const nodeArray = [];
+            const nodeArray: any[] = [];
             for (key in nodes) {
               node = nodes[key];
               nodeArray.push(node);
