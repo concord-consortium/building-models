@@ -1,3 +1,8 @@
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import * as _ from "lodash";
+import * as $ from "jquery";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -16,22 +21,73 @@ import { DiagramToolkit } from "../utils/js-plumb-diagram-toolkit";
 import { dropImageHandler } from "../utils/drop-image-handler";
 import { tr } from "../utils/translate";
 import { PaletteStore, PaletteActions } from "../stores/palette-store";
-import { GraphStore, GraphMixin } from "../stores/graph-store";
+import { GraphStore, GraphMixin, GraphMixin2Props, GraphMixin2State, GraphMixin2 } from "../stores/graph-store";
 import { ImageDialogActions } from "../stores/image-dialog-store";
 import { RelationFactory } from "../models/relation-factory";
 
-import { SimulationMixin } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsMixin } from "../stores/app-settings-store";
-import { CodapMixin } from "../stores/codap-store";
-import { LaraMixin } from "../stores/lara-store";
+import { SimulationMixin, SimulationMixin2Props, SimulationMixin2State, SimulationMixin2 } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin, AppSettingsMixin2Props, AppSettingsMixin2State, AppSettingsMixin2 } from "../stores/app-settings-store";
+import { CodapMixin, CodapMixin2Props, CodapMixin2State, CodapMixin2 } from "../stores/codap-store";
+import { LaraMixin, LaraMixin2Props, LaraMixin2State, LaraMixin2 } from "../stores/lara-store";
 import { LinkColors } from "../utils/link-colors";
+import { Mixer } from "../mixins/components";
 
-export const GraphView = React.createClass({
 
-  displayName: "GraphView",
+interface GraphViewOuterProps {
+  selectionManager: any; // TODO: get concrete type
+  graphStore: any; // TODO: get concrete type
+  connectionTarget?: any; // TODO: get concrete type
+  transferTarget?: any; // TODO: get concrete type
+  linkTarget?: any; // TODO: get concrete type
+}
+type GraphViewProps = GraphViewOuterProps & GraphMixin2Props & SimulationMixin2Props & AppSettingsMixin2Props & CodapMixin2Props & LaraMixin2Props;
 
-  mixins: [ GraphMixin, SimulationMixin, AppSettingsMixin, CodapMixin, LaraMixin ],
+interface GraphViewOuterState {
+  selectedNodes: any[]; // TODO: get concrete type
+  editingNode: any; // TODO: get concrete type
+  selectedLink: any[]; // TODO: get concrete type
+  editingLink: any; // TODO: get concrete type
+  canDrop: boolean;
+  drawingMarquee: boolean;
+  selectBox: {
+    startX: number;
+    startY: number;
+    x: number;
+    y: number;
+  };
+}
+type GraphViewState = GraphViewOuterState & GraphMixin2State & SimulationMixin2State & AppSettingsMixin2State & CodapMixin2State & LaraMixin2State;
 
+export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
+
+  public static displayName = "GraphView";
+
+  private diagramToolkit: any; // TODO: get concrete type
+  private forceRedrawLinks: boolean;
+  private linkButtonClientClass: string;
+  private ignoringEvents: boolean;
+
+  constructor(props: GraphViewProps) {
+    super(props);
+    this.mixins = [new GraphMixin2(this, props), new SimulationMixin2(this, props), new AppSettingsMixin2(this, props), new CodapMixin2(this, props), new LaraMixin2(this, props)];
+    const outerState: GraphViewOuterState = {
+      selectedNodes: [],
+      editingNode: null,
+      selectedLink: [],
+      editingLink: null,
+      canDrop: false,
+      drawingMarquee: false,
+      selectBox: {
+        startX: 0,
+        startY: 0,
+        x: 0,
+        y: 0
+      }
+    };
+    this.setInitialState(outerState, GraphMixin2.InitialState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState, CodapMixin2.InitialState, LaraMixin2.InitialState);
+  }
+
+  /*
   getDefaultProps() {
     return {
       linkTarget: ".link-top",
@@ -39,8 +95,12 @@ export const GraphView = React.createClass({
       transferTarget: ".link-target"
     };
   },
+  */
 
-  componentDidMount() {
+  public componentDidMount() {
+    // for mixins...
+    super.componentDidMount();
+
     const $container = $(this.refs.container);
 
     this.diagramToolkit = new DiagramToolkit($container, {
@@ -52,7 +112,7 @@ export const GraphView = React.createClass({
     );
 
     // force an initial draw of the connections
-    this._updateToolkit();
+    this.handleUpdateToolkit();
 
     this.props.selectionManager.addSelectionListener(manager => {
       const lastLinkSelection = this.state.selectedLink[this.state.selectedLink.length - 1];
@@ -70,11 +130,11 @@ export const GraphView = React.createClass({
       });
 
       if (lastLinkSelection === !this.state.selectedLink) {
-        return this._updateToolkit();
+        return this.handleUpdateToolkit();
       }
     });
 
-    return $container.droppable({
+    return ($container as any).droppable({
       accept: ".palette-image",
       hoverClass: "ui-state-highlight",
       drop: (e, ui) => {
@@ -82,9 +142,9 @@ export const GraphView = React.createClass({
         // we also can't just make the inspector panel eat the drops because the container handler is called first
         const $panel = $(".inspector-panel-content");
         const panel = {
-          width: $panel.width(),
-          height: $panel.height(),
-          offset: $panel.offset()
+          width: $panel.width() || 0,
+          height: $panel.height() || 0,
+          offset: $panel.offset() || {left: 0, top: 0}
         };
 
         const inPanel = (ui.offset.left >= panel.offset.left) &&
@@ -93,37 +153,98 @@ export const GraphView = React.createClass({
                   (ui.offset.top <= (panel.offset.top + panel.height));
 
         if (!inPanel) {
-          return this.addNode(e, ui);
+          return this.handleAddNode(e, ui);
         }
       }
     });
-  },
+  }
 
-  addNode(e, ui) {
+  public componentDidUpdate(prevProps, prevState) {
+    if ((prevState.description.links !== this.state.description.links) ||
+        (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) ||
+        (prevState.selectedLink !== this.state.selectedLink) ||
+        (prevState.relationshipSymbols !== this.state.relationshipSymbols) ||
+        this.forceRedrawLinks) {
+      if (this.diagramToolkit && this.diagramToolkit.clear) {
+        this.diagramToolkit.clear();
+      }
+      this.handleUpdateToolkit();
+      return this.forceRedrawLinks = false;
+    }
+  }
+
+  public render() {
+    let dataColor = Colors.mediumGray.value;
+    let innerColor = Colors.mediumGrayInner.value;
+    if (this.state.isRecording) {
+      dataColor = Colors.data.value;
+      innerColor = Colors.dataInner.value;
+    }
+    const diagramOnly = this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly;
+    const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
+    const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
+    const marqueeStyle: any = {
+      width: Math.abs(this.state.selectBox.x - this.state.selectBox.startX),
+      height: Math.abs(this.state.selectBox.y - this.state.selectBox.startY),
+      left,
+      top
+    };
+
+    return (
+      <div className={`graph-view ${this.state.canDrop ? "can-drop" : ""}`} ref="linkView" onDragOver={this.handleDragOver} onDrop={this.handleDrop} onDragLeave={this.handleDragLeave}>
+        <div className="container" ref="container" onMouseDown={this.handleMouseDown} onMouseUp={this.handleMouseUp} onMouseMove={this.handleMouseMove}>
+          {this.state.drawingMarquee ? <div className="selectionBox" ref="selectionBox" style={marqueeStyle} /> : undefined}
+          {this.state.nodes.map((node) =>
+            <NodeView
+              key={node.key}
+              data={node}
+              dataColor={dataColor}
+              innerColor={innerColor}
+              selected={_.includes(this.state.selectedNodes, node)}
+              simulating={this.state.simulationPanelExpanded}
+              // running={this.state.modelIsRunning}
+              editTitle={this.state.editingNode === node}
+              nodeKey={node.key}
+              ref={node.key}
+              onMove={this.handleNodeMoved}
+              onMoveComplete={this.handleNodeMoveComplete}
+              onDelete={this.handleNodeDeleted}
+              graphStore={this.props.graphStore}
+              selectionManager={this.props.selectionManager}
+              showMinigraph={this.state.showingMinigraphs}
+              isTimeBased={this.state.isTimeBased}
+              showGraphButton={this.state.codapHasLoaded && !diagramOnly}
+            />)}
+        </div>
+      </div>
+    );
+  }
+
+  private handleAddNode = (e, ui) => {
     let paletteItem;
     const data = ui.draggable.data();
     if (data.droptype === "new") {
-      return paletteItem = this.addNewPaletteNode(e, ui);
+      return paletteItem = this.handleAddNewPaletteNode(e, ui);
 
     } else if (data.droptype === "paletteItem") {
       paletteItem = PaletteStore.palette[data.index];
       PaletteActions.selectPaletteIndex(data.index);
-      return this.addPaletteNode(ui, paletteItem);
+      return this.handleAddPaletteNode(ui, paletteItem);
     }
-  },
+  }
 
-  addNewPaletteNode(e, ui) {
+  private handleAddNewPaletteNode = (e, ui) => {
     return ImageDialogActions.open(savedPaletteItem => {
       if (savedPaletteItem) {
-        return this.addPaletteNode(ui, savedPaletteItem);
+        return this.handleAddPaletteNode(ui, savedPaletteItem);
       }
     });
-  },
+  }
 
-  addPaletteNode(ui, paletteItem) {
+  private handleAddPaletteNode = (ui, paletteItem) => {
     // Default new nodes are untitled
     const title = tr("~NODE.UNTITLED");
-    const linkOffset = $(this.refs.linkView).offset();
+    const linkOffset = $(this.refs.linkView).offset() || {left: 0, top: 0};
     const imageOffset = NodeView.nodeImageOffset();
     const newNode = new Node({
       x: ui.offset.left - linkOffset.left - imageOffset.left,
@@ -136,51 +257,18 @@ export const GraphView = React.createClass({
 
     this.props.graphStore.addNode(newNode);
     return this.props.graphStore.editNode(newNode.key);
-  },
+  }
 
-  getInitialState() {
-    // nodes: covered by GraphStore mixin
-    // links: covered by GraphStore mixin
-    return {
-      selectedNodes: [],
-      editingNode: null,
-      selectedLink: [],
-      editingLink: null,
-      canDrop: false,
-      drawingMarquee: false,
-      selectBox: {
-        startX: 0,
-        startY: 0,
-        x: 0,
-        y: 0
-      }
-    };
-  },
-
-  componentDidUpdate(prevProps, prevState) {
-    if ((prevState.description.links !== this.state.description.links) ||
-        (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) ||
-        (prevState.selectedLink !== this.state.selectedLink) ||
-        (prevState.relationshipSymbols !== this.state.relationshipSymbols) ||
-        this.forceRedrawLinks) {
-      if (this.diagramToolkit && this.diagramToolkit.clear) {
-        this.diagramToolkit.clear();
-      }
-      this._updateToolkit();
-      return this.forceRedrawLinks = false;
-    }
-  },
-
-  handleEvent(handler) {
+  private handleEvent = (handler) => {
     if (this.ignoringEvents) {
       return false;
     } else {
       handler();
       return true;
     }
-  },
+  }
 
-  onNodeMoved(node_event) {
+  private handleNodeMoved = (node_event) => {
     const {left, top} = node_event.extra.position;
     const theNode = GraphStore.nodeKeys[node_event.nodeKey];
     const leftDiff = left - theNode.x;
@@ -188,7 +276,7 @@ export const GraphView = React.createClass({
     const { selectedNodes } = this.state;
     if (selectedNodes.length > 0) {
       return this.handleEvent(() => {
-        if (selectedNodes.includes(theNode)) {
+        if (_.includes(selectedNodes, theNode)) {
           return selectedNodes.map((node) =>
             GraphStore.moveNode(node.key, leftDiff, topDiff));
         } else { // when node is unselected, but we drag it, only it should be dragged
@@ -199,9 +287,9 @@ export const GraphView = React.createClass({
       // alert "leftDiff 2" + leftDiff
       return this.handleEvent(() => GraphStore.moveNode(node_event.nodeKey, leftDiff, topDiff));
     }
-  },
+  }
 
-  onNodeMoveComplete(node_event) {
+  private handleNodeMoveComplete = (node_event) => {
     const {left, top} = node_event.extra.position;
     const leftDiff = left - node_event.extra.originalPosition.left;
     const topDiff = top - node_event.extra.originalPosition.top;
@@ -214,28 +302,28 @@ export const GraphView = React.createClass({
     } else {
       return this.handleEvent(() => GraphStore.moveNodeCompleted(node_event.nodeKey, leftDiff, topDiff));
     }
-  },
+  }
 
-  onNodeDeleted(node_event) {
+  private handleNodeDeleted = (node_event) => {
     return this.handleEvent(() => GraphStore.removeNode(node_event.nodeKey));
-  },
+  }
 
-  handleConnect(info, evnt) {
+  private handleConnect = (info, evnt) => {
     return this.handleEvent(() => {
       this.forceRedrawLinks = true;
       return GraphStore.newLinkFromEvent(info, evnt);
     });
-  },
+  }
 
-  handleLinkClick(connection, evt) {
+  private handleLinkClick = (connection, evt) => {
     return this.handleEvent(() => {
       const multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey;
       this.forceRedrawLinks = true;
       return GraphStore.clickLink(connection.linkModel, multipleSelections);
     });
-  },
+  }
 
-  _updateNodeValue(name, key, value) {
+  private updateNodeValue(name, key, value) {
     let changed = 0;
     for (const node of this.state.nodes) {
       if (node.key === name) {
@@ -246,19 +334,19 @@ export const GraphView = React.createClass({
     if (changed > 0) {
       return this.setState({nodes: this.state.nodes});
     }
-  },
+  }
 
-  _updateToolkit() {
+  private handleUpdateToolkit = () => {
     if (this.diagramToolkit) {
       this.ignoringEvents = true;
       this.diagramToolkit.suspendDrawing();
-      this._redrawLinks();
-      this._redrawTargets();
+      this.redrawLinks();
+      this.redrawTargets();
       this.diagramToolkit.resumeDrawing();
       this.ignoringEvents = false;
-      return this._checkForLinkButtonClientClass();
+      return this.checkForLinkButtonClientClass();
     }
-  },
+  }
 
   // There is a bug which only manifests in Firefox (but which may well be a jsPlumb bug)
   // in which the draggable rectangle that corresponds to the link source action circle
@@ -273,36 +361,36 @@ export const GraphView = React.createClass({
   // we know corresponds to the observed Firefox behavior and only apply it if the
   // detected offset is great enough to make the constant correction an improvement.
   // https://www.pivotaltracker.com/story/show/142418227
-  _checkForLinkButtonClientClass() {
+  private checkForLinkButtonClientClass() {
     if (this.linkButtonClientClass != null) { return; }
     const nodeLinkButtonElts = $(".graph-view").find(".node-link-button");
     const nodeLinkButtonElt = nodeLinkButtonElts && nodeLinkButtonElts[0];
-    const connectionSrcElt = nodeLinkButtonElt && nodeLinkButtonElt._jsPlumbRelatedElement;
+    const connectionSrcElt = nodeLinkButtonElt && (nodeLinkButtonElt as any)._jsPlumbRelatedElement;
     if (connectionSrcElt && nodeLinkButtonElt) {
       const connectionSrcTop = connectionSrcElt.getBoundingClientRect().top;
       const nodeLinkButtonTop = nodeLinkButtonElt.getBoundingClientRect().top;
       const topOffset = nodeLinkButtonTop - connectionSrcTop;
       return this.linkButtonClientClass = topOffset > 6 ? "correct-drag-top" : "";
     }
-  },
+  }
 
-  _redrawTargets() {
+  private redrawTargets() {
     this.diagramToolkit.makeSource(($(this.refs.linkView).find(".connection-source")), this.linkButtonClientClass);
     const target = $(this.refs.linkView).find(this.props.linkTarget);
     const targetStyle = "node-link-target";
 
     return this.diagramToolkit.makeTarget(target, targetStyle);
-  },
+  }
 
-  _redrawLinks() {
+  private redrawLinks() {
     return this.state.links.map((link) =>
       (link.relation != null ? link.relation.isTransfer : undefined) ?
-        this._redrawTransferLinks(link)
+        this.redrawTransferLinks(link)
         :
-        this._redrawLink(link));
-  },
+        this.redrawLink(link));
+  }
 
-  _redrawLink(link) {
+  private redrawLink(link) {
     const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])).find(this.props.connectionTarget);
     const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])).find(this.props.connectionTarget);
     const isSelected = this.props.selectionManager.isSelected(link);
@@ -343,16 +431,16 @@ export const GraphView = React.createClass({
       }
       return this.diagramToolkit.addLink(opts);
     }
-  },
+  }
 
-  _redrawTransferLinks(link) {
+  private redrawTransferLinks(link) {
     // during import of saved files .transferNode isn't set until the link is created so it may be null here
     if (!link.transferNode) { return; }
-    this._redrawTransferLink(link, link.sourceNode, link.transferNode);
-    return this._redrawTransferLink(link, link.transferNode, link.targetNode);
-  },
+    this.redrawTransferLink(link, link.sourceNode, link.transferNode);
+    return this.redrawTransferLink(link, link.transferNode, link.targetNode);
+  }
 
-  _redrawTransferLink(link, sourceNode, targetNode) {
+  private redrawTransferLink(link, sourceNode, targetNode) {
     const fromSource = sourceNode === link.sourceNode;
     const sourceConnectionClass = fromSource ? this.props.connectionTarget : this.props.transferTarget;
     const targetConnectionClass = !fromSource ? this.props.connectionTarget : this.props.transferTarget;
@@ -374,26 +462,26 @@ export const GraphView = React.createClass({
       };
       return this.diagramToolkit.addLink(opts);
     }
-  },
+  }
 
-  onDragOver(e) {
+  private handleDragOver = (e) => {
     if (!this.state.canDrop) {
       this.setState({canDrop: true});
     }
     return e.preventDefault();
-  },
+  }
 
-  onDragLeave(e) {
+  private handleDragLeave = (e) => {
     this.setState({canDrop: false});
     return e.preventDefault();
-  },
+  }
 
-  onDrop(e) {
+  private handleDrop = (e) => {
     this.setState({canDrop: false});
     e.preventDefault();
     try { // not sure any of the code inside this block is used?
       // figure out where to drop files
-      const offset = $(this.refs.linkView).offset();
+      const offset = $(this.refs.linkView).offset() || {left: 0, top: 0};
       const dropPos = {
         x: e.clientX - offset.left,
         y: e.clientY - offset.top
@@ -417,24 +505,24 @@ export const GraphView = React.createClass({
       // of valid application items like connections or images
       return console.error("Invalid drag/drop operation", ex); // tslint:disable-line:no-console
     }
-  },
+  }
 
-  onMouseDown(e) {
+  private handleMouseDown = (e) => {
     if (e.target === this.refs.container) {
       // deselect links when background is clicked
       this.forceRedrawLinks = true;
       this.props.selectionManager.clearSelection();
       const selectBox = $.extend({}, this.state.selectBox);
-      const offset = $(this.refs.linkView).offset();
+      const offset = $(this.refs.linkView).offset() || {left: 0, top: 0};
       selectBox.startX = e.pageX - offset.left;
       selectBox.startY = e.pageY - offset.top;
       selectBox.x = selectBox.startX;
       selectBox.y = selectBox.startY;
       return this.setState({drawingMarquee: true, selectBox});
     }
-  },
+  }
 
-  onMouseUp(e) {
+  private handleMouseUp = (e) => {
     if (e.target === this.refs.container) {
     // deselect links when background is clicked
       this.props.selectionManager.clearSelection();
@@ -450,19 +538,19 @@ export const GraphView = React.createClass({
       this.checkSelectBoxLinkCollisions();
       return this.setState({drawingMarquee: false});
     }
-  },
+  }
 
-  onMouseMove(e) {
+  private handleMouseMove = (e) => {
     if (this.state.drawingMarquee) {
-      const offset = $(this.refs.linkView).offset();
+      const offset = $(this.refs.linkView).offset() || {left: 0, top: 0};
       const selectBox = $.extend({}, this.state.selectBox);
       selectBox.x = e.pageX - offset.left;
       selectBox.y = e.pageY - offset.top;
       return this.setState({selectBox});
     }
-  },
+  }
 
-  checkSelectBoxLinkCollisions() {
+  private checkSelectBoxLinkCollisions() {
     return (() => {
       const result: any[] = [];
       for (const link of this.state.links) {
@@ -474,9 +562,9 @@ export const GraphView = React.createClass({
       }
       return result;
     })();
-  },
+  }
 
-  checkSelectBoxCollisions() {
+  private checkSelectBoxCollisions() {
     return (() => {
       const result: any[] = [];
       for (const node of this.state.nodes) {
@@ -488,13 +576,13 @@ export const GraphView = React.createClass({
       }
       return result;
     })();
-  },
+  }
 
   // Detecting collision between drawn selectBox and existing link
   // Start of the link is (x0,y0), upper left corner of the most left node
   // End of the link is (x1,y1), lower right corner of the most right node
   // Function uses Liang-Barsky algorithm described at https://gist.github.com/ChickenProp/3194723
-  checkBoxLinkCollision(link) {
+  private checkBoxLinkCollision(link) {
     const { selectBox } = this.state;
     const connection = link.jsPlumbConnection;
 
@@ -535,9 +623,9 @@ export const GraphView = React.createClass({
       return false;
     }
     return true;
-  },
+  }
 
-  checkSelectBoxCollision(node) {
+  private checkSelectBoxCollision(node) {
     const nodeWidth = 45; // Width of node in px
     const nodeHeight = 45; // Height of node in px
     const { selectBox } = this.state;
@@ -552,57 +640,10 @@ export const GraphView = React.createClass({
     const d = ((nodeHeight + node.y) > sY);
     const result = (a && b && c && d);
     return result;
-  },
+  }
 
-  handleLabelEdit(link, title) {
+  private handleLabelEdit = (link, title) => {
     this.props.graphStore.changeLink(link, {title});
     return this.props.selectionManager.clearSelection();
-  },
-
-  render() {
-    let dataColor = Colors.mediumGray.value;
-    let innerColor = Colors.mediumGrayInner.value;
-    if (this.state.isRecording) {
-      dataColor = Colors.data.value;
-      innerColor = Colors.dataInner.value;
-    }
-    const diagramOnly = this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly;
-    const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
-    const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
-    const marqueeStyle: any = {
-      width: Math.abs(this.state.selectBox.x - this.state.selectBox.startX),
-      height: Math.abs(this.state.selectBox.y - this.state.selectBox.startY),
-      left,
-      top
-    };
-
-    return (
-      <div className={`graph-view ${this.state.canDrop ? "can-drop" : ""}`} ref="linkView" onDragOver={this.onDragOver} onDrop={this.onDrop} onDragLeave={this.onDragLeave}>
-        <div className="container" ref="container" onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp} onMouseMove={this.onMouseMove}>
-          {this.state.drawingMarquee ? <div className="selectionBox" ref="selectionBox" style={marqueeStyle} /> : undefined}
-          {this.state.nodes.map((node) =>
-            <NodeView
-              key={node.key}
-              data={node}
-              dataColor={dataColor}
-              innerColor={innerColor}
-              selected={this.state.selectedNodes.includes(node)}
-              simulating={this.state.simulationPanelExpanded}
-              running={this.state.modelIsRunning}
-              editTitle={this.state.editingNode === node}
-              nodeKey={node.key}
-              ref={node.key}
-              onMove={this.onNodeMoved}
-              onMoveComplete={this.onNodeMoveComplete}
-              onDelete={this.onNodeDeleted}
-              graphStore={this.props.graphStore}
-              selectionManager={this.props.selectionManager}
-              showMinigraph={this.state.showingMinigraphs}
-              isTimeBased={this.state.isTimeBased}
-              showGraphButton={this.state.codapHasLoaded && !diagramOnly}
-            />)}
-        </div>
-      </div>
-    );
   }
-});
+}

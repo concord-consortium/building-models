@@ -5,6 +5,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+
 import { tr } from "../utils/translate";
 import { Relationship } from "./relationship";
 

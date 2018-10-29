@@ -7,6 +7,9 @@
  */
 
 import { GraphStore } from "./graph-store";
+import { Mixin } from "../mixins/components";
+import { StoreUnsubscriber } from "./store-class";
+const Reflux = require("reflux");
 
 export const UndoRedoUIActions = Reflux.createActions(
   [
@@ -61,4 +64,37 @@ export const UndoRedoUIMixin = {
       canRedo: state.canRedo
     });
   }
+};
+
+export interface UndoRedoUIMixin2Props {}
+
+export interface UndoRedoUIMixin2State {
+  canUndo: boolean;
+  canRedo: boolean;
+}
+
+export class UndoRedoUIMixin2 extends Mixin<UndoRedoUIMixin2Props, UndoRedoUIMixin2State> {
+  private unsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    this.unsubscribe = UndoRedoUIStore.listen(this.handleUndoRedoUIStateChange);
+    // can't add listener in init due to order-of-initialization issues
+    GraphStore.addChangeListener(this.handleUndoRedoUIStateChange);
+  }
+
+  public componentWillUnmount() {
+    return this.unsubscribe();
+  }
+
+  private handleUndoRedoUIStateChange = (state) => {
+    return this.setState({
+      canUndo: state.canUndo,
+      canRedo: state.canRedo
+    });
+  }
+}
+
+UndoRedoUIMixin2.InitialState = {
+  canUndo: UndoRedoUIStore.canUndo,
+  canRedo: UndoRedoUIStore.canRedo
 };

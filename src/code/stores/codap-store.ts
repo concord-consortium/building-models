@@ -4,9 +4,12 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const Reflux = require("reflux");
+
 import { CodapConnect } from "../models/codap-connect";
 import { CodapActions } from "../actions/codap-actions";
-import { StoreClass } from "./store-class";
+import { StoreClass, StoreUnsubscriber } from "./store-class";
+import { Mixin } from "../mixins/components";
 
 export declare class CodapStoreClass extends StoreClass {
   public codapHasLoaded: boolean;
@@ -63,4 +66,35 @@ export const CodapMixin = {
       hideUndoRedo:   status.hideUndoRedo
     });
   }
+};
+
+export interface CodapMixin2Props {}
+
+export interface CodapMixin2State {
+  codapHasLoaded: boolean;
+  hideUndoRedo: boolean;
+}
+
+export class CodapMixin2 extends Mixin<CodapMixin2Props, CodapMixin2State> {
+  private unsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    return this.unsubscribe = CodapStore.listen(this.handleCodapStateChange);
+  }
+
+  public componentWillUnmount() {
+    return this.unsubscribe();
+  }
+
+  private handleCodapStateChange = (status) => {
+    return this.setState({
+      codapHasLoaded: status.codapHasLoaded,
+      hideUndoRedo:   status.hideUndoRedo
+    });
+  }
+}
+
+CodapMixin2.InitialState = {
+  codapHasLoaded: CodapStore.codapHasLoaded,
+  hideUndoRedo:   CodapStore.hideUndoRedo
 };

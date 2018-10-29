@@ -6,6 +6,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+// created by gapi
+declare const gapi: any;
+declare const google: any;
+
 export class GoogleDriveIO {
 
   private APP_ID  = "1095918012594";

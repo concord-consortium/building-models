@@ -5,12 +5,18 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+import * as React from "react";
+const _ = require("lodash");
+const Reflux = require("reflux");
+
 import { AppSettingsStore, AppSettingsActions } from "./app-settings-store";
 import { ImportActions } from "../actions/import-actions";
 import { GraphActions } from "../actions/graph-actions";
 import { Simulation } from "../models/simulation";
 import { TimeUnits } from "../utils/time-units";
 import { tr } from "../utils/translate";
+import { Mixin } from "../mixins/components";
+import { StoreUnsubscriber } from "./store-class";
 
 const DEFAULT_SIMULATION_STEPS = 20;
 
@@ -38,6 +44,24 @@ export const SimulationActions = Reflux.createActions(
   ]
 );
 SimulationActions.runSimulation = Reflux.createAction({sync: true});
+
+interface SimulationSettings {
+  simulationPanelExpanded: boolean;
+  duration: number;
+  experimentNumber: number;
+  experimentFrame: number;
+  stepUnits: string;
+  stepUnitsName: string;
+  timeUnitOptions: any;
+  capNodeValues: boolean;
+  modelIsRunning: boolean;
+  modelIsRunnable: boolean;
+  isTimeBased: boolean;
+  isRecording: boolean;
+  isRecordingOne: boolean;
+  isRecordingStream: boolean;
+  isRecordingPeriod: boolean;
+}
 
 export const SimulationStore = Reflux.createStore({
   listenables: [
@@ -69,7 +93,7 @@ export const SimulationStore = Reflux.createStore({
       isRecordingOne: false,         // record-1 pressed?
       isRecordingStream: false,      // record stream pressed?
       isRecordingPeriod: false      // record n units' pressed?
-    };
+    } as SimulationSettings;
 
     return this._updateModelIsRunnable();
   },
@@ -342,4 +366,27 @@ export const SimulationMixin = {
     return this.setState(_.clone(newData));
   }
 };
+
+export interface SimulationMixin2Props {}
+
+export type SimulationMixin2State = SimulationSettings;
+
+export class SimulationMixin2 extends Mixin<{}, SimulationMixin2State> {
+  private simulationUnsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    return this.simulationUnsubscribe = SimulationStore.listen(this.handleSimulationStoreChange);
+  }
+
+  public componentWillUnmount() {
+    // this one named explicitly as we have views that mixin both simulationStore
+    // and appSettingsStore
+    return this.simulationUnsubscribe();
+  }
+
+  private handleSimulationStoreChange = (newData) => {
+    return this.setState(_.clone(newData));
+  }
+}
+SimulationMixin2.InitialState = _.clone(SimulationStore.settings);
 

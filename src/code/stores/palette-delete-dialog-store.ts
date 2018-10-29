@@ -4,9 +4,14 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+const Reflux = require("reflux");
+
 import { PaletteStore, PaletteActions } from "./palette-store";
-import { UndoRedo } from "../utils/undo-redo";
+import { undoRedoInstance } from "../utils/undo-redo";
 import { NodesStore } from "./nodes-store";
+import { Mixin } from "../mixins/components";
+import { StoreUnsubscriber } from "./store-class";
 
 export const PaletteDeleteDialogActions = Reflux.createActions([
   "open", "close", "delete", "cancel", "select"
@@ -17,7 +22,10 @@ export const PaletteDeleteDialogStore = Reflux.createStore({
 
   init() {
     this.initValues();
-    return this.undoManger = UndoRedo.instance({debug: false});
+    // wait because of require order
+    setTimeout(() => {
+      this.undoManager = undoRedoInstance({debug: false});
+    }, 1);
   },
 
   initValues() {
@@ -45,7 +53,7 @@ export const PaletteDeleteDialogStore = Reflux.createStore({
     if (this.showReplacement) {
       this.replacement = this.options[0];
     }
-    this.undoManger.startCommandBatch();
+    this.undoManager.startCommandBatch();
     return this._notifyChanges();
   },
 
@@ -73,11 +81,11 @@ export const PaletteDeleteDialogStore = Reflux.createStore({
   close() {
     this.showing = false;
     this._notifyChanges();
-    this.undoManger.endCommandBatch();
+    this.undoManager.endCommandBatch();
     if (this.replacement && this.deleted) {
       return PaletteActions.selectPaletteItem(this.replacement);
     } else if (!this.deleted) {
-      this.undoManger.undo(true);
+      this.undoManager.undo(true);
       return PaletteActions.restoreSelection();
     }
   },
@@ -131,3 +139,48 @@ export const PaletteDeleteDialogMixin = {
     });
   }
 };
+
+export interface PaletteDeleteDialogMixin2Props {}
+
+export interface PaletteDeleteDialogMixin2State {
+  showing: any; // TODO: get concrete type
+  paletteItem: any; // TODO: get concrete type
+  options: any; // TODO: get concrete type
+  replacement: any; // TODO: get concrete type
+  deleted: any; // TODO: get concrete type
+  showReplacement: any; // TODO: get concrete type
+}
+
+export class PaletteDeleteDialogMixin2 extends Mixin<PaletteDeleteDialogMixin2Props, PaletteDeleteDialogMixin2State> {
+  private unsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    return this.unsubscribe = PaletteDeleteDialogStore.listen(this.handleChange);
+  }
+
+  public componentWillUnmount() {
+    return this.unsubscribe();
+  }
+
+  private handleChange = (status) => {
+    return this.setState({
+      showing:         status.showing,
+      paletteItem:     status.paletteItem,
+      options:         status.options,
+      replacement:     status.replacement,
+      deleted:         status.deleted,
+      showReplacement: status.showReplacement
+    });
+  }
+}
+
+PaletteDeleteDialogMixin2.InitialState = {
+  showing:         PaletteDeleteDialogStore.showing,
+  paletteItem:     PaletteDeleteDialogStore.paletteItem,
+  options:         PaletteDeleteDialogStore.options,
+  replacement:     PaletteDeleteDialogStore.replacement,
+  deleted:         PaletteDeleteDialogStore.deleted,
+  showReplacement: PaletteDeleteDialogStore.showReplacement
+};
+
+

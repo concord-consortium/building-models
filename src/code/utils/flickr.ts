@@ -6,9 +6,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-// TODO: remove when modules are converted to TypeScript style modules
-export {};
-
 const FLICKR_API_KEY = "1082174cc952ccc6a97412e9e14aaf88";
 
 export const Flickr = {

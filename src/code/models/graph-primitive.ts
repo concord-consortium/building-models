@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 // GraphPrimitive is the basis for the Node and Link classes.
 // They share a common ID generation mechanism mostly.
 export class GraphPrimitive {

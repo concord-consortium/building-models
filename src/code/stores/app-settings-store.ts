@@ -4,10 +4,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+const Reflux = require("reflux");
+
+import * as React from "react";
+
 import { HashParams } from "../utils/hash-parameters";
 import { ImportActions } from "../actions/import-actions";
 import { urlParams } from "../utils/url-params";
-import { StoreClass } from "./store-class";
+import { StoreClass, StoreUnsubscriber } from "./store-class";
+import { Mixin } from "../mixins/components";
 
 export declare class AppSettingsActionsClass {
   public setComplexity(val: any): void;  // TODO: get concrete class
@@ -57,6 +63,17 @@ const SimulationType: SimulationTypeType = {
   DEFAULT: 1
 };
 
+interface AppSettingsSettings {
+  showingSettingsDialog: boolean;
+  complexity: number;
+  simulationType: number;
+  showingMinigraphs: boolean;
+  relationshipSymbols: boolean;
+  uiElements: any;
+  lockdown: any;
+  touchDevice: boolean;
+}
+
 export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
   listenables: [AppSettingsActions, ImportActions],
 
@@ -94,7 +111,7 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       uiElements,
       lockdown,
       touchDevice: false
-    };
+    } as AppSettingsSettings;
   },
 
   onShowMinigraphs(show) {
@@ -164,3 +181,24 @@ export const AppSettingsMixin = {
     return this.setState(_.clone(newData));
   }
 };
+
+export interface AppSettingsMixin2Props {}
+
+export type AppSettingsMixin2State = AppSettingsSettings;
+
+export class AppSettingsMixin2 extends Mixin<{}, AppSettingsMixin2State> {
+  private unsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    return this.unsubscribe = AppSettingsStore.listen(this.handleAppSettingsChange);
+  }
+
+  public componentWillUnmount() {
+    return this.unsubscribe();
+  }
+
+  private handleAppSettingsChange = (newData) => {
+    return this.setState(_.clone(newData));
+  }
+}
+AppSettingsMixin2.InitialState = _.clone(AppSettingsStore.settings);

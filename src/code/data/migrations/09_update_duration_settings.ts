@@ -5,6 +5,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+
 import { MigrationMixin } from "./migration-mixin";
 
 const migration = {

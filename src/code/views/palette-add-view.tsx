@@ -1,3 +1,5 @@
+import * as React from "react";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -5,33 +7,38 @@
  */
 
 import { ImageDialogActions } from "../stores/image-dialog-store";
-import { Draggable } from "../mixins/draggable";
+import { DraggableMixin } from "../mixins/draggable";
 import { tr } from "../utils/translate";
+import { Mixer } from "../mixins/components";
 
-export const PaletteAddView = React.createClass({
+interface PaletteAddViewProps {
+  callback?: (data: any) => void;
+  label: string;
+}
 
-  displayName: "PaletteAddView",
+export class PaletteAddView extends Mixer<PaletteAddViewProps, {}> {
 
-  mixins: [Draggable],
+  public static displayName = "PaletteAddView";
 
-  getDefaultProps() {
-    return {
-      callback: false,
-      label: tr("~PALETTE-INSPECTOR.ADD_IMAGE")
-    };
-  },
+  constructor(props: PaletteAddViewProps) {
+    super(props);
+    this.mixins = [new DraggableMixin(this, props)];
+    this.setInitialState({}, DraggableMixin.InitialState);
+  }
 
-  onClick() {
-    ImageDialogActions.open.trigger(this.props.callback);
-  },
-
-  render() {
+  public render() {
     return (
       <div className="palette-image" data-droptype="new">
-        <div className="palette-add-image" onClick={this.onClick}>
+        <div className="palette-add-image" onClick={this.handleClick}>
           {this.props.label}
         </div>
       </div>
     );
   }
-});
+
+  private handleClick = () => {
+    if (this.props.callback) {
+      ImageDialogActions.open.trigger(this.props.callback);
+    }
+  }
+}

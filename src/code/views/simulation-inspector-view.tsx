@@ -1,3 +1,6 @@
+import * as React from "react";
+import * as _ from "lodash";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -5,44 +8,27 @@
  */
 
 const { RadioGroup, Radio } = require("react-radio-group");
-import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsActions, AppSettingsMixin } from "../stores/app-settings-store";
+import { SimulationActions, SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsActions, AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
 import { GraphStore } from "../stores/graph-store";
 import { tr } from "../utils/translate";
+import { Mixer } from "../mixins/components";
 
 const { SimulationType, Complexity } = AppSettingsStore;
 
-export const SimulationInspectorView = React.createClass({
+type SimulationInspectorViewState = SimulationMixin2State & AppSettingsMixin2State;
 
-  displayName: "SimulationInspectorView",
+export class SimulationInspectorView extends Mixer<{}, SimulationInspectorViewState> {
 
-  mixins: [ SimulationMixin, AppSettingsMixin ],
+  public static displayName = "SimulationInspectorView";
 
-  setDuration(e) {
-    SimulationActions.setDuration(parseInt(e.target.value, 10));
-  },
+  constructor(props: {}) {
+    super(props);
+    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
+    this.setInitialState({}, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+  }
 
-  setCapNodeValues(e) {
-    SimulationActions.capNodeValues(e.target.checked);
-  },
-
-  setShowingMinigraphs(e) {
-    AppSettingsActions.showMinigraphs(e.target.checked);
-  },
-
-  setRelationshipSymbols(e) {
-    AppSettingsActions.relationshipSymbols(e.target.checked);
-  },
-
-  setSimulationType(val) {
-    AppSettingsActions.setSimulationType(val);
-  },
-
-  setComplexity(val) {
-    AppSettingsActions.setComplexity(val);
-  },
-
-  render() {
+  public render() {
     let runPanelClasses = "run-panel";
     const diagramOnly = this.state.simulationType === SimulationType.diagramOnly;
     if (diagramOnly) { runPanelClasses += " collapsed"; }
@@ -57,7 +43,7 @@ export const SimulationInspectorView = React.createClass({
       <RadioGroup
         name="complexity"
         selectedValue={this.state.complexity}
-        onChange={this.setComplexity}
+        onChange={this.handleComplexity}
         className="radio-group"
       >
         <label key="complexity-basic">
@@ -77,7 +63,7 @@ export const SimulationInspectorView = React.createClass({
         <RadioGroup
           name="simulationType"
           selectedValue={this.state.simulationType}
-          onChange={this.setSimulationType}
+          onChange={this.handleSimulationType}
           className="radio-group simulation-radio-buttons"
         >
           <label key="simulation-type-diagram-only">
@@ -111,7 +97,7 @@ export const SimulationInspectorView = React.createClass({
               type="checkbox"
               value="cap-values"
               checked={this.state.capNodeValues}
-              onChange={this.setCapNodeValues}
+              onChange={this.handleCapNodeValues}
             />
             {tr("~SIMULATION.CAP_VALUES")}
           </label>
@@ -126,7 +112,7 @@ export const SimulationInspectorView = React.createClass({
                 type="checkbox"
                 value="show-mini"
                 checked={this.state.showingMinigraphs}
-                onChange={this.setShowingMinigraphs}
+                onChange={this.handleShowingMinigraphs}
               />
               {tr("~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS")}
             </label>
@@ -138,7 +124,7 @@ export const SimulationInspectorView = React.createClass({
                 type="checkbox"
                 value="relationship-symbols"
                 checked={this.state.relationshipSymbols}
-                onChange={this.setRelationshipSymbols}
+                onChange={this.handleRelationshipSymbols}
               />
               {tr("~SIMULATION.RELATIONSHIP_SYMBOLS")}
             </label>
@@ -147,4 +133,24 @@ export const SimulationInspectorView = React.createClass({
       </div>
     );
   }
-});
+
+  private handleCapNodeValues = (e) => {
+    SimulationActions.capNodeValues(e.target.checked);
+  }
+
+  private handleShowingMinigraphs = (e) => {
+    AppSettingsActions.showMinigraphs(e.target.checked);
+  }
+
+  private handleRelationshipSymbols = (e) => {
+    AppSettingsActions.relationshipSymbols(e.target.checked);
+  }
+
+  private handleSimulationType = (val) => {
+    AppSettingsActions.setSimulationType(val);
+  }
+
+  private handleComplexity = (val) => {
+    AppSettingsActions.setComplexity(val);
+  }
+}

@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -229,7 +231,7 @@ describe("Migrations",  () =>
         // Pre-test our broken json is our expected version of 1.22.0
         expect(brokenExample.version).to.equal('1.22.0');
         expect(brokenExample.settings.simulationType).to.equal(1); // wrong value!
-        // Now migrate & test for corrected migration. 
+        // Now migrate & test for corrected migration.
         Migrations.update(brokenExample);
         return expect(brokenExample.settings.simulationType).to.equal(2);
       })

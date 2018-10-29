@@ -1,29 +1,30 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import * as React from "react";
 
-import { Draggable } from "../mixins/draggable";
+import { DraggableMixin } from "../mixins/draggable";
 import { SquareImageView } from "./square-image-view";
+import { Mixer } from "../mixins/components";
 
-export const PaletteItemView = React.createClass({
+interface PaletteItemViewProps {
+  index: number;
+  image?: string;
+  node: any; // TODO: get concrete type
+  onSelect: (index: number) => void;
+}
 
-  displayName: "PaletteItemView",
+export class PaletteItemView extends Mixer<PaletteItemViewProps, {}> {
 
-  mixins: [Draggable],
+  public static displayName = "PaletteItemView";
 
-  onClick() {
-    return this.props.onSelect(this.props.index);
-  },
+  constructor(props: PaletteItemViewProps) {
+    super(props);
+    this.mixins = [new DraggableMixin(this, props, {removeClasses: ["palette-image"]})];
+    this.setInitialState({}, DraggableMixin.InitialState);
+  }
 
-  removeClasses: ["palette-image"],
-
-  render() {
+  public render() {
     const className = "palette-image";
     const defaultImage = "img/nodes/blank.png";
-    const imageUrl = (this.props.image != null ? this.props.image.length : undefined) > 0 ? this.props.image : defaultImage;
+    const imageUrl = this.props.image && this.props.image.length > 0 ? this.props.image : defaultImage;
 
     return (
       <div
@@ -32,7 +33,7 @@ export const PaletteItemView = React.createClass({
         data-droptype={"paletteItem"}
         className={className}
         ref="node"
-        onClick={this.onClick}
+        onClick={this.handleClick}
       >
         <div className="proto-node">
           <div className="img-background">
@@ -42,4 +43,8 @@ export const PaletteItemView = React.createClass({
       </div>
     );
   }
-});
+
+  private handleClick = () => {
+    this.props.onSelect(this.props.index);
+  }
+}

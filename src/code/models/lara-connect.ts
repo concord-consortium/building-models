@@ -6,8 +6,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const log = require("loglevel");
+
 const IframePhone = require("iframe-phone");
-import { UndoRedo } from "../utils/undo-redo";
+import { undoRedoInstance } from "../utils/undo-redo";
 import { PaletteStore } from "../stores/palette-store";
 import { GraphStore } from "../stores/graph-store";
 
@@ -35,7 +37,7 @@ export class LaraConnect {
 
   constructor(context) {
     log.info("LaraConnect: initializing");
-    this.undoRedoManager = UndoRedo.instance({debug: false, context});
+    this.undoRedoManager = undoRedoInstance({debug: false, context});
     this.loaded = false;
     this.graphStore = GraphStore;
     this.paletteStore = PaletteStore;
@@ -71,13 +73,13 @@ export class LaraConnect {
       return this.laraPhone.post("interactiveState", saveData);
     });
 
-    this.graphStore.addChangeListener(this.onUndoRedoStateChange.bind(this));
+    this.graphStore.addChangeListener(this.handleUndoRedoStateChange.bind(this));
 
     // load any previous data by initializing handshake
     this.laraPhone.post("initInteractive", "Sage is ready");
   }
 
-  public onUndoRedoStateChange(state) {
+  private handleUndoRedoStateChange = (state) => {
     const lastAction = this.undoRedoManager.commands[this.undoRedoManager.stackPosition];
     if (lastAction && this.loaded) {
       if ((this.undoRedoManager.stackPosition < (this.undoRedoManager.commands.length - 1)) && (this.lastCommandStackPosition > this.undoRedoManager.stackPosition)) {

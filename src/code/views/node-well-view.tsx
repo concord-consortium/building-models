@@ -1,3 +1,5 @@
+import * as React from "react";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -5,38 +7,37 @@
  */
 
 import { PaletteInspectorView } from "./palette-inspector-view";
-import { PaletteMixin } from "../stores/palette-store";
+import { PaletteMixin, PaletteMixin2Props, PaletteMixin2State, PaletteMixin2 } from "../stores/palette-store";
+import { Mixer } from "../mixins/components";
 
-export const NodeWellView = React.createClass({
+interface NodeWellViewOuterProps {
+  uiElements: any; // TODO: get concrete type
+  toggleImageBrowser: () => void;
+  graphStore: any; // TODO: get concrete type
+}
+interface NodeWellViewOuterState {
+  nodes: any[]; // TODO: get concrete type
+  collapsed: boolean;
+}
 
-  displayName: "NodeWellView",
+type NodeWellViewProps = NodeWellViewOuterProps & PaletteMixin2Props;
+type NodeWellViewState = NodeWellViewOuterState & PaletteMixin2State;
 
-  mixins: [ PaletteMixin ],
+export class NodeWellView extends Mixer<NodeWellViewProps, NodeWellViewState> {
 
-  getInitialState() {
-    return {
+  public static displayName = "NodeWellView";
+
+  constructor(props: NodeWellViewProps) {
+    super(props);
+    this.mixins = [new PaletteMixin2(this, props)];
+    const outerState: NodeWellViewOuterState = {
       nodes: [],
       collapsed: true
     };
-  },
+    this.setInitialState(outerState, PaletteMixin2.InitialState);
+  }
 
-  collapse() {
-    return this.setState({collapsed: true});
-  },
-
-  expand() {
-    return this.setState({collapsed: false});
-  },
-
-  toggle() {
-    if (this.state.collapsed) {
-      return this.expand();
-    } else {
-      return this.collapse();
-    }
-  },
-
-  render() {
+  public render() {
     let topNodePaletteClass    = "top-node-palette-wrapper";
     let topNodeTabPaletteClass = "top-node-palette-tab";
     if (this.state.collapsed) {
@@ -48,14 +49,19 @@ export const NodeWellView = React.createClass({
       <div className={this.props.uiElements.nodePalette === false ? "wrapperwrapper hidden" : this.props.uiElements.globalNav === false ? "wrapperwrapper top" : "wrapperwrapper"}>
         <div className={topNodePaletteClass}>
           <PaletteInspectorView
-            toggleImageBrowser={this.props.toggleImageBrowser}
-            graphStore={this.props.graphStore}
+            // TODO: these props were in the coffee code but don't exist
+            // toggleImageBrowser={this.props.toggleImageBrowser}
+            // graphStore={this.props.graphStore}
           />
         </div>
         <div className="tab-wrapper">
-          <div className={topNodeTabPaletteClass} onClick={this.toggle} />
+          <div className={topNodeTabPaletteClass} onClick={this.handleToggle} />
         </div>
       </div>
     );
   }
-});
+
+  private handleToggle = () => {
+    return this.setState({collapsed: !this.state.collapsed});
+  }
+}

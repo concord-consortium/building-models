@@ -1,4 +1,5 @@
 import * as React from "react";
+const log = require("loglevel");
 
 import { tr } from "../utils/translate";
 

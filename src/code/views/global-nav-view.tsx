@@ -1,38 +1,50 @@
+import * as React from "react";
+
 import { tr } from "../utils/translate";
 
 import { DropDownView } from "./dropdown-view";
 import { OpenInCodapView } from "./open-in-codap-view";
 import { ModalGoogleSaveView } from "./modal-google-save-view";
 import { BuildInfoView } from "./build-info-view";
-import { GoogleFileActions, GoogleFileMixin } from "../stores/google-file-store";
-import { UndoRedoUIMixin } from "../stores/undo-redo-ui-store";
+import { GoogleFileActions, GoogleFileMixin, GoogleFileMixin2Props, GoogleFileMixin2State, GoogleFileMixin2 } from "../stores/google-file-store";
+import { UndoRedoUIMixin, UndoRedoUIMixin2, UndoRedoUIMixin2Props, UndoRedoUIMixin2State } from "../stores/undo-redo-ui-store";
+import { Mixer } from "../mixins/components";
 
-export const GlobalNavView = React.createClass({
+interface GlobalNavViewOuterProps {
+  graphStore: any; // TODO: get concrete type
+  filename: string;
+}
+type GlobalNavViewProps = GlobalNavViewOuterProps & GoogleFileMixin2Props & UndoRedoUIMixin2Props;
 
-  displayName: "GlobalNavView",
+interface GlobalNavViewOuterState {
+  dirty: boolean;
+  saved: boolean;
+  filename: string;
+}
+type GlobalNavViewState = GlobalNavViewOuterState & GoogleFileMixin2State & UndoRedoUIMixin2State;
 
-  mixins: [ GoogleFileMixin, UndoRedoUIMixin ],
+export class GlobalNavView extends Mixer<GlobalNavViewProps, GlobalNavViewState> {
 
-  getInitialState() {
-    return {
+  public static displayName = "GlobalNavView";
+
+  constructor(props: GlobalNavViewProps) {
+    super(props);
+    this.mixins = [new GoogleFileMixin2(this, props), new UndoRedoUIMixin2(this, props)];
+    const outerState: GlobalNavViewOuterState = {
       dirty: false,
-      saved: false
+      saved: false,
+      filename: props.filename
     };
-  },
+    this.setInitialState(outerState, GoogleFileMixin2.InitialState, UndoRedoUIMixin2.InitialState);
+  }
 
-  componentDidMount() {
-    this.props.graphStore.addChangeListener(this.modelChanged);
-  },
+  public componentDidMount() {
+    // for mixins...
+    super.componentDidMount();
+    this.props.graphStore.addChangeListener(this.handleModelChanged);
+  }
 
-  modelChanged(status) {
-    this.setState({
-      dirty: status.dirty,
-      canUndo: status.canUndo,
-      saved: status.saved
-    });
-  },
-
-  render() {
+  public render() {
     const options = [{
       name: tr("~MENU.NEW"),
       action: GoogleFileActions.newFile
@@ -86,4 +98,12 @@ export const GlobalNavView = React.createClass({
       </div>
     );
   }
-});
+
+  private handleModelChanged = (status) => {
+    this.setState({
+      dirty: status.dirty,
+      canUndo: status.canUndo,
+      saved: status.saved
+    });
+  }
+}

@@ -4,6 +4,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+
 const PARAM_TOKEN = /[?|&]/g;
 const VALUE_TOKEN = "=";
 

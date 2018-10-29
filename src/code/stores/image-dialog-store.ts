@@ -6,7 +6,13 @@
  */
 // TODO:  This should be split up into and ImageDialogStore and a DialogStore…
 
+
+const _ = require("lodash");
+const Reflux = require("reflux");
+
 import { PaletteStore } from "./palette-store";
+import { Mixin } from "../mixins/components";
+import { StoreUnsubscriber } from "./store-class";
 
 export const ImageDialogActions = Reflux.createActions([
   "open", "close", "update", "cancel"
@@ -139,4 +145,41 @@ export const ImageDialogMixin = {
       selectedImage: status.paletteItem
     });
   }
+};
+
+export interface ImageDialogMixin2Props {}
+export interface ImageDialogMixin2State {
+  showingDialog: boolean;
+  keepShowing: boolean;
+  paletteItem: boolean;
+  selectedImage: boolean;
+}
+
+export class ImageDialogMixin2 extends Mixin<{}, ImageDialogMixin2State> {
+  public actions = ImageDialogActions;
+  private unsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    return this.unsubscribe = ImageDialogStore.listen(this.handleOnChange);
+  }
+
+  public componentWillUnmount() {
+    return this.unsubscribe();
+  }
+
+  private handleOnChange = (status) => {
+    this.setState({
+      showingDialog: status.showingDialog,
+      keepShowing: status.keepShowing,
+      paletteItem: status.paletteItem,
+      selectedImage: status.paletteItem
+    });
+  }
+}
+
+ImageDialogMixin2.InitialState = {
+  showingDialog: ImageDialogStore.showingDialog,
+  keepShowing: ImageDialogStore.keepShowing,
+  paletteItem: ImageDialogStore.paletteItem,
+  selectedImage: ImageDialogStore.paletteItem
 };

@@ -6,6 +6,7 @@
 // Implement version: xx and doUpdate: (data) ->  in your migrations.
 // and mixin this module
 
+const log = require("loglevel");
 const semver = require("semver");
 
 export const MigrationMixin = {

@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as $ from "jquery";
 
 interface AboutViewState {
   showing: boolean;
@@ -9,10 +10,17 @@ export class AboutView extends React.Component<{}, AboutViewState> {
 
   public static displayName = "AboutView";
 
+  public state: AboutViewState = {
+    showing: true,
+    year: ""
+  };
+
   public componentWillMount() {
-    const build_info = $("html").find("meta[name='build-info']").attr("content");
-    const year = build_info.split(" ")[0].split("-")[0];
-    this.setState({showing: false, year});
+    setTimeout(() => {
+      const build_info = $("html").find("meta[name='build-info']").attr("content") || "";
+      const year = build_info.split(" ")[0].split("-")[0];
+      this.setState({showing: false, year});
+    }, 1);
   }
 
   public render() {

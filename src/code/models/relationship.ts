@@ -7,6 +7,7 @@
  */
 
 const math = require("mathjs");  // For formula parsing...
+const log = require("loglevel");
 
 export class Relationship {
   public static errValue;

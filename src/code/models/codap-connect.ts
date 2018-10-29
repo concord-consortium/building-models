@@ -6,6 +6,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+const log = require("loglevel");
+
 const { IframePhoneRpcEndpoint } = require("iframe-phone");
 import { tr } from "../utils/translate";
 import { CodapActions } from "../actions/codap-actions";

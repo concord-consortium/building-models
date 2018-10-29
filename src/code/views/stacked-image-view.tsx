@@ -1,3 +1,4 @@
+const _ = require("lodash");
 import * as React from "react";
 
 interface StackedImageViewProps {

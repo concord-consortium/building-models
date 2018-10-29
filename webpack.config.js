@@ -29,48 +29,16 @@ const envMap = { production: "production", master: "staging" },
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
-  const app = {
+  return {
     context: __dirname, // to automatically find tsconfig.json
     devtool: 'source-map',
-    entry: './src/code/app.ts',
+    entry: './src/code/app.tsx',
     mode: 'development',
     output: {
       path: __dirname + (devMode ? "/dev" : "/dist"),
       filename: 'js/app.js'
     },
     performance: { hints: false },
-    /*
-    externals: {
-      jquery1: {
-        commonjs: "jquery",
-        root: "jQuery"
-      },
-      jquery2: {
-        commonjs: "jquery",
-        root: "$"
-      },
-      react: {
-        commonjs: "react",
-        root: "React"
-      },
-      reactDOM: {
-        commonjs: "react-dom",
-        root: "ReactDOM"
-      },
-      lodash: {
-        commonjs: "lodash",
-        root: "_"
-      },
-      log: {
-        commonjs: "loglevel",
-        root: "log"
-      },
-      reflux: {
-        commonjs: "reflux",
-        root: "Reflux"
-      }
-    },
-    */
     module: {
       rules: [
         {
@@ -156,36 +124,4 @@ module.exports = (env, argv) => {
       }]),
     ]
   };
-
-  const globals = {
-    context: __dirname, // to automatically find tsconfig.json
-    devtool: 'source-map',
-    entry: './src/code/globals.ts',
-    mode: 'development',
-    output: {
-      path: __dirname + (devMode ? "/dev" : "/dist"),
-      filename: 'js/globals.js'
-    },
-    performance: { hints: false },
-    module: {
-      rules: [
-        {
-          test: /\.ts$/,
-          loader: 'ts-loader',
-          options: {
-            transpileOnly: true // IMPORTANT! use transpileOnly mode to speed-up compilation
-          }
-        }
-      ]
-    },
-    resolve: {
-      extensions: [ '.ts', '.js' ]
-    },
-    stats: {
-      // suppress "export not found" warnings about re-exported types
-      warningsFilter: /export .* was not found in/
-    }
-  };
-
-  return [app, globals];
 };

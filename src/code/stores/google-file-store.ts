@@ -6,12 +6,19 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+const Reflux = require("reflux");
+
+declare const gapi: any;
+
 import { GoogleDriveIO } from "../utils/google-drive-io";
 import { GraphStore } from "./graph-store";
 import { PaletteStore } from "./palette-store";
 import { HashParams } from "../utils/hash-parameters";
 
 import { tr } from "../utils/translate";
+import { Mixin } from "../mixins/components";
+import { StoreUnsubscriber } from "./store-class";
 
 export const GoogleFileActions = Reflux.createActions([
   "showSaveDialog", "newFile", "openFile",
@@ -224,6 +231,45 @@ export const GoogleFileMixin = {
     return this.setState(_.clone(newData));
   }
 };
+
+export interface GoogleFileMixin2Props {}
+
+export interface GoogleFileMixin2State {
+  gapiLoaded: boolean;
+  fileId: string | null;
+  filename: string;
+  action: string;
+  isPublic: boolean;
+  docLink: any; // TODO: get concrete type
+  showingSaveDialog: boolean;
+}
+
+export class GoogleFileMixin2 extends Mixin<GoogleFileMixin2Props, GoogleFileMixin2State> {
+  private unsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    return this.unsubscribe = GoogleFileStore.listen(this.handleGoogleChange);
+  }
+
+  public componentWillUnmount() {
+    return this.unsubscribe();
+  }
+
+  private handleGoogleChange = (newData) => {
+    return this.setState(_.clone(newData));
+  }
+}
+
+GoogleFileMixin2.InitialState = {
+  gapiLoaded:        false,
+  fileId:            null,
+  filename:          "", // this.filename,  // TODO: figure out fix for this
+  action:            tr("~FILE.CHECKING_AUTH"),
+  isPublic:          false,
+  docLink:           null,
+  showingSaveDialog: false
+};
+
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

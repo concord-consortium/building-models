@@ -1,3 +1,6 @@
+import * as React from "react";
+
+const _ = require("lodash");
 import { CSSProperties } from "react";
 
 /*
@@ -6,82 +9,47 @@ import { CSSProperties } from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { SimulationStore, SimulationMixin } from "../stores/simulation-store";
+import { SimulationStore, SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
+import { Mixer } from "../mixins/components";
 
-export const NodeSvgGraphView = React.createClass({
+interface NodeSvgGraphViewOuterProps {
+  isTimeBased: boolean;
+  width: number;
+  height: number;
+  strokeWidth: number;
+  min: number;
+  max: number;
+  data: any[]; // TODO: get concrete type
+  color: string;
+  currentValue: any; // TODO: get concrete type
+  innerColor: string;
+  image: JSX.Element;
+}
+type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps;
 
-  displayName: "NodeSvgGraphView",
+interface NodeSvgGraphViewOuterState {}
+type NodeSvgGraphViewState = NodeSvgGraphViewOuterState | SimulationMixin2State;
 
-  mixins: [ SimulationMixin ],
+export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphViewState> {
 
-  getDefaultProps() {
-    return {
-      width: 48,
-      height: 48,
-      strokeWidth: 3,
-      min: 0,
-      max: 100,
-      data: [],
-      color: "#aaa"
-    };
-  },
+  public static displayName = "NodeSvgGraphView";
 
-  invertPoint(point) {
-    return {x: this.props.width - point.x, y: this.props.height - point.y};
-  },
+  constructor(props: NodeSvgGraphViewProps) {
+    super(props);
+    this.mixins = [new SimulationMixin2(this, props)];
+    this.setInitialState({}, SimulationMixin2.InitialState);
+  }
 
-  graphMapPoint(point) {
-    const x = point.x * this.props.width;
-    const y = (this.props.strokeWidth - 1) + (point.y * (this.props.height - (this.props.strokeWidth + 1)));
-    return this.invertPoint({x, y});
-  },
+  public render() {
+    return (
+      <div>
+        {this.renderImage()}
+        {this.renderSVG()}
+      </div>
+    );
+  }
 
-  pointsToPath(points) {
-    let data = _.map(points, p => this.graphMapPoint(p));
-    data = _.map(data,   p => `${p.x} ${p.y}`);
-    data = data.join(" L ");
-    return `M ${data}`;
-  },
-
-  getPathPoints() {
-    let { max }  = this.props;
-    let { min }  = this.props;
-    let { data } = this.props;
-
-    const rangex = SimulationStore.simulationDuration();
-    data = _.takeRight(data, rangex).reverse();
-
-    for (const point of data) {
-      if (point > max) { max = point; }
-      if (point < min) { min = point; }
-    }
-    const rangey = max - min;
-
-    data = _.map(data, (d, i) => {
-      const x = i / rangex;
-      const y = d / rangey;
-      return {x, y};
-    });
-    return data;
-  },
-
-  getBarPath() {
-    const { max }  = this.props;
-    const { min }  = this.props;
-    let val = Math.min(max, Math.max(min, this.props.currentValue));
-    val = val / (max - min);
-
-    const left = this.props.width * 0.25;
-    const right = this.props.width * 0.75;
-    const bottom = this.props.height;
-    const top = this.props.height - ((this.props.strokeWidth - 1) + (val * (this.props.height - (this.props.strokeWidth + 1))));
-
-    let data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}];
-    data = _.map(data,   p => `${p.x} ${p.y}`);
-    return `M ${data.join(" L ")}`;
-  },
-
-  renderImage() {
+  private renderImage() {
     const imageOffset = 2;
     const imageStyle: CSSProperties = {
       position: "absolute",
@@ -93,9 +61,9 @@ export const NodeSvgGraphView = React.createClass({
     };
 
     return <div style={imageStyle}>{this.props.image}</div>;
-  },
+  }
 
-  renderSVG() {
+  private renderSVG() {
     let chart;
     const svgOffset = 3;
     const svgStyle: CSSProperties = {
@@ -119,14 +87,60 @@ export const NodeSvgGraphView = React.createClass({
         {chart}
       </svg>
     );
-  },
-
-  render() {
-    return (
-      <div>
-        {this.renderImage()}
-        {this.renderSVG()}
-      </div>
-    );
   }
-});
+
+  private invertPoint(point) {
+    return {x: this.props.width - point.x, y: this.props.height - point.y};
+  }
+
+  private graphMapPoint(point) {
+    const x = point.x * this.props.width;
+    const y = (this.props.strokeWidth - 1) + (point.y * (this.props.height - (this.props.strokeWidth + 1)));
+    return this.invertPoint({x, y});
+  }
+
+  private pointsToPath(points) {
+    let data = _.map(points, p => this.graphMapPoint(p));
+    data = _.map(data,   p => `${p.x} ${p.y}`);
+    data = data.join(" L ");
+    return `M ${data}`;
+  }
+
+  private getPathPoints() {
+    let { max }  = this.props;
+    let { min }  = this.props;
+    let { data } = this.props;
+
+    const rangex = SimulationStore.simulationDuration();
+    data = _.takeRight(data, rangex).reverse();
+
+    for (const point of data) {
+      if (point > max) { max = point; }
+      if (point < min) { min = point; }
+    }
+    const rangey = max - min;
+
+    data = _.map(data, (d, i) => {
+      const x = i / rangex;
+      const y = d / rangey;
+      return {x, y};
+    });
+    return data;
+  }
+
+  private getBarPath() {
+    const { max }  = this.props;
+    const { min }  = this.props;
+    let val = Math.min(max, Math.max(min, this.props.currentValue));
+    val = val / (max - min);
+
+    const left = this.props.width * 0.25;
+    const right = this.props.width * 0.75;
+    const bottom = this.props.height;
+    const top = this.props.height - ((this.props.strokeWidth - 1) + (val * (this.props.height - (this.props.strokeWidth + 1))));
+
+    let data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}];
+    data = _.map(data,   p => `${p.x} ${p.y}`);
+    return `M ${data.join(" L ")}`;
+  }
+}

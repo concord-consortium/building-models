@@ -1,14 +1,15 @@
+
+import * as React from "react";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-global.React = require('react');
 
 const chai = require('chai');
 chai.config.includeStack = true;
 
-const React = require('react');
 const {div} = React.DOM;
 const Enzyme = require('enzyme');
 

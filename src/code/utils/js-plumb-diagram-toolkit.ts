@@ -6,7 +6,14 @@
  */
 // Purpose of this class: Provide an abstraction over our chosen diagramming toolkit.
 
+const _ = require("lodash");
+const log = require("loglevel");
+
 import { LinkColors } from "../utils/link-colors";
+import * as $ from "jquery";
+
+// const jsPlumb = require("../../vendor/jsPlumb");
+declare var jsPlumb;
 
 export class DiagramToolkit {
   private domContext: any;
@@ -226,7 +233,7 @@ export class DiagramToolkit {
       return $("<input>").val(label).css(style)
         .show(function() {
           return $(this).focus(); }).change(function() {
-          return (typeof _self.options.handleLabelEdit === "function" ? _self.options.handleLabelEdit(link, this.value) : undefined);
+          return (typeof _self.options.handleLabelEdit === "function" ? _self.options.handleLabelEdit(link, (this as HTMLInputElement).value) : undefined);
         });
     };
   }

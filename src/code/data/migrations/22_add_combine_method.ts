@@ -1,3 +1,5 @@
+const _ = require("lodash");
+
 import { MigrationMixin } from "./migration-mixin";
 
 const migration = {

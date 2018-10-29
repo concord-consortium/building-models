@@ -7,34 +7,36 @@
 
 import "../stylus/app.styl";
 
-import { AppView as AppViewClass } from "./views/app-view";
-const AppView     = React.createFactory(AppViewClass);
+import * as React from "react";
+import * as ReactDOM from "react-dom";
 
+import { AppView } from "./views/app-view";
 import { GraphStore } from "./stores/graph-store";
 import { PaletteStore } from "./stores/palette-store";
 import { HashParams } from "./utils/hash-parameters";
+
+import * as $ from "jquery";
+require("jquery-ui-dist/jquery-ui.js");
+const Touchpunch = require("./vendor/touchpunch.js");
+Touchpunch($);
+
+// const jsPlumb = require("../vendor/jsPlumb");
+declare var jsPlumb;
 
 let appView;
 
 // App API
 (window as any).Sage = {
   initApp() {
-    const opts = {
-      // Valid opts are:
-      // graphStore: store for the node-link graph
-      // publicUrl: Where to load json e.g.'json/serialized.json'
-      // googleDoc: try to load a googledoc from the url
-      // data: the json to load (compare with publicUrl above)
-      graphStore: GraphStore,
-      publicUrl: HashParams.getParam("publicUrl"),
-      data: HashParams.getParam("data"),
-      googleDoc: HashParams.getParam("googleDoc")
-    };
-
-    appView = AppView(opts);
-    const elem = "#app";
-
-    return jsPlumb.bind("ready", () => ReactDOM.render(appView, $(elem)[0]));
+    return jsPlumb.bind("ready", () => {
+      appView = <AppView
+        graphStore={GraphStore}
+        publicUrl={HashParams.getParam("publicUrl")}
+        data={HashParams.getParam("data")}
+        googleDoc={HashParams.getParam("googleDoc")}
+      />;
+      ReactDOM.render(appView, document.getElementById("app"));
+    });
   },
 
   clearModel() {

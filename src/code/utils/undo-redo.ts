@@ -7,7 +7,11 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
- // based on https://github.com/jzaefferer/undo/blob/master/undo.js
+const _ = require("lodash");
+const log = require("loglevel");
+const Reflux = require("reflux");
+
+// based on https://github.com/jzaefferer/undo/blob/master/undo.js
 import { CodapConnect } from "../models/codap-connect";
 
 const DEFAULT_CONTEXT_NAME = "building-models";
@@ -16,7 +20,7 @@ const DEFAULT_CONTEXT_NAME = "building-models";
 // which puts actions in a stack before calling them. We frequently want to ensure
 // that all other actions have completed before, e.g., we end a commandBatch.
 
-class Manager {
+export class UndoRedoManager {
   private endCommandBatch: any;
   private undo: any;
   private redo: any;
@@ -54,7 +58,7 @@ class Manager {
     if (this.currentBatch && !this.currentBatch.matches(optionalName)) {
       this._endComandBatch();
     }
-    if (!this.currentBatch) { return this.currentBatch = new CommandBatch(optionalName); }
+    if (!this.currentBatch) { return this.currentBatch = new UndoRedoCommandBatch(optionalName); }
   }
 
   public _endComandBatch() {
@@ -72,7 +76,7 @@ class Manager {
       this._endComandBatch();
     }
 
-    const result = this.execute((new Command(name, methods)));
+    const result = this.execute((new UndoRedoCommand(name, methods)));
 
     // Only notify CODAP of an undoable action on the first command of a batched command
     if ((!this.currentBatch) || (this.currentBatch.commands.length === 1)) {
@@ -215,7 +219,7 @@ class Manager {
   }
 }
 
-class Command {
+export class UndoRedoCommand {
   private name: string;
   private methods: any;
 
@@ -241,7 +245,7 @@ class Command {
   } else { return this._call("execute", debug, "redo"); } }
 }
 
-class CommandBatch {
+export class UndoRedoCommandBatch {
   private name: string;
   private commands: any[];
 
@@ -277,16 +281,11 @@ class CommandBatch {
 }
 
 const instances = {};
-const instance  = (opts) => {
+
+export const undoRedoInstance  = (opts) => {
   if (opts == null) { opts = {}; }
   let {contextName} = opts;
   if (!contextName) { contextName = DEFAULT_CONTEXT_NAME; }
-  if (!instances[contextName]) { instances[contextName] = new Manager(opts); }
+  if (!instances[contextName]) { instances[contextName] = new UndoRedoManager(opts); }
   return instances[contextName];
-};
-
-export const UndoRedo = {
-  instance,
-  constructor: Manager,
-  command: Command
 };

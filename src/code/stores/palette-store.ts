@@ -5,11 +5,17 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+const log = require("loglevel");
+const Reflux = require("reflux");
+
 import { resizeImage } from "../utils/resize-image";
 import { initialPalette } from "../data/initial-palette";
 import { internalLibrary } from "../data/internal-library";
-import { UndoRedo } from "../utils/undo-redo";
+import { undoRedoInstance } from "../utils/undo-redo";
 import { ImportActions } from "../actions/import-actions";
+import { Mixin } from "../mixins/components";
+import { StoreUnsubscriber } from "./store-class";
 const uuid           = require("uuid");
 
 // TODO: Maybe loadData goes into some other action-set
@@ -37,7 +43,7 @@ export const PaletteStore = Reflux.createStore({
 
     // due to import order issues wait to resolve UndoRedo
     setTimeout(() => {
-      this.undoManger = UndoRedo.instance({debug: false});
+      this.undoManger = undoRedoInstance({debug: false});
     }, 1);
   },
 
@@ -251,4 +257,47 @@ export const PaletteMixin = {
     });
   }
 };
+
+export interface PaletteMixin2Props {}
+
+export interface PaletteMixin2State {
+  palette: any; // TODO: get concrete type
+  library: any; // TODO: get concrete type
+  selectedPaletteItem: any; // TODO: get concrete type
+  selectedPaletteIndex: any; // TODO: get concrete type
+  selectedPaletteImage: any; // TODO: get concrete type
+  imageMetadata: any; // TODO: get concrete type
+}
+
+export class PaletteMixin2 extends Mixin<PaletteMixin2Props, PaletteMixin2State> {
+  private paletteUnsubscribe: StoreUnsubscriber;
+
+  public componentDidMount() {
+    return this.paletteUnsubscribe = PaletteStore.listen(this.handlePaletteChange);
+  }
+
+  public componentWillUnmount() {
+    return this.paletteUnsubscribe();
+  }
+
+  private handlePaletteChange = (status) => {
+    return this.setState({
+      palette: status.palette,
+      library: status.library,
+      selectedPaletteIndex: status.selectedPaletteIndex,
+      selectedPaletteItem: status.selectedPaletteItem,
+      selectedPaletteImage: status.selectedPaletteImage,
+      imageMetadata: status.imageMetadata
+    });
+  }
+}
+
+PaletteMixin2.InitialState = {
+  palette: PaletteStore.palette,
+  library: PaletteStore.library,
+  selectedPaletteItem: PaletteStore.selectedPaletteItem,
+  selectedPaletteIndex: PaletteStore.selectedPaletteIndex,
+  selectedPaletteImage: PaletteStore.selectedPaletteImage,
+  imageMetadata: PaletteStore.imageMetadata
+} as PaletteMixin2State;
 

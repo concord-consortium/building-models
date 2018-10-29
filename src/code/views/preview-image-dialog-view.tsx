@@ -7,7 +7,6 @@ import { PaletteActions } from "../stores/palette-store";
 import { tr } from "../utils/translate";
 
 interface PreviewImageDialogViewProps {
-  key: string;
   imageInfo: any; // TODO: get concrete type
 }
 
@@ -17,7 +16,7 @@ export class PreviewImageDialogView extends React.Component<PreviewImageDialogVi
 
   public render() {
     return (
-      <div key={this.props.key}>
+      <div>
         <div className="header">{tr("~IMAGE-BROWSER.PREVIEW")}</div>
         <div className="preview-image">
           <img src={this.props.imageInfo != null ? this.props.imageInfo.image : undefined} />

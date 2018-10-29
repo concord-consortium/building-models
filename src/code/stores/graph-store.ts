@@ -8,11 +8,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+const log = require("loglevel");
+const Reflux = require("reflux");
+import * as $ from "jquery";
+
 import { Importer } from "../utils/importer";
 import { Link } from "../models/link";
 import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
-import { UndoRedo } from "../utils/undo-redo";
+import { undoRedoInstance } from "../utils/undo-redo";
 import { SelectionManager } from "../models/selection-manager";
 import { PaletteStore } from "../stores/palette-store";
 import { tr } from "../utils/translate";
@@ -22,11 +27,18 @@ import { AppSettingsStore } from "../stores/app-settings-store";
 import { SimulationStore, SimulationActions } from "../stores/simulation-store";
 import { GraphActions } from "../actions/graph-actions";
 import { CodapActions } from "../actions/codap-actions";
-import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { CodapConnect } from "../models/codap-connect";
 import { RelationFactory } from "../models/relation-factory";
 import { GraphPrimitive } from "../models/graph-primitive";
+import { Mixin } from "../mixins/components";
+import { StoreUnsubscriber } from "./store-class";
 const DEFAULT_CONTEXT_NAME = "building-models";
+
+interface GraphSettings {
+  nodes: any; // TODO: get concrete type
+  links: any; // TODO: get concrete type
+  description: any; // TODO: get concrete type
+}
 
 export const GraphStore  = Reflux.createStore({
   init(context) {
@@ -36,7 +48,10 @@ export const GraphStore  = Reflux.createStore({
     this.filename           = null;
     this.filenameListeners  = [];
 
-    this.undoRedoManager    = UndoRedo.instance({debug: false, context});
+    // wait because of require order
+    setTimeout(() => {
+      this.undoRedoManager    = undoRedoInstance({debug: false, context});
+    }, 1);
     this.selectionManager   = new SelectionManager();
     PaletteDeleteDialogStore.listen(this.paletteDelete.bind(this));
 
@@ -145,7 +160,10 @@ export const GraphStore  = Reflux.createStore({
 
   addChangeListener(listener) {
     log.info("adding change listener");
-    return this.undoRedoManager.addChangeListener(listener);
+    // wait because of require order
+    setTimeout(() => {
+      this.undoRedoManager.addChangeListener(listener);
+    }, 2);
   },
 
   addFilenameListener(listener) {
@@ -561,7 +579,7 @@ export const GraphStore  = Reflux.createStore({
     if (isDoubleClick) {
       this.selectionManager.selectNodeForInspection(link.targetNode);
       if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
-        return InspectorPanelActions.openInspectorPanel("relations", {link});
+        return GraphActions.openGraph("relations", {link});
       }
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click
@@ -846,7 +864,7 @@ export const GraphStore  = Reflux.createStore({
     return JSON.stringify(this.serialize(palette));
   },
 
-  getGraphState() {
+  getGraphState(): GraphSettings {
     const nodes = this.getNodes();
     const links = this.getLinks();
     const description = this.getDescription(nodes, links);
@@ -897,6 +915,41 @@ export const GraphMixin = {
   }
 };
 
+export interface GraphMixin2Props {
+  // TODO: diagramToolkit was changed to optional but this needs to be looked at closer
+  diagramToolkit?: any; // TODO: get concrete type
+}
+
+export type GraphMixin2State = GraphSettings;
+
+export class GraphMixin2 extends Mixin<GraphMixin2Props, GraphMixin2State> {
+  private subscriptions: StoreUnsubscriber[];
+
+  public componentDidMount() {
+    this.subscriptions = [];
+    this.subscriptions.push(GraphActions.graphChanged.listen(this.handleGraphChanged));
+    return this.subscriptions.push(GraphActions.resetSimulation.listen(this.handleResetSimulation));
+  }
+
+  public componentWillUnmount() {
+    return this.subscriptions.map((unsubscribe) => unsubscribe());
+  }
+
+  private handleGraphChanged = (state) => {
+    this.setState(state);
+
+    // TODO: not this:
+    if (this.props.diagramToolkit) {
+      this.props.diagramToolkit.repaint();
+    }
+  }
+
+  private handleResetSimulation = () => {
+    return GraphStore.resetSimulation();
+  }
+}
+
+GraphMixin2.InitialState = GraphStore.getGraphState();
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

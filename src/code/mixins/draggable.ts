@@ -1,23 +1,36 @@
-export const Draggable = {
-  componentDidMount() {
-    // Things to override in our classes
-    const doMove        = this.doMove || (() => undefined);
-    const removeClasses = this.removeClasses || ["proto-node"];
-    const addClasses    = this.addClasses || ["elm"];
-    const domRef        = this.refs.draggable || this;
+const _ = require("lodash");
+import * as $ from "jquery";
+import * as ReactDOM from "react-dom";
+import { Mixin } from "./components";
 
+interface DraggableMixinOptions {
+  doMove?: (e, extra) => void;
+  removeClasses?: string[];
+}
+
+export class DraggableMixin extends Mixin<{}, {}> {
+  private doMove: ((e, extra) => void);
+  private removeClasses: string[];
+
+  constructor(mixer: any, props = {}, options: DraggableMixinOptions = {}) {
+    super(mixer, props);
+    this.doMove = options.doMove || (() => console.log("DO MOVE"));
+    this.removeClasses = options.removeClasses || ["proto-node"];
+  }
+
+  public componentDidMount() {
     // converts from a paletteItem to a element
     // in the diagram. (adding and removing css classes as required)
+    const self = this;
     const reactSafeClone = function(e) {
       const clone = $(this).clone(false);
-      _.each(removeClasses, classToRemove => clone.removeClass(classToRemove));
-      _.each(addClasses, classToAdd => clone.addClass(classToAdd));
+      _.each(self.removeClasses, classToRemove => clone.removeClass(classToRemove));
       clone.attr("data-reactid", null);
-      clone.find("*").each((i, v) => $(v).attr("data-reactid", null));
+      clone.find("*").each((i, v) => { $(v).attr("data-reactid", null); });
       return clone;
     };
 
-    return $(ReactDOM.findDOMNode(domRef)).draggable({
+    return ($(ReactDOM.findDOMNode(this.mixer)) as any).draggable({
       drag: this.doMove,
       revert: true,
       helper: reactSafeClone,
@@ -27,4 +40,7 @@ export const Draggable = {
       zIndex: 1000
     });
   }
-};
+}
+
+DraggableMixin.InitialState = {};
+

@@ -1,56 +1,61 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
-import { AppSettingsMixin } from "../stores/app-settings-store";
+import * as React from "react";
+
+import { SimulationActions, SimulationMixin2Props } from "../stores/simulation-store";
+import { AppSettingsMixin2Props } from "../stores/app-settings-store";
 
 import { tr } from "../utils/translate";
 import { RecordButtonView  } from "./record-button-view";
 import { DropDownView } from "./dropdown-view";
 import { ExperimentPanelView } from "./experiment-panel-view";
 
-export const SimulationRunPanelView = React.createClass({
-
-  displayName: "SimulationRunPanelView",
-
-  mixins: [ SimulationMixin, AppSettingsMixin ],
+import { SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
+import { AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
+import { Mixer } from "../mixins/components";
 
 
-  setDuration(e) {
-    return SimulationActions.setDuration(parseInt(e.target.value, 10));
-  },
+interface SimulationRunPanelViewOuterProps {}
+interface SimulationRunPanelViewOuterState {}
 
-  toggle() {
-    if (this.state.simulationPanelExpanded) {
-      return SimulationActions.collapseSimulationPanel();
-    } else {
-      return SimulationActions.expandSimulationPanel();
-    }
-  },
-  // -- TBD: There was discussion about automatically showing
-  // -- MiniGraphs when this panel is opened  …  NP 2018-01
-  // if ! @state.showingMinigraphs
-  //   AppSettingsStore.actions.showMinigraphs true
+type SimulationRunPanelViewProps = SimulationRunPanelViewOuterProps & SimulationMixin2Props & AppSettingsMixin2Props;
+type SimulationRunPanelViewState = SimulationRunPanelViewOuterState & SimulationMixin2State & AppSettingsMixin2State;
 
-  renderToggleButton() {
+export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, SimulationRunPanelViewState> {
+
+  public static displayName = "SimulationRunPanelView";
+
+  private simulateElt: HTMLDivElement | null;
+
+  constructor(props: SimulationRunPanelViewProps) {
+    super(props);
+    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
+    const outerState: SimulationRunPanelViewOuterState = {};
+    this.setInitialState(outerState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+  }
+
+  public render() {
+    return (
+      <div className="simulation-run-panel">
+        {this.renderToggleButton()}
+        {this.renderControls()}
+      </div>
+    );
+  }
+
+  private renderToggleButton() {
     const iconClass = this.state.simulationPanelExpanded ? "inspectorArrow-collapse" : "inspectorArrow-expand";
-    const simRefFunc = elt => this.simulateElt = elt;
     const simText = tr("~DOCUMENT.ACTIONS.SIMULATE");
     const simTextWidth = (this.simulateElt != null) ? this.simulateElt.clientWidth : simText.length * 6;
     const simTextLeft = (simTextWidth / 2) - 6;
     const simStyle = { left: simTextLeft };
     return (
-      <div className="flow" onClick={this.toggle}>
-        <div className="toggle-title" ref={simRefFunc} style={simStyle}>{simText}</div>
+      <div className="flow" onClick={this.handleToggle}>
+        <div className="toggle-title" ref={el => this.simulateElt = el} style={simStyle}>{simText}</div>
         <i className={`icon-codap-${iconClass}`} />
       </div>
     );
-  },
+  }
 
-  renderControls() {
+  private renderControls() {
     let wrapperClasses = "buttons flow";
     if (!this.state.simulationPanelExpanded) { wrapperClasses += " closed"; }
     const disabled = (this.state.isRecording && !this.state.isRecordingOne) || !this.state.modelIsRunnable;
@@ -81,10 +86,9 @@ export const SimulationRunPanelView = React.createClass({
         </div>
       </div>
     );
-  },
+  }
 
-
-  renderRecordForCollectors() {
+  private renderRecordForCollectors() {
     let recordAction = SimulationActions.recordPeriod;
     if (this.state.isRecording) {
       recordAction = () => undefined;
@@ -112,7 +116,7 @@ export const SimulationRunPanelView = React.createClass({
             width: `${Math.max(3, (this.state.duration.toString().length + 1))}em`
           }}
           value={this.state.duration}
-          onChange={this.setDuration}
+          onChange={this.handleSetDuration}
         />
         <DropDownView
           isActionMenu={false}
@@ -122,10 +126,9 @@ export const SimulationRunPanelView = React.createClass({
         />
       </div>
     );
-  },
+  }
 
-
-  renderRecordStreamButton() {
+  private renderRecordStreamButton() {
     let recordAction = SimulationActions.recordStream;
     if (this.state.isRecording) {
       recordAction = SimulationActions.stopRecording;
@@ -163,14 +166,22 @@ export const SimulationRunPanelView = React.createClass({
         </RecordButtonView>
       );
     }
-  },
-
-  render() {
-    return (
-      <div className="simulation-run-panel">
-        {this.renderToggleButton()}
-        {this.renderControls()}
-      </div>
-    );
   }
-});
+
+  private handleSetDuration = (e) => {
+    SimulationActions.setDuration(parseInt(e.target.value, 10));
+  }
+
+  private handleToggle = () => {
+    if (this.state.simulationPanelExpanded) {
+      SimulationActions.collapseSimulationPanel();
+    } else {
+      SimulationActions.expandSimulationPanel();
+    }
+  }
+
+  // -- TBD: There was discussion about automatically showing
+  // -- MiniGraphs when this panel is opened  …  NP 2018-01
+  // if ! @state.showingMinigraphs
+  //   AppSettingsStore.actions.showMinigraphs true
+}

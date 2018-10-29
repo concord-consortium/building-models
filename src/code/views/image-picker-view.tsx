@@ -1,16 +1,22 @@
+import * as React from "react";
+
 import { tr } from "../utils/translate";
 
 import { PaletteAddView } from "./palette-add-view";
-import { PaletteMixin } from "../stores/palette-store";
+import { PaletteMixin, PaletteMixin2Props, PaletteMixin2State, PaletteMixin2 } from "../stores/palette-store";
+import { Mixer } from "../mixins/components";
 
-const ImgChoice = React.createClass({
-  displayName: "ImgChoice",
+interface ImgChoiceViewProps {
+  node: any; // TODO: get concrete type
+  selected: any; // TODO: get concrete type
+  onChange: (node: any) => void; // TODO: get concrete type
+}
 
-  selectNode() {
-    return this.props.onChange(this.props.node);
-  },
+class ImgChoiceView extends React.Component<ImgChoiceViewProps, {}> {
 
-  render() {
+  public static displayName = "ImgChoiceView";
+
+  public render() {
     let className = "image-choice";
     if (this.props.node.image === this.props.selected.image) {
       className = "image-choice selected";
@@ -21,33 +27,37 @@ const ImgChoice = React.createClass({
       </div>
     );
   }
-});
 
-export const ImagePickerView = React.createClass({
+  private selectNode() {
+    return this.props.onChange(this.props.node);
+  }
+}
 
-  displayName: "ImagePickerView",
+interface ImagePickerViewOuterProps {
+  selected: any; // TODO: get concrete type
+  onChange: (node: any) => void; // TODO: get concrete type
+}
+interface ImagePickerViewOuterState {
+  opened: boolean;
+}
 
-  getInitialState() {
-    return {opened: false};
-  },
+type ImagePickerViewProps = ImagePickerViewOuterProps & PaletteMixin2Props;
+type ImagePickerViewState = ImagePickerViewOuterState & PaletteMixin2State;
 
-  mixins: [PaletteMixin],
+export class ImagePickerView extends Mixer<ImagePickerViewProps, ImagePickerViewState> {
 
-  toggleOpen() {
-    this.setState({opened: (!this.state.opened)});
-  },
+  public static displayName = "ImagePickerView";
 
-  className() {
-    if (this.state.opened) {
-      return "image-choices opened";
-    } else {
-      return "image-choices closed";
-    }
-  },
+  constructor(props: ImagePickerViewProps) {
+    super(props);
+    this.mixins = [new PaletteMixin2(this, props)];
+    const outerState: ImagePickerViewOuterState = {opened: false};
+    this.setInitialState(outerState, PaletteMixin2.InitialState);
+  }
 
-  render() {
+  public render() {
     return (
-      <div onClick={this.toggleOpen} className="image-picker">
+      <div onClick={this.handleToggleOpen} className="image-picker">
         <div className="selected-image">
           <img src={this.props.selected.image} />
         </div>
@@ -59,9 +69,21 @@ export const ImagePickerView = React.createClass({
             />
           </div>
           {this.state.palette.map((node, i) =>
-            <ImgChoice key={i} node={node} selected={this.props.selected} onChange={this.props.onChange} />)}
+            <ImgChoiceView key={i} node={node} selected={this.props.selected} onChange={this.props.onChange} />)}
         </div>
       </div>
     );
   }
-});
+
+  private handleToggleOpen = () => {
+    this.setState({opened: (!this.state.opened)});
+  }
+
+  private className() {
+    if (this.state.opened) {
+      return "image-choices opened";
+    } else {
+      return "image-choices closed";
+    }
+  }
+}

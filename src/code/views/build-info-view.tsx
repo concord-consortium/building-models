@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as $ from "jquery";
 
 import { latestVersion } from "../data/migrations/migrations";
 
@@ -16,7 +17,7 @@ export class BuildInfoView extends React.Component<{}, BuildInfoViewState> {
   public static displayName = "BuildInfoView";
 
   public componentWillMount() {
-    const build_info = $("html").find("meta[name='build-info']").attr("content");
+    const build_info = $("html").find("meta[name='build-info']").attr("content") || "";
     const [date, tag, commit, commiter] = build_info.split(" ");
     return this.setState({
       date,

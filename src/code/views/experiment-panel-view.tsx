@@ -1,34 +1,27 @@
-import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
+import * as React from "react";
+import * as _ from "lodash";
+
+import { SimulationActions, SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
 import { tr } from "../utils/translate";
+import { Mixer } from "../mixins/components";
 
-export const ExperimentPanelView = React.createClass({
+interface ExperimentPanelViewProps {
+  disabled: boolean;
+}
 
-  displayName: "ExperimentPanelView",
+type ExperimentPanelViewState = SimulationMixin2State;
 
-  mixins: [ SimulationMixin ],
+export class ExperimentPanelView extends Mixer<ExperimentPanelViewProps, ExperimentPanelViewState> {
 
-  increment() {
-    if (!this.props.disabled) {
-      SimulationActions.createExperiment();
-    }
-  },
+  public static displayName = "ExperimentPanelView";
 
-  renderLabel() {
-    const experimentLabel = "Experiment #";
-    return <span className="experiment-label">{experimentLabel}</span>;
-  },
+  constructor(props: ExperimentPanelViewProps) {
+    super(props);
+    this.mixins = [new SimulationMixin2(this, props)];
+    this.setInitialState({}, SimulationMixin2.InitialState);
+  }
 
-  renderCounter() {
-    const count = this.state.experimentNumber || 211;
-    return (
-      <div className="experiment-counter" onClick={this.increment}>
-        <div className="count">{count}</div>
-        <div className="increment">+</div>
-      </div>
-    );
-  },
-
-  render() {
+  public render() {
     const classes = ["experiment-panel"];
     if (this.props.disabled) {
       classes.push("disabled");
@@ -40,4 +33,25 @@ export const ExperimentPanelView = React.createClass({
       </div>
     );
   }
-});
+
+  private renderLabel() {
+    const experimentLabel = "Experiment #";
+    return <span className="experiment-label">{experimentLabel}</span>;
+  }
+
+  private renderCounter() {
+    const count = this.state.experimentNumber || 211;
+    return (
+      <div className="experiment-counter" onClick={this.handleIncrement}>
+        <div className="count">{count}</div>
+        <div className="increment">+</div>
+      </div>
+    );
+  }
+
+  private handleIncrement = () => {
+    if (!this.props.disabled) {
+      SimulationActions.createExperiment();
+    }
+  }
+}

@@ -1,3 +1,6 @@
+const _ = require("lodash");
+import * as React from "react";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -12,11 +15,21 @@ import { SvgGraphView } from "./svg-graph-view";
 import { tr } from "../utils/translate";
 
 const autosize         = require("autosize");
-import { SimulationMixin } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsMixin } from "../stores/app-settings-store";
+import { SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
+import { Mixer } from "../mixins/components";
 
-const Graph = React.createClass({
-  render() {
+interface LinkGraphViewProps {
+  xAxis: string;
+  yAxis: string;
+  link: any; // TODO: get concrete type
+  graphStore: any; // TODO: get concrete type
+}
+
+class LinkGraphView extends React.Component<LinkGraphViewProps, {}> {
+  public static displayName = "LinkGraphView";
+
+  public render() {
     return (
       <SvgGraphView
         width={130}
@@ -31,10 +44,17 @@ const Graph = React.createClass({
       />
     );
   }
-});
+}
 
-const QuantStart = React.createClass({
-  render() {
+interface QuantStartViewProps {
+  source: any; // TODO: get concrete type
+  target: any; // TODO: get concrete type
+}
+
+class QuantStartView extends React.Component<QuantStartViewProps, {}> {
+  public static displayName = "QuantStartView";
+
+  public render() {
     const start = tr("~NODE-RELATION-EDIT.SEMI_QUANT_START");
     return (
       <div style={{width: "95%"}}>
@@ -45,14 +65,56 @@ const QuantStart = React.createClass({
       </div>
     );
   }
-});
+}
 
-export const LinkRelationView = React.createClass({
+interface LinkRelationViewProps {
+  link: any; // TODO: get concrete type
+  graphStore: any; // TODO: get concrete type
+}
 
-  displayName: "LinkRelationView",
+interface LinkRelationViewOuterState {
+  selectedVector: any; // TODO: get concrete type
+  selectedScalar: any; // TODO: get concrete type
+  selectedVectorHasChanged: boolean;
+  selectedAccumulator: any ; // TODO: get concrete type
+  selectedTransferModifier: any; // TODO: get concrete type
+  isAccumulator: boolean;
+  isDualAccumulator: boolean;
+  isTransfer: boolean;
+  isTransferModifier: boolean;
+}
+type LinkRelationViewState = LinkRelationViewOuterState & SimulationMixin2State & AppSettingsMixin2State;
 
-  mixins: [ SimulationMixin, AppSettingsMixin ],
+export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationViewState> {
 
+  public static displayName = "LinkRelationView";
+
+  private reasoning: HTMLTextAreaElement | null;
+  private accumulator: HTMLSelectElement | null;
+  private transfer: HTMLSelectElement | null;
+  private vector: HTMLSelectElement | null;
+  private scalar: HTMLSelectElement | null;
+
+  constructor(props: LinkRelationViewProps) {
+    super(props);
+    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
+
+    const status = this.checkStatus(this.props.link);
+    const outerState: LinkRelationViewOuterState = {
+      selectedVector: null,
+      selectedScalar: null,
+      selectedVectorHasChanged: false,
+      selectedAccumulator: null,
+      selectedTransferModifier: null,
+      isAccumulator: status.isAccumulator,
+      isDualAccumulator: status.isDualAccumulator,
+      isTransfer: status.isTransfer,
+      isTransferModifier: status.isTransferModifier
+    };
+    this.setInitialState(outerState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+  }
+
+  /*
   getDefaultProps() {
     return {
       link: {
@@ -65,61 +127,81 @@ export const LinkRelationView = React.createClass({
       }
     };
   },
+  */
 
-  getInitialState() {
-    const status = this.checkStatus(this.props.link);
-    return {
-      selectedVector: null,
-      selectedScalar: null,
-      selectedVectorHasChanged: false,
-      selectedAccumulator: null,
-      selectedTransferModifier: null,
-      isAccumulator: status.isAccumulator,
-      isDualAccumulator: status.isDualAccumulator,
-      isTransfer: status.isTransfer,
-      isTransferModifier: status.isTransferModifier
-    };
-  },
+  public componentWillMount() {
+    // for mixins
+    super.componentWillMount();
 
-  componentWillMount() {
     if (this.state.isAccumulator || this.state.isTransferModifier || (this.state.selectedVector == null)) {
-      return this.updateState(this.props);
+      this.updateState(this.props);
     } else if (this.props.link.relation.customData != null) {
       const selectedVector = RelationFactory.vary;
       const selectedScalar = RelationFactory.custom;
-      return this.setState({selectedVector, selectedScalar});
+      this.setState({selectedVector, selectedScalar});
     }
-  },
+  }
 
-  componentDidMount() {
-    return autosize(this.refs.reasoning);
-  },
+  public componentDidMount() {
+    // for mixins
+    super.componentDidMount();
 
-  componentWillReceiveProps(newProps) {
+    autosize(this.refs.reasoning);
+  }
+
+  public componentWillReceiveProps(newProps, nextContext) {
+    // for mixins
+    super.componentWillReceiveProps(newProps, nextContext);
+
     if (this.props.link !== newProps.link) {
       this.updateState(newProps);
 
       // ensure reasoning value has been set, as onblur not triggered
-      this.props.link.reasoning = this.refs.reasoning.value;
+      this.props.link.reasoning = this.reasoning ? this.reasoning.value : "";
     }
 
     // a hack to update uncontrolled textarea when viewing new links
-    return this.refs.reasoning.value = newProps.link.reasoning;
-  },
+    if (this.reasoning) {
+      this.reasoning.value = newProps.link.reasoning;
+    }
+  }
 
-  checkStatus(link) {
+  public render() {
+    return (
+      <div className="link-relation-view">
+        {this.renderRelation()}
+        <div className="bottom">
+          <div>
+            <span>{`${tr("~NODE-RELATION-EDIT.BECAUSE")} `}</span>
+          </div>
+          <textarea
+            defaultValue={this.props.link.reasoning}
+            placeholder={tr("~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER")}
+            onChange={this.handleUpdateReasoning}
+            ref="reasoning"
+            className="full"
+            rows={3}
+            style={{ overflowY: "scroll", resize: "none"}}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  private checkStatus(link) {
     let status;
     const {sourceNode, targetNode} = link;
     return status = {
       isAccumulator: targetNode.isAccumulator,
       isDualAccumulator: sourceNode.isAccumulator && targetNode.isAccumulator,
+      isTransfer: targetNode.isTransfer,
       isTransferModifier: (targetNode.isTransfer &&
         ((targetNode.transferLink != null ? targetNode.transferLink.sourceNode : undefined) === sourceNode)) ||
         ((targetNode.transferLink != null ? targetNode.transferLink.targetNode : undefined) === sourceNode)
     };
-  },
+  }
 
-  updateState(props) {
+  private updateState(props) {
     const status = this.checkStatus(props.link);
     const selections =  RelationFactory.selectionsFromRelation(props.link.relation);
     const {accumulator, transferModifier} = selections;
@@ -137,9 +219,9 @@ export const LinkRelationView = React.createClass({
       isDualAccumulator: status.isDualAccumulator,
       isTransferModifier: status.isTransferModifier
     });
-  },
+  }
 
-  updateRelation() {
+  private updateRelation() {
     let link, relation;
     if (this.state.isAccumulator) {
       const selectedAccumulator = this.getAccumulator();
@@ -184,22 +266,22 @@ export const LinkRelationView = React.createClass({
         return this.props.graphStore.changeLink(link, {relation});
       }
     }
-  },
+  }
 
-  updateReasoning() {
-    return this.props.graphStore.changeLink(this.props.link, {reasoning: this.refs.reasoning.value});
-  },
+  private handleUpdateReasoning = () => {
+    this.props.graphStore.changeLink(this.props.link, {reasoning: this.reasoning ? this.reasoning.value : ""});
+  }
 
-  getAccumulator() {
-    return RelationFactory.accumulators[this.refs.accumulator.value];
-  },
+  private getAccumulator() {
+    return RelationFactory.accumulators[this.accumulator ? this.accumulator.value : ""];
+  }
 
-  getTransferModifier() {
-    return RelationFactory.transferModifiers[this.refs.transfer.value];
-  },
+  private getTransferModifier() {
+    return RelationFactory.transferModifiers[this.transfer ? this.transfer.value : ""];
+  }
 
-  getVector() {
-    const id = this.refs.vector.value;
+  private getVector() {
+    const id = this.vector ? this.vector.value : "";
     const newVector = RelationFactory.vectors[id];
 
     let selectedVectorHasChanged = false;
@@ -209,19 +291,19 @@ export const LinkRelationView = React.createClass({
 
     this.setState({ selectedVectorHasChanged });
     return newVector;
-  },
+  }
 
-  getScalar() {
+  private getScalar() {
     if (this.state.complexity === AppSettingsStore.Complexity.basic) {
       return RelationFactory.scalars.aboutTheSame;
     } else if (this.refs.scalar) {
-      return RelationFactory.scalars[this.refs.scalar.value];
+      return RelationFactory.scalars[this.scalar ? this.scalar.value : ""];
     } else {
       return undefined;
     }
-  },
+  }
 
-  renderVectorPulldown(vectorSelection) {
+  private renderVectorPulldown(vectorSelection) {
     let currentOption;
     const vectorOptions = this.state.complexity === AppSettingsStore.Complexity.basic ?
       RelationFactory.basicVectors
@@ -244,9 +326,9 @@ export const LinkRelationView = React.createClass({
         </select>
       </div>
     );
-  },
+  }
 
-  renderScalarPulldown(scalarSelection) {
+  private renderScalarPulldown(scalarSelection) {
     let currentOption;
     const options = _.map(RelationFactory.scalars, (opt, i) => <option value={opt.id} key={i}>{opt.uiText}</option>);
 
@@ -280,9 +362,9 @@ export const LinkRelationView = React.createClass({
         </div>
       );
     }
-  },
+  }
 
-  renderAccumulator(source, target) {
+  private renderAccumulator(source, target) {
     let currentOption;
     const options: any[] = [];
     _.each(RelationFactory.accumulators, (opt, i) => {
@@ -315,9 +397,9 @@ export const LinkRelationView = React.createClass({
         <span className={textClass}>{this.state.stepUnits.toLowerCase()}</span>
       </div>
     );
-  },
+  }
 
-  renderTransfer(source, target, isTargetProportional) {
+  private renderTransfer(source, target, isTargetProportional) {
     let currentOption, line_a, line_b;
     const spanWrap = (string, className) => `<span class='${className}'>${string}</span>`;
     const options = _.map(RelationFactory.transferModifiers, (opt, i) => <option value={opt.id} key={opt.id}>{opt.text}</option>);
@@ -357,13 +439,13 @@ export const LinkRelationView = React.createClass({
         <span>{}`${this.state.stepUnits.toLowerCase()}.`}</span>
       </div>
     );
-  },
+  }
 
-  renderNonAccumulator(source, target) {
+  private renderNonAccumulator(source, target) {
     return (
       <div>
         <div className="top">
-          <QuantStart source={source} target={target} />
+          <QuantStartView source={source} target={target} />
           <div className="full">
             {this.renderVectorPulldown(this.state.selectedVector)}
           </div>
@@ -373,7 +455,7 @@ export const LinkRelationView = React.createClass({
         </div>
         <div className="bottom">
           <div className="graph" id="relation-graph">
-            <Graph
+            <LinkGraphView
               xAxis={source}
               yAxis={target}
               link={this.props.link}
@@ -383,9 +465,9 @@ export const LinkRelationView = React.createClass({
         </div>
       </div>
     );
-  },
+  }
 
-  renderRelation() {
+  private renderRelation() {
     const source = this.props.link.sourceNode.title;
     let target = this.props.link.targetNode.title;
 
@@ -398,30 +480,8 @@ export const LinkRelationView = React.createClass({
     } else {
       return this.renderNonAccumulator(source, target);
     }
-  },
-
-  render() {
-    return (
-      <div className="link-relation-view">
-        {this.renderRelation()}
-        <div className="bottom">
-          <div>
-            <span>{`${tr("~NODE-RELATION-EDIT.BECAUSE")} `}</span>
-          </div>
-          <textarea
-            defaultValue={this.props.link.reasoning}
-            placeholder={tr("~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER")}
-            onChange={this.updateReasoning}
-            ref="reasoning"
-            className="full"
-            rows={3}
-            style={{ overflowY: "scroll", resize: "none"}}
-          />
-        </div>
-      </div>
-    );
   }
-});
+}
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

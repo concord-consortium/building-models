@@ -7,6 +7,9 @@
 // transfer values are scaled if they have no modifier and
 // their source is an independent node (has no inputs)
 
+const _ = require("lodash");
+const log = require("loglevel");
+
 const isScaledTransferNode = (node) => {
   if (!node.isTransfer) { return false; }
   if (node.inLinks("transfer-modifier").length) { return false; }

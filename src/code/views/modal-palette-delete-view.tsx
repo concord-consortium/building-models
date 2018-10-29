@@ -1,19 +1,41 @@
+import * as React from "react";
+const log = require("loglevel");
+
 import { ModalDialogView } from "./modal-dialog-view";
 import { PaletteDeleteView } from "./palette-delete-view";
-import { PaletteDeleteDialogActions, PaletteDeleteDialogMixin } from "../stores/palette-delete-dialog-store";
+import { PaletteDeleteDialogActions, PaletteDeleteDialogMixin, PaletteDeleteDialogMixin2Props, PaletteDeleteDialogMixin2State, PaletteDeleteDialogMixin2 } from "../stores/palette-delete-dialog-store";
 import { tr } from "../utils/translate";
+import { Mixer } from "../mixins/components";
 
-export const ModalPaletteDeleteView = React.createClass({
 
-  displayName: "ModalPaletteDeleteView",
+interface ModalPaletteDeleteViewOuterProps {}
+type ModalPaletteDeleteViewProps = ModalPaletteDeleteViewOuterProps & PaletteDeleteDialogMixin2Props;
 
-  mixins: [PaletteDeleteDialogMixin],
+interface ModalPaletteDeleteViewOuterState {
+}
+type ModalPaletteDeleteViewState = ModalPaletteDeleteViewOuterState & PaletteDeleteDialogMixin2State;
 
-  deleteItem() {
-    PaletteDeleteDialogActions.delete(this.state.paletteItem);
-  },
+export class ModalPaletteDeleteView extends Mixer<ModalPaletteDeleteViewProps, ModalPaletteDeleteViewState> {
 
-  renderShowing() {
+  public static displayName = "ModalPaletteDeleteView";
+
+  constructor(props: ModalPaletteDeleteViewProps) {
+    super(props);
+    this.mixins = [new PaletteDeleteDialogMixin2(this, props)];
+    const outerState: ModalPaletteDeleteViewOuterState = {
+    };
+    this.setInitialState(outerState, PaletteDeleteDialogMixin2.InitialState);
+  }
+
+  public render() {
+    return (
+      <div key="ModalPaletteDelete">
+        {this.state.showing ? this.renderShowing() : undefined}
+      </div>
+    );
+  }
+
+  private renderShowing() {
     const title = tr("~PALETTE-DIALOG.TITLE");
     return (
       <ModalDialogView title={title} close={PaletteDeleteDialogActions.close}>
@@ -22,17 +44,13 @@ export const ModalPaletteDeleteView = React.createClass({
           replacement={this.state.replacement}
           showReplacement={this.state.showReplacement}
           cancel={PaletteDeleteDialogActions.close}
-          ok={this.deleteItem}
+          ok={this.handleDeleteItem}
         />
       </ModalDialogView>
     );
-  },
-
-  render() {
-    return (
-      <div key="ModalPaletteDelete">
-        {this.state.showing ? this.renderShowing() : undefined}
-      </div>
-    );
   }
-});
+
+  private handleDeleteItem = () => {
+    PaletteDeleteDialogActions.delete(this.state.paletteItem);
+  }
+}

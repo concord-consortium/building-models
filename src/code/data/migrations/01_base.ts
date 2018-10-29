@@ -6,6 +6,7 @@
 // FORMAT BEFORE THIS TRANSFORM: in serialized-test-data-0.1.js
 // FORMAT AFTER THIS TRANSFORM:  in serialized-test-data-1.0.js
 
+const _ = require("lodash");
 import { MigrationMixin } from "./migration-mixin";
 
 const migration = {

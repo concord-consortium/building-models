@@ -49,7 +49,7 @@ interface TabbedPanelViewProps {
   selectedTabIndex?: number;
   onTabSelected?: (index: number) => void;
   clientClass?: string;
-  onRenderBelowTabsComponent?: () => JSX.Element;
+  onRenderBelowTabsComponent?: () => any; // TODO: get concrete type
   tabs: any[]; // TODO: get concrete type
 }
 

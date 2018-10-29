@@ -1,3 +1,5 @@
+import * as React from "react";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -5,32 +7,50 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { SimulationActions, SimulationMixin } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsMixin } from "../stores/app-settings-store";
+import { SimulationActions, SimulationMixin, SimulationMixin2Props } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin, AppSettingsMixin2Props } from "../stores/app-settings-store";
 import { tr } from "../utils/translate";
 
-export const NodeValueInspectorView = React.createClass({
+import { SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
+import { AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
+import { Mixer } from "../mixins/components";
 
-  displayName: "NodeValueInspectorView",
+interface NodeValueInspectorViewOuterProps {
+  node: any; // TODO: get concrete type
+  graphStore: any;  // TODO: get concrete type
+}
+interface NodeValueInspectorViewOuterState {
+  "editing-min": boolean;
+  "editing-max": boolean;
+  "min-value": number;
+  "max-value": number;
+}
 
-  mixins: [ SimulationMixin, AppSettingsMixin ],
+type NodeValueInspectorViewProps = NodeValueInspectorViewOuterProps & SimulationMixin2Props & AppSettingsMixin2Props;
+type NodeValueInspectorViewState = NodeValueInspectorViewOuterState & SimulationMixin2State & AppSettingsMixin2State;
 
-  propTypes: {
-    max: React.PropTypes.number,
-    min: React.PropTypes.number,
-    onChange: React.PropTypes.func
-  },
+export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, NodeValueInspectorViewState> {
 
-  getInitialState() {
-    return {
+  public static displayName = "NodeValueInspectorView";
+
+  private input: HTMLInputElement | null;
+
+  constructor(props: NodeValueInspectorViewProps) {
+    super(props);
+    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
+    const outerState: NodeValueInspectorViewOuterState = {
       "editing-min": false,
       "editing-max": false,
       "min-value": this.props.node.min,
       "max-value": this.props.node.max
     };
-  },
+    this.setInitialState(outerState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+  }
 
-  componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps, nextContext) {
+    // for mixins...
+    super.componentWillReceiveProps(nextProps, nextContext);
+
     // min and max are copied to state to disconnect the state and property, so
     // that we can set the text field and only update the model when the input field
     // is blured. This way we don't perform min/max validation while user is typing
@@ -38,59 +58,81 @@ export const NodeValueInspectorView = React.createClass({
       "min-value": nextProps.node.min,
       "max-value": nextProps.node.max
     });
-  },
+  }
 
-  trim(inputValue) {
-    return Math.max(this.props.node.min, Math.min(this.props.node.max, inputValue));
-  },
+  public render() {
+    const { node } = this.props;
+    return (
+      <div className="value-inspector">
+        <div className="inspector-content group">
+          <div className="full">
+            {!node.valueDefinedSemiQuantitatively ?
+              <span className="full">
+                <label className="right">{tr("~NODE-VALUE-EDIT.INITIAL-VALUE")}</label>
+                <input
+                  className="left"
+                  type="number"
+                  min={node.min}
+                  max={node.max}
+                  value={node.initialValue}
+                  onClick={this.handleSelectText}
+                  onChange={this.handleUpdateValue}
+                />
+              </span> : undefined}
+            <div className="slider group full">
+              <input
+                className="full"
+                type="range"
+                min={node.min}
+                max={node.max}
+                value={node.initialValue}
+                onChange={this.handleUpdateValue}
+              />
+              {this.renderMinAndMax(node)}
+            </div>
+          </div>
+          {!node.isTransfer ? this.renderCollectorOptions(node) : undefined}
+        </div>
 
-  updateValue(evt) {
-    let value;
-    if (this.state.modelIsRunning && !this.props.node.canEditValueWhileRunning()) {
-      // don't do anything; effectively disables slider
-      return;
-    }
+        <div className="bottom-pane">
+          <p>
+            {node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.DEFINING_WITH_WORDS") :  tr("~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")}
+          </p>
+          <p>
+            <label className="node-switch-edit-mode" onClick={this.handleUpdateDefiningType}>
+              {node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS") : tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS")}
+            </label>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-    if (value = evt.target.value) {
-      value = this.trim(parseInt(value, 10));
-      return this.props.graphStore.changeNode({initialValue: value});
-    }
-  },
-
-  updateAccumulatorChecked(evt) {
-    const value = evt.target.checked;
-    this.props.graphStore.changeNode({isAccumulator: value});
-    return SimulationActions.toggledCollectorTo(value);
-  },
-
-  updateNegativeValuesAllowed(evt) {
-    const value = evt.target.checked;
-    return this.props.graphStore.changeNode({allowNegativeValues: value});
-  },
-
-  updateDefiningType() {
-    return this.props.graphStore.changeNode({valueDefinedSemiQuantitatively: !this.props.node.valueDefinedSemiQuantitatively});
-  },
-
-  selectText(evt) {
-    return evt.target.select();
-  },
-
-  renderEditableProperty(property, classNames) {
+  private renderEditableProperty(property, classNames) {
     const swapState = () => {
+      const editing = !!this.state[`editing-${property}`];
+      const focus = () => this.input && this.input.focus();
       // first copy state value to model if we were editing
-      if (this.state[`editing-${property}`]) {
+      if (editing) {
         this.props.graphStore.changeNodeProperty(property, this.state[`${property}-value`]);
       }
-      return this.setState({[`editing-${property}`]: !this.state[`editing-${property}`]}, function() {
-        return (this.refs.focusable != null ? this.refs.focusable.focus() : undefined);
-      });
+      if (property === "min") {
+        this.setState({"editing-min": !editing}, focus);
+      } else {
+        this.setState({"editing-max": !editing}, focus);
+      }
     };
 
-    const updateProperty = evt => {
+    const handleUpdateProperty = (evt) => {
       // just update internal state while typing
       const value = parseInt(evt.target.value, 10);
-      if (value != null) { return this.setState({[`${property}-value`]: value}); }
+      if (value != null) {
+        if (property === "min") {
+          this.setState({"min-value": value});
+        } else {
+          this.setState({"max-value": value});
+        }
+      }
     };
 
     const keyDown = (evt) => {
@@ -107,16 +149,16 @@ export const NodeValueInspectorView = React.createClass({
           className={`half small editable-prop ${classNames}`}
           type="number"
           value={this.state[`${property}-value`]}
-          onChange={updateProperty}
+          onChange={handleUpdateProperty}
           onBlur={swapState}
           onKeyDown={keyDown}
-          ref="focusable"
+          ref={el => this.input = el}
         />
       );
     }
-  },
+  }
 
-  renderMinAndMax(node) {
+  private renderMinAndMax(node) {
     if (node.valueDefinedSemiQuantitatively) {
       return (
         <div className="group full">
@@ -132,9 +174,9 @@ export const NodeValueInspectorView = React.createClass({
         </div>
       );
     }
-  },
+  }
 
-  renderCollectorOptions(node) {
+  private renderCollectorOptions(node) {
     if (this.state.simulationType !== AppSettingsStore.SimulationType.time) {
       return null;
     }
@@ -156,7 +198,7 @@ export const NodeValueInspectorView = React.createClass({
           type="checkbox"
           checked={isChecked}
           disabled={this.state.capNodeValues}
-          onChange={this.state.capNodeValues ? null : this.updateNegativeValuesAllowed}
+          onChange={this.state.capNodeValues ? undefined : this.handleUpdateNegativeValuesAllowed}
         />
         {tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE")}
       </label>
@@ -169,60 +211,48 @@ export const NodeValueInspectorView = React.createClass({
             key="accumulator-checkbox"
             type="checkbox"
             checked={node.isAccumulator}
-            onChange={this.updateAccumulatorChecked}
+            onChange={this.handleUpdateAccumulatorChecked}
           />
           {tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR")}
         </label>
         {node.isAccumulator ? positiveCheckbox : null}
       </span>
     );
-  },
-
-  render() {
-    const { node } = this.props;
-    return (
-      <div className="value-inspector">
-        <div className="inspector-content group">
-          <div className="full">
-            {!node.valueDefinedSemiQuantitatively ?
-              <span className="full">
-                <label className="right">{tr("~NODE-VALUE-EDIT.INITIAL-VALUE")}</label>
-                <input
-                  className="left"
-                  type="number"
-                  min={node.min}
-                  max={node.max}
-                  value={node.initialValue}
-                  onClick={this.selectText}
-                  onChange={this.updateValue}
-                />
-              </span> : undefined}
-            <div className="slider group full">
-              <input
-                className="full"
-                type="range"
-                min={node.min}
-                max={node.max}
-                value={node.initialValue}
-                onChange={this.updateValue}
-              />
-              {this.renderMinAndMax(node)}
-            </div>
-          </div>
-          {!node.isTransfer ? this.renderCollectorOptions(node) : undefined}
-        </div>
-
-        <div className="bottom-pane">
-          <p>
-            {node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.DEFINING_WITH_WORDS") :  tr("~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS")}
-          </p>
-          <p>
-            <label className="node-switch-edit-mode" onClick={this.updateDefiningType}>
-              {node.valueDefinedSemiQuantitatively ? tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS") : tr("~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS")}
-            </label>
-          </p>
-        </div>
-      </div>
-    );
   }
-});
+
+  private trim(inputValue) {
+    return Math.max(this.props.node.min, Math.min(this.props.node.max, inputValue));
+  }
+
+  private handleUpdateValue = (evt) => {
+    let value;
+    if (this.state.modelIsRunning && !this.props.node.canEditValueWhileRunning()) {
+      // don't do anything; effectively disables slider
+      return;
+    }
+
+    if (value = evt.target.value) {
+      value = this.trim(parseInt(value, 10));
+      return this.props.graphStore.changeNode({initialValue: value});
+    }
+  }
+
+  private handleUpdateAccumulatorChecked = (evt) => {
+    const value = evt.target.checked;
+    this.props.graphStore.changeNode({isAccumulator: value});
+    return SimulationActions.toggledCollectorTo(value);
+  }
+
+  private handleUpdateNegativeValuesAllowed = (evt) => {
+    const value = evt.target.checked;
+    return this.props.graphStore.changeNode({allowNegativeValues: value});
+  }
+
+  private handleUpdateDefiningType = () => {
+    this.props.graphStore.changeNode({valueDefinedSemiQuantitatively: !this.props.node.valueDefinedSemiQuantitatively});
+  }
+
+  private handleSelectText = (evt) => {
+    evt.target.select();
+  }
+}

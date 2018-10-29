@@ -5,6 +5,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+const _ = require("lodash");
+const log = require("loglevel");
+
 export class SelectionManager {
 
   public static NodeTitleEditing;

@@ -1,3 +1,7 @@
+const _ = require("lodash");
+
+import * as React from "react";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -7,169 +11,189 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { ImageDialogActions, ImageDialogMixin } from "../stores/image-dialog-store";
+import { ImageDialogActions, ImageDialogMixin, ImageDialogMixin2Props, ImageDialogMixin2State, ImageDialogMixin2 } from "../stores/image-dialog-store";
 
 import { OpenClipArt } from "../utils/open-clipart";
 import { tr } from "../utils/translate";
-import { ImageDialogViewMixin } from "../mixins/image-dialog-view";
+import { ImageDialogViewMixin, ImageDialogViewMixinProps, ImageDialogViewMixinState } from "../mixins/image-dialog-view";
+import { Mixer } from "../mixins/components";
+import { internalLibrary } from "../data/internal-library";
 
-const ImageSearchResult = React.createClass({
-  displayName: "ImageSearchResult",
+interface ImageSearchResultViewProps {
+  imageInfo: any; // TODO: get concrete type
+  isDisabled: (imageInfo: any) => boolean; // TODO: get concrete type
+}
 
-  getInitialState() {
-    return {loaded: false};
-  },
+interface ImageSearchResultViewState {
+  loaded: boolean;
+}
 
-  componentDidMount() {
+class ImageSearchResultView extends React.Component<ImageSearchResultViewProps, ImageSearchResultViewState> {
+
+  public static displayName = "ImageSearchResultView";
+
+  public state = {loaded: false};
+
+  private unmounted: boolean;
+
+  public componentDidMount() {
     const image = new Image();
     image.src = this.props.imageInfo.image;
     image.onload = () => {
       if (!this.unmounted) { return this.setState({loaded: true}); }
     };
-  },
+  }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.unmounted = true;
-  },
+  }
 
-  clicked() {
-    ImageDialogActions.update(this.props.imageInfo);
-  },
-
-  render() {
+  public render() {
     const src = this.state.loaded ? this.props.imageInfo.image : "img/bb-chrome/spin.svg";
     if (!this.props.isDisabled(this.props.imageInfo)) {
-      return <img src={src} onClick={this.clicked} title={this.props.imageInfo.metadata.title} />;
+      return <img src={src} onClick={this.handleClicked} title={this.props.imageInfo.metadata.title} />;
     } else {
       return null;
     }
   }
-});
 
-const ImageSearchPageLink = React.createClass({
-  displayName: "ImageSearchPageLink",
+  private handleClicked = () => {
+    ImageDialogActions.update(this.props.imageInfo);
+  }
+}
 
-  selectPage(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.props.selectPage(this.props.page);
-  },
+interface ImageSearchPageLinkViewProps {
+  currentPage: any; // TODO: get concrete type
+  page: any; // TODO: get concrete type
+  selectPage: (page: any) => void; // TODO: get concrete type
+}
 
-  render() {
+class ImageSearchPageLinkView extends React.Component<ImageSearchPageLinkViewProps, {}> {
+
+  public static displayName = "ImageSearchPageLinkView";
+
+  public render() {
     if (this.props.currentPage === this.props.page) {
       return <span className="image-search-page-link">{this.props.page}</span>;
     } else {
-      return <a className="image-search-page-link" href="#" onClick={this.selectPage}>{this.props.page}</a>;
+      return <a className="image-search-page-link" href="#" onClick={this.handleSelectPage}>{this.props.page}</a>;
     }
   }
-});
 
-const ImageSearchPrevNextLink = React.createClass({
-  displayName: "ImageSearchPrevNextLink",
-
-  selectPage(e) {
+  private handleSelectPage = (e) => {
     e.preventDefault();
     e.stopPropagation();
     this.props.selectPage(this.props.page);
-  },
+  }
+}
 
-  render() {
+interface ImageSearchPrevNextLinkViewProps {
+  enabled: boolean;
+  page: any; // TODO: get concrete type
+  selectPage: (page: any) => void; // TODO: get concrete type
+  label: string;
+}
+
+class ImageSearchPrevNextLinkView extends React.Component<ImageSearchPrevNextLinkViewProps, {}> {
+
+  public static displayName = "ImageSearchPrevNextLinkView";
+
+  public render() {
     if (this.props.enabled) {
-      return <a className="image-search-prev-next-link" href="#" onClick={this.selectPage}>{this.props.label}</a>;
+      return <a className="image-search-prev-next-link" href="#" onClick={this.handleSelectPage}>{this.props.label}</a>;
     } else {
       return <span className="image-search-prev-next-link" style={{color: "#777"}}>{this.props.label}</span>;
     }
   }
-});
 
-export const ImageSearchDialogView = React.createClass({
-  displayName: "ImageSearchDialogView",
+  private handleSelectPage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.props.selectPage(this.props.page);
+  }
+}
 
-  mixins: [ImageDialogViewMixin, ImageDialogMixin],
+interface ImageSearchDialogViewOuterProps {
+  internalLibrary: any; // TODO: get concrete type
+  inPalette: (node: any) => boolean; // TODO: get concrete type
+  inLibrary: (node: any) => boolean; // TODO: get concrete type
+}
 
-  getInitialState() {
-    return this.getInitialImageDialogViewState({
+type ImageSearchDialogViewProps = ImageSearchDialogViewOuterProps & ImageDialogMixin2Props & ImageDialogViewMixinProps;
+
+interface ImageSearchDialogViewOuterState {
+  searching: boolean;
+  searched: boolean;
+  searchable: boolean;
+  results: any[];
+  page: number;
+  numPages: number;
+  query: string;
+}
+type ImageSearchDialogViewState = ImageSearchDialogViewOuterState & ImageDialogMixin2State & ImageDialogViewMixinState;
+
+export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, ImageSearchDialogViewState> {
+
+  public static displayName = "ImageSearchDialogView";
+
+  private imageDialogViewMixin: ImageDialogViewMixin;
+  private input: HTMLInputElement | null;
+
+  constructor(props: ImageSearchDialogViewProps) {
+    super(props);
+    this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
+
+    this.mixins = [new ImageDialogMixin2(this, props), this.imageDialogViewMixin];
+
+    const outerState: ImageSearchDialogViewOuterState = {
       searching: false,
       searched: false,
+      searchable: false,
       results: [],
       page: 1,
-      numPages: 0
-    });
-  },
+      numPages: 0,
+      query: ""
+    };
+    this.setInitialState(outerState, ImageDialogMixin2.InitialState, ImageDialogViewMixin.InitialState);
+  }
 
-  searchClicked(e) {
-    e.preventDefault();
-    this.search({
-      page: 1,
-      newSearch: true
-    });
-  },
-
-  selectPage(page) {
-    this.search({
-      page,
-      newSearch: false
-    });
-  },
-
-  search(options) {
-    const query = $.trim(this.refs.search.value);
-    const validQuery = query.length > 0;
-    this.setState({
-      query,
-      searchable: validQuery,
-      searching: validQuery,
-      searched: false,
-      results: [],
-      page: options.newSearch ? 1 : options.page,
-      numPages: options.newSearch ? 0 : this.state.numPages
-    });
-
-    if (validQuery) {
-      OpenClipArt.search(query, options, (results, page, numPages) => {
-        this.setState({
-          searching: false,
-          searched: true,
-          results,
-          page,
-          numPages
-        });
-      });
+  public componentDidMount() {
+    // for mixins...
+    super.componentDidMount();
+    if (this.input) {
+      this.input.focus();
     }
-  },
+  }
 
-  componentDidMount() {
-    this.refs.search.focus();
-  },
+  public render() {
+    const havePreviewImage = !!(this.props.selectedImage && this.props.selectedImage.image);
+    return (
+      <div className="image-search-dialog">
+        {havePreviewImage ? this.imageDialogViewMixin.renderPreviewImage() : this.renderDialogForm()}
+      </div>
+    );
+  }
 
-  isDisabledInInternalLibrary(node) {
-    return this.props.inPalette(node);
-  },
-
-  isDisabledInExternalSearch(node) {
-    return (this.props.inPalette(node)) || (this.props.inLibrary(node));
-  },
-
-  renderPagination() {
+  private renderPagination() {
     let page;
     if (this.state.numPages > 0) {
       let asc, end;
       const links: JSX.Element[] = [];
       for (page = 1, end = this.state.numPages, asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
-        links.push(<ImageSearchPageLink key={`page${page}`} page={page} currentPage={this.state.page} selectPage={this.selectPage} />);
+        links.push(<ImageSearchPageLinkView key={`page${page}`} page={page} currentPage={this.state.page} selectPage={this.handleSelectPage} />);
       }
 
       return (
         <div key="pagination" className="image-search-dialog-pagination">
-          <ImageSearchPrevNextLink key="prev" page={this.state.page - 1} label={tr("~IMAGE-BROWSER.PREVIOUS")} selectPage={this.selectPage} enabled={this.state.page > 1} />
+          <ImageSearchPrevNextLinkView key="prev" page={this.state.page - 1} label={tr("~IMAGE-BROWSER.PREVIOUS")} selectPage={this.handleSelectPage} enabled={this.state.page > 1} />
           {links}
-          <ImageSearchPrevNextLink key="next" page={this.state.page + 1} label={tr("~IMAGE-BROWSER.NEXT")} selectPage={this.selectPage} enabled={this.state.page < this.state.numPages} />
+          <ImageSearchPrevNextLinkView key="next" page={this.state.page + 1} label={tr("~IMAGE-BROWSER.NEXT")} selectPage={this.handleSelectPage} enabled={this.state.page < this.state.numPages} />
         </div>
       );
     }
-  },
+  }
 
-  renderDialogForm() {
+  private renderDialogForm() {
     let index, node;
     const showNoResultsAlert = this.state.searchable && this.state.searched && (this.state.results.length === 0);
     const noResultsClass = showNoResultsAlert ? " no-results" : "";
@@ -182,7 +206,7 @@ export const ImageSearchDialogView = React.createClass({
         node = iterable[index];
         if (node.image) {
           if (node.image) {
-            noResultsItems.push(<ImageSearchResult key={index} imageInfo={node} clicked={this.imageSelected} isDisabled={this.isDisabledInInternalLibrary} />);
+            noResultsItems.push(<ImageSearchResultView key={index} imageInfo={node} isDisabled={this.isDisabledInInternalLibrary} />);
           }
         }
       }
@@ -191,7 +215,7 @@ export const ImageSearchDialogView = React.createClass({
     if (this.state.searched) {
       for (index = 0; index < this.state.results.length; index++) {
         node = this.state.results[index];
-        searchResultItems.push(<ImageSearchResult key={index} imageInfo={node} clicked={this.imageSelected} isDisabled={this.isDisabledInExternalSearch} />);
+        searchResultItems.push(<ImageSearchResultView key={index} imageInfo={node} isDisabled={this.isDisabledInExternalSearch} />);
       }
     }
 
@@ -199,8 +223,8 @@ export const ImageSearchDialogView = React.createClass({
       <div>
         <div className="image-search-dialog-form">
           <form>
-            <input type="text" ref="search" defaultValue={this.state.query} placeholder={tr("~IMAGE-BROWSER.SEARCH_HEADER")} />
-            <input type="submit" value={tr("~IMAGE-BROWSER.SEARCH_BUTTON_LABEL")} onClick={this.searchClicked} />
+            <input type="text" ref={el => this.input = el} defaultValue={this.state.query} placeholder={tr("~IMAGE-BROWSER.SEARCH_HEADER")} />
+            <input type="submit" value={tr("~IMAGE-BROWSER.SEARCH_BUTTON_LABEL")} onClick={this.handleSearchClicked} />
           </form>
         </div>
 
@@ -237,14 +261,56 @@ export const ImageSearchDialogView = React.createClass({
         </div>
       </div>
     );
-  },
-
-  render() {
-    const havePreviewImage = !!(this.props.selectedImage && this.props.selectedImage.image);
-    return (
-      <div className="image-search-dialog">
-        {havePreviewImage ? this.renderPreviewImage() : this.renderDialogForm()}
-      </div>
-    );
   }
-});
+
+  private handleSearchClicked = (e) => {
+    e.preventDefault();
+    this.search({
+      page: 1,
+      newSearch: true
+    });
+  }
+
+  private handleSelectPage = (page) => {
+    this.search({
+      page,
+      newSearch: false
+    });
+  }
+
+  private search(options) {
+    const query = $.trim(this.input ? this.input.value : "");
+    const validQuery = query.length > 0;
+    this.setState({
+      query,
+      searchable: validQuery,
+      searching: validQuery,
+      searched: false,
+      results: [],
+      page: options.newSearch ? 1 : options.page,
+      numPages: options.newSearch ? 0 : this.state.numPages
+    });
+
+    if (validQuery) {
+      OpenClipArt.search(query, options, (results, page, numPages) => {
+        this.setState({
+          searching: false,
+          searched: true,
+          results,
+          page,
+          numPages
+        });
+      });
+    }
+  }
+
+  private isDisabledInInternalLibrary(node) {
+    return this.props.inPalette(node);
+  }
+
+  private isDisabledInExternalSearch(node) {
+    return (this.props.inPalette(node)) || (this.props.inLibrary(node));
+  }
+
+}
+

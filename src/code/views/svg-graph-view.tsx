@@ -1,4 +1,6 @@
+const _ = require("lodash");
 import * as React from "react";
+import * as $ from "jquery";
 
 /*
  * decaffeinate suggestions:
@@ -198,8 +200,9 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
 
   private findClosestPoint(path, pointX, pointY) {
     const graphOrigin = this.graphMapPoint({x: 0, y: 0});
-    const x = pointX - $(path).offset().left;
-    const y = pointX - $(path).offset().top;
+    const offset = $(path).offset() || {left: 0, top: 0};
+    const x = pointX - offset.left;
+    const y = pointX - offset.top;
     const p = {x, y};
     return p;
   }
