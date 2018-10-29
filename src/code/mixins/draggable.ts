@@ -14,7 +14,7 @@ export class DraggableMixin extends Mixin<{}, {}> {
 
   constructor(mixer: any, props = {}, options: DraggableMixinOptions = {}) {
     super(mixer, props);
-    this.doMove = options.doMove || (() => console.log("DO MOVE"));
+    this.doMove = options.doMove || (() => undefined);
     this.removeClasses = options.removeClasses || ["proto-node"];
   }
 
@@ -25,6 +25,7 @@ export class DraggableMixin extends Mixin<{}, {}> {
     const reactSafeClone = function(e) {
       const clone = $(this).clone(false);
       _.each(self.removeClasses, classToRemove => clone.removeClass(classToRemove));
+      clone.addClass("elm");
       clone.attr("data-reactid", null);
       clone.find("*").each((i, v) => { $(v).attr("data-reactid", null); });
       return clone;

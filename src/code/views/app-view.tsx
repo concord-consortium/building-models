@@ -153,6 +153,9 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
             <GraphView
               graphStore={this.props.graphStore}
               selectionManager={this.props.graphStore.selectionManager}
+              linkTarget=".link-top"
+              connectionTarget=".link-target"
+              transferTarget=".link-target"
               // selectedLink={this.state.selectedLink}
             />
           </div>

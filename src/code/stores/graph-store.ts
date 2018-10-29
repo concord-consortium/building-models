@@ -915,10 +915,7 @@ export const GraphMixin = {
   }
 };
 
-export interface GraphMixin2Props {
-  // TODO: diagramToolkit was changed to optional but this needs to be looked at closer
-  diagramToolkit?: any; // TODO: get concrete type
-}
+export interface GraphMixin2Props {}
 
 export type GraphMixin2State = GraphSettings;
 
@@ -939,8 +936,8 @@ export class GraphMixin2 extends Mixin<GraphMixin2Props, GraphMixin2State> {
     this.setState(state);
 
     // TODO: not this:
-    if (this.props.diagramToolkit) {
-      this.props.diagramToolkit.repaint();
+    if (this.mixer.diagramToolkit) {
+      this.mixer.diagramToolkit.repaint();
     }
   }
 

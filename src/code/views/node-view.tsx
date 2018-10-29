@@ -268,8 +268,8 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   public componentDidMount() {
     const $elem = $(this.refs.node);
     return ($elem as any).draggable({
-      drag: this.doMove,
-      stop: this.doStop,
+      drag: this.handleMove,
+      stop: this.handleStop,
       containment: "parent"
     });
   }
@@ -439,7 +439,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     }
   }
 
-  private doMove(evt, extra) {
+  private handleMove = (evt, extra) => {
     this.props.onMove({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
@@ -452,7 +452,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     return !this.state.ignoreDrag;
   }
 
-  private doStop(evt, extra) {
+  private handleStop = (evt, extra) => {
     return this.props.onMoveComplete({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
@@ -462,7 +462,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     });
   }
 
-  private doDelete(evt) {
+  private handleDelete = (evt) => {
     return this.props.onDelete({
       nodeKey: this.props.nodeKey,
       reactComponent: this,

@@ -66,6 +66,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   private forceRedrawLinks: boolean;
   private linkButtonClientClass: string;
   private ignoringEvents: boolean;
+  private linkView: HTMLDivElement | null;
+  private container: HTMLDivElement | null;
+  private selectionBox: HTMLDivElement | null;
 
   constructor(props: GraphViewProps) {
     super(props);
@@ -87,21 +90,11 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     this.setInitialState(outerState, GraphMixin2.InitialState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState, CodapMixin2.InitialState, LaraMixin2.InitialState);
   }
 
-  /*
-  getDefaultProps() {
-    return {
-      linkTarget: ".link-top",
-      connectionTarget: ".link-target",
-      transferTarget: ".link-target"
-    };
-  },
-  */
-
   public componentDidMount() {
     // for mixins...
     super.componentDidMount();
 
-    const $container = $(this.refs.container);
+    const $container = $(this.container!);
 
     this.diagramToolkit = new DiagramToolkit($container, {
       Container:            $container[0],
@@ -159,7 +152,10 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     });
   }
 
-  public componentDidUpdate(prevProps, prevState) {
+  public componentDidUpdate(prevProps, prevState, prevContext) {
+    // for mixins
+    super.componentDidUpdate(prevProps, prevState, prevContext);
+
     if ((prevState.description.links !== this.state.description.links) ||
         (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) ||
         (prevState.selectedLink !== this.state.selectedLink) ||
@@ -191,9 +187,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     };
 
     return (
-      <div className={`graph-view ${this.state.canDrop ? "can-drop" : ""}`} ref="linkView" onDragOver={this.handleDragOver} onDrop={this.handleDrop} onDragLeave={this.handleDragLeave}>
-        <div className="container" ref="container" onMouseDown={this.handleMouseDown} onMouseUp={this.handleMouseUp} onMouseMove={this.handleMouseMove}>
-          {this.state.drawingMarquee ? <div className="selectionBox" ref="selectionBox" style={marqueeStyle} /> : undefined}
+      <div className={`graph-view ${this.state.canDrop ? "can-drop" : ""}`} ref={el => this.linkView = el} onDragOver={this.handleDragOver} onDrop={this.handleDrop} onDragLeave={this.handleDragLeave}>
+        <div className="container" ref={el => this.container = el} onMouseDown={this.handleMouseDown} onMouseUp={this.handleMouseUp} onMouseMove={this.handleMouseMove}>
+          {this.state.drawingMarquee ? <div className="selectionBox" ref={el => this.selectionBox = el} style={marqueeStyle} /> : undefined}
           {this.state.nodes.map((node) =>
             <NodeView
               key={node.key}
@@ -244,7 +240,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   private handleAddPaletteNode = (ui, paletteItem) => {
     // Default new nodes are untitled
     const title = tr("~NODE.UNTITLED");
-    const linkOffset = $(this.refs.linkView).offset() || {left: 0, top: 0};
+    const linkOffset = $(this.linkView!).offset() || {left: 0, top: 0};
     const imageOffset = NodeView.nodeImageOffset();
     const newNode = new Node({
       x: ui.offset.left - linkOffset.left - imageOffset.left,
@@ -375,8 +371,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private redrawTargets() {
-    this.diagramToolkit.makeSource(($(this.refs.linkView).find(".connection-source")), this.linkButtonClientClass);
-    const target = $(this.refs.linkView).find(this.props.linkTarget);
+    this.diagramToolkit.makeSource(($(this.linkView!).find(".connection-source")), this.linkButtonClientClass);
+    const target = $(this.linkView!).find(this.props.linkTarget);
     const targetStyle = "node-link-target";
 
     return this.diagramToolkit.makeTarget(target, targetStyle);
@@ -481,7 +477,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     e.preventDefault();
     try { // not sure any of the code inside this block is used?
       // figure out where to drop files
-      const offset = $(this.refs.linkView).offset() || {left: 0, top: 0};
+      const offset = $(this.linkView!).offset() || {left: 0, top: 0};
       const dropPos = {
         x: e.clientX - offset.left,
         y: e.clientY - offset.top
@@ -508,12 +504,12 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private handleMouseDown = (e) => {
-    if (e.target === this.refs.container) {
+    if (e.target === this.container!) {
       // deselect links when background is clicked
       this.forceRedrawLinks = true;
       this.props.selectionManager.clearSelection();
       const selectBox = $.extend({}, this.state.selectBox);
-      const offset = $(this.refs.linkView).offset() || {left: 0, top: 0};
+      const offset = $(this.linkView!).offset() || {left: 0, top: 0};
       selectBox.startX = e.pageX - offset.left;
       selectBox.startY = e.pageY - offset.top;
       selectBox.x = selectBox.startX;
@@ -523,7 +519,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private handleMouseUp = (e) => {
-    if (e.target === this.refs.container) {
+    if (e.target === this.container!) {
     // deselect links when background is clicked
       this.props.selectionManager.clearSelection();
       if (this.state.drawingMarquee) {
@@ -542,7 +538,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   private handleMouseMove = (e) => {
     if (this.state.drawingMarquee) {
-      const offset = $(this.refs.linkView).offset() || {left: 0, top: 0};
+      const offset = $(this.linkView!).offset() || {left: 0, top: 0};
       const selectBox = $.extend({}, this.state.selectBox);
       selectBox.x = e.pageX - offset.left;
       selectBox.y = e.pageY - offset.top;
