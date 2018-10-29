@@ -1,48 +1,32 @@
 const _ = require("lodash");
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-global._      = require('lodash');
-global.log    = require('loglevel');
-global.Reflux = require('reflux');
-global.window = { location: '' };
-global.window.performance = {
+const g = global as any;
+
+g.window = { location: "" };
+g.window.performance = {
   now() {
     return Date.now();
   }
 };
-global.requestAnimationFrame = callback => setTimeout(callback, 1);
+g.requestAnimationFrame = callback => setTimeout(callback, 1);
 
-const chai = require('chai');
 chai.config.includeStack = true;
 
 const { expect }         = chai;
-const should         = chai.should();
-const Sinon          = require('sinon');
 
-const requireModel = name => require(`${__dirname}/../src/code/models/${name}`);
+import { Link } from "../src/code/models/link";
+import { Node } from "../src/code/models/node";
+import { TransferModel } from "../src/code/models/transfer";
+import { Simulation } from "../src/code/models/simulation";
+import { Relationship } from "../src/code/models/relationship";
+import { RelationFactory } from "../src/code/models/relation-factory";
 
-const Link           = requireModel('link');
-const Node           = requireModel('node');
-const TransferNode   = requireModel('transfer');
-const Simulation     = requireModel('simulation');
-const Relationship   = requireModel('relationship');
-const RelationFactory = requireModel('relation-factory');
+import { GraphStore } from "../src/code/stores/graph-store";
+import { SimulationStore, SimulationActions } from "../src/code/stores/simulation-store";
 
-const requireStore = name => require(`${__dirname}/../src/code/stores/${name}`);
+const CodapHelper = require("./codap-helper");
 
-const GraphStore        = requireStore('graph-store').store;
-const SimulationStore   = requireStore('simulation-store').store;
-const SimulationActions = requireStore('simulation-store').actions;
-
-const CodapHelper = require('./codap-helper');
-
-
-const LinkNodes = function(sourceNode, targetNode, relationSpec) {
+const LinkNodes = (sourceNode, targetNode, relationSpec) => {
   const link = new Link({
     title: "function",
     sourceNode,
@@ -51,50 +35,49 @@ const LinkNodes = function(sourceNode, targetNode, relationSpec) {
   });
   sourceNode.addLink(link);
   targetNode.addLink(link);
-  if (link.relation.type === 'transfer') {
-    link.transferNode = new TransferNode;
+  if (link.relation.type === "transfer") {
+    link.transferNode = new TransferModel({});
     link.transferNode.setTransferLink(link);
   }
   return link;
 };
 
-
-const asyncListenTest = function(done, action, func) {
-  var stopListening = action.listen(function(args) {
+const asyncListenTest = (done, action, func) => {
+  const stopListening = action.listen((args) => {
     try {
       func.apply(null, arguments);
       done();
     } catch (ex) {
       done(ex);
     }
-    return stopListening();
+    stopListening();
   });
 };
 
-describe("Simulation", function() {
-  beforeEach(function() {
+describe("Simulation", () => {
+  beforeEach(() => {
     this.nodes     = [];
-    return this.arguments = {
+    this.arguments = {
       nodes: this.nodes,
       duration: 5
     };
   });
-  it("the class should exist", () => Simulation.should.be.defined);
+  it("the class should exist", () => Simulation.should.be.defined());
 
-  describe("the constructor", function() {
-    beforeEach(function() {
-      return this.simulation = new Simulation(this.arguments);
+  describe("the constructor", () => {
+    beforeEach(() => {
+      this.simulation = new Simulation(this.arguments);
     });
 
-    return it("makes a configured instance", function() {
+    it("makes a configured instance", () => {
       this.simulation.duration.should.equal(this.arguments.duration);
-      return this.simulation.nodes.should.equal(this.arguments.nodes);
+      this.simulation.nodes.should.equal(this.arguments.nodes);
     });
   });
 
-  return describe("run", function() {
-    describe("for a simple graph A(10) -0.1-> B(0) for 10 iterations", function() {
-      beforeEach(function() {
+  describe("run", () => {
+    describe("for a simple graph A(10) -0.1-> B(0) for 10 iterations", () => {
+      beforeEach(() => {
         this.nodeA    = new Node({initialValue: 10});
         this.nodeB    = new Node({initialValue: 0 });
         this.formula  = "0.1 * in";
@@ -103,18 +86,18 @@ describe("Simulation", function() {
           duration: 10
         };
 
-        LinkNodes(this.nodeA, this.nodeB, { type: 'range', formula: this.formula });
-        return this.simulation = new Simulation(this.arguments);
+        LinkNodes(this.nodeA, this.nodeB, { type: "range", formula: this.formula });
+        this.simulation = new Simulation(this.arguments);
       });
 
-      it("the link formula should work", function() {
-        return this.nodeB.inLinks().length.should.equal(1);
+      it("the link formula should work", () => {
+        this.nodeB.inLinks().length.should.equal(1);
       });
 
-      return describe("the result", () =>
-        it("should give B 10 at the end", function() {
+      describe("the result", () =>
+        it("should give B 10 at the end", () => {
           this.simulation.run();
-          return this.nodeB.currentValue.should.equal(1);
+          this.nodeB.currentValue.should.equal(1);
         })
       );
     });
@@ -129,7 +112,7 @@ describe("Simulation", function() {
     // Each two-letter node is a link, with the formula for the link.
     // Results is an array of arbitrary length, describing the expected result for each
     // node on each step.
-    describe("for other scenarios", function() {
+    describe("for other scenarios", () => {
       const scenarios = [
         // 0: unlinked nodes should retain their initial values
         {A: 0, B: 50, C: 100, D: "0+", E: "50+", F: "100+",
@@ -153,7 +136,7 @@ describe("Simulation", function() {
         ]},
 
         // 3: basic collector (A->[B])
-        {A:5, B:"50+", AB: "1 * in",
+        {A: 5, B: "50+", AB: "1 * in",
         results: [
           [5, 50],
           [5, 55],
@@ -161,7 +144,7 @@ describe("Simulation", function() {
         ]},
 
         // 4: basic collector with feedback (A<->[B])
-        {A:10, B:"50+", AB: "1 * in", BA: "1 * in",
+        {A: 10, B: "50+", AB: "1 * in", BA: "1 * in",
         results: [
           [50, 50],
           [100, 100],
@@ -210,7 +193,7 @@ describe("Simulation", function() {
         // Note most nodes have min:0 and max:100 by default
         // But collectors have a default max of 1000
         // 10: basic collector (A->[B])
-        {A:30, B:"900+", AB: "1 * in",
+        {A: 30, B: "900+", AB: "1 * in",
         cap: true,
         results: [
           [30, 900],
@@ -221,7 +204,7 @@ describe("Simulation", function() {
         ]},
 
         // 11: basic subtracting collector (A- -1 ->[B])
-        {A:40, B:"90+", AB: "-1 * in",
+        {A: 40, B: "90+", AB: "-1 * in",
         cap: true,
         results: [
           [40, 90],
@@ -231,7 +214,7 @@ describe("Simulation", function() {
         ]},
 
         // 12: basic independent and dependent nodes (A->B)
-        {A:120, B:0, AB: "1 * in",
+        {A: 120, B: 0, AB: "1 * in",
         cap: true,
         results: [
           [100, 100]
@@ -240,93 +223,82 @@ describe("Simulation", function() {
         // *** Collector initial-value tests ***
 
         // 13: (A-init->B+)
-        {A:10, B:"50+", AB: "initial-value",
+        {A: 10, B: "50+", AB: "initial-value",
         results: [
           [10, 10],
           [10, 10]
         ]},
 
         // 14: A and B averageing initial values >- (A-init->C+, B-init->C+)
-        {A:10, B:20, C:"50+", AC: "initial-value", BC: "initial-value",
+        {A: 10, B: 20, C: "50+", AC: "initial-value", BC: "initial-value",
         results: [
           [10, 20, 15],
           [10, 20, 15]
         ]},
 
         // 15: Setting initial values, and accumulating >- (A-init->C+, B->C+)
-        {A:10, B:20, C:"50+", AC: "initial-value", BC: "1 * in",
+        {A: 10, B: 20, C: "50+", AC: "initial-value", BC: "1 * in",
         results: [
           [10, 20, 10],
           [10, 20, 30]
         ]}
       ];
 
-      return _.each(scenarios, (scenario, i) =>
-        it(`should compute scenario ${i} correctly`, function() {
+      _.each(scenarios, (scenario, i) =>
+        it(`should compute scenario ${i} correctly`, () => {
           let key, node;
           const nodes = {};
           for (key in scenario) {
-            var isAccumulator;
+            let isAccumulator;
             const value = scenario[key];
             if (key.length === 1) {
-              isAccumulator = (typeof value === "string") && ~value.indexOf('+');
-              const isProduct = (typeof value === "string") && ~value.indexOf('*');
-              const combineMethod = isProduct ? 'product' : 'average';
-              nodes[key] = new Node({title: key, initialValue: parseInt(value), combineMethod, isAccumulator});
+              isAccumulator = (typeof value === "string") && ~value.indexOf("+"); // tslint:disable-line:no-bitwise
+              const isProduct = (typeof value === "string") && ~value.indexOf("*"); // tslint:disable-line:no-bitwise
+              const combineMethod = isProduct ? "product" : "average";
+              nodes[key] = new Node({title: key, initialValue: parseInt(value, 10), combineMethod, isAccumulator});
             } else if (key.length === 2) {
-              var type;
+              let type;
               const node1 = nodes[key[0]];
               const node2 = nodes[key[1]];
               let func = null;
               if (node2.isAccumulator) {
-                type = value === 'initial-value' ? value : 'accumulator';
-                if (type === 'initial-value') { func = () => ({}); }
+                type = value === "initial-value" ? value : "accumulator";
+                if (type === "initial-value") { func = () => ({}); }
               } else {
-                type = 'range';
+                type = "range";
               }
               LinkNodes(node1, node2, { type, formula: value, func });
             }
           }
-          return (() => {
-            const result1 = [];
-            for (var j = 0; j < scenario.results.length; j++) {
-              var result = scenario.results[j];
-              var nodeArray = ((() => {
-                const result2 = [];
-                for (key in nodes) {
-                  node = nodes[key];
-                  result2.push(node);
-                }
-                return result2;
-              })());
-              const simulation = new Simulation({
-                nodes: nodeArray,
-                duration: j+1,
-                capNodeValues: scenario.cap === true
-              });
+          for (let j = 0; j < scenario.results.length; j++) {
+            const result = scenario.results[j];
+            const nodeArray = [];
+            for (key in nodes) {
+              node = nodes[key];
+              nodeArray.push(node);
+            }
+            const simulation = new Simulation({
+              nodes: nodeArray,
+              duration: j + 1,
+              capNodeValues: scenario.cap === true
+            });
 
-              if (result === false) {
-                result1.push(expect(simulation.run.bind(simulation)).to.throw("Graph not valid"));
-              } else {
-                simulation.run();
-                result1.push((() => {
-                  const result3 = [];
-                  for (let k = 0; k < nodeArray.length; k++) {
-                    node = nodeArray[k];
-                    result3.push(expect(node.currentValue, `Step: ${j}, Node: ${node.title}`).to.be.closeTo(result[k], 0.000001));
-                  }
-                  return result3;
-                })());
+            if (result === false) {
+              expect(simulation.run.bind(simulation)).to.throw("Graph not valid");
+            } else {
+              simulation.run();
+              for (let k = 0; k < nodeArray.length; k++) {
+                node = nodeArray[k];
+                expect(node.currentValue, `Step: ${j}, Node: ${node.title}`).to.be.closeTo(result[k], 0.000001);
               }
             }
-            return result1;
-          })();
+          }
         })
       );
     });
 
-    describe("for mixed semiquantitative and quantitative nodes", function() {
-      beforeEach(function() {
+    describe("for mixed semiquantitative and quantitative nodes", () => {
+      beforeEach(() => {
         this.nodeA    = new Node({initialValue: 20});
         this.nodeB    = new Node({initialValue: 50});
         this.formula  = "1 * in";
@@ -335,53 +307,53 @@ describe("Simulation", function() {
           duration: 1
         };
 
-        LinkNodes(this.nodeA, this.nodeB, { type: 'range', formula: this.formula });
-        return this.simulation = new Simulation(this.arguments);
+        LinkNodes(this.nodeA, this.nodeB, { type: "range", formula: this.formula });
+        this.simulation = new Simulation(this.arguments);
       });
 
-      describe("when the input is SQ and the output is Q", function() {
-        beforeEach(function() {
+      describe("when the input is SQ and the output is Q", () => {
+        beforeEach(() => {
           this.nodeA.valueDefinedSemiQuantitatively = true;
-          return this.nodeB.valueDefinedSemiQuantitatively = false;
+          this.nodeB.valueDefinedSemiQuantitatively = false;
         });
 
         // sanity check
-        it("should be no different when both have the same range", function() {
+        it("should be no different when both have the same range", () => {
           this.simulation.run();
-          return this.nodeB.currentValue.should.equal(20);
+          this.nodeB.currentValue.should.equal(20);
         });
 
-        return it("should scale between output's min and max", function() {
+        it("should scale between output's min and max", () => {
           this.nodeB.min = 50;
           this.nodeB.max = 100;
           this.simulation.run();
-          return this.nodeB.currentValue.should.equal(60);
+          this.nodeB.currentValue.should.equal(60);
         });
       });
 
-      return describe("when the input is Q and the output is SQ", function() {
-        beforeEach(function() {
+      describe("when the input is Q and the output is SQ", () => {
+        beforeEach(() => {
           this.nodeA.valueDefinedSemiQuantitatively = false;
-          return this.nodeB.valueDefinedSemiQuantitatively = true;
+          this.nodeB.valueDefinedSemiQuantitatively = true;
         });
 
         // sanity check
-        it("should be no different when both have the same range", function() {
+        it("should be no different when both have the same range", () => {
           this.simulation.run();
-          return this.nodeB.currentValue.should.equal(20);
+          this.nodeB.currentValue.should.equal(20);
         });
 
-        return it("should scale between output's min and max", function() {
+        it("should scale between output's min and max", () => {
           this.nodeA.min = 0;
           this.nodeA.max = 50;
           this.simulation.run();
-          return this.nodeB.currentValue.should.equal(40);
+          this.nodeB.currentValue.should.equal(40);
         });
       });
     });
 
-    return describe("for transfer nodes", function() {
-      beforeEach(function() {
+    describe("for transfer nodes", () => {
+      beforeEach(() => {
         this.nodeA    = new Node({title: "A", isAccumulator: true, initialValue: 100});
         this.nodeB    = new Node({title: "B", isAccumulator: true, initialValue: 50});
         this.transferLink = LinkNodes(this.nodeA, this.nodeB, RelationFactory.transferred);
@@ -391,46 +363,46 @@ describe("Simulation", function() {
           duration: 2
         };
 
-        return this.simulation = new Simulation(this.arguments);
+        this.simulation = new Simulation(this.arguments);
       });
 
-      return describe("should transfer appropriate amount from the source node to the target node", function() {
+      describe("should transfer appropriate amount from the source node to the target node", () => {
 
         // sanity check
-        it("should transfer (transwerNode.initialValue 50) to B with no transfer-modifier", function() {
+        it("should transfer (transwerNode.initialValue 50) to B with no transfer-modifier", () => {
           this.transferNode.initialValue = 50;
           this.simulation.run();
           expect(this.nodeA.currentValue, `Node: ${this.nodeA.title}`).to.be.closeTo(50, 0.000001);
-          return expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(100, 0.000001);
+          expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(100, 0.000001);
         });
 
         // sanity check
-        it("should transfer (transwerNode.initialValue 80) to B with no transfer-modifier", function() {
+        it("should transfer (transwerNode.initialValue 80) to B with no transfer-modifier", () => {
           this.transferNode.initialValue = 80;
           this.simulation.run();
           expect(this.nodeA.currentValue, `Node: ${this.nodeA.title}`).to.be.closeTo(20, 0.000001);
-          return expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(130, 0.000001);
+          expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(130, 0.000001);
         });
 
         // sanity check
-        it("should limit the transfer to the quantity in the source node", function() {
+        it("should limit the transfer to the quantity in the source node", () => {
           this.nodeA.initialValue = 5;
           this.nodeA.capNodeValues = (this.nodeB.capNodeValues = true);
           this.simulation.duration = 12;
           this.simulation.run();
           expect(this.nodeA.currentValue, `Node: ${this.nodeA.title}`).to.be.closeTo(0, 0.000001);
-          return expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(55, 0.000001);
+          expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(55, 0.000001);
         });
 
         // sanity check
         // transfer 10% of source (2) per step. 20 - 2 = 18 ,  50 + 2 = 52
-        return it("should transfer the appropriate percentage of the source node with a transfer-modifer", function() {
+        it("should transfer the appropriate percentage of the source node with a transfer-modifer", () => {
           this.nodeA.initialValue = 20;
           this.transferModifier = LinkNodes(this.nodeA, this.transferNode, RelationFactory.proportionalSourceMore);
           this.simulation.duration = 2;
           this.simulation.run();
           expect(this.nodeA.currentValue, `Node: ${this.nodeA.title}`).to.be.closeTo(18, 0.000001);
-          return expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(52, 0.000001);
+          expect(this.nodeB.currentValue, `Node: ${this.nodeB.title}`).to.be.closeTo(52, 0.000001);
         });
       });
     });
@@ -438,8 +410,8 @@ describe("Simulation", function() {
 });
 
 
-describe("The SimulationStore, with a network in the GraphStore", function() {
-  beforeEach(function() {
+describe("The SimulationStore, with a network in the GraphStore", () => {
+  beforeEach(() => {
     CodapHelper.Stub();
 
     this.nodeA    = new Node({title: "A", initialValue: 10});
@@ -451,38 +423,38 @@ describe("The SimulationStore, with a network in the GraphStore", function() {
     GraphStore.addNode(this.nodeA);
     GraphStore.addNode(this.nodeB);
 
-    return LinkNodes(this.nodeA, this.nodeB, { type: 'range', formula: this.formula });
+    LinkNodes(this.nodeA, this.nodeB, { type: "range", formula: this.formula });
   });
 
   afterEach(() => CodapHelper.UnStub());
 
-  describe("for a fast simulation for 10 iterations", function() {
+  describe("for a fast simulation for 10 iterations", () => {
 
-    beforeEach(function() {
+    beforeEach(() => {
       SimulationActions.setDuration.trigger(10);
-      return SimulationActions.expandSimulationPanel.trigger();
+      SimulationActions.expandSimulationPanel.trigger();
     });
 
-    it("should call recordingDidStart with the node names", function(done) {
+    it("should call recordingDidStart with the node names", (done) => {
       asyncListenTest(done, SimulationActions.recordingDidStart, nodeNames => nodeNames.should.eql(["A", "B"]));
 
       SimulationActions.createExperiment();
       SimulationActions.recordPeriod();
     });
 
-    return it("should call simulationFramesCreated with all the step values", function(done) {
+    it("should call simulationFramesCreated with all the step values", (done) => {
 
-      asyncListenTest(done, SimulationActions.recordingFramesCreated, function(data) {
+      asyncListenTest(done, SimulationActions.recordingFramesCreated, (data) => {
 
           data.length.should.equal(10);
 
           const frame0 = data[0];
           frame0.time.should.equal(11);
-          frame0.nodes.should.eql([ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]);
+          frame0.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
 
           const frame9 = data[9];
           frame9.time.should.equal(20);
-          return frame9.nodes.should.eql([ { title: 'A', value: 10 }, { title: 'B', value: 1 } ]);
+          frame9.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
     });
 
       SimulationActions.createExperiment();
@@ -490,16 +462,16 @@ describe("The SimulationStore, with a network in the GraphStore", function() {
     });
   });
 
-  return describe("for a slow simulation for 3 iterations", function() {
+  describe("for a slow simulation for 3 iterations", () => {
 
-    beforeEach(function() {
+    beforeEach(() => {
       SimulationActions.setDuration.trigger(3);
-      return SimulationActions.expandSimulationPanel.trigger();
+      SimulationActions.expandSimulationPanel.trigger();
     });
-    return it("should call simulationFramesCreated with 3 frames", function(done) {
-      const testFunction = function(data) {
+    it("should call simulationFramesCreated with 3 frames", (done) => {
+      const testFunction = (data) => {
         const size = data.length;
-        return size.should.eql(3);
+        size.should.eql(3);
       };
 
       asyncListenTest(done, SimulationActions.recordingFramesCreated, testFunction);

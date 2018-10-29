@@ -1,40 +1,25 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-global._      = require('lodash');
-global.log    = require('loglevel');
-global.Reflux = require('reflux');
-global.window = { location: '' };
-global.window.performance = {
+const g = global as any;
+
+g.window = { location: "" };
+g.window.performance = {
   now() {
     return Date.now();
   }
 };
-global.requestAnimationFrame = callback => setTimeout(callback, 1);
+g.requestAnimationFrame = callback => setTimeout(callback, 1);
 
-const chai = require('chai');
 chai.config.includeStack = true;
 
-const { expect }         = chai;
-const should         = chai.should();
-const Sinon          = require('sinon');
+import { Link } from "../src/code/models/link";
+import { Node } from "../src/code/models/node";
+import { RelationFactory } from "../src/code/models/relation-factory";
 
-const requireModel = name => require(`${__dirname}/../src/code/models/${name}`);
+import { GraphStore } from "../src/code/stores/graph-store";
+import { AppSettingsStore } from "../src/code/stores/app-settings-store";
 
-const Link            = requireModel('link');
-const Node            = requireModel('node');
-const RelationFactory = requireModel('relation-factory');
-const CodapHelper      = require("./codap-helper");
+import { Stub, UnStub } from "./codap-helper";
 
-const requireStore = name => require(`${__dirname}/../src/code/stores/${name}`);
-
-const GraphStore       = requireStore('graph-store').store;
-const AppSettingsStore = requireStore('app-settings-store').store;
-
-
-const LinkNodes = function(sourceNode, targetNode, relation) {
+const LinkNodes = (sourceNode, targetNode, relation?) => {
   const link = new Link({
     title: "function",
     sourceNode,
@@ -44,37 +29,37 @@ const LinkNodes = function(sourceNode, targetNode, relation) {
   return link;
 };
 
-describe("Complexity", function() {
-  beforeEach(function() {
-    CodapHelper.Stub();
+describe("Complexity", () => {
+  beforeEach(() => {
+    Stub();
     this.graphStore = GraphStore;
-    return this.graphStore.init();
+    this.graphStore.init();
   });
 
-  afterEach(() => CodapHelper.UnStub());
+  afterEach(() => UnStub());
 
-  describe("The minimum complexity", function() {
+  describe("The minimum complexity", () => {
 
-    describe("for a graph without relations", function() {
-      beforeEach(function() {
-        const nodeA    = new Node();
-        const nodeB    = new Node();
+    describe("for a graph without relations", () => {
+      beforeEach(() => {
+        const nodeA    = new Node({});
+        const nodeB    = new Node({});
         const link     = LinkNodes(nodeA, nodeB);
 
         this.graphStore.addNode(nodeA);
         this.graphStore.addNode(nodeB);
-        return this.graphStore.addLink(link);
+        this.graphStore.addLink(link);
       });
 
-      return it("should be basic", function() {
-        return this.graphStore.getMinimumComplexity().should.equal(AppSettingsStore.Complexity.basic);
+      it("should be basic", () => {
+        this.graphStore.getMinimumComplexity().should.equal(AppSettingsStore.Complexity.basic);
       });
     });
 
-    describe("for a graph with only an `about the same` relation", function() {
-      beforeEach(function() {
-        const nodeA    = new Node();
-        const nodeB    = new Node();
+    describe("for a graph with only an `about the same` relation", () => {
+      beforeEach(() => {
+        const nodeA    = new Node({});
+        const nodeB    = new Node({});
         const vector   = RelationFactory.decrease;
         const scalar   = RelationFactory.aboutTheSame;
         const relation = RelationFactory.fromSelections(vector, scalar);
@@ -82,18 +67,18 @@ describe("Complexity", function() {
 
         this.graphStore.addNode(nodeA);
         this.graphStore.addNode(nodeB);
-        return this.graphStore.addLink(link);
+        this.graphStore.addLink(link);
       });
 
-      return it("should be basic", function() {
-        return this.graphStore.getMinimumComplexity().should.equal(AppSettingsStore.Complexity.basic);
+      it("should be basic", () => {
+        this.graphStore.getMinimumComplexity().should.equal(AppSettingsStore.Complexity.basic);
       });
     });
 
-    return describe("for a graph with an `a lot` relation", function() {
-      beforeEach(function() {
-        const nodeA    = new Node();
-        const nodeB    = new Node();
+    describe("for a graph with an `a lot` relation", () => {
+      beforeEach(() => {
+        const nodeA    = new Node({});
+        const nodeB    = new Node({});
         const vector   = RelationFactory.increase;
         const scalar   = RelationFactory.aLot;
         const relation = RelationFactory.fromSelections(vector, scalar);
@@ -101,37 +86,37 @@ describe("Complexity", function() {
 
         this.graphStore.addNode(nodeA);
         this.graphStore.addNode(nodeB);
-        return this.graphStore.addLink(link);
+        this.graphStore.addLink(link);
       });
 
-      return it("should be expanded", function() {
-        return this.graphStore.getMinimumComplexity().should.equal(AppSettingsStore.Complexity.expanded);
+      it("should be expanded", () => {
+        this.graphStore.getMinimumComplexity().should.equal(AppSettingsStore.Complexity.expanded);
       });
     });
   });
 
 
-  return describe("The minimum simulation type", function() {
-    describe("for a graph without relations", function() {
-      beforeEach(function() {
-        const nodeA    = new Node();
-        const nodeB    = new Node();
+  describe("The minimum simulation type", () => {
+    describe("for a graph without relations", () => {
+      beforeEach(() => {
+        const nodeA    = new Node({});
+        const nodeB    = new Node({});
         const link     = LinkNodes(nodeA, nodeB);
 
         this.graphStore.addNode(nodeA);
         this.graphStore.addNode(nodeB);
-        return this.graphStore.addLink(link);
+        this.graphStore.addLink(link);
       });
 
-      return it("should be diagramOnly", function() {
-        return this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.diagramOnly);
+      it("should be diagramOnly", () => {
+        this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.diagramOnly);
       });
     });
 
-    describe("for a graph with relations but no collectors", function() {
-      beforeEach(function() {
-        const nodeA    = new Node();
-        const nodeB    = new Node();
+    describe("for a graph with relations but no collectors", () => {
+      beforeEach(() => {
+        const nodeA    = new Node({});
+        const nodeB    = new Node({});
         const vector   = RelationFactory.increase;
         const scalar   = RelationFactory.aLot;
         const relation = RelationFactory.fromSelections(vector, scalar);
@@ -139,27 +124,27 @@ describe("Complexity", function() {
 
         this.graphStore.addNode(nodeA);
         this.graphStore.addNode(nodeB);
-        return this.graphStore.addLink(link);
+        this.graphStore.addLink(link);
       });
 
-      return it("should be static", function() {
-        return this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.static);
+      it("should be static", () => {
+        this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.static);
       });
     });
 
-    return describe("for a graph with a collector", function() {
-      beforeEach(function() {
-        const nodeA    = new Node();
+    describe("for a graph with a collector", () => {
+      beforeEach(() => {
+        const nodeA    = new Node({});
         const nodeB    = new Node({isAccumulator: true});
         const link     = LinkNodes(nodeA, nodeB);
 
         this.graphStore.addNode(nodeA);
         this.graphStore.addNode(nodeB);
-        return this.graphStore.addLink(link);
+        this.graphStore.addLink(link);
       });
 
-      return it("should be collectors", function() {
-        return this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.time);
+      it("should be collectors", () => {
+        this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.time);
       });
     });
   });

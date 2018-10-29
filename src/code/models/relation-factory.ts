@@ -283,7 +283,7 @@ export class RelationFactory {
     return new Relationship(options);
   }
 
-  public static fromSelections(vector, scalar, existingData) {
+  public static fromSelections(vector, scalar, existingData?) {
     let formula, func, magnitude, name;
     if ((vector != null) && vector.isCustomRelationship) {
       scalar = this.custom;

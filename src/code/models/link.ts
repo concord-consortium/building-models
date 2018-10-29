@@ -19,6 +19,7 @@ export class Link extends GraphPrimitive {
   }
 
   public transferNode: any;
+  public relation: any; // TODO: get concrete type
 
   private options: any; // TODO: get concrete type
   private sourceNode: any; // TODO: get concrete type
@@ -27,7 +28,6 @@ export class Link extends GraphPrimitive {
   private targetTerminal: any; // TODO: get concrete type
   private color: any; // TODO: get concrete type
   private title: any; // TODO: get concrete type
-  private relation: any; // TODO: get concrete type
   private reasoning: any; // TODO: get concrete type
   private jsPlumbConnection: any; // TODO: get concrete type
 

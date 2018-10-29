@@ -31,13 +31,16 @@ export class Relationship {
     log.error(`Expression:    ${expr}`);
     return log.error(`vars=${vars}`);
   }
+
+  public isDefined: boolean;
+  public formula: any;
+  public text: string;
+
   private opts: any;
   private type: string;
-  private text: string;
   private uiText: string;
   private func: any;
   private errHandler: any;
-  private isDefined: boolean;
   private isRange: boolean;
   private isAccumulator: boolean;
   private isTransfer: boolean;
@@ -45,7 +48,6 @@ export class Relationship {
   private hasError: boolean;
   private customData: any;
   private isCustomRelationship: boolean;
-  private formula: any;
 
   constructor(opts) {
     if (opts == null) { opts = {}; }

@@ -27,7 +27,7 @@ export const TimeUnits = {
 
   defaultCollectorUnit: "STEP",
 
-  toString(unit, plural) {
+  toString(unit, plural?) {
     const number = plural ? ".PLURAL" : "";
     return tr(`~TIME.${unit}${number}`);
   },

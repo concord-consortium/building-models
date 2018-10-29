@@ -1,80 +1,70 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-global._      = require('lodash');
-global.log    = require('loglevel');
-global.Reflux = require('reflux');
+const g = global as any;
 
-global.window = { location: '' };
+g.window = { location: "" };
 
-const chai = require('chai');
 chai.config.includeStack = true;
 
-const { expect }         = chai;
-const should         = chai.should();
-const Sinon          = require('sinon');
+const Sinon = require("sinon");
 
-const ImageDialogStore = require("../src/code/stores/image-dialog-store");
+import { ImageDialogStore } from "../src/code/stores/image-dialog-store";
 
-describe('ImageDialogStore', function() {
+describe("ImageDialogStore", () => {
 
-  beforeEach(function() {
+  beforeEach(() => {
     this.clock = Sinon.useFakeTimers();
-    return this.mock = Sinon.mock(ImageDialogStore.store);
+    this.mock = Sinon.mock(ImageDialogStore.store);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     this.clock.restore();
-    return this.mock.restore();
+    this.mock.restore();
   });
 
-  it('GraphPrimitive should exists', () => ImageDialogStore.should.exist);
+  it("GraphPrimitive should exists", () => ImageDialogStore.should.exist());
 
-  return describe('the ImageDialogStore Actions', function() {
-    beforeEach(function() {
-      return this.actions = ImageDialogStore.actions;
+  describe("the ImageDialogStore Actions", () => {
+    beforeEach(() => {
+      this.actions = ImageDialogStore.actions;
     });
 
-    return describe('open', function() {
-      describe('with no callback', function() {
-        beforeEach(function() {
+    describe("open", () => {
+      describe("with no callback", () => {
+        beforeEach(() => {
           this.actions.open(false);
-          return this.clock.tick(1);
+          this.clock.tick(1);
         });
 
         it("should try to keep the dialog open", () => ImageDialogStore.store.keepShowing.should.equal(true));
 
-        return it("shouldn't call 'close' when finishing", function() {
+        it("shouldn't call 'close' when finishing", () => {
           this.mock.expects("close").never();
           this.actions.cancel();
           this.clock.tick(1);
-          return this.mock.verify();
+          this.mock.verify();
         });
       });
 
 
-      return describe("when opened with a callback function", function() {
-        beforeEach(function() {
+      describe("when opened with a callback function", () => {
+        beforeEach(() => {
           this.callbackF = Sinon.spy();
           this.actions.open(this.callbackF);
-          return this.clock.tick(1);
+          this.clock.tick(1);
         });
 
         it("shouldn't keep the dialog open", () => ImageDialogStore.store.keepShowing.should.equal(false));
 
-        it("should call 'close' when finishing", function() {
+        it("should call 'close' when finishing", () => {
           this.mock.expects("close");
           this.actions.cancel();
           this.clock.tick(1);
-          return this.mock.verify();
+          this.mock.verify();
         });
 
-        return it("should call the callback when finishing", function() {
+        it("should call the callback when finishing", () => {
           this.actions.cancel();
           this.clock.tick(1);
-          return this.callbackF.called.should.be.true;
+          this.callbackF.called.should.be.true();
         });
       });
     });

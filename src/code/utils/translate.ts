@@ -35,7 +35,7 @@ const defaultLang = urlParams.lang && translations[urlParams.lang] ? urlParams.l
 
 const varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
 
-const translate = (key, vars?, lang?) => {
+export const translate = (key, vars?, lang?) => {
   if (vars == null) { vars = {}; }
   if (lang == null) { lang = defaultLang; }
   let translation = translations[lang] != null ? translations[lang][key] : undefined;

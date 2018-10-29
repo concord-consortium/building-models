@@ -1,30 +1,22 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-global.window = { location: '' };
+const g = global as any;
+g.window = { location: "" };
 
-const chai = require('chai');
 chai.config.includeStack = true;
 
-const { expect }         = chai;
-const should         = chai.should();
-const Sinon          = require('sinon');
+const { expect } = chai;
 
-const requireModel = name => require(`${__dirname}/../src/code/models/${name}`);
-const Node           = requireModel('node');
+import { Node } from "../src/code/models/node";
 
 describe("Serialization", () =>
-  describe("for a single default Node", function() {
-    beforeEach(function() {
-      this.node = new Node({title: "a", x:10, y:15}, 'a');
-      return this.serializedForm = this.node.toExport();
+  describe("for a single default Node", () => {
+    beforeEach(() => {
+      this.node = new Node({title: "a", x: 10, y: 15}, "a");
+      this.serializedForm = this.node.toExport();
     });
 
-    return describe("its serialized form", () =>
-      it("should always include `combineMethod`", function() {
-        return expect(this.serializedForm.data.combineMethod).to.equal('average');
+    describe("its serialized form", () =>
+      it("should always include `combineMethod`", () => {
+        expect(this.serializedForm.data.combineMethod).to.equal("average");
       })
     );
   })
