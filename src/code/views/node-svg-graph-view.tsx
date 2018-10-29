@@ -9,7 +9,7 @@ import { CSSProperties } from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { SimulationStore, SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
+import { SimulationStore, SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
 import { Mixer } from "../mixins/components";
 
 interface NodeSvgGraphViewOuterProps {
@@ -25,10 +25,10 @@ interface NodeSvgGraphViewOuterProps {
   innerColor: string;
   image: JSX.Element;
 }
-type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps;
+type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps & SimulationMixinProps;
 
 interface NodeSvgGraphViewOuterState {}
-type NodeSvgGraphViewState = NodeSvgGraphViewOuterState | SimulationMixin2State;
+type NodeSvgGraphViewState = NodeSvgGraphViewOuterState & SimulationMixinState;
 
 export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphViewState> {
 
@@ -36,8 +36,9 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
   constructor(props: NodeSvgGraphViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin2(this, props)];
-    this.setInitialState({}, SimulationMixin2.InitialState);
+    this.mixins = [new SimulationMixin(this, props)];
+    const outerState: NodeSvgGraphViewOuterState = {};
+    this.setInitialState(outerState, SimulationMixin.InitialState);
   }
 
   public render() {

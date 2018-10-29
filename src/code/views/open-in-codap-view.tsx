@@ -6,7 +6,9 @@ interface OpenInCodapViewProps {
   disabled: boolean;
 }
 
-export class OpenInCodapView extends React.Component<OpenInCodapViewProps, {}> {
+interface OpenInCodapViewState {}
+
+export class OpenInCodapView extends React.Component<OpenInCodapViewProps, OpenInCodapViewState> {
 
   public static displayName = "OpenInCodapView";
 

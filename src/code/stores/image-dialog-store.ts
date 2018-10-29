@@ -1,11 +1,4 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 // TODO:  This should be split up into and ImageDialogStore and a DialogStore…
-
 
 const _ = require("lodash");
 const Reflux = require("reflux");
@@ -117,45 +110,16 @@ export const ImageDialogStore = Reflux.createStore({
   }
 });
 
-export const ImageDialogMixin = {
-  actions: ImageDialogActions,
+export interface ImageDialogMixinProps {}
 
-  getInitialState() {
-    return {
-      showingDialog: ImageDialogStore.showingDialog,
-      keepShowing: ImageDialogStore.keepShowing,
-      paletteItem: ImageDialogStore.paletteItem,
-      selectedImage: ImageDialogStore.paletteItem
-    };
-  },
-
-  componentDidMount() {
-    return this.unsubscribe = ImageDialogStore.listen(this.onChange);
-  },
-
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onChange(status) {
-    return this.setState({
-      showingDialog: status.showingDialog,
-      keepShowing: status.keepShowing,
-      paletteItem: status.paletteItem,
-      selectedImage: status.paletteItem
-    });
-  }
-};
-
-export interface ImageDialogMixin2Props {}
-export interface ImageDialogMixin2State {
+export interface ImageDialogMixinState {
   showingDialog: boolean;
   keepShowing: boolean;
   paletteItem: boolean;
   selectedImage: boolean;
 }
 
-export class ImageDialogMixin2 extends Mixin<{}, ImageDialogMixin2State> {
+export class ImageDialogMixin extends Mixin<ImageDialogMixinProps, ImageDialogMixinState> {
   public actions = ImageDialogActions;
   private unsubscribe: StoreUnsubscriber;
 
@@ -177,7 +141,7 @@ export class ImageDialogMixin2 extends Mixin<{}, ImageDialogMixin2State> {
   }
 }
 
-ImageDialogMixin2.InitialState = {
+ImageDialogMixin.InitialState = {
   showingDialog: ImageDialogStore.showingDialog,
   keepShowing: ImageDialogStore.keepShowing,
   paletteItem: ImageDialogStore.paletteItem,

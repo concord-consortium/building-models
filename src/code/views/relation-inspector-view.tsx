@@ -16,8 +16,8 @@ import { TabbedPanelView } from "./tabbed-panel-view";
 import { RelationFactory } from "../models/relation-factory";
 import { tr } from "../utils/translate";
 
-import { InspectorPanelActions, InspectorPanelMixin, InspectorPanelMixin2Props, InspectorPanelMixin2State, InspectorPanelMixin2 } from "../stores/inspector-panel-store";
-import { GraphStore, GraphMixin, GraphMixin2, GraphMixin2Props, GraphMixin2State } from "../stores/graph-store";
+import { InspectorPanelActions, InspectorPanelMixinProps, InspectorPanelMixinState, InspectorPanelMixin } from "../stores/inspector-panel-store";
+import { GraphStore, GraphMixin, GraphMixinProps, GraphMixinState } from "../stores/graph-store";
 import { Mixer } from "../mixins/components";
 
 interface RelationInspectorViewOuterProps {
@@ -28,8 +28,8 @@ interface RelationInspectorViewOuterProps {
 interface RelationInspectorViewOuterState {
 }
 
-type RelationInspectorViewProps = RelationInspectorViewOuterProps & InspectorPanelMixin2Props & GraphMixin2Props;
-type RelationInspectorViewState = RelationInspectorViewOuterState & InspectorPanelMixin2State & GraphMixin2State;
+type RelationInspectorViewProps = RelationInspectorViewOuterProps & InspectorPanelMixinProps & GraphMixinProps;
+type RelationInspectorViewState = RelationInspectorViewOuterState & InspectorPanelMixinState & GraphMixinState;
 
 export class RelationInspectorView extends Mixer<RelationInspectorViewProps, RelationInspectorViewState> {
 
@@ -39,9 +39,9 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
   // (link-relation-view uses @props.graphStore.changeLink() to update the link)
   constructor(props: RelationInspectorViewProps) {
     super(props);
-    this.mixins = [new InspectorPanelMixin2(this, props), new GraphMixin2(this, props)];
+    this.mixins = [new InspectorPanelMixin(this, props), new GraphMixin(this, props)];
     const outerState: RelationInspectorViewOuterState = {};
-    this.setInitialState(outerState, InspectorPanelMixin2.InitialState);
+    this.setInitialState(outerState, InspectorPanelMixin.InitialState);
   }
 
     public render() {

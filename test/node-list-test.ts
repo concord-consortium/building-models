@@ -203,7 +203,7 @@ describe("NodeList", () => {
 
         this.nodeA = new Node({title: "a", x: 10, y: 10}, "a");
         this.nodeB = new Node({title: "b", x: 20, y: 20}, "b");
-        this.graphStore = GraphStore.store;
+        this.graphStore = GraphStore;
         this.graphStore.init();
         this.graphStore.addNode(this.nodeA);
         this.graphStore.addNode(this.nodeB);
@@ -265,7 +265,7 @@ describe("NodeList", () => {
         LinkNodes(this.nodeC, this.nodeA, this.formula);
         LinkNodes(this.nodeB, this.nodeD, this.formula);
 
-        const graphStore = GraphStore.store;
+        const graphStore = GraphStore;
         graphStore.init();
         graphStore.addNode(this.nodeA);
         graphStore.addNode(this.nodeB);
@@ -306,7 +306,7 @@ describe("NodeList", () => {
         LinkNodes(this.nodeD, this.nodeB, this.formula);
         LinkNodes(this.nodeC, this.nodeE, this.formula);
 
-        const graphStore = GraphStore.store;
+        const graphStore = GraphStore;
         graphStore.init();
         graphStore.addNode(this.nodeA);
         graphStore.addNode(this.nodeB);
@@ -344,7 +344,7 @@ describe("NodeList", () => {
         LinkNodes(this.nodeA, this.nodeB, this.formula);
         LinkNodes(this.nodeB, this.nodeC, this.formula);
 
-        const graphStore = GraphStore.store;
+        const graphStore = GraphStore;
         graphStore.init();
         graphStore.addNode(this.nodeA);
         graphStore.addNode(this.nodeB);
@@ -375,7 +375,7 @@ describe("NodeList", () => {
         LinkNodes(this.nodeA, this.nodeB);
         LinkNodes(this.nodeB, this.nodeC, this.formula);
 
-        const graphStore = GraphStore.store;
+        const graphStore = GraphStore;
         graphStore.init();
         graphStore.addNode(this.nodeA);
         graphStore.addNode(this.nodeB);
@@ -409,7 +409,7 @@ describe("NodeList", () => {
       const linkA = makeLink(nodeA, nodeB, formula);
       const linkB = makeLink(nodeB, nodeC, formula);
       const linkC = makeLink(nodeC, nodeD);
-      const graphStore = GraphStore.store;
+      const graphStore = GraphStore;
       graphStore.init();
       graphStore.addNode(nodeA);
       graphStore.addNode(nodeB);
@@ -422,13 +422,13 @@ describe("NodeList", () => {
 
 
     it("should describe the visual links correctly", () => {
-      const graphStore = GraphStore.store;
+      const graphStore = GraphStore;
       const desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks());
       desc.links.should.equal("10,15;1 * in;20,25|20,25;1 * in;30,35|30,35;undefined;40,45|4");
     });
 
     it("should describe the model graph correctly", () => {
-      const graphStore = GraphStore.store;
+      const graphStore = GraphStore;
       const desc = graphStore.getDescription(graphStore.getNodes(), graphStore.getLinks());
       desc.model.should.equal("steps:10|cap:false|Node-71:10;1 * in;Node-72:20;average|Node-72:20:cap;1 * in;Node-73;average|");
     });

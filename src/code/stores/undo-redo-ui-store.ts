@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 import { GraphStore } from "./graph-store";
 import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber } from "./store-class";
@@ -40,40 +32,14 @@ export const UndoRedoUIStore = Reflux.createStore({
   }
 });
 
-export const UndoRedoUIMixin = {
-  getInitialState() {
-    return {
-      canUndo: UndoRedoUIStore.canUndo,
-      canRedo: UndoRedoUIStore.canRedo
-    };
-  },
+export interface UndoRedoUIMixinProps {}
 
-  componentDidMount() {
-    this.unsubscribe = UndoRedoUIStore.listen(this.onUndoRedoUIStateChange);
-    // can't add listener in init due to order-of-initialization issues
-    GraphStore.addChangeListener(this.onUndoRedoUIStateChange);
-  },
-
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onUndoRedoUIStateChange(state) {
-    return this.setState({
-      canUndo: state.canUndo,
-      canRedo: state.canRedo
-    });
-  }
-};
-
-export interface UndoRedoUIMixin2Props {}
-
-export interface UndoRedoUIMixin2State {
+export interface UndoRedoUIMixinState {
   canUndo: boolean;
   canRedo: boolean;
 }
 
-export class UndoRedoUIMixin2 extends Mixin<UndoRedoUIMixin2Props, UndoRedoUIMixin2State> {
+export class UndoRedoUIMixin extends Mixin<UndoRedoUIMixinProps, UndoRedoUIMixinState> {
   private unsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -94,7 +60,7 @@ export class UndoRedoUIMixin2 extends Mixin<UndoRedoUIMixin2Props, UndoRedoUIMix
   }
 }
 
-UndoRedoUIMixin2.InitialState = {
+UndoRedoUIMixin.InitialState = {
   canUndo: UndoRedoUIStore.canUndo,
   canRedo: UndoRedoUIStore.canRedo
 };

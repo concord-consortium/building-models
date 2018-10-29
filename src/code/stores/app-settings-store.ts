@@ -7,8 +7,6 @@
 const _ = require("lodash");
 const Reflux = require("reflux");
 
-import * as React from "react";
-
 import { HashParams } from "../utils/hash-parameters";
 import { ImportActions } from "../actions/import-actions";
 import { urlParams } from "../utils/url-params";
@@ -164,29 +162,11 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
 AppSettingsStore.Complexity = Complexity;
 AppSettingsStore.SimulationType = SimulationType;
 
-export const AppSettingsMixin = {
-  getInitialState() {
-    return _.clone(AppSettingsStore.settings);
-  },
+export interface AppSettingsMixinProps {}
 
-  componentDidMount() {
-    return this.unsubscribe = AppSettingsStore.listen(this.onAppSettingsChange);
-  },
+export type AppSettingsMixinState = AppSettingsSettings;
 
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onAppSettingsChange(newData) {
-    return this.setState(_.clone(newData));
-  }
-};
-
-export interface AppSettingsMixin2Props {}
-
-export type AppSettingsMixin2State = AppSettingsSettings;
-
-export class AppSettingsMixin2 extends Mixin<{}, AppSettingsMixin2State> {
+export class AppSettingsMixin extends Mixin<AppSettingsMixinProps, AppSettingsMixinState> {
   private unsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -201,4 +181,4 @@ export class AppSettingsMixin2 extends Mixin<{}, AppSettingsMixin2State> {
     return this.setState(_.clone(newData));
   }
 }
-AppSettingsMixin2.InitialState = _.clone(AppSettingsStore.settings);
+AppSettingsMixin.InitialState = _.clone(AppSettingsStore.settings);

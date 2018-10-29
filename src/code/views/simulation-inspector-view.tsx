@@ -8,24 +8,29 @@ import * as _ from "lodash";
  */
 
 const { RadioGroup, Radio } = require("react-radio-group");
-import { SimulationActions, SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsActions, AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
+import { SimulationActions, SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsActions, AppSettingsMixin, AppSettingsMixinState, AppSettingsMixinProps } from "../stores/app-settings-store";
 import { GraphStore } from "../stores/graph-store";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 
 const { SimulationType, Complexity } = AppSettingsStore;
 
-type SimulationInspectorViewState = SimulationMixin2State & AppSettingsMixin2State;
+interface SimulationInspectorOuterProps {}
+type SimulationInspectorProps = SimulationInspectorOuterProps & SimulationMixinProps & AppSettingsMixinProps;
 
-export class SimulationInspectorView extends Mixer<{}, SimulationInspectorViewState> {
+interface SimulationInspectorViewOuterState {}
+type SimulationInspectorViewState = SimulationInspectorViewOuterState & SimulationMixinState & AppSettingsMixinState;
+
+export class SimulationInspectorView extends Mixer<SimulationInspectorProps, SimulationInspectorViewState> {
 
   public static displayName = "SimulationInspectorView";
 
   constructor(props: {}) {
     super(props);
-    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
-    this.setInitialState({}, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+    this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
+    const outerProps: SimulationInspectorOuterProps = {};
+    this.setInitialState(outerProps, SimulationMixin.InitialState, AppSettingsMixin.InitialState);
   }
 
   public render() {

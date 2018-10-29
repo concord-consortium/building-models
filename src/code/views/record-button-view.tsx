@@ -8,7 +8,9 @@ interface RecordButtonViewProps {
   onClick: (e: any) => void; // TODO: get concrete type
 }
 
-export class RecordButtonView extends React.Component<RecordButtonViewProps, {}> {
+interface RecordButtonViewState {}
+
+export class RecordButtonView extends React.Component<RecordButtonViewProps, RecordButtonViewState> {
 
   public static displayName = "RecordButtonView";
 

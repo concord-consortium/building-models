@@ -1,15 +1,17 @@
 import * as React from "react";
 import * as _ from "lodash";
 
-import { SimulationActions, SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
+import { SimulationActions, SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 
-interface ExperimentPanelViewProps {
+interface ExperimentPanelViewOuterProps {
   disabled: boolean;
 }
+type ExperimentPanelViewProps = ExperimentPanelViewOuterProps & SimulationMixinProps;
 
-type ExperimentPanelViewState = SimulationMixin2State;
+interface ExperimentPanelViewOuterState {}
+type ExperimentPanelViewState = ExperimentPanelViewOuterState & SimulationMixinState;
 
 export class ExperimentPanelView extends Mixer<ExperimentPanelViewProps, ExperimentPanelViewState> {
 
@@ -17,8 +19,9 @@ export class ExperimentPanelView extends Mixer<ExperimentPanelViewProps, Experim
 
   constructor(props: ExperimentPanelViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin2(this, props)];
-    this.setInitialState({}, SimulationMixin2.InitialState);
+    this.mixins = [new SimulationMixin(this, props)];
+    const outerState: ExperimentPanelViewOuterState = {};
+    this.setInitialState(outerState, SimulationMixin.InitialState);
   }
 
   public render() {

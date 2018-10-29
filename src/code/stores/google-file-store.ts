@@ -206,35 +206,9 @@ const waitForAuthCheck = () => {
 };
 waitForAuthCheck();
 
-export const GoogleFileMixin = {
-  getInitialState() {
-    return {
-      gapiLoaded:        false,
-      fileId:            null,
-      filename:          this.filename,
-      action:            tr("~FILE.CHECKING_AUTH"),
-      isPublic:          false,
-      docLink:          null,
-      showingSaveDialog: false
-    };
-  },
+export interface GoogleFileMixinProps {}
 
-  componentDidMount() {
-    return this.unsubscribe = GoogleFileStore.listen(this.onGoogleChange);
-  },
-
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onGoogleChange(newData) {
-    return this.setState(_.clone(newData));
-  }
-};
-
-export interface GoogleFileMixin2Props {}
-
-export interface GoogleFileMixin2State {
+export interface GoogleFileMixinState {
   gapiLoaded: boolean;
   fileId: string | null;
   filename: string;
@@ -244,7 +218,7 @@ export interface GoogleFileMixin2State {
   showingSaveDialog: boolean;
 }
 
-export class GoogleFileMixin2 extends Mixin<GoogleFileMixin2Props, GoogleFileMixin2State> {
+export class GoogleFileMixin extends Mixin<GoogleFileMixinProps, GoogleFileMixinState> {
   private unsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -260,7 +234,7 @@ export class GoogleFileMixin2 extends Mixin<GoogleFileMixin2Props, GoogleFileMix
   }
 }
 
-GoogleFileMixin2.InitialState = {
+GoogleFileMixin.InitialState = {
   gapiLoaded:        false,
   fileId:            null,
   filename:          "", // this.filename,  // TODO: figure out fix for this

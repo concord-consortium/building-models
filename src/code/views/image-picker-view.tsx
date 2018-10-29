@@ -3,7 +3,7 @@ import * as React from "react";
 import { tr } from "../utils/translate";
 
 import { PaletteAddView } from "./palette-add-view";
-import { PaletteMixin, PaletteMixin2Props, PaletteMixin2State, PaletteMixin2 } from "../stores/palette-store";
+import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/palette-store";
 import { Mixer } from "../mixins/components";
 
 interface ImgChoiceViewProps {
@@ -12,7 +12,9 @@ interface ImgChoiceViewProps {
   onChange: (node: any) => void; // TODO: get concrete type
 }
 
-class ImgChoiceView extends React.Component<ImgChoiceViewProps, {}> {
+interface ImgChoiceViewState {}
+
+class ImgChoiceView extends React.Component<ImgChoiceViewProps, ImgChoiceViewState> {
 
   public static displayName = "ImgChoiceView";
 
@@ -41,8 +43,8 @@ interface ImagePickerViewOuterState {
   opened: boolean;
 }
 
-type ImagePickerViewProps = ImagePickerViewOuterProps & PaletteMixin2Props;
-type ImagePickerViewState = ImagePickerViewOuterState & PaletteMixin2State;
+type ImagePickerViewProps = ImagePickerViewOuterProps & PaletteMixinProps;
+type ImagePickerViewState = ImagePickerViewOuterState & PaletteMixinState;
 
 export class ImagePickerView extends Mixer<ImagePickerViewProps, ImagePickerViewState> {
 
@@ -50,9 +52,9 @@ export class ImagePickerView extends Mixer<ImagePickerViewProps, ImagePickerView
 
   constructor(props: ImagePickerViewProps) {
     super(props);
-    this.mixins = [new PaletteMixin2(this, props)];
+    this.mixins = [new PaletteMixin(this, props)];
     const outerState: ImagePickerViewOuterState = {opened: false};
-    this.setInitialState(outerState, PaletteMixin2.InitialState);
+    this.setInitialState(outerState, PaletteMixin.InitialState);
   }
 
   public render() {

@@ -1,13 +1,6 @@
 import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber } from "./store-class";
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const _ = require("lodash");
 const Reflux = require("reflux");
 
@@ -49,29 +42,11 @@ export const InspectorPanelStore = Reflux.createStore({
   }
 });
 
-export const InspectorPanelMixin = {
-  getInitialState() {
-    return _.clone(InspectorPanelStore.settings);
-  },
+export interface InspectorPanelMixinProps {}
 
-  componentDidMount() {
-    return this.inspectorPanelUnsubscribe = InspectorPanelStore.listen(this.onInspectorPanelStoreChange);
-  },
+export type InspectorPanelMixinState = InspectorPanelSettings;
 
-  componentWillUnmount() {
-    return this.inspectorPanelUnsubscribe();
-  },
-
-  onInspectorPanelStoreChange(newData) {
-    return this.setState(_.clone(newData));
-  }
-};
-
-export interface InspectorPanelMixin2Props {}
-
-export type InspectorPanelMixin2State = InspectorPanelSettings;
-
-export class InspectorPanelMixin2 extends Mixin<InspectorPanelMixin2Props, InspectorPanelMixin2State> {
+export class InspectorPanelMixin extends Mixin<InspectorPanelMixinProps, InspectorPanelMixinState> {
   private inspectorPanelUnsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -87,4 +62,4 @@ export class InspectorPanelMixin2 extends Mixin<InspectorPanelMixin2Props, Inspe
   }
 }
 
-InspectorPanelMixin2.InitialState = _.clone(InspectorPanelStore.settings);
+InspectorPanelMixin.InitialState = _.clone(InspectorPanelStore.settings);

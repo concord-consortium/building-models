@@ -8,7 +8,10 @@ interface DraggableMixinOptions {
   removeClasses?: string[];
 }
 
-export class DraggableMixin extends Mixin<{}, {}> {
+export interface DraggableMixinProps {}
+export interface DraggableMixinState {}
+
+export class DraggableMixin extends Mixin<DraggableMixinProps, DraggableMixinState> {
   private doMove: ((e, extra) => void);
   private removeClasses: string[];
 

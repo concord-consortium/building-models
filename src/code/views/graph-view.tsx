@@ -21,14 +21,14 @@ import { DiagramToolkit } from "../utils/js-plumb-diagram-toolkit";
 import { dropImageHandler } from "../utils/drop-image-handler";
 import { tr } from "../utils/translate";
 import { PaletteStore, PaletteActions } from "../stores/palette-store";
-import { GraphStore, GraphMixin, GraphMixin2Props, GraphMixin2State, GraphMixin2 } from "../stores/graph-store";
+import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin } from "../stores/graph-store";
 import { ImageDialogActions } from "../stores/image-dialog-store";
 import { RelationFactory } from "../models/relation-factory";
 
-import { SimulationMixin, SimulationMixin2Props, SimulationMixin2State, SimulationMixin2 } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsMixin, AppSettingsMixin2Props, AppSettingsMixin2State, AppSettingsMixin2 } from "../stores/app-settings-store";
-import { CodapMixin, CodapMixin2Props, CodapMixin2State, CodapMixin2 } from "../stores/codap-store";
-import { LaraMixin, LaraMixin2Props, LaraMixin2State, LaraMixin2 } from "../stores/lara-store";
+import { SimulationMixinProps, SimulationMixinState, SimulationMixin } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
+import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-store";
+import { LaraMixinProps, LaraMixinState, LaraMixin } from "../stores/lara-store";
 import { LinkColors } from "../utils/link-colors";
 import { Mixer } from "../mixins/components";
 
@@ -40,7 +40,7 @@ interface GraphViewOuterProps {
   transferTarget?: any; // TODO: get concrete type
   linkTarget?: any; // TODO: get concrete type
 }
-type GraphViewProps = GraphViewOuterProps & GraphMixin2Props & SimulationMixin2Props & AppSettingsMixin2Props & CodapMixin2Props & LaraMixin2Props;
+type GraphViewProps = GraphViewOuterProps & GraphMixinProps & SimulationMixinProps & AppSettingsMixinProps & CodapMixinProps & LaraMixinProps;
 
 interface GraphViewOuterState {
   selectedNodes: any[]; // TODO: get concrete type
@@ -56,7 +56,7 @@ interface GraphViewOuterState {
     y: number;
   };
 }
-type GraphViewState = GraphViewOuterState & GraphMixin2State & SimulationMixin2State & AppSettingsMixin2State & CodapMixin2State & LaraMixin2State;
+type GraphViewState = GraphViewOuterState & GraphMixinState & SimulationMixinState & AppSettingsMixinState & CodapMixinState & LaraMixinState;
 
 export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
@@ -72,7 +72,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   constructor(props: GraphViewProps) {
     super(props);
-    this.mixins = [new GraphMixin2(this, props), new SimulationMixin2(this, props), new AppSettingsMixin2(this, props), new CodapMixin2(this, props), new LaraMixin2(this, props)];
+    this.mixins = [new GraphMixin(this, props), new SimulationMixin(this, props), new AppSettingsMixin(this, props), new CodapMixin(this, props), new LaraMixin(this, props)];
     const outerState: GraphViewOuterState = {
       selectedNodes: [],
       editingNode: null,
@@ -87,7 +87,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         y: 0
       }
     };
-    this.setInitialState(outerState, GraphMixin2.InitialState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState, CodapMixin2.InitialState, LaraMixin2.InitialState);
+    this.setInitialState(outerState, GraphMixin.InitialState, SimulationMixin.InitialState, AppSettingsMixin.InitialState, CodapMixin.InitialState, LaraMixin.InitialState);
   }
 
   public componentDidMount() {

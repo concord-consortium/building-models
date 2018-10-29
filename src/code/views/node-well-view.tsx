@@ -7,7 +7,7 @@ import * as React from "react";
  */
 
 import { PaletteInspectorView } from "./palette-inspector-view";
-import { PaletteMixin, PaletteMixin2Props, PaletteMixin2State, PaletteMixin2 } from "../stores/palette-store";
+import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/palette-store";
 import { Mixer } from "../mixins/components";
 
 interface NodeWellViewOuterProps {
@@ -20,8 +20,8 @@ interface NodeWellViewOuterState {
   collapsed: boolean;
 }
 
-type NodeWellViewProps = NodeWellViewOuterProps & PaletteMixin2Props;
-type NodeWellViewState = NodeWellViewOuterState & PaletteMixin2State;
+type NodeWellViewProps = NodeWellViewOuterProps & PaletteMixinProps;
+type NodeWellViewState = NodeWellViewOuterState & PaletteMixinState;
 
 export class NodeWellView extends Mixer<NodeWellViewProps, NodeWellViewState> {
 
@@ -29,12 +29,12 @@ export class NodeWellView extends Mixer<NodeWellViewProps, NodeWellViewState> {
 
   constructor(props: NodeWellViewProps) {
     super(props);
-    this.mixins = [new PaletteMixin2(this, props)];
+    this.mixins = [new PaletteMixin(this, props)];
     const outerState: NodeWellViewOuterState = {
       nodes: [],
       collapsed: true
     };
-    this.setInitialState(outerState, PaletteMixin2.InitialState);
+    this.setInitialState(outerState, PaletteMixin.InitialState);
   }
 
   public render() {

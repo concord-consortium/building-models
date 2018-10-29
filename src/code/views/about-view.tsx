@@ -1,12 +1,14 @@
 import * as React from "react";
 import * as $ from "jquery";
 
+interface AboutViewProps {}
+
 interface AboutViewState {
   showing: boolean;
   year: string;
 }
 
-export class AboutView extends React.Component<{}, AboutViewState> {
+export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
 
   public static displayName = "AboutView";
 

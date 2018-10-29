@@ -44,38 +44,14 @@ export const CodapStore: CodapStoreClass = Reflux.createStore({
   }
 });
 
-export const CodapMixin = {
-  getInitialState() {
-    return {
-      codapHasLoaded: CodapStore.codapHasLoaded,
-      hideUndoRedo:   CodapStore.hideUndoRedo
-    };
-  },
+export interface CodapMixinProps {}
 
-  componentDidMount() {
-    return this.unsubscribe = CodapStore.listen(this.onCodapStateChange);
-  },
-
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onCodapStateChange(status) {
-    return this.setState({
-      codapHasLoaded: status.codapHasLoaded,
-      hideUndoRedo:   status.hideUndoRedo
-    });
-  }
-};
-
-export interface CodapMixin2Props {}
-
-export interface CodapMixin2State {
+export interface CodapMixinState {
   codapHasLoaded: boolean;
   hideUndoRedo: boolean;
 }
 
-export class CodapMixin2 extends Mixin<CodapMixin2Props, CodapMixin2State> {
+export class CodapMixin extends Mixin<CodapMixinProps, CodapMixinState> {
   private unsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -94,7 +70,7 @@ export class CodapMixin2 extends Mixin<CodapMixin2Props, CodapMixin2State> {
   }
 }
 
-CodapMixin2.InitialState = {
+CodapMixin.InitialState = {
   codapHasLoaded: CodapStore.codapHasLoaded,
   hideUndoRedo:   CodapStore.hideUndoRedo
 };

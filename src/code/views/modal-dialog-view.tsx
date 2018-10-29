@@ -7,7 +7,9 @@ interface ModalDialogViewProps {
   close?: () => void;
 }
 
-export class ModalDialogView extends React.Component<ModalDialogViewProps, {}> {
+interface ModalDialogViewState {}
+
+export class ModalDialogView extends React.Component<ModalDialogViewProps, ModalDialogViewState> {
 
   public static displayName = "ModalDialogView";
 

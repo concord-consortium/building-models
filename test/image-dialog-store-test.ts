@@ -13,7 +13,7 @@ describe("ImageDialogStore", () => {
 
   beforeEach(() => {
     this.clock = Sinon.useFakeTimers();
-    this.mock = Sinon.mock(ImageDialogStore.store);
+    this.mock = Sinon.mock(ImageDialogStore);
   });
 
   afterEach(() => {
@@ -35,7 +35,7 @@ describe("ImageDialogStore", () => {
           this.clock.tick(1);
         });
 
-        it("should try to keep the dialog open", () => ImageDialogStore.store.keepShowing.should.equal(true));
+        it("should try to keep the dialog open", () => ImageDialogStore.keepShowing.should.equal(true));
 
         it("shouldn't call 'close' when finishing", () => {
           this.mock.expects("close").never();
@@ -53,7 +53,7 @@ describe("ImageDialogStore", () => {
           this.clock.tick(1);
         });
 
-        it("shouldn't keep the dialog open", () => ImageDialogStore.store.keepShowing.should.equal(false));
+        it("shouldn't keep the dialog open", () => ImageDialogStore.keepShowing.should.equal(false));
 
         it("should call 'close' when finishing", () => {
           this.mock.expects("close");

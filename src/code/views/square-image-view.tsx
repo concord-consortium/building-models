@@ -4,7 +4,9 @@ interface SquareImageViewProps {
   image?: string;
 }
 
-export class SquareImageView extends React.Component<SquareImageViewProps, {}> {
+interface SquareImageViewState {}
+
+export class SquareImageView extends React.Component<SquareImageViewProps, SquareImageViewState> {
 
   public static displayName = "SquareImageView";
 

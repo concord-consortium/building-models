@@ -21,7 +21,7 @@ import { NodeSvgGraphView } from "./node-svg-graph-view";
 import { CodapConnect } from "../models/codap-connect";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
-import { NodeTitleMixin, NodeTitleMixin2State, NodeTitleMixin2Props, NodeTitleMixin2 } from "../mixins/node-title";
+import { NodeTitleMixinState, NodeTitleMixinProps, NodeTitleMixin } from "../mixins/node-title";
 
 import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
@@ -43,23 +43,23 @@ interface NodeTitleViewOuterState {
   isCancelled: boolean;
 }
 
-type NodeTitleViewProps = NodeTitleViewOuterProps & NodeTitleMixin2Props;
-type NodeTitleViewState = NodeTitleViewOuterState & NodeTitleMixin2State;
+type NodeTitleViewProps = NodeTitleViewOuterProps & NodeTitleMixinProps;
+type NodeTitleViewState = NodeTitleViewOuterState & NodeTitleMixinState;
 
 class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
 
   public static displayName = "NodeTitle";
 
-  private nodeTitleMixin: NodeTitleMixin2;
+  private nodeTitleMixin: NodeTitleMixin;
   private titleUpdated: boolean;
 
   constructor(props: NodeTitleViewProps) {
     super(props);
-    this.nodeTitleMixin = new NodeTitleMixin2(this, props);
+    this.nodeTitleMixin = new NodeTitleMixin(this, props);
     this.mixins = [this.nodeTitleMixin];
 
     const outerState: NodeTitleViewOuterState = this.getStateFromProps(props);
-    this.setInitialState(outerState, NodeTitleMixin2.InitialState);
+    this.setInitialState(outerState, NodeTitleMixin.InitialState);
   }
 
   public componentWillUnmount() {

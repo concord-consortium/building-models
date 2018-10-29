@@ -10,16 +10,16 @@ import { PaletteStore } from "../stores/palette-store";
 
 import { tr } from "../utils/translate";
 
-import { PaletteMixin2Props, PaletteMixin2State, PaletteMixin2 } from "../stores/palette-store";
-import { ImageDialogActions, ImageDialogMixin2, ImageDialogMixin2State, ImageDialogMixin2Props } from "../stores/image-dialog-store";
+import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/palette-store";
+import { ImageDialogActions, ImageDialogMixin, ImageDialogMixinState, ImageDialogMixinProps } from "../stores/image-dialog-store";
 import { Mixer } from "../mixins/components";
 
 interface ImageBrowserViewOuterProps {}
-type ImageBrowserViewProps = ImageBrowserViewOuterProps & PaletteMixin2Props & ImageDialogMixin2Props;
+type ImageBrowserViewProps = ImageBrowserViewOuterProps & PaletteMixinProps & ImageDialogMixinProps;
 
 interface ImageBrowserViewOuterState {
 }
-type ImageBrowserViewState = ImageBrowserViewOuterState & PaletteMixin2State & ImageDialogMixin2State;
+type ImageBrowserViewState = ImageBrowserViewOuterState & PaletteMixinState & ImageDialogMixinState;
 
 export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserViewState> {
 
@@ -28,8 +28,9 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
   constructor(props: ImageBrowserViewProps) {
     super(props);
 
-    this.mixins = [new ImageDialogMixin2(this, props), new PaletteMixin2(this, props)];
-    this.setInitialState({}, ImageDialogMixin2.InitialState, PaletteMixin2.InitialState);
+    this.mixins = [new ImageDialogMixin(this, props), new PaletteMixin(this, props)];
+    const outerState: ImageBrowserViewOuterState = {};
+    this.setInitialState(outerState, ImageDialogMixin.InitialState, PaletteMixin.InitialState);
   }
 
   public render() {

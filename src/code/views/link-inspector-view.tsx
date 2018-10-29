@@ -14,7 +14,9 @@ interface LinkInspectorViewProps {
   graphStore: any; // TODO: get concrete type
 }
 
-export class LinkInspectorView extends React.Component<LinkInspectorViewProps, {}> {
+interface LinkInspectorViewState {}
+
+export class LinkInspectorView extends React.Component<LinkInspectorViewProps, LinkInspectorViewState> {
 
   public static displayName = "LinkInspectorView";
 

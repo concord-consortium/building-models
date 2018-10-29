@@ -13,7 +13,9 @@ interface PaletteDeleteViewProps {
   ok?: () => void;
 }
 
-export class PaletteDeleteView extends React.Component<PaletteDeleteViewProps, {}> {
+interface PaletteDeleteViewState {}
+
+export class PaletteDeleteView extends React.Component<PaletteDeleteViewProps, PaletteDeleteViewState> {
 
   public static displayName = "PaletteDeleteView";
 

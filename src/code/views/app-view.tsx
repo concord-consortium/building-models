@@ -22,12 +22,9 @@ import { DocumentActionsView } from "./document-actions-view";
 import { ModalPaletteDeleteView } from "./modal-palette-delete-view";
 import { BuildInfoView } from "./build-info-view";
 
-import { ImageDialogMixin, ImageDialogMixin2Props, ImageDialogMixin2State, ImageDialogMixin2 } from "../stores/image-dialog-store";
-import { AppSettingsStore, AppSettingsActions, AppSettingsMixin, AppSettingsMixin2Props } from "../stores/app-settings-store";
-
-import { AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
+import { ImageDialogMixinProps, ImageDialogMixinState, ImageDialogMixin } from "../stores/image-dialog-store";
+import { AppSettingsStore, AppSettingsActions, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
-
 
 interface AppViewOuterProps {
   graphStore: any; // TODO: get concrete type
@@ -50,8 +47,8 @@ interface AppViewOuterState {
   internalLibrary: any; // TODO: get concrete type
 }
 
-type AppViewProps = AppViewOuterProps & ImageDialogMixin2Props & AppSettingsMixin2Props;
-type AppViewState = AppViewOuterState & ImageDialogMixin2State & AppSettingsMixin2State;
+type AppViewProps = AppViewOuterProps & ImageDialogMixinProps & AppSettingsMixinProps;
+type AppViewState = AppViewOuterState & ImageDialogMixinState & AppSettingsMixinState;
 
 export class AppView extends Mixer<AppViewProps, AppViewState> {
 
@@ -59,7 +56,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
 
   constructor(props: AppViewProps) {
     super(props);
-    this.mixins = [new ImageDialogMixin2(this, props), new AppSettingsMixin2(this, props)];
+    this.mixins = [new ImageDialogMixin(this, props), new AppSettingsMixin(this, props)];
 
     let iframed;
     try {
@@ -82,7 +79,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
       selectedLink: null,
       internalLibrary: null
     };
-    this.setInitialState(outerState, ImageDialogMixin2.InitialState, AppSettingsMixin2.InitialState);
+    this.setInitialState(outerState, ImageDialogMixin.InitialState, AppSettingsMixin.InitialState);
   }
 
   public componentDidMount() {

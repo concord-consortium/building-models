@@ -1,6 +1,9 @@
 import * as React from "react";
 
-export class LinkValueInspectorView extends React.Component<{}, {}> {
+interface LinkValueInspectorViewProps {}
+interface LinkValueInspectorViewState {}
+
+export class LinkValueInspectorView extends React.Component<LinkValueInspectorViewProps, LinkValueInspectorViewState> {
 
   public static displayName = "LinkValueInspectorView";
 

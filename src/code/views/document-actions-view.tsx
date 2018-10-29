@@ -1,8 +1,8 @@
 import * as React from "react";
 
-import { AppSettingsMixin, AppSettingsMixin2Props, AppSettingsMixin2State, AppSettingsMixin2 } from "../stores/app-settings-store";
-import { CodapMixin, CodapMixin2Props, CodapMixin2State, CodapMixin2 } from "../stores/codap-store";
-import { UndoRedoUIMixin, UndoRedoUIMixin2, UndoRedoUIMixin2Props, UndoRedoUIMixin2State } from "../stores/undo-redo-ui-store";
+import { AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
+import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-store";
+import { UndoRedoUIMixin, UndoRedoUIMixinProps, UndoRedoUIMixinState } from "../stores/undo-redo-ui-store";
 
 import { AboutView } from "./about-view";
 import { SimulationRunPanelView } from "./simulation-run-panel-view";
@@ -12,14 +12,14 @@ interface DocumentActionsViewOuterProps {
   graphStore: any; // TODO: get concrete type
   diagramOnly: boolean;
 }
-type DocumentActionsViewProps = DocumentActionsViewOuterProps & CodapMixin2Props & UndoRedoUIMixin2Props & AppSettingsMixin2Props;
+type DocumentActionsViewProps = DocumentActionsViewOuterProps & CodapMixinProps & UndoRedoUIMixinProps & AppSettingsMixinProps;
 
 interface DocumentActionsViewOuterState {
   selectedNodes: any[]; // TODO: get concrete type
   selectedLinks: any[]; // TODO: get concrete type
   selectedItems: any[]; // TODO: get concrete type
 }
-type DocumentActionsViewState = DocumentActionsViewOuterState & CodapMixin2State & UndoRedoUIMixin2State & AppSettingsMixin2State;
+type DocumentActionsViewState = DocumentActionsViewOuterState & CodapMixinState & UndoRedoUIMixinState & AppSettingsMixinState;
 
 export class DocumentActionsView extends Mixer<DocumentActionsViewProps, DocumentActionsViewState> {
 
@@ -27,13 +27,13 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
 
   constructor(props: DocumentActionsViewProps) {
     super(props);
-    this.mixins = [new CodapMixin2(this, props), new UndoRedoUIMixin2(this, props), new AppSettingsMixin2(this, props)];
+    this.mixins = [new CodapMixin(this, props), new UndoRedoUIMixin(this, props), new AppSettingsMixin(this, props)];
     const outerState: DocumentActionsViewOuterState = {
       selectedNodes: [],
       selectedLinks: [],
       selectedItems: []
     };
-    this.setInitialState(outerState, CodapMixin2.InitialState, UndoRedoUIMixin2.InitialState, AppSettingsMixin2.InitialState);
+    this.setInitialState(outerState, CodapMixin.InitialState, UndoRedoUIMixin.InitialState, AppSettingsMixin.InitialState);
   }
 
   public componentDidMount() {

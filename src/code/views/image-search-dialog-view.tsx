@@ -11,7 +11,7 @@ import * as React from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { ImageDialogActions, ImageDialogMixin, ImageDialogMixin2Props, ImageDialogMixin2State, ImageDialogMixin2 } from "../stores/image-dialog-store";
+import { ImageDialogActions, ImageDialogMixinProps, ImageDialogMixinState, ImageDialogMixin } from "../stores/image-dialog-store";
 
 import { OpenClipArt } from "../utils/open-clipart";
 import { tr } from "../utils/translate";
@@ -68,7 +68,9 @@ interface ImageSearchPageLinkViewProps {
   selectPage: (page: any) => void; // TODO: get concrete type
 }
 
-class ImageSearchPageLinkView extends React.Component<ImageSearchPageLinkViewProps, {}> {
+interface ImageSearchPageLinkViewState {}
+
+class ImageSearchPageLinkView extends React.Component<ImageSearchPageLinkViewProps, ImageSearchPageLinkViewState> {
 
   public static displayName = "ImageSearchPageLinkView";
 
@@ -94,7 +96,9 @@ interface ImageSearchPrevNextLinkViewProps {
   label: string;
 }
 
-class ImageSearchPrevNextLinkView extends React.Component<ImageSearchPrevNextLinkViewProps, {}> {
+interface ImageSearchPrevNextLinkViewState {}
+
+class ImageSearchPrevNextLinkView extends React.Component<ImageSearchPrevNextLinkViewProps, ImageSearchPrevNextLinkViewState> {
 
   public static displayName = "ImageSearchPrevNextLinkView";
 
@@ -119,7 +123,7 @@ interface ImageSearchDialogViewOuterProps {
   inLibrary: (node: any) => boolean; // TODO: get concrete type
 }
 
-type ImageSearchDialogViewProps = ImageSearchDialogViewOuterProps & ImageDialogMixin2Props & ImageDialogViewMixinProps;
+type ImageSearchDialogViewProps = ImageSearchDialogViewOuterProps & ImageDialogMixinProps & ImageDialogViewMixinProps;
 
 interface ImageSearchDialogViewOuterState {
   searching: boolean;
@@ -130,7 +134,7 @@ interface ImageSearchDialogViewOuterState {
   numPages: number;
   query: string;
 }
-type ImageSearchDialogViewState = ImageSearchDialogViewOuterState & ImageDialogMixin2State & ImageDialogViewMixinState;
+type ImageSearchDialogViewState = ImageSearchDialogViewOuterState & ImageDialogMixinState & ImageDialogViewMixinState;
 
 export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, ImageSearchDialogViewState> {
 
@@ -143,7 +147,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
     super(props);
     this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
 
-    this.mixins = [new ImageDialogMixin2(this, props), this.imageDialogViewMixin];
+    this.mixins = [new ImageDialogMixin(this, props), this.imageDialogViewMixin];
 
     const outerState: ImageSearchDialogViewOuterState = {
       searching: false,
@@ -154,7 +158,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
       numPages: 0,
       query: ""
     };
-    this.setInitialState(outerState, ImageDialogMixin2.InitialState, ImageDialogViewMixin.InitialState);
+    this.setInitialState(outerState, ImageDialogMixin.InitialState, ImageDialogViewMixin.InitialState);
   }
 
   public componentDidMount() {

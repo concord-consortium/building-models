@@ -10,7 +10,9 @@ interface PreviewImageDialogViewProps {
   imageInfo: any; // TODO: get concrete type
 }
 
-export class PreviewImageDialogView extends React.Component<PreviewImageDialogViewProps, {}> {
+interface PreviewImageDialogViewState {}
+
+export class PreviewImageDialogView extends React.Component<PreviewImageDialogViewProps, PreviewImageDialogViewState> {
 
   public static displayName = "PreviewImageDialogView";
 

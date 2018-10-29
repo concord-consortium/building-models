@@ -7,23 +7,28 @@ import * as React from "react";
  */
 
 import { ImageDialogActions } from "../stores/image-dialog-store";
-import { DraggableMixin } from "../mixins/draggable";
+import { DraggableMixin, DraggableMixinProps, DraggableMixinState } from "../mixins/draggable";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 
-interface PaletteAddViewProps {
+interface PaletteAddViewOuterProps {
   callback?: (data: any) => void;
   label: string;
 }
+type PaletteAddViewProps = PaletteAddViewOuterProps & DraggableMixinProps;
 
-export class PaletteAddView extends Mixer<PaletteAddViewProps, {}> {
+interface PaletteAddViewOuterState {}
+type PaletteAddViewState = PaletteAddViewOuterState & DraggableMixinState;
+
+export class PaletteAddView extends Mixer<PaletteAddViewProps, PaletteAddViewState> {
 
   public static displayName = "PaletteAddView";
 
   constructor(props: PaletteAddViewProps) {
     super(props);
     this.mixins = [new DraggableMixin(this, props)];
-    this.setInitialState({}, DraggableMixin.InitialState);
+    const outerState: PaletteAddViewOuterState = {};
+    this.setInitialState(outerState, DraggableMixin.InitialState);
   }
 
   public render() {

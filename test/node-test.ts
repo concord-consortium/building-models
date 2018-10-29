@@ -11,7 +11,7 @@ import { Stub, UnStub } from "./codap-helper";
 describe("A Node", () => {
   beforeEach(() => {
     Stub();
-    this.graphStore = GraphStore.store;
+    this.graphStore = GraphStore;
     this.graphStore.init();
   });
 

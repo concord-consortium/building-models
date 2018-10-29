@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const Reflux = require("reflux");
 
 import { LaraConnect } from "../models/lara-connect";
@@ -30,32 +24,13 @@ export const LaraStore = Reflux.createStore({
   }
 });
 
-export const LaraMixin = {
-  getInitialState() {
-    return {laraHasLoaded: LaraStore.laraHasLoaded};
-  },
+export interface LaraMixinProps {}
 
-  componentDidMount() {
-    return this.unsubscribe = LaraStore.listen(this.onLaraStateChange);
-  },
-
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onLaraStateChange(status) {
-    return this.setState({
-      laraHasLoaded: status.laraHasLoaded});
-  }
-};
-
-export interface LaraMixin2Props {}
-
-export interface LaraMixin2State {
+export interface LaraMixinState {
   laraHasLoaded: boolean;
 }
 
-export class LaraMixin2 extends Mixin<LaraMixin2Props, LaraMixin2State> {
+export class LaraMixin extends Mixin<LaraMixinProps, LaraMixinState> {
   private unsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -71,6 +46,6 @@ export class LaraMixin2 extends Mixin<LaraMixin2Props, LaraMixin2State> {
   }
 }
 
-LaraMixin2.InitialState = {
+LaraMixin.InitialState = {
   laraHasLoaded: LaraStore.laraHasLoaded
 };

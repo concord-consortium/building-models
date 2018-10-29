@@ -27,7 +27,9 @@ interface TabbedPanelTabViewProps {
   onSelected: (index: number) => void;
 }
 
-class TabbedPanelTabView extends React.Component<TabbedPanelTabViewProps, {}> {
+interface TabbedPanelTabViewState {}
+
+class TabbedPanelTabView extends React.Component<TabbedPanelTabViewProps, TabbedPanelTabViewState> {
 
   public static displayName = "TabbedPanelTabView";
 

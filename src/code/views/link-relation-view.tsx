@@ -15,8 +15,8 @@ import { SvgGraphView } from "./svg-graph-view";
 import { tr } from "../utils/translate";
 
 const autosize         = require("autosize");
-import { SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
+import { SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinState, AppSettingsMixinProps } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
 interface LinkGraphViewProps {
@@ -26,7 +26,9 @@ interface LinkGraphViewProps {
   graphStore: any; // TODO: get concrete type
 }
 
-class LinkGraphView extends React.Component<LinkGraphViewProps, {}> {
+interface LinkGraphViewState {}
+
+class LinkGraphView extends React.Component<LinkGraphViewProps, LinkGraphViewState> {
   public static displayName = "LinkGraphView";
 
   public render() {
@@ -51,7 +53,9 @@ interface QuantStartViewProps {
   target: any; // TODO: get concrete type
 }
 
-class QuantStartView extends React.Component<QuantStartViewProps, {}> {
+interface QuantStartViewState {}
+
+class QuantStartView extends React.Component<QuantStartViewProps, QuantStartViewState> {
   public static displayName = "QuantStartView";
 
   public render() {
@@ -67,10 +71,11 @@ class QuantStartView extends React.Component<QuantStartViewProps, {}> {
   }
 }
 
-interface LinkRelationViewProps {
+interface LinkRelationViewOuterProps {
   link: any; // TODO: get concrete type
   graphStore: any; // TODO: get concrete type
 }
+type LinkRelationViewProps = LinkRelationViewOuterProps & SimulationMixinProps & AppSettingsMixinProps;
 
 interface LinkRelationViewOuterState {
   selectedVector: any; // TODO: get concrete type
@@ -83,7 +88,7 @@ interface LinkRelationViewOuterState {
   isTransfer: boolean;
   isTransferModifier: boolean;
 }
-type LinkRelationViewState = LinkRelationViewOuterState & SimulationMixin2State & AppSettingsMixin2State;
+type LinkRelationViewState = LinkRelationViewOuterState & SimulationMixinState & AppSettingsMixinState;
 
 export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationViewState> {
 
@@ -97,7 +102,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
 
   constructor(props: LinkRelationViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
+    this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
 
     const status = this.checkStatus(this.props.link);
     const outerState: LinkRelationViewOuterState = {
@@ -111,7 +116,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       isTransfer: status.isTransfer,
       isTransferModifier: status.isTransferModifier
     };
-    this.setInitialState(outerState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+    this.setInitialState(outerState, SimulationMixin.InitialState, AppSettingsMixin.InitialState);
   }
 
   /*

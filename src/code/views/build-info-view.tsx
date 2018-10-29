@@ -3,6 +3,8 @@ import * as $ from "jquery";
 
 import { latestVersion } from "../data/migrations/migrations";
 
+interface BuildInfoViewProps {}
+
 interface BuildInfoViewState {
   date: string;
   showing: boolean;
@@ -12,7 +14,7 @@ interface BuildInfoViewState {
   dataVersion: string;
 }
 
-export class BuildInfoView extends React.Component<{}, BuildInfoViewState> {
+export class BuildInfoView extends React.Component<BuildInfoViewProps, BuildInfoViewState> {
 
   public static displayName = "BuildInfoView";
 

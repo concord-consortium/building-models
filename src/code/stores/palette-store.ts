@@ -226,41 +226,9 @@ export const PaletteStore = Reflux.createStore({
   }
 });
 
-export const PaletteMixin = {
-  getInitialState() {
-    return {
-      palette: PaletteStore.palette,
-      library: PaletteStore.library,
-      selectedPaletteItem: PaletteStore.selectedPaletteItem,
-      selectedPaletteIndex: PaletteStore.selectedPaletteIndex,
-      selectedPaletteImage: PaletteStore.selectedPaletteImage,
-      imageMetadata: PaletteStore.imageMetadata
-    };
-  },
+export interface PaletteMixinProps {}
 
-  componentDidMount() {
-    return this.paletteUnsubscribe = PaletteStore.listen(this.onPaletteChange);
-  },
-
-  componentWillUnmount() {
-    return this.paletteUnsubscribe();
-  },
-
-  onPaletteChange(status) {
-    return this.setState({
-      palette: status.palette,
-      library: status.library,
-      selectedPaletteIndex: status.selectedPaletteIndex,
-      selectedPaletteItem: status.selectedPaletteItem,
-      selectedPaletteImage: status.selectedPaletteImage,
-      imageMetadata: status.imageMetadata
-    });
-  }
-};
-
-export interface PaletteMixin2Props {}
-
-export interface PaletteMixin2State {
+export interface PaletteMixinState {
   palette: any; // TODO: get concrete type
   library: any; // TODO: get concrete type
   selectedPaletteItem: any; // TODO: get concrete type
@@ -269,7 +237,7 @@ export interface PaletteMixin2State {
   imageMetadata: any; // TODO: get concrete type
 }
 
-export class PaletteMixin2 extends Mixin<PaletteMixin2Props, PaletteMixin2State> {
+export class PaletteMixin extends Mixin<PaletteMixinProps, PaletteMixinState> {
   private paletteUnsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -292,12 +260,12 @@ export class PaletteMixin2 extends Mixin<PaletteMixin2Props, PaletteMixin2State>
   }
 }
 
-PaletteMixin2.InitialState = {
+PaletteMixin.InitialState = {
   palette: PaletteStore.palette,
   library: PaletteStore.library,
   selectedPaletteItem: PaletteStore.selectedPaletteItem,
   selectedPaletteIndex: PaletteStore.selectedPaletteIndex,
   selectedPaletteImage: PaletteStore.selectedPaletteImage,
   imageMetadata: PaletteStore.imageMetadata
-} as PaletteMixin2State;
+} as PaletteMixinState;
 

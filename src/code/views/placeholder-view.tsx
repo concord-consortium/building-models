@@ -5,7 +5,9 @@ interface PlaceholderViewProps {
   label: string;
 }
 
-export class PlaceholderView extends React.Component<PlaceholderViewProps, {}> {
+interface PlaceholderViewState {}
+
+export class PlaceholderView extends React.Component<PlaceholderViewProps, PlaceholderViewState> {
 
   public static displayName = "PlaceholderView";
 

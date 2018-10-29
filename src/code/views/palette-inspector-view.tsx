@@ -5,21 +5,21 @@ import { PaletteItemView } from "./palette-item-view";
 import { PaletteAddView } from "./palette-add-view";
 import { ImageMetadataView } from "./image-metadata-view";
 
-import { PaletteActions, PaletteMixin } from "../stores/palette-store";
+import { PaletteActions } from "../stores/palette-store";
 import { PaletteDeleteDialogActions } from "../stores/palette-delete-dialog-store";
-import { NodesMixin2, NodesMixin2Props, NodesMixin2State } from "../stores/nodes-store";
+import { NodesMixin, NodesMixinProps, NodesMixinState } from "../stores/nodes-store";
 
 import { tr } from "../utils/translate";
 
-import { PaletteMixin2Props, PaletteMixin2State, PaletteMixin2 } from "../stores/palette-store";
+import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/palette-store";
 import { Mixer } from "../mixins/components";
 
 interface PaletteInspectorViewOuterProps {}
-type PaletteInspectorViewProps = PaletteInspectorViewOuterProps & PaletteMixin2Props & NodesMixin2Props;
+type PaletteInspectorViewProps = PaletteInspectorViewOuterProps & PaletteMixinProps & NodesMixinProps;
 
 interface PaletteInspectorViewOuterState {
 }
-type PaletteInspectorViewState = PaletteInspectorViewOuterState & PaletteMixin2State & NodesMixin2State;
+type PaletteInspectorViewState = PaletteInspectorViewOuterState & PaletteMixinState & NodesMixinState;
 
 export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, PaletteInspectorViewState> {
 
@@ -27,10 +27,10 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
 
   constructor(props: PaletteInspectorViewProps) {
     super(props);
-    this.mixins = [new PaletteMixin2(this, props), new NodesMixin2(this, props)];
+    this.mixins = [new PaletteMixin(this, props), new NodesMixin(this, props)];
     const outerState: PaletteInspectorViewOuterState = {
     };
-    this.setInitialState(outerState, PaletteMixin2.InitialState, NodesMixin2.InitialState);
+    this.setInitialState(outerState, PaletteMixin.InitialState, NodesMixin.InitialState);
   }
 
   public render() {

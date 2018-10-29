@@ -60,7 +60,7 @@ describe("Serialization and Loading", () => {
     let jsonString = "";
 
     beforeEach(() => {
-      this.graphStore = GraphStore.store;
+      this.graphStore = GraphStore;
       this.graphStore.init();
 
       this.nodeA = new Node({title: "a", x: 10, y: 15, paletteItem: "uuid-dingo", frames: [] }, "a");
@@ -171,7 +171,7 @@ describe("Serialization and Loading", () => {
       });
 
       it("should be able to serialize the simulation settings", () => {
-        const { settings } = SimulationStore.store;
+        const { settings } = SimulationStore;
         settings.duration = 15;
         settings.stepUnits = "SECOND";
         settings.capNodeValues = true;
@@ -189,7 +189,7 @@ describe("Serialization and Loading", () => {
 
   describe("loadData", () => {
     beforeEach(() => {
-      this.graphStore = GraphStore.store;
+      this.graphStore = GraphStore;
       this.graphStore.init();
     });
 

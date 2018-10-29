@@ -1,24 +1,29 @@
 import * as React from "react";
 
-import { DraggableMixin } from "../mixins/draggable";
+import { DraggableMixin, DraggableMixinProps, DraggableMixinState } from "../mixins/draggable";
 import { SquareImageView } from "./square-image-view";
 import { Mixer } from "../mixins/components";
 
-interface PaletteItemViewProps {
+interface PaletteItemViewOuterProps {
   index: number;
   image?: string;
   node: any; // TODO: get concrete type
   onSelect: (index: number) => void;
 }
+type PaletteItemViewProps = PaletteItemViewOuterProps & DraggableMixinProps;
 
-export class PaletteItemView extends Mixer<PaletteItemViewProps, {}> {
+interface PaletteItemViewOuterState {}
+type PaletteItemViewState = PaletteItemViewOuterState & DraggableMixinState;
+
+export class PaletteItemView extends Mixer<PaletteItemViewProps, PaletteItemViewState> {
 
   public static displayName = "PaletteItemView";
 
   constructor(props: PaletteItemViewProps) {
     super(props);
     this.mixins = [new DraggableMixin(this, props, {removeClasses: ["palette-image"]})];
-    this.setInitialState({}, DraggableMixin.InitialState);
+    const outerState: PaletteItemViewOuterState = {};
+    this.setInitialState(outerState, DraggableMixin.InitialState);
   }
 
   public render() {

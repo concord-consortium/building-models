@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const _ = require("lodash");
 const Reflux = require("reflux");
 
@@ -68,37 +62,14 @@ export const NodesStore   = Reflux.createStore({
   }
 });
 
-export const NodesMixin = {
-  getInitialState() {
-    return {
-      nodes: NodesStore.nodes,
-      paletteItemHasNodes: NodesStore.paletteItemHasNodes
-    };
-  },
+export interface NodesMixinProps {}
 
-  componentDidMount() {
-    return this.unsubscribe = NodesStore.listen(this.onNodesChange);
-  },
-
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onNodesChange(status) {
-    return this.setState({
-      // nodes: status.nodes
-      paletteItemHasNodes: status.paletteItemHasNodes});
-  }
-};
-
-export interface NodesMixin2Props {}
-
-export interface NodesMixin2State {
+export interface NodesMixinState {
   // nodes: any; // TODO: get concrete type
   paletteItemHasNodes: any;
 }
 
-export class NodesMixin2 extends Mixin<NodesMixin2Props, NodesMixin2State> {
+export class NodesMixin extends Mixin<NodesMixinProps, NodesMixinState> {
   private unsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -114,7 +85,7 @@ export class NodesMixin2 extends Mixin<NodesMixin2Props, NodesMixin2State> {
   }
 }
 
-NodesMixin2.InitialState = {
+NodesMixin.InitialState = {
   // nodes: [],
   paletteItemHasNodes: false
-} as NodesMixin2State;
+} as NodesMixinState;

@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const _ = require("lodash");
 const Reflux = require("reflux");
 
@@ -90,8 +84,6 @@ export const PaletteDeleteDialogStore = Reflux.createStore({
     }
   },
 
-
-
   _notifyChanges() {
     const data = {
       showing:         this.showing,
@@ -105,44 +97,9 @@ export const PaletteDeleteDialogStore = Reflux.createStore({
   }
 });
 
-export const PaletteDeleteDialogMixin = {
+export interface PaletteDeleteDialogMixinProps {}
 
-  actions: PaletteDeleteDialogActions,
-
-  getInitialState() {
-    return {
-      showing:         PaletteDeleteDialogStore.showing,
-      paletteItem:     PaletteDeleteDialogStore.paletteItem,
-      options:         PaletteDeleteDialogStore.options,
-      replacement:     PaletteDeleteDialogStore.replacement,
-      deleted:         PaletteDeleteDialogStore.deleted,
-      showReplacement: PaletteDeleteDialogStore.showReplacement
-    };
-  },
-
-  componentDidMount() {
-    return this.unsubscribe = PaletteDeleteDialogStore.listen(this.onChange);
-  },
-
-  componentWillUnmount() {
-    return this.unsubscribe();
-  },
-
-  onChange(status) {
-    return this.setState({
-      showing:         status.showing,
-      paletteItem:     status.paletteItem,
-      options:         status.options,
-      replacement:     status.replacement,
-      deleted:         status.deleted,
-      showReplacement: status.showReplacement
-    });
-  }
-};
-
-export interface PaletteDeleteDialogMixin2Props {}
-
-export interface PaletteDeleteDialogMixin2State {
+export interface PaletteDeleteDialogMixinState {
   showing: any; // TODO: get concrete type
   paletteItem: any; // TODO: get concrete type
   options: any; // TODO: get concrete type
@@ -151,7 +108,7 @@ export interface PaletteDeleteDialogMixin2State {
   showReplacement: any; // TODO: get concrete type
 }
 
-export class PaletteDeleteDialogMixin2 extends Mixin<PaletteDeleteDialogMixin2Props, PaletteDeleteDialogMixin2State> {
+export class PaletteDeleteDialogMixin extends Mixin<PaletteDeleteDialogMixinProps, PaletteDeleteDialogMixinState> {
   private unsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -174,7 +131,7 @@ export class PaletteDeleteDialogMixin2 extends Mixin<PaletteDeleteDialogMixin2Pr
   }
 }
 
-PaletteDeleteDialogMixin2.InitialState = {
+PaletteDeleteDialogMixin.InitialState = {
   showing:         PaletteDeleteDialogStore.showing,
   paletteItem:     PaletteDeleteDialogStore.paletteItem,
   options:         PaletteDeleteDialogStore.options,

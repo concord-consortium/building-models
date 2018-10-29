@@ -3,7 +3,7 @@ import * as React from "react";
 import { tr } from "../utils/translate";
 import { ColorPickerView } from "./color-picker-view";
 import { ImagePickerView } from "./image-picker-view";
-import { NodeTitleMixin2, NodeTitleMixin2Props, NodeTitleMixin2State } from "../mixins/node-title";
+import { NodeTitleMixin, NodeTitleMixinProps, NodeTitleMixinState } from "../mixins/node-title";
 import { Mixer } from "../mixins/components";
 
 interface NodeInspectorViewOuterProps {
@@ -13,22 +13,22 @@ interface NodeInspectorViewOuterProps {
 }
 interface NodeInspectorViewOuterState {}
 
-type NodeInspectorViewProps = NodeInspectorViewOuterProps & NodeTitleMixin2Props;
-type NodeInspectorViewState = NodeInspectorViewOuterState & NodeTitleMixin2State;
+type NodeInspectorViewProps = NodeInspectorViewOuterProps & NodeTitleMixinProps;
+type NodeInspectorViewState = NodeInspectorViewOuterState & NodeTitleMixinState;
 
 export class NodeInspectorView extends Mixer<NodeInspectorViewProps, NodeInspectorViewState> {
 
   public static displayName = "NodeInspectorView";
 
-  private nodeTitleMixin: NodeTitleMixin2;
+  private nodeTitleMixin: NodeTitleMixin;
 
   constructor(props: NodeInspectorViewProps) {
     super(props);
-    this.nodeTitleMixin = new NodeTitleMixin2(this, props);
+    this.nodeTitleMixin = new NodeTitleMixin(this, props);
     this.mixins = [this.nodeTitleMixin];
 
     const outerState: NodeInspectorViewOuterState = {};
-    this.setInitialState(outerState, NodeTitleMixin2.InitialState);
+    this.setInitialState(outerState, NodeTitleMixin.InitialState);
   }
 
   public render() {

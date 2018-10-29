@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-import * as React from "react";
 const _ = require("lodash");
 const Reflux = require("reflux");
 
@@ -347,31 +339,11 @@ export const SimulationStore = Reflux.createStore({
   }
 });
 
-export const SimulationMixin = {
-  getInitialState() {
-    return _.clone(SimulationStore.settings);
-  },
+export interface SimulationMixinProps {}
 
-  componentDidMount() {
-    return this.simulationUnsubscribe = SimulationStore.listen(this.onSimulationStoreChange);
-  },
+export type SimulationMixinState = SimulationSettings;
 
-  componentWillUnmount() {
-    // this one named explicitly as we have views that mixin both simulationStore
-    // and appSettingsStore
-    return this.simulationUnsubscribe();
-  },
-
-  onSimulationStoreChange(newData) {
-    return this.setState(_.clone(newData));
-  }
-};
-
-export interface SimulationMixin2Props {}
-
-export type SimulationMixin2State = SimulationSettings;
-
-export class SimulationMixin2 extends Mixin<{}, SimulationMixin2State> {
+export class SimulationMixin extends Mixin<SimulationMixinProps, SimulationMixinState> {
   private simulationUnsubscribe: StoreUnsubscriber;
 
   public componentDidMount() {
@@ -388,5 +360,5 @@ export class SimulationMixin2 extends Mixin<{}, SimulationMixin2State> {
     return this.setState(_.clone(newData));
   }
 }
-SimulationMixin2.InitialState = _.clone(SimulationStore.settings);
+SimulationMixin.InitialState = _.clone(SimulationStore.settings);
 

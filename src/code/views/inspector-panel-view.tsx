@@ -16,7 +16,7 @@ import { NodeValueInspectorView } from "./node-value-inspector-view";
 import { RelationInspectorView } from "./relation-inspector-view";
 import { SimulationInspectorView } from "./simulation-inspector-view";
 
-import { InspectorPanelActions, InspectorPanelMixin, InspectorPanelMixin2Props, InspectorPanelMixin2State, InspectorPanelMixin2 } from "../stores/inspector-panel-store";
+import { InspectorPanelActions, InspectorPanelMixinProps, InspectorPanelMixinState, InspectorPanelMixin } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
 
 interface ToolButtonViewProps {
@@ -26,7 +26,9 @@ interface ToolButtonViewProps {
   onClick: (name: string) => void;
 }
 
-class ToolButtonView extends React.Component<ToolButtonViewProps, {}> {
+interface ToolButtonViewState {}
+
+class ToolButtonView extends React.Component<ToolButtonViewProps, ToolButtonViewState> {
 
   public static displayName = "ToolButtonView";
 
@@ -60,7 +62,9 @@ interface ToolPanelViewProps {
   onNowShowing: (shows: string|null) => void;
 }
 
-class ToolPanelView extends React.Component<ToolPanelViewProps, {}> {
+interface ToolPanelViewState {}
+
+class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewState> {
 
   public static displayName: "ToolPanelView";
 
@@ -136,8 +140,8 @@ interface InspectorPanelViewOuterProps {
 interface InspectorPanelViewOuterState {
 }
 
-type InspectorPanelViewProps = InspectorPanelViewOuterProps & InspectorPanelMixin2Props;
-type InspectorPanelViewState = InspectorPanelViewOuterState & InspectorPanelMixin2State;
+type InspectorPanelViewProps = InspectorPanelViewOuterProps & InspectorPanelMixinProps;
+type InspectorPanelViewState = InspectorPanelViewOuterState & InspectorPanelMixinState;
 
 export class InspectorPanelView extends Mixer<InspectorPanelViewProps, InspectorPanelViewState> {
 
@@ -145,9 +149,9 @@ export class InspectorPanelView extends Mixer<InspectorPanelViewProps, Inspector
 
   constructor(props: InspectorPanelViewProps) {
     super(props);
-    this.mixins = [new InspectorPanelMixin2(this, props)];
+    this.mixins = [new InspectorPanelMixin(this, props)];
     const outerState: InspectorPanelViewOuterState = {};
-    this.setInitialState(outerState, InspectorPanelMixin2.InitialState);
+    this.setInitialState(outerState, InspectorPanelMixin.InitialState);
   }
 
   public render() {

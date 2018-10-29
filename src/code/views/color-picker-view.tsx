@@ -8,7 +8,9 @@ interface ColorChoiceProps {
   onChange: (Color) => void;
 }
 
-class ColorChoice extends React.Component<ColorChoiceProps, {}> {
+interface ColorChoiceState {}
+
+class ColorChoice extends React.Component<ColorChoiceProps, ColorChoiceState> {
 
   public static displayName = "ColorChoice";
 

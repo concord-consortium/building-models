@@ -1,13 +1,16 @@
 import * as React from "react";
 
 import { DropZoneView } from "./dropzone-view";
-import { ImageDialogMixin2, ImageDialogMixin2State, ImageDialogMixin2Props } from "../stores/image-dialog-store";
+import { ImageDialogMixin, ImageDialogMixinState, ImageDialogMixinProps } from "../stores/image-dialog-store";
 import { tr } from "../utils/translate";
 import { ImageDialogViewMixin, ImageDialogViewMixinState, ImageDialogViewMixinProps } from "../mixins/image-dialog-view";
 import { Mixer } from "../mixins/components";
 
-type ImageLinkDialogViewProps = ImageDialogMixin2Props & ImageDialogViewMixinProps;
-type ImageLinkDialogViewState = ImageDialogMixin2State & ImageDialogViewMixinState;
+interface ImageLinkDialogViewOuterProps {}
+type ImageLinkDialogViewProps = ImageLinkDialogViewOuterProps & ImageDialogMixinProps & ImageDialogViewMixinProps;
+
+interface ImageLinkDialogViewOuterState {}
+type ImageLinkDialogViewState = ImageLinkDialogViewOuterState & ImageDialogMixinState & ImageDialogViewMixinState;
 
 export class ImageLinkDialogView extends Mixer<ImageLinkDialogViewProps, ImageLinkDialogViewState> {
   public static displayName = "ImageLinkDialogView";
@@ -18,9 +21,9 @@ export class ImageLinkDialogView extends Mixer<ImageLinkDialogViewProps, ImageLi
   constructor(props: ImageLinkDialogViewProps) {
     super(props);
     this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
-
-    this.mixins = [new ImageDialogMixin2(this, props), this.imageDialogViewMixin];
-    this.setInitialState({}, ImageDialogMixin2.InitialState, ImageDialogViewMixin.InitialState);
+    this.mixins = [new ImageDialogMixin(this, props), this.imageDialogViewMixin];
+    const outerState: ImageLinkDialogViewOuterState = {};
+    this.setInitialState(outerState, ImageDialogMixin.InitialState, ImageDialogViewMixin.InitialState);
   }
 
   public render() {

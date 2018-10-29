@@ -10,7 +10,9 @@ interface ModalTabbedDialogViewProps {
   tabs: any; // TODO: get concrete type
 }
 
-export class ModalTabbedDialogView extends React.Component<ModalTabbedDialogViewProps, {}> {
+interface ModalTabbedDialogViewState {}
+
+export class ModalTabbedDialogView extends React.Component<ModalTabbedDialogViewProps, ModalTabbedDialogViewState> {
 
   public static displayName = "ModalTabbedDialogView";
 

@@ -6,22 +6,22 @@ import { DropDownView } from "./dropdown-view";
 import { OpenInCodapView } from "./open-in-codap-view";
 import { ModalGoogleSaveView } from "./modal-google-save-view";
 import { BuildInfoView } from "./build-info-view";
-import { GoogleFileActions, GoogleFileMixin, GoogleFileMixin2Props, GoogleFileMixin2State, GoogleFileMixin2 } from "../stores/google-file-store";
-import { UndoRedoUIMixin, UndoRedoUIMixin2, UndoRedoUIMixin2Props, UndoRedoUIMixin2State } from "../stores/undo-redo-ui-store";
+import { GoogleFileActions, GoogleFileMixinProps, GoogleFileMixinState, GoogleFileMixin } from "../stores/google-file-store";
+import { UndoRedoUIMixin, UndoRedoUIMixinProps, UndoRedoUIMixinState } from "../stores/undo-redo-ui-store";
 import { Mixer } from "../mixins/components";
 
 interface GlobalNavViewOuterProps {
   graphStore: any; // TODO: get concrete type
   filename: string;
 }
-type GlobalNavViewProps = GlobalNavViewOuterProps & GoogleFileMixin2Props & UndoRedoUIMixin2Props;
+type GlobalNavViewProps = GlobalNavViewOuterProps & GoogleFileMixinProps & UndoRedoUIMixinProps;
 
 interface GlobalNavViewOuterState {
   dirty: boolean;
   saved: boolean;
   filename: string;
 }
-type GlobalNavViewState = GlobalNavViewOuterState & GoogleFileMixin2State & UndoRedoUIMixin2State;
+type GlobalNavViewState = GlobalNavViewOuterState & GoogleFileMixinState & UndoRedoUIMixinState;
 
 export class GlobalNavView extends Mixer<GlobalNavViewProps, GlobalNavViewState> {
 
@@ -29,13 +29,13 @@ export class GlobalNavView extends Mixer<GlobalNavViewProps, GlobalNavViewState>
 
   constructor(props: GlobalNavViewProps) {
     super(props);
-    this.mixins = [new GoogleFileMixin2(this, props), new UndoRedoUIMixin2(this, props)];
+    this.mixins = [new GoogleFileMixin(this, props), new UndoRedoUIMixin(this, props)];
     const outerState: GlobalNavViewOuterState = {
       dirty: false,
       saved: false,
       filename: props.filename
     };
-    this.setInitialState(outerState, GoogleFileMixin2.InitialState, UndoRedoUIMixin2.InitialState);
+    this.setInitialState(outerState, GoogleFileMixin.InitialState, UndoRedoUIMixin.InitialState);
   }
 
   public componentDidMount() {

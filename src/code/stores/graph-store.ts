@@ -888,38 +888,11 @@ export const GraphStore  = Reflux.createStore({
   }
 });
 
-export const GraphMixin = {
-  getInitialState() {
-    return GraphStore.getGraphState();
-  },
+export interface GraphMixinProps {}
 
-  componentDidMount() {
-    this.subscriptions = [];
-    this.subscriptions.push(GraphActions.graphChanged.listen(this.onGraphChanged));
-    return this.subscriptions.push(GraphActions.resetSimulation.listen(this.onResetSimulation));
-  },
+export type GraphMixinState = GraphSettings;
 
-  componentWillUnmount() {
-    return this.subscriptions.map((unsubscribe) => unsubscribe());
-  },
-
-  onGraphChanged(state) {
-    this.setState(state);
-
-    // TODO: not this:
-    return (this.diagramToolkit != null ? this.diagramToolkit.repaint() : undefined);
-  },
-
-  onResetSimulation() {
-    return GraphStore.resetSimulation();
-  }
-};
-
-export interface GraphMixin2Props {}
-
-export type GraphMixin2State = GraphSettings;
-
-export class GraphMixin2 extends Mixin<GraphMixin2Props, GraphMixin2State> {
+export class GraphMixin extends Mixin<GraphMixinProps, GraphMixinState> {
   private subscriptions: StoreUnsubscriber[];
 
   public componentDidMount() {
@@ -946,7 +919,7 @@ export class GraphMixin2 extends Mixin<GraphMixin2Props, GraphMixin2State> {
   }
 }
 
-GraphMixin2.InitialState = GraphStore.getGraphState();
+GraphMixin.InitialState = GraphStore.getGraphState();
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

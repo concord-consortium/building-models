@@ -6,7 +6,9 @@ interface DropdownItemViewProps {
   select: (item: any) => void; // TODO: set concrete type
 }
 
-class DropdownItemView extends React.Component<DropdownItemViewProps, {}> {
+interface DropdownItemViewState {}
+
+class DropdownItemView extends React.Component<DropdownItemViewProps, DropdownItemViewState> {
 
   public static displayName = "DropdownItem";
 

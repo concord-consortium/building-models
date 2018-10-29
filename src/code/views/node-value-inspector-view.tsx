@@ -7,12 +7,10 @@ import * as React from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { SimulationActions, SimulationMixin, SimulationMixin2Props } from "../stores/simulation-store";
-import { AppSettingsStore, AppSettingsMixin, AppSettingsMixin2Props } from "../stores/app-settings-store";
+import { SimulationActions, SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
+import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { tr } from "../utils/translate";
 
-import { SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
-import { AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
 interface NodeValueInspectorViewOuterProps {
@@ -26,8 +24,8 @@ interface NodeValueInspectorViewOuterState {
   "max-value": number;
 }
 
-type NodeValueInspectorViewProps = NodeValueInspectorViewOuterProps & SimulationMixin2Props & AppSettingsMixin2Props;
-type NodeValueInspectorViewState = NodeValueInspectorViewOuterState & SimulationMixin2State & AppSettingsMixin2State;
+type NodeValueInspectorViewProps = NodeValueInspectorViewOuterProps & SimulationMixinProps & AppSettingsMixinProps;
+type NodeValueInspectorViewState = NodeValueInspectorViewOuterState & SimulationMixinState & AppSettingsMixinState;
 
 export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, NodeValueInspectorViewState> {
 
@@ -37,14 +35,14 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
   constructor(props: NodeValueInspectorViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
+    this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
     const outerState: NodeValueInspectorViewOuterState = {
       "editing-min": false,
       "editing-max": false,
       "min-value": this.props.node.min,
       "max-value": this.props.node.max
     };
-    this.setInitialState(outerState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+    this.setInitialState(outerState, SimulationMixin.InitialState, AppSettingsMixin.InitialState);
   }
 
   public componentWillReceiveProps(nextProps, nextContext) {

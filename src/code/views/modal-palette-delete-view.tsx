@@ -3,17 +3,17 @@ const log = require("loglevel");
 
 import { ModalDialogView } from "./modal-dialog-view";
 import { PaletteDeleteView } from "./palette-delete-view";
-import { PaletteDeleteDialogActions, PaletteDeleteDialogMixin, PaletteDeleteDialogMixin2Props, PaletteDeleteDialogMixin2State, PaletteDeleteDialogMixin2 } from "../stores/palette-delete-dialog-store";
+import { PaletteDeleteDialogActions, PaletteDeleteDialogMixinProps, PaletteDeleteDialogMixinState, PaletteDeleteDialogMixin } from "../stores/palette-delete-dialog-store";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 
 
 interface ModalPaletteDeleteViewOuterProps {}
-type ModalPaletteDeleteViewProps = ModalPaletteDeleteViewOuterProps & PaletteDeleteDialogMixin2Props;
+type ModalPaletteDeleteViewProps = ModalPaletteDeleteViewOuterProps & PaletteDeleteDialogMixinProps;
 
 interface ModalPaletteDeleteViewOuterState {
 }
-type ModalPaletteDeleteViewState = ModalPaletteDeleteViewOuterState & PaletteDeleteDialogMixin2State;
+type ModalPaletteDeleteViewState = ModalPaletteDeleteViewOuterState & PaletteDeleteDialogMixinState;
 
 export class ModalPaletteDeleteView extends Mixer<ModalPaletteDeleteViewProps, ModalPaletteDeleteViewState> {
 
@@ -21,10 +21,10 @@ export class ModalPaletteDeleteView extends Mixer<ModalPaletteDeleteViewProps, M
 
   constructor(props: ModalPaletteDeleteViewProps) {
     super(props);
-    this.mixins = [new PaletteDeleteDialogMixin2(this, props)];
+    this.mixins = [new PaletteDeleteDialogMixin(this, props)];
     const outerState: ModalPaletteDeleteViewOuterState = {
     };
-    this.setInitialState(outerState, PaletteDeleteDialogMixin2.InitialState);
+    this.setInitialState(outerState, PaletteDeleteDialogMixin.InitialState);
   }
 
   public render() {

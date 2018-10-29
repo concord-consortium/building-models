@@ -1,23 +1,23 @@
 import * as React from "react";
 
-import { SimulationActions, SimulationMixin2Props } from "../stores/simulation-store";
-import { AppSettingsMixin2Props } from "../stores/app-settings-store";
+import { SimulationActions, SimulationMixinProps } from "../stores/simulation-store";
+import { AppSettingsMixinProps } from "../stores/app-settings-store";
 
 import { tr } from "../utils/translate";
 import { RecordButtonView  } from "./record-button-view";
 import { DropDownView } from "./dropdown-view";
 import { ExperimentPanelView } from "./experiment-panel-view";
 
-import { SimulationMixin2, SimulationMixin2State } from "../stores/simulation-store";
-import { AppSettingsMixin2, AppSettingsMixin2State } from "../stores/app-settings-store";
+import { SimulationMixin, SimulationMixinState } from "../stores/simulation-store";
+import { AppSettingsMixin, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
 
 interface SimulationRunPanelViewOuterProps {}
 interface SimulationRunPanelViewOuterState {}
 
-type SimulationRunPanelViewProps = SimulationRunPanelViewOuterProps & SimulationMixin2Props & AppSettingsMixin2Props;
-type SimulationRunPanelViewState = SimulationRunPanelViewOuterState & SimulationMixin2State & AppSettingsMixin2State;
+type SimulationRunPanelViewProps = SimulationRunPanelViewOuterProps & SimulationMixinProps & AppSettingsMixinProps;
+type SimulationRunPanelViewState = SimulationRunPanelViewOuterState & SimulationMixinState & AppSettingsMixinState;
 
 export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, SimulationRunPanelViewState> {
 
@@ -27,9 +27,9 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
 
   constructor(props: SimulationRunPanelViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin2(this, props), new AppSettingsMixin2(this, props)];
+    this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
     const outerState: SimulationRunPanelViewOuterState = {};
-    this.setInitialState(outerState, SimulationMixin2.InitialState, AppSettingsMixin2.InitialState);
+    this.setInitialState(outerState, SimulationMixin.InitialState, AppSettingsMixin.InitialState);
   }
 
   public render() {

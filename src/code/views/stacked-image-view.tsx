@@ -6,7 +6,9 @@ interface StackedImageViewProps {
   imageProps: any[]; // TODO: get concrete type
 }
 
-export class StackedImageView extends React.Component<StackedImageViewProps, {}> {
+interface StackedImageViewState {}
+
+export class StackedImageView extends React.Component<StackedImageViewProps, StackedImageViewState> {
 
   public static displayName = "StackedImageView";
 
