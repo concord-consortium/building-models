@@ -3,6 +3,7 @@
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const execSync = require('sync-exec'),
       now = new Date(),
@@ -28,6 +29,10 @@ const envMap = { production: "production", master: "staging" },
 
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
+
+  const addBuildInfo = (content) => {
+    return content.toString().replace(/__BUILD_INFO__/g, buildInfoString).replace(/__ENVIRONMENT__/g, environment);
+  };
 
   return {
     context: __dirname, // to automatically find tsconfig.json
@@ -108,12 +113,20 @@ module.exports = (env, argv) => {
       new MiniCssExtractPlugin({
         filename: "css/app.css"
       }),
+      new HtmlWebpackPlugin({
+        inject: false,
+        filename: 'index.html',
+        template: 'src/templates/index.html.ejs',
+        transform (content, path) {
+          return addBuildInfo(content);
+        }
+      }),
       new CopyWebpackPlugin([{
         from: 'src/assets',
         to: '',
         transform (content, path) {
           if (/\.html$/.test(path)) {
-            return content.toString().replace(/__BUILD_INFO__/g, buildInfoString).replace(/__ENVIRONMENT__/g, environment);
+            return addBuildInfo(content);
           }
           return content;
         }
@@ -122,6 +135,18 @@ module.exports = (env, argv) => {
         from: 'src/vendor',
         to: 'js'
       }]),
-    ]
+    ],
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          commons: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            filename: 'js/globals.js'
+          }
+        }
+      }
+    }
   };
 };

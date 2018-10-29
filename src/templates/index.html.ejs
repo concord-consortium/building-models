@@ -41,7 +41,9 @@
   </script>
 
   <!-- <script type="text/javascript"> atatus.config('3aefe626ce09488db16c70d9e10fea9a').install(); </script> -->
-  <link rel="stylesheet" href="css/app.css">
+  <% for (key in htmlWebpackPlugin.files.css) { %>
+  <link rel="stylesheet" href="<%= htmlWebpackPlugin.files.css[key] %>" />
+  <% } %>
   <link rel="stylesheet" href="codap-ivy-fonts.css">
 </head>
 <body>
@@ -49,7 +51,10 @@
     <div id='app'></div>
   </div>
   <script src="js/jsPlumb.js"></script>
-  <script src="js/app.js"></script>
+  <% for (key in htmlWebpackPlugin.files.chunks) { %>
+  <script src="<%= htmlWebpackPlugin.files.chunks[key].entry %>" type="text/javascript"></script>
+  <% } %>
+
   <script type="text/javascript" charset="utf-8">
     if(self == top) {
       // redirect to CFM wrapper if we have none
