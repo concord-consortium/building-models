@@ -66,7 +66,7 @@ export class Node extends GraphPrimitive {
   constructor(nodeSpec, key?) {
     let val, val1, val10, val2, val3, val4, val5, val6, val7, val8, val9;
     if (nodeSpec == null) { nodeSpec = {}; }
-    super();
+    super("Node");
     if (key) {
       this.key = key;
     }
@@ -116,7 +116,6 @@ export class Node extends GraphPrimitive {
 
     this._collectorImageProps = null;
 
-    this.type = "Node";
     this.isTransfer = false;
   }
 

@@ -32,7 +32,7 @@ export class Link extends GraphPrimitive {
   private jsPlumbConnection: any; // TODO: get concrete type
 
   constructor(options) {
-    super();
+    super("Link");
 
     if (options == null) { options = {}; }
     this.options = options;

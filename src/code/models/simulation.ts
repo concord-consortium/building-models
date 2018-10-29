@@ -55,7 +55,8 @@ const getTransferLimit = (transferNode) => {
   if (sourceNode) { return sourceNode.previousValue != null ? sourceNode.previousValue : sourceNode.initialValue; } else { return 0; }
 };
 
-const filterFinalValue = (value) => {
+// keep as function so it can be bound to a node
+const filterFinalValue = function(value) {
   // limit max value
   value = this.capNodeValues ? Math.min(this.max, value) : value;
   // limit min value
@@ -63,7 +64,8 @@ const filterFinalValue = (value) => {
   if (shouldLimitMinValue) { return Math.max(this.min, value); } else { return value; }
 };
 
-const RangeIntegrationFunction = (incrementAccumulators) => {
+// keep as function so it can be bound to a node
+const RangeIntegrationFunction = function(incrementAccumulators) {
 
   // if we've already calculated a currentValue for ourselves this step, return it
   if (this.currentValue != null) { return this.currentValue; }
@@ -106,7 +108,8 @@ const RangeIntegrationFunction = (incrementAccumulators) => {
 // Sets the value of node.initialValue before the simulations starts. If there
 // are inbound `initial-value` links, we request the initial values of the
 // source nodes (no calculations needed) and average them.
-const SetInitialAccumulatorValueFunction = () => {
+// keep as function so it can be bound to a node
+const SetInitialAccumulatorValueFunction = function() {
   const initialValueLinks = this.inLinks("initial-value");
   const inValues: any = [];
   _.each(initialValueLinks, (link) => {
@@ -119,7 +122,8 @@ const SetInitialAccumulatorValueFunction = () => {
   }
 };
 
-const SetAccumulatorValueFunction = (nodeValues) => {
+// keep as function so it can be bound to a node
+const SetAccumulatorValueFunction = function(nodeValues) {
   // collectors only have accumulator and transfer links
   const links = this.inLinks("accumulator").concat(this.inLinks("transfer")).concat(this.outLinks("transfer"));
 

@@ -32,19 +32,19 @@ describe("Migrations",  () =>
 
       it("should have key: and data: attributes", () => {
         for (const node of this.result.nodes) {
-          node.key.should.exist();
-          node.data.should.exist();
+          node.key.should.not.equal(undefined);
+          node.data.should.not.equal(undefined);
         }
       });
     });
 
     describe("the palette", () => {
       it("should exist", () => {
-        this.result.palette.should.exist();
+        this.result.palette.should.not.equal(undefined);
       });
       it("should include a blank node", () => {
         const blank = _.find(this.result.palette, pitem => pitem.key === "img/nodes/blank.png");
-        blank.should.exist();
+        blank.should.not.equal(undefined);
       });
     });
 
@@ -57,15 +57,15 @@ describe("Migrations",  () =>
     describe("v-1.1 changes", () => {
       it("should have initial node values", () => {
         for (const node of this.result.nodes) {
-          node.data.initialValue.should.exist();
-          node.data.isAccumulator.should.exist();
+          node.data.initialValue.should.not.equal(undefined);
+          node.data.isAccumulator.should.not.equal(undefined);
           node.data.isAccumulator.should.equal(false);
         }
       });
 
       it("should have valid relationship values", () => {
         for (const link of this.result.links) {
-          link.relation.should.exist();
+          link.relation.should.not.equal(undefined);
           // WAS expect(link.relation.text).to.be.undefined();
           expect(link.relation.text).to.equal(undefined);
           // WAS expect(link.relation.formula).to.be.undefined();
@@ -77,7 +77,7 @@ describe("Migrations",  () =>
     describe("v-1.2 node changes", () =>
       it("should have initial node values", () => {
         for (const node of this.result.nodes) {
-          node.data.valueDefinedSemiQuantitatively.should.exist();
+          node.data.valueDefinedSemiQuantitatively.should.not.equal(undefined);
           node.data.valueDefinedSemiQuantitatively.should.equal(true);
         }
       })
@@ -99,13 +99,13 @@ describe("Migrations",  () =>
     describe("v-1.5 changes", () => {
       it("should have images and paletteItems for nodes", () => {
         for (const node of this.result.nodes) {
-          node.data.image.should.not.be.null();
-          node.data.paletteItem.should.not.be.null();
+          node.data.image.should.not.equal(null);
+          node.data.paletteItem.should.not.equal(null);
         }
       });
 
       it("paletteItems should have a uuid", () => {
-        this.result.palette.map((paletteItem) => paletteItem.uuid.should.not.be.null());
+        this.result.palette.map((paletteItem) => paletteItem.uuid.should.not.equal(null));
       });
     });
 
@@ -116,7 +116,7 @@ describe("Migrations",  () =>
 
     describe("v-1.7 changes", () =>
       it("should have settings for the simulation", () => {
-        this.result.settings.simulation.should.exist();
+        this.result.settings.simulation.should.not.equal(undefined);
       })
     );
         // Removed or changed in 1.8:
@@ -149,13 +149,13 @@ describe("Migrations",  () =>
 
     describe("v-1.12.0 changes", () =>
       it("should have frames array", () => {
-        this.result.nodes.map((node) => node.data.frames.should.exist());
+        this.result.nodes.map((node) => node.data.frames.should.not.equal(undefined));
       })
     );
 
     describe("v-1.15.0 changes", () =>
       it("should have link reasoning", () => {
-        this.result.links.map((link) => link.reasoning.should.exist());
+        this.result.links.map((link) => link.reasoning.should.not.equal(undefined));
       })
     );
 
@@ -176,7 +176,7 @@ describe("Migrations",  () =>
 
     describe("v-1.18.0 changes", () =>
       it("should have link relation type", () => {
-        this.result.links.map((link) => link.relation.type.should.exist());
+        this.result.links.map((link) => link.relation.type.should.not.equal(undefined));
       })
     );
 

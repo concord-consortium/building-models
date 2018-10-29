@@ -7,7 +7,7 @@ chai.config.includeStack = true;
 
 const Sinon = require("sinon");
 
-import { ImageDialogStore } from "../src/code/stores/image-dialog-store";
+import { ImageDialogStore, ImageDialogActions } from "../src/code/stores/image-dialog-store";
 
 describe("ImageDialogStore", () => {
 
@@ -21,11 +21,9 @@ describe("ImageDialogStore", () => {
     this.mock.restore();
   });
 
-  it("GraphPrimitive should exists", () => ImageDialogStore.should.exist());
-
   describe("the ImageDialogStore Actions", () => {
     beforeEach(() => {
-      this.actions = ImageDialogStore.actions;
+      this.actions = ImageDialogActions;
     });
 
     describe("open", () => {
@@ -65,7 +63,7 @@ describe("ImageDialogStore", () => {
         it("should call the callback when finishing", () => {
           this.actions.cancel();
           this.clock.tick(1);
-          this.callbackF.called.should.be.true();
+          this.callbackF.called.should.equal(true);
         });
       });
     });

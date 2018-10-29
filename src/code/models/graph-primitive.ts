@@ -45,8 +45,9 @@ export class GraphPrimitive {
   public type: string;
   public key: string;
 
-  constructor() {
-    this.id = GraphPrimitive.nextID(this.type);
+  constructor(type: string = "GraphPrimitive") {
+    this.type = type;
+    this.id = GraphPrimitive.nextID(type);
     this.key = this.id;
   }
 }

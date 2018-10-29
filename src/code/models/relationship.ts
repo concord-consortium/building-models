@@ -35,6 +35,7 @@ export class Relationship {
   public isDefined: boolean;
   public formula: any;
   public text: string;
+  public hasError: boolean;
 
   private opts: any;
   private type: string;
@@ -45,7 +46,6 @@ export class Relationship {
   private isAccumulator: boolean;
   private isTransfer: boolean;
   private isTransferModifier: boolean;
-  private hasError: boolean;
   private customData: any;
   private isCustomRelationship: boolean;
 
