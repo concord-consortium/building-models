@@ -2,7 +2,9 @@ const _ = require("lodash");
 
 import { migrationUpdate } from "../src/code/data/migrations/migrations";
 import { TimeUnits } from "../src/code/utils/time-units";
-const originalData   = require("./serialized-test-data/v-0.1");
+import { v01data } from "./serialized-test-data/v-0.1";
+import { v1220data } from "./serialized-test-data/v-1.22.0";
+import { v1220MissingCombineMethodData } from "./serialized-test-data/v-1.22.0-missing-combine-method";
 
 import * as chai from "chai";
 
@@ -16,7 +18,7 @@ export {};
 describe("Migrations",  () =>
   describe("update", () => {
     beforeEach(() => {
-      this.result = migrationUpdate(originalData);
+      this.result = migrationUpdate(v01data);
     });
 
     describe("the final version number", () =>
@@ -198,7 +200,7 @@ describe("Migrations",  () =>
         // containg collector nodes was not corectly migrating the simulationType
         // to time-based. In other words, the wrong value is 1 and the value
         // we want is 2.
-        const brokenExample = require("./serialized-test-data/v-1.22.0");
+        const brokenExample = v1220data;
         // Pre-test our broken json is our expected version of 1.22.0
         expect(brokenExample.version).to.equal("1.22.0");
         expect(brokenExample.settings.simulationType).to.equal(1); // wrong value!
@@ -211,7 +213,7 @@ describe("Migrations",  () =>
     describe("v-1.24.0 changes", () =>
       describe("a known failing case: missing `combineMethod` in serialization", () => {
         // We don"t seem to be serializing the combinMethod
-        const brokenExample = require("./serialized-test-data/v-1.22.0-missing-combine-method");
+        const brokenExample = v1220MissingCombineMethodData;
         // Pre-test our broken json is our expected version of 1.22.0
         expect(brokenExample.version).to.equal("1.22.0");
         // expect to not find any `combineMethod` for our nodes.

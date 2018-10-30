@@ -18,7 +18,7 @@ import { SimulationStore } from "../src/code/stores/simulation-store";
 
 import { Stub, UnStub } from "./codap-helper";
 
-const SerializedTestData = require("./serialized-test-data/v-0.1");
+import { v01data as SerializedTestData } from "./serialized-test-data/v-0.1";
 
 describe("Serialization and Loading", () => {
   beforeEach(() => {

@@ -1,4 +1,4 @@
-module.exports = {
+export const v1220MissingCombineMethodData = {
     "version": "1.22.0",
     "filename": "New Model",
     "palette": [

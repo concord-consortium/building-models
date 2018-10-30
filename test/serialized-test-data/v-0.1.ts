@@ -1,5 +1,5 @@
 // Initial test data using inherited v 0.1 format
-module.exports = {
+export const v01data = {
   version: 0.1,
   filename: "sample model",
   nodes: [
