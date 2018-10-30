@@ -52,6 +52,7 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
 
   private nodeTitleMixin: NodeTitleMixin;
   private titleUpdated: boolean;
+  private input: HTMLInputElement | null;
 
   constructor(props: NodeTitleViewProps) {
     super(props);
@@ -122,7 +123,7 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
     return (
       <input
         type="text"
-        ref="input"
+        ref={el => this.input = el}
         key="edit"
         style={{ display: this.props.isEditing ? "block" : "none" }}
         className={className}
@@ -149,7 +150,7 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
   }
 
   private inputElm() {
-    return $(this.refs.input);
+    return $(this.input!);
   }
 
   private inputValue() {
@@ -249,6 +250,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private lastClickLinkTime;
   private initialTitle: string;
+  private node: HTMLDivElement | null;
 
   constructor(props: NodeViewProps) {
     super(props);
@@ -261,12 +263,12 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   public componentDidUpdate() {
     const handle = ".img-background";
-    const $elem = $(this.refs.node);
+    const $elem = $(this.node!);
     return ($elem as any).draggable( "option", "handle", handle);
   }
 
   public componentDidMount() {
-    const $elem = $(this.refs.node);
+    const $elem = $(this.node!);
     return ($elem as any).draggable({
       drag: this.handleMove,
       stop: this.handleStop,
@@ -288,7 +290,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     const handleBackgroundTouchEnd = () => this.handleSelected(true);
 
     return (
-      <div className={this.nodeClasses()} ref="node" style={style}>
+      <div className={this.nodeClasses()} ref={el => this.node = el} style={style}>
         <div className={this.linkTargetClasses()} data-node-key={this.props.nodeKey}>
           <div className="slider" data-node-key={this.props.nodeKey}>
             {this.props.simulating ? <div>{this.renderSliderView()}</div> : undefined}
@@ -443,7 +445,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     this.props.onMove({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
-      domElement: this.refs.node,
+      domElement: this.node,
       syntheticEvent: evt,
       extra
     });
@@ -456,7 +458,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     return this.props.onMoveComplete({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
-      domElement: this.refs.node,
+      domElement: this.node,
       syntheticEvent: evt,
       extra
     });
@@ -466,7 +468,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     return this.props.onDelete({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
-      domElement: this.refs.node,
+      domElement: this.node,
       syntheticEvent: evt
     });
   }

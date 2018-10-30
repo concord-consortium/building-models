@@ -54,6 +54,8 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
 
   public static displayName = "AppView";
 
+  private inspectorPanel: InspectorPanelView | null;
+
   constructor(props: AppViewProps) {
     super(props);
     this.mixins = [new ImageDialogMixin(this, props), new AppSettingsMixin(this, props)];
@@ -165,7 +167,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
             diagramOnly={this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly}
             // toggleImageBrowser={this.handleToggleImageBrowser}
             graphStore={this.props.graphStore}
-            ref="inspectorPanel"
+            ref={el => this.inspectorPanel = el}
             display={AppSettingsStore.settings.uiElements.inspectorPanel}
           />
           {this.state.showingDialog ? <ImageBrowserView /* graphStore={this.props.graphStore} */ /> : null}
@@ -177,8 +179,8 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
   }
 
   private selectionUpdated() {
-    if (this.refs.inspectorPanel != null) {
-      (this.refs.inspectorPanel as any).nodeSelectionChanged();
+    if (this.inspectorPanel) {
+      (this.inspectorPanel as any).nodeSelectionChanged();
     }
   }
 

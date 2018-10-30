@@ -19,6 +19,8 @@ export class PaletteItemView extends Mixer<PaletteItemViewProps, PaletteItemView
 
   public static displayName = "PaletteItemView";
 
+  private node: HTMLDivElement | null;
+
   constructor(props: PaletteItemViewProps) {
     super(props);
     this.mixins = [new DraggableMixin(this, props, {removeClasses: ["palette-image"]})];
@@ -37,7 +39,7 @@ export class PaletteItemView extends Mixer<PaletteItemViewProps, PaletteItemView
         data-title={this.props.node.title}
         data-droptype={"paletteItem"}
         className={className}
-        ref="node"
+        ref={el => this.node = el}
         onClick={this.handleClick}
       >
         <div className="proto-node">

@@ -151,7 +151,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     // for mixins
     super.componentDidMount();
 
-    autosize(this.refs.reasoning);
+    autosize(this.reasoning);
   }
 
   public componentWillReceiveProps(newProps, nextContext) {
@@ -183,7 +183,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
             defaultValue={this.props.link.reasoning}
             placeholder={tr("~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER")}
             onChange={this.handleUpdateReasoning}
-            ref="reasoning"
+            ref={el => this.reasoning = el}
             className="full"
             rows={3}
             style={{ overflowY: "scroll", resize: "none"}}
@@ -301,7 +301,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
   private getScalar() {
     if (this.state.complexity === AppSettingsStore.Complexity.basic) {
       return RelationFactory.scalars.aboutTheSame;
-    } else if (this.refs.scalar) {
+    } else if (this.scalar) {
       return RelationFactory.scalars[this.scalar ? this.scalar.value : ""];
     } else {
       return undefined;
@@ -326,7 +326,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     return (
       <div className="bb-select">
         <span>{`${tr("~NODE-RELATION-EDIT.TO")} `}</span>
-        <select value={currentOption} className="" ref="vector" onChange={this.handleUpdateRelation}>
+        <select value={currentOption} className="" ref={el => this.vector = el} onChange={this.handleUpdateRelation}>
           {options}
         </select>
       </div>
@@ -361,7 +361,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       return (
         <div className={`bb-select${visClass}`}>
           <span>{`${tr("~NODE-RELATION-EDIT.BY")} `}</span>
-          <select value={currentOption} className="" ref="scalar" onChange={this.handleUpdateRelation}>
+          <select value={currentOption} className="" ref={el => this.scalar = el} onChange={this.handleUpdateRelation}>
             {options}
           </select>
         </div>
@@ -393,7 +393,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
         <span className="source">{source}</span>
         <span className={textClass}>{` ${tr("~NODE-RELATION-EDIT.IS")} `}</span>
         <div>
-          <select value={currentOption} ref="accumulator" onChange={this.handleUpdateRelation}>
+          <select value={currentOption} ref={el => this.accumulator = el} onChange={this.handleUpdateRelation}>
             {options}
           </select>
         </div>
@@ -437,7 +437,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     return (
       <div className="top">
         <span dangerouslySetInnerHTML={{__html: line_a}} />
-        <select value={currentOption} ref="transfer" onChange={this.handleUpdateRelation}>
+        <select value={currentOption} ref={el => this.transfer = el} onChange={this.handleUpdateRelation}>
           {options}
         </select>
         <span dangerouslySetInnerHTML={{__html: line_b}} />

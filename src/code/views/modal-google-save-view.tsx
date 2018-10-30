@@ -22,6 +22,8 @@ export class ModalGoogleSaveView extends React.Component<ModalGoogleSaveViewProp
 
   public static displayName = "ModalGoogleSave";
 
+  private fileName: HTMLInputElement | null;
+
   constructor(props: ModalGoogleSaveViewProps) {
     super(props);
     this.setState({
@@ -47,7 +49,7 @@ export class ModalGoogleSaveView extends React.Component<ModalGoogleSaveViewProp
             <label htmlFor="filename">Name</label>
             <input
               name="fileName"
-              ref="fileName"
+              ref={el => this.fileName = el}
               value={this.state.filename}
               type="text"
               placeholder={tr("~MENU.UNTITLED_MODEL")}

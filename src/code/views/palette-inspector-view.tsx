@@ -25,6 +25,8 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
 
   public static displayName = "PaletteInspectorView";
 
+  private palette: HTMLDivElement | null;
+
   constructor(props: PaletteInspectorViewProps) {
     super(props);
     this.mixins = [new PaletteMixin(this, props), new NodesMixin(this, props)];
@@ -37,7 +39,7 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
     const index = 0;
     return (
       <div className="palette-inspector">
-        <div className="palette" ref="palette">
+        <div className="palette" ref={el => this.palette = el}>
           <div>
             <PaletteAddView label={tr("~PALETTE-INSPECTOR.ADD_IMAGE")} />
             {_.map(this.state.palette, (node, index) => {
