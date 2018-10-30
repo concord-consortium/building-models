@@ -30,10 +30,6 @@ const envMap = { production: "production", master: "staging" },
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
-  const addBuildInfo = (content) => {
-    return content.toString().replace(/__BUILD_INFO__/g, buildInfoString).replace(/__ENVIRONMENT__/g, environment);
-  };
-
   return {
     context: __dirname, // to automatically find tsconfig.json
     devtool: 'source-map',
@@ -117,16 +113,15 @@ module.exports = (env, argv) => {
         inject: false,
         filename: 'index.html',
         template: 'src/templates/index.html.ejs',
-        transform (content, path) {
-          return addBuildInfo(content);
-        }
+        __BUILD_INFO__: buildInfoString,
+        __ENVIRONMENT__: environment
       }),
       new CopyWebpackPlugin([{
         from: 'src/assets',
         to: '',
         transform (content, path) {
           if (/\.html$/.test(path)) {
-            return addBuildInfo(content);
+            return content.toString().replace(/__BUILD_INFO__/g, buildInfoString).replace(/__ENVIRONMENT__/g, environment);
           }
           return content;
         }

@@ -13,16 +13,14 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   public static displayName = "AboutView";
 
   public state: AboutViewState = {
-    showing: true,
+    showing: false,
     year: ""
   };
 
   public componentWillMount() {
-    setTimeout(() => {
-      const build_info = $("html").find("meta[name='build-info']").attr("content") || "";
-      const year = build_info.split(" ")[0].split("-")[0];
-      this.setState({showing: false, year});
-    }, 1);
+    const build_info = $("html").find("meta[name='build-info']").attr("content") || "";
+    const year = build_info.split(" ")[0].split("-")[0];
+    this.setState({showing: false, year});
   }
 
   public render() {
