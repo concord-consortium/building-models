@@ -23,7 +23,7 @@ export class ImageLinkDialogView extends Mixer<ImageLinkDialogViewProps, ImageLi
     this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
     this.mixins = [new ImageDialogMixin(this, props), this.imageDialogViewMixin];
     const outerState: ImageLinkDialogViewOuterState = {};
-    this.setInitialState(outerState, ImageDialogMixin.InitialState, ImageDialogViewMixin.InitialState);
+    this.setInitialState(outerState, ImageDialogMixin.InitialState(), ImageDialogViewMixin.InitialState());
   }
 
   public render() {

@@ -60,7 +60,7 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
     this.mixins = [this.nodeTitleMixin];
 
     const outerState: NodeTitleViewOuterState = this.getStateFromProps(props);
-    this.setInitialState(outerState, NodeTitleMixin.InitialState);
+    this.setInitialState(outerState, NodeTitleMixin.InitialState());
   }
 
   public componentWillUnmount() {

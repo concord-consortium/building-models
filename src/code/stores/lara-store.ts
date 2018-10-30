@@ -46,6 +46,7 @@ export class LaraMixin extends Mixin<LaraMixinProps, LaraMixinState> {
   }
 }
 
-LaraMixin.InitialState = {
-  laraHasLoaded: LaraStore.laraHasLoaded
+LaraMixin.InitialState = () => {
+  return {laraHasLoaded: LaraStore.laraHasLoaded};
 };
+

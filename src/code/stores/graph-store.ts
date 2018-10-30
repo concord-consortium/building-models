@@ -919,7 +919,7 @@ export class GraphMixin extends Mixin<GraphMixinProps, GraphMixinState> {
   }
 }
 
-GraphMixin.InitialState = GraphStore.getGraphState();
+GraphMixin.InitialState = () => GraphStore.getGraphState();
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

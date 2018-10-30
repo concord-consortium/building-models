@@ -24,7 +24,7 @@ export class ModalPaletteDeleteView extends Mixer<ModalPaletteDeleteViewProps, M
     this.mixins = [new PaletteDeleteDialogMixin(this, props)];
     const outerState: ModalPaletteDeleteViewOuterState = {
     };
-    this.setInitialState(outerState, PaletteDeleteDialogMixin.InitialState);
+    this.setInitialState(outerState, PaletteDeleteDialogMixin.InitialState());
   }
 
   public render() {

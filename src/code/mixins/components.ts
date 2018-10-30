@@ -2,7 +2,7 @@ import * as React from "react";
 import * as _ from "lodash";
 
 export class Mixin<P, S> extends React.Component<P, S> {
-  public static InitialState: any;
+  public static InitialState: () => any;
 
   protected mixer: any;
 

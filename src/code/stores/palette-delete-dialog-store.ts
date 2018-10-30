@@ -131,13 +131,13 @@ export class PaletteDeleteDialogMixin extends Mixin<PaletteDeleteDialogMixinProp
   }
 }
 
-PaletteDeleteDialogMixin.InitialState = {
-  showing:         PaletteDeleteDialogStore.showing,
-  paletteItem:     PaletteDeleteDialogStore.paletteItem,
-  options:         PaletteDeleteDialogStore.options,
-  replacement:     PaletteDeleteDialogStore.replacement,
-  deleted:         PaletteDeleteDialogStore.deleted,
-  showReplacement: PaletteDeleteDialogStore.showReplacement
+PaletteDeleteDialogMixin.InitialState = () => {
+  return {
+    showing:         PaletteDeleteDialogStore.showing,
+    paletteItem:     PaletteDeleteDialogStore.paletteItem,
+    options:         PaletteDeleteDialogStore.options,
+    replacement:     PaletteDeleteDialogStore.replacement,
+    deleted:         PaletteDeleteDialogStore.deleted,
+    showReplacement: PaletteDeleteDialogStore.showReplacement
+  };
 };
-
-

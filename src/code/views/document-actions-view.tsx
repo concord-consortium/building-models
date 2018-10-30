@@ -33,7 +33,7 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
       selectedLinks: [],
       selectedItems: []
     };
-    this.setInitialState(outerState, CodapMixin.InitialState, UndoRedoUIMixin.InitialState, AppSettingsMixin.InitialState);
+    this.setInitialState(outerState, CodapMixin.InitialState(), UndoRedoUIMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   public componentDidMount() {

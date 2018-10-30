@@ -60,7 +60,9 @@ export class UndoRedoUIMixin extends Mixin<UndoRedoUIMixinProps, UndoRedoUIMixin
   }
 }
 
-UndoRedoUIMixin.InitialState = {
-  canUndo: UndoRedoUIStore.canUndo,
-  canRedo: UndoRedoUIStore.canRedo
+UndoRedoUIMixin.InitialState = () => {
+  return {
+    canUndo: UndoRedoUIStore.canUndo,
+    canRedo: UndoRedoUIStore.canRedo
+  };
 };

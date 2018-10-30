@@ -85,7 +85,9 @@ export class NodesMixin extends Mixin<NodesMixinProps, NodesMixinState> {
   }
 }
 
-NodesMixin.InitialState = {
-  // nodes: [],
-  paletteItemHasNodes: false
-} as NodesMixinState;
+NodesMixin.InitialState = () => {
+  return {
+    // nodes: [],
+    paletteItemHasNodes: false
+  } as NodesMixinState;
+};

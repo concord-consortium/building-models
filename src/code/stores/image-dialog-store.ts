@@ -141,9 +141,11 @@ export class ImageDialogMixin extends Mixin<ImageDialogMixinProps, ImageDialogMi
   }
 }
 
-ImageDialogMixin.InitialState = {
-  showingDialog: ImageDialogStore.showingDialog,
-  keepShowing: ImageDialogStore.keepShowing,
-  paletteItem: ImageDialogStore.paletteItem,
-  selectedImage: ImageDialogStore.paletteItem
+ImageDialogMixin.InitialState = () => {
+  return {
+    showingDialog: ImageDialogStore.showingDialog,
+    keepShowing: ImageDialogStore.keepShowing,
+    paletteItem: ImageDialogStore.paletteItem,
+    selectedImage: ImageDialogStore.paletteItem
+  };
 };

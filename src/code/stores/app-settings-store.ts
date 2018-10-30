@@ -181,4 +181,4 @@ export class AppSettingsMixin extends Mixin<AppSettingsMixinProps, AppSettingsMi
     return this.setState(_.clone(newData));
   }
 }
-AppSettingsMixin.InitialState = _.clone(AppSettingsStore.settings);
+AppSettingsMixin.InitialState = () => _.clone(AppSettingsStore.settings);

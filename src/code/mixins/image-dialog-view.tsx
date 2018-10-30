@@ -36,5 +36,5 @@ export class ImageDialogViewMixin extends Mixin<ImageDialogViewMixinProps, Image
   }
 }
 
-ImageDialogViewMixin.InitialState = {};
+ImageDialogViewMixin.InitialState = () => ({});
 

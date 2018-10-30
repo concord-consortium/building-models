@@ -158,7 +158,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
       numPages: 0,
       query: ""
     };
-    this.setInitialState(outerState, ImageDialogMixin.InitialState, ImageDialogViewMixin.InitialState);
+    this.setInitialState(outerState, ImageDialogMixin.InitialState(), ImageDialogViewMixin.InitialState());
   }
 
   public componentDidMount() {

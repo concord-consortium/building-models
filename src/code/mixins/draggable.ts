@@ -46,5 +46,5 @@ export class DraggableMixin extends Mixin<DraggableMixinProps, DraggableMixinSta
   }
 }
 
-DraggableMixin.InitialState = {};
+DraggableMixin.InitialState = () => ({});
 

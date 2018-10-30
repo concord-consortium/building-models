@@ -81,7 +81,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
       selectedLink: null,
       internalLibrary: null
     };
-    this.setInitialState(outerState, ImageDialogMixin.InitialState, AppSettingsMixin.InitialState);
+    this.setInitialState(outerState, ImageDialogMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   public componentDidMount() {

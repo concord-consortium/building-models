@@ -234,16 +234,17 @@ export class GoogleFileMixin extends Mixin<GoogleFileMixinProps, GoogleFileMixin
   }
 }
 
-GoogleFileMixin.InitialState = {
-  gapiLoaded:        false,
-  fileId:            null,
-  filename:          "", // this.filename,  // TODO: figure out fix for this
-  action:            tr("~FILE.CHECKING_AUTH"),
-  isPublic:          false,
-  docLink:           null,
-  showingSaveDialog: false
+GoogleFileMixin.InitialState = () => {
+  return {
+    gapiLoaded:        false,
+    fileId:            null,
+    filename:          "", // this.filename,  // TODO: figure out fix for this
+    action:            tr("~FILE.CHECKING_AUTH"),
+    isPublic:          false,
+    docLink:           null,
+    showingSaveDialog: false
+  };
 };
-
 
 function __guard__(value, transform) {
   return (typeof value !== "undefined" && value !== null) ? transform(value) : undefined;

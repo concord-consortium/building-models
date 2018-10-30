@@ -42,7 +42,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
       "min-value": this.props.node.min,
       "max-value": this.props.node.max
     };
-    this.setInitialState(outerState, SimulationMixin.InitialState, AppSettingsMixin.InitialState);
+    this.setInitialState(outerState, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   public componentWillReceiveProps(nextProps, nextContext) {

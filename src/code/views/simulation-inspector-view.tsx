@@ -30,7 +30,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
     super(props);
     this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
     const outerProps: SimulationInspectorOuterProps = {};
-    this.setInitialState(outerProps, SimulationMixin.InitialState, AppSettingsMixin.InitialState);
+    this.setInitialState(outerProps, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   public render() {

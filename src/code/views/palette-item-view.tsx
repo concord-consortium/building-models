@@ -25,7 +25,7 @@ export class PaletteItemView extends Mixer<PaletteItemViewProps, PaletteItemView
     super(props);
     this.mixins = [new DraggableMixin(this, props, {removeClasses: ["palette-image"]})];
     const outerState: PaletteItemViewOuterState = {};
-    this.setInitialState(outerState, DraggableMixin.InitialState);
+    this.setInitialState(outerState, DraggableMixin.InitialState());
   }
 
   public render() {

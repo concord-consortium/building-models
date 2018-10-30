@@ -62,4 +62,4 @@ export class InspectorPanelMixin extends Mixin<InspectorPanelMixinProps, Inspect
   }
 }
 
-InspectorPanelMixin.InitialState = _.clone(InspectorPanelStore.settings);
+InspectorPanelMixin.InitialState = () => _.clone(InspectorPanelStore.settings);

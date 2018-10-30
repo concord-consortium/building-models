@@ -54,7 +54,7 @@ export class ImagePickerView extends Mixer<ImagePickerViewProps, ImagePickerView
     super(props);
     this.mixins = [new PaletteMixin(this, props)];
     const outerState: ImagePickerViewOuterState = {opened: false};
-    this.setInitialState(outerState, PaletteMixin.InitialState);
+    this.setInitialState(outerState, PaletteMixin.InitialState());
   }
 
   public render() {

@@ -35,7 +35,7 @@ export class GlobalNavView extends Mixer<GlobalNavViewProps, GlobalNavViewState>
       saved: false,
       filename: props.filename
     };
-    this.setInitialState(outerState, GoogleFileMixin.InitialState, UndoRedoUIMixin.InitialState);
+    this.setInitialState(outerState, GoogleFileMixin.InitialState(), UndoRedoUIMixin.InitialState());
   }
 
   public componentDidMount() {

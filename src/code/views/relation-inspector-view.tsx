@@ -41,7 +41,7 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     super(props);
     this.mixins = [new InspectorPanelMixin(this, props), new GraphMixin(this, props)];
     const outerState: RelationInspectorViewOuterState = {};
-    this.setInitialState(outerState, InspectorPanelMixin.InitialState);
+    this.setInitialState(outerState, InspectorPanelMixin.InitialState());
   }
 
     public render() {

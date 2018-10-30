@@ -260,12 +260,14 @@ export class PaletteMixin extends Mixin<PaletteMixinProps, PaletteMixinState> {
   }
 }
 
-PaletteMixin.InitialState = {
-  palette: PaletteStore.palette,
-  library: PaletteStore.library,
-  selectedPaletteItem: PaletteStore.selectedPaletteItem,
-  selectedPaletteIndex: PaletteStore.selectedPaletteIndex,
-  selectedPaletteImage: PaletteStore.selectedPaletteImage,
-  imageMetadata: PaletteStore.imageMetadata
-} as PaletteMixinState;
+PaletteMixin.InitialState = () => {
+  return {
+    palette: PaletteStore.palette,
+    library: PaletteStore.library,
+    selectedPaletteItem: PaletteStore.selectedPaletteItem,
+    selectedPaletteIndex: PaletteStore.selectedPaletteIndex,
+    selectedPaletteImage: PaletteStore.selectedPaletteImage,
+    imageMetadata: PaletteStore.imageMetadata
+  } as PaletteMixinState;
+};
 

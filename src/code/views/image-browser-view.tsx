@@ -30,7 +30,7 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
 
     this.mixins = [new ImageDialogMixin(this, props), new PaletteMixin(this, props)];
     const outerState: ImageBrowserViewOuterState = {};
-    this.setInitialState(outerState, ImageDialogMixin.InitialState, PaletteMixin.InitialState);
+    this.setInitialState(outerState, ImageDialogMixin.InitialState(), PaletteMixin.InitialState());
   }
 
   public render() {

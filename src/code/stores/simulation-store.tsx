@@ -360,5 +360,5 @@ export class SimulationMixin extends Mixin<SimulationMixinProps, SimulationMixin
     return this.setState(_.clone(newData));
   }
 }
-SimulationMixin.InitialState = _.clone(SimulationStore.settings);
+SimulationMixin.InitialState = () => _.clone(SimulationStore.settings);
 

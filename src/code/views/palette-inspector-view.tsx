@@ -32,7 +32,7 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
     this.mixins = [new PaletteMixin(this, props), new NodesMixin(this, props)];
     const outerState: PaletteInspectorViewOuterState = {
     };
-    this.setInitialState(outerState, PaletteMixin.InitialState, NodesMixin.InitialState);
+    this.setInitialState(outerState, PaletteMixin.InitialState(), NodesMixin.InitialState());
   }
 
   public render() {

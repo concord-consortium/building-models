@@ -34,7 +34,7 @@ export class NodeWellView extends Mixer<NodeWellViewProps, NodeWellViewState> {
       nodes: [],
       collapsed: true
     };
-    this.setInitialState(outerState, PaletteMixin.InitialState);
+    this.setInitialState(outerState, PaletteMixin.InitialState());
   }
 
   public render() {

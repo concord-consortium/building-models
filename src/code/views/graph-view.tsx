@@ -87,7 +87,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         y: 0
       }
     };
-    this.setInitialState(outerState, GraphMixin.InitialState, SimulationMixin.InitialState, AppSettingsMixin.InitialState, CodapMixin.InitialState, LaraMixin.InitialState);
+    this.setInitialState(outerState, GraphMixin.InitialState(), SimulationMixin.InitialState(), AppSettingsMixin.InitialState(), CodapMixin.InitialState(), LaraMixin.InitialState());
   }
 
   public componentDidMount() {

@@ -70,7 +70,9 @@ export class CodapMixin extends Mixin<CodapMixinProps, CodapMixinState> {
   }
 }
 
-CodapMixin.InitialState = {
-  codapHasLoaded: CodapStore.codapHasLoaded,
-  hideUndoRedo:   CodapStore.hideUndoRedo
+CodapMixin.InitialState = () => {
+  return {
+    codapHasLoaded: CodapStore.codapHasLoaded,
+    hideUndoRedo:   CodapStore.hideUndoRedo
+  };
 };

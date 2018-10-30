@@ -116,7 +116,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       isTransfer: status.isTransfer,
       isTransferModifier: status.isTransferModifier
     };
-    this.setInitialState(outerState, SimulationMixin.InitialState, AppSettingsMixin.InitialState);
+    this.setInitialState(outerState, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   /*

@@ -38,7 +38,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     super(props);
     this.mixins = [new SimulationMixin(this, props)];
     const outerState: NodeSvgGraphViewOuterState = {};
-    this.setInitialState(outerState, SimulationMixin.InitialState);
+    this.setInitialState(outerState, SimulationMixin.InitialState());
   }
 
   public render() {

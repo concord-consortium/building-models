@@ -46,5 +46,5 @@ export class NodeTitleMixin extends Mixin<NodeTitleMixinProps, NodeTitleMixinSta
   }
 }
 
-NodeTitleMixin.InitialState = {};
+NodeTitleMixin.InitialState = () => ({});
 
