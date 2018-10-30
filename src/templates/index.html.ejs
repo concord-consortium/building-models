@@ -24,11 +24,11 @@
           accessToken: "2af50f6fb22b4c68b2e6754300aa1d2f",
           captureUncaught: true,
           payload: {
-              environment: "__ENVIRONMENT__",
+              environment: "<%= htmlWebpackPlugin.options.__ENVIRONMENT__%>",
               client: {
                   javascript: {
                     source_map_enabled: true,
-                    code_version: "__BUILD_INFO__",
+                    code_version: "<%= htmlWebpackPlugin.options.__BUILD_INFO__ %>",
                     // Optionally have Rollbar guess which frames the error was thrown from
                     // when the browser does not provide line and column numbers.
                     guess_uncaught_frames: true
