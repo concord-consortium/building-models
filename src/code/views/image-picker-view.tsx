@@ -24,13 +24,13 @@ class ImgChoiceView extends React.Component<ImgChoiceViewProps, ImgChoiceViewSta
       className = "image-choice selected";
     }
     return (
-      <div className={className} onClick={this.selectNode}>
+      <div className={className} onClick={this.handleSelectNode}>
         <img src={this.props.node.image} className="image-choice" />
       </div>
     );
   }
 
-  private selectNode() {
+  private handleSelectNode = () => {
     return this.props.onChange(this.props.node);
   }
 }

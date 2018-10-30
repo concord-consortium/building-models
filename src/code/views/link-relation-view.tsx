@@ -226,7 +226,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     });
   }
 
-  private updateRelation() {
+  private handleUpdateRelation = () => {
     let link, relation;
     if (this.state.isAccumulator) {
       const selectedAccumulator = this.getAccumulator();
@@ -326,7 +326,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     return (
       <div className="bb-select">
         <span>{`${tr("~NODE-RELATION-EDIT.TO")} `}</span>
-        <select value={currentOption} className="" ref="vector" onChange={this.updateRelation}>
+        <select value={currentOption} className="" ref="vector" onChange={this.handleUpdateRelation}>
           {options}
         </select>
       </div>
@@ -361,7 +361,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       return (
         <div className={`bb-select${visClass}`}>
           <span>{`${tr("~NODE-RELATION-EDIT.BY")} `}</span>
-          <select value={currentOption} className="" ref="scalar" onChange={this.updateRelation}>
+          <select value={currentOption} className="" ref="scalar" onChange={this.handleUpdateRelation}>
             {options}
           </select>
         </div>
@@ -393,7 +393,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
         <span className="source">{source}</span>
         <span className={textClass}>{` ${tr("~NODE-RELATION-EDIT.IS")} `}</span>
         <div>
-          <select value={currentOption} ref="accumulator" onChange={this.updateRelation}>
+          <select value={currentOption} ref="accumulator" onChange={this.handleUpdateRelation}>
             {options}
           </select>
         </div>
@@ -437,7 +437,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     return (
       <div className="top">
         <span dangerouslySetInnerHTML={{__html: line_a}} />
-        <select value={currentOption} ref="transfer" onChange={this.updateRelation}>
+        <select value={currentOption} ref="transfer" onChange={this.handleUpdateRelation}>
           {options}
         </select>
         <span dangerouslySetInnerHTML={{__html: line_b}} />

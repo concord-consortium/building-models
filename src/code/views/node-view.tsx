@@ -282,10 +282,10 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     };
     const fullWidthBackgroundClass = this.props.data.isTransfer ? "full-width" : "";
 
-    const onDragStart = evt => this.handleCODAPAttributeDrag(evt, this.props.data.codapID);
-    const onGraphButtonClick = () => this.handleGraphClick(this.props.data.title);
-    const onBackgroundClick = evt => this.handleSelected(true, evt);
-    const onBackgroundTouchEnd = () => this.handleSelected(true);
+    const handleDragStart = evt => this.handleCODAPAttributeDrag(evt, this.props.data.codapID);
+    const handleGraphButtonClick = () => this.handleGraphClick(this.props.data.title);
+    const handleBackgroundClick = evt => this.handleSelected(true, evt);
+    const handleBackgroundTouchEnd = () => this.handleSelected(true);
 
     return (
       <div className={this.nodeClasses()} ref="node" style={style}>
@@ -300,21 +300,21 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
                 <div
                   className="graph-source action-circle icon-codap-graph"
                   draggable={true}
-                  onDragStart={onDragStart}
-                  onClick={onGraphButtonClick}
+                  onDragStart={handleDragStart}
+                  onClick={handleGraphButtonClick}
                 /> : undefined}
             </div>
             <div className={this.topClasses()} data-node-key={this.props.nodeKey}>
               <div
                 className={`img-background transfer-target ${fullWidthBackgroundClass}`}
-                onClick={onBackgroundClick}
-                onTouchEnd={onBackgroundTouchEnd}
+                onClick={handleBackgroundClick}
+                onTouchEnd={handleBackgroundTouchEnd}
               >
                 {this.renderNodeInternal()}
               </div>
               {this.props.data.isTransfer
                 ? <div className="node-title" />
-                : <div draggable={this.props.showGraphButton} onDragStart={onDragStart}>
+                : <div draggable={this.props.showGraphButton} onDragStart={handleDragStart}>
                     <NodeTitleView
                       isEditing={this.props.editTitle}
                       title={this.props.data.title}

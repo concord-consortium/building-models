@@ -332,7 +332,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     const isEditable = this.props[`${property}Editable`];
     const key = `editing-${property}`;
 
-    const swapState = () => {
+    const handleSwapState = () => {
       // if not editable, ignore
       if (!isEditable) { return; }
       // first copy state value to model if we were editing
@@ -348,9 +348,9 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
       }
     };
 
-    const keyDown = (evt) => {
+    const handleKeyDown = (evt) => {
       if (evt.key === "Enter") {
-        return swapState();
+        return handleSwapState();
       }
     };
 
@@ -358,15 +358,15 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     if (isEditable) { classNames += " editable"; }
 
     if (!this.state[key]) {
-      return <div className={classNames} onClick={swapState}>{this.props[property]}</div>;
+      return <div className={classNames} onClick={handleSwapState}>{this.props[property]}</div>;
     } else {
       return (
         <input
           className={property}
           type="number"
           value={this.props[property]}
-          onBlur={swapState}
-          onKeyDown={keyDown}
+          onBlur={handleSwapState}
+          onKeyDown={handleKeyDown}
           ref={(el) => this.input = el}
         />
       );

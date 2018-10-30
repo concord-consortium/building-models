@@ -61,7 +61,8 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     return TabbedPanelView.Tab({label, component: relationView, defined: isFullyDefined});
   }
 
-  private renderNodeDetailsInspector() {
+  // this is passed as a prop so it needs to be bound to this class
+  private renderNodeDetailsInspector = () => {
     let left;
     const inputCount = (left = __guard__(this.props.node.inLinks(), x => x.length)) != null ? left : 0;
     if (!(inputCount > 1)) { return null; }

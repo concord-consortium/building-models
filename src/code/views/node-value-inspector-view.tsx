@@ -107,7 +107,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
   }
 
   private renderEditableProperty(property, classNames) {
-    const swapState = () => {
+    const handleSwapState = () => {
       const editing = !!this.state[`editing-${property}`];
       const focus = () => this.input && this.input.focus();
       // first copy state value to model if we were editing
@@ -135,12 +135,12 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
     const keyDown = (evt) => {
       if (evt.key === "Enter") {
-        return swapState();
+        return handleSwapState();
       }
     };
 
     if (!this.state[`editing-${property}`]) {
-      return <div className={`half small editable-prop ${classNames}`} onClick={swapState}>{this.state[`${property}-value`]}</div>;
+      return <div className={`half small editable-prop ${classNames}`} onClick={handleSwapState}>{this.state[`${property}-value`]}</div>;
     } else {
       return (
         <input
@@ -148,7 +148,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
           type="number"
           value={this.state[`${property}-value`]}
           onChange={handleUpdateProperty}
-          onBlur={swapState}
+          onBlur={handleSwapState}
           onKeyDown={keyDown}
           ref={el => this.input = el}
         />
