@@ -24,6 +24,8 @@ migrations = [
   require "./21_remove_experiment_number"
   require "./22_add_combine_method"
   require "./23_add_simulation_type"
+  require "./24_fix_simulation_type"
+  require "./25_ensure_combine_method"
 ]
 
 module.exports =

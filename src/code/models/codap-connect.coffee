@@ -5,6 +5,7 @@ undoRedoUIActions = (require '../stores/undo-redo-ui-store').actions
 SimulationStore = require '../stores/simulation-store'
 TimeUnits       = require '../utils/time-units'
 escapeRegExp = (require '../utils/escape-reg-ex').escapeRegExp
+# log -- see loglevel in package.json
 
 module.exports = class CodapConnect
 
@@ -27,6 +28,7 @@ module.exports = class CodapConnect
     @simulationCollectionName = "Simulation"
     @samplesCollectionName = "Samples"
 
+    @defaultExperimentName = "ExpNo"
     SimulationStore.actions.recordingFramesCreated.listen  @addData.bind(@)
 
     CodapActions.sendUndoToCODAP.listen @_sendUndoToCODAP.bind(@)
@@ -93,9 +95,10 @@ module.exports = class CodapConnect
       if !ret or ret.success
         if (attrs = ret?.values?.collections?[1]?.attrs?)
           @_initialSyncAttributeProperties attrs
-        @_getExperimentNumber()
       else
         @_createDataContext()
+      @updateExperimentColumn()
+      @_getExperimentNumber()
 
   # initial synchronization; primarily used for synchronizing legacy documents
   _initialSyncAttributeProperties: (attrs, isLoaded) ->
@@ -104,6 +107,7 @@ module.exports = class CodapConnect
     if @_attrsToSync and @_attrsAreLoaded
       @_syncAttributeProperties @_attrsToSync, true
       @_attrsToSync = null
+
 
   _createDataContext: ->
     sampleDataAttrs = @_getSampleAttributes()
@@ -121,7 +125,7 @@ module.exports = class CodapConnect
                 singleCase: 'run'
                 pluralCase: 'runs'
               attrs: [
-                name: tr '~CODAP.SIMULATION.EXPERIMENT'
+                name: @defaultExperimentName
                 type: 'categorical'
               ]
             },
@@ -238,7 +242,7 @@ module.exports = class CodapConnect
     if codapKey
       message =
         action: 'update'
-        resource: "dataContext[Sage Simulation].collection[Samples].attribute[#{codapKey}]"
+        resource: "dataContext[#{@dataContextName}].collection[#{@samplesCollectionName}].attribute[#{codapKey}]"
         values: { name: node.title }
         meta:
           dirtyDocument: false
@@ -247,7 +251,69 @@ module.exports = class CodapConnect
           if response?.values?.attrs
             @_syncAttributeProperties response.values.attrs
         else if node.codapID and node.codapName
-          console.log "Error: CODAP attribute rename failed!"
+          log.warn "Error: CODAP attribute rename failed!"
+
+
+
+  # updateExperimentColumn
+  #
+  # At the time of document creation in CODAP we don't always know
+  # the final language the document is going to be rendered in. For
+  # example, An author sets up a CODAP document with Sage, and some
+  # other CODAP plugins. Next, they make copies of this document for
+  # several languages. Regardless of the author's language setting,
+  # the experiment number column has the un-localized label. Later
+  # when an i18 user collects experiment data for the first time, we
+  # then rename the column from the default to that user's language.
+  # We could partially avoid this if data CODAP table attributes
+  # supported `titles` for localized names.
+  updateExperimentColumn: ->
+    experimentNumberLabel = tr '~CODAP.SIMULATION.EXPERIMENT'
+    handleSimulationAttributes = (listAttributeResponse) =>
+      if listAttributeResponse?.success
+        values = _.pluck(listAttributeResponse.values, 'name')
+        if not _.includes(values, experimentNumberLabel)
+          if _.includes(values, @defaultExperimentName)
+            @renameExperimentNumberColumn experimentNumberLabel
+          else
+            @createExperimentNumberColumn experimentNumberLabel
+      else
+        log.warn "CODAP: unable to list Simulation attributes"
+
+    getListing =
+      action: 'get'
+      resource: "dataContext[#{@dataContextName}].collection[#{@simulationCollectionName}].attributeList"
+    @codapPhone.call(getListing, handleSimulationAttributes)
+
+  createExperimentNumberColumn: (label) ->
+    experimentAttributes =
+      name: label
+      type: 'categorical'
+    message =
+      action: 'create'
+      resource: "dataContext[#{@dataContextName}].collection[#{@simulationCollectionName}].attribute"
+      values: [ experimentAttributes ]
+    @codapPhone.call message, (response) ->
+      if response.success
+        log.info "created attribute #{label}"
+      else
+        log.warn "Unable to create attribute #{label}"
+
+  renameExperimentNumberColumn: (label) ->
+    @renameSimulationProperty(@defaultExperimentName, label)
+
+  renameSimulationProperty: (oldValue, newValue) ->
+    message =
+      action: 'update'
+      resource: "dataContext[#{@dataContextName}].collection[#{@simulationCollectionName}].attribute[#{oldValue}]"
+      values: { name: newValue }
+      meta:
+        dirtyDocument: false
+    @codapPhone.call message, (response) ->
+      if response.success
+        log.info "Renamed Simulation attribute: #{oldValue} → #{newValue}"
+      else
+        log.info "CODAP rename Simulation attribute failed!"
 
   _timeStamp: ->
     new Date().getTime()
@@ -425,7 +491,7 @@ module.exports = class CodapConnect
           , (ret2) ->
             if ret2?.success
               lastCase = ret2.values['case']
-              lastExperimentNumber = lastCase.values[tr "~CODAP.SIMULATION.EXPERIMENT"]
+              lastExperimentNumber = parseInt(lastCase.values[tr '~CODAP.SIMULATION.EXPERIMENT'], 10) || 0
               SimulationStore.actions.setExperimentNumber lastExperimentNumber + 1
 
       @initGameHandler ret

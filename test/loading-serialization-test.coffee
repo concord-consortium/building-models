@@ -17,16 +17,14 @@ Node             = requireModel 'node'
 GraphStore       = require "#{__dirname}/../src/code/stores/graph-store"
 AppSettingsStore = require "#{__dirname}/../src/code/stores/app-settings-store"
 SimulationStore  = require "#{__dirname}/../src/code/stores/simulation-store"
-CodapConnect     = requireModel 'codap-connect'
 RelationFactory  = requireModel 'relation-factory'
+CodapHelper      = require "./codap-helper"
 
 SerializedTestData = require "./serialized-test-data/v-0.1"
 
 describe "Serialization and Loading", ->
   beforeEach ->
-    @sandbox = Sinon.sandbox.create()
-    @sandbox.stub CodapConnect, "instance", ->
-      sendUndoableActionPerformed: -> return ''
+    CodapHelper.Stub()
 
     @serializedForm = JSON.stringify SerializedTestData
     @fakePalette = [
@@ -53,7 +51,7 @@ describe "Serialization and Loading", ->
     ]
 
   afterEach ->
-    CodapConnect.instance.restore()
+    CodapHelper.UnStub()
 
 
   describe "For a model created by a user", ->
@@ -102,7 +100,7 @@ describe "Serialization and Loading", ->
         model.nodes.should.exist
         model.links.should.exist
 
-        model.version.should.equal "1.22.0"
+        model.version.should.equal "1.24.0"
         model.nodes.length.should.equal 3
         model.links.length.should.equal 2
 
@@ -207,6 +205,7 @@ describe "Serialization and Loading", ->
       @graphStore.nodeKeys['a'].image.should.equal "img/nodes/chicken.png"
       @graphStore.nodeKeys['b'].image.should.equal "img/nodes/egg.png"
 
+
     it "should load the nodes previous frames", ->
       data = JSON.parse(@serializedForm)
       data.nodes[1].frames = [50]
@@ -214,3 +213,31 @@ describe "Serialization and Loading", ->
       @graphStore.nodeKeys['a'].frames.length.should.equal 0
       @graphStore.nodeKeys['b'].frames.length.should.equal 1
       @graphStore.nodeKeys['b'].frames[0].should.equal 50
+
+    it "Should load saved `combineMethod` for all nodes, defaulting to 'average'", ->
+      sampleNodes = '{
+        "filename": "sample model",
+        "nodes": [
+          {
+            "key": "a",
+            "combineMethod": "average"
+          },{
+            "key": "b",
+            "combineMethod": "product"
+          },{
+            "key": "c"
+          }
+        ]
+      }'
+      data = JSON.parse(sampleNodes)
+      @graphStore.loadData(data)
+      @graphStore.nodeKeys['a'].combineMethod.should.equal "average"
+      @graphStore.nodeKeys['b'].combineMethod.should.equal "product"
+      @graphStore.nodeKeys['c'].combineMethod.should.equal "average"
+ 
+
+    it "should remove references to missing transferNodes", ->
+      data = JSON.parse(@serializedForm)
+      data.links[0].transferNode = "Transfer-1"
+      @graphStore.loadData(data)
+      should.not.exist @graphStore.linkKeys['a ------> b'].transferNode

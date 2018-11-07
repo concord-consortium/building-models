@@ -42,20 +42,28 @@ module.exports = React.createClass
     @setState showImageBrowser: not @state.showImageBrowser
 
   render: ->
+    actionBarStyle = 'action-bar'
+    if AppSettingsStore.store.settings.uiElements.actionBar is false
+      actionBarStyle += ' hidden'
+    else if AppSettingsStore.store.settings.uiElements.globalNav is false
+      actionBarStyle += ' small'
+
     (div {className: 'app'},
       (div {className: if @state.iframed then 'iframed-workspace' else 'workspace'},
-        if not @state.iframed
+        if not @state.iframed && AppSettingsStore.store.settings.uiElements.globalNav != false
           (GlobalNav
             filename: @state.filename
             username: @state.username
             graphStore: @props.graphStore
             GraphStore: @GraphStore
+            display: AppSettingsStore.store.settings.uiElements.globalNav
           )
-        (div {className: 'action-bar'},
+        (div {className: actionBarStyle},
           (NodeWell {
             palette: @state.palette
             toggleImageBrowser: @toggleImageBrowser
             graphStore: @props.graphStore
+            uiElements: AppSettingsStore.store.settings.uiElements
           })
           (DocumentActions
             graphStore: @props.graphStore
@@ -63,7 +71,7 @@ module.exports = React.createClass
             iframed: @state.iframed
           )
         )
-        (div {className: 'canvas'},
+        (div {className: if AppSettingsStore.store.settings.uiElements.globalNav is false then 'canvas full' else 'canvas'},
           (GraphView {
             graphStore: @props.graphStore,
             selectionManager: @props.graphStore.selectionManager,
@@ -79,6 +87,7 @@ module.exports = React.createClass
           toggleImageBrowser: @toggleImageBrowser
           graphStore: @props.graphStore
           ref: "inspectorPanel"
+          display: AppSettingsStore.store.settings.uiElements.inspectorPanel
         )
         if @state.showingDialog
           (ImageBrowser

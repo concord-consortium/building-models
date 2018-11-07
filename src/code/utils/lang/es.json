@@ -139,7 +139,6 @@
     "~DOCUMENT.ACTIONS.REDO": "Rehacer",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "Debe haber por lo menos un enlace con una relación definida",
     "~SIMULATION.SIMULATION_SETTINGS": "Configuración de la simulación",
-    "~SIMULATION.DIAGRAM_SETTINGS": "Configuración del diagrama",
     "~SIMULATION.STEP_UNIT": "Cada cálculo es 1",
     "~SIMULATION.DURATION": "Cálculos por cada ejecución",
     "~SIMULATION.CAP_VALUES": "Limitar valores a rango mín/máx",
@@ -173,12 +172,13 @@
     "~SIMULATION.COMPLEXITY.DIAGRAM_ONLY": "Herramientas sólo para diagrama",
     "~SIMULATION.COMPLEXITY.BASIC": "Relaciones básicas (aumento/disminución)",
     "~SIMULATION.COMPLEXITY.EXPANDED": "Conjunto expandido de relaciones incluyendo gráficos propios",
-    "~SIMULATION.COMPLEXITY.COLLECTORS": "Incluir colectores",
     "~NODE-RELATION-EDIT.SETS_INITIAL": "configura el valor inicial de",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_MORE": "más",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_LESS": "menos",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A": "Más %{sourceTitle} significa",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_B": " se transferirá a %{targetTitle} cada ",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "Más %{targetTitle} significa",
-    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} se transferirá cada "
+    "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} se transferirá cada ",
+    "~SIMULATION.COMPLEXITY.STATIC": "Simulación equilibrio estático",
+    "~SIMULATION.COMPLEXITY.TIME": "Simulación dinámica x tiempo"
 }

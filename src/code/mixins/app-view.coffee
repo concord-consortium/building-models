@@ -1,8 +1,10 @@
 PaletteStore    = require "../stores/palette-store"
 CodapStore      = require "../stores/codap-store"
+LaraStore       = require "../stores/lara-store"
 GoogleFileStore = require "../stores/google-file-store"
 HashParams      = require "../utils/hash-parameters"
 tr              = require '../utils/translate'
+AppSettingsStore = require '../stores/app-settings-store'
 
 module.exports =
 
@@ -19,9 +21,25 @@ module.exports =
   componentDidUpdate: ->
     log.info 'Did Update: AppView'
 
+  addTouchDeviceHandler: (add) ->
+    isMobileDevice = /Android|webOS|iPhone|iPad|iPod|Opera Mini/i.test navigator.userAgent
+    if isMobileDevice
+      AppSettingsStore.actions.setTouchDevice true
+    else if add
+      $(window).on 'touchstart', (e) ->
+        AppSettingsStore.actions.setTouchDevice true
+        $(window).off 'touchstart'
+    else
+      $(window).off 'touchstart'
+
   addDeleteKeyHandler: (add) ->
     if add
-      deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
+      if AppSettingsStore.store.settings.lockdown
+        # In Lockdown mode users can only remove relationships between links
+        deleteFunction = @props.graphStore.removeSelectedLinks.bind @props.graphStore
+      else
+        deleteFunction = @props.graphStore.deleteSelected.bind @props.graphStore
+
       $(window).on 'keydown', (e) ->
         # 8 is backspace, 46 is delete
         if e.which in [8, 46] and not $(e.target).is('input, textarea')
@@ -32,6 +50,7 @@ module.exports =
 
   componentDidMount: ->
     @addDeleteKeyHandler true
+    @addTouchDeviceHandler true
     @props.graphStore.selectionManager.addSelectionListener @_updateSelection
 
     @props.graphStore.addFilenameListener (filename) =>
@@ -41,6 +60,7 @@ module.exports =
     @_registerUndoRedoKeys()
     PaletteStore.store.listen @onPaletteChange
     CodapStore.store.listen @onCodapStateChange
+    LaraStore.store.listen @onLaraStateChange
 
   componentWillUnmount: ->
     @addDeleteKeyHandler false

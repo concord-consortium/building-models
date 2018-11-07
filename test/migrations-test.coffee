@@ -7,14 +7,14 @@ should = require('chai').should()
 expect = chai.expect
 
 
-describe.only "Migrations",  ->
+describe "Migrations",  ->
   describe "update", ->
     beforeEach ->
       @result = Migrations.update(originalData)
 
     describe "the final version number", ->
-      it "should be 1.22.0", ->
-        @result.version.should.equal "1.22.0"
+      it "should be 1.24.0", ->
+        @result.version.should.equal "1.24.0"
 
     describe "the nodes", ->
       it "should have two nodes", ->
@@ -146,4 +146,35 @@ describe.only "Migrations",  ->
       it "should have complexity and simulation settings", ->
         @result.settings.simulationType.should.equal 1
         @result.settings.complexity.should.equal 1
+
+    describe "v-1.23.0 changes", ->
+      describe "a known failing case", ->
+        # This test case is based on a field-reported bug whereby a simulation
+        # containg collector nodes was not corectly migrating the simulationType
+        # to time-based. In other words, the wrong value is 1 and the value
+        # we want is 2.
+        brokenExample = require "./serialized-test-data/v-1.22.0"
+        # Pre-test our broken json is our expected version of 1.22.0
+        expect(brokenExample.version).to.equal('1.22.0')
+        expect(brokenExample.settings.simulationType).to.equal(1) # wrong value!
+        # Now migrate & test for corrected migration. 
+        Migrations.update(brokenExample)
+        expect(brokenExample.settings.simulationType).to.equal(2)
+
+    describe "v-1.24.0 changes", ->
+      describe "a known failing case: missing `combineMethod` in serialization", ->
+        # We don't seem to be serializing the combinMethod
+        brokenExample = require "./serialized-test-data/v-1.22.0-missing-combine-method"
+        # Pre-test our broken json is our expected version of 1.22.0
+        expect(brokenExample.version).to.equal('1.22.0')
+        # expect to not find any `comineMethod` for our nodes.
+        _.each(brokenExample.nodes, (n) ->
+          expect(n.data.combineMethod).to.not_exist
+        )
+        # Now migrate & test for corrected migration.
+        Migrations.update(brokenExample)
+        # Now we want all 4 nodes to have combineMethod
+        _.each(brokenExample.nodes, (n) ->
+          expect(n.data.combineMethod).to.exist
+        )
 

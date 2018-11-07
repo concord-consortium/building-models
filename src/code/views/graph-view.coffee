@@ -14,6 +14,7 @@ RelationFactory  = require "../models/relation-factory"
 SimulationStore  = require "../stores/simulation-store"
 AppSettingsStore = require "../stores/app-settings-store"
 CodapStore       = require "../stores/codap-store"
+LaraStore        = require "../stores/lara-store"
 LinkColors       = require "../utils/link-colors"
 
 {div} = React.DOM
@@ -21,7 +22,7 @@ LinkColors       = require "../utils/link-colors"
 module.exports = React.createClass
 
   displayName: 'LinkView'
-  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin ]
+  mixins: [ GraphStore.mixin, SimulationStore.mixin, AppSettingsStore.mixin, CodapStore.mixin, LaraStore.mixin ]
 
   getDefaultProps: ->
     linkTarget: '.link-top'
@@ -45,7 +46,8 @@ module.exports = React.createClass
       selectedNodes     = manager.getNodeInspection() or []
       editingNode       = manager.getNodeTitleEditing()[0] or null
       selectedLink      = manager.getLinkInspection() or []
-      editingLink       = manager.getLinkTitleEditing()[0] or null
+      # only allow link labels if simulation is not in lockdown mode
+      editingLink       = if not AppSettingsStore.store.settings.lockdown then manager.getLinkTitleEditing()[0] or null else false
 
       @setState
         selectedNodes: selectedNodes

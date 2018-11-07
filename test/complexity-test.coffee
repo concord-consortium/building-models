@@ -21,7 +21,7 @@ requireModel = (name) -> require "#{__dirname}/../src/code/models/#{name}"
 Link            = requireModel 'link'
 Node            = requireModel 'node'
 RelationFactory = requireModel 'relation-factory'
-CodapConnect    = requireModel 'codap-connect'
+CodapHelper      = require "./codap-helper"
 
 requireStore = (name) -> require "#{__dirname}/../src/code/stores/#{name}"
 
@@ -37,114 +37,102 @@ LinkNodes = (sourceNode, targetNode, relation) ->
     relation: relation
   link
 
-describe "The minimum complexity", ->
+describe "Complexity", ->
   beforeEach ->
-    @sandbox = Sinon.sandbox.create()
-    @sandbox.stub CodapConnect, "instance", ->
-      sendUndoableActionPerformed: -> return ''
-
+    CodapHelper.Stub()
     @graphStore = GraphStore
     @graphStore.init()
 
   afterEach ->
-    CodapConnect.instance.restore()
+    CodapHelper.UnStub()
 
-  describe "for a graph without relations", ->
-    beforeEach ->
-      nodeA    = new Node()
-      nodeB    = new Node()
-      link     = LinkNodes(nodeA, nodeB)
+  describe "The minimum complexity", ->
 
-      @graphStore.addNode nodeA
-      @graphStore.addNode nodeB
-      @graphStore.addLink link
+    describe "for a graph without relations", ->
+      beforeEach ->
+        nodeA    = new Node()
+        nodeB    = new Node()
+        link     = LinkNodes(nodeA, nodeB)
 
-    it "should be basic", ->
-      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.basic
+        @graphStore.addNode nodeA
+        @graphStore.addNode nodeB
+        @graphStore.addLink link
 
-  describe "for a graph with only an `about the same` relation", ->
-    beforeEach ->
-      nodeA    = new Node()
-      nodeB    = new Node()
-      vector   = RelationFactory.decrease
-      scalar   = RelationFactory.aboutTheSame
-      relation = RelationFactory.fromSelections vector, scalar
-      link     = LinkNodes(nodeA, nodeB, relation)
+      it "should be basic", ->
+        @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.basic
 
-      @graphStore.addNode nodeA
-      @graphStore.addNode nodeB
-      @graphStore.addLink link
+    describe "for a graph with only an `about the same` relation", ->
+      beforeEach ->
+        nodeA    = new Node()
+        nodeB    = new Node()
+        vector   = RelationFactory.decrease
+        scalar   = RelationFactory.aboutTheSame
+        relation = RelationFactory.fromSelections vector, scalar
+        link     = LinkNodes(nodeA, nodeB, relation)
 
-    it "should be basic", ->
-      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.basic
+        @graphStore.addNode nodeA
+        @graphStore.addNode nodeB
+        @graphStore.addLink link
 
-  describe "for a graph with an `a lot` relation", ->
-    beforeEach ->
-      nodeA    = new Node()
-      nodeB    = new Node()
-      vector   = RelationFactory.increase
-      scalar   = RelationFactory.aLot
-      relation = RelationFactory.fromSelections vector, scalar
-      link     = LinkNodes(nodeA, nodeB, relation)
+      it "should be basic", ->
+        @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.basic
 
-      @graphStore.addNode nodeA
-      @graphStore.addNode nodeB
-      @graphStore.addLink link
+    describe "for a graph with an `a lot` relation", ->
+      beforeEach ->
+        nodeA    = new Node()
+        nodeB    = new Node()
+        vector   = RelationFactory.increase
+        scalar   = RelationFactory.aLot
+        relation = RelationFactory.fromSelections vector, scalar
+        link     = LinkNodes(nodeA, nodeB, relation)
 
-    it "should be expanded", ->
-      @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.expanded
+        @graphStore.addNode nodeA
+        @graphStore.addNode nodeB
+        @graphStore.addLink link
+
+      it "should be expanded", ->
+        @graphStore.getMinimumComplexity().should.equal AppSettingsStore.Complexity.expanded
 
 
-describe "The minimum simulation type", ->
-  beforeEach ->
-    @sandbox = Sinon.sandbox.create()
-    @sandbox.stub CodapConnect, "instance", ->
-      sendUndoableActionPerformed: -> return ''
+  describe "The minimum simulation type", ->
+    describe "for a graph without relations", ->
+      beforeEach ->
+        nodeA    = new Node()
+        nodeB    = new Node()
+        link     = LinkNodes(nodeA, nodeB)
 
-    @graphStore = GraphStore
-    @graphStore.init()
+        @graphStore.addNode nodeA
+        @graphStore.addNode nodeB
+        @graphStore.addLink link
 
-  afterEach ->
-    CodapConnect.instance.restore()
+      it "should be diagramOnly", ->
+        @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.diagramOnly
 
-  describe "for a graph without relations", ->
-    beforeEach ->
-      nodeA    = new Node()
-      nodeB    = new Node()
-      link     = LinkNodes(nodeA, nodeB)
+    describe "for a graph with relations but no collectors", ->
+      beforeEach ->
+        nodeA    = new Node()
+        nodeB    = new Node()
+        vector   = RelationFactory.increase
+        scalar   = RelationFactory.aLot
+        relation = RelationFactory.fromSelections vector, scalar
+        link     = LinkNodes(nodeA, nodeB, relation)
 
-      @graphStore.addNode nodeA
-      @graphStore.addNode nodeB
-      @graphStore.addLink link
+        @graphStore.addNode nodeA
+        @graphStore.addNode nodeB
+        @graphStore.addLink link
 
-    it "should be diagramOnly", ->
-      @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.diagramOnly
+      it "should be static", ->
+        @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.static
 
-  describe "for a graph with relations but no collectors", ->
-    beforeEach ->
-      nodeA    = new Node()
-      nodeB    = new Node()
-      vector   = RelationFactory.increase
-      scalar   = RelationFactory.aLot
-      relation = RelationFactory.fromSelections vector, scalar
-      link     = LinkNodes(nodeA, nodeB, relation)
+    describe "for a graph with a collector", ->
+      beforeEach ->
+        nodeA    = new Node()
+        nodeB    = new Node({isAccumulator: true})
+        link     = LinkNodes(nodeA, nodeB)
 
-      @graphStore.addNode nodeA
-      @graphStore.addNode nodeB
-      @graphStore.addLink link
+        @graphStore.addNode nodeA
+        @graphStore.addNode nodeB
+        @graphStore.addLink link
 
-    it "should be static", ->
-      @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.static
-
-  describe "for a graph with a collector", ->
-    beforeEach ->
-      nodeA    = new Node()
-      nodeB    = new Node({isAccumulator: true})
-      link     = LinkNodes(nodeA, nodeB)
-
-      @graphStore.addNode nodeA
-      @graphStore.addNode nodeB
-      @graphStore.addLink link
-
-    it "should be collectors", ->
-      @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.time
+      it "should be collectors", ->
+        @graphStore.getMinimumSimulationType().should.equal AppSettingsStore.SimulationType.time

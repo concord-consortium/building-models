@@ -2,6 +2,7 @@ Migrations          = require '../data/migrations/migrations'
 DiagramNode         = require '../models/node'
 TransferNode        = require '../models/transfer'
 ImportActions       = require '../actions/import-actions'
+GraphPrimitive      = require '../models/graph-primitive'
 
 module.exports = class MySystemImporter
 
@@ -14,6 +15,8 @@ module.exports = class MySystemImporter
     ImportActions.import.trigger(data)
     @importNodes data.nodes
     @importLinks data.links
+    # set the nextID counters
+    GraphPrimitive.initCounters({nodes: @graphStore.getNodes(), links: @graphStore.getLinks()})
     @graphStore.setFilename data.filename or 'New Model'
 
   importNode: (nodeSpec) ->
@@ -29,10 +32,14 @@ module.exports = class MySystemImporter
   importNodes: (importNodes) ->
     for nodespec in importNodes
       node = @importNode(nodespec)
+      # ensure id matches key for imported documents
+      node.id = node.key
       @graphStore.addNode node
     return  # prevent unused default return value
 
   importLinks: (links) ->
     for link in links
       @graphStore.importLink link
+      # ensure id matches key for imported documents
+      link.id = link.key
     return  # prevent unused default return value

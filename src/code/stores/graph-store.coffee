@@ -12,9 +12,12 @@ AppSettingsStore    = require "../stores/app-settings-store"
 SimulationStore     = require "../stores/simulation-store"
 GraphActions        = require "../actions/graph-actions"
 CodapActions        = require '../actions/codap-actions'
+LaraActions         = require "../actions/lara-actions"
 InspectorPanelStore = require "../stores/inspector-panel-store"
 CodapConnect        = require '../models/codap-connect'
+LaraConnect         = require '../models/lara-connect'
 RelationFactory     = require "../models/relation-factory"
+GraphPrimitive      = require '../models/graph-primitive'
 DEFAULT_CONTEXT_NAME = 'building-models'
 
 GraphStore  = Reflux.createStore
@@ -35,6 +38,7 @@ GraphStore  = Reflux.createStore
     SimulationStore.actions.simulationFramesCreated.listen @updateSimulationData.bind(@)
 
     @usingCODAP = false
+    @usingLara = false
     @codapStandaloneMode = false
 
     @lastRunModel = ""   # string description of the model last time we ran simulation
@@ -98,6 +102,7 @@ GraphStore  = Reflux.createStore
     @undoRedoManager.revertToLastSave()
 
   setUsingCODAP: (@usingCODAP) ->
+  setUsingLara: (@usingLara) ->
 
   setCodapStandaloneMode: (@codapStandaloneMode) ->
 
@@ -132,7 +137,10 @@ GraphStore  = Reflux.createStore
     transferNode = @nodeKeys[linkSpec.transferNode] if linkSpec.transferNode
     linkSpec.sourceNode = sourceNode
     linkSpec.targetNode = targetNode
-    linkSpec.transferNode = transferNode if transferNode
+    if transferNode
+      linkSpec.transferNode = transferNode
+    else
+      delete linkSpec.transferNode
     link = new Link(linkSpec)
     @addLink(link)
     link
@@ -469,6 +477,7 @@ GraphStore  = Reflux.createStore
   deleteAll: ->
     for node of @nodeKeys
       @removeNode node
+    GraphPrimitive.resetCounters()
     @setFilename 'New Model'
     @undoRedoManager.clearHistory()
 
@@ -514,7 +523,6 @@ GraphStore  = Reflux.createStore
       linkDescription += "#{source.x},#{source.y};"
       linkDescription += link.relation.formula + ";"
       linkDescription += "#{target.x},#{target.y}|"
-
       if link.relation.isDefined
         isCappedAccumulator = source.isAccumulator and not source.allowNegativeValues
         capValue = if isCappedAccumulator then ':cap' else ''
@@ -523,8 +531,8 @@ GraphStore  = Reflux.createStore
         if link.relation.type is 'transfer'
           transfer = link.transferNode
           modelDescription += "#{transfer.key}:#{transfer.initialValue}:#{transfer.combineMethod};" if transfer
-        modelDescription += "#{target.key}#{if target.isAccumulator then ':'+(target.value ? target.initialValue) else ''}|"
-
+        modelDescription += "#{target.key}#{if target.isAccumulator then ':'+(target.value ? target.initialValue) else ''}"
+        modelDescription += ";#{target.combineMethod}|"
     linkDescription += nodes.length     # we need to redraw targets when new node is added
 
     return {

@@ -6,6 +6,8 @@ languageFiles = {
   'tr': require './lang/tr'
   'zh-TW': require './lang/zh-TW'
   'es': require './lang/es'
+  'et': require './lang/et'
+  'pl': require './lang/pl'
 }
 
 translations =  {}

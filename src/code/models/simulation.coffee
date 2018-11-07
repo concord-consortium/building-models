@@ -69,8 +69,8 @@ RangeIntegrationFunction = (incrementAccumulators) ->
 
   # if the user has explicitly set the combination method, we use that
   # otherwise, if any link points to a collector, it should use the scaled product
-  useScaledProduct = if @combineMethod? then @combineMethod is 'product' \
-                      else @isTransfer or !!(_.find @outLinks(), (link) -> link.targetNode.isAccumulator)
+  useScaledProduct = (@combineMethod is 'product') or @isTransfer
+
   value = if inValues.length then combineInputs(inValues, useScaledProduct) else startValue
 
   # can't transfer more than is present in source
