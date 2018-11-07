@@ -116,6 +116,13 @@ module.exports = (env, argv) => {
         __BUILD_INFO__: buildInfoString,
         __ENVIRONMENT__: environment
       }),
+      new HtmlWebpackPlugin({
+        inject: false,
+        filename: 'sagemodeler.html',
+        template: 'src/templates/sagemodeler.html.ejs',
+        __BUILD_INFO__: buildInfoString,
+        __ENVIRONMENT__: environment
+      }),
       new CopyWebpackPlugin([{
         from: 'src/assets',
         to: '',
