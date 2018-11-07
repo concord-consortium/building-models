@@ -63,9 +63,8 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
 
   // this is passed as a prop so it needs to be bound to this class
   private renderNodeDetailsInspector = () => {
-    let left;
-    const inputCount = (left = __guard__(this.props.node.inLinks(), x => x.length)) != null ? left : 0;
-    if (!(inputCount > 1)) { return null; }
+    const inputCount = (this.props.node.inLinks() || []).length;
+    if (this.props.node.isAccumulator || (inputCount < 2)) { return null; }
 
     const method = this.props.node.combineMethod != null ? this.props.node.combineMethod : "average";
     return (
