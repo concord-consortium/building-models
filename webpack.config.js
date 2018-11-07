@@ -5,18 +5,19 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const packageJSON = require("./package.json");
+
 const execSync = require('sync-exec'),
       now = new Date(),
       buildDate = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`,
       gitBranch = execSync('git symbolic-ref --short HEAD').stdout.trim(),
-      gitTags   = execSync('git describe --tags').stdout,
       gitLog = execSync('git log -1 --date=short --pretty=format:"%cd %h %ce"').stdout;
 
 const envMap = { production: "production", master: "staging" },
       environment = process.env.ENVIRONMENT || envMap[gitBranch] || "development",
       buildInfo = {
         date: buildDate,
-        tag: gitTags.split('-')[0],
+        tag: packageJSON.version,
         branch: gitBranch,
         commiter: gitLog.split(" ")[2],
         commit: gitLog.split(" ")[1]
@@ -114,7 +115,9 @@ module.exports = (env, argv) => {
         filename: 'index.html',
         template: 'src/templates/index.html.ejs',
         __BUILD_INFO__: buildInfoString,
-        __ENVIRONMENT__: environment
+        __ENVIRONMENT__: environment,
+        __VERSION__: buildInfo.tag,
+        __BUILD_DATE__: buildInfo.date,
       }),
       new CopyWebpackPlugin([{
         from: 'src/assets',
