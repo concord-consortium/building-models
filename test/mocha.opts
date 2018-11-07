@@ -1,8 +1,5 @@
 --require chai
---require lodash
---require jquery
---require coffeescript
 --reporter spec
---compilers coffee:coffeescript/register
+--compilers ts:ts-node/register
 --ui bdd
 --recursive
