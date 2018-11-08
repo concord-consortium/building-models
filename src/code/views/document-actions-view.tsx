@@ -72,7 +72,7 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
             <i className={`icon-codap-arrow-undo ${buttonClass(this.state.canUndo)}`} onClick={this.handleUndoClicked} />
             <i className={`icon-codap-arrow-redo ${buttonClass(this.state.canRedo)}`} onClick={this.handleRedoClicked} />
           </div> : undefined}
-        <AboutView />
+        <AboutView standaloneMode={this.props.standaloneMode}/>
       </div>
     );
   }
