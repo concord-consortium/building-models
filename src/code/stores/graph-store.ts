@@ -207,6 +207,13 @@ export const GraphStore  = Reflux.createStore({
     return (this.nodeKeys[node.key] != null);
   },
 
+  importNode(nodeSpec) {
+    const importer = new Importer(this, AppSettingsStore, PaletteStore);
+    const node = importer.importNode(nodeSpec);
+    this.addNode(node);
+    return node;
+  },
+
   importLink(linkSpec) {
     let transferNode;
     const sourceNode = this.nodeKeys[linkSpec.sourceNode];

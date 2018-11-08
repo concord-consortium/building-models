@@ -85,7 +85,6 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
       internalLibrary: null,
       standaloneMode: urlParams.standalone === "true"
     };
-    debugger;
     this.setInitialState(outerState, ImageDialogMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
