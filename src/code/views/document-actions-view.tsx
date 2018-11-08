@@ -8,9 +8,12 @@ import { AboutView } from "./about-view";
 import { SimulationRunPanelView } from "./simulation-run-panel-view";
 import { Mixer } from "../mixins/components";
 
+import { CodapConnect } from "../models/codap-connect";
+
 interface DocumentActionsViewOuterProps {
   graphStore: any; // TODO: get concrete type
   diagramOnly: boolean;
+  standaloneMode: boolean;
 }
 type DocumentActionsViewProps = DocumentActionsViewOuterProps & CodapMixinProps & UndoRedoUIMixinProps & AppSettingsMixinProps;
 
@@ -58,6 +61,7 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     const buttonClass = (enabled) => { if (!enabled) { return "disabled"; } else { return ""; } };
     return (
       <div className="document-actions">
+        {this.props.standaloneMode ? this.renderCODAPToolbar() : undefined}
         <div className="misc-actions">
           {this.renderRunPanel()}
         </div>
@@ -69,6 +73,37 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
             <i className={`icon-codap-arrow-redo ${buttonClass(this.state.canRedo)}`} onClick={this.handleRedoClicked} />
           </div> : undefined}
         <AboutView />
+      </div>
+    );
+  }
+
+  private renderCODAPToolbar() {
+    return (
+      <div className="misc-actions codap-toolbar">
+        <div className="codap-tool">
+          <div>
+            <span className="moonicon-icon-table" />
+          </div>
+          <div style={{textDecoration: "line-through"}}>Tables</div>
+        </div>
+        <div className="codap-tool" onClick={this.handleCODAPGraphToolClicked}>
+          <div>
+            <span className="moonicon-icon-graph" />
+          </div>
+          <div>Graph</div>
+        </div>
+        <div className="codap-tool" onClick={this.handleCODAPTextToolClicked}>
+          <div>
+            <span className="moonicon-icon-comment" />
+          </div>
+          <div>Text</div>
+        </div>
+        <div className="codap-tool">
+          <div>
+            <span className="moonicon-icon-options" />
+          </div>
+          <div style={{textDecoration: "line-through"}}>Options</div>
+        </div>
       </div>
     );
   }
@@ -96,5 +131,15 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     }
     // Clear stored selections after delete
     this.props.graphStore.selectionManager.clearSelection();
+  }
+
+  private handleCODAPGraphToolClicked = () => {
+    const codapConnect = CodapConnect.instance("building-models");
+    codapConnect.createEmptyGraph();
+  }
+
+  private handleCODAPTextToolClicked = () => {
+    const codapConnect = CodapConnect.instance("building-models");
+    codapConnect.createText();
   }
 }

@@ -537,6 +537,33 @@ export class CodapConnect {
     });
   }
 
+  public createEmptyGraph() {
+    this._createMissingDataAttributes();
+
+    return this.codapPhone.call({
+      action: "create",
+      resource: "component",
+      values: {
+        type: "graph",
+        dataContext: this.dataContextName,
+        size: { width: 242, height: 221 },
+        position: "bottom",
+        enableNumberToggle: true
+      }
+    });
+  }
+
+  public createText() {
+    return this.codapPhone.call({
+      action: "create",
+      resource: "component",
+      values: {
+        type: "text",
+        title: "Text"
+      }
+    });
+  }
+
   public createTable() {
     if (!this.tableCreated) {
       this.codapPhone.call({

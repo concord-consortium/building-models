@@ -26,6 +26,8 @@ import { ImageDialogMixinProps, ImageDialogMixinState, ImageDialogMixin } from "
 import { AppSettingsStore, AppSettingsActions, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
+import { urlParams } from "../utils/url-params";
+
 interface AppViewOuterProps {
   graphStore: any; // TODO: get concrete type
   data?: any; // TODO: get concrete type
@@ -45,6 +47,7 @@ interface AppViewOuterState {
   editingNode: any; // TODO: get concrete type
   selectedLink: any; // TODO: get concrete type
   internalLibrary: any; // TODO: get concrete type
+  standaloneMode: boolean;
 }
 
 type AppViewProps = AppViewOuterProps & ImageDialogMixinProps & AppSettingsMixinProps;
@@ -79,8 +82,10 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
       showImageBrowser: false,
       editingNode: null,
       selectedLink: null,
-      internalLibrary: null
+      internalLibrary: null,
+      standaloneMode: urlParams.standalone === "true"
     };
+    debugger;
     this.setInitialState(outerState, ImageDialogMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
@@ -145,6 +150,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
             <DocumentActionsView
               graphStore={this.props.graphStore}
               diagramOnly={this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly}
+              standaloneMode={this.state.standaloneMode}
               // iframed={this.state.iframed}
             />
           </div>
