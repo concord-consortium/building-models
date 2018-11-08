@@ -32,8 +32,13 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   private renderNormal() {
     return (
       <div>
-        <div className="misc-actions">
-          <i className="icon-codap-help" onClick={this.handleOpen} />
+        <div className="misc-actions toolbar">
+          <div className="toolbar-button" onClick={this.handleOpen}>
+            <div>
+              <i className="icon-codap-help" />
+            </div>
+            <div>About</div>
+          </div>
         </div>
         {this.state.showing ? this.renderShowing() : null}
       </div>
@@ -44,7 +49,12 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
     return (
       <div>
         <div className="misc-actions">
-          <a href="https://concord.org/our-work/research-projects/building-models/" target="_blank"><i className="icon-codap-help" /></a>
+          <div className="toolbar-button">
+            <div>
+              <a href="https://concord.org/our-work/research-projects/building-models/" target="_blank"><i className="icon-codap-help" /></a>
+            </div>
+            <div>Help</div>
+          </div>
         </div>
       </div>
     );

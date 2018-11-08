@@ -10,6 +10,15 @@ import { Mixer } from "../mixins/components";
 
 import { CodapConnect } from "../models/codap-connect";
 
+interface ToolButtonOptions {
+  icon: string;
+  label: string;
+  labelStyle?: any;
+  labelClassName?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
 interface DocumentActionsViewOuterProps {
   graphStore: any; // TODO: get concrete type
   diagramOnly: boolean;
@@ -59,6 +68,7 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
   public render() {
     const showDeleteUI = !this.state.uiElements.inspectorPanel && (this.state.touchDevice || this.props.graphStore.usingLara);
     const buttonClass = (enabled) => { if (!enabled) { return "disabled"; } else { return ""; } };
+    const showDeleteIcon = (showDeleteUI && this.state.lockdown && this.state.selectedLinks && (this.state.selectedLinks.length > 0)) || (showDeleteUI && !this.state.lockdown && this.state.selectedItems && (this.state.selectedItems.length > 0));
     return (
       <div className="document-actions">
         {this.props.standaloneMode ? this.renderCODAPToolbar() : undefined}
@@ -66,11 +76,26 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
           {this.renderRunPanel()}
         </div>
         {!this.state.hideUndoRedo ?
-          <div className="misc-actions">
-            {showDeleteUI && this.state.lockdown && this.state.selectedLinks && (this.state.selectedLinks.length > 0) ? <i className="icon-codap-trash" onClick={this.handleDeleteClicked} /> : undefined}
-            {showDeleteUI && !this.state.lockdown && this.state.selectedItems && (this.state.selectedItems.length > 0) ? <i className="icon-codap-trash" onClick={this.handleDeleteClicked} /> : undefined}
-            <i className={`icon-codap-arrow-undo ${buttonClass(this.state.canUndo)}`} onClick={this.handleUndoClicked} />
-            <i className={`icon-codap-arrow-redo ${buttonClass(this.state.canRedo)}`} onClick={this.handleRedoClicked} />
+          <div className="misc-actions toolbar">
+            {showDeleteIcon
+              ? this.renderToolbarButton({
+                  icon: "icon-codap-trash",
+                  label: "Delete",
+                  onClick: this.handleDeleteClicked
+                })
+              : undefined}
+            {this.renderToolbarButton({
+              icon: "icon-codap-arrow-undo",
+              label: "Undo",
+              onClick: this.handleUndoClicked,
+              disabled: !this.state.canUndo
+            })}
+            {this.renderToolbarButton({
+              icon: `icon-codap-arrow-redo`,
+              label: "Redo",
+              onClick: this.handleRedoClicked,
+              disabled: !this.state.canRedo
+            })}
           </div> : undefined}
         <AboutView standaloneMode={this.props.standaloneMode}/>
       </div>
@@ -79,31 +104,35 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
 
   private renderCODAPToolbar() {
     return (
-      <div className="misc-actions codap-toolbar">
-        <div className="codap-tool">
-          <div>
-            <span className="moonicon-icon-table" />
-          </div>
-          <div style={{textDecoration: "line-through"}}>Tables</div>
+      <div className="misc-actions toolbar">
+        {this.renderToolbarButton({
+          icon: "moonicon-icon-table",
+          label: "Tables",
+          labelStyle: {textDecoration: "line-through"}
+        })}
+        {this.renderToolbarButton({
+          icon: "moonicon-icon-graph",
+          label: "Graph",
+          onClick: this.handleCODAPGraphToolClicked
+        })}
+        {this.renderToolbarButton({
+          icon: "moonicon-icon-comment",
+          label: "Text",
+          onClick: this.handleCODAPTextToolClicked
+        })}
+      </div>
+    );
+  }
+
+  private renderToolbarButton(options: ToolButtonOptions) {
+    const {icon, label, labelStyle, labelClassName, onClick, disabled} = options;
+    const className = `toolbar-button${disabled ? " disabled" : ""}`;
+    return (
+      <div className={className} onClick={onClick}>
+        <div>
+          <i className={icon} />
         </div>
-        <div className="codap-tool" onClick={this.handleCODAPGraphToolClicked}>
-          <div>
-            <span className="moonicon-icon-graph" />
-          </div>
-          <div>Graph</div>
-        </div>
-        <div className="codap-tool" onClick={this.handleCODAPTextToolClicked}>
-          <div>
-            <span className="moonicon-icon-comment" />
-          </div>
-          <div>Text</div>
-        </div>
-        <div className="codap-tool">
-          <div>
-            <span className="moonicon-icon-options" />
-          </div>
-          <div style={{textDecoration: "line-through"}}>Options</div>
-        </div>
+        <div style={labelStyle} className={labelClassName}>{label}</div>
       </div>
     );
   }
