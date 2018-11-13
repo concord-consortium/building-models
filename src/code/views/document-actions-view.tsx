@@ -8,7 +8,61 @@ import { AboutView } from "./about-view";
 import { SimulationRunPanelView } from "./simulation-run-panel-view";
 import { Mixer } from "../mixins/components";
 
-import { CodapConnect } from "../models/codap-connect";
+import { CodapConnect, CODAPDataContextListItem } from "../models/codap-connect";
+
+interface CODAPTableMenuProps {
+  toggleMenu: () => void;
+}
+
+interface CODAPTableMenuState {
+  dataContexts: CODAPDataContextListItem[];
+}
+
+class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenuState> {
+  public state: CODAPTableMenuState = {
+    dataContexts: []
+  };
+
+  private codapConnect: CodapConnect;
+
+  public componentWillMount() {
+    this.codapConnect = CodapConnect.instance("building-models");
+    this.codapConnect.getDataContexts((dataContexts) => {
+      this.setState({dataContexts});
+    });
+  }
+
+  public render() {
+    return (
+      <div className="codap-table-menu">
+        {this.state.dataContexts.map((dataContext) => {
+          return <div key={dataContext.id} className="codap-table-menu-item" onClick={this.handleLoadTable(dataContext)}>{dataContext.name}</div>;
+        })}
+        <div className="codap-table-menu-item" onClick={this.handleCreateNewTable}>New</div>
+      </div>
+    );
+  }
+
+  private handleLoadTable(dataContext: CODAPDataContextListItem) {
+    return () => {
+      this.codapConnect.showTable(dataContext.name);
+      this.props.toggleMenu();
+    };
+  }
+
+  private handleCreateNewTable = () => {
+    // trigger the same blank csv import method that CODAP uses internally
+    window.parent.postMessage({
+      type: "cfm::event",
+      eventType: "importedData",
+      eventData: {
+        text: "AttributeName",
+        name: "New Table"
+      }
+    }, "*");
+    this.props.toggleMenu();
+  }
+}
 
 interface ToolButtonOptions {
   icon: string;
@@ -30,6 +84,7 @@ interface DocumentActionsViewOuterState {
   selectedNodes: any[]; // TODO: get concrete type
   selectedLinks: any[]; // TODO: get concrete type
   selectedItems: any[]; // TODO: get concrete type
+  showCODAPTableMenu: boolean;
 }
 type DocumentActionsViewState = DocumentActionsViewOuterState & CodapMixinState & UndoRedoUIMixinState & AppSettingsMixinState;
 
@@ -43,7 +98,8 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     const outerState: DocumentActionsViewOuterState = {
       selectedNodes: [],
       selectedLinks: [],
-      selectedItems: []
+      selectedItems: [],
+      showCODAPTableMenu: false
     };
     this.setInitialState(outerState, CodapMixin.InitialState(), UndoRedoUIMixin.InitialState(), AppSettingsMixin.InitialState());
   }
@@ -108,8 +164,9 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
         {this.renderToolbarButton({
           icon: "moonicon-icon-table",
           label: "Tables",
-          labelStyle: {textDecoration: "line-through"}
+          onClick: this.handleCODAPTableToolClicked
         })}
+        {this.state.showCODAPTableMenu ? <CODAPTableMenu toggleMenu={this.handleCODAPTableToolClicked} /> : undefined}
         {this.renderToolbarButton({
           icon: "moonicon-icon-graph",
           label: "Graph",
@@ -160,6 +217,10 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     }
     // Clear stored selections after delete
     this.props.graphStore.selectionManager.clearSelection();
+  }
+
+  private handleCODAPTableToolClicked = () => {
+    this.setState({showCODAPTableMenu: !this.state.showCODAPTableMenu});
   }
 
   private handleCODAPGraphToolClicked = () => {

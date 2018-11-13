@@ -21,6 +21,12 @@ import { GraphStore } from "../stores/graph-store";
 
 // log -- see loglevel in package.json
 
+export interface CODAPDataContextListItem {
+  id: number;
+  name: string;
+  title: string;
+}
+
 interface CodapConnectMap {
   [key: string]: CodapConnect;
 }
@@ -576,6 +582,28 @@ export class CodapConnect {
       });
       return this.tableCreated = true;
     }
+  }
+
+  public showTable(dataContextName: string) {
+    this.codapPhone.call({
+      action: "create",
+      resource: "component",
+      values: {
+        type: "caseTable",
+        dataContext: dataContextName
+      }
+    });
+  }
+
+  public getDataContexts(callback: (dataContexts: CODAPDataContextListItem[]) => void) {
+    this.codapPhone.call({
+      action: "get",
+      resource: "dataContextList"
+    }, (ret) => {
+      if (ret && ret.success) {
+        callback(ret.values);
+      }
+    });
   }
 
   public codapRequestHandler(cmd, callback) {
