@@ -160,6 +160,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
               linkTarget=".link-top"
               connectionTarget=".link-target"
               transferTarget=".link-target"
+              iframed={this.state.iframed}
               // selectedLink={this.state.selectedLink}
             />
           </div>

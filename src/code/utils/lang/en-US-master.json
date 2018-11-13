@@ -185,6 +185,7 @@
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols",
 
     "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
+    "~DROP.ONLY_ALLOWED_IF_IFRAMED": "Sorry, dropping items of this type is only allowed if iframed.",
 
     "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
     "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)",

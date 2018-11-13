@@ -61,6 +61,8 @@ export class ImageMyComputerDialogView extends Mixer<ImageMyComputerDialogViewPr
         });
       };
       reader.readAsDataURL(files[0]);
+    } else {
+      alert(tr("~DROP.ONLY_IMAGES_ALLOWED"));
     }
   }
 }
