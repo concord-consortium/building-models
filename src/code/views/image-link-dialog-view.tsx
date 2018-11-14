@@ -59,6 +59,8 @@ export class ImageLinkDialogView extends Mixer<ImageLinkDialogViewProps, ImageLi
           link: url
         }
       });
+    } else {
+      alert(tr("~DROP.ONLY_IMAGES_ALLOWED"));
     }
   }
 }

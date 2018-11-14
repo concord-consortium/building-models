@@ -18,7 +18,7 @@ import { NodeView } from "./node-view";
 import { Node } from "../models/node";
 import { Colors } from "../utils/colors";
 import { DiagramToolkit } from "../utils/js-plumb-diagram-toolkit";
-import { dropImageHandler } from "../utils/drop-image-handler";
+import { dropHandler } from "../utils/drop-handler";
 import { tr } from "../utils/translate";
 import { PaletteStore, PaletteActions } from "../stores/palette-store";
 import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin } from "../stores/graph-store";
@@ -39,6 +39,7 @@ interface GraphViewOuterProps {
   connectionTarget?: any; // TODO: get concrete type
   transferTarget?: any; // TODO: get concrete type
   linkTarget?: any; // TODO: get concrete type
+  iframed: boolean;
 }
 type GraphViewProps = GraphViewOuterProps & GraphMixinProps & SimulationMixinProps & AppSettingsMixinProps & CodapMixinProps & LaraMixinProps;
 
@@ -475,7 +476,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   private handleDrop = (e) => {
     this.setState({canDrop: false});
     e.preventDefault();
-    try { // not sure any of the code inside this block is used?
+    try {
       // figure out where to drop files
       const offset = $(this.linkView!).offset() || {left: 0, top: 0};
       const dropPos = {
@@ -484,22 +485,35 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       };
 
       // get the files
-      return dropImageHandler(e, file => {
-        // @props.graphStore.setImageMetadata file.image, file.metadata   #there is no setImageMetadata?
-        const node = this.props.graphStore.importNode({
-          data: {
-            x: dropPos.x,
-            y: dropPos.y,
-            title: tr("~NODE.UNTITLED"),
-            image: file.image
-          }
-        });
-        return this.props.graphStore.editNode(node.key);
+      const {iframed} = this.props;
+      dropHandler({allow: "anythingIfFramed", iframed}, e, (item) => {
+        if (item.type === "image") {
+          const node = this.props.graphStore.importNode({
+            data: {
+              x: dropPos.x,
+              y: dropPos.y,
+              title: tr("~NODE.UNTITLED"),
+              image: item.image
+            }
+          });
+          this.props.graphStore.editNode(node.key);
+        } else if (iframed) {
+          // invoke an import data event via url event on the parent
+          window.parent.postMessage({
+            type: "cfm::event",
+            eventType: "importedData",
+            eventData: {
+              url: item.url,
+              via: "select",
+              componentType: "DG.WebView"
+            }
+          }, "*");
+        }
       });
     } catch (ex) {
       // user could have selected elements on the page and dragged those instead
       // of valid application items like connections or images
-      return console.error("Invalid drag/drop operation", ex); // tslint:disable-line:no-console
+      console.error("Invalid drag/drop operation", ex); // tslint:disable-line:no-console
     }
   }
 

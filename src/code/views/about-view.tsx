@@ -1,7 +1,9 @@
 import * as React from "react";
 import * as $ from "jquery";
 
-interface AboutViewProps {}
+interface AboutViewProps {
+  standaloneMode: boolean;
+}
 
 interface AboutViewState {
   showing: boolean;
@@ -24,12 +26,36 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   }
 
   public render() {
+    return this.props.standaloneMode ? this.renderStandalone() : this.renderNormal();
+  }
+
+  private renderNormal() {
+    return (
+      <div>
+        <div className="misc-actions toolbar">
+          <div className="toolbar-button" onClick={this.handleOpen}>
+            <div>
+              <i className="icon-codap-help" />
+            </div>
+            <div>About</div>
+          </div>
+        </div>
+        {this.state.showing ? this.renderShowing() : null}
+      </div>
+    );
+  }
+
+  private renderStandalone() {
     return (
       <div>
         <div className="misc-actions">
-          <i className="icon-codap-help" onClick={this.handleOpen} />
+          <div className="toolbar-button">
+            <div>
+              <a href="https://concord.org/our-work/research-projects/building-models/" target="_blank"><i className="icon-codap-help" /></a>
+            </div>
+            <div>Help</div>
+          </div>
         </div>
-        {this.state.showing ? this.renderShowing() : null}
       </div>
     );
   }

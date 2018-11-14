@@ -8,9 +8,75 @@ import { AboutView } from "./about-view";
 import { SimulationRunPanelView } from "./simulation-run-panel-view";
 import { Mixer } from "../mixins/components";
 
+import { CodapConnect, CODAPDataContextListItem } from "../models/codap-connect";
+
+interface CODAPTableMenuProps {
+  toggleMenu: () => void;
+}
+
+interface CODAPTableMenuState {
+  dataContexts: CODAPDataContextListItem[];
+}
+
+class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenuState> {
+  public state: CODAPTableMenuState = {
+    dataContexts: []
+  };
+
+  private codapConnect: CodapConnect;
+
+  public componentWillMount() {
+    this.codapConnect = CodapConnect.instance("building-models");
+    this.codapConnect.getDataContexts((dataContexts) => {
+      this.setState({dataContexts});
+    });
+  }
+
+  public render() {
+    return (
+      <div className="codap-table-menu">
+        {this.state.dataContexts.map((dataContext) => {
+          return <div key={dataContext.id} className="codap-table-menu-item" onClick={this.handleLoadTable(dataContext)}>{dataContext.name}</div>;
+        })}
+        <div className="codap-table-menu-item" onClick={this.handleCreateNewTable}>New</div>
+      </div>
+    );
+  }
+
+  private handleLoadTable(dataContext: CODAPDataContextListItem) {
+    return () => {
+      this.codapConnect.showTable(dataContext.name);
+      this.props.toggleMenu();
+    };
+  }
+
+  private handleCreateNewTable = () => {
+    // trigger the same blank csv import method that CODAP uses internally
+    window.parent.postMessage({
+      type: "cfm::event",
+      eventType: "importedData",
+      eventData: {
+        text: "AttributeName",
+        name: "New Table"
+      }
+    }, "*");
+    this.props.toggleMenu();
+  }
+}
+
+interface ToolButtonOptions {
+  icon: string;
+  label: string;
+  labelStyle?: any;
+  labelClassName?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
 interface DocumentActionsViewOuterProps {
   graphStore: any; // TODO: get concrete type
   diagramOnly: boolean;
+  standaloneMode: boolean;
 }
 type DocumentActionsViewProps = DocumentActionsViewOuterProps & CodapMixinProps & UndoRedoUIMixinProps & AppSettingsMixinProps;
 
@@ -18,6 +84,7 @@ interface DocumentActionsViewOuterState {
   selectedNodes: any[]; // TODO: get concrete type
   selectedLinks: any[]; // TODO: get concrete type
   selectedItems: any[]; // TODO: get concrete type
+  showCODAPTableMenu: boolean;
 }
 type DocumentActionsViewState = DocumentActionsViewOuterState & CodapMixinState & UndoRedoUIMixinState & AppSettingsMixinState;
 
@@ -31,7 +98,8 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     const outerState: DocumentActionsViewOuterState = {
       selectedNodes: [],
       selectedLinks: [],
-      selectedItems: []
+      selectedItems: [],
+      showCODAPTableMenu: false
     };
     this.setInitialState(outerState, CodapMixin.InitialState(), UndoRedoUIMixin.InitialState(), AppSettingsMixin.InitialState());
   }
@@ -56,19 +124,72 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
   public render() {
     const showDeleteUI = !this.state.uiElements.inspectorPanel && (this.state.touchDevice || this.props.graphStore.usingLara);
     const buttonClass = (enabled) => { if (!enabled) { return "disabled"; } else { return ""; } };
+    const showDeleteIcon = (showDeleteUI && this.state.lockdown && this.state.selectedLinks && (this.state.selectedLinks.length > 0)) || (showDeleteUI && !this.state.lockdown && this.state.selectedItems && (this.state.selectedItems.length > 0));
     return (
       <div className="document-actions">
+        {this.props.standaloneMode ? this.renderCODAPToolbar() : undefined}
         <div className="misc-actions">
           {this.renderRunPanel()}
         </div>
         {!this.state.hideUndoRedo ?
-          <div className="misc-actions">
-            {showDeleteUI && this.state.lockdown && this.state.selectedLinks && (this.state.selectedLinks.length > 0) ? <i className="icon-codap-trash" onClick={this.handleDeleteClicked} /> : undefined}
-            {showDeleteUI && !this.state.lockdown && this.state.selectedItems && (this.state.selectedItems.length > 0) ? <i className="icon-codap-trash" onClick={this.handleDeleteClicked} /> : undefined}
-            <i className={`icon-codap-arrow-undo ${buttonClass(this.state.canUndo)}`} onClick={this.handleUndoClicked} />
-            <i className={`icon-codap-arrow-redo ${buttonClass(this.state.canRedo)}`} onClick={this.handleRedoClicked} />
+          <div className="misc-actions toolbar">
+            {showDeleteIcon
+              ? this.renderToolbarButton({
+                  icon: "icon-codap-trash",
+                  label: "Delete",
+                  onClick: this.handleDeleteClicked
+                })
+              : undefined}
+            {this.renderToolbarButton({
+              icon: "icon-codap-arrow-undo",
+              label: "Undo",
+              onClick: this.handleUndoClicked,
+              disabled: !this.state.canUndo
+            })}
+            {this.renderToolbarButton({
+              icon: `icon-codap-arrow-redo`,
+              label: "Redo",
+              onClick: this.handleRedoClicked,
+              disabled: !this.state.canRedo
+            })}
           </div> : undefined}
-        <AboutView />
+        <AboutView standaloneMode={this.props.standaloneMode}/>
+      </div>
+    );
+  }
+
+  private renderCODAPToolbar() {
+    return (
+      <div className="misc-actions toolbar">
+        {this.renderToolbarButton({
+          icon: "moonicon-icon-table",
+          label: "Tables",
+          onClick: this.handleCODAPTableToolClicked
+        })}
+        {this.state.showCODAPTableMenu ? <CODAPTableMenu toggleMenu={this.handleCODAPTableToolClicked} /> : undefined}
+        {this.renderToolbarButton({
+          icon: "moonicon-icon-graph",
+          label: "Graph",
+          onClick: this.handleCODAPGraphToolClicked
+        })}
+        {this.renderToolbarButton({
+          icon: "moonicon-icon-comment",
+          label: "Text",
+          onClick: this.handleCODAPTextToolClicked
+        })}
+      </div>
+    );
+  }
+
+  private renderToolbarButton(options: ToolButtonOptions) {
+    const {icon, label, labelStyle, labelClassName, onClick, disabled} = options;
+    const className = `toolbar-button${disabled ? " disabled" : ""}`;
+    return (
+      <div className={className} onClick={onClick}>
+        <div>
+          <i className={icon} />
+        </div>
+        <div style={labelStyle} className={labelClassName}>{label}</div>
       </div>
     );
   }
@@ -96,5 +217,19 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     }
     // Clear stored selections after delete
     this.props.graphStore.selectionManager.clearSelection();
+  }
+
+  private handleCODAPTableToolClicked = () => {
+    this.setState({showCODAPTableMenu: !this.state.showCODAPTableMenu});
+  }
+
+  private handleCODAPGraphToolClicked = () => {
+    const codapConnect = CodapConnect.instance("building-models");
+    codapConnect.createEmptyGraph();
+  }
+
+  private handleCODAPTextToolClicked = () => {
+    const codapConnect = CodapConnect.instance("building-models");
+    codapConnect.createText();
   }
 }

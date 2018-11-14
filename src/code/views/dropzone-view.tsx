@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { dropImageHandler } from "../utils/drop-image-handler";
+import { dropHandler } from "../utils/drop-handler";
 
 import { tr } from "../utils/translate";
 
@@ -45,7 +45,7 @@ export class DropZoneView extends React.Component<DropZoneViewProps, DropZoneVie
     e.preventDefault();
 
     // get the files
-    dropImageHandler(e, file => {
+    dropHandler({allow: "onlyImages"}, e, file => {
       this.props.dropped(file);
     });
   }
