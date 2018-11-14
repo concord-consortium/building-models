@@ -40,3 +40,5 @@ building-models.sublime-workspace
 # vscode settings
 .vscode
 
+# intellij settings
+.idea
