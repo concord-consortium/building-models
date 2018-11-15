@@ -8,7 +8,8 @@
     "url": "https://github.com/concord-consortium/building-models"
   },
   "scripts": {
-    "start": "webpack-dev-server --https --inline --hot --content-base dev/",
+    "start": "webpack-dev-server --inline --hot --content-base dev/",
+    "start:secure": "webpack-dev-server --https --inline --hot --content-base dev/",
     "build": "npm-run-all clean build:webpack",
     "build:watch": "npm-run-all clean build:webpack:watch",
     "build:webpack": "webpack --mode production --devtool false",
