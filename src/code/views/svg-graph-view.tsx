@@ -138,10 +138,10 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
     return (
       <div className="svgGraphView">
         <svg width={this.props.width} height={this.props.height}>
-          this.renderAxisLines(),
-          this.renderLineData(),
-          this.renderXLabel(),
-          this.renderYLabel()
+          {this.renderAxisLines()}
+          {this.renderLineData()}
+          {this.renderXLabel()}
+          {this.renderYLabel()}
         </svg>
         <div
           className={drawClass}
