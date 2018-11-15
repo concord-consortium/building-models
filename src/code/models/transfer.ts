@@ -12,7 +12,14 @@ const DEFAULT_COMBINE_METHOD = "product";
 
 export class TransferModel extends Node {
   public type = "Transfer";
+  public isTransfer = true;
+  public combineMethod = DEFAULT_COMBINE_METHOD;
+
   protected transferLink: any; // TODO: get concrete type
+
+  constructor(options, key?) {
+    super(options, key, true);
+  }
 
   public setTransferLink(link) {
     this.transferLink = link;
