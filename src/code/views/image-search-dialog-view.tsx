@@ -1,4 +1,5 @@
 const _ = require("lodash");
+import * as $ from "jquery";
 
 import * as React from "react";
 
@@ -210,7 +211,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
         node = iterable[index];
         if (node.image) {
           if (node.image) {
-            noResultsItems.push(<ImageSearchResultView key={index} imageInfo={node} isDisabled={this.isDisabledInInternalLibrary} />);
+            noResultsItems.push(<ImageSearchResultView key={index} imageInfo={node} isDisabled={this.handleIsDisabledInInternalLibrary} />);
           }
         }
       }
@@ -219,7 +220,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
     if (this.state.searched) {
       for (index = 0; index < this.state.results.length; index++) {
         node = this.state.results[index];
-        searchResultItems.push(<ImageSearchResultView key={index} imageInfo={node} isDisabled={this.isDisabledInExternalSearch} />);
+        searchResultItems.push(<ImageSearchResultView key={index} imageInfo={node} isDisabled={this.handleIsDisabledInExternalSearch} />);
       }
     }
 
@@ -308,11 +309,11 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
     }
   }
 
-  private isDisabledInInternalLibrary(node) {
+  private handleIsDisabledInInternalLibrary = (node) => {
     return this.props.inPalette(node);
   }
 
-  private isDisabledInExternalSearch(node) {
+  private handleIsDisabledInExternalSearch = (node) => {
     return (this.props.inPalette(node)) || (this.props.inLibrary(node));
   }
 

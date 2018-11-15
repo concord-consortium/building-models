@@ -6,6 +6,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+import * as $ from "jquery";
+
 const MAX_NUMBER_OF_PAGES = 20;
 
 let jqXHR;

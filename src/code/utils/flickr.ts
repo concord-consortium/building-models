@@ -6,6 +6,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
+import * as $ from "jquery";
+
 const FLICKR_API_KEY = "1082174cc952ccc6a97412e9e14aaf88";
 
 export const Flickr = {
