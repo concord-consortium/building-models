@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as $ from "jquery";
 
 import { DropZoneView } from "./dropzone-view";
 import { ImageDialogMixin, ImageDialogMixinState, ImageDialogMixinProps } from "../stores/image-dialog-store";
