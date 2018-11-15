@@ -17,6 +17,10 @@ export class TransferModel extends Node {
 
   protected transferLink: any; // TODO: get concrete type
 
+  constructor(options, key?) {
+    super(options, key, true);
+  }
+
   public setTransferLink(link) {
     this.transferLink = link;
     return this.title = this.computeTitle();

@@ -40,6 +40,8 @@ export class Node extends GraphPrimitive {
     Node.SEMIQUANT_ACCUMULATOR_MAX = SEMIQUANT_ACCUMULATOR_MAX;
   }
 
+  public type: string = "Node";
+
   protected links: any; // TODO: get concrete type
   protected x: any; // TODO: get concrete type
   protected y: any; // TODO: get concrete type
@@ -63,10 +65,11 @@ export class Node extends GraphPrimitive {
   protected isTransfer: any; // TODO: get concrete type
   protected _isAccumulator: any; // TODO: get concrete type
 
-  constructor(nodeSpec, key?) {
+  constructor(nodeSpec, key?, isTransfer?) {
+    super(isTransfer ? "Transfer" : "Node");
+
     let val, val1, val10, val2, val3, val4, val5, val6, val7, val8, val9;
     if (nodeSpec == null) { nodeSpec = {}; }
-    super("Node");
     if (key) {
       this.key = key;
     }
