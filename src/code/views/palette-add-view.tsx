@@ -42,8 +42,6 @@ export class PaletteAddView extends Mixer<PaletteAddViewProps, PaletteAddViewSta
   }
 
   private handleClick = () => {
-    if (this.props.callback) {
-      ImageDialogActions.open.trigger(this.props.callback);
-    }
+    ImageDialogActions.open.trigger(this.props.callback);
   }
 }
