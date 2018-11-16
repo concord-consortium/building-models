@@ -23,7 +23,8 @@
     "strings:push:usage": "echo Usage: `npm run strings:push -- -a <poeditor_api_key>`",
     "strings:push": "./bin/strings-push-project.sh",
     "test": "mocha",
-    "test:watch": "mocha -w"
+    "test:watch": "mocha -w",
+    "cypress:open": "cypress open"
   },
   "dependencies": {
     "autosize": "^3.0.18",
@@ -54,6 +55,7 @@
     "chai": "^4.2.0",
     "copy-webpack-plugin": "^4.5.4",
     "css-loader": "^1.0.0",
+    "cypress": "^3.1.1",
     "enzyme": "^2.8.0",
     "file-loader": "^2.0.0",
     "fork-ts-checker-webpack-plugin": "^0.4.10",
