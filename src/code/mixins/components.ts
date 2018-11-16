@@ -1,23 +1,36 @@
 import * as React from "react";
 import * as _ from "lodash";
 
-export class Mixin<P, S> extends React.Component<P, S> {
+interface IMixin<P, S> extends React.ComponentLifecycle<P, S> {
+  props: P;
+  state: S;
+  setState: (newState: S, callback?: () => any) => void;
+}
+
+export class Mixin<P, S> implements IMixin<P, S> {
   public static InitialState: () => any;
 
   protected mixer: any;
 
-  constructor(mixer: any, props: P) {
-    super(props);
+  constructor(mixer: any) {
     this.mixer = mixer;
   }
 
-  public setState(state: S) {
-    this.mixer.setState(state);
+  public get props() {
+    return this.mixer.props;
+  }
+
+  public get state() {
+    return this.mixer.state;
+  }
+
+  public setState(state: S, callback?: () => any) {
+    this.mixer.setState(state, callback);
   }
 }
 
 export class Mixer<P, S> extends React.Component<P, S> {
-  protected mixins: Array<React.Component<any, any>>;
+  protected mixins: Array<IMixin<any, any>>;
 
   public setInitialState(s: any, ...rest) {
     this.state = _.extend(s, ...rest);

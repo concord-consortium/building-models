@@ -29,7 +29,7 @@ export class GlobalNavView extends Mixer<GlobalNavViewProps, GlobalNavViewState>
 
   constructor(props: GlobalNavViewProps) {
     super(props);
-    this.mixins = [new GoogleFileMixin(this, props), new UndoRedoUIMixin(this, props)];
+    this.mixins = [new GoogleFileMixin(this), new UndoRedoUIMixin(this)];
     const outerState: GlobalNavViewOuterState = {
       dirty: false,
       saved: false,

@@ -61,7 +61,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
 
   constructor(props: AppViewProps) {
     super(props);
-    this.mixins = [new ImageDialogMixin(this, props), new AppSettingsMixin(this, props)];
+    this.mixins = [new ImageDialogMixin(this), new AppSettingsMixin(this)];
 
     let iframed;
     try {

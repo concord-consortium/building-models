@@ -21,9 +21,9 @@ export class ImageMyComputerDialogView extends Mixer<ImageMyComputerDialogViewPr
 
   constructor(props: ImageMyComputerDialogViewProps) {
     super(props);
-    this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
+    this.imageDialogViewMixin = new ImageDialogViewMixin(this);
 
-    this.mixins = [new ImageDialogMixin(this, props), this.imageDialogViewMixin];
+    this.mixins = [new ImageDialogMixin(this), this.imageDialogViewMixin];
     const outerState: ImageMyComputerDialogViewOuterState = {};
     this.setInitialState(outerState, ImageDialogMixin.InitialState(), ImageDialogViewMixin.InitialState());
   }
@@ -34,7 +34,7 @@ export class ImageMyComputerDialogView extends Mixer<ImageMyComputerDialogViewPr
         {this.state.selectedImage
           ? this.imageDialogViewMixin.renderPreviewImage()
           : <div>
-              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP")} dropped={this.imageDialogViewMixin.imageDropped} />
+              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP")} dropped={this.imageDialogViewMixin.handleImageDrop} />
               <p>{tr("~IMAGE-BROWSER.CHOOSE_FILE")}</p>
               <p><input ref={el => this.file = el} type="file" onChange={this.handlePreviewImage} /></p>
             </div>}

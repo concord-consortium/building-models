@@ -149,7 +149,7 @@ export class InspectorPanelView extends Mixer<InspectorPanelViewProps, Inspector
 
   constructor(props: InspectorPanelViewProps) {
     super(props);
-    this.mixins = [new InspectorPanelMixin(this, props)];
+    this.mixins = [new InspectorPanelMixin(this)];
     const outerState: InspectorPanelViewOuterState = {};
     this.setInitialState(outerState, InspectorPanelMixin.InitialState());
   }

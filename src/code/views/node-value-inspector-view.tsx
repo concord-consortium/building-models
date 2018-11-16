@@ -35,7 +35,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
   constructor(props: NodeValueInspectorViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
+    this.mixins = [new SimulationMixin(this), new AppSettingsMixin(this)];
     const outerState: NodeValueInspectorViewOuterState = {
       "editing-min": false,
       "editing-max": false,

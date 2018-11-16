@@ -29,7 +29,7 @@ export class NodeWellView extends Mixer<NodeWellViewProps, NodeWellViewState> {
 
   constructor(props: NodeWellViewProps) {
     super(props);
-    this.mixins = [new PaletteMixin(this, props)];
+    this.mixins = [new PaletteMixin(this)];
     const outerState: NodeWellViewOuterState = {
       nodes: [],
       collapsed: true

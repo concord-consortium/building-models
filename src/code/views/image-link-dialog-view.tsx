@@ -21,8 +21,8 @@ export class ImageLinkDialogView extends Mixer<ImageLinkDialogViewProps, ImageLi
 
   constructor(props: ImageLinkDialogViewProps) {
     super(props);
-    this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
-    this.mixins = [new ImageDialogMixin(this, props), this.imageDialogViewMixin];
+    this.imageDialogViewMixin = new ImageDialogViewMixin(this);
+    this.mixins = [new ImageDialogMixin(this), this.imageDialogViewMixin];
     const outerState: ImageLinkDialogViewOuterState = {};
     this.setInitialState(outerState, ImageDialogMixin.InitialState(), ImageDialogViewMixin.InitialState());
   }
@@ -33,7 +33,7 @@ export class ImageLinkDialogView extends Mixer<ImageLinkDialogViewProps, ImageLi
         {this.state.selectedImage
           ? this.imageDialogViewMixin.renderPreviewImage()
           : <div>
-              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER")} dropped={this.imageDialogViewMixin.imageDropped} />
+              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER")} dropped={this.imageDialogViewMixin.handleImageDrop} />
               <p>{tr("~IMAGE-BROWSER.TYPE_OR_PASTE_LINK")}</p>
               <p>
                 {tr("~IMAGE-BROWSER.IMAGE_URL")}

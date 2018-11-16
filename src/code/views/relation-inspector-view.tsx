@@ -39,7 +39,7 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
   // (link-relation-view uses @props.graphStore.changeLink() to update the link)
   constructor(props: RelationInspectorViewProps) {
     super(props);
-    this.mixins = [new InspectorPanelMixin(this, props), new GraphMixin(this, props)];
+    this.mixins = [new InspectorPanelMixin(this), new GraphMixin(this)];
     const outerState: RelationInspectorViewOuterState = {};
     this.setInitialState(outerState, InspectorPanelMixin.InitialState());
   }
