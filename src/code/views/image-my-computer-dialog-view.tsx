@@ -34,7 +34,7 @@ export class ImageMyComputerDialogView extends Mixer<ImageMyComputerDialogViewPr
         {this.state.selectedImage
           ? this.imageDialogViewMixin.renderPreviewImage()
           : <div>
-              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP")} dropped={this.imageDialogViewMixin.imageDropped} />
+              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP")} dropped={this.imageDialogViewMixin.handleImageDrop} />
               <p>{tr("~IMAGE-BROWSER.CHOOSE_FILE")}</p>
               <p><input ref={el => this.file = el} type="file" onChange={this.handlePreviewImage} /></p>
             </div>}

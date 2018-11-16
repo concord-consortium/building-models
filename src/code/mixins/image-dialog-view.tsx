@@ -23,16 +23,18 @@ export class ImageDialogViewMixin extends Mixin<ImageDialogViewMixinProps, Image
     return ImageDialogActions.update(imageInfo);
   }
 
-  public imageDropped(imageInfo) {
-    return this.imageSelected(imageInfo);
-  }
-
   public hasValidImageExtension(imageName) {
     return hasValidImageExtension(imageName);
   }
 
   public renderPreviewImage() {
     return <PreviewImageDialogView imageInfo={this.props.selectedImage} />;
+  }
+
+  // Event handler, usually used together with drop zone view.
+  // That's why it's necessary to ensure that it's bound to correct `this` object.
+  public handleImageDrop = (imageInfo) => {
+    return this.imageSelected(imageInfo);
   }
 }
 

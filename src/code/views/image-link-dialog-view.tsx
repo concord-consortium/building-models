@@ -33,7 +33,7 @@ export class ImageLinkDialogView extends Mixer<ImageLinkDialogViewProps, ImageLi
         {this.state.selectedImage
           ? this.imageDialogViewMixin.renderPreviewImage()
           : <div>
-              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER")} dropped={this.imageDialogViewMixin.imageDropped} />
+              <DropZoneView header={tr("~IMAGE-BROWSER.DROP_IMAGE_FROM_BROWSER")} dropped={this.imageDialogViewMixin.handleImageDrop} />
               <p>{tr("~IMAGE-BROWSER.TYPE_OR_PASTE_LINK")}</p>
               <p>
                 {tr("~IMAGE-BROWSER.IMAGE_URL")}
