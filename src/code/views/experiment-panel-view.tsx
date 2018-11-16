@@ -19,7 +19,7 @@ export class ExperimentPanelView extends Mixer<ExperimentPanelViewProps, Experim
 
   constructor(props: ExperimentPanelViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin(this, props)];
+    this.mixins = [new SimulationMixin(this)];
     const outerState: ExperimentPanelViewOuterState = {};
     this.setInitialState(outerState, SimulationMixin.InitialState());
   }

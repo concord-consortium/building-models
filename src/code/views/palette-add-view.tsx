@@ -26,7 +26,7 @@ export class PaletteAddView extends Mixer<PaletteAddViewProps, PaletteAddViewSta
 
   constructor(props: PaletteAddViewProps) {
     super(props);
-    this.mixins = [new DraggableMixin(this, props)];
+    this.mixins = [new DraggableMixin(this)];
     const outerState: PaletteAddViewOuterState = {};
     this.setInitialState(outerState, DraggableMixin.InitialState());
   }

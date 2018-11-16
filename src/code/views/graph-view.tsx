@@ -73,7 +73,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   constructor(props: GraphViewProps) {
     super(props);
-    this.mixins = [new GraphMixin(this, props), new SimulationMixin(this, props), new AppSettingsMixin(this, props), new CodapMixin(this, props), new LaraMixin(this, props)];
+    this.mixins = [new GraphMixin(this), new SimulationMixin(this), new AppSettingsMixin(this), new CodapMixin(this), new LaraMixin(this)];
     const outerState: GraphViewOuterState = {
       selectedNodes: [],
       editingNode: null,

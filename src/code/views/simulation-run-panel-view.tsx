@@ -27,7 +27,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
 
   constructor(props: SimulationRunPanelViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
+    this.mixins = [new SimulationMixin(this), new AppSettingsMixin(this)];
     const outerState: SimulationRunPanelViewOuterState = {};
     this.setInitialState(outerState, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }

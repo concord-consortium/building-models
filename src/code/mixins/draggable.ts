@@ -16,7 +16,7 @@ export class DraggableMixin extends Mixin<DraggableMixinProps, DraggableMixinSta
   private removeClasses: string[];
 
   constructor(mixer: any, props = {}, options: DraggableMixinOptions = {}) {
-    super(mixer, props);
+    super(mixer);
     this.doMove = options.doMove || (() => undefined);
     this.removeClasses = options.removeClasses || ["proto-node"];
   }

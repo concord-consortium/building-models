@@ -146,9 +146,9 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
 
   constructor(props: ImageSearchDialogViewProps) {
     super(props);
-    this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
+    this.imageDialogViewMixin = new ImageDialogViewMixin(this);
 
-    this.mixins = [new ImageDialogMixin(this, props), this.imageDialogViewMixin];
+    this.mixins = [new ImageDialogMixin(this), this.imageDialogViewMixin];
 
     const outerState: ImageSearchDialogViewOuterState = {
       searching: false,

@@ -56,7 +56,7 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
 
   constructor(props: NodeTitleViewProps) {
     super(props);
-    this.nodeTitleMixin = new NodeTitleMixin(this, props);
+    this.nodeTitleMixin = new NodeTitleMixin(this);
     this.mixins = [this.nodeTitleMixin];
 
     const outerState: NodeTitleViewOuterState = this.getStateFromProps(props);

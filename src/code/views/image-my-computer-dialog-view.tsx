@@ -21,9 +21,9 @@ export class ImageMyComputerDialogView extends Mixer<ImageMyComputerDialogViewPr
 
   constructor(props: ImageMyComputerDialogViewProps) {
     super(props);
-    this.imageDialogViewMixin = new ImageDialogViewMixin(this, props);
+    this.imageDialogViewMixin = new ImageDialogViewMixin(this);
 
-    this.mixins = [new ImageDialogMixin(this, props), this.imageDialogViewMixin];
+    this.mixins = [new ImageDialogMixin(this), this.imageDialogViewMixin];
     const outerState: ImageMyComputerDialogViewOuterState = {};
     this.setInitialState(outerState, ImageDialogMixin.InitialState(), ImageDialogViewMixin.InitialState());
   }

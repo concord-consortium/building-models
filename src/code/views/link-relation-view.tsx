@@ -102,7 +102,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
 
   constructor(props: LinkRelationViewProps) {
     super(props);
-    this.mixins = [new SimulationMixin(this, props), new AppSettingsMixin(this, props)];
+    this.mixins = [new SimulationMixin(this), new AppSettingsMixin(this)];
 
     const status = this.checkStatus(this.props.link);
     const outerState: LinkRelationViewOuterState = {

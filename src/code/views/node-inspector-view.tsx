@@ -24,7 +24,7 @@ export class NodeInspectorView extends Mixer<NodeInspectorViewProps, NodeInspect
 
   constructor(props: NodeInspectorViewProps) {
     super(props);
-    this.nodeTitleMixin = new NodeTitleMixin(this, props);
+    this.nodeTitleMixin = new NodeTitleMixin(this);
     this.mixins = [this.nodeTitleMixin];
 
     const outerState: NodeInspectorViewOuterState = {};

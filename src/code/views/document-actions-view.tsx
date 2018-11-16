@@ -94,7 +94,7 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
 
   constructor(props: DocumentActionsViewProps) {
     super(props);
-    this.mixins = [new CodapMixin(this, props), new UndoRedoUIMixin(this, props), new AppSettingsMixin(this, props)];
+    this.mixins = [new CodapMixin(this), new UndoRedoUIMixin(this), new AppSettingsMixin(this)];
     const outerState: DocumentActionsViewOuterState = {
       selectedNodes: [],
       selectedLinks: [],
