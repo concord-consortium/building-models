@@ -43,12 +43,13 @@ export class CodapConnect {
     return CodapConnect.instances[context];
   }
 
+  public dataContextName: string;
+
   private standaloneMode: boolean;
   private queue: any[];
   private graphStore: any;
   private lastTimeSent: number;
   private sendThrottleMs: number;
-  private dataContextName: string;
   private simulationCollectionName: string;
   private samplesCollectionName: string;
   private defaultExperimentName: string;
@@ -593,6 +594,13 @@ export class CodapConnect {
         type: "caseTable",
         dataContext: dataContextName
       }
+    });
+  }
+
+  public deleteDataContext(dataContextName: string) {
+    this.codapPhone.call({
+      action: "delete",
+      resource: `dataContext[${dataContextName}]`
     });
   }
 

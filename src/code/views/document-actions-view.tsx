@@ -36,9 +36,16 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
     return (
       <div className="codap-table-menu" onMouseLeave={this.handleMouseLeave}>
         {this.state.dataContexts.map((dataContext) => {
-          return <div key={dataContext.id} className="codap-table-menu-item" onClick={this.handleLoadTable(dataContext)}>{dataContext.name}</div>;
+          return (
+            <div key={dataContext.id} className="codap-table-menu-item" onClick={this.handleLoadTable(dataContext)}>
+              {dataContext.name}
+              {dataContext.name !== this.codapConnect.dataContextName ? <i className="moonicon-icon-trash" onClick={this.handleDeleteTable(dataContext)} /> : undefined}
+            </div>
+          );
         })}
-        <div className="codap-table-menu-item" onClick={this.handleCreateNewTable}>New</div>
+        <div className="codap-table-menu-item">
+          <button onClick={this.handleCreateNewTable}>New Table</button>
+        </div>
       </div>
     );
   }
@@ -47,6 +54,16 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
     return () => {
       this.codapConnect.showTable(dataContext.name);
       this.props.toggleMenu(false);
+    };
+  }
+
+  private handleDeleteTable(dataContext: CODAPDataContextListItem) {
+    return (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      if (confirm(`Are you sure you want to delete "${dataContext.name}"?`)) {
+        this.codapConnect.deleteDataContext(dataContext.name);
+        this.props.toggleMenu(false);
+      }
     };
   }
 
