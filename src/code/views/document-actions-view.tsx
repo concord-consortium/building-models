@@ -38,7 +38,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
         {this.state.dataContexts.map((dataContext) => {
           return (
             <div key={dataContext.id} className="codap-table-menu-item" onClick={this.handleLoadTable(dataContext)}>
-              {dataContext.name}
+              {dataContext.title}
               {dataContext.name !== this.codapConnect.dataContextName ? <i className="moonicon-icon-trash" onClick={this.handleDeleteTable(dataContext)} /> : undefined}
             </div>
           );
@@ -60,7 +60,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
   private handleDeleteTable(dataContext: CODAPDataContextListItem) {
     return (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      if (confirm(`Are you sure you want to delete "${dataContext.name}"?`)) {
+      if (confirm(`Are you sure you want to delete "${dataContext.title}"?`)) {
         this.codapConnect.deleteDataContext(dataContext.name);
         this.props.toggleMenu(false);
       }
