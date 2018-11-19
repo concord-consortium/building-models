@@ -11,7 +11,7 @@ import { Mixer } from "../mixins/components";
 import { CodapConnect, CODAPDataContextListItem } from "../models/codap-connect";
 
 interface CODAPTableMenuProps {
-  toggleMenu: () => void;
+  toggleMenu: (override?: boolean) => void;
 }
 
 interface CODAPTableMenuState {
@@ -34,7 +34,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
 
   public render() {
     return (
-      <div className="codap-table-menu">
+      <div className="codap-table-menu" onMouseLeave={this.handleMouseLeave}>
         {this.state.dataContexts.map((dataContext) => {
           return <div key={dataContext.id} className="codap-table-menu-item" onClick={this.handleLoadTable(dataContext)}>{dataContext.name}</div>;
         })}
@@ -46,7 +46,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
   private handleLoadTable(dataContext: CODAPDataContextListItem) {
     return () => {
       this.codapConnect.showTable(dataContext.name);
-      this.props.toggleMenu();
+      this.props.toggleMenu(false);
     };
   }
 
@@ -60,7 +60,11 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
         name: "New Table"
       }
     }, "*");
-    this.props.toggleMenu();
+    this.props.toggleMenu(false);
+  }
+
+  private handleMouseLeave = () => {
+    this.props.toggleMenu(false);
   }
 }
 
@@ -219,8 +223,9 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     this.props.graphStore.selectionManager.clearSelection();
   }
 
-  private handleCODAPTableToolClicked = () => {
-    this.setState({showCODAPTableMenu: !this.state.showCODAPTableMenu});
+  private handleCODAPTableToolClicked = (override?: boolean) => {
+    const showCODAPTableMenu = typeof override !== "undefined" ? override : !this.state.showCODAPTableMenu;
+    this.setState({showCODAPTableMenu});
   }
 
   private handleCODAPGraphToolClicked = () => {
