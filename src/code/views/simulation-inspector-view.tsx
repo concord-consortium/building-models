@@ -111,18 +111,6 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
         <div className={runPanelClasses}>
           <div className="title">{tr("~SIMULATION.VIEW_SETTINGS")}</div>
           <div className="row">
-            <label key="minigraphs-label">
-              <input
-                key="minigraphs-checkbox"
-                type="checkbox"
-                value="show-mini"
-                checked={this.state.showingMinigraphs}
-                onChange={this.handleShowingMinigraphs}
-              />
-              {tr("~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS")}
-            </label>
-          </div>
-          <div className="row">
             <label key="symbols-label">
               <input
                 key="symbols-checkbox"
@@ -141,10 +129,6 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleCapNodeValues = (e) => {
     SimulationActions.capNodeValues(e.target.checked);
-  }
-
-  private handleShowingMinigraphs = (e) => {
-    AppSettingsActions.showMinigraphs(e.target.checked);
   }
 
   private handleRelationshipSymbols = (e) => {

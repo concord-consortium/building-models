@@ -179,9 +179,4 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
       SimulationActions.expandSimulationPanel();
     }
   }
-
-  // -- TBD: There was discussion about automatically showing
-  // -- MiniGraphs when this panel is opened  …  NP 2018-01
-  // if ! @state.showingMinigraphs
-  //   AppSettingsStore.actions.showMinigraphs true
 }
