@@ -24,8 +24,8 @@
       }
     };
 
-    // show the initial splash screen for two seconds
-    checkerTimeout = setTimeout(checkForAppRender, 3000);
+    // show the initial splash screen for four seconds
+    checkerTimeout = setTimeout(checkForAppRender, 4000);
   }
 })();
 
