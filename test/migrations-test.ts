@@ -99,9 +99,12 @@ describe("Migrations",  () =>
       })
     );
 
-    describe("v-1.4 changes", () => it("should have settings and cap value", () => undefined));
-        // Removed or changed in 1.9:
-        // @result.settings.capNodeValues.should.equal false
+    describe("v-1.4 changes", () => {
+      it("should have settings and cap value", () => {
+        const result = migrationUpdate(data, "1.4.0");
+        result.settings.capNodeValues.should.equal(false);
+      });
+    });
 
     describe("v-1.5 changes", () => {
       it("should have images and paletteItems for nodes", () => {
@@ -118,10 +121,12 @@ describe("Migrations",  () =>
       });
     });
 
-    // Removed in 1.19
-    // describe "v-1.6 changes", ->
-    //   it "should have diagramOnly setting", ->
-    //     @result.settings.diagramOnly.should.equal false
+    describe("v-1.6 changes", () => {
+      it("should have diagramOnly setting", () => {
+        const result = migrationUpdate(data, "1.6.0");
+        result.settings.diagramOnly.should.equal(false);
+      });
+    });
 
     describe("v-1.7 changes", () =>
       it("should have settings for the simulation", () => {
@@ -129,11 +134,6 @@ describe("Migrations",  () =>
         result.settings.simulation.should.not.equal(undefined);
       })
     );
-        // Removed or changed in 1.8:
-        // @result.settings.simulation.period.should.equal 10
-        // @result.settings.simulation.stepSize.should.equal 1
-        // @result.settings.simulation.periodUnits.should.equal "YEAR"
-        // @result.settings.simulation.stepUnits.should.equal "YEAR"
 
     describe("v-1.8 changes", () =>
       it("should have settings for the simulation", () => {
@@ -143,16 +143,20 @@ describe("Migrations",  () =>
       })
     );
 
-    // describe "v-1.9 changes", ->
-    //   it "should have speed setting", ->
-    //     @result.settings.simulation.speed.should.equal 4
+    describe("v-1.9 changes", () =>
+      it("should have speed setting", () => {
+        const result = migrationUpdate(data, "1.9.0");
+        result.settings.simulation.speed.should.equal(4);
+      })
+    );
 
-    // Removed in 1.13
-    // describe "v-1.10 changes", ->
-    //   it "should have newIntegration setting", ->
-    //     @result.settings.simulation.newIntegration.should.equal false
+    describe("v-1.10.0 changes", () =>
+      it("should have newIntegration setting", () => {
+        const result = migrationUpdate(data, "1.10.0");
+        result.settings.simulation.newIntegration.should.equal(false);
+      })
+    );
 
-    // Removed in 1.25
     describe("v-1.11.0 changes", () =>
       it("should have minigraphs setting", () => {
         const result = migrationUpdate(data, "1.11.0");
@@ -182,13 +186,13 @@ describe("Migrations",  () =>
       })
     );
 
-    // removed in 1.20.0
-    // describe "v-1.17.0 changes", ->
-    //   it "should have experiment number and frame", ->
-    //     experiment = @result.settings.simulation.experimentNumber
-    //     frame = @result.settings.simulation.experimentFrame
-    //     should.equal(experiment, 0)
-    //     should.equal(frame, 0)
+    describe("v-1.17.0 changes", () => {
+      it("should have experiment number and frame", () => {
+        const result = migrationUpdate(data, "1.17.0");
+        result.settings.simulation.experimentNumber.should.equal(0)
+        result.settings.simulation.experimentFrame.should.equal(0);
+      });
+    });
 
     describe("v-1.18.0 changes", () =>
       it("should have link relation type", () => {
@@ -197,10 +201,12 @@ describe("Migrations",  () =>
       })
     );
 
-    // removed in 1.22.0
-    // describe "v-1.19.0 changes", ->
-    //   it "should have complexity setting", ->
-    //     @result.settings.complexity.should.equal 3
+    describe("v-1.19.0 changes", () =>
+      it("should have link relation type", () => {
+        const result = migrationUpdate(data, "1.19.0");
+        result.settings.complexity.should.equal(2);
+      })
+    );
 
     describe("v-1.22.0 changes", () =>
       it("should have complexity and simulation settings", () => {
@@ -250,4 +256,3 @@ describe("Migrations",  () =>
     );
   })
 );
-
