@@ -110,9 +110,6 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
 
   onSetComplexity(val) {
     this.settings.complexity = val;
-    if (val === 0) {
-      this.settings.showingMinigraphs = false;
-    }
     return this.notifyChange();
   },
 
@@ -144,7 +141,6 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
     return {
       complexity: this.settings.complexity,
       simulationType: this.settings.simulationType,
-      showingMinigraphs: this.settings.showingMinigraphs,
       relationshipSymbols: this.settings.relationshipSymbols
     };
   }

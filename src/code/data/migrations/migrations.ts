@@ -31,6 +31,7 @@ import { migration_22 } from "./22_add_combine_method";
 import { migration_23 } from "./23_add_simulation_type";
 import { migration_24 } from "./24_fix_simulation_type";
 import { migration_25 } from "./25_ensure_combine_method";
+import { migration_26 } from "./26_remove_minigraphs_visibility";
 
 export const migrations = [
   migration_01,
@@ -58,12 +59,17 @@ export const migrations = [
   migration_23,
   migration_24,
   migration_25,
+  migration_26
 ];
 
-export const migrationUpdate = (data) => {
+export const migrationUpdate = (data, upToVersion: string | null = null) => {
   for (const m of migrations) {
     if (m.update) {
       data = m.update(data);
+    }
+    if (upToVersion && m.version === upToVersion) {
+      // Optionally, apply migrations up to provided version. Useful for testing.
+      return data;
     }
   }
   return data;
