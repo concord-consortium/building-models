@@ -56,37 +56,20 @@
   <link rel="stylesheet" href="icon_font_style.css">
   <link rel="stylesheet" href="codap-ivy-fonts.css">
   <link rel="stylesheet" href="css/splash-screen.css">
+  <script src="js/splash-screen.js"></script>
 </head>
 <body>
   <div class="content-box">
     <div id='app'></div>
-    <div id='splash-container'>
-      <div id='splash-background'></div>
-      <div id='splash-dialog'>
-        <div id='splash-inner-dialog'>
-          <div>
-            <img src="img/logo.png" />
-          </div>
-          <div>
-            <p>
-              Created by the Concord Consortium and the<br/>CREATE for STEM Institute at Michigan State University.
-            </p>
-            <p>
-              Version <%= htmlWebpackPlugin.options.__VERSION__ %> (<%= htmlWebpackPlugin.options.__BUILD_DATE__ %>)
-            </p>
-            <p>
-              <span id="splash-loading">Loading</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
+  <script type="text/javascript" charset="utf-8">
+    showSplashScreen("<%= htmlWebpackPlugin.options.__VERSION__ %>", "<%= htmlWebpackPlugin.options.__BUILD_DATE__ %>");
+  </script>
   <script src="js/jsPlumb.js"></script>
+
   <% for (key in htmlWebpackPlugin.files.chunks) { %>
   <script src="<%= htmlWebpackPlugin.files.chunks[key].entry %>" type="text/javascript"></script>
   <% } %>
-  <script src="js/splash-screen.js"></script>
 
   <script type="text/javascript" charset="utf-8">
     if(self == top) {
