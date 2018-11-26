@@ -98,7 +98,7 @@ describe("Serialization and Loading", () => {
       it("should serialize all the properties of the model", () => {
         const model = JSON.parse(jsonString);
 
-        model.version.should.equal("1.24.0");
+        model.version.should.equal("1.25.0");
         model.nodes.length.should.equal(3);
         model.links.length.should.equal(2);
       });
@@ -158,12 +158,10 @@ describe("Serialization and Loading", () => {
       it("should be able to serialize the settings", () => {
         AppSettingsStore.settings.simulationType = "static";
         AppSettingsStore.settings.complexity = "expanded";
-        AppSettingsStore.settings.showingMinigraphs = true;
         jsonString = this.graphStore.toJsonString(this.fakePalette);
         const model = JSON.parse(jsonString);
         model.settings.simulationType.should.equal("static");
         model.settings.complexity.should.equal("expanded");
-        model.settings.showingMinigraphs.should.equal(true);
       });
 
       it("should be able to serialize the simulation settings", () => {
@@ -202,7 +200,6 @@ describe("Serialization and Loading", () => {
       this.graphStore.loadData(data);
       AppSettingsStore.settings.simulationType.should.equal("static");
       AppSettingsStore.settings.complexity.should.equal("expanded");
-      AppSettingsStore.settings.showMinigraphs.should.equal(true);
     });
 
     it("nodes should have paletteItem properties after loading", () => {

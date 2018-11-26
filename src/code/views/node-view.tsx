@@ -204,7 +204,6 @@ interface NodeViewProps {
   editTitle: boolean;
   graphStore: any; // TODO: get concrete type
   dataColor: string;
-  showMinigraph: boolean;
   isTimeBased: boolean;
   innerColor: string;
   selectionManager?: any; // TODO: get concrete type
@@ -347,6 +346,12 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private renderSliderView() {
+    if (!this.props.data.hasGraphData()) {
+      // Do not show slider view when mini graph would be empty anyway. In practice it happens when the simulation
+      // mode is disabled.
+      return null;
+    }
+
     const showHandle = this.props.data.canEditInitialValue();
     let value = this.props.data.currentValue != null ? this.props.data.currentValue : this.props.data.initialValue;
     if (showHandle) {
@@ -400,7 +405,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
     const nodeImage = getNodeImage(this.props.data);
 
-    if (this.props.showMinigraph) {
+    if (this.props.data.hasGraphData()) {
       return (
         <NodeSvgGraphView
           isTimeBased={this.props.isTimeBased}

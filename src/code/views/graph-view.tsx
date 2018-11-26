@@ -208,7 +208,6 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
               onDelete={this.handleNodeDeleted}
               graphStore={this.props.graphStore}
               selectionManager={this.props.selectionManager}
-              showMinigraph={this.state.showingMinigraphs}
               isTimeBased={this.state.isTimeBased}
               showGraphButton={this.state.codapHasLoaded && !diagramOnly}
             />)}
