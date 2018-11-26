@@ -359,6 +359,10 @@ export class Node extends GraphPrimitive {
   public paletteItemIs(paletteItem) {
     return paletteItem.uuid === this.paletteItem;
   }
+
+  public hasGraphData() {
+    return this.frames.length > 0;
+  }
 }
 
 Node.initialize();

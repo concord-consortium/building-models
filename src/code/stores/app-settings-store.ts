@@ -16,7 +16,6 @@ import { Mixin } from "../mixins/components";
 export declare class AppSettingsActionsClass {
   public setComplexity(val: any): void;  // TODO: get concrete class
   public setSimulationType(val: any): void;  // TODO: get concrete class
-  public showMinigraphs(show: boolean): void;
   public relationshipSymbols(show: boolean): void;
   public setTouchDevice(val: any): void;  // TODO: get concrete class
 }
@@ -31,7 +30,6 @@ export const AppSettingsActions: AppSettingsActionsClass = Reflux.createActions(
   [
     "setComplexity",
     "setSimulationType",
-    "showMinigraphs",
     "relationshipSymbols",
     "setTouchDevice"
   ]
@@ -65,7 +63,6 @@ interface AppSettingsSettings {
   showingSettingsDialog: boolean;
   complexity: number;
   simulationType: number;
-  showingMinigraphs: boolean;
   relationshipSymbols: boolean;
   uiElements: any;
   lockdown: any;
@@ -104,7 +101,6 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       showingSettingsDialog: false,
       complexity: Complexity.DEFAULT,
       simulationType,
-      showingMinigraphs: false,
       relationshipSymbols: false,
       uiElements,
       lockdown,
@@ -112,16 +108,8 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
     } as AppSettingsSettings;
   },
 
-  onShowMinigraphs(show) {
-    this.settings.showingMinigraphs = show;
-    return this.notifyChange();
-  },
-
   onSetComplexity(val) {
     this.settings.complexity = val;
-    if (val === 0) {
-      this.settings.showingMinigraphs = false;
-    }
     return this.notifyChange();
   },
 
@@ -153,7 +141,6 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
     return {
       complexity: this.settings.complexity,
       simulationType: this.settings.simulationType,
-      showingMinigraphs: this.settings.showingMinigraphs,
       relationshipSymbols: this.settings.relationshipSymbols
     };
   }
