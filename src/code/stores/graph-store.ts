@@ -310,11 +310,20 @@ export const GraphStore  = Reflux.createStore({
   addNode(node) {
     this.endNodeEdit();
     node.title = this.ensureUniqueTitle(node);
-    return this.undoRedoManager.createAndExecuteCommand("addNode", {
-      execute: () => this._addNode(node),
-      undo: () => this._removeNode(node)
-    }
-    );
+    console.log("Added node");
+    this.undoRedoManager.createAndExecuteCommand("addNode", {
+      execute: () => {
+        this._addNode(node);
+      },
+      undo: () => {
+        // Remove related variable from CODAP. Note that this is not part of the _removeNode.
+        // When we undo "add" operation, it makes perfect sense to cleanup CODAP attribute.
+        // However, when node was around for some time, there's some data, and user deletes it, it's safer
+        // to leave this data around. User might want to delete it or not.
+        CodapConnect.instance(DEFAULT_CONTEXT_NAME).sendDeleteAttribute(node);
+        this._removeNode(node);
+      }
+    });
   },
 
   removeNode(nodeKey) {

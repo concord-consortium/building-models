@@ -246,7 +246,10 @@ export class CodapConnect {
           const message = {
             action: "create",
             resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute`,
-            values: newAttributes
+            values: newAttributes,
+            meta: {
+              dirtyDocument: false
+            }
           };
           return this.codapPhone.call(message, response => {
             if (response.success) {
@@ -343,7 +346,23 @@ export class CodapConnect {
     }
   }
 
-
+  public sendDeleteAttribute(node) {
+    const codapKey = node.codapID || node.codapName;
+    if (codapKey) {
+      const message = {
+        action: "delete",
+        resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute[${codapKey}]`,
+        meta: {
+          dirtyDocument: false
+        }
+      };
+      return this.codapPhone.call(message, response => {
+        if (!response.success) {
+          log.warn("Error: CODAP attribute delete failed!");
+        }
+      });
+    }
+  }
 
   // updateExperimentColumn
   //
