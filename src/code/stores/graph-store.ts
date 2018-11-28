@@ -366,6 +366,11 @@ export const GraphStore  = Reflux.createStore({
     if (!this.hasNode(node)) {
       this.nodeKeys[node.key] = node;
       this._graphUpdated();
+      // In some cases .codapID and .codapName properties might be already set. E.g. when node is re-added because
+      // of redoing node add action. Or undoing node remove. If these attributes are set and we create new CODAP
+      // variables, it will prevent them from being updated and they will be out of sync.
+      node.codapID = null;
+      node.codapName = null;
       // add variable to CODAP
       CodapConnect.instance(DEFAULT_CONTEXT_NAME)._createMissingDataAttributes();
       return this.updateListeners();
