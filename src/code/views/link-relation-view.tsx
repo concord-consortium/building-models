@@ -441,7 +441,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
           {options}
         </select>
         <span dangerouslySetInnerHTML={{__html: line_b}} />
-        <span>{}`${this.state.stepUnits.toLowerCase()}.`}</span>
+        <span>{this.state.stepUnits.toLowerCase()}.</span>
       </div>
     );
   }
