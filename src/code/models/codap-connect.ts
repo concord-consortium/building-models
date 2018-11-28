@@ -586,7 +586,8 @@ export class CodapConnect {
       resource: "component",
       values: {
         type: "text",
-        title: "Text"
+        title: "Text",
+        position: "bottom"
       }
     });
   }
@@ -598,10 +599,11 @@ export class CodapConnect {
         resource: "component",
         values: {
           type: "caseTable",
-          dataContext: this.dataContextName
+          dataContext: this.dataContextName,
+          position: "bottom"
         }
       });
-      return this.tableCreated = true;
+      this.tableCreated = true;
     }
   }
 
@@ -611,7 +613,8 @@ export class CodapConnect {
       resource: "component",
       values: {
         type: "caseTable",
-        dataContext: dataContextName
+        dataContext: dataContextName,
+        position: "bottom"
       }
     });
   }
