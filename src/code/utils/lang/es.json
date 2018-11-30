@@ -180,5 +180,17 @@
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "Más %{targetTitle} significa",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} se transferirá cada ",
     "~SIMULATION.COMPLEXITY.STATIC": "Simulación equilibrio estático",
-    "~SIMULATION.COMPLEXITY.TIME": "Simulación dinámica x tiempo"
+    "~SIMULATION.COMPLEXITY.TIME": "Simulación dinámica x tiempo",
+    "~DROP.ONLY_ALLOWED_IF_IFRAMED": "Sorry, dropping items of this type is only allowed if iframed.",
+    "~SAGEMODELER.MENU.CLOSE": "Cerrar",
+    "~SAGEMODELER.MENU.IMPORT": "Importar...",
+    "~SAGEMODELER.OPEN_OR_CREATE.TITLE": "¿Que quieres hacer?",
+    "~SAGEMODELER.OPEN_OR_CREATE.OPEN_DOC": "Abrir documento o Examinar ejemplos",
+    "~SAGEMODELER.OPEN_OR_CREATE.NEW_DOC": "Crear nuevo documento",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES": "Tablas",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.NEW": "nuevo",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM": "¿Seguro?",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME": "Atributo",
+    "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Gráfico",
+    "~DOCUMENT.CODAP_ACTIONS.TEXT": "Texto"
 }

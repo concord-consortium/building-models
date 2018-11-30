@@ -3,6 +3,7 @@ import * as React from "react";
 import { AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
 import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-store";
 import { UndoRedoUIMixin, UndoRedoUIMixinProps, UndoRedoUIMixinState } from "../stores/undo-redo-ui-store";
+import { tr } from "../utils/translate";
 
 import { AboutView } from "./about-view";
 import { SimulationRunPanelView } from "./simulation-run-panel-view";
@@ -44,7 +45,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
           );
         })}
         <div className="codap-table-menu-item">
-          <button onClick={this.handleCreateNewTable}>New Table</button>
+          <button onClick={this.handleCreateNewTable}>{tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW")}</button>
         </div>
       </div>
     );
@@ -60,7 +61,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
   private handleDeleteTable(dataContext: CODAPDataContextListItem) {
     return (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      if (confirm(`Are you sure you want to delete "${dataContext.title}"?`)) {
+      if (confirm(tr("~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM", {tableName: dataContext.title}))) {
         this.codapConnect.deleteDataContext(dataContext.name);
         this.props.toggleMenu(false);
       }
@@ -73,8 +74,8 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
       type: "cfm::event",
       eventType: "importedData",
       eventData: {
-        text: "AttributeName",
-        name: "New Table"
+        text: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME"),
+        name: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW")
       }
     }, "*");
     this.props.toggleMenu(false);
@@ -157,19 +158,19 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
             {showDeleteIcon
               ? this.renderToolbarButton({
                   icon: "icon-codap-trash",
-                  label: "Delete",
+                  label: tr("~NODE-EDIT.DELETE"),
                   onClick: this.handleDeleteClicked
                 })
               : undefined}
             {this.renderToolbarButton({
               icon: "icon-codap-arrow-undo",
-              label: "Undo",
+              label: tr("~DOCUMENT.ACTIONS.UNDO"),
               onClick: this.handleUndoClicked,
               disabled: !this.state.canUndo
             })}
             {this.renderToolbarButton({
               icon: `icon-codap-arrow-redo`,
-              label: "Redo",
+              label: tr("~DOCUMENT.ACTIONS.REDO"),
               onClick: this.handleRedoClicked,
               disabled: !this.state.canRedo
             })}
@@ -184,18 +185,18 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
       <div className="misc-actions toolbar">
         {this.renderToolbarButton({
           icon: "moonicon-icon-table",
-          label: "Tables",
+          label: tr("~DOCUMENT.CODAP_ACTIONS.TABLES"),
           onClick: this.handleCODAPTableToolClicked
         })}
         {this.state.showCODAPTableMenu ? <CODAPTableMenu toggleMenu={this.handleCODAPTableToolClicked} /> : undefined}
         {this.renderToolbarButton({
           icon: "moonicon-icon-graph",
-          label: "Graph",
+          label: tr("~DOCUMENT.CODAP_ACTIONS.GRAPH"),
           onClick: this.handleCODAPGraphToolClicked
         })}
         {this.renderToolbarButton({
           icon: "moonicon-icon-comment",
-          label: "Text",
+          label: tr("~DOCUMENT.CODAP_ACTIONS.TEXT"),
           onClick: this.handleCODAPTextToolClicked
         })}
       </div>
