@@ -292,7 +292,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
       <div className={this.nodeClasses()} ref={el => this.node = el} style={style}>
         <div className={this.linkTargetClasses()} data-node-key={this.props.nodeKey}>
           <div className="slider" data-node-key={this.props.nodeKey}>
-            {this.props.simulating ? <div>{this.renderSliderView()}</div> : undefined}
+            {this.props.simulating && this.props.data.canEditInitialValue() && <div>{this.renderSliderView()}</div>}
           </div>
           <div>
             <div className="actions">
@@ -346,28 +346,16 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private renderSliderView() {
-    if (!this.props.data.hasGraphData()) {
-      // Do not show slider view when mini graph would be empty anyway. In practice it happens when the simulation
-      // mode is disabled.
-      return null;
-    }
-
-    const showHandle = this.props.data.canEditInitialValue();
-    let value = this.props.data.currentValue != null ? this.props.data.currentValue : this.props.data.initialValue;
-    if (showHandle) {
-      value = this.props.data.initialValue;
-    }
-
     return (
       <SVGSliderView
         orientation="vertical"
         filled={true}
         height={44}
         width={15}
-        showHandle={showHandle}
+        showHandle={true}
         showLabels={false}
         onValueChange={this.handleChangeValue}
-        value={value}
+        value={this.props.data.initialValue}
         displaySemiQuant={this.props.data.valueDefinedSemiQuantitatively}
         max={this.props.data.max}
         min={this.props.data.min}
