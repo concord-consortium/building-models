@@ -186,5 +186,11 @@
     "~SAGEMODELER.MENU.IMPORT": "Import...",
     "~SAGEMODELER.OPEN_OR_CREATE.TITLE": "What would you like to do?",
     "~SAGEMODELER.OPEN_OR_CREATE.OPEN_DOC": "Open Document or Browse Examples",
-    "~SAGEMODELER.OPEN_OR_CREATE.NEW_DOC": "Create New Document"
+    "~SAGEMODELER.OPEN_OR_CREATE.NEW_DOC": "Create New Document",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES": "Tabele",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.NEW": "nowa",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM": "Czy na pewno chcesz usunąć \"%{tableName}\"?",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME": "Atrubut",
+    "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Wykres",
+    "~DOCUMENT.CODAP_ACTIONS.TEXT": "Tekst"
 }

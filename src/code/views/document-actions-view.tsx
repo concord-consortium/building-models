@@ -45,7 +45,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
           );
         })}
         <div className="codap-table-menu-item">
-          <button onClick={this.handleCreateNewTable}>New Table</button>
+          <button onClick={this.handleCreateNewTable}>{tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW")}</button>
         </div>
       </div>
     );
