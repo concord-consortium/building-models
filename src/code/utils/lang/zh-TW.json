@@ -180,5 +180,11 @@
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A": "More %{targetTitle} means",
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} will be transferred each ",
     "~SIMULATION.COMPLEXITY.STATIC": "Static equilibrium simulation",
-    "~SIMULATION.COMPLEXITY.TIME": "Dynamic time-based simulation"
+    "~SIMULATION.COMPLEXITY.TIME": "Dynamic time-based simulation",
+    "~DROP.ONLY_ALLOWED_IF_IFRAMED": "Sorry, dropping items of this type is only allowed if iframed.",
+    "~SAGEMODELER.MENU.CLOSE": "關閉",
+    "~SAGEMODELER.MENU.IMPORT": "匯入...",
+    "~SAGEMODELER.OPEN_OR_CREATE.TITLE": "選擇想要的動作？",
+    "~SAGEMODELER.OPEN_OR_CREATE.OPEN_DOC": "開啟檔案或範例",
+    "~SAGEMODELER.OPEN_OR_CREATE.NEW_DOC": "建立新檔案"
 }
