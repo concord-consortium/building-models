@@ -172,6 +172,14 @@
     "~DOCUMENT.ACTIONS.REDO": "Redo",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship.",
 
+    // CODAP-specific actions
+    "~DOCUMENT.CODAP_ACTIONS.TABLES": "Tables",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.NEW": "New Table",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM": "Are you sure you want to delete \"%{tableName}\"?",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME": "AttributeName",
+    "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Graph",
+    "~DOCUMENT.CODAP_ACTIONS.TEXT": "Text",
+
     "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings",
     "~SIMULATION.VIEW_SETTINGS": "View settings",
     "~SIMULATION.STEP_UNIT": "Each calculation is 1",
