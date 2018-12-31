@@ -143,7 +143,7 @@ export class Node extends GraphPrimitive {
 
   get min() {
     if (!this.valueDefinedSemiQuantitatively) {
-      if (this.isAccumulator && !this.allowNegativeValues) { return Math.max(0, this._min); } else { return this._min; }
+      if (this.limitMinValue) { return Math.max(0, this._min); } else { return this._min; }
     } else {
       return SEMIQUANT_MIN;
     }
@@ -175,6 +175,14 @@ export class Node extends GraphPrimitive {
         this._max = SEMIQUANT_MAX;
       }
     }
+  }
+
+  get isConnectedToAccumulator() {
+    return _.filter(this.inNodes(), node => node.isAccumulator).length > 0;
+  }
+
+  get limitMinValue() {
+    return ((this.isAccumulator || this.isTransfer || this.isConnectedToAccumulator) && !this.allowNegativeValues);
   }
 
   public addLink(link) {

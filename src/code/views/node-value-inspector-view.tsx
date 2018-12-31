@@ -89,7 +89,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
               {this.renderMinAndMax(node)}
             </div>
           </div>
-          {!node.isTransfer ? this.renderCollectorOptions(node) : undefined}
+          {this.renderCollectorOptions(node)}
         </div>
 
         <div className="bottom-pane">
@@ -204,6 +204,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
     return (
       <span className="checkbox group full">
+        {!node.isTransfer ?
         <label key="accumulator-label">
           <input
             key="accumulator-checkbox"
@@ -212,8 +213,8 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
             onChange={this.handleUpdateAccumulatorChecked}
           />
           {tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR")}
-        </label>
-        {node.isAccumulator ? positiveCheckbox : null}
+        </label> : null}
+        {node.isAccumulator || node.isTransfer || node.isConnectedToAccumulator ? positiveCheckbox : null}
       </span>
     );
   }
