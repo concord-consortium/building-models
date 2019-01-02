@@ -449,11 +449,11 @@ describe("The SimulationStore, with a network in the GraphStore", () => {
           data.length.should.equal(10);
 
           const frame0 = data[0];
-          frame0.time.should.equal(11);
+          frame0.time.should.equal(21);
           frame0.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
 
           const frame9 = data[9];
-          frame9.time.should.equal(20);
+          frame9.time.should.equal(30);
           frame9.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
     });
 
