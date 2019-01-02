@@ -178,7 +178,7 @@ export class Node extends GraphPrimitive {
   }
 
   get isConnectedToAccumulator() {
-    return _.filter(this.inNodes(), node => node.isAccumulator).length > 0;
+    return _.filter(this.outNodes(), node => node.isAccumulator).length > 0;
   }
 
   get limitMinValue() {
@@ -215,6 +215,10 @@ export class Node extends GraphPrimitive {
 
   public inNodes() {
     return _.map(this.inLinks(), link => link.sourceNode);
+  }
+
+  public outNodes() {
+    return _.map(this.outLinks(), link => link.targetNode);
   }
 
   public isDependent(onlyConsiderDefinedRelations) {
