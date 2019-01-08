@@ -6,12 +6,14 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const packageJSON = require("./package.json");
+const child_process = require('child_process');
 
-const execSync = require('sync-exec'),
-      now = new Date(),
+const execSync = child_process.execSync;
+const getOutput = (cmd) => execSync(cmd).toString().trim();
+const now = new Date(),
       buildDate = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`,
-      gitBranch = execSync('git symbolic-ref --short HEAD').stdout.trim(),
-      gitLog = execSync('git log -1 --date=short --pretty=format:"%cd %h %ce"').stdout;
+      gitBranch = getOutput('git symbolic-ref --short HEAD'),
+      gitLog = getOutput('git log -1 --date=short --pretty=format:"%cd %h %ce"')
 
 const envMap = { production: "production", master: "staging" },
       environment = process.env.ENVIRONMENT || envMap[gitBranch] || "development",
