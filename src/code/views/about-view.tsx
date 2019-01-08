@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as $ from "jquery";
+import { DropDownView } from "./dropdown-view";
 
 interface AboutViewProps {
   standaloneMode: boolean;
@@ -30,17 +31,42 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   }
 
   private renderNormal() {
+    const options = [{
+      name: "about",
+      action: () => this.showAbout()
+    },
+    {
+      name: "help",
+      action: () => this.showHelp()
+      }
+    ];
+    const helpAnchor =
+      <div className="toolbar-button">
+        <div><i style={{fontSize: "30px"}} className="icon-codap-help" /></div>
+        <div
+          style={{
+            fontSize: "12px",
+            textTransform: "none",
+            fontFamily: "'Montserrat', sans-serif"
+          }}
+        >
+          About
+        </div>
+      </div>;
+
     return (
       <div>
         <div className="misc-actions toolbar">
-          <div className="toolbar-button" onClick={this.handleOpen}>
-            <div>
-              <i className="icon-codap-help" />
-            </div>
-            <div>About</div>
+          <div className="toolbar-button">
+            <DropDownView
+              anchor={helpAnchor}
+              items={options}
+              hideArrow={true}
+              isActionMenu={true}
+              menuStyle={{right: "0px"}}
+            />
           </div>
         </div>
-        {this.state.showing ? this.renderShowing() : null}
       </div>
     );
   }
@@ -60,41 +86,15 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
     );
   }
 
-  private handleClose = () => {
-    this.setState({showing: false});
+  private showHelp = () => {
+    const url = "https://concord.org/our-work/research-projects/building-models/";
+    const win = window.open(url, "_blank");
+    win.focus();
+    console.log("help");
+  }
+  private showAbout = () => {
+    const displaySeconds = 60;
+    (window as any).showSplashScreen(displaySeconds);
   }
 
-  private handleOpen = () => {
-    this.setState({showing: true});
-  }
-
-  private handleIgnore = (e) => {
-    e.stopPropagation();
-  }
-
-  private renderShowing() {
-    return (
-      <div className="BuildInfoView" onClick={this.handleClose}>
-        <div className="content" onClick={this.handleIgnore}>
-          <div className="top" style={{textAlign: "right"}}>
-            <i className="icon-codap-ex" style={{padding: 0, cursor: "pointer"}} onClick={this.handleClose} />
-          </div>
-          <div className="inner" style={{paddingTop: 0, textAlign: "center"}}>
-            <h2>SageModeler</h2>
-            <p>
-              {`Copyright © ${this.state.year} The Concord Consortium. All rights reserved.`}
-            </p>
-            <p>
-              This open-source software is licensed under the <a href="https://github.com/concord-consortium/building-models/blob/master/LICENSE" target="_blank">MIT license</a>.
-            </p>
-            <p>
-              Please provide attribution to The Concord Consortium
-              <br />
-              and the URL <a href="https://concord.org/" target="_blank">https://concord.org</a>.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 }

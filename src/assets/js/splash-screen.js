@@ -1,6 +1,27 @@
-window.showSplashScreen = function (version, buildDate) {
+var version, buildDate = "";
+
+window.setSageVersionInfo = function (_version, _buildDate) {
+  version = _version;
+  buildDate = _buildDate;
+}
+
+window.showSplashScreen = function (timeoutseconds, isLoading) {
+  var timeoutmillies = timeoutseconds ? timeoutseconds * 1000 : 4000;
   // First, generate HTML markup and append splash screen to body element.
   var splashContainer = document.createElement("div");
+  var authors =
+    'Concord Consortium and the CREATE for STEM ' +
+    'Institute at Michigan State University';
+
+  var citationText =
+    'Suggested citation: SageModeler [Computer software]. (2018). ' +
+    'Concrd, MA: ' + authors;
+
+  var loadingDiv = isLoading ?
+  '      <div class="splash-cell">' +
+  '        <span id="splash-loading">Loading</span>' +
+  '      </div>' : '<div class="splash-cell"/>';
+
   splashContainer.setAttribute("id", "splash-container");
   splashContainer.innerHTML =
     '<div id="splash-container">' +
@@ -9,10 +30,11 @@ window.showSplashScreen = function (version, buildDate) {
     '    <div id="splash-inner-dialog">' +
     '      <div class="splash-cell">' +
     '        <img src="img/logo.png"/>' +
+    '         Version ' + version + ' (' + buildDate + ')' +
     '      </div>' +
     '      <div id="splash-text" class="splash-cell">' +
     '        <p>' +
-    '          Created by the Concord Consortium and the CREATE for STEM Institute at Michigan State University.' +
+    '          Created by the ' + authors +
     '        </p>' +
     '        <p>' +
     '          This open-source software is licensed under the MIT license.' +
@@ -20,13 +42,10 @@ window.showSplashScreen = function (version, buildDate) {
     '        <p>' +
     '          Copyright © 2018 All rights reserved.' +
     '        </p>' +
+    '        <p>' + citationText +
+    '        </p>' +
     '      </div>' +
-    '      <div class="splash-cell">' +
-    '        Version ' + version + ' (' + buildDate + ')' +
-    '      </div>' +
-    '      <div class="splash-cell">' +
-    '        <span id="splash-loading">Loading</span>' +
-    '      </div>' +
+    '      <div class="splash-cell"/>' + loadingDiv +
     '    </div>' +
     '  </div>' +
     '</div>';
@@ -60,5 +79,5 @@ window.showSplashScreen = function (version, buildDate) {
   };
 
   // show the initial splash screen for four seconds
-  checkerTimeout = setTimeout(checkForAppRender, 4000);
+  checkerTimeout = setTimeout(checkForAppRender, timeoutmillies);
 };
