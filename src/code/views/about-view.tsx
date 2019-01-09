@@ -28,10 +28,6 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   }
 
   public render() {
-    return this.props.standaloneMode ? this.renderStandalone() : this.renderNormal();
-  }
-
-  private renderNormal() {
     const options = [{
       name: tr("~MENU.ABOUT.ABOUT"),
       action: () => this.showAbout()
@@ -72,23 +68,8 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
     );
   }
 
-  private renderStandalone() {
-    return (
-      <div>
-        <div className="misc-actions">
-          <div className="toolbar-button">
-            <div>
-              <a href="https://concord.org/our-work/research-projects/building-models/" target="_blank"><i className="icon-codap-help" /></a>
-            </div>
-            <div>Help</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   private showHelp = () => {
-    const url = "https://concord.org/our-work/research-projects/building-models/";
+    const url = "https://building-models-resources.concord.org/SageIntro/sageIntro-v3.html";
     const win = window.open(url, "_blank");
     (win as Window).focus();
   }
