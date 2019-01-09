@@ -8,16 +8,25 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const packageJSON = require("./package.json");
 const child_process = require('child_process');
 
-const execSync = child_process.execSync;
-const getOutput = (cmd) => execSync(cmd).toString().trim();
-const now = new Date(),
-      buildDate = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`,
-      gitBranch = getOutput('git symbolic-ref --short HEAD'),
-      gitLog = getOutput('git log -1 --date=short --pretty=format:"%cd %h %ce"')
 
-const envMap = { production: "production", master: "staging" },
-      environment = process.env.ENVIRONMENT || envMap[gitBranch] || "development",
-      buildInfo = {
+const execSync = child_process.execSync;
+
+const getOutput = (cmd) => execSync(cmd, {cwd: __dirname}).toString().trim();
+const now = new Date();
+const buildDate = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`;
+
+const env = process.env;
+const gitBranch =
+  env.TRAVIS_PULL_REQUEST_BRANCH ||
+  env.TRAVIS_BRANCH ||
+  getOutput('git symbolic-ref --short HEAD');
+
+const gitLog = getOutput('git log -1 --date=short --pretty=format:"%cd %h %ce"')
+
+const envMap = { production: "production", master: "staging" };
+const environment = env.ENVIRONMENT || envMap[gitBranch] || "development";
+
+const buildInfo = {
         date: buildDate,
         tag: packageJSON.version,
         branch: gitBranch,
