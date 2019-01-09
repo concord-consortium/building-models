@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as $ from "jquery";
 import { DropDownView } from "./dropdown-view";
+import { tr } from "../utils/translate";
 
 interface AboutViewProps {
   standaloneMode: boolean;
@@ -32,11 +33,11 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
 
   private renderNormal() {
     const options = [{
-      name: "about",
+      name: tr("~MENU.ABOUT.ABOUT"),
       action: () => this.showAbout()
     },
     {
-      name: "help",
+      name: tr("~MENU.ABOUT.HELP"),
       action: () => this.showHelp()
       }
     ];
@@ -50,7 +51,7 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
             fontFamily: "'Montserrat', sans-serif"
           }}
         >
-          About
+          {tr("~MENU.ABOUT")}
         </div>
       </div>;
 
