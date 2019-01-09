@@ -15,6 +15,8 @@
     gtag('js', new Date());
     gtag('config', 'UA-6899787-55');
   </script>
+  <link rel="stylesheet" href="css/splash-screen.css">
+  <script src="js/splash-screen.js"/>
   <script>
     var disableRollbar = (window.location.hostname === 'localhost') ||
                           (window.location.hostname === '127.0.0.1') ||
@@ -47,6 +49,12 @@
   <link rel="stylesheet" href="codap-ivy-fonts.css">
   <link rel="stylesheet" href="icon_font_style.css">
 </head>
+<script type="text/javascript" charset="utf-8">
+  window.setSageVersionInfo(
+    "<%= htmlWebpackPlugin.options.__VERSION__ %>",
+    "<%= htmlWebpackPlugin.options.__BUILD_DATE__ %>"
+  );
+</script>
 <body>
   <div class="content-box">
     <div id='app'></div>

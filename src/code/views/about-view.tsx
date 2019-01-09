@@ -89,9 +89,9 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   private showHelp = () => {
     const url = "https://concord.org/our-work/research-projects/building-models/";
     const win = window.open(url, "_blank");
-    win.focus();
-    console.log("help");
+    (win as Window).focus();
   }
+
   private showAbout = () => {
     const displaySeconds = 60;
     (window as any).showSplashScreen(displaySeconds);

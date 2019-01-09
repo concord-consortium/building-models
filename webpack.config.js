@@ -126,7 +126,9 @@ module.exports = (env, argv) => {
         filename: 'sagemodeler.html',
         template: 'src/templates/sagemodeler.html.ejs',
         __BUILD_INFO__: buildInfoString,
-        __ENVIRONMENT__: environment
+        __ENVIRONMENT__: environment,
+        __VERSION__: buildInfo.tag,
+        __BUILD_DATE__: buildInfo.date,
       }),
       new CopyWebpackPlugin([{
         from: 'src/assets',
