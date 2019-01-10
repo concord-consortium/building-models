@@ -39,14 +39,8 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
     ];
     const helpAnchor =
       <div className="toolbar-button">
-        <div><i style={{fontSize: "30px"}} className="icon-codap-help" /></div>
-        <div
-          style={{
-            fontSize: "12px",
-            textTransform: "none",
-            fontFamily: "'Montserrat', sans-serif"
-          }}
-        >
+        <div><i className="icon-codap-help" /></div>
+        <div>
           {tr("~MENU.ABOUT")}
         </div>
       </div>;
@@ -60,7 +54,7 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
               items={options}
               hideArrow={true}
               isActionMenu={true}
-              menuStyle={{right: "0px"}}
+              rightSide={true}
             />
           </div>
         </div>

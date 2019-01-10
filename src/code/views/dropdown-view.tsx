@@ -28,7 +28,7 @@ interface DropDownViewProps {
   isActionMenu: boolean;
   anchor: string | JSX.Element;
   hideArrow?: boolean;
-  menuStyle?: React.CSSProperties;
+  rightSide?: boolean;
   onSelect?: (item: any) => void; // TODO: get concrete type
 }
 
@@ -48,8 +48,9 @@ export class DropDownView extends React.Component<DropDownViewProps, DropDownVie
 
   public render() {
     let item;
-    const {anchor, hideArrow, menuStyle} = this.props;
-    const menuClass = this.state.showingMenu ? "menu-showing" : "menu-hidden";
+    const {anchor, hideArrow, rightSide} = this.props;
+    let menuClass = this.state.showingMenu ? "menu-showing" : "menu-hidden";
+    menuClass = rightSide ? `${menuClass} right-align` : menuClass;
     const items: JSX.Element[] = [];
     for (item of this.props.items) {
       items.push(<DropdownItemView
@@ -68,7 +69,6 @@ export class DropDownView extends React.Component<DropDownViewProps, DropDownVie
         </span>
         <div
           className={menuClass}
-          style={menuStyle ? menuStyle : {}}
           onMouseLeave={this.handleBlur}
           onMouseEnter={this.handleUnblur}
         >
