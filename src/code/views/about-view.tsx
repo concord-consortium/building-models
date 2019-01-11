@@ -1,5 +1,7 @@
 import * as React from "react";
 import * as $ from "jquery";
+import { DropDownView } from "./dropdown-view";
+import { tr } from "../utils/translate";
 
 interface AboutViewProps {
   standaloneMode: boolean;
@@ -26,75 +28,49 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   }
 
   public render() {
-    return this.props.standaloneMode ? this.renderStandalone() : this.renderNormal();
-  }
+    const options = [{
+      name: tr("~MENU.ABOUT.ABOUT"),
+      action: () => this.showAbout()
+    },
+    {
+      name: tr("~MENU.ABOUT.HELP"),
+      action: () => this.showHelp()
+      }
+    ];
+    const helpAnchor =
+      <div className="toolbar-button">
+        <div><i className="icon-codap-help" /></div>
+        <div>
+          {tr("~MENU.ABOUT")}
+        </div>
+      </div>;
 
-  private renderNormal() {
     return (
       <div>
         <div className="misc-actions toolbar">
-          <div className="toolbar-button" onClick={this.handleOpen}>
-            <div>
-              <i className="icon-codap-help" />
-            </div>
-            <div>About</div>
-          </div>
-        </div>
-        {this.state.showing ? this.renderShowing() : null}
-      </div>
-    );
-  }
-
-  private renderStandalone() {
-    return (
-      <div>
-        <div className="misc-actions">
           <div className="toolbar-button">
-            <div>
-              <a href="https://concord.org/our-work/research-projects/building-models/" target="_blank"><i className="icon-codap-help" /></a>
-            </div>
-            <div>Help</div>
+            <DropDownView
+              anchor={helpAnchor}
+              items={options}
+              hideArrow={true}
+              isActionMenu={true}
+              rightSide={true}
+            />
           </div>
         </div>
       </div>
     );
   }
 
-  private handleClose = () => {
-    this.setState({showing: false});
+  private showHelp = () => {
+    const url = "https://building-models-resources.concord.org/SageIntro/sageIntro-v3.html";
+    const win = window.open(url, "_blank");
+    (win as Window).focus();
   }
 
-  private handleOpen = () => {
-    this.setState({showing: true});
+  private showAbout = () => {
+    const displaySeconds = 60;
+    (window as any).showSplashScreen(displaySeconds);
   }
 
-  private handleIgnore = (e) => {
-    e.stopPropagation();
-  }
-
-  private renderShowing() {
-    return (
-      <div className="BuildInfoView" onClick={this.handleClose}>
-        <div className="content" onClick={this.handleIgnore}>
-          <div className="top" style={{textAlign: "right"}}>
-            <i className="icon-codap-ex" style={{padding: 0, cursor: "pointer"}} onClick={this.handleClose} />
-          </div>
-          <div className="inner" style={{paddingTop: 0, textAlign: "center"}}>
-            <h2>SageModeler</h2>
-            <p>
-              {`Copyright © ${this.state.year} The Concord Consortium. All rights reserved.`}
-            </p>
-            <p>
-              This open-source software is licensed under the <a href="https://github.com/concord-consortium/building-models/blob/master/LICENSE" target="_blank">MIT license</a>.
-            </p>
-            <p>
-              Please provide attribution to The Concord Consortium
-              <br />
-              and the URL <a href="https://concord.org/" target="_blank">https://concord.org</a>.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 }

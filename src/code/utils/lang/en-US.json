@@ -6,6 +6,9 @@
     "~MENU.REVERT_TO_ORIGINAL": "Revert To Original",
     "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save",
     "~MENU.UNTITLED_MODEL": "Untitled model",
+    "~MENU.ABOUT": "About",
+    "~MENU.ABOUT.HELP": "Help",
+    "~MENU.ABOUT.ABOUT": "About",
 
     "~GOOGLE_SAVE.TITLE": "Save Document",
     "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)",

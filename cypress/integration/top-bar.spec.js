@@ -22,4 +22,17 @@ context("Sage top bar UI", () => {
       cy.getSageIframe().contains(".modal-dialog-title", "Add new image")
     })
   })
+  context("About menu", () => {
+    it("opens a menu displaying 'About' and 'Help'", () => {
+      cy.getSageIframe().find('.icon-codap-help').click()
+      cy.getSageIframe().contains(".menuItem", "About")
+      cy.getSageIframe().contains(".menuItem", "Help")
+    })
+    it ("Will display a splash screen when we click on about", () => {
+      cy.getSageIframe().find('.icon-codap-help').click()
+      cy.getSageIframe().contains(".menuItem", "About").click()
+      cy.getSageIframe().contains("#splash-dialog", "Concord Consortium")
+    });
+  })
+
 })

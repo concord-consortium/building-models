@@ -26,7 +26,9 @@ class DropdownItemView extends React.Component<DropdownItemViewProps, DropdownIt
 interface DropDownViewProps {
   items: any[]; // TODO: get concrete type
   isActionMenu: boolean;
-  anchor: string;
+  anchor: string | JSX.Element;
+  hideArrow?: boolean;
+  rightSide?: boolean;
   onSelect?: (item: any) => void; // TODO: get concrete type
 }
 
@@ -46,7 +48,9 @@ export class DropDownView extends React.Component<DropDownViewProps, DropDownVie
 
   public render() {
     let item;
-    const menuClass = this.state.showingMenu ? "menu-showing" : "menu-hidden";
+    const {anchor, hideArrow, rightSide} = this.props;
+    let menuClass = this.state.showingMenu ? "menu-showing" : "menu-hidden";
+    menuClass = rightSide ? `${menuClass} right-align` : menuClass;
     const items: JSX.Element[] = [];
     for (item of this.props.items) {
       items.push(<DropdownItemView
@@ -61,9 +65,13 @@ export class DropDownView extends React.Component<DropDownViewProps, DropDownVie
       <div className="menu">
         <span className="menu-anchor" onClick={this.handleSelectNone}>
           {this.props.anchor}
-          <i className="icon-codap-arrow-expand"/>
+          {hideArrow ? "" : <i className="icon-codap-arrow-expand"/>}
         </span>
-        <div className={menuClass} onMouseLeave={this.handleBlur} onMouseEnter={this.handleUnblur}>
+        <div
+          className={menuClass}
+          onMouseLeave={this.handleBlur}
+          onMouseEnter={this.handleUnblur}
+        >
           <ul>{items}</ul>
         </div>
       </div>

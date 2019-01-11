@@ -63,7 +63,10 @@
     <div id='app'></div>
   </div>
   <script type="text/javascript" charset="utf-8">
-    showSplashScreen("<%= htmlWebpackPlugin.options.__VERSION__ %>", "<%= htmlWebpackPlugin.options.__BUILD_DATE__ %>");
+    var loading = true;
+    var displaySeconds = 4;
+    setSageVersionInfo("<%= htmlWebpackPlugin.options.__VERSION__ %>", "<%= htmlWebpackPlugin.options.__BUILD_DATE__ %>");
+    showSplashScreen(displaySeconds, loading);
   </script>
   <script src="js/jsPlumb.js"></script>
 
