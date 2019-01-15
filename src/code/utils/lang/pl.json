@@ -194,6 +194,6 @@
     "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Wykres",
     "~DOCUMENT.CODAP_ACTIONS.TEXT": "Tekst",
     "~MENU.ABOUT": "About",
-    "~MENU.ABOUT.HELP": "Help",
-    "~MENU.ABOUT.ABOUT": "About"
+    "~MENU.ABOUT.HELP": "Go to Help website",
+    "~MENU.ABOUT.ABOUT": "About SageModeler"
 }
