@@ -39,7 +39,7 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
     ];
     const helpAnchor =
       <div className="toolbar-button">
-        <div><i className="icon-codap-help" /></div>
+        <div><i className="icon-codap-help big" /></div>
         <div>
           {tr("~MENU.ABOUT")}
         </div>
