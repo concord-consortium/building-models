@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { tr } from "../utils/translate";
+import { Link } from "../models/link";
 
 const palettes = [
   ["#4D6A6D", "#798478", "#A0A083", "#C9ADA1", "#EAE0CC"],
@@ -10,7 +11,7 @@ const palettes = [
 const palette = palettes[2];
 
 interface LinkInspectorViewProps {
-  link: any; // TODO: get concrete type
+  link: Link;
   graphStore: any; // TODO: get concrete type
 }
 

@@ -9,6 +9,17 @@
 const math = require("mathjs");  // For formula parsing...
 const log = require("loglevel");
 
+export interface RelationshipOptions {
+  type?: "range";
+  text?: string;
+  uiText?: string;
+  formula?: string;
+  func?: () => void; // TODO
+  errHandler?: () => void; // TODO
+  customData?: object;
+  magnitude?: number;
+}
+
 export class Relationship {
   public static errValue;
   public static defaultText;
@@ -37,7 +48,6 @@ export class Relationship {
   public text: string;
   public hasError: boolean;
 
-  private opts: any;
   private type: string;
   private uiText: string;
   private func: any;
@@ -49,23 +59,21 @@ export class Relationship {
   private customData: any;
   private isCustomRelationship: boolean;
 
-  constructor(opts) {
-    if (opts == null) { opts = {}; }
-    this.opts = opts;
-    this.type        = this.opts.type || "range";
-    this.text        = this.opts.text;
-    this.uiText      = this.opts.uiText;
-    const { formula }      = this.opts;
-    this.func        = this.opts.func;
-    this.errHandler  = this.opts.errHandler || Relationship.defaultErrHandler;
-    this.isDefined   = (this.opts.formula != null) || (this.opts.func != null);
+  constructor(opts: RelationshipOptions) {
+    this.type        = opts.type || "range";
+    this.text        = opts.text || "";
+    this.uiText      = opts.uiText || "";
+    const { formula }      = opts;
+    this.func        = opts.func;
+    this.errHandler  = opts.errHandler || Relationship.defaultErrHandler;
+    this.isDefined   = (opts.formula != null) || (opts.func != null);
     this.isRange       = this.type === "range";
     this.isAccumulator = this.type === "accumulator";
     this.isTransfer    = this.type === "transfer";
     this.isTransferModifier = this.type === "transfer-modifier";
     this.hasError    = false;
     this.setFormula(formula);
-    this.customData  = this.opts.customData;
+    this.customData  = opts.customData;
     this.isCustomRelationship = false;
   }
 

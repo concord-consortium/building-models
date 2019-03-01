@@ -3,12 +3,12 @@ chai.config.includeStack = true;
 
 const { expect } = chai;
 
-import { Relationship } from "../src/code/models/relationship";
+import { Relationship, RelationshipOptions } from "../src/code/models/relationship";
 
 describe("relationship", () => {
   let undertest: Relationship;
   let inFormula: string;
-  let options: any;
+  let options: RelationshipOptions;
 
   it("should exists", () => Relationship.should.exist);
 

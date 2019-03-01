@@ -25,12 +25,13 @@ import { NodeTitleMixinState, NodeTitleMixinProps, NodeTitleMixin } from "../mix
 
 import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
+import { Node} from "../models/node";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
-  node: any; // TODO: get concrete type
-  onNodeChanged?: (node: any, newValue: any) => void; // TODO: get concrete type
-  onNodeDelete?: (node: any) => void; // TODO: get concrete type
+  node: Node;
+  onNodeChanged?: (node: Node, newValue: any) => void; // TODO: get concrete type
+  onNodeDelete?: (node: Node) => void;
   graphStore: any; // TODO: get concrete type
   nodeKey: string;
   onStartEditing: () => void;

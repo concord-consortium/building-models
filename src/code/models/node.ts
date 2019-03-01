@@ -41,28 +41,29 @@ export class Node extends GraphPrimitive {
   }
 
   public type: string = "Node";
+  public title: string;
+
+  public readonly combineMethod: any; // TODO: get concrete type
+  public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
+  public readonly isTransfer: any; // TODO: get concrete type
+  public readonly addedThisSession: any; // TODO: get concrete type
+  public readonly color: any; // TODO: get concrete type
+  public readonly image: any; // TODO: get concrete type
 
   protected links: any; // TODO: get concrete type
   protected x: any; // TODO: get concrete type
   protected y: any; // TODO: get concrete type
-  protected title: any; // TODO: get concrete type
   protected codapID: any; // TODO: get concrete type
   protected codapName: any; // TODO: get concrete type
   protected allowNegativeValues: any; // TODO: get concrete type
-  protected valueDefinedSemiQuantitatively: any; // TODO: get concrete type
   protected paletteItem: any; // TODO: get concrete type
   protected frames: any; // TODO: get concrete type
-  protected addedThisSession: any; // TODO: get concrete type
-  protected combineMethod: any; // TODO: get concrete type
-  protected image: any; // TODO: get concrete type
   protected _min: any; // TODO: get concrete type
   protected _max: any; // TODO: get concrete type
   protected _initialValue: any; // TODO: get concrete type
-  protected color: any; // TODO: get concrete type
   protected accumulatorInputScale: any; // TODO: get concrete type
   protected isInDependentCycle: any; // TODO: get concrete type
   protected _collectorImageProps: any; // TODO: get concrete type
-  protected isTransfer: any; // TODO: get concrete type
   protected _isAccumulator: any; // TODO: get concrete type
 
   constructor(nodeSpec, key?, isTransfer?) {
@@ -209,7 +210,7 @@ export class Node extends GraphPrimitive {
     return _.map(this.inLinks(), link => link.sourceNode);
   }
 
-  public isDependent(onlyConsiderDefinedRelations) {
+  public isDependent(onlyConsiderDefinedRelations?: boolean) {
     if (onlyConsiderDefinedRelations) {
       for (const link of this.inLinks()) {
         if (link.relation && link.relation.isDefined) {

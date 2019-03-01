@@ -19,6 +19,9 @@ import { SimulationInspectorView } from "./simulation-inspector-view";
 import { InspectorPanelActions, InspectorPanelMixinProps, InspectorPanelMixinState, InspectorPanelMixin } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
 
+import { Node } from "../models/node";
+import { Link } from "../models/link";
+
 interface ToolButtonViewProps {
   name: string;
   selected: boolean;
@@ -56,8 +59,8 @@ interface ToolPanelButton {
 
 interface ToolPanelViewProps {
   diagramOnly: boolean;
-  node: any; // TODO: get concrete type
-  link: any; // TODO: get concrete type
+  node: Node | null;
+  link: Link | null;
   nowShowing: string;
   onNowShowing: (shows: string|null) => void;
 }
@@ -130,10 +133,10 @@ class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewSta
 interface InspectorPanelViewOuterProps {
   display?: boolean;
   diagramOnly: boolean;
-  node: any; // TODO: get concrete type
-  link: any; // TODO: get concrete type
-  onNodeChanged: (node: any, data: any) => void; // TODO: get concrete type
-  onNodeDelete: (node: any) => void; // TODO: get concrete type
+  node: Node | null;
+  link: Link | null;
+  onNodeChanged: (node: Node, data: any) => void; // TODO: get concrete type
+  onNodeDelete: (node: Node) => void; // TODO: get concrete type
   palette: any; // TODO: get concrete type
   graphStore: any; // TODO: get concrete type
 }

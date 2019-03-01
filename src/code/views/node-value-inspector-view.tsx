@@ -12,9 +12,10 @@ import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinProps, AppSettingsM
 import { tr } from "../utils/translate";
 
 import { Mixer } from "../mixins/components";
+import { Node } from "../models/node";
 
 interface NodeValueInspectorViewOuterProps {
-  node: any; // TODO: get concrete type
+  node: Node;
   graphStore: any;  // TODO: get concrete type
 }
 interface NodeValueInspectorViewOuterState {

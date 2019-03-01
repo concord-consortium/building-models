@@ -1,9 +1,15 @@
 const _ = require("lodash");
 import * as React from "react";
 
+interface StackedImage {
+  top: number;
+  left: number;
+  rotation: number;
+}
+
 interface StackedImageViewProps {
   image?: string;
-  imageProps: any[]; // TODO: get concrete type
+  imageProps: StackedImage[]; // TODO: get concrete type
 }
 
 interface StackedImageViewState {}

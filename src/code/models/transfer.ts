@@ -7,6 +7,7 @@
 
 import { Node } from "./node";
 import { tr } from "../utils/translate";
+import { Link } from "./link";
 
 const DEFAULT_COMBINE_METHOD = "product";
 
@@ -15,7 +16,7 @@ export class TransferModel extends Node {
   public isTransfer = true;
   public combineMethod = DEFAULT_COMBINE_METHOD;
 
-  protected transferLink: any; // TODO: get concrete type
+  public transferLink: Link;
 
   constructor(options, key?) {
     super(options, key, true);

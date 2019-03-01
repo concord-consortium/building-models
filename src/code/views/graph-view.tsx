@@ -31,7 +31,7 @@ import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-st
 import { LaraMixinProps, LaraMixinState, LaraMixin } from "../stores/lara-store";
 import { LinkColors } from "../utils/link-colors";
 import { Mixer } from "../mixins/components";
-
+import { Link } from "../models/link";
 
 interface GraphViewOuterProps {
   selectionManager: any; // TODO: get concrete type
@@ -45,9 +45,9 @@ type GraphViewProps = GraphViewOuterProps & GraphMixinProps & SimulationMixinPro
 
 interface GraphViewOuterState {
   selectedNodes: any[]; // TODO: get concrete type
-  editingNode: any; // TODO: get concrete type
-  selectedLink: any[]; // TODO: get concrete type
-  editingLink: any; // TODO: get concrete type
+  editingNode: Node | null;
+  selectedLink: Link[];
+  editingLink: Link | null;
   canDrop: boolean;
   drawingMarquee: boolean;
   selectBox: {
@@ -123,9 +123,10 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         editingLink
       });
 
-      if (lastLinkSelection === !this.state.selectedLink) {
-        return this.handleUpdateToolkit();
-      }
+      // FIXME: this code makes no sense after types were added - figure out reason for existence!
+      // if (lastLinkSelection === !this.state.selectedLink) {
+      //   return this.handleUpdateToolkit();
+      // }
     });
 
     return ($container as any).droppable({

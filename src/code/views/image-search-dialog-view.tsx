@@ -19,6 +19,7 @@ import { tr } from "../utils/translate";
 import { ImageDialogViewMixin, ImageDialogViewMixinProps, ImageDialogViewMixinState } from "../mixins/image-dialog-view";
 import { Mixer } from "../mixins/components";
 import { internalLibrary } from "../data/internal-library";
+import { Node } from "../models/node";
 
 interface ImageSearchResultViewProps {
   imageInfo: any; // TODO: get concrete type
@@ -120,8 +121,8 @@ class ImageSearchPrevNextLinkView extends React.Component<ImageSearchPrevNextLin
 
 interface ImageSearchDialogViewOuterProps {
   internalLibrary: any; // TODO: get concrete type
-  inPalette: (node: any) => boolean; // TODO: get concrete type
-  inLibrary: (node: any) => boolean; // TODO: get concrete type
+  inPalette: (node: Node) => boolean;
+  inLibrary: (node: Node) => boolean;
 }
 
 type ImageSearchDialogViewProps = ImageSearchDialogViewOuterProps & ImageDialogMixinProps & ImageDialogViewMixinProps;

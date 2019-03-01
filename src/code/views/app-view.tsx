@@ -26,7 +26,10 @@ import { ImageDialogMixinProps, ImageDialogMixinState, ImageDialogMixin } from "
 import { AppSettingsStore, AppSettingsActions, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
+import { Node } from "../models/node";
+
 import { urlParams } from "../utils/url-params";
+import { Link } from "../models/link";
 
 interface AppViewOuterProps {
   graphStore: any; // TODO: get concrete type
@@ -35,7 +38,7 @@ interface AppViewOuterProps {
   googleDoc?: string;
 }
 interface AppViewOuterState {
-  selectedNode: any; // TODO: get concrete type
+  selectedNode: Node | null;
   selectedConnection: any; // TODO: get concrete type
   palette: any[]; // TODO: get concrete type
   undoRedoShowing: boolean;
@@ -44,8 +47,8 @@ interface AppViewOuterState {
   username: string;
   filename: string;
   showImageBrowser: boolean;
-  editingNode: any; // TODO: get concrete type
-  selectedLink: any; // TODO: get concrete type
+  editingNode: Node | null;
+  selectedLink: Link | null;
   internalLibrary: any; // TODO: get concrete type
   standaloneMode: boolean;
 }

@@ -18,11 +18,13 @@ const autosize         = require("autosize");
 import { SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
 import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinState, AppSettingsMixinProps } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
+import { Link } from "../models/link";
+import { TransferModel } from "../models/transfer";
 
 interface LinkGraphViewProps {
   xAxis: string;
   yAxis: string;
-  link: any; // TODO: get concrete type
+  link: Link;
   graphStore: any; // TODO: get concrete type
 }
 
@@ -72,7 +74,7 @@ class QuantStartView extends React.Component<QuantStartViewProps, QuantStartView
 }
 
 interface LinkRelationViewOuterProps {
-  link: any; // TODO: get concrete type
+  link: Link;
   graphStore: any; // TODO: get concrete type
 }
 type LinkRelationViewProps = LinkRelationViewOuterProps & SimulationMixinProps & AppSettingsMixinProps;
@@ -409,10 +411,10 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     const spanWrap = (string, className) => `<span class='${className}'>${string}</span>`;
     const options = _.map(RelationFactory.transferModifiers, (opt, i) => <option value={opt.id} key={opt.id}>{opt.text}</option>);
     let sourceTitle = (this.props.link.sourceNode != null ? this.props.link.sourceNode.title : undefined) || "NONE";
-    const targetTitle = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x1 => x1.targetNode), x => x.title) || "NONE";
+    const targetTitle = __guard__(__guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x1 => x1.targetNode), x => x.title) || "NONE";
 
     if (isTargetProportional) {
-      sourceTitle = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x3 => x3.sourceNode), x2 => x2.title) || "NONE";
+      sourceTitle = __guard__(__guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x3 => x3.sourceNode), x2 => x2.title) || "NONE";
       line_a = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_A",
         { targetTitle: spanWrap(targetTitle, "target") });
       line_b = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B",
@@ -479,12 +481,16 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     if (this.state.isAccumulator) {
       return this.renderAccumulator(source, target);
     } else if (this.state.isTransferModifier) {
-      target = __guard__(__guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x1 => x1.targetNode), x => x.title);
-      const isTargetProportional = this.props.link.sourceNode === __guard__(this.props.link.targetNode != null ? this.props.link.targetNode.transferLink : undefined, x2 => x2.targetNode);
+      target = __guard__(__guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x1 => x1.targetNode), x => x.title);
+      const isTargetProportional = this.props.link.sourceNode === __guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x2 => x2.targetNode);
       return this.renderTransfer(source, target, isTargetProportional);
     } else {
       return this.renderNonAccumulator(source, target);
     }
+  }
+
+  private get targetAsTransferNode() {
+    return this.props.link.targetNode != null ? this.props.link.targetNode as TransferModel : null;
   }
 }
 

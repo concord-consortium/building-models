@@ -1,16 +1,15 @@
 import * as React from "react";
-import { runInThisContext } from "vm";
 
 interface TabInfoSettings {
   label: string;
-  component: any;
+  component: JSX.Element | null;
   defined?: boolean;
 }
 
 class TabInfo {
-  private label: string;
-  private component: any;
-  private defined: boolean;
+  public readonly label: string;
+  public readonly component: JSX.Element | null;
+  public readonly defined: boolean;
 
   constructor(settings?: TabInfoSettings) {
     settings = settings || {label: "", component: null, defined: false};
@@ -52,7 +51,7 @@ interface TabbedPanelViewProps {
   onTabSelected?: (index: number) => void;
   clientClass?: string;
   onRenderBelowTabsComponent?: () => any; // TODO: get concrete type
-  tabs: any[]; // TODO: get concrete type
+  tabs: TabInfo[]; // TODO: get concrete type
 }
 
 interface TabbedPanelViewState {
