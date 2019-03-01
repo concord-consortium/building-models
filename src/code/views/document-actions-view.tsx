@@ -10,6 +10,7 @@ import { SimulationRunPanelView } from "./simulation-run-panel-view";
 import { Mixer } from "../mixins/components";
 
 import { CodapConnect, CODAPDataContextListItem } from "../models/codap-connect";
+import { GraphStoreClass } from "../stores/graph-store";
 
 interface CODAPTableMenuProps {
   toggleMenu: (override?: boolean) => void;
@@ -96,7 +97,7 @@ interface ToolButtonOptions {
 }
 
 interface DocumentActionsViewOuterProps {
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   diagramOnly: boolean;
   standaloneMode: boolean;
 }

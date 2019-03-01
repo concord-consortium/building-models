@@ -21,7 +21,7 @@ import { DiagramToolkit } from "../utils/js-plumb-diagram-toolkit";
 import { dropHandler } from "../utils/drop-handler";
 import { tr } from "../utils/translate";
 import { PaletteStore, PaletteActions } from "../stores/palette-store";
-import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin } from "../stores/graph-store";
+import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin, GraphStoreClass } from "../stores/graph-store";
 import { ImageDialogActions } from "../stores/image-dialog-store";
 import { RelationFactory } from "../models/relation-factory";
 
@@ -32,10 +32,11 @@ import { LaraMixinProps, LaraMixinState, LaraMixin } from "../stores/lara-store"
 import { LinkColors } from "../utils/link-colors";
 import { Mixer } from "../mixins/components";
 import { Link } from "../models/link";
+import { SelectionManager } from "../models/selection-manager";
 
 interface GraphViewOuterProps {
-  selectionManager: any; // TODO: get concrete type
-  graphStore: any; // TODO: get concrete type
+  selectionManager: SelectionManager;
+  graphStore: GraphStoreClass;
   connectionTarget?: any; // TODO: get concrete type
   transferTarget?: any; // TODO: get concrete type
   linkTarget?: any; // TODO: get concrete type
@@ -308,7 +309,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   private handleConnect = (info, evnt) => {
     return this.handleEvent(() => {
       this.forceRedrawLinks = true;
-      return GraphStore.newLinkFromEvent(info, evnt);
+      return GraphStore.newLinkFromEvent(info);
     });
   }
 

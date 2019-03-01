@@ -17,7 +17,7 @@ import { RelationFactory } from "../models/relation-factory";
 import { tr } from "../utils/translate";
 
 import { InspectorPanelActions, InspectorPanelMixinProps, InspectorPanelMixinState, InspectorPanelMixin } from "../stores/inspector-panel-store";
-import { GraphStore, GraphMixin, GraphMixinProps, GraphMixinState } from "../stores/graph-store";
+import { GraphStore, GraphMixin, GraphMixinProps, GraphMixinState, GraphStoreClass } from "../stores/graph-store";
 import { Mixer } from "../mixins/components";
 import { Link } from "../models/link";
 import { Node } from "../models/node";
@@ -25,7 +25,7 @@ import { Node } from "../models/node";
 interface RelationInspectorViewOuterProps {
   node?: Node | null;
   link?: Link | null;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
 }
 interface RelationInspectorViewOuterState {
 }
@@ -116,7 +116,10 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
   }
 
   private handleMethodSelected = (evt) => {
-    GraphStore.changeNode({ combineMethod: evt.target.value }, this.props.node);
+    const {node} = this.props;
+    if (node) {
+      GraphStore.changeNode({ combineMethod: evt.target.value }, node);
+    }
   }
 }
 

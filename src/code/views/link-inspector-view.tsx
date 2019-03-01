@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { tr } from "../utils/translate";
 import { Link } from "../models/link";
+import { GraphStoreClass } from "../stores/graph-store";
 
 const palettes = [
   ["#4D6A6D", "#798478", "#A0A083", "#C9ADA1", "#EAE0CC"],
@@ -12,7 +13,7 @@ const palette = palettes[2];
 
 interface LinkInspectorViewProps {
   link: Link;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
 }
 
 interface LinkInspectorViewState {}

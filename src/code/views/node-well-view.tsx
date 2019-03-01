@@ -10,13 +10,16 @@ import { PaletteInspectorView } from "./palette-inspector-view";
 import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/palette-store";
 import { Mixer } from "../mixins/components";
 
+import { Node } from "../models/node";
+import { GraphStoreClass } from "../stores/graph-store";
+
 interface NodeWellViewOuterProps {
   uiElements: any; // TODO: get concrete type
   toggleImageBrowser: () => void;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
 }
 interface NodeWellViewOuterState {
-  nodes: any[]; // TODO: get concrete type
+  nodes: Node[];
   collapsed: boolean;
 }
 

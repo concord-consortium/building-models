@@ -21,11 +21,12 @@ const DEFAULT_CONTEXT_NAME = "building-models";
 // that all other actions have completed before, e.g., we end a commandBatch.
 
 export class UndoRedoManager {
+  public commands: any[];
+  public stackPosition: number;
+
   private endCommandBatch: any;
   private undo: any;
   private redo: any;
-  private commands: any[];
-  private stackPosition: number;
   private savePosition: number;
   private changeListeners: any[];
   private currentBatch: any;

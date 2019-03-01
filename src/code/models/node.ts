@@ -49,12 +49,12 @@ export class Node extends GraphPrimitive {
   public readonly addedThisSession: any; // TODO: get concrete type
   public readonly color: any; // TODO: get concrete type
   public readonly image: any; // TODO: get concrete type
+  public readonly codapID: any; // TODO: get concrete type
+  public readonly codapName: any; // TODO: get concrete type
+  public readonly x: any; // TODO: get concrete type
+  public readonly y: any; // TODO: get concrete type
 
   protected links: any; // TODO: get concrete type
-  protected x: any; // TODO: get concrete type
-  protected y: any; // TODO: get concrete type
-  protected codapID: any; // TODO: get concrete type
-  protected codapName: any; // TODO: get concrete type
   protected allowNegativeValues: any; // TODO: get concrete type
   protected paletteItem: any; // TODO: get concrete type
   protected frames: any; // TODO: get concrete type

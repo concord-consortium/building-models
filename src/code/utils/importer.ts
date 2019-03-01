@@ -10,9 +10,10 @@ import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
 import { ImportActions } from "../actions/import-actions";
 import { GraphPrimitive } from "../models/graph-primitive";
+import { GraphStoreClass } from "../stores/graph-store";
 
 export class Importer {
-  private graphStore: any;
+  private graphStore: GraphStoreClass;
   private settings: any;
   private paletteStore: any;
 

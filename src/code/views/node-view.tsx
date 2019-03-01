@@ -26,13 +26,15 @@ import { NodeTitleMixinState, NodeTitleMixinProps, NodeTitleMixin } from "../mix
 import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
 import { Node} from "../models/node";
+import { GraphStoreClass } from "../stores/graph-store";
+import { SelectionManager } from "../models/selection-manager";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
   node: Node;
   onNodeChanged?: (node: Node, newValue: any) => void; // TODO: get concrete type
   onNodeDelete?: (node: Node) => void;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   nodeKey: string;
   onStartEditing: () => void;
   onStopEditing: () => void;
@@ -203,11 +205,11 @@ interface NodeViewProps {
   simulating: boolean;
   showGraphButton: boolean;
   editTitle: boolean;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   dataColor: string;
   isTimeBased: boolean;
   innerColor: string;
-  selectionManager?: any; // TODO: get concrete type
+  selectionManager?: SelectionManager;
   selected: boolean;
   onMove: (data: any) => void;
   onMoveComplete: (data: any) => void;
@@ -479,7 +481,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleStartEditing = () => {
-    if (!AppSettingsStore.settings.lockdown) {
+    if (this.props.selectionManager && !AppSettingsStore.settings.lockdown) {
       this.initialTitle = this.props.graphStore.nodeKeys[this.props.nodeKey].title;
       return this.props.selectionManager.selectNodeForTitleEditing(this.props.data);
     }
@@ -487,11 +489,15 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private handleStopEditing = () => {
     this.props.graphStore.endNodeEdit();
-    return this.props.selectionManager.clearTitleEditing();
+    if (this.props.selectionManager) {
+      this.props.selectionManager.clearTitleEditing();
+    }
   }
 
   private isEditing() {
-    return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
+    if (this.props.selectionManager) {
+      return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
+    }
   }
 
   private handleSliderDragStart = () => {

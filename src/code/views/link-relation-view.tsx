@@ -20,12 +20,13 @@ import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinState, AppSettingsM
 import { Mixer } from "../mixins/components";
 import { Link } from "../models/link";
 import { TransferModel } from "../models/transfer";
+import { GraphStoreClass } from "../stores/graph-store";
 
 interface LinkGraphViewProps {
   xAxis: string;
   yAxis: string;
   link: Link;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
 }
 
 interface LinkGraphViewState {}
@@ -75,7 +76,7 @@ class QuantStartView extends React.Component<QuantStartViewProps, QuantStartView
 
 interface LinkRelationViewOuterProps {
   link: Link;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
 }
 type LinkRelationViewProps = LinkRelationViewOuterProps & SimulationMixinProps & AppSettingsMixinProps;
 

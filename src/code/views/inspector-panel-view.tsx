@@ -21,6 +21,7 @@ import { Mixer } from "../mixins/components";
 
 import { Node } from "../models/node";
 import { Link } from "../models/link";
+import { GraphStoreClass } from "../stores/graph-store";
 
 interface ToolButtonViewProps {
   name: string;
@@ -138,7 +139,7 @@ interface InspectorPanelViewOuterProps {
   onNodeChanged: (node: Node, data: any) => void; // TODO: get concrete type
   onNodeDelete: (node: Node) => void; // TODO: get concrete type
   palette: any; // TODO: get concrete type
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
 }
 interface InspectorPanelViewOuterState {
 }

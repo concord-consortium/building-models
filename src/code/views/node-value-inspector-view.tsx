@@ -13,10 +13,12 @@ import { tr } from "../utils/translate";
 
 import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
+import { GraphStoreClass } from "../stores/graph-store";
 
 interface NodeValueInspectorViewOuterProps {
+
   node: Node;
-  graphStore: any;  // TODO: get concrete type
+  graphStore: GraphStoreClass;
 }
 interface NodeValueInspectorViewOuterState {
   "editing-min": boolean;
@@ -113,7 +115,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
       const focus = () => this.input && this.input.focus();
       // first copy state value to model if we were editing
       if (editing) {
-        this.props.graphStore.changeNodeProperty(property, this.state[`${property}-value`]);
+        this.props.graphStore.changeNodeProperty(property, this.state[`${property}-value`], this.props.node);
       }
       if (property === "min") {
         this.setState({"editing-min": !editing}, focus);

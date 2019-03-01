@@ -30,9 +30,10 @@ import { Node } from "../models/node";
 
 import { urlParams } from "../utils/url-params";
 import { Link } from "../models/link";
+import { GraphStoreClass } from "../stores/graph-store";
 
 interface AppViewOuterProps {
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   data?: any; // TODO: get concrete type
   publicUrl?: string;
   googleDoc?: string;
@@ -269,14 +270,12 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
 
   private loadInitialData() {
     if ((this.props.data != null ? this.props.data.length : 0) > 0) {
-      this.props.graphStore.addAfterAuthHandler(JSON.parse(this.props.data));
+      GoogleFileActions.addAfterAuthHandler(JSON.parse(this.props.data));
       return HashParams.clearParam("data");
-
     } else if ((this.props.publicUrl != null ? this.props.publicUrl.length : 0) > 0) {
       const { publicUrl } = this.props;
       GoogleFileActions.addAfterAuthHandler(context => context.loadPublicUrl(publicUrl));
       return HashParams.clearParam("publicUrl");
-
     } else if ((this.props.googleDoc != null ? this.props.googleDoc.length : 0) > 0) {
       const { googleDoc } = this.props;
       return GoogleFileActions.addAfterAuthHandler(context => context.loadFile({id: googleDoc}));

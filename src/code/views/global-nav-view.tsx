@@ -9,9 +9,10 @@ import { BuildInfoView } from "./build-info-view";
 import { GoogleFileActions, GoogleFileMixinProps, GoogleFileMixinState, GoogleFileMixin } from "../stores/google-file-store";
 import { UndoRedoUIMixin, UndoRedoUIMixinProps, UndoRedoUIMixinState } from "../stores/undo-redo-ui-store";
 import { Mixer } from "../mixins/components";
+import { GraphStoreClass } from "../stores/graph-store";
 
 interface GlobalNavViewOuterProps {
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   filename: string;
 }
 type GlobalNavViewProps = GlobalNavViewOuterProps & GoogleFileMixinProps & UndoRedoUIMixinProps;

@@ -13,6 +13,7 @@ import * as $ from "jquery";
 
 import { tr } from "../utils/translate";
 import { Link } from "../models/link";
+import { GraphStoreClass } from "../stores/graph-store";
 const math = require("mathjs");  // For formula parsing...
 
 interface SvgGraphViewPoint {
@@ -27,7 +28,7 @@ interface SvgGraphViewProps {
   height: number;
   fontSize: number;
   strokeWidth: number;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   strokeDasharray: string;
   xLabel: string;
   yLabel: string;
