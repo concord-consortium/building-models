@@ -12,9 +12,10 @@ import { Mixer } from "../mixins/components";
 
 import { Node } from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
+import { UIElements } from "../stores/app-settings-store";
 
 interface NodeWellViewOuterProps {
-  uiElements: any; // TODO: get concrete type
+  uiElements: UIElements;
   toggleImageBrowser: () => void;
   graphStore: GraphStoreClass;
 }

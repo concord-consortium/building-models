@@ -7,10 +7,11 @@ import { PaletteActions } from "../stores/palette-store";
 import { tr } from "../utils/translate";
 
 export interface ImageMetadata {
-  license: string;
   title: string;
   link: string;
   source: string;
+  license?: string;
+  description?: string;
 }
 
 export interface ImageInfo {

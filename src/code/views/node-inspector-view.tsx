@@ -7,9 +7,12 @@ import { NodeTitleMixin, NodeTitleMixinProps, NodeTitleMixinState } from "../mix
 import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 
+export interface NodeChangedValues {
+}
+
 interface NodeInspectorViewOuterProps {
   node: Node;
-  onNodeChanged?: (node: Node, newValue: any) => void; // TODO: get concrete type
+  onNodeChanged?: (node: Node, newValue: NodeChangedValues) => void;
   onNodeDelete?: (node: Node) => void;
 }
 interface NodeInspectorViewOuterState {}
@@ -62,7 +65,7 @@ export class NodeInspectorView extends Mixer<NodeInspectorViewProps, NodeInspect
         </div>
         <div className="edit-row">
           <label htmlFor="image">{tr("~NODE-EDIT.IMAGE")}</label>
-          <ImagePickerView selected={this.props.node} onChange={this.handleChangeImage} />
+          <ImagePickerView selected={this.props.node.image} onChange={this.handleChangeImage} />
         </div>
       </div>
     );

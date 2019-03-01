@@ -6,7 +6,7 @@ interface TabInfoSettings {
   defined?: boolean;
 }
 
-class TabInfo {
+export class TabInfo {
   public readonly label: string;
   public readonly component: JSX.Element | null;
   public readonly defined: boolean;
@@ -51,7 +51,7 @@ interface TabbedPanelViewProps {
   onTabSelected?: (index: number) => void;
   clientClass?: string;
   onRenderBelowTabsComponent?: () => any; // TODO: get concrete type
-  tabs: TabInfo[]; // TODO: get concrete type
+  tabs: TabInfo[];
 }
 
 interface TabbedPanelViewState {

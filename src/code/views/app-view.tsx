@@ -31,6 +31,8 @@ import { Node } from "../models/node";
 import { urlParams } from "../utils/url-params";
 import { Link } from "../models/link";
 import { GraphStoreClass } from "../stores/graph-store";
+import { NodeChangedValues } from "./node-inspector-view";
+import { InternalLibraryItem } from "../data/internal-library";
 
 interface AppViewOuterProps {
   graphStore: GraphStoreClass;
@@ -50,7 +52,7 @@ interface AppViewOuterState {
   showImageBrowser: boolean;
   editingNode: Node | null;
   selectedLink: Link | null;
-  internalLibrary: any; // TODO: get concrete type
+  internalLibrary: InternalLibraryItem[] | null;
   standaloneMode: boolean;
 }
 
@@ -245,7 +247,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     this.setState({undoRedoShowing: !status.hideUndoRedo});
   }
 
-  private handleNodeChanged = (node, data) => {
+  private handleNodeChanged = (node: Node, data: NodeChangedValues) => {
     return this.props.graphStore.changeNode(data);
   }
 

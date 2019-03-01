@@ -43,6 +43,7 @@ export class Node extends GraphPrimitive {
 
   public type: string = "Node";
   public title: string;
+  public currentValue: number;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
@@ -54,11 +55,11 @@ export class Node extends GraphPrimitive {
   public readonly codapName: any; // TODO: get concrete type
   public readonly x: any; // TODO: get concrete type
   public readonly y: any; // TODO: get concrete type
+  public readonly frames: any; // TODO: get concrete type
 
   protected links: any; // TODO: get concrete type
   protected allowNegativeValues: any; // TODO: get concrete type
   protected paletteItem: PalleteItem;
-  protected frames: any; // TODO: get concrete type
   protected _min: any; // TODO: get concrete type
   protected _max: any; // TODO: get concrete type
   protected _initialValue: any; // TODO: get concrete type

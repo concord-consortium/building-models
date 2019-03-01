@@ -10,9 +10,10 @@ import { ImageDialogActions } from "../stores/image-dialog-store";
 import { DraggableMixin, DraggableMixinProps, DraggableMixinState } from "../mixins/draggable";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
+import { Node } from "../models/node";
 
 interface PaletteAddViewOuterProps {
-  callback?: (data: any) => void;
+  callback?: (data: Node) => void;
   label: string;
 }
 type PaletteAddViewProps = PaletteAddViewOuterProps & DraggableMixinProps;

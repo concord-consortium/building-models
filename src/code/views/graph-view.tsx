@@ -63,7 +63,7 @@ type GraphViewState = GraphViewOuterState & GraphMixinState & SimulationMixinSta
 export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   public static displayName = "GraphView";
-  public diagramToolkit: any; // TODO: get concrete type
+  public diagramToolkit: DiagramToolkit;
 
   private forceRedrawLinks: boolean;
   private linkButtonClientClass: string;
@@ -562,31 +562,19 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private checkSelectBoxLinkCollisions() {
-    return (() => {
-      const result: any[] = [];
-      for (const link of this.state.links) {
-        if (!(link.relation != null ? link.relation.isTransfer : undefined) && this.checkBoxLinkCollision(link)) {
-          result.push(this.props.selectionManager.selectLinkForInspection(link, true));
-        } else {
-          result.push(undefined);
-        }
+    for (const link of this.state.links) {
+      if (!(link.relation != null ? link.relation.isTransfer : undefined) && this.checkBoxLinkCollision(link)) {
+        this.props.selectionManager.selectLinkForInspection(link, true);
       }
-      return result;
-    })();
+    }
   }
 
   private checkSelectBoxCollisions() {
-    return (() => {
-      const result: any[] = [];
-      for (const node of this.state.nodes) {
-        if (this.checkSelectBoxCollision(node)) {
-          result.push(this.props.selectionManager.selectNodeForInspection(node, true));
-        } else {
-          result.push(undefined);
-        }
+    for (const node of this.state.nodes) {
+      if (this.checkSelectBoxCollision(node)) {
+        this.props.selectionManager.selectNodeForInspection(node, true);
       }
-      return result;
-    })();
+    }
   }
 
   // Detecting collision between drawn selectBox and existing link

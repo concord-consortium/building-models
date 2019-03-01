@@ -19,9 +19,9 @@ interface NodeSvgGraphViewOuterProps {
   strokeWidth: number;
   min: number;
   max: number;
-  data: any[]; // TODO: get concrete type
+  data: number[];
   color: string;
-  currentValue: any; // TODO: get concrete type
+  currentValue: number;
   innerColor: string;
   image: JSX.Element;
 }

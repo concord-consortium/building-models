@@ -7,14 +7,16 @@
  */
 
 import * as $ from "jquery";
+import { ImageInfo } from "../views/preview-image-dialog-view";
 
 const MAX_NUMBER_OF_PAGES = 20;
 
 let jqXHR;
 
+
 export const OpenClipArt = {
 
-  search(query, options, callback) {
+  search(query, options, callback: (results: ImageInfo[], page: number, numPages: number) => void) {
     // abort the last request
     if (jqXHR) {
       jqXHR.abort();
@@ -23,7 +25,7 @@ export const OpenClipArt = {
     const url = `https://openclipart.org/search/json/?query=${encodeURIComponent(query)}&sort=downloads&page=${options.page}&amount=24`;
 
     jqXHR = $.getJSON(url, (data) => {
-      const results: any[] = [];
+      const results: ImageInfo[] = [];
       const page = Math.min(__guard__(data != null ? data.info : undefined, x => x.current_page) || 0, MAX_NUMBER_OF_PAGES);
       const numPages = Math.min(__guard__(data != null ? data.info : undefined, x1 => x1.pages) || 0, MAX_NUMBER_OF_PAGES);
       if (data.payload) {

@@ -7,10 +7,11 @@ import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/pa
 import { Mixer } from "../mixins/components";
 
 import { Node } from "../models/node";
+import { ImageInfo } from "./preview-image-dialog-view";
 
 interface ImgChoiceViewProps {
   node: Node;
-  selected: any; // TODO: get concrete type
+  selected: ImageInfo;
   onChange: (node: Node) => void;
 }
 
@@ -38,8 +39,8 @@ class ImgChoiceView extends React.Component<ImgChoiceViewProps, ImgChoiceViewSta
 }
 
 interface ImagePickerViewOuterProps {
-  selected: any; // TODO: get concrete type
-  onChange: (node: Node) => void; // TODO: get concrete type
+  selected: ImageInfo;
+  onChange: (node: Node) => void;
 }
 interface ImagePickerViewOuterState {
   opened: boolean;

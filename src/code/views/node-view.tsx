@@ -32,8 +32,6 @@ import { SelectionManager } from "../models/selection-manager";
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
   node: Node;
-  onNodeChanged?: (node: Node, newValue: any) => void; // TODO: get concrete type
-  onNodeDelete?: (node: Node) => void;
   graphStore: GraphStoreClass;
   nodeKey: string;
   onStartEditing: () => void;
@@ -199,8 +197,16 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
   }
 }
 
+interface NodeViewHandlerOptions {
+  nodeKey: string;
+  reactComponent: NodeView;
+  domElement: HTMLDivElement | null;
+  syntheticEvent: any; // checked: any ok
+  extra?: any; // checked: any ok
+}
+
 interface NodeViewProps {
-  data: any; // TODO: get concrete type
+  data: Node;
   nodeKey: string;
   simulating: boolean;
   showGraphButton: boolean;
@@ -211,9 +217,9 @@ interface NodeViewProps {
   innerColor: string;
   selectionManager?: SelectionManager;
   selected: boolean;
-  onMove: (data: any) => void;
-  onMoveComplete: (data: any) => void;
-  onDelete: (data: any) => void;
+  onMove: (options: NodeViewHandlerOptions) => void;
+  onMoveComplete: (options: NodeViewHandlerOptions) => void;
+  onDelete: (options: NodeViewHandlerOptions) => void;
 }
 
 interface NodeViewState {
@@ -333,17 +339,6 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  private renderValue() {
-    let value = this.props.data.value || this.props.data.initialValue;
-    value = Math.round(value);
-    return (
-      <div className="value">
-        <label>{tr("~NODE.SIMULATION.VALUE")}</label>
-        <input type="text" className="value" value={value} />
       </div>
     );
   }

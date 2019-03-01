@@ -9,7 +9,7 @@ import * as React from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { NodeInspectorView } from "./node-inspector-view";
+import { NodeInspectorView, NodeChangedValues } from "./node-inspector-view";
 import { LinkInspectorView } from "./link-inspector-view";
 import { LinkValueInspectorView } from "./link-value-inspector-view";
 import { NodeValueInspectorView } from "./node-value-inspector-view";
@@ -22,12 +22,15 @@ import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 import { Link } from "../models/link";
 import { GraphStoreClass } from "../stores/graph-store";
+import { PalleteItem } from "../stores/palette-store";
 
 interface ToolButtonViewProps {
+  key?: string;
   name: string;
   selected: boolean;
   disabled: boolean;
-  onClick: (name: string) => void;
+  shows: string;
+  onClick?: (name: string) => void;
 }
 
 interface ToolButtonViewState {}
@@ -102,7 +105,7 @@ class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewSta
   }
 
   private buttonProps(button: ToolPanelButton) {
-    const props: any = {
+    const props: ToolButtonViewProps = {
       name:     button.name,
       shows:    button.shows,
       selected: false,
@@ -136,9 +139,9 @@ interface InspectorPanelViewOuterProps {
   diagramOnly: boolean;
   node: Node | null;
   link: Link | null;
-  onNodeChanged: (node: Node, data: any) => void; // TODO: get concrete type
-  onNodeDelete: (node: Node) => void; // TODO: get concrete type
-  palette: any; // TODO: get concrete type
+  onNodeChanged: (node: Node, data: NodeChangedValues) => void;
+  onNodeDelete: (node: Node) => void;
+  palette: PalleteItem[];
   graphStore: GraphStoreClass;
 }
 interface InspectorPanelViewOuterState {

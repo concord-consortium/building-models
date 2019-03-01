@@ -19,6 +19,7 @@ import { SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../
 import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinState, AppSettingsMixinProps } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 import { Link } from "../models/link";
+import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
 import { GraphStoreClass } from "../stores/graph-store";
 
@@ -52,8 +53,8 @@ class LinkGraphView extends React.Component<LinkGraphViewProps, LinkGraphViewSta
 }
 
 interface QuantStartViewProps {
-  source: any; // TODO: get concrete type
-  target: any; // TODO: get concrete type
+  source: Node;
+  target: Node;
 }
 
 interface QuantStartViewState {}
@@ -374,7 +375,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
 
   private renderAccumulator(source, target) {
     let currentOption;
-    const options: any[] = [];
+    const options: JSX.Element[] = [];
     _.each(RelationFactory.accumulators, (opt, i) => {
       if ((!opt.forDualAccumulator || this.state.isDualAccumulator) &&
           (!opt.forSoloAccumulatorOnly || !this.state.isDualAccumulator)) {

@@ -64,9 +64,16 @@ interface AppSettingsSettings {
   complexity: number;
   simulationType: number;
   relationshipSymbols: boolean;
-  uiElements: any;
+  uiElements: UIElements;
   lockdown: any;
   touchDevice: boolean;
+}
+
+export interface UIElements {
+  globalNav: boolean;
+  actionBar: boolean;
+  inspectorPanel: boolean;
+  nodePalette: boolean;
 }
 
 export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
@@ -78,7 +85,7 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       :
       SimulationType.DEFAULT;
 
-    const uiElements = {
+    const uiElements: UIElements = {
       globalNav: true,
       actionBar: true,
       inspectorPanel: true,
