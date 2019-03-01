@@ -22,30 +22,24 @@ we are using.
 
 1. Install the global dependencies:
     * [Node.js](http://nodejs.org): `brew install node` on OS X
-    * [Gulp](http://gulpjs.com/): `npm install -g gulp`
-    * [live-server](https://www.npmjs.com/package/live-server) `npm install -g live-server`
-    * [yarn](https://yarnpkg.com/) `npm install -g yarn`
 `
 
 2. Check out the project and install the local dependencies:
     * `git checkout https://github.com/concord-consortium/building-models.git`
     * `cd building-models`
-    * `yarn`
+    * `npm install`
 
 3. Run:
-    * `gulp` — watches the project sources in `./src/` and builds artifacts into `dev`.
-    * `live-server dev`– starts a live webserver on https://localhost:8080 with autorefreshing.  You will need to allow the self-signed live-server-https certificate
-       (click the Advanced link on the error page when the app loads in Chrome and then accept the certificate there).
-    * `dev` - runs both scripts above in a single command
-    * Edit code in `./src/`, watch live changes in browser. (Gulp will build your changes automatically to `./dev/`, and Live-Server will automatically refresh when it sees changes there.)
+    * `npm start` — watches the project sources in `./src/` and builds artifacts into `dev` and starts webserver.
+    * Edit code in `./src/`, watch live changes in browser. (Webpack will build your changes automatically to `./dev/` and will automatically refresh your browser when it sees changes there.)
     * Place static files you want to be copied to `dev/` in `src/assets/`
 
     If you get an node error about "too many files open," try running `ulimit -n 2560`
 
-4. Test (after `gulp` has run, or while it is running):
+4. Test (after `webpack` has run, or while it is running):
     * `./node_modules/mocha/bin/mocha -w` to run mocha tests (located in `./test/`)
 
-    The `-w` flag should keep the tests running everytime you make a code change (if `gulp` is still running), but occasionally a hard-error of a test will force you to start them up again.
+    The `-w` flag should keep the tests running everytime you make a code change (if `webpack` is still running), but occasionally a hard-error of a test will force you to start them up again.
 
 5. Test Sage running in CODAP:
     * Open [CODAP](http://codap.concord.org/releases/latest/static/dg/en/cert/index.html)
@@ -57,7 +51,7 @@ we are using.
 * Read `./build.sh` before running it.
 * run `./build.sh`. This should:
     * Check out new clone of this repo into dest, checking out the gh-pages branch by default
-    * Run `gulp build-all` on your **current** codebase to generate all assets into ./dist/
+    * Run `npm build` on your **current** codebase to generate all assets into ./dist/
     * Push changes up to gh-pages on github.
 * See the model at http://concord-consortium.github.io/building-models/sage.html
 
@@ -109,7 +103,7 @@ The ZERO-WIDTH-SPACE character can be used to indicate that the empty string is 
 To add a new language:
 1. Add the language to the POEditor project
 2. Add the language code to the list of languages in `bin/strings-pull-project.sh`
-3. Load the new language file in `src/code/utils/translate.coffee`
+3. Load the new language file in `src/code/utils/translate.js`
 
 Note that there is probably a way to eliminate the need for step 3 above by requiring all JSON files in the `src/code/utils/lang` directory (except for `en-US-master.json`), but that has not been implemented yet.
 

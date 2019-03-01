@@ -6,6 +6,9 @@
     "~MENU.REVERT_TO_ORIGINAL": "Revert To Original",
     "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save",
     "~MENU.UNTITLED_MODEL": "Untitled model",
+    "~MENU.ABOUT": "About",
+    "~MENU.ABOUT.HELP": "Go to Help website",
+    "~MENU.ABOUT.ABOUT": "About SageModeler",
 
     "~GOOGLE_SAVE.TITLE": "Save Document",
     "~GOOGLE_SAVE.MAKE_PUBLIC": "make public (read-only)",
@@ -25,7 +28,7 @@
     "~NODE-EDIT.ADD_REMOTE": "Add remote",
     "~NODE-EDIT.DELETE": "Delete",
 
-    // views/node-value-inspector-view.coffee
+    // views/node-value-inspector-view.js
     "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value",
     "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS": "You are defining values with numbers.",
     "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words.",
@@ -40,7 +43,7 @@
     "~NODE-VALUE-EDIT.HIGH": "High",
     "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable",
 
-    // views/relation-inspector-view.coffee
+    // views/relation-inspector-view.js
     "~NODE-RELATION-EDIT.COMBINATION_METHOD": "Combine variables using:",
     "~NODE-RELATION-EDIT.ARITHMETIC_MEAN": "average",
     "~NODE-RELATION-EDIT.SCALED_PRODUCT": "limiting factor",
@@ -95,26 +98,26 @@
     "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
     "~ADD-NEW-IMAGE.LINK-TAB": "Link",
 
-    // views/palette-inspector-view.coffee
+    // views/palette-inspector-view.js
     "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image",
     "~PALETTE-INSPECTOR.ADD_IMAGE_SHORT": "New",
     "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
     "~PALETTE-INSPECTOR.DELETE": "Delete Image",
     "~PALETTE-INSPECTOR.REPLACE": "Replace Image",
 
-    // views/palette-delete-view.coffee
+    // views/palette-delete-view.js
     "~PALETTE-DIALOG.TITLE": "Delete image?",
     "~PALETTE-DIALOG.DELETE": "Delete",
     "~PALETTE-DIALOG.REPLACE": "and replace with",
     "~PALETTE-DIALOG.OK": "ok",
     "~PALETTE-DIALOG.CANCEL": "✖ cancel",
 
-    // views/image-metadata-view.coffee
+    // views/image-metadata-view.js
     "~METADATA.TITLE": "Title",
     "~METADATA.LINK": "Link",
     "~METADATA.CREDIT": "Credit",
 
-    // views/image-browser-view.coffee
+    // views/image-browser-view.js
     "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
     "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
     "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
@@ -172,6 +175,14 @@
     "~DOCUMENT.ACTIONS.REDO": "Redo",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship.",
 
+    // CODAP-specific actions
+    "~DOCUMENT.CODAP_ACTIONS.TABLES": "Tables",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.NEW": "New Table",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM": "Are you sure you want to delete \"%{tableName}\"?",
+    "~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME": "AttributeName",
+    "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Graph",
+    "~DOCUMENT.CODAP_ACTIONS.TEXT": "Text",
+
     "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings",
     "~SIMULATION.VIEW_SETTINGS": "View settings",
     "~SIMULATION.STEP_UNIT": "Each calculation is 1",
@@ -185,6 +196,7 @@
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols",
 
     "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
+    "~DROP.ONLY_ALLOWED_IF_IFRAMED": "Sorry, dropping items of this type is only allowed if iframed.",
 
     "~DROPZONE.DROP_IMAGES_HERE": "Drop image here",
     "~DROPZONE.SQUARES_LOOK_BEST": "(Squares look best.)",
@@ -213,5 +225,11 @@
     "~TIME.DAY.PLURAL": "Days",
     "~TIME.WEEK.PLURAL": "Weeks",
     "~TIME.MONTH.PLURAL": "Months",
-    "~TIME.YEAR.PLURAL": "Years"
+    "~TIME.YEAR.PLURAL": "Years",
+
+    "~SAGEMODELER.MENU.CLOSE": "Close",
+    "~SAGEMODELER.MENU.IMPORT": "Import...",
+    "~SAGEMODELER.OPEN_OR_CREATE.TITLE": "What would you like to do?",
+    "~SAGEMODELER.OPEN_OR_CREATE.OPEN_DOC": "Open Document or Browse Examples",
+    "~SAGEMODELER.OPEN_OR_CREATE.NEW_DOC": "Create New Document"
 }

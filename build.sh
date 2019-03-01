@@ -53,10 +53,9 @@ git clean -fxd
 
 cd $HERE
 
-# 4) Build our project using gulp into the dist folder
+# 4) Build our project using webpack into the dist folder
 echo "Rebuilding app"
-BUILD_INFO="$SHA built on $DATE"
-ENVIRONMENT=$DEPLOY_ENV gulp build-all --production --buildInfo "$SHA | $DATE" &&\
+ENVIRONMENT=$DEPLOY_ENV npm run build
 
 
 # 5a) Either Deploy Production to S3,

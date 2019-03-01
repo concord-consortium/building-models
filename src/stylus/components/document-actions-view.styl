@@ -10,12 +10,48 @@
       font-size 30px
       cursor pointer
       no-select()
+    i.error
+      color #AF0000
+      &:hover
+        text-shadow none
+    a
+      color #666
+      text-decoration none
+
+  .toolbar
+    display inline-flex
+
+    .toolbar-button
+      text-align center
+      padding-right 1em
+      cursor pointer
+      no-select()
+      i
+        padding 0
       &.disabled
         color #BBB
         cursor not-allowed
       &:hover:not(.disabled)
         color #444
-    i.error
-      color #AF0000
-      &:hover
-        text-shadow none
+
+    .codap-table-menu
+      position absolute
+      top 65px
+      box-shadow: 0 0 5px rgba(0,0,0,0.15);
+      z-index 10
+      background-color #fff
+
+      .codap-table-menu-item
+        padding 10px
+        cursor pointer
+
+        &:hover
+          color #fff
+          background hsla(0,0,80,1.0)
+
+        button
+          width 100%
+
+        i
+          margin-left 10px
+          font-size 12px
