@@ -16,7 +16,13 @@ import { undoRedoInstance } from "../utils/undo-redo";
 import { ImportActions } from "../actions/import-actions";
 import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber } from "./store-class";
+import { ImageMetadata } from "../views/preview-image-dialog-view";
 const uuid           = require("uuid");
+
+export interface PalleteItem {
+  image: string;
+  metadata: ImageMetadata;
+}
 
 // TODO: Maybe loadData goes into some other action-set
 export const PaletteActions = Reflux.createActions(
@@ -231,7 +237,7 @@ export interface PaletteMixinProps {}
 export interface PaletteMixinState {
   palette: any; // TODO: get concrete type
   library: any; // TODO: get concrete type
-  selectedPaletteItem: any; // TODO: get concrete type
+  selectedPaletteItem: PalleteItem;
   selectedPaletteIndex: any; // TODO: get concrete type
   selectedPaletteImage: any; // TODO: get concrete type
   imageMetadata: any; // TODO: get concrete type

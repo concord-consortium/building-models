@@ -16,6 +16,7 @@ import { GraphPrimitive } from "./graph-primitive";
 import { ColorChoices } from "../utils/colors";
 import { tr } from "../utils/translate";
 import { urlParams } from "../utils/url-params";
+import { PalleteItem } from "../stores/palette-store";
 
 const SEMIQUANT_MIN = 0;
 const SEMIQUANT_MAX = 100;
@@ -56,7 +57,7 @@ export class Node extends GraphPrimitive {
 
   protected links: any; // TODO: get concrete type
   protected allowNegativeValues: any; // TODO: get concrete type
-  protected paletteItem: any; // TODO: get concrete type
+  protected paletteItem: PalleteItem;
   protected frames: any; // TODO: get concrete type
   protected _min: any; // TODO: get concrete type
   protected _max: any; // TODO: get concrete type

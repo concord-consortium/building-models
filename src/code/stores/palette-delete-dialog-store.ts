@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const Reflux = require("reflux");
 
-import { PaletteStore, PaletteActions } from "./palette-store";
+import { PaletteStore, PaletteActions, PalleteItem } from "./palette-store";
 import { undoRedoInstance } from "../utils/undo-redo";
 import { NodesStore } from "./nodes-store";
 import { Mixin } from "../mixins/components";
@@ -101,7 +101,7 @@ export interface PaletteDeleteDialogMixinProps {}
 
 export interface PaletteDeleteDialogMixinState {
   showing: any; // TODO: get concrete type
-  paletteItem: any; // TODO: get concrete type
+  paletteItem: PalleteItem;
   options: any; // TODO: get concrete type
   replacement: any; // TODO: get concrete type
   deleted: any; // TODO: get concrete type
