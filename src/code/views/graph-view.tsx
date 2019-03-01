@@ -37,15 +37,15 @@ import { SelectionManager } from "../models/selection-manager";
 interface GraphViewOuterProps {
   selectionManager: SelectionManager;
   graphStore: GraphStoreClass;
-  connectionTarget?: any; // TODO: get concrete type
-  transferTarget?: any; // TODO: get concrete type
-  linkTarget?: any; // TODO: get concrete type
+  connectionTarget?: string;
+  transferTarget?: string;
+  linkTarget?: string;
   iframed: boolean;
 }
 type GraphViewProps = GraphViewOuterProps & GraphMixinProps & SimulationMixinProps & AppSettingsMixinProps & CodapMixinProps & LaraMixinProps;
 
 interface GraphViewOuterState {
-  selectedNodes: any[]; // TODO: get concrete type
+  selectedNodes: Node[];
   editingNode: Node | null;
   selectedLink: Link[];
   editingLink: Link | null;
@@ -182,7 +182,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const diagramOnly = this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly;
     const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
     const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
-    const marqueeStyle: any = {
+    const marqueeStyle = {
       width: Math.abs(this.state.selectBox.x - this.state.selectBox.startX),
       height: Math.abs(this.state.selectBox.y - this.state.selectBox.startY),
       left,
@@ -373,11 +373,13 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private redrawTargets() {
+    if (!this.props.linkTarget) {
+      return;
+    }
     this.diagramToolkit.makeSource(($(this.linkView!).find(".connection-source")), this.linkButtonClientClass);
     const target = $(this.linkView!).find(this.props.linkTarget);
     const targetStyle = "node-link-target";
-
-    return this.diagramToolkit.makeTarget(target, targetStyle);
+    this.diagramToolkit.makeTarget(target, targetStyle);
   }
 
   private redrawLinks() {
@@ -389,6 +391,10 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private redrawLink(link) {
+    if (!this.props.connectionTarget) {
+      return;
+    }
+
     const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])).find(this.props.connectionTarget);
     const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])).find(this.props.connectionTarget);
     const isSelected = this.props.selectionManager.isSelected(link);
@@ -442,23 +448,25 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const fromSource = sourceNode === link.sourceNode;
     const sourceConnectionClass = fromSource ? this.props.connectionTarget : this.props.transferTarget;
     const targetConnectionClass = !fromSource ? this.props.connectionTarget : this.props.transferTarget;
-    const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])).find(sourceConnectionClass);
-    const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])).find(targetConnectionClass);
-    if (source && target) {
-      const opts = {
-        fromSource,
-        source,
-        target,
-        label: "",
-        color: LinkColors.transferPipe,
-        thickness: 10,
-        showIndicators: false,
-        isEditing: false,
-        linkModel: link,
-        isTransfer: true,
-        hideArrow: fromSource
-      };
-      return this.diagramToolkit.addLink(opts);
+    if (sourceConnectionClass && targetConnectionClass) {
+      const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])).find(sourceConnectionClass);
+      const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])).find(targetConnectionClass);
+      if (source && target) {
+        const opts = {
+          fromSource,
+          source,
+          target,
+          label: "",
+          color: LinkColors.transferPipe,
+          thickness: 10,
+          showIndicators: false,
+          isEditing: false,
+          linkModel: link,
+          isTransfer: true,
+          hideArrow: fromSource
+        };
+        return this.diagramToolkit.addLink(opts);
+      }
     }
   }
 

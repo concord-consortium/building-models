@@ -7,7 +7,7 @@ import { tr } from "../utils/translate";
 const _ = require("lodash");
 const log = require("loglevel");
 
-import { PaletteStore } from "../stores/palette-store";
+import { PaletteStore, PalleteItem } from "../stores/palette-store";
 import { CodapStore } from "../stores/codap-store";
 import { LaraStore } from "../stores/lara-store";
 import { GoogleFileActions } from "../stores/google-file-store";
@@ -36,14 +36,13 @@ import { InternalLibraryItem } from "../data/internal-library";
 
 interface AppViewOuterProps {
   graphStore: GraphStoreClass;
-  data?: any; // TODO: get concrete type
+  data?: string;
   publicUrl?: string;
   googleDoc?: string;
 }
 interface AppViewOuterState {
   selectedNode: Node | null;
-  selectedConnection: any; // TODO: get concrete type
-  palette: any[]; // TODO: get concrete type
+  palette: PalleteItem[];
   undoRedoShowing: boolean;
   showBuildInfo: boolean;
   iframed: boolean;
@@ -78,7 +77,6 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
 
     const outerState: AppViewOuterState = {
       selectedNode: null,
-      selectedConnection: null,
       palette: [],
       undoRedoShowing: true,
       showBuildInfo: false,
@@ -271,15 +269,18 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
   }
 
   private loadInitialData() {
-    if ((this.props.data != null ? this.props.data.length : 0) > 0) {
-      GoogleFileActions.addAfterAuthHandler(JSON.parse(this.props.data));
+    const {data, publicUrl, googleDoc} = this.props;
+    if (data) {
+      GoogleFileActions.addAfterAuthHandler(JSON.parse(data));
       return HashParams.clearParam("data");
-    } else if ((this.props.publicUrl != null ? this.props.publicUrl.length : 0) > 0) {
-      const { publicUrl } = this.props;
+    }
+
+    if (publicUrl) {
       GoogleFileActions.addAfterAuthHandler(context => context.loadPublicUrl(publicUrl));
       return HashParams.clearParam("publicUrl");
-    } else if ((this.props.googleDoc != null ? this.props.googleDoc.length : 0) > 0) {
-      const { googleDoc } = this.props;
+    }
+
+    if (googleDoc) {
       return GoogleFileActions.addAfterAuthHandler(context => context.loadFile({id: googleDoc}));
     }
   }

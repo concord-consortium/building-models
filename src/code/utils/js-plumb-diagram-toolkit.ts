@@ -177,7 +177,7 @@ export class DiagramToolkit {
 
   public _overlays(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) {
     if (editingLabel == null) { editingLabel = true; }
-    const results: any[] = [];
+    const results: any[] = []; // checked: any ok
     if (!hideArrow) {
       results.push(["Arrow", {
         location: 1.0,

@@ -1,12 +1,12 @@
 import * as React from "react";
 
-import { dropHandler } from "../utils/drop-handler";
+import { dropHandler, DropCallbackInfo } from "../utils/drop-handler";
 
 import { tr } from "../utils/translate";
 
 interface DropZoneViewProps {
   header: string;
-  dropped: (file: any) => void; // TODO: get concrete type
+  dropped: (file: DropCallbackInfo) => void; // TODO: get concrete type
 }
 
 interface DropZoneViewState {

@@ -45,11 +45,11 @@ export class Relationship {
 
   public isDefined: boolean;
   public formula: any;
-  public text: string;
+  public text?: string;
   public hasError: boolean;
 
   private type: string;
-  private uiText: string;
+  private uiText?: string;
   private func: any;
   private errHandler: any;
   private isRange: boolean;
@@ -61,9 +61,9 @@ export class Relationship {
 
   constructor(opts: RelationshipOptions) {
     this.type        = opts.type || "range";
-    this.text        = opts.text || "";
-    this.uiText      = opts.uiText || "";
-    const { formula }      = opts;
+    this.text        = opts.text;
+    this.uiText      = opts.uiText;
+    this.formula     = opts.formula;
     this.func        = opts.func;
     this.errHandler  = opts.errHandler || Relationship.defaultErrHandler;
     this.isDefined   = (opts.formula != null) || (opts.func != null);
@@ -72,9 +72,9 @@ export class Relationship {
     this.isTransfer    = this.type === "transfer";
     this.isTransferModifier = this.type === "transfer-modifier";
     this.hasError    = false;
-    this.setFormula(formula);
     this.customData  = opts.customData;
     this.isCustomRelationship = false;
+    this.checkFormula();
   }
 
   public setFormula(newf) {

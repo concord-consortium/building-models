@@ -957,7 +957,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   },
 
   toJsonString(palette) {
-    return JSON.stringify(this.serialize(palette));
+    return JSON.stringify(this.serializeGraph(palette));
   },
 
   getGraphState(): GraphSettings {

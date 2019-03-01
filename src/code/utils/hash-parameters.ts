@@ -9,8 +9,12 @@ const _ = require("lodash");
 const PARAM_TOKEN = /[?|&]/g;
 const VALUE_TOKEN = "=";
 
+interface HashParameterMap {
+  [key: string]: string | undefined;
+}
+
 class HashParameters {
-  private parameters: any;
+  private parameters: HashParameterMap;
 
   constructor() {
     this.parameters = {};

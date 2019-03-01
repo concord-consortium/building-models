@@ -20,9 +20,7 @@ describe("relationship", () => {
       it("should make an undefined relationship", () => {
         undertest = new Relationship(options);
         undertest.isDefined.should.equal(false);
-        // WAS: expect(undertest.text).to.be.undefined();
         expect(undertest.text).to.equal(undefined);
-        // WAS: expect(undertest.formula).to.be.undefined();
         expect(undertest.formula).to.equal(undefined);
       })
     );
