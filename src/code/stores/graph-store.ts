@@ -32,6 +32,7 @@ import { RelationFactory } from "../models/relation-factory";
 import { GraphPrimitive } from "../models/graph-primitive";
 import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber } from "./store-class";
+import { GraphView } from "../views/graph-view";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -929,9 +930,11 @@ export class GraphMixin extends Mixin<GraphMixinProps, GraphMixinState> {
   private handleGraphChanged = (state) => {
     this.setState(state);
 
-    // TODO: not this:
-    if (this.mixer.diagramToolkit) {
-      this.mixer.diagramToolkit.repaint();
+    // this mixin is used by the GraphView and RelationInspector view but diagramToolkit
+    // only exists in GraphView
+    const diagramToolkit = (this.mixer as GraphView).diagramToolkit;
+    if (diagramToolkit) {
+      diagramToolkit.repaint();
     }
   }
 

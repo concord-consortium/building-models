@@ -62,8 +62,8 @@ type GraphViewState = GraphViewOuterState & GraphMixinState & SimulationMixinSta
 export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   public static displayName = "GraphView";
+  public diagramToolkit: any; // TODO: get concrete type
 
-  private diagramToolkit: any; // TODO: get concrete type
   private forceRedrawLinks: boolean;
   private linkButtonClientClass: string;
   private ignoringEvents: boolean;
