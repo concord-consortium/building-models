@@ -2,7 +2,7 @@ import * as React from "react";
 
 export interface DropDownViewItem {
   name: string;
-  action: () => void;
+  action?: () => void;
 }
 
 interface DropdownItemViewProps {

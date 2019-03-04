@@ -12,6 +12,14 @@ import { StoreUnsubscriber } from "./store-class";
 
 const DEFAULT_SIMULATION_STEPS = 20;
 
+interface TimeUnits {
+  name: string;
+  unit: string;
+}
+interface TimeUnitsMap {
+  [key: string]: TimeUnits;
+}
+
 export const SimulationActions = Reflux.createActions(
   [
     "expandSimulationPanel",
@@ -44,7 +52,7 @@ interface SimulationSettings {
   experimentFrame: number;
   stepUnits: string;
   stepUnitsName: string;
-  timeUnitOptions: any;
+  timeUnitOptions: TimeUnitsMap;
   capNodeValues: boolean;
   modelIsRunning: boolean;
   modelIsRunnable: boolean;
@@ -64,7 +72,7 @@ export const SimulationStore = Reflux.createStore({
     this.defaultUnit = TimeUnits.defaultUnit;
     this.unitName    = TimeUnits.toString(this.defaultUnit, true);
     this.defaultCollectorUnit = TimeUnits.defaultCollectorUnit;
-    const timeUnitOptions = TimeUnits.units.map((unit) => ({name: TimeUnits.toString(unit, true), unit}));
+    const timeUnitOptions: TimeUnitsMap = TimeUnits.units.map((unit) => ({name: TimeUnits.toString(unit, true), unit}));
 
     this.nodes = [];
     this.currentSimulation = null;

@@ -100,6 +100,10 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
       recording: this.state.isRecording,
       disabled: !this.state.modelIsRunnable
     };
+    const {timeUnitOptions} = this.state;
+    const items = Object.keys(timeUnitOptions).map((key) => {
+      return {name: timeUnitOptions[key].name};
+    });
     return (
       <div className="horizontal">
         <RecordButtonView {...props}>
@@ -122,7 +126,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
           isActionMenu={false}
           onSelect={SimulationActions.setStepUnits}
           anchor={this.state.stepUnitsName}
-          items={this.state.timeUnitOptions}
+          items={items}
         />
       </div>
     );
