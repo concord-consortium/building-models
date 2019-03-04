@@ -50,8 +50,8 @@ export class Relationship {
 
   public customData: any;
   public readonly isCustomRelationship: boolean;
+  public readonly type: string;
 
-  private type: string;
   private uiText?: string;
   private func: any;
   private errHandler: any;

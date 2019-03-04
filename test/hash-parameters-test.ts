@@ -11,7 +11,7 @@ const Sinon      = require("sinon");
 // to get around type errors of undefined return value
 const getParam = (param: string) => {
   return HashParams.getParam(param) || "";
-}
+};
 
 describe("HashParameters", () => {
 
