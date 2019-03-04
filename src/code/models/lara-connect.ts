@@ -10,11 +10,16 @@ const log = require("loglevel");
 
 const IframePhone = require("iframe-phone");
 import { undoRedoInstance, UndoRedoManager } from "../utils/undo-redo";
-import { PaletteStore } from "../stores/palette-store";
+import { PaletteStore, PaletteStoreClass } from "../stores/palette-store";
 import { GraphStore, GraphStoreClass } from "../stores/graph-store";
 
 interface LaraConnectMap {
   [key: string]: LaraConnect;
+}
+
+interface LaraPhone {
+  addListener(message: string, callback: (data?: any) => void); // checked: any ok
+  post(message: string, data: any); // checked: any ok
 }
 
 export class LaraConnect {
@@ -31,8 +36,8 @@ export class LaraConnect {
   private undoRedoManager: UndoRedoManager;
   private loaded: boolean;
   private graphStore: GraphStoreClass;
-  private paletteStore: any;
-  private laraPhone: any;
+  private paletteStore: PaletteStoreClass;
+  private laraPhone: LaraPhone;
   private lastCommandStackPosition: number;
 
   constructor(context) {

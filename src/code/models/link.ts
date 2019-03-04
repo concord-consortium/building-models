@@ -21,18 +21,18 @@ export class Link extends GraphPrimitive {
   }
 
   public transferNode: TransferModel;
-  public relation: any; // TODO: get concrete type
+  public relation: Relationship;
 
-  public reasoning: any; // TODO: get concrete type
+  public reasoning: string;
   public sourceNode: Node; // TODO: get concrete type
   public targetNode: Node | TransferModel;
 
-  public readonly title: any; // TODO: get concrete type
+  public readonly title: string;
 
   private options: any; // TODO: get concrete type
   private sourceTerminal: any; // TODO: get concrete type
   private targetTerminal: any; // TODO: get concrete type
-  private color: any; // TODO: get concrete type
+  private color: string;
   private jsPlumbConnection: any; // TODO: get concrete type
 
   constructor(options) {

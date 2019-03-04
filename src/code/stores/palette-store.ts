@@ -11,13 +11,14 @@ const Reflux = require("reflux");
 
 import { resizeImage } from "../utils/resize-image";
 import { initialPalette } from "../data/initial-palette";
-import { internalLibrary } from "../data/internal-library";
+import { internalLibrary, InternalLibraryItem } from "../data/internal-library";
 import { undoRedoInstance } from "../utils/undo-redo";
 import { ImportActions } from "../actions/import-actions";
 import { Mixin } from "../mixins/components";
-import { StoreUnsubscriber } from "./store-class";
-import { ImageMetadata } from "../views/preview-image-dialog-view";
+import { StoreUnsubscriber, StoreClass } from "./store-class";
+import { ImageMetadata, ImageInfo } from "../views/preview-image-dialog-view";
 const uuid           = require("uuid");
+import { Node } from "../models/node";
 
 export interface PalleteItem {
   image: string;
@@ -32,7 +33,23 @@ export const PaletteActions = Reflux.createActions(
   ]
 );
 
-export const PaletteStore = Reflux.createStore({
+interface LibraryMap {
+  [key: string]: InternalLibraryItem;
+}
+
+export declare class PaletteStoreClass extends StoreClass {
+  public readonly palette: PalleteItem[];
+  public readonly library: LibraryMap;
+  public readonly selectedPaletteItem: PalleteItem;
+  public readonly selectedPaletteIndex: number;
+  public readonly selectedPaletteImage: ImageInfo;
+  public readonly imageMetadata: ImageMetadata;
+  public inLibrary(node: Node): boolean;
+  public inPalette(node: Node): boolean;
+  public findByUUID(uuid: string): PalleteItem | undefined;
+}
+
+export const PaletteStore: PaletteStoreClass = Reflux.createStore({
   listenables: [PaletteActions, ImportActions],
 
   init() {

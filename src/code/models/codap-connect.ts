@@ -31,6 +31,11 @@ interface CodapConnectMap {
   [key: string]: CodapConnect;
 }
 
+type CodapPhoneAction = any; // checked: any ok
+interface CodapPhone {
+  call(items: CodapPhoneAction | CodapPhoneAction[], callback?: (result: any) => void); // checked: any ok
+}
+
 export class CodapConnect {
   public static instances: CodapConnectMap;
 
@@ -46,17 +51,17 @@ export class CodapConnect {
   public dataContextName: string;
 
   private standaloneMode: boolean;
-  private queue: any[];
+  private queue: any[]; // checked: any ok
   private graphStore: GraphStoreClass;
   private lastTimeSent: number;
   private sendThrottleMs: number;
   private simulationCollectionName: string;
   private samplesCollectionName: string;
   private defaultExperimentName: string;
-  private codapPhone: any;
-  private attributesKey: any;
+  private codapPhone: CodapPhone;
+  private attributesKey: string;
   private tableCreated: boolean;
-  private _attrsToSync: any;
+  private _attrsToSync: any; // checked: any ok
   private _attrsAreLoaded: boolean;
 
   constructor(context) {

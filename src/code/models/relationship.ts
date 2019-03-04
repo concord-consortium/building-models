@@ -48,6 +48,9 @@ export class Relationship {
   public text?: string;
   public hasError: boolean;
 
+  public customData: any;
+  public readonly isCustomRelationship: boolean;
+
   private type: string;
   private uiText?: string;
   private func: any;
@@ -56,8 +59,6 @@ export class Relationship {
   private isAccumulator: boolean;
   private isTransfer: boolean;
   private isTransferModifier: boolean;
-  private customData: any;
-  private isCustomRelationship: boolean;
 
   constructor(opts: RelationshipOptions) {
     this.type        = opts.type || "range";
