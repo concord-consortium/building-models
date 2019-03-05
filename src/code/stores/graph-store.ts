@@ -906,6 +906,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     log.info("json success");
     const importer = new Importer(this, AppSettingsStore, PaletteStore);
     importer.importData(data);
+    this.resetSimulation();
     return this.undoRedoManager.clearHistory();
   },
 
