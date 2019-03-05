@@ -189,7 +189,7 @@ describe("Migrations",  () =>
     describe("v-1.17.0 changes", () => {
       it("should have experiment number and frame", () => {
         const result = migrationUpdate(data, "1.17.0");
-        result.settings.simulation.experimentNumber.should.equal(0)
+        result.settings.simulation.experimentNumber.should.equal(0);
         result.settings.simulation.experimentFrame.should.equal(0);
       });
     });

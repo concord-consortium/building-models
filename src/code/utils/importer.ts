@@ -10,15 +10,15 @@ import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
 import { ImportActions } from "../actions/import-actions";
 import { GraphPrimitive } from "../models/graph-primitive";
+import { GraphStoreClass } from "../stores/graph-store";
+import { PaletteStoreClass } from "../stores/palette-store";
 
 export class Importer {
-  private graphStore: any;
-  private settings: any;
-  private paletteStore: any;
+  private graphStore: GraphStoreClass;
+  private paletteStore: PaletteStoreClass;
 
   constructor(graphStore, settings, paletteStore) {
     this.graphStore = graphStore;
-    this.settings = settings;
     this.paletteStore = paletteStore;
   }
 

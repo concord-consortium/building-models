@@ -6,13 +6,13 @@
 
 import * as React from "react";
 
-import { PreviewImageDialogView } from "../views/preview-image-dialog-view";
+import { PreviewImageDialogView, ImageInfo } from "../views/preview-image-dialog-view";
 import { hasValidImageExtension } from "../utils/has-valid-image-extension";
 import { ImageDialogActions } from "../stores/image-dialog-store";
 import { Mixin } from "./components";
 
 export interface ImageDialogViewMixinProps {
-  selectedImage: any; // TODO: get concrete type
+  selectedImage: ImageInfo;
 }
 
 export interface ImageDialogViewMixinState {}

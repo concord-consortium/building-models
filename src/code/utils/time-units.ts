@@ -8,7 +8,7 @@ const _ = require("lodash");
 
 import { tr } from "../utils/translate";
 
-const units: any = {STEP: 1};
+const units: any = {STEP: 1}; // checked: any ok
 units.SECOND =  1;
 units.MINUTE = 60 * units.SECOND;
 units.HOUR   = 60 * units.MINUTE;

@@ -7,7 +7,7 @@ import { tr } from "../utils/translate";
 const _ = require("lodash");
 const log = require("loglevel");
 
-import { PaletteStore } from "../stores/palette-store";
+import { PaletteStore, PalleteItem } from "../stores/palette-store";
 import { CodapStore } from "../stores/codap-store";
 import { LaraStore } from "../stores/lara-store";
 import { GoogleFileActions } from "../stores/google-file-store";
@@ -26,27 +26,32 @@ import { ImageDialogMixinProps, ImageDialogMixinState, ImageDialogMixin } from "
 import { AppSettingsStore, AppSettingsActions, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
+import { Node } from "../models/node";
+
 import { urlParams } from "../utils/url-params";
+import { Link } from "../models/link";
+import { GraphStoreClass } from "../stores/graph-store";
+import { NodeChangedValues } from "./node-inspector-view";
+import { InternalLibraryItem } from "../data/internal-library";
 
 interface AppViewOuterProps {
-  graphStore: any; // TODO: get concrete type
-  data?: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
+  data?: string;
   publicUrl?: string;
   googleDoc?: string;
 }
 interface AppViewOuterState {
-  selectedNode: any; // TODO: get concrete type
-  selectedConnection: any; // TODO: get concrete type
-  palette: any[]; // TODO: get concrete type
+  selectedNode: Node | null;
+  palette: PalleteItem[];
   undoRedoShowing: boolean;
   showBuildInfo: boolean;
   iframed: boolean;
   username: string;
   filename: string;
   showImageBrowser: boolean;
-  editingNode: any; // TODO: get concrete type
-  selectedLink: any; // TODO: get concrete type
-  internalLibrary: any; // TODO: get concrete type
+  editingNode: Node | null;
+  selectedLink: Link | null;
+  internalLibrary: InternalLibraryItem[] | null;
   standaloneMode: boolean;
 }
 
@@ -72,7 +77,6 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
 
     const outerState: AppViewOuterState = {
       selectedNode: null,
-      selectedConnection: null,
       palette: [],
       undoRedoShowing: true,
       showBuildInfo: false,
@@ -241,7 +245,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     this.setState({undoRedoShowing: !status.hideUndoRedo});
   }
 
-  private handleNodeChanged = (node, data) => {
+  private handleNodeChanged = (node: Node, data: NodeChangedValues) => {
     return this.props.graphStore.changeNode(data);
   }
 
@@ -265,17 +269,18 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
   }
 
   private loadInitialData() {
-    if ((this.props.data != null ? this.props.data.length : 0) > 0) {
-      this.props.graphStore.addAfterAuthHandler(JSON.parse(this.props.data));
+    const {data, publicUrl, googleDoc} = this.props;
+    if (data) {
+      GoogleFileActions.addAfterAuthHandler(JSON.parse(data));
       return HashParams.clearParam("data");
+    }
 
-    } else if ((this.props.publicUrl != null ? this.props.publicUrl.length : 0) > 0) {
-      const { publicUrl } = this.props;
+    if (publicUrl) {
       GoogleFileActions.addAfterAuthHandler(context => context.loadPublicUrl(publicUrl));
       return HashParams.clearParam("publicUrl");
+    }
 
-    } else if ((this.props.googleDoc != null ? this.props.googleDoc.length : 0) > 0) {
-      const { googleDoc } = this.props;
+    if (googleDoc) {
       return GoogleFileActions.addAfterAuthHandler(context => context.loadFile({id: googleDoc}));
     }
   }

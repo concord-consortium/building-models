@@ -10,9 +10,9 @@ interface IMixin<P, S> extends React.ComponentLifecycle<P, S> {
 export class Mixin<P, S> implements IMixin<P, S> {
   public static InitialState: () => any;
 
-  protected mixer: any;
+  protected mixer: Mixer<P, S>;
 
-  constructor(mixer: any) {
+  constructor(mixer: Mixer<P, S>) {
     this.mixer = mixer;
   }
 
@@ -24,7 +24,7 @@ export class Mixin<P, S> implements IMixin<P, S> {
     return this.mixer.state;
   }
 
-  public setState(state: S, callback?: () => any) {
+  public setState(state: S, callback?: () => void) {
     this.mixer.setState(state, callback);
   }
 }
@@ -32,7 +32,7 @@ export class Mixin<P, S> implements IMixin<P, S> {
 export class Mixer<P, S> extends React.Component<P, S> {
   protected mixins: Array<IMixin<any, any>>;
 
-  public setInitialState(s: any, ...rest) {
+  public setInitialState(s: any, ...rest) {  // checked: any valid
     this.state = _.extend(s, ...rest);
   }
 
@@ -44,7 +44,7 @@ export class Mixer<P, S> extends React.Component<P, S> {
     this.mixins.forEach(mixin => mixin.componentDidMount && mixin.componentDidMount());
   }
 
-  public componentWillReceiveProps(nextProps: Readonly<P>, nextContext: any) {
+  public componentWillReceiveProps(nextProps: Readonly<P>, nextContext: any) { // checked: any valid
     this.mixins.forEach(mixin => mixin.componentWillReceiveProps && mixin.componentWillReceiveProps(nextProps, nextContext));
   }
 
@@ -55,11 +55,11 @@ export class Mixer<P, S> extends React.Component<P, S> {
   }
   */
 
-  public componentWillUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any) {
+  public componentWillUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any) {  // checked: any valid
     this.mixins.forEach(mixin => mixin.componentWillUpdate && mixin.componentWillUpdate(nextProps, nextState, nextContext));
   }
 
-  public componentDidUpdate(prevProps: Readonly<P>, prevState: Readonly<S>, prevContext: any) {
+  public componentDidUpdate(prevProps: Readonly<P>, prevState: Readonly<S>, prevContext: any) {  // checked: any valid
     this.mixins.forEach(mixin => mixin.componentDidUpdate && mixin.componentDidUpdate(prevProps, prevState, prevContext));
   }
 

@@ -1,7 +1,7 @@
 const _ = require("lodash");
 import * as $ from "jquery";
 import * as ReactDOM from "react-dom";
-import { Mixin } from "./components";
+import { Mixin, Mixer } from "./components";
 
 interface DraggableMixinOptions {
   doMove?: (e, extra) => void;
@@ -15,7 +15,7 @@ export class DraggableMixin extends Mixin<DraggableMixinProps, DraggableMixinSta
   private doMove: ((e, extra) => void);
   private removeClasses: string[];
 
-  constructor(mixer: any, props = {}, options: DraggableMixinOptions = {}) {
+  constructor(mixer: Mixer<DraggableMixinProps, DraggableMixinState>, props = {}, options: DraggableMixinOptions = {}) {
     super(mixer);
     this.doMove = options.doMove || (() => undefined);
     this.removeClasses = options.removeClasses || ["proto-node"];

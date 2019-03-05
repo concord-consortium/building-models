@@ -17,7 +17,7 @@ import { SimulationStore, SimulationActions } from "../stores/simulation-store";
 import { PaletteStore } from "../stores/palette-store";
 import { TimeUnits } from "../utils/time-units";
 import { escapeRegExp } from "../utils/escape-reg-ex";
-import { GraphStore } from "../stores/graph-store";
+import { GraphStore, GraphStoreClass } from "../stores/graph-store";
 
 // log -- see loglevel in package.json
 
@@ -29,6 +29,11 @@ export interface CODAPDataContextListItem {
 
 interface CodapConnectMap {
   [key: string]: CodapConnect;
+}
+
+type CodapPhoneAction = any; // checked: any ok
+interface CodapPhone {
+  call(items: CodapPhoneAction | CodapPhoneAction[], callback?: (result: any) => void); // checked: any ok
 }
 
 export class CodapConnect {
@@ -46,17 +51,17 @@ export class CodapConnect {
   public dataContextName: string;
 
   private standaloneMode: boolean;
-  private queue: any[];
-  private graphStore: any;
+  private queue: any[]; // checked: any ok
+  private graphStore: GraphStoreClass;
   private lastTimeSent: number;
   private sendThrottleMs: number;
   private simulationCollectionName: string;
   private samplesCollectionName: string;
   private defaultExperimentName: string;
-  private codapPhone: any;
-  private attributesKey: any;
+  private codapPhone: CodapPhone;
+  private attributesKey: string;
   private tableCreated: boolean;
-  private _attrsToSync: any;
+  private _attrsToSync: any; // checked: any ok
   private _attrsAreLoaded: boolean;
 
   constructor(context) {
@@ -306,7 +311,7 @@ export class CodapConnect {
           } else if (node.codapName !== attr.name) {
             node.codapName = attr.name;
             if (!initialSync && (node.title !== attr.name)) {
-              this.graphStore._changeNode(node, { title: attr.name }, false);
+              this.graphStore.changeNodeOutsideUndoRedo(node, { title: attr.name }, false);
             }
           }
           if (initialSync) {
@@ -651,7 +656,7 @@ export class CodapConnect {
         log.info("Received saveState request from CODAP.");
         return callback({
           success: true,
-          state: this.graphStore.serialize(PaletteStore.palette)
+          state: this.graphStore.serializeGraph(PaletteStore.palette)
         });
       }
       break;

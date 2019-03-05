@@ -17,13 +17,15 @@ import { RelationFactory } from "../models/relation-factory";
 import { tr } from "../utils/translate";
 
 import { InspectorPanelActions, InspectorPanelMixinProps, InspectorPanelMixinState, InspectorPanelMixin } from "../stores/inspector-panel-store";
-import { GraphStore, GraphMixin, GraphMixinProps, GraphMixinState } from "../stores/graph-store";
+import { GraphStore, GraphMixin, GraphMixinProps, GraphMixinState, GraphStoreClass } from "../stores/graph-store";
 import { Mixer } from "../mixins/components";
+import { Link } from "../models/link";
+import { Node } from "../models/node";
 
 interface RelationInspectorViewOuterProps {
-  node?: any; // TODO: get concrete type
-  link?: any; // TODO: get concrete type
-  graphStore: any; // TODO: get concrete type
+  node?: Node | null;
+  link?: Link | null;
+  graphStore: GraphStoreClass;
 }
 interface RelationInspectorViewOuterState {
 }
@@ -44,11 +46,14 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     this.setInitialState(outerState, InspectorPanelMixin.InitialState());
   }
 
-    public render() {
-    if (this.props.node) {
-      return this.renderNodeRelationInspector();
-    } else {
+  public render() {
+    const {node, link} = this.props;
+    if (node) {
+      return this.renderNodeRelationInspector(node);
+    } else if (link) {
       return this.renderLinkRelationInspector();
+    } else {
+      return <div />;
     }
   }
 
@@ -63,24 +68,27 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
 
   // this is passed as a prop so it needs to be bound to this class
   private renderNodeDetailsInspector = () => {
-    const inputCount = (this.props.node.inLinks() || []).length;
-    if (this.props.node.isAccumulator || (inputCount < 2)) { return null; }
+    const {node} = this.props;
+    if (node) {
+      const inputCount = (node.inLinks() || []).length;
+      if (node.isAccumulator || (inputCount < 2)) { return null; }
 
-    const method = this.props.node.combineMethod != null ? this.props.node.combineMethod : "average";
-    return (
-      <div className="node-details-inspector" key="details">
-        {tr("~NODE-RELATION-EDIT.COMBINATION_METHOD")}
-        <select key={0} value={method} onChange={this.handleMethodSelected}>
-          <option value="average" key={1}>{tr("~NODE-RELATION-EDIT.ARITHMETIC_MEAN")}</option>
-          <option value="product" key={2}>{tr("~NODE-RELATION-EDIT.SCALED_PRODUCT")}</option>
-        </select>
-      </div>
-    );
+      const method = node.combineMethod != null ? node.combineMethod : "average";
+      return (
+        <div className="node-details-inspector" key="details">
+          {tr("~NODE-RELATION-EDIT.COMBINATION_METHOD")}
+          <select key={0} value={method} onChange={this.handleMethodSelected}>
+            <option value="average" key={1}>{tr("~NODE-RELATION-EDIT.ARITHMETIC_MEAN")}</option>
+            <option value="product" key={2}>{tr("~NODE-RELATION-EDIT.SCALED_PRODUCT")}</option>
+          </select>
+        </div>
+      );
+    }
   }
 
-  private renderNodeRelationInspector() {
+  private renderNodeRelationInspector(node: Node) {
     let selectedTabIndex = 0;
-    const tabs = _.map(this.props.node.inLinks(), (link, i) => {
+    const tabs = _.map(node.inLinks(), (link, i) => {
       if (this.state.selectedLink === link) { selectedTabIndex = i; }
       return this.renderTabforLink(link);
     });
@@ -101,11 +109,17 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
   }
 
   private handleTabSelected = (index) => {
-    InspectorPanelActions.openInspectorPanel("relations", {link: __guard__(this.props.node.inLinks(), x => x[index])});
+    const {node} = this.props;
+    if (node) {
+      InspectorPanelActions.openInspectorPanel("relations", {link: __guard__(node.inLinks(), x => x[index])});
+    }
   }
 
   private handleMethodSelected = (evt) => {
-    GraphStore.changeNode({ combineMethod: evt.target.value }, this.props.node);
+    const {node} = this.props;
+    if (node) {
+      GraphStore.changeNode({ combineMethod: evt.target.value }, node);
+    }
   }
 }
 

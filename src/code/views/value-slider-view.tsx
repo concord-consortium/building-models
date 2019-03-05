@@ -19,18 +19,23 @@ const constants = {
   }
 };
 
+interface Range {
+  min: number;
+  max: number;
+}
+
 interface SVGSliderViewProps {
   min: number;
   max: number;
   value: number;
   onValueChange?: (value: number) => void;
-  onRangeChange?: (range: any) => void; // TODO: get concrete type
-  orientation: any; // TODO: get concrete type
+  onRangeChange?: (range: Range) => void;
+  orientation: "horizontal" | "vertical";
   width: number;
   height: number;
   handleSize: number;
   renderValueTooltip: boolean;
-  displayPrecision: any; // TODO: get concrete type
+  displayPrecision: number;
   onSliderDragStart?: () => void;
   onSliderDragEnd?: () => void;
   stepSize: number;
@@ -64,8 +69,8 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     "editing-max": false
   };
 
-  private slider: any; // TODO: get concrete type
-  private handle: any; // TODO: get concrete type
+  private slider: HTMLDivElement | null;
+  private handle: HTMLDivElement | null;
   private input: HTMLInputElement | null;
 
   /*
@@ -144,7 +149,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   private updateRange(property, value) {
-    const range = {
+    const range: Range = {
       min: this.props.min,
       max: this.props.max
     };
@@ -168,16 +173,18 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   private handleUpdate = () => {
-    const { orientation } = this.props;
-    let { dimension } = constants.orientation[orientation];
-    dimension = dimension.charAt(0).toUpperCase() + dimension.substr(1);
-    const sliderPos = this.slider[`offset${dimension}`];
-    const handlePos = (this.handle != null ? this.handle[`offset${dimension}`] : undefined) || 0;
+    if (this.slider && this.handle) {
+      const { orientation } = this.props;
+      let { dimension } = constants.orientation[orientation];
+      dimension = dimension.charAt(0).toUpperCase() + dimension.substr(1);
+      const sliderPos = this.slider[`offset${dimension}`];
+      const handlePos = this.handle[`offset${dimension}`];
 
-    return this.setState({
-      limit: sliderPos - handlePos,
-      grab: handlePos / 2
-    });
+      return this.setState({
+        limit: sliderPos - handlePos,
+        grab: handlePos / 2
+      });
+    }
   }
 
   private sliderLocation() {
@@ -202,7 +209,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   private renderNumber() {
-    const style: any = {bottom: `${this.props.handleSize}px`};
+    const style: any = {bottom: `${this.props.handleSize}px`}; // checked: any ok
 
     if (this.state.dragging && this.props.renderValueTooltip) {
       style.display = "block";
@@ -269,19 +276,22 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   private position(e) {
-    const { grab } = this.state;
-    const { orientation } = this.props;
-    const node = this.slider;
-    const coordinateStyle = constants.orientation[orientation].coordinate;
-    const directionStyle = constants.orientation[orientation].direction;
-    const clientCoordinateStyle = `client${coordinateStyle.toUpperCase()}`;
-    const coordinate = !e.touches ? e[clientCoordinateStyle] : e.touches[0][clientCoordinateStyle];
-    const direction = node.getBoundingClientRect()[directionStyle];
+    if (this.slider) {
+      const { grab } = this.state;
+      const { orientation } = this.props;
+      const node = this.slider;
+      const coordinateStyle = constants.orientation[orientation].coordinate;
+      const directionStyle = constants.orientation[orientation].direction;
+      const clientCoordinateStyle = `client${coordinateStyle.toUpperCase()}`;
+      const coordinate = !e.touches ? e[clientCoordinateStyle] : e.touches[0][clientCoordinateStyle];
+      const direction = node.getBoundingClientRect()[directionStyle];
 
-    const pos = coordinate - direction - grab;
-    const value = this.getValueFromPosition(pos);
+      const pos = coordinate - direction - grab;
+      const value = this.getValueFromPosition(pos);
 
-    return value;
+      return value;
+    }
+    return 0;
   }
 
   private renderHandle() {
@@ -290,7 +300,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     const width = (height = `${handleSize}px`);
     const centerOfDiv = `${this.sliderPercent()}%`;
     const outerEdge = Math.round((this.thickness() - handleSize) / 2.0 );
-    const style: any = {
+    const style: any = { // checked: any valid
       "width": width,
       "height": height,
       "fontSize": `${handleSize / 2}px`
@@ -396,7 +406,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     const numTicks = ((max - min) / stepSize);
     const tickDistance = this.length() / numTicks;
     const tickHeight = circleRadius * 1.5;
-    const ticks: any[] = [];
+    const ticks: JSX.Element[] = [];
     for (let j = 1, end = numTicks, asc = 1 <= end; asc ? j < end : j > end; asc ? j++ : j--) {
       if (orientation === "horizontal") {
         ticks.push(<path key={j} d={`M${j * tickDistance} ${center - tickHeight} l 0 ${tickHeight * 2}`} className="slider-line" />);

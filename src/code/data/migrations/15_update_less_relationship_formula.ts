@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const _ = require("lodash");
 import { MigrationMixin } from "./migration-mixin";
 
@@ -14,21 +7,14 @@ const migration = {
   date: "2016-05-24",
 
   doUpdate(data) {
-
-    return (() => {
-      const result: any = [];
-      for (const link of data.links) {
-        if (link.relation.formula === "maxIn - 21.7 * log(in+1)") {
-          link.relation.formula = "maxIn - 21.7 * log(max(1,in))";
-        }
-        if (link.relation.formula === "1 * 21.7 * log(in+1)") {
-          result.push(link.relation.formula = "1 * 21.7 * log(max(1,in))");
-        } else {
-          result.push(undefined);
-        }
+    for (const link of data.links) {
+      if (link.relation.formula === "maxIn - 21.7 * log(in+1)") {
+        link.relation.formula = "maxIn - 21.7 * log(max(1,in))";
       }
-      return result;
-    })();
+      if (link.relation.formula === "1 * 21.7 * log(in+1)") {
+        link.relation.formula = "1 * 21.7 * log(max(1,in))";
+      }
+    }
   }
 };
 

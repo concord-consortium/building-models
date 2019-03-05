@@ -9,7 +9,7 @@ import * as React from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { NodeInspectorView } from "./node-inspector-view";
+import { NodeInspectorView, NodeChangedValues } from "./node-inspector-view";
 import { LinkInspectorView } from "./link-inspector-view";
 import { LinkValueInspectorView } from "./link-value-inspector-view";
 import { NodeValueInspectorView } from "./node-value-inspector-view";
@@ -19,11 +19,18 @@ import { SimulationInspectorView } from "./simulation-inspector-view";
 import { InspectorPanelActions, InspectorPanelMixinProps, InspectorPanelMixinState, InspectorPanelMixin } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
 
+import { Node } from "../models/node";
+import { Link } from "../models/link";
+import { GraphStoreClass } from "../stores/graph-store";
+import { PalleteItem } from "../stores/palette-store";
+
 interface ToolButtonViewProps {
+  key?: string;
   name: string;
   selected: boolean;
   disabled: boolean;
-  onClick: (name: string) => void;
+  shows: string;
+  onClick?: (name: string) => void;
 }
 
 interface ToolButtonViewState {}
@@ -56,8 +63,8 @@ interface ToolPanelButton {
 
 interface ToolPanelViewProps {
   diagramOnly: boolean;
-  node: any; // TODO: get concrete type
-  link: any; // TODO: get concrete type
+  node: Node | null;
+  link: Link | null;
   nowShowing: string;
   onNowShowing: (shows: string|null) => void;
 }
@@ -98,7 +105,7 @@ class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewSta
   }
 
   private buttonProps(button: ToolPanelButton) {
-    const props: any = {
+    const props: ToolButtonViewProps = {
       name:     button.name,
       shows:    button.shows,
       selected: false,
@@ -130,12 +137,12 @@ class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewSta
 interface InspectorPanelViewOuterProps {
   display?: boolean;
   diagramOnly: boolean;
-  node: any; // TODO: get concrete type
-  link: any; // TODO: get concrete type
-  onNodeChanged: (node: any, data: any) => void; // TODO: get concrete type
-  onNodeDelete: (node: any) => void; // TODO: get concrete type
-  palette: any; // TODO: get concrete type
-  graphStore: any; // TODO: get concrete type
+  node: Node | null;
+  link: Link | null;
+  onNodeChanged: (node: Node, data: NodeChangedValues) => void;
+  onNodeDelete: (node: Node) => void;
+  palette: PalleteItem[];
+  graphStore: GraphStoreClass;
 }
 interface InspectorPanelViewOuterState {
 }

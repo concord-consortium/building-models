@@ -20,15 +20,21 @@ const DEFAULT_CONTEXT_NAME = "building-models";
 // which puts actions in a stack before calling them. We frequently want to ensure
 // that all other actions have completed before, e.g., we end a commandBatch.
 
+export interface UndoRedoListenerOptions {
+}
+
+export type UndoRedoListener = (options: UndoRedoListenerOptions) => void;
+
 export class UndoRedoManager {
-  private endCommandBatch: any;
-  private undo: any;
-  private redo: any;
-  private commands: any[];
-  private stackPosition: number;
+  public commands: Array<UndoRedoCommand | UndoRedoCommandBatch>;
+  public stackPosition: number;
+
+  private endCommandBatch: any; // checked: any ok (reflux action)
+  private undo: any; // checked: any ok (reflux action)
+  private redo: any; // checked: any ok (reflux action)
   private savePosition: number;
-  private changeListeners: any[];
-  private currentBatch: any;
+  private changeListeners: UndoRedoListener[];
+  private currentBatch: UndoRedoCommandBatch | null;
   private debug: boolean;
 
   constructor(options) {
@@ -158,36 +164,24 @@ export class UndoRedoManager {
   }
 
   public revertToOriginal() {
-    return (() => {
-      const result: any[] = [];
-      while (this.canUndo()) {
-        result.push(this.undo());
-      }
-      return result;
-    })();
+    while (this.canUndo()) {
+      this.undo();
+    }
   }
 
   public revertToLastSave() {
     if (this.stackPosition > this.savePosition) {
-      return (() => {
-        const result: any[] = [];
-        while (this.dirty()) {
-          result.push(this.undo());
-        }
-        return result;
-      })();
+      while (this.dirty()) {
+        this.undo();
+      }
     } else if (this.stackPosition < this.savePosition) {
-      return (() => {
-        const result1: any[] = [];
-        while (this.dirty()) {
-          result1.push(this.redo());
-        }
-        return result1;
-      })();
+      while (this.dirty()) {
+        this.redo();
+      }
     }
   }
 
-  public addChangeListener(listener) {
+  public addChangeListener(listener: UndoRedoListener) {
     return this.changeListeners.push(listener);
   }
 
@@ -219,21 +213,29 @@ export class UndoRedoManager {
   }
 }
 
-export class UndoRedoCommand {
-  private name: string;
-  private methods: any;
+type UndoRedoMethod = "execute" | "undo" | "redo";
+interface UndoRedoMethods {
+  execute?: () => void;
+  undo?: () => void;
+  redo?: () => void;
+}
 
-  constructor(name, methods) {
+export class UndoRedoCommand {
+  public readonly name: string;
+  private methods: UndoRedoMethods;
+
+  constructor(name: string, methods: UndoRedoMethods) {
     this.name = name;
     this.methods = methods;
   }
 
-  public _call(method, debug, via?) {
+  public _call(method: UndoRedoMethod, debug: boolean, via?: string) {
     if (debug) {
       log.info(`Command: ${this.name}.${method}()` + (via ? ` via ${via}` : ""));
     }
-    if (this.methods.hasOwnProperty(method)) {
-      return this.methods[method]();
+    const methodAction = this.methods[method];
+    if (methodAction) {
+      return methodAction();
     } else {
       throw new Error(`Undefined ${method} method for ${this.name} command`);
     }
@@ -246,8 +248,8 @@ export class UndoRedoCommand {
 }
 
 export class UndoRedoCommandBatch {
-  private name: string;
-  private commands: any[];
+  public readonly commands: UndoRedoCommand[];
+  public readonly name: string;
 
   constructor(name) {
     this.name = name;
@@ -259,14 +261,10 @@ export class UndoRedoCommandBatch {
   }
 
   public undo(debug) {
-    return (() => {
-      const result: any[] = [];
-      for (let i = this.commands.length - 1; i >= 0; i--) {
-        const command = this.commands[i];
-        result.push(command.undo(debug));
-      }
-      return result;
-    })();
+    for (let i = this.commands.length - 1; i >= 0; i--) {
+      const command = this.commands[i];
+      command.undo(debug);
+    }
   }
   public redo(debug) {
     return this.commands.map((command) => command.redo(debug));

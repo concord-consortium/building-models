@@ -64,9 +64,16 @@ interface AppSettingsSettings {
   complexity: number;
   simulationType: number;
   relationshipSymbols: boolean;
-  uiElements: any;
-  lockdown: any;
+  uiElements: UIElements;
+  lockdown: boolean;
   touchDevice: boolean;
+}
+
+export interface UIElements {
+  globalNav: boolean;
+  actionBar: boolean;
+  inspectorPanel: boolean;
+  nodePalette: boolean;
 }
 
 export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
@@ -78,7 +85,7 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       :
       SimulationType.DEFAULT;
 
-    const uiElements = {
+    const uiElements: UIElements = {
       globalNav: true,
       actionBar: true,
       inspectorPanel: true,
@@ -95,7 +102,7 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       uiElements.nodePalette = uiParams.indexOf("nodePalette") === -1;
     }
 
-    const lockdown = (HashParams.getParam("lockdown") === "true") || urlParams.lockdown;
+    const lockdown = (HashParams.getParam("lockdown") === "true") || (urlParams.lockdown === "true");
 
     return this.settings = {
       showingSettingsDialog: false,

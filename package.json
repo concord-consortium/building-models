@@ -24,6 +24,7 @@
     "strings:push": "./bin/strings-push-project.sh",
     "test": "mocha",
     "test:watch": "mocha -w",
+    "test:lint": "tslint -c tslint.json 'test/**/*.{ts,tsx}'",
     "cypress:open": "cypress open"
   },
   "dependencies": {

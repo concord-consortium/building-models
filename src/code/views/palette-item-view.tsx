@@ -3,11 +3,12 @@ import * as React from "react";
 import { DraggableMixin, DraggableMixinProps, DraggableMixinState } from "../mixins/draggable";
 import { SquareImageView } from "./square-image-view";
 import { Mixer } from "../mixins/components";
+import { Node } from "../models/node";
 
 interface PaletteItemViewOuterProps {
   index: number;
   image?: string;
-  node: any; // TODO: get concrete type
+  node: Node;
   onSelect: (index: number) => void;
 }
 type PaletteItemViewProps = PaletteItemViewOuterProps & DraggableMixinProps;

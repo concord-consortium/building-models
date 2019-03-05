@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
 const _ = require("lodash");
 import { MigrationMixin } from "./migration-mixin";
 import { Relationship } from "../../models/relationship";
@@ -21,15 +14,11 @@ const migration = {
 
   // Add initialValue if it doesn't exist
   updateNodes(data) {
-    return (() => {
-      const result: any = [];
-      for (const node of data.nodes) {
-        if (!node.data) { node.data = {}; } // should never happen
-        node.data.initialValue = 50;
-        result.push(node.data.isAccumulator = false);
-      }
-      return result;
-    })();
+    for (const node of data.nodes) {
+      if (!node.data) { node.data = {}; } // should never happen
+      node.data.initialValue = 50;
+      node.data.isAccumulator = false;
+    }
   },
 
   // Add initialValue if it doesn't exist
@@ -39,7 +28,7 @@ const migration = {
       formula     : Relationship.defaultFormula
     };
 
-    return data.links.map((link: any) =>
+    return data.links.map((link) =>
       (link.relation = _.clone(defaultRelation)));
   }
 };

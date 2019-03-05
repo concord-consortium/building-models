@@ -12,7 +12,7 @@ import { SVGSliderView as SVGSliderViewClass } from "../src/code/views/value-sli
 const Slider = React.createFactory(SVGSliderViewClass);
 
 describe("The Value Slider", () => {
-  const createSlider = (orientation: string) => {
+  const createSlider = (orientation: "horizontal" | "vertical") => {
     return Slider({
       orientation,
       filled: true,
@@ -38,10 +38,6 @@ describe("The Value Slider", () => {
     });
   };
 
-  it("contains a div with the value-slider class", () => {
-    const wrapper = shallow(createSlider(""));
-    return expect(wrapper.find(".value-slider").length).to.equal(1);
-  });
   describe("vertical slider", () =>
     it("has a vertical classs ", () => {
       const component = shallow(createSlider("vertical"));

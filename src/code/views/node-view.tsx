@@ -25,13 +25,14 @@ import { NodeTitleMixinState, NodeTitleMixinProps, NodeTitleMixin } from "../mix
 
 import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
+import { Node} from "../models/node";
+import { GraphStoreClass } from "../stores/graph-store";
+import { SelectionManager } from "../models/selection-manager";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
-  node: any; // TODO: get concrete type
-  onNodeChanged?: (node: any, newValue: any) => void; // TODO: get concrete type
-  onNodeDelete?: (node: any) => void; // TODO: get concrete type
-  graphStore: any; // TODO: get concrete type
+  node: Node;
+  graphStore: GraphStoreClass;
   nodeKey: string;
   onStartEditing: () => void;
   onStopEditing: () => void;
@@ -196,21 +197,29 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
   }
 }
 
+interface NodeViewHandlerOptions {
+  nodeKey: string;
+  reactComponent: NodeView;
+  domElement: HTMLDivElement | null;
+  syntheticEvent: any; // checked: any ok
+  extra?: any; // checked: any ok
+}
+
 interface NodeViewProps {
-  data: any; // TODO: get concrete type
+  data: Node;
   nodeKey: string;
   simulating: boolean;
   showGraphButton: boolean;
   editTitle: boolean;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   dataColor: string;
   isTimeBased: boolean;
   innerColor: string;
-  selectionManager?: any; // TODO: get concrete type
+  selectionManager?: SelectionManager;
   selected: boolean;
-  onMove: (data: any) => void;
-  onMoveComplete: (data: any) => void;
-  onDelete: (data: any) => void;
+  onMove: (options: NodeViewHandlerOptions) => void;
+  onMoveComplete: (options: NodeViewHandlerOptions) => void;
+  onDelete: (options: NodeViewHandlerOptions) => void;
 }
 
 interface NodeViewState {
@@ -330,17 +339,6 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  private renderValue() {
-    let value = this.props.data.value || this.props.data.initialValue;
-    value = Math.round(value);
-    return (
-      <div className="value">
-        <label>{tr("~NODE.SIMULATION.VALUE")}</label>
-        <input type="text" className="value" value={value} />
       </div>
     );
   }
@@ -478,7 +476,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleStartEditing = () => {
-    if (!AppSettingsStore.settings.lockdown) {
+    if (this.props.selectionManager && !AppSettingsStore.settings.lockdown) {
       this.initialTitle = this.props.graphStore.nodeKeys[this.props.nodeKey].title;
       return this.props.selectionManager.selectNodeForTitleEditing(this.props.data);
     }
@@ -486,11 +484,15 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private handleStopEditing = () => {
     this.props.graphStore.endNodeEdit();
-    return this.props.selectionManager.clearTitleEditing();
+    if (this.props.selectionManager) {
+      this.props.selectionManager.clearTitleEditing();
+    }
   }
 
   private isEditing() {
-    return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
+    if (this.props.selectionManager) {
+      return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
+    }
   }
 
   private handleSliderDragStart = () => {

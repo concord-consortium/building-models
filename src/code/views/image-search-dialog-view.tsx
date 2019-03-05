@@ -18,11 +18,13 @@ import { OpenClipArt } from "../utils/open-clipart";
 import { tr } from "../utils/translate";
 import { ImageDialogViewMixin, ImageDialogViewMixinProps, ImageDialogViewMixinState } from "../mixins/image-dialog-view";
 import { Mixer } from "../mixins/components";
-import { internalLibrary } from "../data/internal-library";
+import { internalLibrary, InternalLibraryItem } from "../data/internal-library";
+import { Node } from "../models/node";
+import { ImageInfo } from "./preview-image-dialog-view";
 
 interface ImageSearchResultViewProps {
-  imageInfo: any; // TODO: get concrete type
-  isDisabled: (imageInfo: any) => boolean; // TODO: get concrete type
+  imageInfo: ImageInfo;
+  isDisabled: (imageInfo: ImageInfo) => boolean;
 }
 
 interface ImageSearchResultViewState {
@@ -64,9 +66,9 @@ class ImageSearchResultView extends React.Component<ImageSearchResultViewProps, 
 }
 
 interface ImageSearchPageLinkViewProps {
-  currentPage: any; // TODO: get concrete type
-  page: any; // TODO: get concrete type
-  selectPage: (page: any) => void; // TODO: get concrete type
+  currentPage: number;
+  page: number;
+  selectPage: (page: number) => void;
 }
 
 interface ImageSearchPageLinkViewState {}
@@ -92,8 +94,8 @@ class ImageSearchPageLinkView extends React.Component<ImageSearchPageLinkViewPro
 
 interface ImageSearchPrevNextLinkViewProps {
   enabled: boolean;
-  page: any; // TODO: get concrete type
-  selectPage: (page: any) => void; // TODO: get concrete type
+  page: number;
+  selectPage: (page: number) => void;
   label: string;
 }
 
@@ -119,9 +121,9 @@ class ImageSearchPrevNextLinkView extends React.Component<ImageSearchPrevNextLin
 }
 
 interface ImageSearchDialogViewOuterProps {
-  internalLibrary: any; // TODO: get concrete type
-  inPalette: (node: any) => boolean; // TODO: get concrete type
-  inLibrary: (node: any) => boolean; // TODO: get concrete type
+  internalLibrary: InternalLibraryItem[];
+  inPalette: (node: Node) => boolean;
+  inLibrary: (node: Node) => boolean;
 }
 
 type ImageSearchDialogViewProps = ImageSearchDialogViewOuterProps & ImageDialogMixinProps & ImageDialogViewMixinProps;
@@ -130,7 +132,7 @@ interface ImageSearchDialogViewOuterState {
   searching: boolean;
   searched: boolean;
   searchable: boolean;
-  results: any[];
+  results: ImageInfo[];
   page: number;
   numPages: number;
   query: string;

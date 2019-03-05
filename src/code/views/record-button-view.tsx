@@ -5,7 +5,7 @@ interface RecordButtonViewProps {
   includeLight: boolean;
   disabled: boolean;
   // cantRecord: boolean; TODO: was not used in caller
-  onClick: (e: any) => void; // TODO: get concrete type
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 interface RecordButtonViewState {}
@@ -71,7 +71,7 @@ export class RecordButtonView extends React.Component<RecordButtonViewProps, Rec
     return classes.join(" ");
   }
 
-  private handleOnClick = (e) => {
+  private handleOnClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!this.props.disabled && this.props.onClick) {
       this.props.onClick(e);
     }

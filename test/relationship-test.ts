@@ -3,12 +3,12 @@ chai.config.includeStack = true;
 
 const { expect } = chai;
 
-import { Relationship } from "../src/code/models/relationship";
+import { Relationship, RelationshipOptions } from "../src/code/models/relationship";
 
 describe("relationship", () => {
   let undertest: Relationship;
   let inFormula: string;
-  let options: any;
+  let options: RelationshipOptions;
 
   it("should exists", () => Relationship.should.exist);
 
@@ -20,9 +20,7 @@ describe("relationship", () => {
       it("should make an undefined relationship", () => {
         undertest = new Relationship(options);
         undertest.isDefined.should.equal(false);
-        // WAS: expect(undertest.text).to.be.undefined();
         expect(undertest.text).to.equal(undefined);
-        // WAS: expect(undertest.formula).to.be.undefined();
         expect(undertest.formula).to.equal(undefined);
       })
     );

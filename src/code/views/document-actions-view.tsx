@@ -10,6 +10,9 @@ import { SimulationRunPanelView } from "./simulation-run-panel-view";
 import { Mixer } from "../mixins/components";
 
 import { CodapConnect, CODAPDataContextListItem } from "../models/codap-connect";
+import { GraphStoreClass } from "../stores/graph-store";
+import { Link } from "../models/link";
+import { Node } from "../models/node";
 
 interface CODAPTableMenuProps {
   toggleMenu: (override?: boolean) => void;
@@ -89,23 +92,23 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
 interface ToolButtonOptions {
   icon: string;
   label: string;
-  labelStyle?: any;
+  labelStyle?: object;
   labelClassName?: string;
   onClick?: () => void;
   disabled?: boolean;
 }
 
 interface DocumentActionsViewOuterProps {
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   diagramOnly: boolean;
   standaloneMode: boolean;
 }
 type DocumentActionsViewProps = DocumentActionsViewOuterProps & CodapMixinProps & UndoRedoUIMixinProps & AppSettingsMixinProps;
 
 interface DocumentActionsViewOuterState {
-  selectedNodes: any[]; // TODO: get concrete type
-  selectedLinks: any[]; // TODO: get concrete type
-  selectedItems: any[]; // TODO: get concrete type
+  selectedNodes: Node[];
+  selectedLinks: Link[];
+  selectedItems: Array<Node | Link>;
   showCODAPTableMenu: boolean;
 }
 type DocumentActionsViewState = DocumentActionsViewOuterState & CodapMixinState & UndoRedoUIMixinState & AppSettingsMixinState;

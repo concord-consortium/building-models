@@ -8,6 +8,11 @@ chai.config.includeStack = true;
 const { expect } = chai;
 const Sinon      = require("sinon");
 
+// to get around type errors of undefined return value
+const getParam = (param: string) => {
+  return HashParams.getParam(param) || "";
+};
+
 describe("HashParameters", () => {
 
   beforeEach(() => {
@@ -36,8 +41,8 @@ describe("HashParameters", () => {
     });
 
     it("The pameter should be set", () => {
-      HashParams.getParam("url").should.equal(this.decodedURL);
-      HashParams.getParam("foo").should.equal("bar");
+      getParam("url").should.equal(this.decodedURL);
+      getParam("foo").should.equal("bar");
     });
 
     it("should have encoded the URL in the locationHash", () => {
@@ -53,7 +58,7 @@ describe("HashParameters", () => {
 
       it("should return null when trying to fetch the value from the param list", () => expect(HashParams.getParam("url")).to.not.exist);
 
-      it("should keep other items in the params list", () => HashParams.getParam("foo").should.equal("bar"));
+      it("should keep other items in the params list", () => getParam("foo").should.equal("bar"));
 
       it("should remove the parameter from the locationHash", () => {
         this.locationHash.should.not.have.string("url");

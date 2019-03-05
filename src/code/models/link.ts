@@ -8,6 +8,8 @@
 import { GraphPrimitive } from "./graph-primitive";
 import { Relationship } from "./relationship";
 import { LinkColors } from "../utils/link-colors";
+import { TransferModel } from "./transfer";
+import { Node } from "./node";
 
 export class Link extends GraphPrimitive {
   public static defaultColor;
@@ -18,17 +20,19 @@ export class Link extends GraphPrimitive {
     Link.defaultRelation = new Relationship({formula: "1 * in"});
   }
 
-  public transferNode: any;
-  public relation: any; // TODO: get concrete type
+  public transferNode: TransferModel;
+  public relation: Relationship;
+
+  public reasoning: string;
+  public sourceNode: Node; // TODO: get concrete type
+  public targetNode: Node | TransferModel;
+
+  public readonly title: string;
 
   private options: any; // TODO: get concrete type
-  private sourceNode: any; // TODO: get concrete type
   private sourceTerminal: any; // TODO: get concrete type
-  private targetNode: any; // TODO: get concrete type
   private targetTerminal: any; // TODO: get concrete type
-  private color: any; // TODO: get concrete type
-  private title: any; // TODO: get concrete type
-  private reasoning: any; // TODO: get concrete type
+  private color: string;
   private jsPlumbConnection: any; // TODO: get concrete type
 
   constructor(options) {
@@ -83,7 +87,7 @@ export class Link extends GraphPrimitive {
   }
 
   public toExport() {
-    const link: any = {
+    const link: any = {  // checked: any ok
       "title": this.title,
       "color": this.color,
       "sourceNode": this.sourceNode.key,

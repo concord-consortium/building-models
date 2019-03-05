@@ -272,7 +272,7 @@ describe("Simulation", () => {
           }
           for (let j = 0; j < scenario.results.length; j++) {
             const result = scenario.results[j];
-            const nodeArray: any[] = [];
+            const nodeArray: Node[] = [];
             for (key in nodes) {
               node = nodes[key];
               nodeArray.push(node);
