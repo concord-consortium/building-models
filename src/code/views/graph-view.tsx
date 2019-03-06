@@ -317,7 +317,10 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     return this.handleEvent(() => {
       const multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey;
       this.forceRedrawLinks = true;
-      return GraphStore.clickLink(connection.linkModel, multipleSelections);
+      // this event is also invoked for clicks in the label input field which has no linkModel
+      if (connection.linkModel) {
+        return GraphStore.clickLink(connection.linkModel, multipleSelections);
+      }
     });
   }
 
