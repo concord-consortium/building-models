@@ -15,12 +15,14 @@ window.showSplashScreen = function (timeoutseconds, isLoading) {
 
   var citationText =
     'Suggested citation: SageModeler [Computer software]. (2018). ' +
-    'Concrd, MA: ' + authors;
+    'Concord, MA: ' + authors;
 
   var loadingDiv = isLoading ?
   '      <div class="splash-cell">' +
   '        <span id="splash-loading">Loading</span>' +
   '      </div>' : '<div class="splash-cell"/>';
+
+  var year = (new Date()).getFullYear();
 
   splashContainer.setAttribute("id", "splash-container");
   splashContainer.innerHTML =
@@ -40,7 +42,7 @@ window.showSplashScreen = function (timeoutseconds, isLoading) {
     '          This open-source software is licensed under the MIT license.' +
     '        </p>' +
     '        <p>' +
-    '          Copyright © 2018 All rights reserved.' +
+    '          Copyright © ' + year + ' All rights reserved.' +
     '        </p>' +
     '        <p>' + citationText +
     '        </p>' +
