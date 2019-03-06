@@ -12,7 +12,8 @@ import { StoreUnsubscriber } from "./store-class";
 
 const DEFAULT_SIMULATION_STEPS = 20;
 
-export const RECORDING_TIME = 500;
+export const STATIC_RECORDING_TIME = 500;
+export const TIME_BASED_RECORDING_TIME = 1500;
 
 interface TimeUnits {
   name: string;
@@ -276,7 +277,7 @@ export const SimulationStore = Reflux.createStore({
     this.settings.isRecordingOne = true;
     this._runSimulation();
     const stopRecording = () => SimulationActions.stopRecording();
-    this.timeout = setTimeout(stopRecording, RECORDING_TIME);
+    this.timeout = setTimeout(stopRecording, this.settings.isTimeBased ? TIME_BASED_RECORDING_TIME : STATIC_RECORDING_TIME);
     return this.notifyChange();
   },
 
@@ -291,7 +292,7 @@ export const SimulationStore = Reflux.createStore({
     this.settings.isRecordingPeriod = true;
     this._runSimulation();
     const stopRecording = () => SimulationActions.stopRecording();
-    this.timeout = setTimeout(stopRecording, RECORDING_TIME);
+    this.timeout = setTimeout(stopRecording, this.settings.isTimeBased ? TIME_BASED_RECORDING_TIME : STATIC_RECORDING_TIME);
     return this.notifyChange();
   },
 

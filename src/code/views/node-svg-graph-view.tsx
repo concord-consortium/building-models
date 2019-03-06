@@ -9,7 +9,7 @@ import { CSSProperties } from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { SimulationStore, SimulationMixin, SimulationMixinState, SimulationMixinProps, RECORDING_TIME } from "../stores/simulation-store";
+import { SimulationStore, SimulationMixin, SimulationMixinState, SimulationMixinProps, TIME_BASED_RECORDING_TIME } from "../stores/simulation-store";
 import { Mixer } from "../mixins/components";
 
 interface NodeSvgGraphViewOuterProps {
@@ -56,7 +56,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   }
 
   public componentDidUpdate(prevProps: NodeSvgGraphViewProps) {
-    if (prevProps.animateGraphs !== this.props.animateGraphs) {
+    if (this.props.isTimeBased && (prevProps.animateGraphs !== this.props.animateGraphs)) {
       if (this.animationInterval) {
         window.clearInterval(this.animationInterval);
       }
@@ -164,7 +164,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     const { max }  = this.props;
     const { min }  = this.props;
     let val = Math.min(max, Math.max(min, this.props.currentValue));
-    val = (val / (max - min)) * (this.props.animateGraphs ? this.state.animationMultiplier : 1);
+    val = (val / (max - min));
 
     const left = this.props.width * 0.25;
     const right = this.props.width * 0.75;
@@ -178,6 +178,6 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
   private handleAnimationInterval = () => {
     const delta = Date.now() - this.animationStartTime;
-    this.setState({animationMultiplier: Math.min(delta / RECORDING_TIME, 1)});
+    this.setState({animationMultiplier: Math.min(delta / TIME_BASED_RECORDING_TIME, 1)});
   }
 }
