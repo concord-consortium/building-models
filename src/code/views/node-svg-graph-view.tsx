@@ -9,7 +9,7 @@ import { CSSProperties } from "react";
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import { SimulationStore, SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
+import { SimulationStore, SimulationMixin, SimulationMixinState, SimulationMixinProps, RECORDING_TIME } from "../stores/simulation-store";
 import { Mixer } from "../mixins/components";
 
 interface NodeSvgGraphViewOuterProps {
@@ -24,20 +24,25 @@ interface NodeSvgGraphViewOuterProps {
   currentValue: number;
   innerColor: string;
   image: JSX.Element;
+  animateGraphs: boolean;
 }
 type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps & SimulationMixinProps;
 
-interface NodeSvgGraphViewOuterState {}
+interface NodeSvgGraphViewOuterState {
+  animationMultiplier: number;
+}
 type NodeSvgGraphViewState = NodeSvgGraphViewOuterState & SimulationMixinState;
 
 export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphViewState> {
-
   public static displayName = "NodeSvgGraphView";
+
+  private animationInterval: number | null = null;
+  private animationStartTime: number;
 
   constructor(props: NodeSvgGraphViewProps) {
     super(props);
     this.mixins = [new SimulationMixin(this)];
-    const outerState: NodeSvgGraphViewOuterState = {};
+    const outerState: NodeSvgGraphViewOuterState = {animationMultiplier: 0};
     this.setInitialState(outerState, SimulationMixin.InitialState());
   }
 
@@ -48,6 +53,23 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
         {this.renderSVG()}
       </div>
     );
+  }
+
+  public componentDidUpdate(prevProps: NodeSvgGraphViewProps) {
+    if (prevProps.animateGraphs !== this.props.animateGraphs) {
+      if (this.animationInterval) {
+        window.clearInterval(this.animationInterval);
+      }
+      // starting animation?
+      if (this.props.animateGraphs) {
+        this.setState({animationMultiplier: 0}, () => {
+          this.animationStartTime = Date.now();
+          this.animationInterval = window.setInterval(this.handleAnimationInterval, 10);
+        });
+      } else {
+        this.setState({animationMultiplier: 1});
+      }
+    }
   }
 
   private renderImage() {
@@ -102,9 +124,18 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
   private pointsToPath(points) {
     let data = _.map(points, p => this.graphMapPoint(p));
+    if (this.props.animateGraphs) {
+      const animationMaxX = this.props.width * this.state.animationMultiplier;
+      data = _.filter(data, (d) => {
+        return d.x <= animationMaxX;
+      });
+    }
     data = _.map(data,   p => `${p.x} ${p.y}`);
     data = data.join(" L ");
-    return `M ${data}`;
+    if (data.length > 0) {
+      return `M ${data}`;
+    }
+    return "";
   }
 
   private getPathPoints() {
@@ -133,7 +164,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     const { max }  = this.props;
     const { min }  = this.props;
     let val = Math.min(max, Math.max(min, this.props.currentValue));
-    val = val / (max - min);
+    val = (val / (max - min)) * (this.props.animateGraphs ? this.state.animationMultiplier : 1);
 
     const left = this.props.width * 0.25;
     const right = this.props.width * 0.75;
@@ -143,5 +174,10 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     let data = [{x: left, y: bottom}, {x: left, y: top}, {x: right, y: top}, {x: right, y: bottom}];
     data = _.map(data,   p => `${p.x} ${p.y}`);
     return `M ${data.join(" L ")}`;
+  }
+
+  private handleAnimationInterval = () => {
+    const delta = Date.now() - this.animationStartTime;
+    this.setState({animationMultiplier: Math.min(delta / RECORDING_TIME, 1)});
   }
 }
