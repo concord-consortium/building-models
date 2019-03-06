@@ -33,6 +33,7 @@ import { GraphPrimitive } from "../models/graph-primitive";
 import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber, StoreClass } from "./store-class";
 import { GraphView } from "../views/graph-view";
+import { InspectorPanelActions } from "./inspector-panel-store";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -675,7 +676,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     if (isDoubleClick) {
       this.selectionManager.selectNodeForInspection(link.targetNode);
       if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
-        return GraphActions.openGraph("relations", {link});
+        return InspectorPanelActions.openInspectorPanel("relations", {link});
       }
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click
