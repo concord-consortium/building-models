@@ -31,9 +31,13 @@ interface CodapConnectMap {
   [key: string]: CodapConnect;
 }
 
+interface CodapPhoneResult {
+  success: boolean;
+  values: any;
+}
 type CodapPhoneAction = any; // checked: any ok
 interface CodapPhone {
-  call(items: CodapPhoneAction | CodapPhoneAction[], callback?: (result: any) => void); // checked: any ok
+  call(items: CodapPhoneAction | CodapPhoneAction[], callback?: (result?: CodapPhoneResult) => void); // checked: any ok
 }
 
 export class CodapConnect {
@@ -257,7 +261,7 @@ export class CodapConnect {
             }
           };
           return this.codapPhone.call(message, response => {
-            if (response.success) {
+            if (response && response.success) {
               if ((response.values != null ? response.values.attrs : undefined) != null) {
                 this._syncAttributeProperties(response.values.attrs, true);
               }
@@ -340,7 +344,7 @@ export class CodapConnect {
         }
       };
       return this.codapPhone.call(message, response => {
-        if (response.success) {
+        if (response && response.success) {
           if (__guard__(response != null ? response.values : undefined, x => x.attrs)) {
             return this._syncAttributeProperties(response.values.attrs);
           }
@@ -362,7 +366,7 @@ export class CodapConnect {
         }
       };
       return this.codapPhone.call(message, response => {
-        if (!response.success) {
+        if (!response || !response.success) {
           log.warn("Error: CODAP attribute delete failed!");
         }
       });
@@ -416,7 +420,7 @@ export class CodapConnect {
       values: [ experimentAttributes ]
     };
     return this.codapPhone.call(message, (response) => {
-      if (response.success) {
+      if (response && response.success) {
         return log.info(`created attribute ${label}`);
       } else {
         return log.warn(`Unable to create attribute ${label}`);
@@ -438,7 +442,7 @@ export class CodapConnect {
       }
     };
     return this.codapPhone.call(message, (response) => {
-      if (response.success) {
+      if (response && response.success) {
         return log.info(`Renamed Simulation attribute: ${oldValue} → ${newValue}`);
       } else {
         return log.info("CODAP rename Simulation attribute failed!");
@@ -496,7 +500,7 @@ export class CodapConnect {
         operation: this.standaloneMode ? "undoButtonPress" : "undoAction"
       }
     }, (response) => {
-      if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+      if (response && response.values) {
         return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
@@ -510,7 +514,7 @@ export class CodapConnect {
         operation: this.standaloneMode ? "redoButtonPress" : "redoAction"
       }
     }, (response) => {
-      if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+      if (response && response.values) {
         return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
@@ -525,7 +529,7 @@ export class CodapConnect {
         logMessage
       }
     }, (response) => {
-      if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+      if (response && response.values) {
         return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
@@ -719,7 +723,7 @@ export class CodapConnect {
       resource: `${runsCollection}.caseCount`
     }
     , ret => {
-      if (ret != null ? ret.success : undefined) {
+      if (ret && ret.success) {
         const caseCount = ret.values;
         if (caseCount > 0) {
           // get last case, and find its number
@@ -728,7 +732,7 @@ export class CodapConnect {
             resource: `${runsCollection}.caseByIndex[${caseCount - 1}]`
           }
           , (ret2) => {
-            if (ret2 != null ? ret2.success : undefined) {
+            if (ret2 && ret2.success) {
               const lastCase = ret2.values.case;
               const lastExperimentNumber = parseInt(lastCase.values[tr("~CODAP.SIMULATION.EXPERIMENT")], 10) || 0;
               return SimulationActions.setExperimentNumber(lastExperimentNumber + 1);
