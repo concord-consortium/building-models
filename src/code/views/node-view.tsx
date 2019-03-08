@@ -510,9 +510,14 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private handleCODAPAttributeDrag = (evt, attributeName) => {
     evt.dataTransfer.effectAllowed = "moveCopy";
-    evt.dataTransfer.setData("text/html", attributeName);
-    evt.dataTransfer.setData("text", attributeName);
-    evt.dataTransfer.setData(`application/x-codap-attr-${attributeName}`, attributeName);
+    // IE only allows text or URL for the argument type and throws an error for other types
+    try {
+      evt.dataTransfer.setData("text", attributeName);
+      evt.dataTransfer.setData("text/html", attributeName);
+      evt.dataTransfer.setData(`application/x-codap-attr-${attributeName}`, attributeName);
+    } catch (e) {
+      // to make linter happy with empty block
+    }
     // CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
     return evt.dataTransfer.contains = () => false;
   }
