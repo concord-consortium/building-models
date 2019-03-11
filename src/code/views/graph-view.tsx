@@ -58,6 +58,7 @@ interface GraphViewOuterState {
     y: number;
   };
   animateGraphs: boolean;
+  hideGraphs: boolean;
 }
 type GraphViewState = GraphViewOuterState & GraphMixinState & SimulationMixinState & AppSettingsMixinState & CodapMixinState & LaraMixinState;
 
@@ -92,6 +93,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         y: 0
       },
       animateGraphs: false,
+      hideGraphs: false,
     };
     this.setInitialState(outerState, GraphMixin.InitialState(), SimulationMixin.InitialState(), AppSettingsMixin.InitialState(), CodapMixin.InitialState(), LaraMixin.InitialState());
   }
@@ -167,13 +169,15 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       if (this.animateTimeout) {
         window.clearTimeout(this.animateTimeout);
       }
-      this.animateTimeout = window.setTimeout(() => {
-        this.setState({animateGraphs: true}, () => {
-          window.setTimeout(() => {
-            this.setState({animateGraphs: false});
-          }, TIME_BASED_RECORDING_TIME);
-        });
-      }, 1000);
+      this.setState({hideGraphs: true}, () => {
+        this.animateTimeout = window.setTimeout(() => {
+          this.setState({hideGraphs: false, animateGraphs: true}, () => {
+            window.setTimeout(() => {
+              this.setState({animateGraphs: false});
+            }, TIME_BASED_RECORDING_TIME);
+          });
+        }, 1000);
+      });
     }
 
     if ((prevState.description.links !== this.state.description.links) ||
@@ -230,6 +234,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
               isTimeBased={this.state.isTimeBased}
               showGraphButton={this.state.codapHasLoaded && !diagramOnly}
               animateGraphs={this.state.isRecording || this.state.animateGraphs}
+              hideGraphs={this.state.hideGraphs}
             />)}
         </div>
       </div>

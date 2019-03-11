@@ -218,6 +218,7 @@ interface NodeViewProps {
   selectionManager?: SelectionManager;
   selected: boolean;
   animateGraphs: boolean;
+  hideGraphs: boolean;
   onMove: (options: NodeViewHandlerOptions) => void;
   onMoveComplete: (options: NodeViewHandlerOptions) => void;
   onDelete: (options: NodeViewHandlerOptions) => void;
@@ -407,6 +408,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
           height={48}
           strokeWidth={3}
           animateGraphs={this.props.animateGraphs}
+          hideGraphs={this.props.hideGraphs}
         />
       );
     } else {

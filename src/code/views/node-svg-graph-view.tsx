@@ -25,6 +25,7 @@ interface NodeSvgGraphViewOuterProps {
   innerColor: string;
   image: JSX.Element;
   animateGraphs: boolean;
+  hideGraphs: boolean;
 }
 type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps & SimulationMixinProps;
 
@@ -105,7 +106,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       left: svgOffset
     };
 
-    if (this.props.data.length > 0) {
+    if (!this.props.hideGraphs && (this.props.data.length > 0)) {
       if (this.props.isTimeBased) {
         chart = <path d={this.pointsToPath(this.getPathPoints())} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill="none" />;
       } else {
