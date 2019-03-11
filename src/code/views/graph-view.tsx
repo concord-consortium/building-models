@@ -25,7 +25,7 @@ import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin, GraphStoreCla
 import { ImageDialogActions } from "../stores/image-dialog-store";
 import { RelationFactory } from "../models/relation-factory";
 
-import { SimulationMixinProps, SimulationMixinState, SimulationMixin } from "../stores/simulation-store";
+import { SimulationMixinProps, SimulationMixinState, SimulationMixin, TIME_BASED_RECORDING_TIME } from "../stores/simulation-store";
 import { AppSettingsStore, AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
 import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-store";
 import { LaraMixinProps, LaraMixinState, LaraMixin } from "../stores/lara-store";
@@ -57,6 +57,7 @@ interface GraphViewOuterState {
     x: number;
     y: number;
   };
+  animateGraphs: boolean;
 }
 type GraphViewState = GraphViewOuterState & GraphMixinState & SimulationMixinState & AppSettingsMixinState & CodapMixinState & LaraMixinState;
 
@@ -71,6 +72,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   private linkView: HTMLDivElement | null;
   private container: HTMLDivElement | null;
   private selectionBox: HTMLDivElement | null;
+
+  private animateTimeout: number | null;
 
   constructor(props: GraphViewProps) {
     super(props);
@@ -87,7 +90,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         startY: 0,
         x: 0,
         y: 0
-      }
+      },
+      animateGraphs: false,
     };
     this.setInitialState(outerState, GraphMixin.InitialState(), SimulationMixin.InitialState(), AppSettingsMixin.InitialState(), CodapMixin.InitialState(), LaraMixin.InitialState());
   }
@@ -159,6 +163,19 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     // for mixins
     super.componentDidUpdate(prevProps, prevState, prevContext);
 
+    if (this.state.isTimeBased && (this.state.simulationPanelExpanded && !prevState.simulationPanelExpanded)) {
+      if (this.animateTimeout) {
+        window.clearTimeout(this.animateTimeout);
+      }
+      this.animateTimeout = window.setTimeout(() => {
+        this.setState({animateGraphs: true}, () => {
+          window.setTimeout(() => {
+            this.setState({animateGraphs: false});
+          }, TIME_BASED_RECORDING_TIME);
+        });
+      }, 1000);
+    }
+
     if ((prevState.description.links !== this.state.description.links) ||
         (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) ||
         (prevState.selectedLink !== this.state.selectedLink) ||
@@ -212,7 +229,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
               selectionManager={this.props.selectionManager}
               isTimeBased={this.state.isTimeBased}
               showGraphButton={this.state.codapHasLoaded && !diagramOnly}
-              animateGraphs={this.state.isRecording}
+              animateGraphs={this.state.isRecording || this.state.animateGraphs}
             />)}
         </div>
       </div>
