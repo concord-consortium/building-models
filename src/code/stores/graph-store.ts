@@ -837,8 +837,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       linkDescription += link.relation.formula + ";";
       linkDescription += `${target.x},${target.y}|`;
       if (link.relation.isDefined) {
-        const isCappedAccumulator = source.isAccumulator && !source.allowNegativeValues;
-        const capValue = isCappedAccumulator ? ":cap" : "";
+        const isCappedNode = source.limitMinValue;
+        const capValue = isCappedNode ? ":cap" : "";
         modelDescription += `${source.key}:${source.initialValue}${capValue};`;
         modelDescription += link.relation.formula + ";";
         if (link.relation.type === "transfer") {
