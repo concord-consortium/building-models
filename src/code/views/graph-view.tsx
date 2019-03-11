@@ -176,7 +176,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
               this.setState({animateGraphs: false});
             }, TIME_BASED_RECORDING_TIME);
           });
-        }, 1000);
+        }, 500);
       });
     }
 
