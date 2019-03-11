@@ -161,6 +161,23 @@ export class InspectorPanelView extends Mixer<InspectorPanelViewProps, Inspector
     this.setInitialState(outerState, InspectorPanelMixin.InitialState());
   }
 
+  public componentDidMount() {
+    // for mixins...
+    super.componentDidMount();
+
+    // to prevent a "flash" of a previously opened inspector panel close it when
+    // the graph view selections are cleared
+    this.props.graphStore.selectionManager.addSelectionListener(manager => {
+      if (this.state.nowShowing) {
+        const selectedNodes = manager.getNodeInspection() || [];
+        const selectedLinks = manager.getLinkInspection() || [];
+        if ((selectedNodes.length + selectedLinks.length) === 0) {
+          InspectorPanelActions.closeInspectorPanel();
+        }
+      }
+    });
+  }
+
   public render() {
     let className = "inspector-panel";
     if (this.props.display !== undefined) {
