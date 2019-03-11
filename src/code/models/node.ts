@@ -181,7 +181,7 @@ export class Node extends GraphPrimitive {
   }
 
   get limitMinValue() {
-    return ((this.isAccumulator || this.isTransfer) && !this.allowNegativeValues);
+    return !this.allowNegativeValues;
   }
 
   public addLink(link) {
