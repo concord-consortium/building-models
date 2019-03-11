@@ -279,17 +279,17 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     if (this.slider) {
       const { grab } = this.state;
       const { orientation } = this.props;
-      const node = this.slider;
       const coordinateStyle = constants.orientation[orientation].coordinate;
       const directionStyle = constants.orientation[orientation].direction;
       const clientCoordinateStyle = `client${coordinateStyle.toUpperCase()}`;
       const coordinate = !e.touches ? e[clientCoordinateStyle] : e.touches[0][clientCoordinateStyle];
-      const direction = node.getBoundingClientRect()[directionStyle];
-
-      const pos = coordinate - direction - grab;
-      const value = this.getValueFromPosition(pos);
-
-      return value;
+      const rect = this.slider && this.slider.getBoundingClientRect();
+      if (rect && rect[directionStyle]) {
+        const direction = rect[directionStyle];
+        const pos = coordinate - direction - grab;
+        const value = this.getValueFromPosition(pos);
+        return value;
+      }
     }
     return 0;
   }
