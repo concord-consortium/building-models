@@ -212,6 +212,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
               selectionManager={this.props.selectionManager}
               isTimeBased={this.state.isTimeBased}
               showGraphButton={this.state.codapHasLoaded && !diagramOnly}
+              animateGraphs={this.state.isRecording}
             />)}
         </div>
       </div>

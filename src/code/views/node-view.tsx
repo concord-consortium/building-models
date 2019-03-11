@@ -217,6 +217,7 @@ interface NodeViewProps {
   innerColor: string;
   selectionManager?: SelectionManager;
   selected: boolean;
+  animateGraphs: boolean;
   onMove: (options: NodeViewHandlerOptions) => void;
   onMoveComplete: (options: NodeViewHandlerOptions) => void;
   onDelete: (options: NodeViewHandlerOptions) => void;
@@ -405,6 +406,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
           width={48}
           height={48}
           strokeWidth={3}
+          animateGraphs={this.props.animateGraphs}
         />
       );
     } else {
