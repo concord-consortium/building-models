@@ -131,8 +131,8 @@ describe("Simulation", () => {
         // 2: cascade independent and dependent variables with negative relationship (A->B->C)
         {A: 50, B: 40, C: 30, AB: "0.1 * in", BC: "-1 * in",
         results: [
-          [50, 5, 0],
-          [50, 5, 0]
+          [50, 5, -5],
+          [50, 5, -5]
         ]},
 
         // 3: basic collector (A->[B])

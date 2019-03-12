@@ -14,8 +14,12 @@ import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
+<<<<<<< HEAD
 import { stepSize } from "../utils/step-size";
 import { toFixedTrimmed } from "../utils/to-fixed-trimmed";
+=======
+import { ENABLE_ALL_BELOW_ZERO } from "../utils/url-params";
+>>>>>>> Added enableAllBelowZero url param [#164295027]
 
 interface NodeValueInspectorViewOuterProps {
 
@@ -97,7 +101,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
               {this.renderMinAndMax(node)}
             </div>
           </div>
-          {this.renderCollectorOptions(node)}
+          {ENABLE_ALL_BELOW_ZERO || !node.isTransfer ? this.renderCollectorOptions(node) : undefined}
         </div>
 
         <div className="bottom-pane">
@@ -222,7 +226,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
           />
           {tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR")}
         </label> : null}
-        {positiveCheckbox}
+        {ENABLE_ALL_BELOW_ZERO || node.isAccumulator ? positiveCheckbox : undefined}
       </span>
     );
   }
