@@ -26,26 +26,34 @@ interface NodeSvgGraphViewOuterProps {
   image: JSX.Element;
   animateGraphs: boolean;
   hideGraphs: boolean;
+  unscaled: boolean;
 }
 type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps & SimulationMixinProps;
 
 interface NodeSvgGraphViewOuterState {
-  animationMultiplier: number;
+  xAnimationMultiplier: number;
+  yAnimationMultiplier: number;
 }
 type NodeSvgGraphViewState = NodeSvgGraphViewOuterState & SimulationMixinState;
 
 export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphViewState> {
   public static displayName = "NodeSvgGraphView";
 
-  private animationInterval: number | null = null;
-  private animationStartTime: number;
+  private xAnimationInterval: number | null = null;
+  private xAnimationStartTime: number;
+
+  private yAnimationInterval: number | null = null;
+  private yAnimationStartTime: number;
 
   private mounted: boolean;
 
   constructor(props: NodeSvgGraphViewProps) {
     super(props);
     this.mixins = [new SimulationMixin(this)];
-    const outerState: NodeSvgGraphViewOuterState = {animationMultiplier: 0};
+    const outerState: NodeSvgGraphViewOuterState = {
+      xAnimationMultiplier: 0,
+      yAnimationMultiplier: 0,
+    };
     this.setInitialState(outerState, SimulationMixin.InitialState());
   }
 
@@ -64,22 +72,48 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
   public componentWillUnmount() {
     this.mounted = false;
-    this.clearAnimationInterval();
+    this.clearXAnimationInterval();
   }
 
   public componentDidUpdate(prevProps: NodeSvgGraphViewProps) {
-    if (this.props.isTimeBased && (prevProps.animateGraphs !== this.props.animateGraphs)) {
-      this.clearAnimationInterval();
-      if (this.mounted) {
-        if (this.props.animateGraphs) {
-          this.setState({animationMultiplier: 0}, () => {
-            this.animationStartTime = Date.now();
-            this.animationInterval = window.setInterval(this.handleAnimationInterval, 10);
-          });
-        } else {
-          this.setState({animationMultiplier: 1});
+    if (this.props.isTimeBased) {
+      if (prevProps.animateGraphs !== this.props.animateGraphs) {
+        this.clearXAnimationInterval();
+        if (this.mounted) {
+          if (this.props.animateGraphs) {
+            this.setState({xAnimationMultiplier: 0}, () => {
+              this.xAnimationStartTime = Date.now();
+              this.xAnimationInterval = window.setInterval(this.handleXAnimationInterval, 10);
+            });
+          } else {
+            this.setState({xAnimationMultiplier: 1});
+          }
         }
-      }
+      } /* else if (prevProps.unscaled !== this.props.unscaled) {
+
+        // start timer to animate rescale after 500ms of no activity
+        if (this.props.unscaled) {
+          this.clearYAnimationTimeout();
+          this.yAnimationTimeout = setTimeout(() => {
+            this.startYAnimation();
+          }, 500);
+        }
+
+        this.clearYAnimationInterval();
+        if (this.mounted) {
+          if (!this.props.unscaled) {
+            this.setState({yAnimationMultiplier: 1}, () => {
+              setTimeout(() => {
+
+              })
+              this.xAnimationStartTime = Date.now();
+              this.xAnimationInterval = window.setInterval(this.handleXAnimationInterval, 10);
+            });
+          } else {
+            this.setState({yAnimationMultiplier: 0});
+          }
+        }
+      } */
     }
   }
 
@@ -98,7 +132,8 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   }
 
   private renderSVG() {
-    let chart;
+    let chart: JSX.Element | null = null;
+    let ticks: JSX.Element | null = null;
     const svgOffset = 3;
     const svgStyle: CSSProperties = {
       position: "absolute",
@@ -109,16 +144,18 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     if (!this.props.hideGraphs && (this.props.data.length > 0)) {
       if (this.props.isTimeBased) {
         chart = <path d={this.pointsToPath(this.getPathPoints())} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill="none" />;
+        if (this.props.unscaled) {
+          ticks = this.getUnscaledTicks();
+        }
       } else {
         chart = <path d={this.getBarPath()} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill={this.props.innerColor} />;
       }
-    } else {
-      chart = null;
     }
 
     return (
       <svg style={svgStyle} width={this.props.width} height={this.props.height}>
         {chart}
+        {ticks}
       </svg>
     );
   }
@@ -136,7 +173,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   private pointsToPath(points) {
     let data = _.map(points, p => this.graphMapPoint(p));
     if (this.props.animateGraphs) {
-      const animationMaxX = this.props.width * this.state.animationMultiplier;
+      const animationMaxX = this.props.width * this.state.xAnimationMultiplier;
       data = _.filter(data, (d) => {
         return d.x <= animationMaxX;
       });
@@ -150,15 +187,14 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   }
 
   private getPathPoints() {
-    let { max }  = this.props;
-    let { min }  = this.props;
-    let { data } = this.props;
+    let { max, min, data } = this.props;
+    const { unscaled } = this.props;
 
     const rangex = SimulationStore.simulationDuration();
     data = _.takeRight(data, rangex).reverse();
 
     for (const point of data) {
-      if (point > max) { max = point; }
+      if (!unscaled && (point > max)) { max = point; }
       if (point < min) { min = point; }
     }
     const rangey = max - min;
@@ -169,6 +205,38 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       return {x, y};
     });
     return data;
+  }
+
+  private getUnscaledTicks() {
+    const { max, min, data, width, height } = this.props;
+    let pointMax = max;
+    let pointMin = min;
+
+    for (const point of data) {
+      pointMax = Math.max(pointMax, point);
+      pointMin = Math.min(pointMin, point);
+    }
+
+    // no ticks unless past max y
+    const rangeRatio = (pointMax - pointMin) / (max - min);
+    if (rangeRatio <= 1) {
+      return null;
+    }
+
+    const numTicks = 10;
+    const tickWidth = 5;
+    const tickStroke = 2;
+    const tickSpacing = (height * rangeRatio) / numTicks;
+    const tickX = width - tickWidth;
+    const ticks: string[] = [];
+    for (let i = 0; i < numTicks; i++) {
+      const tickY = height - (i * tickSpacing) + tickStroke;
+      if (tickY >= 0) {
+        ticks.push(`M ${tickX} ${tickY} L ${width} ${tickY}`);
+      }
+    }
+
+    return <path d={ticks.join(" ")} strokeWidth={tickStroke} stroke={this.props.color} fill="none" />;
   }
 
   private getBarPath() {
@@ -187,20 +255,20 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     return `M ${data.join(" L ")}`;
   }
 
-  private handleAnimationInterval = () => {
-    const delta = Date.now() - this.animationStartTime;
+  private handleXAnimationInterval = () => {
+    const delta = Date.now() - this.xAnimationStartTime;
     if (this.mounted) {
-      const animationMultiplier = Math.min(delta / TIME_BASED_RECORDING_TIME, 1);
-      this.setState({animationMultiplier});
-      if (animationMultiplier === 1) {
-        this.clearAnimationInterval();
+      const xAnimationMultiplier = Math.min(delta / TIME_BASED_RECORDING_TIME, 1);
+      this.setState({xAnimationMultiplier});
+      if (xAnimationMultiplier === 1) {
+        this.clearXAnimationInterval();
       }
     }
   }
 
-  private clearAnimationInterval() {
-    if (this.animationInterval) {
-      window.clearInterval(this.animationInterval);
+  private clearXAnimationInterval() {
+    if (this.xAnimationInterval) {
+      window.clearInterval(this.xAnimationInterval);
     }
   }
 }

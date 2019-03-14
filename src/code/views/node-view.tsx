@@ -409,6 +409,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
           strokeWidth={3}
           animateGraphs={this.props.animateGraphs}
           hideGraphs={this.props.hideGraphs}
+          unscaled={this.props.data.unscaled}
         />
       );
     } else {
@@ -500,10 +501,12 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleSliderDragStart = () => {
+    this.props.graphStore.startNodeSliderDrag(this.props.data);
     return this.setState({ignoreDrag: true});
   }
 
   private handleSliderDragEnd = () => {
+    this.props.graphStore.endNodeSliderDrag(this.props.data);
     return this.setState({ignoreDrag: false});
   }
 

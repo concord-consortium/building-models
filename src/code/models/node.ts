@@ -44,6 +44,7 @@ export class Node extends GraphPrimitive {
   public type: string = "Node";
   public title: string;
   public currentValue: number;
+  public unscaled: boolean = false;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
@@ -214,6 +215,10 @@ export class Node extends GraphPrimitive {
 
   public inNodes() {
     return _.map(this.inLinks(), link => link.sourceNode);
+  }
+
+  public outNodes() {
+    return _.map(this.outLinks(), link => link.targetNode);
   }
 
   public isDependent(onlyConsiderDefinedRelations?: boolean) {
