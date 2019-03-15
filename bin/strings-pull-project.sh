@@ -1,6 +1,7 @@
+#!/bin/bash
 PROJECT_ID=125331
 OUTPUT_DIR=src/code/utils/lang
-LANGUAGES=("he" "tr" "zh-TW" "es" "pl" "et")
+LANGUAGES=("he" "tr" "zh-TW" "es" "pl" "et" "el")
 
 # argument processing from https://stackoverflow.com/a/14203146
 while [[ $# -gt 1 ]]

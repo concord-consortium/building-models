@@ -195,5 +195,6 @@
     "~DOCUMENT.CODAP_ACTIONS.TEXT": "Tekst",
     "~MENU.ABOUT": "About",
     "~MENU.ABOUT.HELP": "Go to Help website",
-    "~MENU.ABOUT.ABOUT": "About SageModeler"
+    "~MENU.ABOUT.ABOUT": "About SageModeler",
+    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:"
 }
