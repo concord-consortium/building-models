@@ -165,19 +165,23 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     // for mixins
     super.componentDidUpdate(prevProps, prevState, prevContext);
 
-    if (this.state.isTimeBased && (this.state.simulationPanelExpanded && !prevState.simulationPanelExpanded)) {
-      if (this.animateTimeout) {
-        window.clearTimeout(this.animateTimeout);
+    if (this.state.isTimeBased) {
+      const animateGraphs = (this.state.simulationPanelExpanded && !prevState.simulationPanelExpanded) ||
+                            (this.state.experimentNumber !== prevState.experimentNumber);
+      if (animateGraphs) {
+        if (this.animateTimeout) {
+          window.clearTimeout(this.animateTimeout);
+        }
+        this.setState({hideGraphs: true}, () => {
+          this.animateTimeout = window.setTimeout(() => {
+            this.setState({hideGraphs: false, animateGraphs: true}, () => {
+              window.setTimeout(() => {
+                this.setState({animateGraphs: false});
+              }, TIME_BASED_RECORDING_TIME);
+            });
+          }, 500);
+        });
       }
-      this.setState({hideGraphs: true}, () => {
-        this.animateTimeout = window.setTimeout(() => {
-          this.setState({hideGraphs: false, animateGraphs: true}, () => {
-            window.setTimeout(() => {
-              this.setState({animateGraphs: false});
-            }, TIME_BASED_RECORDING_TIME);
-          });
-        }, 500);
-      });
     }
 
     if ((prevState.description.links !== this.state.description.links) ||

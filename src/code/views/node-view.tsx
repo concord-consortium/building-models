@@ -393,7 +393,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
     const nodeImage = getNodeImage(this.props.data);
 
-    if (this.props.data.hasGraphData()) {
+    if (this.props.data.hasGraphData() || this.props.simulating) {
       return (
         <NodeSvgGraphView
           isTimeBased={this.props.isTimeBased}
