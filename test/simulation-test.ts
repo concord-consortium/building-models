@@ -435,6 +435,15 @@ describe("The SimulationStore, with a network in the GraphStore", () => {
       SimulationActions.expandSimulationPanel.trigger();
     });
 
+    it("should start simulation when experiment is created", (done) => {
+
+      asyncListenTest(done, SimulationActions.simulationStarted, (nodeNames) => {
+        nodeNames.length.should.equal(2);
+      });
+
+      SimulationActions.createExperiment();
+    });
+
     it("should call recordingDidStart with the node names", (done) => {
       asyncListenTest(done, SimulationActions.recordingDidStart, nodeNames => nodeNames.should.eql(["A", "B"]));
 
@@ -455,7 +464,7 @@ describe("The SimulationStore, with a network in the GraphStore", () => {
           const frame9 = data[9];
           frame9.time.should.equal(20);
           frame9.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
-    });
+      });
 
       SimulationActions.createExperiment();
       SimulationActions.recordPeriod();
