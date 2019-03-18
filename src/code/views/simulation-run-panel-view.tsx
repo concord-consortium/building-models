@@ -48,7 +48,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
     const simTextLeft = (simTextWidth / 2) - 6;
     const simStyle = { left: simTextLeft };
     return (
-      <div className="flow" onClick={this.handleToggle}>
+      <div className="flow" onClick={this.handleToggle} title={simText}>
         <div className="toggle-title" ref={el => this.simulateElt = el} style={simStyle}>{simText}</div>
         <i className={`icon-codap-${iconClass}`} />
       </div>
