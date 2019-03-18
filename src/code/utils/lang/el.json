@@ -196,5 +196,6 @@
     "~MENU.ABOUT": "Σχετικά",
     "~MENU.ABOUT.HELP": "Βοήθεια",
     "~MENU.ABOUT.ABOUT": "Σχετικά",
-    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:"
+    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
+    "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Πείραμα #"
 }

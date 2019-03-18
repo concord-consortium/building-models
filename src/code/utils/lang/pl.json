@@ -196,5 +196,6 @@
     "~MENU.ABOUT": "About",
     "~MENU.ABOUT.HELP": "Go to Help website",
     "~MENU.ABOUT.ABOUT": "About SageModeler",
-    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:"
+    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
+    "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Experiment #"
 }
