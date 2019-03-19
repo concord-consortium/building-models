@@ -38,7 +38,7 @@ export class ExperimentPanelView extends Mixer<ExperimentPanelViewProps, Experim
   }
 
   private renderLabel() {
-    const experimentLabel = "Experiment #";
+    const experimentLabel = tr("~DOCUMENT.ACTIONS.EXPERIMENT_NUM");
     return <span className="experiment-label">{experimentLabel}</span>;
   }
 
