@@ -28,8 +28,10 @@
     "cypress:open": "cypress open"
   },
   "dependencies": {
+    "@types/graphlib": "^2.1.4",
     "autosize": "^3.0.18",
     "babelify": "^8.0.0",
+    "graphlib": "^2.1.7",
     "iframe-phone": "1.1.3",
     "jquery": "^3.2.1",
     "jquery-ui-dist": "1.12.1",
