@@ -52,7 +52,7 @@ interface SimulationTypeType {
   time: number;
   DEFAULT: number;
 }
-const SimulationType: SimulationTypeType = {
+export const SimulationType: SimulationTypeType = {
   diagramOnly: 0,
   static: 1,
   time: 2,

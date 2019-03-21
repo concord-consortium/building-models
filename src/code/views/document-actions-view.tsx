@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
+import { AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin, SimulationType } from "../stores/app-settings-store";
 import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-store";
 import { UndoRedoUIMixin, UndoRedoUIMixinProps, UndoRedoUIMixinState } from "../stores/undo-redo-ui-store";
 import { tr } from "../utils/translate";
@@ -184,15 +184,16 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
   }
 
   private renderCODAPToolbar() {
+    const showTableAndGraphButtons = this.state.simulationType !== SimulationType.diagramOnly;
     return (
       <div className="misc-actions toolbar">
-        {this.renderToolbarButton({
+        {showTableAndGraphButtons && this.renderToolbarButton({
           icon: "moonicon-icon-table",
           label: tr("~DOCUMENT.CODAP_ACTIONS.TABLES"),
           onClick: this.handleCODAPTableToolClicked
         })}
         {this.state.showCODAPTableMenu ? <CODAPTableMenu toggleMenu={this.handleCODAPTableToolClicked} /> : undefined}
-        {this.renderToolbarButton({
+        {showTableAndGraphButtons && this.renderToolbarButton({
           icon: "moonicon-icon-graph",
           label: tr("~DOCUMENT.CODAP_ACTIONS.GRAPH"),
           onClick: this.handleCODAPGraphToolClicked
