@@ -247,7 +247,8 @@ export class DiagramToolkit {
   public addLink(opts) {
     const paintStyle = this._paintStyle(LinkColors.default);
     paintStyle.outlineColor = "none";
-    paintStyle.outlineWidth = 4;
+    // use large outline width for all links, this gives a larger selection target around the link
+    paintStyle.outlineWidth = 10;
 
     let startColor = LinkColors.default;
     let finalColor = LinkColors.default;
@@ -266,6 +267,8 @@ export class DiagramToolkit {
     }
     if (opts.isSelected) {
       paintStyle.outlineColor = LinkColors.selectedOutline;
+      // reduce the outline width of the selected link since it is rendered
+      paintStyle.outlineWidth = 4;
     }
     if (opts.isSelected && opts.isDashed) {
       paintStyle.dashstyle = undefined;
