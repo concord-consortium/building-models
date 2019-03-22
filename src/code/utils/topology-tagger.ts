@@ -1,7 +1,5 @@
 const _ = require("lodash");
 import { Graph as AnalysisGraph, alg as GraphLibAlg} from "graphlib";
-import { Link } from "../models/link";
-import { Node } from "../models/node";
 
 type sageNodeKey = string;
 
@@ -36,19 +34,58 @@ export function getAnalysisGraph(sageModelGraph: ISageGraph) {
   return graphlibGraph;
 }
 
-export function countNodes(g: AnalysisGraph) {
-  return g.nodeCount();
+function countMultiLinkTargetNodes(g) {
+  return g.nodes()
+          .map( (node) => (g.inEdges(node).length > 1) ? 1 : 0 )
+          .reduce( (a, b) => (a + b), 0 );
 }
 
-export function getCycles(g: AnalysisGraph) {
-  return GraphLibAlg.findCycles(g);
+function countUnconnectedNodes(g) {
+  return g.nodes()
+          .map( (node) => (g.nodeEdges(node).length <= 0 ? 1 : 0))
+          .reduce( (a, b) => (a + b), 0 );
 }
 
+function isLinearModel(g) {
+  // A model is only linear if there is a single, non-cyclic component (meaning
+  // all nodes in the model are connected), and that all nodes have, at most 1
+  // inEdge and 1 outEdge. Notice that a model with no nodes is not considered
+  // linear; however, a single node **is** linear -- although this is a
+  // degenerate case.
+  if (GraphLibAlg.findCycles(g).length > 0) {
+    return false;   // If there are any cycles; non-linear.
+  }
+  const components = GraphLibAlg.components(g);
+  if (components.length !== 1) {
+    return false;   // If any nodes are not connected, non-linear.
+  }
+  const atMost1InOutEdges = (node) => {
+    return g.inEdges(node).length <= 1 && g.outEdges(node).length <= 1;
+  };
+  return components[0].map( node => (atMost1InOutEdges(node)) ? 1 : 0)
+    .reduce ( (a, b) => (a + b), 0) === g.nodeCount();
+}
 
-export function getToplogy(sageModelGraph: ISageGraph) {
+export function getTopology(sageModelGraph: ISageGraph) {
   const g = getAnalysisGraph(sageModelGraph);
+
   const nodeCount = g.nodeCount();
   const linkCount = g.edgeCount();
-  const cycles = GraphLibAlg.findCycles(g);
-  return { nodeCount, linkCount, cycles: cycles.length };
+  const multiLinkTargetNodes = countMultiLinkTargetNodes(g);
+  const collectorNodeCount = "tbd";
+  const independentGraphs = GraphLibAlg.components(g).length;
+  const unconnectedNodes = countUnconnectedNodes(g);
+  const cycles = GraphLibAlg.findCycles(g).length;
+  const isLinear = isLinearModel(g);
+
+  return {
+    nodeCount,
+    linkCount,
+    multiLinkTargetNodes,
+    collectorNodeCount,
+    independentGraphs,
+    unconnectedNodes,
+    cycles,
+    isLinear
+  };
 }
