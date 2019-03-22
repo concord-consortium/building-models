@@ -18,6 +18,7 @@ import { PaletteStore } from "../stores/palette-store";
 import { TimeUnits } from "../utils/time-units";
 import { escapeRegExp } from "../utils/escape-reg-ex";
 import { GraphStore, GraphStoreClass } from "../stores/graph-store";
+import { AppSettingsActions } from "../stores/app-settings-store";
 
 // log -- see loglevel in package.json
 
@@ -67,6 +68,8 @@ export class CodapConnect {
   private tableCreated: boolean;
   private _attrsToSync: any; // checked: any ok
   private _attrsAreLoaded: boolean;
+  private guidePollerInterval: number | null = null;
+  private guideComponentId: number | null = null;
 
   constructor(context) {
     this.codapRequestHandler = this.codapRequestHandler.bind(this);
@@ -127,10 +130,13 @@ export class CodapConnect {
             this.graphStore.setCodapStandaloneMode(true);
           }
 
+          // get the current list of guide items
+          this.getGuideItems();
+
           // We check for game state in either the frame (CODAP API 2.0) or the dataContext
           // (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
           const state = (frame != null ? frame.values.savedState : undefined) ||
-                  __guard__(__guard__(context != null ? context.values : undefined, x1 => x1.contextStorage), x => x.gameState);
+                __guard__(__guard__(context != null ? context.values : undefined, x1 => x1.contextStorage), x => x.gameState);
 
           if (state != null) {
             this.graphStore.deleteAll();
@@ -651,6 +657,19 @@ export class CodapConnect {
     });
   }
 
+  public openGuideConfiguration() {
+    this.codapPhone.call({
+      action: "notify",
+      resource: "interactiveFrame",
+      values: {
+        request: "openGuideConfiguration"
+      }
+    });
+
+    // start polling for guide item updates to keep guide dropdown in sync
+    this.pollForGuideItemUpdates();
+  }
+
   public codapRequestHandler(cmd, callback) {
     let successes;
     const { resource } = cmd;
@@ -784,6 +803,61 @@ export class CodapConnect {
       });
     });
     return promise;
+  }
+
+  public showGuideItemAtIndex(index: number) {
+    if (this.guideComponentId) {
+      this.codapPhone.call({
+        action: "update",
+        resource: `component[${this.guideComponentId}]`,
+        values: {
+          currentItemIndex: index,
+          isVisible: true
+        }
+      }, (result) => {
+        console.log("showGuideItemAtIndex", result);
+      });
+    }
+  }
+
+  private getGuideItems() {
+    const getGuideComponent = (id) => {
+      this.codapPhone.call({
+        action: "get",
+        resource: `component[${id}]`
+      }, (result) => {
+        if (result && result.success && result.values) {
+          const items = result.values.items || [];
+          AppSettingsActions.setGuideItems(items);
+        }
+      });
+    };
+
+    if (!this.guideComponentId) {
+      this.codapPhone.call({
+        action: "get",
+        resource: "componentList"
+      }, (result) => {
+        if (result && result.success && result.values) {
+          _.map(result.values, (value) => {
+            if (value.type === "guideView") {
+              this.guideComponentId = value.id;
+            }
+          });
+          if (this.guideComponentId) {
+            getGuideComponent(this.guideComponentId);
+          }
+        }
+      });
+    } else {
+      getGuideComponent(this.guideComponentId);
+    }
+  }
+
+  private pollForGuideItemUpdates() {
+    if (!this.guidePollerInterval) {
+      this.guidePollerInterval = window.setInterval(() => this.getGuideItems(), 1000);
+    }
   }
 }
 

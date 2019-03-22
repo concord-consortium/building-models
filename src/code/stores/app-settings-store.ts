@@ -17,7 +17,9 @@ export declare class AppSettingsActionsClass {
   public setComplexity(val: any): void;  // TODO: get concrete class
   public setSimulationType(val: any): void;  // TODO: get concrete class
   public relationshipSymbols(show: boolean): void;
+  public guide(show: boolean): void;
   public setTouchDevice(val: any): void;  // TODO: get concrete class
+  public setGuideItems(items: GuideItem[]): void;
 }
 
 export declare class AppSettingsStoreClass extends StoreClass {
@@ -31,7 +33,9 @@ export const AppSettingsActions: AppSettingsActionsClass = Reflux.createActions(
     "setComplexity",
     "setSimulationType",
     "relationshipSymbols",
-    "setTouchDevice"
+    "guide",
+    "setTouchDevice",
+    "setGuideItems"
   ]
 );
 
@@ -59,11 +63,18 @@ export const SimulationType: SimulationTypeType = {
   DEFAULT: 1
 };
 
+export interface GuideItem {
+  itemTitle: string;
+  url: string;
+}
+
 interface AppSettingsSettings {
   showingSettingsDialog: boolean;
   complexity: number;
   simulationType: number;
   relationshipSymbols: boolean;
+  guide: boolean;
+  guideItems: GuideItem[];
   uiElements: UIElements;
   lockdown: boolean;
   touchDevice: boolean;
@@ -109,6 +120,8 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       complexity: Complexity.DEFAULT,
       simulationType,
       relationshipSymbols: false,
+      guide: false,
+      guideItems: [],
       uiElements,
       lockdown,
       touchDevice: false
@@ -135,6 +148,16 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
     return this.notifyChange();
   },
 
+  onGuide(show) {
+    this.settings.guide = show;
+    return this.notifyChange();
+  },
+
+  onSetGuideItems(items) {
+    this.settings.guideItems = items;
+    return this.notifyChange();
+  },
+
   notifyChange() {
     return this.trigger(_.clone(this.settings));
   },
@@ -148,7 +171,8 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
     return {
       complexity: this.settings.complexity,
       simulationType: this.settings.simulationType,
-      relationshipSymbols: this.settings.relationshipSymbols
+      relationshipSymbols: this.settings.relationshipSymbols,
+      guide: this.settings.guide
     };
   }
 });

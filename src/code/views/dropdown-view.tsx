@@ -1,6 +1,7 @@
 import * as React from "react";
 
 export interface DropDownViewItem {
+  key?: any;
   name: string;
   action?: () => void;
 }
@@ -59,7 +60,7 @@ export class DropDownView extends React.Component<DropDownViewProps, DropDownVie
     const items: JSX.Element[] = [];
     for (item of this.props.items) {
       items.push(<DropdownItemView
-        key={item.name || item}
+        key={item.key || item.name || item}
         item={item}
         select={this.handleSelect}
         isActionMenu={this.props.isActionMenu}

@@ -14,6 +14,7 @@ import { GraphStore } from "../stores/graph-store";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 import { urlParams } from "../utils/url-params";
+import { CodapConnect } from "../models/codap-connect";
 
 const { SimulationType, Complexity } = AppSettingsStore;
 
@@ -26,12 +27,17 @@ type SimulationInspectorViewState = SimulationInspectorViewOuterState & Simulati
 export class SimulationInspectorView extends Mixer<SimulationInspectorProps, SimulationInspectorViewState> {
 
   public static displayName = "SimulationInspectorView";
+  private codapConnect: CodapConnect;
 
   constructor(props: {}) {
     super(props);
     this.mixins = [new SimulationMixin(this), new AppSettingsMixin(this)];
     const outerProps: SimulationInspectorOuterProps = {};
     this.setInitialState(outerProps, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
+  }
+
+  public componentWillMount() {
+    this.codapConnect = CodapConnect.instance("building-models");
   }
 
   public render() {
@@ -128,6 +134,18 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
             ? <div><button onClick={this.showTopology}>Show Topology</button></div>
             : ""
           }
+          <div className="row">
+            <label key="symbols-label">
+              <input
+                key="symbols-checkbox"
+                type="checkbox"
+                value="relationship-symbols"
+                checked={this.state.guide}
+                onChange={this.handleGuide}
+              />
+              {tr("~SIMULATION.GUIDE")} (<span className="link" onClick={this.handleConfigureGuide}>{tr("~SIMULATION.CONFIGURE_GUIDE")}</span>)
+            </label>
+          </div>
         </div>
       </div>
     );
@@ -143,6 +161,16 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleRelationshipSymbols = (e) => {
     AppSettingsActions.relationshipSymbols(e.target.checked);
+  }
+
+  private handleGuide = (e) => {
+    AppSettingsActions.guide(e.target.checked);
+  }
+
+  private handleConfigureGuide = (e: React.MouseEvent<HTMLSpanElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.codapConnect.openGuideConfiguration();
   }
 
   private handleSimulationType = (val) => {
