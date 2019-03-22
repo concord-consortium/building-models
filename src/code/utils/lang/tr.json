@@ -194,7 +194,7 @@
     "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Grafik",
     "~DOCUMENT.CODAP_ACTIONS.TEXT": "Metin",
     "~MENU.ABOUT": "About",
-    "~MENU.ABOUT.HELP": "Go to Help website",
+    "~MENU.ABOUT.HELP": "Go to help website",
     "~MENU.ABOUT.ABOUT": "About SageModeler",
     "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
     "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Experiment #"
