@@ -14,6 +14,7 @@ import { Relationship } from "../src/code/models/relationship";
 
 import { GraphStore } from "../src/code/stores/graph-store";
 
+import { SimulationStore } from "../src/code/stores/simulation-store";
 import { Stub, UnStub } from "./codap-helper";
 
 const makeLink = (sourceNode, targetNode, formula?) =>
@@ -411,6 +412,9 @@ describe("NodeList", () => {
       const linkC = makeLink(nodeC, nodeD);
       const graphStore = GraphStore;
       graphStore.init();
+      // Model link descriptions depend on these settings:
+      SimulationStore.settings.capNodeValues = false;
+      SimulationStore.settings.duration = 10;
       graphStore.addNode(nodeA);
       graphStore.addNode(nodeB);
       graphStore.addNode(nodeC);
