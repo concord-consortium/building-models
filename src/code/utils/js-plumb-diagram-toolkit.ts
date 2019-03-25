@@ -91,7 +91,7 @@ export class DiagramToolkit {
   }
 
   public handleLabelClick(label, evnt) {
-    return (typeof this.options.handleDoubleClick === "function" ? this.options.handleDoubleClick(label.component, evnt) : undefined);
+    return (typeof this.options.handleLabelClick === "function" ? this.options.handleLabelClick(label, evnt) : undefined);
   }
 
   public handleDisconnect(info, evnt) {
@@ -228,13 +228,23 @@ export class DiagramToolkit {
         : label.length < 19 ? 130
           : 200;
     const style = {width};
+
+    const _self = this;
     return () => {
-      const _self = this;
-      return $("<input>").val(label).css(style)
-        .show(function() {
-          return $(this).focus(); }).change(function() {
-          return (typeof _self.options.handleLabelEdit === "function" ? _self.options.handleLabelEdit(link, (this as HTMLInputElement).value) : undefined);
+      const input = $("<input>").val(label).css(style);
+      input
+        .show(() => {
+          // wait for input to show on next render before focus
+          setTimeout(() => {
+            input.focus();
+          }, 1);
+        })
+        .change(() => {
+          if (typeof _self.options.handleLabelEdit === "function") {
+            _self.options.handleLabelEdit(link, input.val());
+          }
         });
+      return input;
     };
   }
 

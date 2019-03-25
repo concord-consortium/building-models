@@ -108,7 +108,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       Container:            $container[0],
       handleConnect:        this.handleConnect,
       handleClick:          this.handleLinkClick,
-      handleLabelEdit:      this.handleLabelEdit
+      handleLabelEdit:      this.handleLabelEdit,
+      handleLabelClick:     this.handleLabelClick
     }
     );
 
@@ -348,6 +349,12 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       if (connection.linkModel) {
         return GraphStore.clickLink(connection.linkModel, multipleSelections);
       }
+    });
+  }
+
+  private handleLabelClick = (label, evt) => {
+    return this.handleEvent(() => {
+      GraphStore.editLink(label.component.linkModel);
     });
   }
 
