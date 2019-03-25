@@ -568,7 +568,8 @@ export class CodapConnect {
         yAttributeName,
         size: { width: 242, height: 221 },
         position: "bottom",
-        enableNumberToggle: true
+        enableNumberToggle: true,
+        numberToggleLastMode: true
       }
     });
   }
@@ -584,7 +585,8 @@ export class CodapConnect {
         dataContext: this.dataContextName,
         size: { width: 242, height: 221 },
         position: "bottom",
-        enableNumberToggle: true
+        enableNumberToggle: true,
+        numberToggleLastMode: true
       }
     });
   }
