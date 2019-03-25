@@ -5,7 +5,7 @@ import { AppSettingsMixinProps } from "../stores/app-settings-store";
 
 import { tr } from "../utils/translate";
 import { RecordButtonView  } from "./record-button-view";
-import { DropDownView } from "./dropdown-view";
+import { DropDownView, DropDownViewItem } from "./dropdown-view";
 import { ExperimentPanelView } from "./experiment-panel-view";
 
 import { SimulationMixin, SimulationMixinState } from "../stores/simulation-store";
@@ -101,9 +101,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
       disabled: !this.state.modelIsRunnable
     };
     const {timeUnitOptions} = this.state;
-    const items = Object.keys(timeUnitOptions).map((key) => {
-      return {name: timeUnitOptions[key].name};
-    });
+    const items = Object.keys(timeUnitOptions).map((key) => timeUnitOptions[key]);
     return (
       <div className="horizontal">
         <RecordButtonView {...props}>
@@ -126,7 +124,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
           isActionMenu={false}
           onSelect={SimulationActions.setStepUnits}
           anchor={this.state.stepUnitsName}
-          items={items}
+          items={items as DropDownViewItem[]}
         />
       </div>
     );
