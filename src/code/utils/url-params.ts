@@ -19,6 +19,7 @@ export interface UrlParams {
   lockdown?: string;
   hide?: string;
   lang?: string;
+  showTopology?: string;
 }
 
 export const urlParams: UrlParams = params;

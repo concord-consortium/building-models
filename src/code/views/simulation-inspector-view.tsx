@@ -13,6 +13,7 @@ import { AppSettingsStore, AppSettingsActions, AppSettingsMixin, AppSettingsMixi
 import { GraphStore } from "../stores/graph-store";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
+import { urlParams } from "../utils/url-params";
 
 const { SimulationType, Complexity } = AppSettingsStore;
 
@@ -122,9 +123,18 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
               {tr("~SIMULATION.RELATIONSHIP_SYMBOLS")}
             </label>
           </div>
+          {
+            urlParams.showTopology
+            ? <div><button onClick={this.showTopology}>Show Topology</button></div>
+            : ""
+          }
         </div>
       </div>
     );
+  }
+  private showTopology = (e) => {
+    const state = GraphStore.serializeGraph({});
+    alert(JSON.stringify(state.topology, null, 3));
   }
 
   private handleCapNodeValues = (e) => {

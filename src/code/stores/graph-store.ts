@@ -34,6 +34,7 @@ import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber, StoreClass } from "./store-class";
 import { GraphView } from "../views/graph-view";
 import { InspectorPanelActions } from "./inspector-panel-store";
+import { getTopology } from "../utils/topology-tagger";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -946,14 +947,15 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     })();
     const settings = AppSettingsStore.serialize();
     settings.simulation = SimulationStore.serialize();
-
+    const topology = getTopology({nodes: nodeExports, links: linkExports});
     const data = {
       version: latestVersion(),
       filename: this.filename,
       palette,
       nodes: nodeExports,
       links: linkExports,
-      settings
+      settings,
+      topology
     };
     return data;
   },
