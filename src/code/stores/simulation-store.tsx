@@ -264,7 +264,10 @@ export const SimulationStore = Reflux.createStore({
   onCreateExperiment() {
     this.settings.experimentNumber++;
     this.settings.experimentFrame = 0;
-    return this.notifyChange();
+    this.notifyChange();
+    // run simulation after listeners respond to experiment update so we can animate the graphs
+    // (the graph store clears each node's frame when createExperiment is called)
+    this._runSimulation();
   },
 
   onStopRecording() {

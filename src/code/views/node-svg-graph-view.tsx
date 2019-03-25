@@ -25,6 +25,7 @@ interface NodeSvgGraphViewOuterProps {
   innerColor: string;
   image: JSX.Element;
   animateGraphs: boolean;
+  hideGraphs: boolean;
 }
 type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps & SimulationMixinProps;
 
@@ -38,6 +39,8 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
   private animationInterval: number | null = null;
   private animationStartTime: number;
+
+  private mounted: boolean;
 
   constructor(props: NodeSvgGraphViewProps) {
     super(props);
@@ -55,19 +58,27 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     );
   }
 
+  public componentDidMount() {
+    this.mounted = true;
+  }
+
+  public componentWillUnmount() {
+    this.mounted = false;
+    this.clearAnimationInterval();
+  }
+
   public componentDidUpdate(prevProps: NodeSvgGraphViewProps) {
     if (this.props.isTimeBased && (prevProps.animateGraphs !== this.props.animateGraphs)) {
-      if (this.animationInterval) {
-        window.clearInterval(this.animationInterval);
-      }
-      // starting animation?
-      if (this.props.animateGraphs) {
-        this.setState({animationMultiplier: 0}, () => {
-          this.animationStartTime = Date.now();
-          this.animationInterval = window.setInterval(this.handleAnimationInterval, 10);
-        });
-      } else {
-        this.setState({animationMultiplier: 1});
+      this.clearAnimationInterval();
+      if (this.mounted) {
+        if (this.props.animateGraphs) {
+          this.setState({animationMultiplier: 0}, () => {
+            this.animationStartTime = Date.now();
+            this.animationInterval = window.setInterval(this.handleAnimationInterval, 10);
+          });
+        } else {
+          this.setState({animationMultiplier: 1});
+        }
       }
     }
   }
@@ -95,7 +106,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       left: svgOffset
     };
 
-    if (this.props.data.length > 0) {
+    if (!this.props.hideGraphs && (this.props.data.length > 0)) {
       if (this.props.isTimeBased) {
         chart = <path d={this.pointsToPath(this.getPathPoints())} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill="none" />;
       } else {
@@ -178,6 +189,18 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
   private handleAnimationInterval = () => {
     const delta = Date.now() - this.animationStartTime;
-    this.setState({animationMultiplier: Math.min(delta / TIME_BASED_RECORDING_TIME, 1)});
+    if (this.mounted) {
+      const animationMultiplier = Math.min(delta / TIME_BASED_RECORDING_TIME, 1);
+      this.setState({animationMultiplier});
+      if (animationMultiplier === 1) {
+        this.clearAnimationInterval();
+      }
+    }
+  }
+
+  private clearAnimationInterval() {
+    if (this.animationInterval) {
+      window.clearInterval(this.animationInterval);
+    }
   }
 }
