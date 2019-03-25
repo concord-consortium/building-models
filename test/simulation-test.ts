@@ -431,6 +431,7 @@ describe("The SimulationStore, with a network in the GraphStore", () => {
   describe("for a fast simulation for 10 iterations", () => {
 
     beforeEach(() => {
+      SimulationStore.settings.experimentFrame = 0;
       SimulationActions.setDuration.trigger(10);
       SimulationActions.expandSimulationPanel.trigger();
     });
@@ -458,11 +459,11 @@ describe("The SimulationStore, with a network in the GraphStore", () => {
           data.length.should.equal(10);
 
           const frame0 = data[0];
-          frame0.time.should.equal(11);
+          frame0.time.should.equal(1);
           frame0.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
 
           const frame9 = data[9];
-          frame9.time.should.equal(20);
+          frame9.time.should.equal(10);
           frame9.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
       });
 
