@@ -29,6 +29,7 @@ window.showSplashScreen = function (timeoutseconds, isLoading) {
     '<div id="splash-container">' +
     '  <div id="splash-background"></div>' +
     '  <div id="splash-dialog">' +
+    '  <div id="splash-dialog-close">X</div>' +
     '    <div id="splash-inner-dialog">' +
     '      <div class="splash-cell">' +
     '        <img src="img/logo.png"/>' +
