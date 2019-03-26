@@ -1,7 +1,17 @@
 import * as React from "react";
 const log = require("loglevel");
 
+import { urlParams } from "../utils/url-params";
 import { tr } from "../utils/translate";
+
+const urlValueWithDefault = (name: string, defaultValue: number, urlValue?: string) => {
+  const value = parseFloat(urlValue || "");
+  const result = isNaN(value) ? defaultValue : value;
+  console.log("Using", result, "for", name);
+  return result;
+};
+const SliderWiggleLookback = urlValueWithDefault("SliderWiggleLookback", 10, urlParams.wiggleLookback);
+const SliderWiggleThreshhold = urlValueWithDefault("SliderWiggleThreshhold", 0.2, urlParams.wiggleThreshold);
 
 const circleRadius = 2;
 const constants = {
@@ -47,6 +57,7 @@ interface SVGSliderViewProps {
   color: string;
   showHandle: boolean;
   showLabels: boolean;
+  nudge?: (delta: number) => void;
 }
 
 interface SVGSliderViewState {
@@ -55,6 +66,7 @@ interface SVGSliderViewState {
   dragging: boolean;
   "editing-min": boolean;
   "editing-max": boolean;
+  showButtons: boolean;
 }
 
 export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSliderViewState> {
@@ -66,12 +78,17 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     grab: 0,
     dragging: false,
     "editing-min": false,
-    "editing-max": false
+    "editing-max": false,
+    showButtons: false
   };
 
   private slider: HTMLDivElement | null;
   private handle: HTMLDivElement | null;
   private input: HTMLInputElement | null;
+
+  private nudgeInterval: number | null = null;
+  private sliderMoved: boolean;
+  private wiggleList: number[] = [];
 
   /*
   getDefaultProps() {
@@ -118,6 +135,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
 
   public render() {
     const { orientation, width, height, filled, showHandle, showLabels } = this.props;
+    const { showButtons } = this.state;
     const horizontal = orientation === "horizontal";
     const lengendHeight = 9 + 4.5;
     const style = {
@@ -144,6 +162,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
         </svg>
         {showHandle ? this.renderHandle() : undefined}
         {showLabels ? this.renderLegend() : undefined}
+        {showHandle && showButtons ? this.renderButtons() : undefined}
       </div>
     );
   }
@@ -217,12 +236,33 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     return <div className="number" style={style}>{this.props.value.toFixed(this.props.displayPrecision)}</div>;
   }
 
+  private isButtonEvent(e) {
+    const {target} = e;
+    const {parentNode} = target;
+    return (target.getAttribute("class") === "slider-button") || (parentNode && (parentNode.getAttribute("class") === "slider-button"));
+  }
+
   private handleNoop = (e) => {
     e.stopPropagation();
     e.preventDefault();
   }
 
+  private handleClick = (e) => {
+    if (this.isButtonEvent(e)) {
+      return;
+    }
+    this.handleNoop(e);
+    if (!this.sliderMoved) {
+      this.toggleButtons();
+    }
+    this.sliderMoved = false;
+    this.wiggleList = [];
+  }
+
   private handleStart = (e) => {
+    if (this.isButtonEvent(e)) {
+      return;
+    }
     this.handleNoop(e);
     if (this.props.onSliderDragStart) {
       this.props.onSliderDragStart();
@@ -231,7 +271,10 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     return document.addEventListener("mouseup",   this.handleEnd);
   }
 
-  private handleEnd = () => {
+  private handleEnd = (e) => {
+    if (this.isButtonEvent(e)) {
+      return;
+    }
     if (this.props.onSliderDragEnd) {
       this.props.onSliderDragEnd();
     }
@@ -240,19 +283,49 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   private handleDrag = (e) => {
+    if (this.isButtonEvent(e)) {
+      return;
+    }
     this.handleNoop(e);
+    this.sliderMoved = true;
     const { onValueChange } = this.props;
     if (onValueChange == null) { return; }
 
     const value = this.position(e);
     if (value !== this.props.value) {
+      this.checkForSliderWiggle(value);
       return onValueChange(value);
     }
   }
 
   private handleJumpAndDrag = (e) => {
+    if (this.isButtonEvent(e)) {
+      return;
+    }
     this.handleDrag(e);
     return this.handleStart(e);
+  }
+
+  // shows the buttons if the user moves the slider around a small range
+  private checkForSliderWiggle(value: number) {
+    if (!this.state.showButtons) {
+      const {wiggleList} = this;
+      const {length} = wiggleList;
+      wiggleList.push(value);
+      if (length >= SliderWiggleLookback) {
+        const maxChange = (this.props.max - this.props.min) * SliderWiggleThreshhold;
+        let min = wiggleList[length - 1];
+        let max = min;
+        for (let i = 0; i < SliderWiggleLookback; i++) {
+          const lookbackValue = wiggleList[length - 1 - i];
+          min = Math.min(min, lookbackValue);
+          max = Math.max(max, lookbackValue);
+        }
+        if (max - min <= maxChange) {
+          this.setState({showButtons: true});
+        }
+      }
+    }
   }
 
   private clamp(value, min, max) {
@@ -331,6 +404,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
         onMouseDown={this.handleStart}
         onTouchEnd={this.handleNoop}
         onTouchMove={this.handleDrag}
+        onClick={this.handleClick}
       >
         <i className={classNames} />
         {label}
@@ -484,5 +558,82 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
         );
       }
     }
+  }
+
+  private toggleButtons() {
+    this.setState({showButtons: !this.state.showButtons});
+  }
+
+  private renderButtons() {
+    const {height, width} = this.props;
+    const margin = 4;
+    const buttonSize = 26;
+    const svgHeight = margin + (buttonSize * 2);
+    const buttonStyle = {fill: "#FFF", fillOpacity: 0.5, strokeWidth: 2, stroke: "#888"};
+    const arrowStyle =  {fill: "#FFF", fillOpacity: 0.5, strokeWidth: 1, stroke: "#888"};
+    const buttonRadius = buttonSize * 0.25;
+    const arrowSize = buttonSize / 2;
+    const halfArrowSize = arrowSize / 2;
+    const arrowMargin = buttonSize / 4;
+    const marginTop = -(svgHeight - ((svgHeight - height) / 2));
+    const marginLeft = -(buttonSize + width + margin);
+
+    return (
+      <div style={{marginTop, marginLeft}}>
+        <svg className="slider-buttons" width={`${buttonSize}px`} height={`${svgHeight}px`} viewBox={`0 0 ${buttonSize} ${svgHeight}`}>
+          <g className="slider-button" onMouseDown={this.handleNudgeUp} onTouchStart={this.handleNudgeUp} onTouchEnd={this.handleNoop}>
+            <rect width={buttonSize} height={buttonSize} rx={buttonRadius} ry={buttonRadius} style={buttonStyle}  />
+            <path d={`M${arrowMargin} ${arrowSize + (arrowSize / 4)} l${halfArrowSize} -${halfArrowSize} l${halfArrowSize} ${halfArrowSize} Z`} style={arrowStyle} />
+          </g>
+          <g className="slider-button" onMouseDown={this.handleNudgeDown} onTouchStart={this.handleNudgeDown} onTouchEnd={this.handleNoop}>
+            <rect y={buttonSize + margin} width={buttonSize} height={buttonSize} rx={buttonRadius} ry={buttonRadius} style={buttonStyle} />
+            <path d={`M${arrowMargin} ${buttonSize + margin + arrowSize - (arrowSize / 5)} l${halfArrowSize} ${halfArrowSize} l${halfArrowSize} -${halfArrowSize} Z`} style={arrowStyle} />
+          </g>
+        </svg>
+      </div>
+    );
+  }
+
+  private handleNudgeUp = (e: React.MouseEvent<SVGElement> | React.TouchEvent<SVGElement>) => {
+    this.handleNoop(e);
+    this.handleNudge(1);
+  }
+
+  private handleNudgeDown = (e: React.MouseEvent<SVGElement> | React.TouchEvent<SVGElement>) => {
+    this.handleNoop(e);
+    this.handleNudge(-1);
+  }
+
+  private handleNudge = (delta: number) => {
+    const startOfNudge = Date.now();
+    const clearMouseDownInterval = () => {
+      if (this.nudgeInterval) {
+        window.clearInterval(this.nudgeInterval);
+        this.nudgeInterval = null;
+      }
+    };
+    const nudge = (value) => {
+      if (this.props.nudge) {
+        this.props.nudge(value);
+      }
+    };
+    const mouseDownNudge = () => {
+      const now = Date.now();
+      // create an exponent for the modifer of number of seconds after 1 second from the start of the nudge
+      const exp = Math.max(0, (now - startOfNudge - 1000) / 1000);
+      // create modifier starting after 1 second (Math.pow(2, 0) is 1 which is why 1 is subtracted)
+      const mod = Math.pow(2, exp) - 1;
+      nudge(delta + (delta * mod));
+    };
+    const mouseUp = (e: MouseEvent) => {
+      clearMouseDownInterval();
+      nudge(delta);
+      document.removeEventListener("mouseup", mouseUp);
+    };
+
+    clearMouseDownInterval();
+    this.nudgeInterval = window.setInterval(mouseDownNudge, 200);
+
+    document.addEventListener("mouseup", mouseUp);
   }
 }

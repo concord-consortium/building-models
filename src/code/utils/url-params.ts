@@ -20,6 +20,8 @@ export interface UrlParams {
   hide?: string;
   lang?: string;
   showTopology?: string;
+  wiggleLookback?: string;
+  wiggleThreshold?: string;
 }
 
 export const urlParams: UrlParams = params;
