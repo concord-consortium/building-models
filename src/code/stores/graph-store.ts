@@ -35,6 +35,7 @@ import { StoreUnsubscriber, StoreClass } from "./store-class";
 import { GraphView } from "../views/graph-view";
 import { InspectorPanelActions } from "./inspector-panel-store";
 import { getTopology } from "../utils/topology-tagger";
+import { urlParams } from "../utils/url-params";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -56,6 +57,8 @@ export declare class GraphStoreClass extends StoreClass {
   public readonly usingCODAP: boolean;
   public readonly usingLara: boolean;
   public readonly codapStandaloneMode: boolean;
+
+  public readonly currentSliderNodeKey: string;
 
   public init(context?): void;
   public resetSimulation(): void;
@@ -115,6 +118,7 @@ export declare class GraphStoreClass extends StoreClass {
   public toJsonString(palette: any): string;
   public getGraphState(): GraphSettings;
   public updateListeners(): void;
+  public nudgeNodeWithKeyInitialValue(key: string, delta: number);
 }
 
 export const GraphStore: GraphStoreClass = Reflux.createStore({
@@ -656,6 +660,19 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     const node = this.nodeKeys[ key ];
     if (node) {
       return this.changeNode(data, node);
+    }
+  },
+
+  nudgeNodeWithKeyInitialValue(key, delta) {
+    const node = this.nodeKeys[ key ];
+    if (node && !node.isTransfer) {
+      const {initialValue, min, max} = node;
+      const nudgeFactor = (max - min) / 1000;
+      const newInitialValue = initialValue + (nudgeFactor * delta);
+      if ((newInitialValue >= min) && (newInitialValue <= max)) {
+        console.log("Nudging node from", initialValue, "to", newInitialValue);
+        this.changeNodeProperty("initialValue", newInitialValue, node);
+      }
     }
   },
 

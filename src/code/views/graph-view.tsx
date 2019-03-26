@@ -25,7 +25,7 @@ import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin, GraphStoreCla
 import { ImageDialogActions } from "../stores/image-dialog-store";
 import { RelationFactory } from "../models/relation-factory";
 
-import { SimulationMixinProps, SimulationMixinState, SimulationMixin, TIME_BASED_RECORDING_TIME } from "../stores/simulation-store";
+import { SimulationMixinProps, SimulationMixinState, SimulationMixin, TIME_BASED_RECORDING_TIME, SimulationStore } from "../stores/simulation-store";
 import { AppSettingsStore, AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
 import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-store";
 import { LaraMixinProps, LaraMixinState, LaraMixin } from "../stores/lara-store";
@@ -75,6 +75,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   private selectionBox: HTMLDivElement | null;
 
   private animateTimeout: number | null;
+  private currentSliderNodeKey: string | null;
 
   constructor(props: GraphViewProps) {
     super(props);
@@ -96,6 +97,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       hideGraphs: false,
     };
     this.setInitialState(outerState, GraphMixin.InitialState(), SimulationMixin.InitialState(), AppSettingsMixin.InitialState(), CodapMixin.InitialState(), LaraMixin.InitialState());
+    this.currentSliderNodeKey = null;
   }
 
   public componentDidMount() {
@@ -131,10 +133,27 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         editingLink
       });
 
+      // if a single non-transfer node is selected then make it the current slider
+      if ((selectedNodes.length === 1) && !selectedNodes[0].isTransfer && !editingNode && (selectedLink.length === 0) && !editingLink) {
+        this.currentSliderNodeKey = selectedNodes[0].key;
+      } else {
+        this.currentSliderNodeKey = null;
+      }
+
       // FIXME: this code makes no sense after types were added - figure out reason for existence!
       // if (lastLinkSelection === !this.state.selectedLink) {
       //   return this.handleUpdateToolkit();
       // }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (this.currentSliderNodeKey && SimulationStore.settings.simulationPanelExpanded) {
+        const {keyCode} = e;
+        const delta = keyCode === 38 ? 1 : (keyCode === 40 ? -1 : 0); // 38: up arrow, 40: down arrow
+        if (delta !== 0) {
+          GraphStore.nudgeNodeWithKeyInitialValue(this.currentSliderNodeKey, delta);
+        }
+      }
     });
 
     return ($container as any).droppable({
@@ -240,6 +259,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
               showGraphButton={this.state.codapHasLoaded && !diagramOnly}
               animateGraphs={this.state.isRecording || this.state.animateGraphs}
               hideGraphs={this.state.hideGraphs}
+              onSliderDragStart={this.handleSliderDragStart}
             />)}
         </div>
       </div>
@@ -690,4 +710,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     this.props.graphStore.changeLink(link, {title});
     return this.props.selectionManager.clearSelection();
   }
+
+  private handleSliderDragStart = (key: string) => {
+    this.currentSliderNodeKey = key;
+  }
+
 }
