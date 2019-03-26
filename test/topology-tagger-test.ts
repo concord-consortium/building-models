@@ -36,7 +36,7 @@ describe("A TopologyTagger", () => {
         const nodes: ISageNode[] = [];
         const links: ISageLink[] = [];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(0);
+        chai.expect(getTopology(graph).multiLinkTargetNodeCount).to.eql(0);
       });
       it("finds 1 multiLinkTargetNode in a 3 node combining branch", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}, {key: "c"} ];
@@ -45,7 +45,7 @@ describe("A TopologyTagger", () => {
           {title: "L2", sourceNode: "c", targetNode: "b"}
         ];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(1);
+        chai.expect(getTopology(graph).multiLinkTargetNodeCount).to.eql(1);
       });
       it("finds no multiLinkTargetNodes in a 3 node diverging branch", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}, {key: "c"} ];
@@ -54,7 +54,7 @@ describe("A TopologyTagger", () => {
           {title: "L2", sourceNode: "a", targetNode: "c"}
         ];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(0);
+        chai.expect(getTopology(graph).multiLinkTargetNodeCount).to.eql(0);
       });
       it("finds no multiLinkTargetNodes in a 3 node linear graph", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}, {key: "c"} ];
@@ -63,7 +63,7 @@ describe("A TopologyTagger", () => {
           {title: "L2", sourceNode: "b", targetNode: "c"}
         ];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(0);
+        chai.expect(getTopology(graph).multiLinkTargetNodeCount).to.eql(0);
       });
 
     });
@@ -73,25 +73,25 @@ describe("A TopologyTagger", () => {
         const nodes: ISageNode[] = [];
         const links: ISageLink[] = [];
         const graph: ISageGraph = {nodes, links};
-        chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+        chai.expect(getTopology(graph).unconnectedNodeCount).to.eql(0);
       });
       it("finds 1 unconnected nodes in model with 1 node", () => {
         const nodes: ISageNode[] = [ {key: "a"}];
         const links: ISageLink[] = [];
         const graph: ISageGraph = {nodes, links};
-        chai.expect(getTopology(graph).unconnectedNodes).to.eql(1);
+        chai.expect(getTopology(graph).unconnectedNodeCount).to.eql(1);
       });
       it("finds 2 unconnected nodes in model with 2 unlinked nodes", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}];
         const links: ISageLink[] = [];
         const graph: ISageGraph = {nodes, links};
-        chai.expect(getTopology(graph).unconnectedNodes).to.eql(2);
+        chai.expect(getTopology(graph).unconnectedNodeCount).to.eql(2);
       });
       it("finds 0 unconnected nodes in model with 2 linked nodes", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}];
         const links: ISageLink[] = [ {title: "", sourceNode: "a", targetNode: "b"}];
         const graph: ISageGraph = {nodes, links};
-        chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+        chai.expect(getTopology(graph).unconnectedNodeCount).to.eql(0);
       });
     });
 
@@ -103,7 +103,7 @@ describe("A TopologyTagger", () => {
         ];
         const nodes: ISageNode[] = [{key: "a"}, {key: "b"}];
         const graph: ISageGraph = {nodes, links};
-        chai.expect(getTopology(graph).cycles).to.eql(1);
+        chai.expect(getTopology(graph).cycleCount).to.eql(1);
       });
 
       it("wont find cycles when they dont exist", () => {
@@ -112,7 +112,7 @@ describe("A TopologyTagger", () => {
         ];
         const nodes: ISageNode[] = [{key: "a"}, {key: "b"}];
         const graph: ISageGraph = {nodes, links};
-        chai.expect(getTopology(graph).cycles).to.eql(0);
+        chai.expect(getTopology(graph).cycleCount).to.eql(0);
       });
     });
 
@@ -121,25 +121,25 @@ describe("A TopologyTagger", () => {
         const nodes: ISageNode[] = [];
         const links: ISageLink[] = [];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).independentGraphs).to.eql(0);
+        chai.expect(getTopology(graph).independentGraphCount).to.eql(0);
       });
       it("finds one when there is a single node", () => {
         const nodes: ISageNode[] = [ {key: "a"}];
         const links: ISageLink[] = [];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).independentGraphs).to.eql(1);
+        chai.expect(getTopology(graph).independentGraphCount).to.eql(1);
       });
       it("finds two when there are two un-connected nodes", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}];
         const links: ISageLink[] = [];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).independentGraphs).to.eql(2);
+        chai.expect(getTopology(graph).independentGraphCount).to.eql(2);
       });
       it("finds one when there are two connected nodes", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}];
         const links: ISageLink[] = [ {title: "", sourceNode: "a", targetNode: "b"}];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).independentGraphs).to.eql(1);
+        chai.expect(getTopology(graph).independentGraphCount).to.eql(1);
       });
       it("finds two when there are two, multi-node, unconnected sub-graphs", () => {
         const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}, {key: "c"}, {key: "d"}];
@@ -148,7 +148,7 @@ describe("A TopologyTagger", () => {
           {title: "L2", sourceNode: "c", targetNode: "d"}
         ];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).independentGraphs).to.eql(2);
+        chai.expect(getTopology(graph).independentGraphCount).to.eql(2);
       });
     });
 
@@ -201,6 +201,42 @@ describe("A TopologyTagger", () => {
         chai.expect(getTopology(graph).isLinear).to.eql(false);
       });
 
+    });
+
+    describe("counts the number of collector nodes", () => {
+      it("finds no collector nodes in an empty model", () => {
+        const nodes: ISageNode[] = [];
+        const links: ISageLink[] = [];
+        const graph: ISageGraph = {nodes, links};
+        chai.expect(getTopology(graph).collectorNodeCount).to.eql(0);
+      });
+      it("finds 1 collector node in a model with 1 node that's an accumulator", () => {
+        const nodes: ISageNode[] = [ {key: "a", data: { title: "", isAccumulator: true }}];
+        const links: ISageLink[] = [];
+        const graph: ISageGraph = {nodes, links};
+        chai.expect(getTopology(graph).collectorNodeCount).to.eql(1);
+      });
+      it("finds no collector nodes in a model with 1 node that is not an accumulator", () => {
+        const nodes: ISageNode[] = [ {key: "a", data: { title: "", isAccumulator: false }}];
+        const links: ISageLink[] = [];
+        const graph: ISageGraph = {nodes, links};
+        chai.expect(getTopology(graph).collectorNodeCount).to.eql(0);
+      });
+      it("finds 2 collector nodes in a linear model with 4 nodes, where 2 are accumulators", () => {
+        const nodes: ISageNode[] = [
+          {key: "a", data: { title: "", isAccumulator: false }},
+          {key: "b", data: { title: "", isAccumulator: true }},
+          {key: "c", data: { title: "", isAccumulator: false }},
+          {key: "d", data: { title: "", isAccumulator: true }}
+        ];
+        const links: ISageLink[] = [
+          {title:"", sourceNode: "a", targetNode: "b"},
+          {title:"", sourceNode: "b", targetNode: "c"},
+          {title:"", sourceNode: "c", targetNode: "d"}
+        ];
+        const graph: ISageGraph = {nodes, links};
+        chai.expect(getTopology(graph).collectorNodeCount).to.eql(2);
+      });
     });
 
   });
