@@ -9,8 +9,14 @@ export interface ISageLink {
   title: string;
 }
 
+export interface ISageData {
+  title: string;
+  isAccumulator: boolean;
+}
+
 export interface ISageNode {
   key: sageNodeKey;
+  data?: ISageData;
 }
 
 export interface ITopology {
@@ -26,7 +32,7 @@ export interface ISageGraph {
 export function getAnalysisGraph(sageModelGraph: ISageGraph) {
   const graphlibGraph = new AnalysisGraph();
   sageModelGraph.nodes.forEach((n) => {
-    graphlibGraph.setNode(n.key);
+    graphlibGraph.setNode(n.key, { isAccumulator: n.data && n.data.isAccumulator });
   });
   sageModelGraph.links.forEach((l) => {
     graphlibGraph.setEdge(l.sourceNode, l.targetNode, l.title);
@@ -43,6 +49,12 @@ function countMultiLinkTargetNodes(g) {
 function countUnconnectedNodes(g) {
   return g.nodes()
           .map( (node) => (g.nodeEdges(node).length <= 0 ? 1 : 0))
+          .reduce( (a, b) => (a + b), 0 );
+}
+
+function countAccumulatorNodes(g) {
+  return g.nodes()
+          .map( (node) => (g.node(node).isAccumulator ? 1 : 0))
           .reduce( (a, b) => (a + b), 0 );
 }
 
@@ -71,21 +83,21 @@ export function getTopology(sageModelGraph: ISageGraph) {
 
   const nodeCount = g.nodeCount();
   const linkCount = g.edgeCount();
-  const multiLinkTargetNodes = countMultiLinkTargetNodes(g);
-  const collectorNodeCount = "tbd";
-  const independentGraphs = GraphLibAlg.components(g).length;
-  const unconnectedNodes = countUnconnectedNodes(g);
-  const cycles = GraphLibAlg.findCycles(g).length;
+  const multiLinkTargetNodeCount = countMultiLinkTargetNodes(g);
+  const collectorNodeCount = countAccumulatorNodes(g);
+  const independentGraphCount = GraphLibAlg.components(g).length;
+  const unconnectedNodeCount = countUnconnectedNodes(g);
+  const cycleCount = GraphLibAlg.findCycles(g).length;
   const isLinear = isLinearModel(g);
 
   return {
     nodeCount,
     linkCount,
-    multiLinkTargetNodes,
+    multiLinkTargetNodeCount,
     collectorNodeCount,
-    independentGraphs,
-    unconnectedNodes,
-    cycles,
+    independentGraphCount,
+    unconnectedNodeCount,
+    cycleCount,
     isLinear
   };
 }
