@@ -375,8 +375,11 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     if (this.diagramToolkit) {
       this.ignoringEvents = true;
       this.diagramToolkit.suspendDrawing();
-      this.redrawLinks();
+      // draw nodes (targets) first so that they are before links when jsplumb searches for drag/drop targets
+      // if reversed the links adjacent to the transfer nodes cause the transfer nodes to lose focus when a link
+      // is dragged to a transfer node
       this.redrawTargets();
+      this.redrawLinks();
       this.diagramToolkit.resumeDrawing();
       this.ignoringEvents = false;
       return this.checkForLinkButtonClientClass();
