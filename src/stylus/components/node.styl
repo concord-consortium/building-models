@@ -81,6 +81,12 @@ $node-design-height = 94px
       padding 0
       width $icon-width + 2
       height $icon-width + 2
+    .selected-background
+      position absolute
+      margin-top 1px
+      width 90px
+      height 127px
+      background-color rgba(255,255,255,0);
   .centered-block
     enable-flex(direction: column, alignContent:center, alignItems:center, justify:flex-start)
     min-height 10px
@@ -199,6 +205,7 @@ $node-design-height = 94px
 .node-link-button
   opacity 0.0
   cursor pointer
+  z-index 2
 
   &.correct-drag-top
     margin-top -13px
