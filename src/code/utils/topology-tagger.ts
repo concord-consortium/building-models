@@ -78,6 +78,13 @@ function isLinearModel(g) {
     .reduce ( (a, b) => (a + b), 0) === g.nodeCount();
 }
 
+function anyBranches(g) {
+  const brancedOrJoinedNodeCount = g.nodes()
+    .map( (node) => ((g.inEdges(node).length > 1 || g.outEdges(node).length > 1 ) ? 1 : 0))
+    .reduce( (a, b) => (a + b), 0 );
+  return brancedOrJoinedNodeCount > 0;
+}
+
 export function getTopology(sageModelGraph: ISageGraph) {
   const g = getAnalysisGraph(sageModelGraph);
 
@@ -89,6 +96,7 @@ export function getTopology(sageModelGraph: ISageGraph) {
   const unconnectedNodeCount = countUnconnectedNodes(g);
   const cycleCount = GraphLibAlg.findCycles(g).length;
   const isLinear = isLinearModel(g);
+  const isBranched = anyBranches(g);
 
   return {
     nodeCount,
@@ -98,6 +106,7 @@ export function getTopology(sageModelGraph: ISageGraph) {
     independentGraphCount,
     unconnectedNodeCount,
     cycleCount,
-    isLinear
+    isLinear,
+    isBranched
   };
 }

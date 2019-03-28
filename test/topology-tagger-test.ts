@@ -200,8 +200,59 @@ describe("A TopologyTagger", () => {
         const graph: ISageGraph = { nodes, links };
         chai.expect(getTopology(graph).isLinear).to.eql(false);
       });
-
     });
+
+    describe("determines if a model is branched", () => {
+      it("a model without any nodes is NOT branched", () => {
+        const nodes: ISageNode[] = [];
+        const links: ISageLink[] = [];
+        const graph: ISageGraph = { nodes, links };
+        chai.expect(getTopology(graph).isBranched).to.eql(false);
+      });
+      it("a model with single node is NOT branched", () => {
+        const nodes: ISageNode[] = [ {key: "a"} ];
+        const links: ISageLink[] = [];
+        const graph: ISageGraph = { nodes, links };
+        chai.expect(getTopology(graph).isBranched).to.eql(false);
+      });
+      it("detects a branch from one node to two", () => {
+        const nodes: ISageNode[] = [
+          {key: "a"},
+          {key: "b"},
+          {key: "c"}
+        ];
+        const links: ISageLink[] = [
+          {title: "L1", sourceNode: "a", targetNode: "b"},
+          {title: "L2", sourceNode: "a", targetNode: "c"}
+        ];
+        const graph: ISageGraph = { nodes, links };
+        chai.expect(getTopology(graph).isBranched).to.eql(true);
+      });
+      it("detects a join from two nodes to one", () => {
+        const nodes: ISageNode[] = [
+          {key: "a"},
+          {key: "b"},
+          {key: "c"}
+        ];
+        const links: ISageLink[] = [
+          {title: "L1", sourceNode: "a", targetNode: "c"},
+          {title: "L2", sourceNode: "b", targetNode: "c"}
+        ];
+        const graph: ISageGraph = { nodes, links };
+        chai.expect(getTopology(graph).isBranched).to.eql(true);
+      });
+      it("a linear model is NOT branched", () => {
+        const nodes: ISageNode[] = [ {key: "a"}, {key: "b"}, {key: "c"} ];
+        const links: ISageLink[] = [
+          {title: "L1", sourceNode: "a", targetNode: "b"},
+          {title: "L2", sourceNode: "b", targetNode: "c"}
+        ];
+        const graph: ISageGraph = { nodes, links };
+        chai.expect(getTopology(graph).isBranched).to.eql(false);
+      });
+    });
+
+
 
     describe("counts the number of collector nodes", () => {
       it("finds no collector nodes in an empty model", () => {
