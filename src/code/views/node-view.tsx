@@ -222,6 +222,7 @@ interface NodeViewProps {
   onMove: (options: NodeViewHandlerOptions) => void;
   onMoveComplete: (options: NodeViewHandlerOptions) => void;
   onDelete: (options: NodeViewHandlerOptions) => void;
+  onSliderDragStart?: (key: string) => void;
 }
 
 interface NodeViewState {
@@ -500,6 +501,9 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleSliderDragStart = () => {
+    if (this.props.onSliderDragStart) {
+      this.props.onSliderDragStart(this.props.nodeKey);
+    }
     return this.setState({ignoreDrag: true});
   }
 
