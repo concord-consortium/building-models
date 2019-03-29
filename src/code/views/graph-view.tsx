@@ -568,16 +568,23 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   private handleMouseDown = (e) => {
     if (e.target === this.container!) {
-      // deselect links when background is clicked
-      this.forceRedrawLinks = true;
-      this.props.selectionManager.clearSelection();
-      const selectBox = $.extend({}, this.state.selectBox);
-      const offset = $(this.linkView!).offset() || {left: 0, top: 0};
-      selectBox.startX = e.pageX - offset.left;
-      selectBox.startY = e.pageY - offset.top;
-      selectBox.x = selectBox.startX;
-      selectBox.y = selectBox.startY;
-      return this.setState({drawingMarquee: true, selectBox});
+      const deselectAction = () => {
+        // deselect links when background is clicked
+        this.forceRedrawLinks = true;
+        this.props.selectionManager.clearSelection();
+        const selectBox = $.extend({}, this.state.selectBox);
+        const offset = $(this.linkView!).offset() || {left: 0, top: 0};
+        selectBox.startX = e.pageX - offset.left;
+        selectBox.startY = e.pageY - offset.top;
+        selectBox.x = selectBox.startX;
+        selectBox.y = selectBox.startY;
+        return this.setState({drawingMarquee: true, selectBox});
+      };
+      // In Safari, if we `setState` here, the link-labels being edited
+      // don't have time to fire Change handlers to trigger label updates.
+      // So we wait for all pending updates in the current event loop here.
+      // see https://www.pivotaltracker.com/story/show/164438776
+      setTimeout(deselectAction, 1);
     }
   }
 
