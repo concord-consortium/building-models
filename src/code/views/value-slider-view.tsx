@@ -4,6 +4,7 @@ const log = require("loglevel");
 import { urlParams } from "../utils/url-params";
 import { tr } from "../utils/translate";
 
+// TODO: remove when final two wiggle const values are assigned
 const urlValueWithDefault = (name: string, defaultValue: number, urlValue?: string) => {
   const value = parseFloat(urlValue || "");
   const result = isNaN(value) ? defaultValue : value;
