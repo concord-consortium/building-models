@@ -322,6 +322,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
           max = Math.max(max, lookbackValue);
         }
         if (max - min <= maxChange) {
+          debugger;
           this.setState({showButtons: true});
         }
       }
@@ -605,6 +606,8 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   private handleNudge = (delta: number) => {
+    const {min, max} = this.props;
+    const maxNudge = (max - min) * 0.5;
     const startOfNudge = Date.now();
     const clearMouseDownInterval = () => {
       if (this.nudgeInterval) {
@@ -621,8 +624,8 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
       const now = Date.now();
       // create an exponent for the modifer of number of seconds after 1 second from the start of the nudge
       const exp = Math.max(0, (now - startOfNudge - 1000) / 1000);
-      // create modifier starting after 1 second (Math.pow(2, 0) is 1 which is why 1 is subtracted)
-      const mod = Math.pow(2, exp) - 1;
+      // create modifier starting after 1 second (Math.pow(10, 0) is 1 which is why 1 is subtracted)
+      const mod = Math.min(maxNudge, Math.pow(10, exp) - 1);
       nudge(delta + (delta * mod));
     };
     const mouseUp = (e: MouseEvent) => {
