@@ -11,7 +11,7 @@ const urlValueWithDefault = (name: string, defaultValue: number, urlValue?: stri
   return result;
 };
 const SliderWiggleLookback = urlValueWithDefault("SliderWiggleLookback", 10, urlParams.wiggleLookback);
-const SliderWiggleThreshhold = urlValueWithDefault("SliderWiggleThreshhold", 0.2, urlParams.wiggleThreshold);
+const SliderWiggleThreshhold = urlValueWithDefault("SliderWiggleThreshhold", 0.1, urlParams.wiggleThreshold);
 
 const circleRadius = 2;
 const constants = {
@@ -310,19 +310,17 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   private checkForSliderWiggle(value: number) {
     if (!this.state.showButtons) {
       const {wiggleList} = this;
-      const {length} = wiggleList;
       wiggleList.push(value);
-      if (length >= SliderWiggleLookback) {
+      if (wiggleList.length > SliderWiggleLookback) {
         const maxChange = (this.props.max - this.props.min) * SliderWiggleThreshhold;
-        let min = wiggleList[length - 1];
-        let max = min;
-        for (let i = 0; i < SliderWiggleLookback; i++) {
-          const lookbackValue = wiggleList[length - 1 - i];
-          min = Math.min(min, lookbackValue);
-          max = Math.max(max, lookbackValue);
+        const newestIndex = wiggleList.length - 1;
+        const oldestIndex = newestIndex - SliderWiggleLookback;
+        const oldestValue = wiggleList[oldestIndex];
+        let maxAbsDelta = 0;
+        for (let i = oldestIndex + 1; i <= newestIndex; i++) {
+          maxAbsDelta = Math.max(maxAbsDelta, Math.abs(wiggleList[i] - oldestValue));
         }
-        if (max - min <= maxChange) {
-          debugger;
+        if (maxAbsDelta <= maxChange) {
           this.setState({showButtons: true});
         }
       }
