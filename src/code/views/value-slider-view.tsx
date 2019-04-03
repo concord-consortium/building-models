@@ -322,6 +322,15 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
           maxAbsDelta = Math.max(maxAbsDelta, Math.abs(wiggleList[i] - oldestValue));
         }
         if (maxAbsDelta <= maxChange) {
+          console.log("checkForSliderWiggle - showing button!", {
+            maxAbsDelta,
+            maxChange,
+            oldestIndex,
+            newestIndex,
+            oldestValue,
+            testedList: wiggleList.slice(oldestIndex),
+            fullList: wiggleList,
+          });
           this.setState({showButtons: true});
         }
       }
