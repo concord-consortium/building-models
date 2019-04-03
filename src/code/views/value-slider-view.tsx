@@ -309,30 +309,34 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
 
   // shows the buttons if the user moves the slider around a small range
   private checkForSliderWiggle(value: number) {
-    if (!this.state.showButtons) {
-      const {wiggleList} = this;
-      wiggleList.push(value);
-      if (wiggleList.length > SliderWiggleLookback) {
-        const maxChange = (this.props.max - this.props.min) * SliderWiggleThreshhold;
-        const newestIndex = wiggleList.length - 1;
-        const oldestIndex = newestIndex - SliderWiggleLookback;
-        const oldestValue = wiggleList[oldestIndex];
-        let maxAbsDelta = 0;
-        for (let i = oldestIndex + 1; i <= newestIndex; i++) {
-          maxAbsDelta = Math.max(maxAbsDelta, Math.abs(wiggleList[i] - oldestValue));
-        }
-        if (maxAbsDelta <= maxChange) {
-          console.log("checkForSliderWiggle - showing button!", {
-            maxAbsDelta,
-            maxChange,
-            oldestIndex,
-            newestIndex,
-            oldestValue,
-            testedList: wiggleList.slice(oldestIndex),
-            fullList: wiggleList,
-          });
-          this.setState({showButtons: true});
-        }
+    if (this.state.showButtons) {
+      return;
+    }
+    const {wiggleList} = this;
+    const newestIndex = wiggleList.length - 1;
+    if ((newestIndex >= 0) && (wiggleList[newestIndex] === value)) {
+      return;
+    }
+    wiggleList.push(value);
+    if (wiggleList.length > SliderWiggleLookback) {
+      const maxChange = (this.props.max - this.props.min) * SliderWiggleThreshhold;
+      const oldestIndex = newestIndex - SliderWiggleLookback;
+      const oldestValue = wiggleList[oldestIndex];
+      let maxAbsDelta = 0;
+      for (let i = oldestIndex + 1; i <= newestIndex; i++) {
+        maxAbsDelta = Math.max(maxAbsDelta, Math.abs(wiggleList[i] - oldestValue));
+      }
+      if (maxAbsDelta <= maxChange) {
+        console.log("checkForSliderWiggle - showing button!", {
+          maxAbsDelta,
+          maxChange,
+          oldestIndex,
+          newestIndex,
+          oldestValue,
+          testedList: wiggleList.slice(oldestIndex),
+          fullList: wiggleList,
+        });
+        this.setState({showButtons: true});
       }
     }
   }
