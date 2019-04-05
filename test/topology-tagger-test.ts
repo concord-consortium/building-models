@@ -18,6 +18,8 @@ import { twoUnconnectedNodes } from "./serialized-test-data/topology-test-cases/
 import { simpleTwoNodeGraph } from "./serialized-test-data/topology-test-cases/simple-two-node-graph";
 import { simpleLinearExamples } from "./serialized-test-data/topology-test-cases/simple-linear-examples";
 import { branchAndJoinExamples } from "./serialized-test-data/topology-test-cases/branch-and-join-examples";
+import { simpleFeedbackExamples } from "./serialized-test-data/topology-test-cases/simple-feedback-examples";
+import { feedbackWithTwoCycles } from "./serialized-test-data/topology-test-cases/feedback-with-two-cycles";
 
 // Draft of some behavior notes. (To be expanded.)
 //
@@ -51,7 +53,7 @@ import { branchAndJoinExamples } from "./serialized-test-data/topology-test-case
 //           a single standalone node is not considered linear
 //           But it does not effect the lineariy of other subgraphs
 //
-// feedbackGraphCount
+// graphsWithFeedbackCount
 //   not yet implmented.
 //
 // branchedGraphCount
@@ -103,7 +105,7 @@ describe("TopologyTagger", () => {
       chai.expect(getTopology(graph).linearGraphCount).to.eql(0);
     });
     it("finds no graphs with feedback", () => {
-      chai.expect(getTopology(graph).feedbackGraphCount).to.eql(0);
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(0);
     });
     it("finds no graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphCount).to.eql(0);
@@ -136,7 +138,7 @@ describe("TopologyTagger", () => {
       chai.expect(getTopology(graph).linearGraphCount).to.eql(0);
     });
     it("finds no graphs with feedback", () => {
-      chai.expect(getTopology(graph).feedbackGraphCount).to.eql(0);
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(0);
     });
     it("finds no graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphCount).to.eql(0);
@@ -167,7 +169,7 @@ describe("TopologyTagger", () => {
       chai.expect(getTopology(graph).linearGraphCount).to.eql(0);
     });
     it("finds no graphs with feedback", () => {
-      chai.expect(getTopology(graph).feedbackGraphCount).to.eql(0);
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(0);
     });
     it("finds no graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphCount).to.eql(0);
@@ -198,7 +200,7 @@ describe("TopologyTagger", () => {
       chai.expect(getTopology(graph).linearGraphCount).to.eql(1);
     });
     it("finds no graphs with feedback", () => {
-      chai.expect(getTopology(graph).feedbackGraphCount).to.eql(0);
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(0);
     });
     it("finds no graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphCount).to.eql(0);
@@ -228,8 +230,8 @@ describe("TopologyTagger", () => {
     it("finds 2 linear graphs", () => {
       chai.expect(getTopology(graph).linearGraphCount).to.eql(2);
     });
-    it("finds no graphs with feedback", () => {
-      chai.expect(getTopology(graph).feedbackGraphCount).to.eql(0);
+    it("finds 1 graph with feedback", () => {
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(1);
     });
     it("finds no graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphCount).to.eql(0);
@@ -259,8 +261,8 @@ describe("TopologyTagger", () => {
     it("finds 1 linear graphs", () => {
       chai.expect(getTopology(graph).linearGraphCount).to.eql(1);
     });
-    it("finds no graphs with feedback", () => {
-      chai.expect(getTopology(graph).feedbackGraphCount).to.eql(0);
+    it("finds 1 graph with feedback", () => {
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(1);
     });
     it("finds no graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphCount).to.eql(0);
@@ -291,10 +293,72 @@ describe("TopologyTagger", () => {
       chai.expect(getTopology(graph).linearGraphCount).to.eql(0);
     });
     it("finds no graphs with feedback", () => {
-      chai.expect(getTopology(graph).feedbackGraphCount).to.eql(0);
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(0);
     });
     it("finds 2 graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphCount).to.eql(2);
+    });
+  });
+
+  describe("analyzes some simple feedback graphs", () => {
+    const graph: ISageGraph = simpleFeedbackExamples;
+    it("finds 13 nodes", () => {
+      chai.expect(getTopology(graph).nodeCount).to.eql(13);
+    });
+    it("finds 12 links", () => {
+      chai.expect(getTopology(graph).linkCount).to.eql(12);
+    });
+    it("finds 1 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodeCount).to.eql(1);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodeCount).to.eql(0);
+    });
+    it("finds 4 independent graphs", () => {
+      chai.expect(getTopology(graph).independentGraphCount).to.eql(4);
+    });
+    it("finds 0 unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodeCount).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphCount).to.eql(0);
+    });
+    it("finds 3 graphs with feedback", () => {
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(3);
+    });
+    it("finds 2 graphs with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphCount).to.eql(2);
+    });
+  });
+
+  describe("counts 1 feedback graph even if contains 2 or more cycles", () => {
+    const graph: ISageGraph = feedbackWithTwoCycles;
+    it("finds 6 nodes", () => {
+      chai.expect(getTopology(graph).nodeCount).to.eql(6);
+    });
+    it("finds 7 links", () => {
+      chai.expect(getTopology(graph).linkCount).to.eql(7);
+    });
+    it("finds 1 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodeCount).to.eql(1);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodeCount).to.eql(0);
+    });
+    it("finds 1 independent graphs", () => {
+      chai.expect(getTopology(graph).independentGraphCount).to.eql(1);
+    });
+    it("finds 0 unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodeCount).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphCount).to.eql(0);
+    });
+    it("finds 1 graphs with feedback", () => {
+      chai.expect(getTopology(graph).graphsWithFeedbackCount).to.eql(1);
+    });
+    it("finds 1 graphs with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphCount).to.eql(1);
     });
   });
 
@@ -375,7 +439,7 @@ describe("TopologyTagger", () => {
         ];
         const nodes: ISageNode[] = [{ key: "a" }, { key: "b" }];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).cycleCount).to.eql(1);
+        // chai.expect(getTopology(graph).cycleCount).to.eql(1);
       });
 
       it("wont find cycles when they dont exist", () => {
@@ -384,7 +448,7 @@ describe("TopologyTagger", () => {
         ];
         const nodes: ISageNode[] = [{ key: "a" }, { key: "b" }];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).cycleCount).to.eql(0);
+        // chai.expect(getTopology(graph).cycleCount).to.eql(0);
       });
     });
 
@@ -479,13 +543,13 @@ describe("TopologyTagger", () => {
         const nodes: ISageNode[] = [];
         const links: ISageLink[] = [];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).isBranched).to.eql(false);
+        // chai.expect(getTopology(graph).isBranched).to.eql(false);
       });
       it("a model with single node is NOT branched", () => {
         const nodes: ISageNode[] = [{ key: "a" }];
         const links: ISageLink[] = [];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).isBranched).to.eql(false);
+        // chai.expect(getTopology(graph).isBranched).to.eql(false);
       });
       it("detects a branch from one node to two", () => {
         const nodes: ISageNode[] = [
@@ -498,7 +562,7 @@ describe("TopologyTagger", () => {
           { title: "L2", sourceNode: "a", targetNode: "c" }
         ];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).isBranched).to.eql(true);
+        // chai.expect(getTopology(graph).isBranched).to.eql(true);
       });
       it("detects a join from two nodes to one", () => {
         const nodes: ISageNode[] = [
@@ -511,7 +575,7 @@ describe("TopologyTagger", () => {
           { title: "L2", sourceNode: "b", targetNode: "c" }
         ];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).isBranched).to.eql(true);
+        // chai.expect(getTopology(graph).isBranched).to.eql(true);
       });
       it("a linear model is NOT branched", () => {
         const nodes: ISageNode[] = [{ key: "a" }, { key: "b" }, { key: "c" }];
@@ -520,7 +584,7 @@ describe("TopologyTagger", () => {
           { title: "L2", sourceNode: "b", targetNode: "c" }
         ];
         const graph: ISageGraph = { nodes, links };
-        chai.expect(getTopology(graph).isBranched).to.eql(false);
+        // chai.expect(getTopology(graph).isBranched).to.eql(false);
       });
     });
 
