@@ -68,6 +68,7 @@ interface SVGSliderViewState {
   "editing-min": boolean;
   "editing-max": boolean;
   showButtons: boolean;
+  deltaButtonDown: number;
 }
 
 export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSliderViewState> {
@@ -80,7 +81,8 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     dragging: false,
     "editing-min": false,
     "editing-max": false,
-    showButtons: false
+    showButtons: false,
+    deltaButtonDown: 0,
   };
 
   private slider: HTMLDivElement | null;
@@ -578,11 +580,13 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   private renderButtons() {
+    const { deltaButtonDown } = this.state;
     const {height, width} = this.props;
     const margin = 4;
     const buttonSize = 26;
     const svgHeight = margin + (buttonSize * 2);
-    const buttonStyle = {fill: "#FFF", fillOpacity: 0.5, strokeWidth: 2, stroke: "#888"};
+    const upButtonStyle = {fill: (deltaButtonDown === 1 ? "#000" : "#FFF"), fillOpacity: 0.5, strokeWidth: 2, stroke: "#888"};
+    const downButtonStyle = {fill: (deltaButtonDown === -1 ? "#000" : "#FFF"), fillOpacity: 0.5, strokeWidth: 2, stroke: "#888"};
     const arrowStyle =  {fill: "#FFF", fillOpacity: 0.5, strokeWidth: 1, stroke: "#888"};
     const buttonRadius = buttonSize * 0.25;
     const arrowSize = buttonSize / 2;
@@ -595,11 +599,11 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
       <div style={{marginTop, marginLeft}}>
         <svg className="slider-buttons" width={`${buttonSize}px`} height={`${svgHeight}px`} viewBox={`0 0 ${buttonSize} ${svgHeight}`}>
           <g className="slider-button" onMouseDown={this.handleNudgeUp} onTouchStart={this.handleNudgeUp} onTouchEnd={this.handleNoop}>
-            <rect width={buttonSize} height={buttonSize} rx={buttonRadius} ry={buttonRadius} style={buttonStyle}  />
+            <rect width={buttonSize} height={buttonSize} rx={buttonRadius} ry={buttonRadius} style={upButtonStyle}  />
             <path d={`M${arrowMargin} ${arrowSize + (arrowSize / 4)} l${halfArrowSize} -${halfArrowSize} l${halfArrowSize} ${halfArrowSize} Z`} style={arrowStyle} />
           </g>
           <g className="slider-button" onMouseDown={this.handleNudgeDown} onTouchStart={this.handleNudgeDown} onTouchEnd={this.handleNoop}>
-            <rect y={buttonSize + margin} width={buttonSize} height={buttonSize} rx={buttonRadius} ry={buttonRadius} style={buttonStyle} />
+            <rect y={buttonSize + margin} width={buttonSize} height={buttonSize} rx={buttonRadius} ry={buttonRadius} style={downButtonStyle} />
             <path d={`M${arrowMargin} ${buttonSize + margin + arrowSize - (arrowSize / 5)} l${halfArrowSize} ${halfArrowSize} l${halfArrowSize} -${halfArrowSize} Z`} style={arrowStyle} />
           </g>
         </svg>
@@ -644,11 +648,13 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
       clearMouseDownInterval();
       nudge(delta);
       document.removeEventListener("mouseup", mouseUp);
+      this.setState({deltaButtonDown: 0});
     };
 
     clearMouseDownInterval();
     this.nudgeInterval = window.setInterval(mouseDownNudge, 200);
 
     document.addEventListener("mouseup", mouseUp);
+    this.setState({deltaButtonDown: delta});
   }
 }
