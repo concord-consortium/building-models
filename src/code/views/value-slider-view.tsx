@@ -4,15 +4,8 @@ const log = require("loglevel");
 import { urlParams } from "../utils/url-params";
 import { tr } from "../utils/translate";
 
-// TODO: remove when final two wiggle const values are assigned
-const urlValueWithDefault = (name: string, defaultValue: number, urlValue?: string) => {
-  const value = parseFloat(urlValue || "");
-  const result = isNaN(value) ? defaultValue : value;
-  console.log("Using", result, "for", name);
-  return result;
-};
-const SliderWiggleLookback = urlValueWithDefault("SliderWiggleLookback", 10, urlParams.wiggleLookback);
-const SliderWiggleThreshhold = urlValueWithDefault("SliderWiggleThreshhold", 0.1, urlParams.wiggleThreshold);
+const SliderWiggleLookback = 7;
+const SliderWiggleThreshhold = 0.07;
 
 const circleRadius = 2;
 const constants = {
