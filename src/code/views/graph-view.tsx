@@ -588,16 +588,18 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   private handleMouseDown = (e) => {
     if (e.target === this.container!) {
+      // calculate selection box before calling setTimeout
+      const selectBox = $.extend({}, this.state.selectBox);
+      const offset = $(this.linkView!).offset() || {left: 0, top: 0};
+      selectBox.startX = e.pageX - offset.left;
+      selectBox.startY = e.pageY - offset.top;
+      selectBox.x = selectBox.startX;
+      selectBox.y = selectBox.startY;
+
       const deselectAction = () => {
         // deselect links when background is clicked
         this.forceRedrawLinks = true;
         this.props.selectionManager.clearSelection();
-        const selectBox = $.extend({}, this.state.selectBox);
-        const offset = $(this.linkView!).offset() || {left: 0, top: 0};
-        selectBox.startX = e.pageX - offset.left;
-        selectBox.startY = e.pageY - offset.top;
-        selectBox.x = selectBox.startX;
-        selectBox.y = selectBox.startY;
         return this.setState({drawingMarquee: true, selectBox});
       };
       // In Safari, if we `setState` here, the link-labels being edited
