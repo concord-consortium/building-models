@@ -812,7 +812,8 @@ export class CodapConnect {
         resource: `component[${this.guideComponentId}]`,
         values: {
           currentItemIndex: index,
-          isVisible: true
+          isVisible: true,
+          position: "top"
         }
       }, (result) => {
         console.log("showGuideItemAtIndex", result);
