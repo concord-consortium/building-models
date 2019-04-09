@@ -1,6 +1,5 @@
 const _ = require("lodash");
 import { Graph as AnalysisGraph, alg as GraphLibAlg, alg } from "graphlib";
-import { TimeoutError } from "bluebird";
 
 type sageNodeKey = string;
 
