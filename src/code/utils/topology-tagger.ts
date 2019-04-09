@@ -43,12 +43,9 @@ export function getAnalysisGraph(sageModelGraph: ISageGraph, swapTransferSource 
   // Transfer links complicate this step as they are represented, in the sage
   // model, as additional, unconnected nodes with control data defining the
   // transfer's behavior. The source and target nodes of a transfer link are
-  // represented by a single link with some control data the references the
+  // represented by a single link with some control data that references the
   // transfer node. (One might think of this as the transfer node drawn -- as a
-  // valve icon -- hovering over the link.
-  //
-  // The desired behavior is to report this as 3 nodes and 2 links in the model
-  // without any un-connected nodes.
+  // valve icon -- hovering over the link.)
   //
   // To make this all work, the analysis graph is built from the serialized sage
   // model by first creating all the nodes in the model and then inspecting all
@@ -56,26 +53,26 @@ export function getAnalysisGraph(sageModelGraph: ISageGraph, swapTransferSource 
   // on the particulars of the links. In particular, transfer links are replaced
   // with two links -- from the source-node to the transfer-node, and from the
   // transfer-node to the target-node. Ordinary links simply link their nodes,
-  // as is obvious.
+  // from source to target, as one would expect.
   //
   // As a result, the transfer nodes are no longer seen as unconnected nodes,
-  // plus the link counts and node counts match the desired behavior.
+  // and this makes counting links and nodes straightforward.
   //
   // This does have a drawback with respect to linearity and feedback. Although
   // this implementation maintains the link direction with consistency in how
   // the user creates the link -- that is, the source "links to" the target,
   // it would also be reasonable to reverse the link between the source node
-  // and the transfer node since the transfer nodes does effect the value of
-  // of the source during a transfer.
+  // and the transfer node since the transfer nodes do effect the value the
+  // source node during a transfer.
   //
   // When the swapTransferSource flag is true, the direction of the source link
   // is reversed so the transfer node "links to" the source node. Doing so
-  // facilitate the detection of feedback at the cost of messing up the tests
+  // facilitates the detection of feedback at the cost of messing up the tests
   // for linearity.
   //
-  // This analysis model also allows a model to have more than 1 link between
-  // the same 2 nodes. This has two consequences for this analysis graph: it
-  // must be a multigraph; and, all edges must be labeled.
+  // Because this analysis model also allows a model to have more than 1 link
+  // between the same 2 nodes. This has two consequences for the analysis graph:
+  // first, it must be a multigraph; and second, all edges must be labeled.
 
   const graphlibGraph = new AnalysisGraph({ multigraph: true });
 
