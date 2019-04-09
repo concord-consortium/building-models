@@ -1,5 +1,5 @@
 const _ = require("lodash");
-import { Graph as AnalysisGraph, alg as GraphLibAlg, alg } from "graphlib";
+import { Graph as AnalysisGraph, alg as GraphLibAlg } from "graphlib";
 
 type sageNodeKey = string;
 
