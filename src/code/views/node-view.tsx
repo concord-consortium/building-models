@@ -370,6 +370,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
         renderValueTooltip={true}
         minLabel={null}
         maxLabel={null}
+        nudge={this.handleNudge}
       />
     );
   }
@@ -528,6 +529,10 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     }
     // CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
     return evt.dataTransfer.contains = () => false;
+  }
+
+  private handleNudge = (delta: number) => {
+    this.props.graphStore.nudgeNodeWithKeyInitialValue(this.props.nodeKey, delta);
   }
 
   private nodeClasses() {

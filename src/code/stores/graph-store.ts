@@ -668,11 +668,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     if (node && !node.isTransfer) {
       const {initialValue, min, max} = node;
       const nudgeFactor = (max - min) / 1000;
-      const newInitialValue = initialValue + (nudgeFactor * delta);
-      if ((newInitialValue >= min) && (newInitialValue <= max)) {
-        console.log("Nudging node from", initialValue, "to", newInitialValue);
-        this.changeNodeProperty("initialValue", newInitialValue, node);
-      }
+      const newInitialValue = Math.max(min, Math.min(max, initialValue + (nudgeFactor * delta)));
+      this.changeNodeProperty("initialValue", newInitialValue, node);
     }
   },
 
