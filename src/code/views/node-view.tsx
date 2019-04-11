@@ -25,13 +25,14 @@ import { NodeTitleMixinState, NodeTitleMixinProps, NodeTitleMixin } from "../mix
 
 import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
+import { Node} from "../models/node";
+import { GraphStoreClass } from "../stores/graph-store";
+import { SelectionManager } from "../models/selection-manager";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
-  node: any; // TODO: get concrete type
-  onNodeChanged?: (node: any, newValue: any) => void; // TODO: get concrete type
-  onNodeDelete?: (node: any) => void; // TODO: get concrete type
-  graphStore: any; // TODO: get concrete type
+  node: Node;
+  graphStore: GraphStoreClass;
   nodeKey: string;
   onStartEditing: () => void;
   onStopEditing: () => void;
@@ -196,21 +197,32 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
   }
 }
 
+interface NodeViewHandlerOptions {
+  nodeKey: string;
+  reactComponent: NodeView;
+  domElement: HTMLDivElement | null;
+  syntheticEvent: any; // checked: any ok
+  extra?: any; // checked: any ok
+}
+
 interface NodeViewProps {
-  data: any; // TODO: get concrete type
+  data: Node;
   nodeKey: string;
   simulating: boolean;
   showGraphButton: boolean;
   editTitle: boolean;
-  graphStore: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
   dataColor: string;
   isTimeBased: boolean;
   innerColor: string;
-  selectionManager?: any; // TODO: get concrete type
+  selectionManager?: SelectionManager;
   selected: boolean;
-  onMove: (data: any) => void;
-  onMoveComplete: (data: any) => void;
-  onDelete: (data: any) => void;
+  animateGraphs: boolean;
+  hideGraphs: boolean;
+  onMove: (options: NodeViewHandlerOptions) => void;
+  onMoveComplete: (options: NodeViewHandlerOptions) => void;
+  onDelete: (options: NodeViewHandlerOptions) => void;
+  onSliderDragStart?: (key: string) => void;
 }
 
 interface NodeViewState {
@@ -334,17 +346,6 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     );
   }
 
-  private renderValue() {
-    let value = this.props.data.value || this.props.data.initialValue;
-    value = Math.round(value);
-    return (
-      <div className="value">
-        <label>{tr("~NODE.SIMULATION.VALUE")}</label>
-        <input type="text" className="value" value={value} />
-      </div>
-    );
-  }
-
   private renderSliderView() {
     return (
       <SVGSliderView
@@ -369,6 +370,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
         renderValueTooltip={true}
         minLabel={null}
         maxLabel={null}
+        nudge={this.handleNudge}
       />
     );
   }
@@ -393,7 +395,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
     const nodeImage = getNodeImage(this.props.data);
 
-    if (this.props.data.hasGraphData()) {
+    if (this.props.data.hasGraphData() || this.props.simulating) {
       return (
         <NodeSvgGraphView
           isTimeBased={this.props.isTimeBased}
@@ -407,6 +409,8 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
           width={48}
           height={48}
           strokeWidth={3}
+          animateGraphs={this.props.animateGraphs}
+          hideGraphs={this.props.hideGraphs}
         />
       );
     } else {
@@ -478,7 +482,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleStartEditing = () => {
-    if (!AppSettingsStore.settings.lockdown) {
+    if (this.props.selectionManager && !AppSettingsStore.settings.lockdown) {
       this.initialTitle = this.props.graphStore.nodeKeys[this.props.nodeKey].title;
       return this.props.selectionManager.selectNodeForTitleEditing(this.props.data);
     }
@@ -486,14 +490,21 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private handleStopEditing = () => {
     this.props.graphStore.endNodeEdit();
-    return this.props.selectionManager.clearTitleEditing();
+    if (this.props.selectionManager) {
+      this.props.selectionManager.clearTitleEditing();
+    }
   }
 
   private isEditing() {
-    return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
+    if (this.props.selectionManager) {
+      return this.props.selectionManager.isSelectedForTitleEditing(this.props.data);
+    }
   }
 
   private handleSliderDragStart = () => {
+    if (this.props.onSliderDragStart) {
+      this.props.onSliderDragStart(this.props.nodeKey);
+    }
     return this.setState({ignoreDrag: true});
   }
 
@@ -508,11 +519,20 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private handleCODAPAttributeDrag = (evt, attributeName) => {
     evt.dataTransfer.effectAllowed = "moveCopy";
-    evt.dataTransfer.setData("text/html", attributeName);
-    evt.dataTransfer.setData("text", attributeName);
-    evt.dataTransfer.setData(`application/x-codap-attr-${attributeName}`, attributeName);
+    // IE only allows text or URL for the argument type and throws an error for other types
+    try {
+      evt.dataTransfer.setData("text", attributeName);
+      evt.dataTransfer.setData("text/html", attributeName);
+      evt.dataTransfer.setData(`application/x-codap-attr-${attributeName}`, attributeName);
+    } catch (e) {
+      // to make linter happy with empty block
+    }
     // CODAP sometimes seems to expect an SC.Array object with a `contains` method, so this avoids a potential error
     return evt.dataTransfer.contains = () => false;
+  }
+
+  private handleNudge = (delta: number) => {
+    this.props.graphStore.nudgeNodeWithKeyInitialValue(this.props.nodeKey, delta);
   }
 
   private nodeClasses() {

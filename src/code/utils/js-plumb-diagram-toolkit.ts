@@ -91,7 +91,7 @@ export class DiagramToolkit {
   }
 
   public handleLabelClick(label, evnt) {
-    return (typeof this.options.handleDoubleClick === "function" ? this.options.handleDoubleClick(label.component, evnt) : undefined);
+    return (typeof this.options.handleLabelClick === "function" ? this.options.handleLabelClick(label, evnt) : undefined);
   }
 
   public handleDisconnect(info, evnt) {
@@ -177,7 +177,7 @@ export class DiagramToolkit {
 
   public _overlays(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) {
     if (editingLabel == null) { editingLabel = true; }
-    const results: any[] = [];
+    const results: any[] = []; // checked: any ok
     if (!hideArrow) {
       results.push(["Arrow", {
         location: 1.0,
@@ -228,13 +228,23 @@ export class DiagramToolkit {
         : label.length < 19 ? 130
           : 200;
     const style = {width};
+
+    const _self = this;
     return () => {
-      const _self = this;
-      return $("<input>").val(label).css(style)
-        .show(function() {
-          return $(this).focus(); }).change(function() {
-          return (typeof _self.options.handleLabelEdit === "function" ? _self.options.handleLabelEdit(link, (this as HTMLInputElement).value) : undefined);
+      const input = $("<input>").val(label).css(style);
+      input
+        .show(() => {
+          // wait for input to show on next render before focus
+          setTimeout(() => {
+            input.focus();
+          }, 1);
+        })
+        .change(() => {
+          if (typeof _self.options.handleLabelEdit === "function") {
+            _self.options.handleLabelEdit(link, input.val());
+          }
         });
+      return input;
     };
   }
 
@@ -247,7 +257,8 @@ export class DiagramToolkit {
   public addLink(opts) {
     const paintStyle = this._paintStyle(LinkColors.default);
     paintStyle.outlineColor = "none";
-    paintStyle.outlineWidth = 4;
+    // use large outline width for all links, this gives a larger selection target around the link
+    paintStyle.outlineWidth = 10;
 
     let startColor = LinkColors.default;
     let finalColor = LinkColors.default;
@@ -266,6 +277,8 @@ export class DiagramToolkit {
     }
     if (opts.isSelected) {
       paintStyle.outlineColor = LinkColors.selectedOutline;
+      // reduce the outline width of the selected link since it is rendered
+      paintStyle.outlineWidth = 4;
     }
     if (opts.isSelected && opts.isDashed) {
       paintStyle.dashstyle = undefined;

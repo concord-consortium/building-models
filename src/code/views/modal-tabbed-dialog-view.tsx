@@ -1,13 +1,13 @@
 import * as React from "react";
 
 import { ModalDialogView } from "./modal-dialog-view";
-import { TabbedPanelView } from "./tabbed-panel-view";
+import { TabbedPanelView, TabInfo } from "./tabbed-panel-view";
 
 interface ModalTabbedDialogViewProps {
   title: string;
   close: () => void;
-  clientClass: any; // TODO: get concrete type
-  tabs: any; // TODO: get concrete type
+  clientClass: string;
+  tabs: TabInfo[];
 }
 
 interface ModalTabbedDialogViewState {}

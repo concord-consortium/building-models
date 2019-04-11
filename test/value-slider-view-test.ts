@@ -4,15 +4,20 @@ import * as chai from "chai";
 chai.config.includeStack = true;
 
 const Enzyme = require("enzyme");
-const { shallow } = Enzyme;
+const { shallow, configure } = Enzyme;
+
+const Adapter = require("enzyme-adapter-react-16");
+configure({ adapter: new Adapter() });
 
 const { expect } = chai;
 
 import { SVGSliderView as SVGSliderViewClass } from "../src/code/views/value-slider-view";
 const Slider = React.createFactory(SVGSliderViewClass);
 
+const savedAddEventListener = window.addEventListener;
+
 describe("The Value Slider", () => {
-  const createSlider = (orientation: string) => {
+  const createSlider = (orientation: "horizontal" | "vertical") => {
     return Slider({
       orientation,
       filled: true,
@@ -38,10 +43,14 @@ describe("The Value Slider", () => {
     });
   };
 
-  it("contains a div with the value-slider class", () => {
-    const wrapper = shallow(createSlider(""));
-    return expect(wrapper.find(".value-slider").length).to.equal(1);
+  // fake the event listeners for enzyme
+  before(() => {
+    window.addEventListener = () => undefined;
   });
+  after(() => {
+    window.addEventListener = savedAddEventListener;
+  });
+
   describe("vertical slider", () =>
     it("has a vertical classs ", () => {
       const component = shallow(createSlider("vertical"));

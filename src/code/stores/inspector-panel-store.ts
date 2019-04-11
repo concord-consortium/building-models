@@ -1,12 +1,13 @@
 import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber } from "./store-class";
+import { Link } from "../models/link";
 
 const _ = require("lodash");
 const Reflux = require("reflux");
 
 interface InspectorPanelSettings {
   nowShowing: any; // TODO: get concrete type
-  selectedLink: any; // TODO: get concrete type
+  selectedLink: Link;
 }
 
 export const InspectorPanelActions = Reflux.createActions(

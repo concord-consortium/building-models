@@ -7,8 +7,8 @@
  */
 
 // created by gapi
-declare const gapi: any;
-declare const google: any;
+declare const gapi: any; // checked: any ok
+declare const google: any; // checked: any ok
 
 export class GoogleDriveIO {
 

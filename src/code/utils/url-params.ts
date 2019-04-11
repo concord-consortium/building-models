@@ -1,5 +1,5 @@
 // http://stackoverflow.com/a/2880929
-const params = {};
+const params: UrlParams = {};
 if (window && window.location && window.location.search) {
   let match;
   const pl = /\+/g;  // Regex for replacing addition symbol with a space
@@ -12,4 +12,14 @@ if (window && window.location && window.location.search) {
   }
 }
 
-export const urlParams: any = params;
+export interface UrlParams {
+  standalone?: string;
+  collectorScale?: string;
+  simplified?: string;
+  lockdown?: string;
+  hide?: string;
+  lang?: string;
+  showTopology?: string;
+}
+
+export const urlParams: UrlParams = params;

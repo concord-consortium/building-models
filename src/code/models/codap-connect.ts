@@ -17,7 +17,7 @@ import { SimulationStore, SimulationActions } from "../stores/simulation-store";
 import { PaletteStore } from "../stores/palette-store";
 import { TimeUnits } from "../utils/time-units";
 import { escapeRegExp } from "../utils/escape-reg-ex";
-import { GraphStore } from "../stores/graph-store";
+import { GraphStore, GraphStoreClass } from "../stores/graph-store";
 
 // log -- see loglevel in package.json
 
@@ -29,6 +29,15 @@ export interface CODAPDataContextListItem {
 
 interface CodapConnectMap {
   [key: string]: CodapConnect;
+}
+
+interface CodapPhoneResult {
+  success: boolean;
+  values: any;
+}
+type CodapPhoneAction = any; // checked: any ok
+interface CodapPhone {
+  call(items: CodapPhoneAction | CodapPhoneAction[], callback?: (result?: CodapPhoneResult) => void); // checked: any ok
 }
 
 export class CodapConnect {
@@ -46,17 +55,17 @@ export class CodapConnect {
   public dataContextName: string;
 
   private standaloneMode: boolean;
-  private queue: any[];
-  private graphStore: any;
+  private queue: any[]; // checked: any ok
+  private graphStore: GraphStoreClass;
   private lastTimeSent: number;
   private sendThrottleMs: number;
   private simulationCollectionName: string;
   private samplesCollectionName: string;
   private defaultExperimentName: string;
-  private codapPhone: any;
-  private attributesKey: any;
+  private codapPhone: CodapPhone;
+  private attributesKey: string;
   private tableCreated: boolean;
-  private _attrsToSync: any;
+  private _attrsToSync: any; // checked: any ok
   private _attrsAreLoaded: boolean;
 
   constructor(context) {
@@ -252,7 +261,7 @@ export class CodapConnect {
             }
           };
           return this.codapPhone.call(message, response => {
-            if (response.success) {
+            if (response && response.success) {
               if ((response.values != null ? response.values.attrs : undefined) != null) {
                 this._syncAttributeProperties(response.values.attrs, true);
               }
@@ -306,7 +315,7 @@ export class CodapConnect {
           } else if (node.codapName !== attr.name) {
             node.codapName = attr.name;
             if (!initialSync && (node.title !== attr.name)) {
-              this.graphStore._changeNode(node, { title: attr.name }, false);
+              this.graphStore.changeNodeOutsideUndoRedo(node, { title: attr.name }, false);
             }
           }
           if (initialSync) {
@@ -335,7 +344,7 @@ export class CodapConnect {
         }
       };
       return this.codapPhone.call(message, response => {
-        if (response.success) {
+        if (response && response.success) {
           if (__guard__(response != null ? response.values : undefined, x => x.attrs)) {
             return this._syncAttributeProperties(response.values.attrs);
           }
@@ -357,7 +366,7 @@ export class CodapConnect {
         }
       };
       return this.codapPhone.call(message, response => {
-        if (!response.success) {
+        if (!response || !response.success) {
           log.warn("Error: CODAP attribute delete failed!");
         }
       });
@@ -411,7 +420,7 @@ export class CodapConnect {
       values: [ experimentAttributes ]
     };
     return this.codapPhone.call(message, (response) => {
-      if (response.success) {
+      if (response && response.success) {
         return log.info(`created attribute ${label}`);
       } else {
         return log.warn(`Unable to create attribute ${label}`);
@@ -433,7 +442,7 @@ export class CodapConnect {
       }
     };
     return this.codapPhone.call(message, (response) => {
-      if (response.success) {
+      if (response && response.success) {
         return log.info(`Renamed Simulation attribute: ${oldValue} → ${newValue}`);
       } else {
         return log.info("CODAP rename Simulation attribute failed!");
@@ -491,7 +500,7 @@ export class CodapConnect {
         operation: this.standaloneMode ? "undoButtonPress" : "undoAction"
       }
     }, (response) => {
-      if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+      if (response && response.values) {
         return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
@@ -505,7 +514,7 @@ export class CodapConnect {
         operation: this.standaloneMode ? "redoButtonPress" : "redoAction"
       }
     }, (response) => {
-      if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+      if (response && response.values) {
         return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
@@ -520,7 +529,7 @@ export class CodapConnect {
         logMessage
       }
     }, (response) => {
-      if ((__guard__(response != null ? response.values : undefined, x => x.canUndo) != null) && (__guard__(response != null ? response.values : undefined, x1 => x1.canRedo) != null)) {
+      if (response && response.values) {
         return UndoRedoUIActions.setCanUndoRedo(response.values.canUndo, response.values.canRedo);
       }
     });
@@ -559,7 +568,8 @@ export class CodapConnect {
         yAttributeName,
         size: { width: 242, height: 221 },
         position: "bottom",
-        enableNumberToggle: true
+        enableNumberToggle: true,
+        numberToggleLastMode: true
       }
     });
   }
@@ -575,7 +585,8 @@ export class CodapConnect {
         dataContext: this.dataContextName,
         size: { width: 242, height: 221 },
         position: "bottom",
-        enableNumberToggle: true
+        enableNumberToggle: true,
+        numberToggleLastMode: true
       }
     });
   }
@@ -651,7 +662,7 @@ export class CodapConnect {
         log.info("Received saveState request from CODAP.");
         return callback({
           success: true,
-          state: this.graphStore.serialize(PaletteStore.palette)
+          state: this.graphStore.serializeGraph(PaletteStore.palette)
         });
       }
       break;
@@ -714,7 +725,7 @@ export class CodapConnect {
       resource: `${runsCollection}.caseCount`
     }
     , ret => {
-      if (ret != null ? ret.success : undefined) {
+      if (ret && ret.success) {
         const caseCount = ret.values;
         if (caseCount > 0) {
           // get last case, and find its number
@@ -723,7 +734,7 @@ export class CodapConnect {
             resource: `${runsCollection}.caseByIndex[${caseCount - 1}]`
           }
           , (ret2) => {
-            if (ret2 != null ? ret2.success : undefined) {
+            if (ret2 && ret2.success) {
               const lastCase = ret2.values.case;
               const lastExperimentNumber = parseInt(lastCase.values[tr("~CODAP.SIMULATION.EXPERIMENT")], 10) || 0;
               return SimulationActions.setExperimentNumber(lastExperimentNumber + 1);

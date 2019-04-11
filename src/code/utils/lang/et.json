@@ -194,6 +194,8 @@
     "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Joonis",
     "~DOCUMENT.CODAP_ACTIONS.TEXT": "Tekst",
     "~MENU.ABOUT": "About",
-    "~MENU.ABOUT.HELP": "Go to Help website",
-    "~MENU.ABOUT.ABOUT": "About SageModeler"
+    "~MENU.ABOUT.HELP": "Go to help website",
+    "~MENU.ABOUT.ABOUT": "About SageModeler",
+    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
+    "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Experiment #"
 }

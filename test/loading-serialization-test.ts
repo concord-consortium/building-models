@@ -217,13 +217,12 @@ describe("Serialization and Loading", () => {
     });
 
 
-    it("should load the nodes previous frames", () => {
+    it("should not load the nodes previous frames", () => {
       const data = JSON.parse(this.serializedForm);
       data.nodes[1].frames = [50];
       this.graphStore.loadData(data);
       this.graphStore.nodeKeys.a.frames.length.should.equal(0);
-      this.graphStore.nodeKeys.b.frames.length.should.equal(1);
-      this.graphStore.nodeKeys.b.frames[0].should.equal(50);
+      this.graphStore.nodeKeys.b.frames.length.should.equal(0);
     });
 
     it("Should load saved `combineMethod` for all nodes, defaulting to 'average'", () => {

@@ -17,7 +17,7 @@ import { Importer } from "../utils/importer";
 import { Link } from "../models/link";
 import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
-import { undoRedoInstance } from "../utils/undo-redo";
+import { undoRedoInstance, UndoRedoManager } from "../utils/undo-redo";
 import { SelectionManager } from "../models/selection-manager";
 import { PaletteStore } from "../stores/palette-store";
 import { tr } from "../utils/translate";
@@ -31,7 +31,11 @@ import { CodapConnect } from "../models/codap-connect";
 import { RelationFactory } from "../models/relation-factory";
 import { GraphPrimitive } from "../models/graph-primitive";
 import { Mixin } from "../mixins/components";
-import { StoreUnsubscriber } from "./store-class";
+import { StoreUnsubscriber, StoreClass } from "./store-class";
+import { GraphView } from "../views/graph-view";
+import { InspectorPanelActions } from "./inspector-panel-store";
+import { getTopology } from "../utils/topology-tagger";
+import { urlParams } from "../utils/url-params";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -40,7 +44,84 @@ interface GraphSettings {
   description: any; // TODO: get concrete type
 }
 
-export const GraphStore  = Reflux.createStore({
+interface NodeMap {
+  [key: string]: Node;
+}
+
+export declare class GraphStoreClass extends StoreClass {
+  public nodeKeys: NodeMap;
+  public readonly undoRedoManager: UndoRedoManager;
+  public readonly selectionManager: SelectionManager;
+  public readonly filename;
+
+  public readonly usingCODAP: boolean;
+  public readonly usingLara: boolean;
+  public readonly codapStandaloneMode: boolean;
+
+  public readonly currentSliderNodeKey: string;
+
+  public init(context?): void;
+  public resetSimulation(): void;
+  public updateSimulationData(data: any): void;
+  public paletteDelete(status: any): void;
+  public undo(fromCODAP?: boolean): void;
+  public redo(fromCODAP?: boolean): void;
+  public setSaved(): void;
+  public revertToOriginal(): void;
+  public revertToLastSave(): void;
+  public setUsingCODAP(usingCODAP: boolean): void;
+  public setUsingLara(usingLara: boolean): void;
+  public setCodapStandaloneMode(codapStandaloneMode: boolean): void;
+  public addChangeListener(listener: any): void;
+  public addFilenameListener(listener: any): void;
+  public setFilename(filename: string): void ;
+  public getLinks(): Link[];
+  public getNodes(): Node[];
+  public hasLink(link: Link): boolean;
+  public hasNode(node: Node): boolean;
+  public importNode(nodeSpec: any): Node;
+  public importLink(linkSpec: any): Link;
+  public addLink(link: Link): void;
+  public removeLink(link: Link): void;
+  public isUniqueTitle(title: string, skipNode: boolean, nodes?: Node[]): boolean;
+  public ensureUniqueTitle(node: Node, newTitle: string): string;
+  public addNode(node: Node): void;
+  public removeNode(nodeKey: string): void;
+  public moveNodeCompleted(nodeKey: string, leftDiff: number, topDiff: number): void;
+  public moveNode(nodeKey: string, leftDiff: number, topDiff: number): void;
+  public selectedNodes(): Node[];
+  public selectedLinks(): Link[];
+  public editingNode(): Node | null;
+  public editNode(nodeKey: string): Node;
+  public selectNode(nodeKey: string): Node;
+  public changeNode(data: any, node?: Node): void;
+  public changeNodeOutsideUndoRedo(node: Node, data: any, notifyCodap: boolean): void;
+  public changeNodeProperty(property: string, value: any, node: Node): void;
+  public changeNodeWithKey(key: string, data: any): void;
+  public startNodeEdit(): void;
+  public endNodeEdit(): void;
+  public clickLink(link: Link, multipleSelectionsAllowed: boolean): void;
+  public editLink(link: Link): Link;
+  public changeLink(link: Link, changes: any): void;
+  public newLinkFromEvent(info: any): void;
+  public deleteAll(): void;
+  public removeSelectedNodes(): void;
+  public removeSelectedLinks(): void;
+  public deleteSelected(): void;
+  public removeLinksForNode(node): void;
+  public getDescription(nodes: Node[], links: Link[]): any;
+  public getMinimumSimulationType(): any;
+  public getMinimumComplexity(): any;
+  public loadData(data: any): void;
+  public loadDataFromUrl(url: string): void;
+  public serializeGraph(palette: any): any;
+  public toJsonString(palette: any): string;
+  public getGraphState(): GraphSettings;
+  public updateListeners(): void;
+  public nudgeNodeWithKeyInitialValue(key: string, delta: number);
+}
+
+export const GraphStore: GraphStoreClass = Reflux.createStore({
   init(context) {
     this.linkKeys           = {};
     this.nodeKeys           = {};
@@ -524,10 +605,10 @@ export const GraphStore  = Reflux.createStore({
                     this._changeLink(link, { relation: link.defaultRelation() });
                   }
                 }
-                return this._changeNode(node, data);
+                return this.changeNodeOutsideUndoRedo(node, data);
               },
               undo: () => {
-                this._changeNode(node, originalData);
+                this.changeNodeOutsideUndoRedo(node, originalData);
                 if (accumulatorChanged) {
                   for (link of changedLinks) {
                     this._changeLink(link, { relation: originalRelations[link.key] });
@@ -548,7 +629,7 @@ export const GraphStore  = Reflux.createStore({
     })();
   },
 
-  _changeNode(node, data, notifyCodap) {
+  changeNodeOutsideUndoRedo(node, data, notifyCodap) {
     if (notifyCodap == null) { notifyCodap = true; }
     log.info(`Change for ${node.title}`);
     for (const key of Node.fields) {
@@ -582,6 +663,16 @@ export const GraphStore  = Reflux.createStore({
     }
   },
 
+  nudgeNodeWithKeyInitialValue(key, delta) {
+    const node = this.nodeKeys[ key ];
+    if (node && !node.isTransfer) {
+      const {initialValue, min, max} = node;
+      const nudgeFactor = (max - min) / 1000;
+      const newInitialValue = Math.max(min, Math.min(max, initialValue + (nudgeFactor * delta)));
+      this.changeNodeProperty("initialValue", newInitialValue, node);
+    }
+  },
+
   startNodeEdit() {
     return this.undoRedoManager.startCommandBatch("changeNode");
   },
@@ -600,7 +691,7 @@ export const GraphStore  = Reflux.createStore({
     if (isDoubleClick) {
       this.selectionManager.selectNodeForInspection(link.targetNode);
       if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
-        return GraphActions.openGraph("relations", {link});
+        return InspectorPanelActions.openInspectorPanel("relations", {link});
       }
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click
@@ -761,8 +852,8 @@ export const GraphStore  = Reflux.createStore({
       linkDescription += link.relation.formula + ";";
       linkDescription += `${target.x},${target.y}|`;
       if (link.relation.isDefined) {
-        const isCappedAccumulator = source.isAccumulator && !source.allowNegativeValues;
-        const capValue = isCappedAccumulator ? ":cap" : "";
+        const isCappedNode = source.limitMinValue;
+        const capValue = isCappedNode ? ":cap" : "";
         modelDescription += `${source.key}:${source.initialValue}${capValue};`;
         modelDescription += link.relation.formula + ";";
         if (link.relation.type === "transfer") {
@@ -831,6 +922,7 @@ export const GraphStore  = Reflux.createStore({
     log.info("json success");
     const importer = new Importer(this, AppSettingsStore, PaletteStore);
     importer.importData(data);
+    this.resetSimulation();
     return this.undoRedoManager.clearHistory();
   },
 
@@ -849,7 +941,7 @@ export const GraphStore  = Reflux.createStore({
     });
   },
 
-  serialize(palette) {
+  serializeGraph(palette) {
     let key;
     const nodeExports = (() => {
       const result: any = [];
@@ -869,20 +961,21 @@ export const GraphStore  = Reflux.createStore({
     })();
     const settings = AppSettingsStore.serialize();
     settings.simulation = SimulationStore.serialize();
-
+    const topology = getTopology({nodes: nodeExports, links: linkExports});
     const data = {
       version: latestVersion(),
       filename: this.filename,
       palette,
       nodes: nodeExports,
       links: linkExports,
-      settings
+      settings,
+      topology
     };
     return data;
   },
 
   toJsonString(palette) {
-    return JSON.stringify(this.serialize(palette));
+    return JSON.stringify(this.serializeGraph(palette));
   },
 
   getGraphState(): GraphSettings {
@@ -929,9 +1022,11 @@ export class GraphMixin extends Mixin<GraphMixinProps, GraphMixinState> {
   private handleGraphChanged = (state) => {
     this.setState(state);
 
-    // TODO: not this:
-    if (this.mixer.diagramToolkit) {
-      this.mixer.diagramToolkit.repaint();
+    // this mixin is used by the GraphView and RelationInspector view but diagramToolkit
+    // only exists in GraphView
+    const diagramToolkit = (this.mixer as GraphView).diagramToolkit;
+    if (diagramToolkit) {
+      diagramToolkit.repaint();
     }
   }
 

@@ -82,7 +82,7 @@ export class SelectionManager {
     return this._deselect({key: graphprimitive.key, context});
   }
 
-  public isSelected(graphprimitive, context) {
+  public isSelected(graphprimitive, context?) {
     const where: any = {key: graphprimitive.key};
     if (context) { where.context = context; }
     const found = _.chain(this.selections)

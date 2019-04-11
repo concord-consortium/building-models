@@ -63,7 +63,7 @@ export class AboutView extends React.Component<AboutViewProps, AboutViewState> {
   }
 
   private showHelp = () => {
-    const url = "https://building-models-resources.concord.org/SageIntro/sageIntro-v3.html";
+    const url = "https://building-models-resources.concord.org/SageIntro/sageIntro-v5_01.html";
     const win = window.open(url, "_blank");
     (win as Window).focus();
   }

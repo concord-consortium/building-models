@@ -21,33 +21,34 @@ import { DiagramToolkit } from "../utils/js-plumb-diagram-toolkit";
 import { dropHandler } from "../utils/drop-handler";
 import { tr } from "../utils/translate";
 import { PaletteStore, PaletteActions } from "../stores/palette-store";
-import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin } from "../stores/graph-store";
+import { GraphStore, GraphMixinProps, GraphMixinState, GraphMixin, GraphStoreClass } from "../stores/graph-store";
 import { ImageDialogActions } from "../stores/image-dialog-store";
 import { RelationFactory } from "../models/relation-factory";
 
-import { SimulationMixinProps, SimulationMixinState, SimulationMixin } from "../stores/simulation-store";
+import { SimulationMixinProps, SimulationMixinState, SimulationMixin, TIME_BASED_RECORDING_TIME, SimulationStore } from "../stores/simulation-store";
 import { AppSettingsStore, AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
 import { CodapMixinProps, CodapMixinState, CodapMixin } from "../stores/codap-store";
 import { LaraMixinProps, LaraMixinState, LaraMixin } from "../stores/lara-store";
 import { LinkColors } from "../utils/link-colors";
 import { Mixer } from "../mixins/components";
-
+import { Link } from "../models/link";
+import { SelectionManager } from "../models/selection-manager";
 
 interface GraphViewOuterProps {
-  selectionManager: any; // TODO: get concrete type
-  graphStore: any; // TODO: get concrete type
-  connectionTarget?: any; // TODO: get concrete type
-  transferTarget?: any; // TODO: get concrete type
-  linkTarget?: any; // TODO: get concrete type
+  selectionManager: SelectionManager;
+  graphStore: GraphStoreClass;
+  connectionTarget?: string;
+  transferTarget?: string;
+  linkTarget?: string;
   iframed: boolean;
 }
 type GraphViewProps = GraphViewOuterProps & GraphMixinProps & SimulationMixinProps & AppSettingsMixinProps & CodapMixinProps & LaraMixinProps;
 
 interface GraphViewOuterState {
-  selectedNodes: any[]; // TODO: get concrete type
-  editingNode: any; // TODO: get concrete type
-  selectedLink: any[]; // TODO: get concrete type
-  editingLink: any; // TODO: get concrete type
+  selectedNodes: Node[];
+  editingNode: Node | null;
+  selectedLink: Link[];
+  editingLink: Link | null;
   canDrop: boolean;
   drawingMarquee: boolean;
   selectBox: {
@@ -56,20 +57,25 @@ interface GraphViewOuterState {
     x: number;
     y: number;
   };
+  animateGraphs: boolean;
+  hideGraphs: boolean;
 }
 type GraphViewState = GraphViewOuterState & GraphMixinState & SimulationMixinState & AppSettingsMixinState & CodapMixinState & LaraMixinState;
 
 export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   public static displayName = "GraphView";
+  public diagramToolkit: DiagramToolkit;
 
-  private diagramToolkit: any; // TODO: get concrete type
   private forceRedrawLinks: boolean;
   private linkButtonClientClass: string;
   private ignoringEvents: boolean;
   private linkView: HTMLDivElement | null;
   private container: HTMLDivElement | null;
   private selectionBox: HTMLDivElement | null;
+
+  private animateTimeout: number | null;
+  private currentSliderNodeKey: string | null;
 
   constructor(props: GraphViewProps) {
     super(props);
@@ -86,9 +92,12 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         startY: 0,
         x: 0,
         y: 0
-      }
+      },
+      animateGraphs: false,
+      hideGraphs: false,
     };
     this.setInitialState(outerState, GraphMixin.InitialState(), SimulationMixin.InitialState(), AppSettingsMixin.InitialState(), CodapMixin.InitialState(), LaraMixin.InitialState());
+    this.currentSliderNodeKey = null;
   }
 
   public componentDidMount() {
@@ -101,7 +110,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       Container:            $container[0],
       handleConnect:        this.handleConnect,
       handleClick:          this.handleLinkClick,
-      handleLabelEdit:      this.handleLabelEdit
+      handleLabelEdit:      this.handleLabelEdit,
+      handleLabelClick:     this.handleLabelClick
     }
     );
 
@@ -123,8 +133,26 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         editingLink
       });
 
-      if (lastLinkSelection === !this.state.selectedLink) {
-        return this.handleUpdateToolkit();
+      // if a single non-transfer node is selected then make it the current slider
+      if ((selectedNodes.length === 1) && !selectedNodes[0].isTransfer && !editingNode && (selectedLink.length === 0) && !editingLink) {
+        this.currentSliderNodeKey = selectedNodes[0].key;
+      } else {
+        this.currentSliderNodeKey = null;
+      }
+
+      // FIXME: this code makes no sense after types were added - figure out reason for existence!
+      // if (lastLinkSelection === !this.state.selectedLink) {
+      //   return this.handleUpdateToolkit();
+      // }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (this.currentSliderNodeKey && SimulationStore.settings.simulationPanelExpanded) {
+        const {keyCode} = e;
+        const delta = keyCode === 38 ? 1 : (keyCode === 40 ? -1 : 0); // 38: up arrow, 40: down arrow
+        if (delta !== 0) {
+          GraphStore.nudgeNodeWithKeyInitialValue(this.currentSliderNodeKey, delta);
+        }
       }
     });
 
@@ -157,6 +185,25 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     // for mixins
     super.componentDidUpdate(prevProps, prevState, prevContext);
 
+    if (this.state.isTimeBased) {
+      const animateGraphs = (this.state.simulationPanelExpanded && !prevState.simulationPanelExpanded) ||
+                            (this.state.experimentNumber !== prevState.experimentNumber);
+      if (animateGraphs) {
+        if (this.animateTimeout) {
+          window.clearTimeout(this.animateTimeout);
+        }
+        this.setState({hideGraphs: true}, () => {
+          this.animateTimeout = window.setTimeout(() => {
+            this.setState({hideGraphs: false, animateGraphs: true}, () => {
+              window.setTimeout(() => {
+                this.setState({animateGraphs: false});
+              }, TIME_BASED_RECORDING_TIME);
+            });
+          }, 500);
+        });
+      }
+    }
+
     if ((prevState.description.links !== this.state.description.links) ||
         (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) ||
         (prevState.selectedLink !== this.state.selectedLink) ||
@@ -180,7 +227,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const diagramOnly = this.state.simulationType === AppSettingsStore.SimulationType.diagramOnly;
     const left = Math.min(this.state.selectBox.startX, this.state.selectBox.x);
     const top = Math.min(this.state.selectBox.startY, this.state.selectBox.y);
-    const marqueeStyle: any = {
+    const marqueeStyle = {
       width: Math.abs(this.state.selectBox.x - this.state.selectBox.startX),
       height: Math.abs(this.state.selectBox.y - this.state.selectBox.startY),
       left,
@@ -210,6 +257,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
               selectionManager={this.props.selectionManager}
               isTimeBased={this.state.isTimeBased}
               showGraphButton={this.state.codapHasLoaded && !diagramOnly}
+              animateGraphs={this.state.isRecording || this.state.animateGraphs}
+              hideGraphs={this.state.hideGraphs}
+              onSliderDragStart={this.handleSliderDragStart}
             />)}
         </div>
       </div>
@@ -307,7 +357,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   private handleConnect = (info, evnt) => {
     return this.handleEvent(() => {
       this.forceRedrawLinks = true;
-      return GraphStore.newLinkFromEvent(info, evnt);
+      return GraphStore.newLinkFromEvent(info);
     });
   }
 
@@ -315,7 +365,16 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     return this.handleEvent(() => {
       const multipleSelections = evt.ctrlKey || evt.metaKey || evt.shiftKey;
       this.forceRedrawLinks = true;
-      return GraphStore.clickLink(connection.linkModel, multipleSelections);
+      // this event is also invoked for clicks in the label input field which has no linkModel
+      if (connection.linkModel) {
+        return GraphStore.clickLink(connection.linkModel, multipleSelections);
+      }
+    });
+  }
+
+  private handleLabelClick = (label, evt) => {
+    return this.handleEvent(() => {
+      GraphStore.editLink(label.component.linkModel);
     });
   }
 
@@ -336,8 +395,11 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     if (this.diagramToolkit) {
       this.ignoringEvents = true;
       this.diagramToolkit.suspendDrawing();
-      this.redrawLinks();
+      // draw nodes (targets) first so that they are before links when jsplumb searches for drag/drop targets
+      // if reversed the links adjacent to the transfer nodes cause the transfer nodes to lose focus when a link
+      // is dragged to a transfer node
       this.redrawTargets();
+      this.redrawLinks();
       this.diagramToolkit.resumeDrawing();
       this.ignoringEvents = false;
       return this.checkForLinkButtonClientClass();
@@ -371,11 +433,13 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private redrawTargets() {
+    if (!this.props.linkTarget) {
+      return;
+    }
     this.diagramToolkit.makeSource(($(this.linkView!).find(".connection-source")), this.linkButtonClientClass);
     const target = $(this.linkView!).find(this.props.linkTarget);
     const targetStyle = "node-link-target";
-
-    return this.diagramToolkit.makeTarget(target, targetStyle);
+    this.diagramToolkit.makeTarget(target, targetStyle);
   }
 
   private redrawLinks() {
@@ -387,6 +451,10 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private redrawLink(link) {
+    if (!this.props.connectionTarget) {
+      return;
+    }
+
     const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])).find(this.props.connectionTarget);
     const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])).find(this.props.connectionTarget);
     const isSelected = this.props.selectionManager.isSelected(link);
@@ -440,23 +508,25 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const fromSource = sourceNode === link.sourceNode;
     const sourceConnectionClass = fromSource ? this.props.connectionTarget : this.props.transferTarget;
     const targetConnectionClass = !fromSource ? this.props.connectionTarget : this.props.transferTarget;
-    const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])).find(sourceConnectionClass);
-    const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])).find(targetConnectionClass);
-    if (source && target) {
-      const opts = {
-        fromSource,
-        source,
-        target,
-        label: "",
-        color: LinkColors.transferPipe,
-        thickness: 10,
-        showIndicators: false,
-        isEditing: false,
-        linkModel: link,
-        isTransfer: true,
-        hideArrow: fromSource
-      };
-      return this.diagramToolkit.addLink(opts);
+    if (sourceConnectionClass && targetConnectionClass) {
+      const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])).find(sourceConnectionClass);
+      const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])).find(targetConnectionClass);
+      if (source && target) {
+        const opts = {
+          fromSource,
+          source,
+          target,
+          label: "",
+          color: LinkColors.transferPipe,
+          thickness: 10,
+          showIndicators: false,
+          isEditing: false,
+          linkModel: link,
+          isTransfer: true,
+          hideArrow: fromSource
+        };
+        return this.diagramToolkit.addLink(opts);
+      }
     }
   }
 
@@ -518,16 +588,25 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
 
   private handleMouseDown = (e) => {
     if (e.target === this.container!) {
-      // deselect links when background is clicked
-      this.forceRedrawLinks = true;
-      this.props.selectionManager.clearSelection();
+      // calculate selection box before calling setTimeout
       const selectBox = $.extend({}, this.state.selectBox);
       const offset = $(this.linkView!).offset() || {left: 0, top: 0};
       selectBox.startX = e.pageX - offset.left;
       selectBox.startY = e.pageY - offset.top;
       selectBox.x = selectBox.startX;
       selectBox.y = selectBox.startY;
-      return this.setState({drawingMarquee: true, selectBox});
+
+      const deselectAction = () => {
+        // deselect links when background is clicked
+        this.forceRedrawLinks = true;
+        this.props.selectionManager.clearSelection();
+        return this.setState({drawingMarquee: true, selectBox});
+      };
+      // In Safari, if we `setState` here, the link-labels being edited
+      // don't have time to fire Change handlers to trigger label updates.
+      // So we wait for all pending updates in the current event loop here.
+      // see https://www.pivotaltracker.com/story/show/164438776
+      setTimeout(deselectAction, 1);
     }
   }
 
@@ -560,31 +639,19 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private checkSelectBoxLinkCollisions() {
-    return (() => {
-      const result: any[] = [];
-      for (const link of this.state.links) {
-        if (!(link.relation != null ? link.relation.isTransfer : undefined) && this.checkBoxLinkCollision(link)) {
-          result.push(this.props.selectionManager.selectLinkForInspection(link, true));
-        } else {
-          result.push(undefined);
-        }
+    for (const link of this.state.links) {
+      if (!(link.relation != null ? link.relation.isTransfer : undefined) && this.checkBoxLinkCollision(link)) {
+        this.props.selectionManager.selectLinkForInspection(link, true);
       }
-      return result;
-    })();
+    }
   }
 
   private checkSelectBoxCollisions() {
-    return (() => {
-      const result: any[] = [];
-      for (const node of this.state.nodes) {
-        if (this.checkSelectBoxCollision(node)) {
-          result.push(this.props.selectionManager.selectNodeForInspection(node, true));
-        } else {
-          result.push(undefined);
-        }
+    for (const node of this.state.nodes) {
+      if (this.checkSelectBoxCollision(node)) {
+        this.props.selectionManager.selectNodeForInspection(node, true);
       }
-      return result;
-    })();
+    }
   }
 
   // Detecting collision between drawn selectBox and existing link
@@ -655,4 +722,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     this.props.graphStore.changeLink(link, {title});
     return this.props.selectionManager.clearSelection();
   }
+
+  private handleSliderDragStart = (key: string) => {
+    this.currentSliderNodeKey = key;
+  }
+
 }

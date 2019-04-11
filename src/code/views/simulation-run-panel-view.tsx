@@ -5,7 +5,7 @@ import { AppSettingsMixinProps } from "../stores/app-settings-store";
 
 import { tr } from "../utils/translate";
 import { RecordButtonView  } from "./record-button-view";
-import { DropDownView } from "./dropdown-view";
+import { DropDownView, DropDownViewItem } from "./dropdown-view";
 import { ExperimentPanelView } from "./experiment-panel-view";
 
 import { SimulationMixin, SimulationMixinState } from "../stores/simulation-store";
@@ -48,7 +48,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
     const simTextLeft = (simTextWidth / 2) - 6;
     const simStyle = { left: simTextLeft };
     return (
-      <div className="flow" onClick={this.handleToggle}>
+      <div className="flow" onClick={this.handleToggle} title={simText}>
         <div className="toggle-title" ref={el => this.simulateElt = el} style={simStyle}>{simText}</div>
         <i className={`icon-codap-${iconClass}`} />
       </div>
@@ -100,6 +100,8 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
       recording: this.state.isRecording,
       disabled: !this.state.modelIsRunnable
     };
+    const {timeUnitOptions} = this.state;
+    const items = Object.keys(timeUnitOptions).map((key) => timeUnitOptions[key]);
     return (
       <div className="horizontal">
         <RecordButtonView {...props}>
@@ -122,7 +124,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
           isActionMenu={false}
           onSelect={SimulationActions.setStepUnits}
           anchor={this.state.stepUnitsName}
-          items={this.state.timeUnitOptions}
+          items={items as DropDownViewItem[]}
         />
       </div>
     );

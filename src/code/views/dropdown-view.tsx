@@ -1,9 +1,14 @@
 import * as React from "react";
 
+export interface DropDownViewItem {
+  name: string;
+  action?: () => void;
+}
+
 interface DropdownItemViewProps {
   isActionMenu: boolean;
-  item: any; // TODO: set concrete type
-  select: (item: any) => void; // TODO: set concrete type
+  item: DropDownViewItem;
+  select: (item: DropDownViewItem) => void;
 }
 
 interface DropdownItemViewState {}
@@ -24,12 +29,12 @@ class DropdownItemView extends React.Component<DropdownItemViewProps, DropdownIt
 }
 
 interface DropDownViewProps {
-  items: any[]; // TODO: get concrete type
+  items: DropDownViewItem[];
   isActionMenu: boolean;
   anchor: string | JSX.Element;
   hideArrow?: boolean;
   rightSide?: boolean;
-  onSelect?: (item: any) => void; // TODO: get concrete type
+  onSelect?: (item: DropDownViewItem) => void; // TODO: get concrete type
 }
 
 interface DropDownViewState {

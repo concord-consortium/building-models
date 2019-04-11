@@ -6,6 +6,7 @@ const Reflux = require("reflux");
 import { PaletteStore } from "./palette-store";
 import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber } from "./store-class";
+import { ImageInfo } from "../views/preview-image-dialog-view";
 
 export const ImageDialogActions = Reflux.createActions([
   "open", "close", "update", "cancel"
@@ -115,8 +116,8 @@ export interface ImageDialogMixinProps {}
 export interface ImageDialogMixinState {
   showingDialog: boolean;
   keepShowing: boolean;
-  paletteItem: boolean;
-  selectedImage: boolean;
+  paletteItem: ImageInfo;
+  selectedImage: ImageInfo;
 }
 
 export class ImageDialogMixin extends Mixin<ImageDialogMixinProps, ImageDialogMixinState> {

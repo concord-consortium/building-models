@@ -2,10 +2,11 @@ import * as React from "react";
 
 import { tr } from "../utils/translate";
 import { licenses } from "../data/licenses";
+import { ImageMetadata } from "./preview-image-dialog-view";
 
 interface ImageMetadataViewProps {
-  metadata: any; // TODO: get concrete type
-  update: (data: any) => void; // TODO: get concrete type
+  metadata: ImageMetadata;
+  update: ({metadata: ImageMetadata}) => void;
 }
 
 interface ImageMetadataViewState {
@@ -89,7 +90,7 @@ export class ImageMetadataView extends React.Component<ImageMetadataViewProps, I
   private hostname() {
     // instead of using a regexp to extract the hostname use the dom
     const link = document.createElement("a");
-    link.setAttribute("href", this.props.metadata != null ? this.props.metadata.link : undefined);
+    link.setAttribute("href", this.props.metadata.link);
     return link.hostname;
   }
 

@@ -272,7 +272,7 @@ describe("Simulation", () => {
           }
           for (let j = 0; j < scenario.results.length; j++) {
             const result = scenario.results[j];
-            const nodeArray: any[] = [];
+            const nodeArray: Node[] = [];
             for (key in nodes) {
               node = nodes[key];
               nodeArray.push(node);
@@ -431,8 +431,18 @@ describe("The SimulationStore, with a network in the GraphStore", () => {
   describe("for a fast simulation for 10 iterations", () => {
 
     beforeEach(() => {
+      SimulationStore.settings.experimentFrame = 0;
       SimulationActions.setDuration.trigger(10);
       SimulationActions.expandSimulationPanel.trigger();
+    });
+
+    it("should start simulation when experiment is created", (done) => {
+
+      asyncListenTest(done, SimulationActions.simulationStarted, (nodeNames) => {
+        nodeNames.length.should.equal(2);
+      });
+
+      SimulationActions.createExperiment();
     });
 
     it("should call recordingDidStart with the node names", (done) => {
@@ -449,13 +459,13 @@ describe("The SimulationStore, with a network in the GraphStore", () => {
           data.length.should.equal(10);
 
           const frame0 = data[0];
-          frame0.time.should.equal(11);
+          frame0.time.should.equal(1);
           frame0.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
 
           const frame9 = data[9];
-          frame9.time.should.equal(20);
+          frame9.time.should.equal(10);
           frame9.nodes.should.eql([ { title: "A", value: 10 }, { title: "B", value: 1 } ]);
-    });
+      });
 
       SimulationActions.createExperiment();
       SimulationActions.recordPeriod();

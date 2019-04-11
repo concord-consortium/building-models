@@ -16,6 +16,7 @@ import { GraphPrimitive } from "./graph-primitive";
 import { ColorChoices } from "../utils/colors";
 import { tr } from "../utils/translate";
 import { urlParams } from "../utils/url-params";
+import { PalleteItem } from "../stores/palette-store";
 
 const SEMIQUANT_MIN = 0;
 const SEMIQUANT_MAX = 100;
@@ -41,28 +42,30 @@ export class Node extends GraphPrimitive {
   }
 
   public type: string = "Node";
+  public title: string;
+  public currentValue: number;
+
+  public readonly combineMethod: any; // TODO: get concrete type
+  public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
+  public readonly isTransfer: any; // TODO: get concrete type
+  public readonly addedThisSession: any; // TODO: get concrete type
+  public readonly color: any; // TODO: get concrete type
+  public readonly image: any; // TODO: get concrete type
+  public readonly codapID: any; // TODO: get concrete type
+  public readonly codapName: any; // TODO: get concrete type
+  public readonly x: any; // TODO: get concrete type
+  public readonly y: any; // TODO: get concrete type
+  public readonly frames: any; // TODO: get concrete type
 
   protected links: any; // TODO: get concrete type
-  protected x: any; // TODO: get concrete type
-  protected y: any; // TODO: get concrete type
-  protected title: any; // TODO: get concrete type
-  protected codapID: any; // TODO: get concrete type
-  protected codapName: any; // TODO: get concrete type
   protected allowNegativeValues: any; // TODO: get concrete type
-  protected valueDefinedSemiQuantitatively: any; // TODO: get concrete type
-  protected paletteItem: any; // TODO: get concrete type
-  protected frames: any; // TODO: get concrete type
-  protected addedThisSession: any; // TODO: get concrete type
-  protected combineMethod: any; // TODO: get concrete type
-  protected image: any; // TODO: get concrete type
+  protected paletteItem: PalleteItem;
   protected _min: any; // TODO: get concrete type
   protected _max: any; // TODO: get concrete type
   protected _initialValue: any; // TODO: get concrete type
-  protected color: any; // TODO: get concrete type
   protected accumulatorInputScale: any; // TODO: get concrete type
   protected isInDependentCycle: any; // TODO: get concrete type
   protected _collectorImageProps: any; // TODO: get concrete type
-  protected isTransfer: any; // TODO: get concrete type
   protected _isAccumulator: any; // TODO: get concrete type
 
   constructor(nodeSpec, key?, isTransfer?) {
@@ -143,7 +146,7 @@ export class Node extends GraphPrimitive {
 
   get min() {
     if (!this.valueDefinedSemiQuantitatively) {
-      if (this.isAccumulator && !this.allowNegativeValues) { return Math.max(0, this._min); } else { return this._min; }
+      if (this.limitMinValue) { return Math.max(0, this._min); } else { return this._min; }
     } else {
       return SEMIQUANT_MIN;
     }
@@ -175,6 +178,10 @@ export class Node extends GraphPrimitive {
         this._max = SEMIQUANT_MAX;
       }
     }
+  }
+
+  get limitMinValue() {
+    return ((this.isAccumulator || this.isTransfer) && !this.allowNegativeValues);
   }
 
   public addLink(link) {
@@ -209,7 +216,7 @@ export class Node extends GraphPrimitive {
     return _.map(this.inLinks(), link => link.sourceNode);
   }
 
-  public isDependent(onlyConsiderDefinedRelations) {
+  public isDependent(onlyConsiderDefinedRelations?: boolean) {
     if (onlyConsiderDefinedRelations) {
       for (const link of this.inLinks()) {
         if (link.relation && link.relation.isDefined) {

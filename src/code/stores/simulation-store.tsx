@@ -12,6 +12,17 @@ import { StoreUnsubscriber } from "./store-class";
 
 const DEFAULT_SIMULATION_STEPS = 20;
 
+export const STATIC_RECORDING_TIME = 500;
+export const TIME_BASED_RECORDING_TIME = 1500;
+
+interface TimeUnits {
+  name: string;
+  unit: string;
+}
+interface TimeUnitsMap {
+  [key: string]: TimeUnits;
+}
+
 export const SimulationActions = Reflux.createActions(
   [
     "expandSimulationPanel",
@@ -44,7 +55,7 @@ interface SimulationSettings {
   experimentFrame: number;
   stepUnits: string;
   stepUnitsName: string;
-  timeUnitOptions: any;
+  timeUnitOptions: TimeUnitsMap;
   capNodeValues: boolean;
   modelIsRunning: boolean;
   modelIsRunnable: boolean;
@@ -64,7 +75,7 @@ export const SimulationStore = Reflux.createStore({
     this.defaultUnit = TimeUnits.defaultUnit;
     this.unitName    = TimeUnits.toString(this.defaultUnit, true);
     this.defaultCollectorUnit = TimeUnits.defaultCollectorUnit;
-    const timeUnitOptions = TimeUnits.units.map((unit) => ({name: TimeUnits.toString(unit, true), unit}));
+    const timeUnitOptions: TimeUnitsMap = TimeUnits.units.map((unit) => ({name: TimeUnits.toString(unit, true), unit}));
 
     this.nodes = [];
     this.currentSimulation = null;
@@ -253,7 +264,10 @@ export const SimulationStore = Reflux.createStore({
   onCreateExperiment() {
     this.settings.experimentNumber++;
     this.settings.experimentFrame = 0;
-    return this.notifyChange();
+    this.notifyChange();
+    // run simulation after listeners respond to experiment update so we can animate the graphs
+    // (the graph store clears each node's frame when createExperiment is called)
+    this._runSimulation();
   },
 
   onStopRecording() {
@@ -266,7 +280,7 @@ export const SimulationStore = Reflux.createStore({
     this.settings.isRecordingOne = true;
     this._runSimulation();
     const stopRecording = () => SimulationActions.stopRecording();
-    this.timeout = setTimeout(stopRecording, 500);
+    this.timeout = setTimeout(stopRecording, this.settings.isTimeBased ? TIME_BASED_RECORDING_TIME : STATIC_RECORDING_TIME);
     return this.notifyChange();
   },
 
@@ -281,7 +295,7 @@ export const SimulationStore = Reflux.createStore({
     this.settings.isRecordingPeriod = true;
     this._runSimulation();
     const stopRecording = () => SimulationActions.stopRecording();
-    this.timeout = setTimeout(stopRecording, 500);
+    this.timeout = setTimeout(stopRecording, this.settings.isTimeBased ? TIME_BASED_RECORDING_TIME : STATIC_RECORDING_TIME);
     return this.notifyChange();
   },
 

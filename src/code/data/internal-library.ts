@@ -1,4 +1,11 @@
-export const internalLibrary = [
+import { ImageMetadata, ImageInfo } from "../views/preview-image-dialog-view";
+
+export interface InternalLibraryItem extends ImageInfo {
+  id: string;
+  title: string;
+}
+
+export const internalLibrary: InternalLibraryItem[] = [
   {
     "id": "2",
     "title": "Egg",

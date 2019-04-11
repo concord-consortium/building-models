@@ -4,11 +4,12 @@ const log = require("loglevel");
 import { tr } from "../utils/translate";
 import { PaletteDeleteDialogActions } from "../stores/palette-delete-dialog-store";
 import { ImagePickerView } from "./image-picker-view";
+import { PalleteItem } from "../stores/palette-store";
 
 interface PaletteDeleteViewProps {
   showReplacement: boolean;
-  replacement: any; // TODO: get concrete type
-  paletteItem?: any; // TODO: get concrete type
+  replacement: PalleteItem;
+  paletteItem?: PalleteItem;
   cancel?: () => void;
   ok?: () => void;
 }

@@ -60,7 +60,7 @@ const filterFinalValue = function(value) {
   // limit max value
   value = this.capNodeValues ? Math.min(this.max, value) : value;
   // limit min value
-  const shouldLimitMinValue = this.capNodeValues || (this.isAccumulator && !this.allowNegativeValues);
+  const shouldLimitMinValue = this.capNodeValues || this.limitMinValue;
   if (shouldLimitMinValue) { return Math.max(this.min, value); } else { return value; }
 };
 
@@ -144,7 +144,7 @@ const SetAccumulatorValueFunction = function(nodeValues) {
       let transferValue = nodeValues[transferNode.key];
 
       // can't overdraw non-negative collectors
-      if (this.capNodeValues || (sourceNode.isAccumulator && !sourceNode.allowNegativeValues)) {
+      if (this.capNodeValues || sourceNode.limitMinValue) {
         transferValue = Math.min(transferValue, getTransferLimit(transferNode));
       }
 

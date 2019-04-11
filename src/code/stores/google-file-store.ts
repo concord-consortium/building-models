@@ -214,7 +214,7 @@ export interface GoogleFileMixinState {
   filename: string;
   action: string;
   isPublic: boolean;
-  docLink: any; // TODO: get concrete type
+  docLink: string | null;
   showingSaveDialog: boolean;
 }
 

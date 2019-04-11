@@ -12,27 +12,35 @@ import * as $ from "jquery";
  */
 
 import { tr } from "../utils/translate";
+import { Link } from "../models/link";
+import { GraphStoreClass } from "../stores/graph-store";
 const math = require("mathjs");  // For formula parsing...
 
+interface SvgGraphViewPoint {
+  x: number;
+  y: number;
+  time: number;
+}
+
 interface SvgGraphViewProps {
-  link: any; // TODO: get concrete type
+  link: Link;
   width: number;
   height: number;
   fontSize: number;
   strokeWidth: number;
-  graphStore: any; // TODO: get concrete type
-  strokeDasharray: any; // TODO: get concrete type
+  graphStore: GraphStoreClass;
+  strokeDasharray: string;
   xLabel: string;
   yLabel: string;
 }
 
 interface SvgGraphViewState {
-  currentData: any; // TODO: get concrete type
-  pointPathData: any; // TODO: get concrete type
+  currentData: SvgGraphViewPoint[] | null;
+  pointPathData: SvgGraphViewPoint[] | null;
   canDraw: boolean;
-  definedRelationship: any; // TODO: get concrete type
+  definedRelationship: boolean;
   newCustomData: boolean;
-  formula: any; // TODO: get concrete type
+  formula: string | null;
 }
 
 export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphViewState> {
@@ -51,7 +59,7 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
   };
 
   private drawing = false;
-  private _lastPoint: any; // TODO: get concrete type
+  private _lastPoint: SvgGraphViewPoint;
   private graphBody: HTMLDivElement | null;
 
   /*
