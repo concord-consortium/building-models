@@ -24,6 +24,11 @@ import { linkToTransferNode } from "./serialized-test-data/topology-test-cases/l
 import { manyMultiPaths } from "./serialized-test-data/topology-test-cases/many-multi-paths";
 import { nodeToTransferNode } from "./serialized-test-data/topology-test-cases/node-to-transfer-node";
 import { nonLinearFourNodes } from "./serialized-test-data/topology-test-cases/non-linear-four-nodes";
+import { immediateFeedback } from "./serialized-test-data/topology-test-cases/immediate-feedback";
+import { leadingRingFeedback } from "./serialized-test-data/topology-test-cases/leading-ring-feedback";
+import { embeddedRingFeedback } from "./serialized-test-data/topology-test-cases/embedded-ring-feedback";
+import { immediateFeedbackOut } from "./serialized-test-data/topology-test-cases/immedate-feedback-from";
+import { multipathAndFeedback } from "./serialized-test-data/topology-test-cases/multipath-and-feedback";
 
 describe("TopologyTagger", () => {
   beforeEach(() => null);
@@ -216,6 +221,143 @@ describe("TopologyTagger", () => {
     });
   });
 
+  describe("analyzes a model with ring feedback between to outer links", () => {
+    const graph: ISageGraph = embeddedRingFeedback;
+    it("finds 5 nodes", () => {
+      chai.expect(getTopology(graph).nodes).to.eql(5);
+    });
+    it("finds 5 links", () => {
+      chai.expect(getTopology(graph).links).to.eql(5);
+    });
+    it("finds 1 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(1);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodes).to.eql(0);
+    });
+    it("finds 1 independent graphs", () => {
+      chai.expect(getTopology(graph).graphs).to.eql(1);
+    });
+    it("finds no unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphs).to.eql(0);
+    });
+    it("finds 1 graph with feedback", () => {
+      chai.expect(getTopology(graph).feedbackGraphs).to.eql(1);
+    });
+    it("finds 1 graph with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphs).to.eql(1);
+    });
+    it("finds no graphs with a multi-path", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
+    });
+  });
+
+  describe("analyzes a model with a link to 3 nodes with ring feedback", () => {
+    const graph: ISageGraph = leadingRingFeedback;
+    it("finds 4 nodes", () => {
+      chai.expect(getTopology(graph).nodes).to.eql(4);
+    });
+    it("finds 4 links", () => {
+      chai.expect(getTopology(graph).links).to.eql(4);
+    });
+    it("finds 1 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(1);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodes).to.eql(0);
+    });
+    it("finds 1 independent graphs", () => {
+      chai.expect(getTopology(graph).graphs).to.eql(1);
+    });
+    it("finds no unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphs).to.eql(0);
+    });
+    it("finds 1 graph with feedback", () => {
+      chai.expect(getTopology(graph).feedbackGraphs).to.eql(1);
+    });
+    it("finds 1 graph with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphs).to.eql(1);
+    });
+    it("finds no graphs with a multi-path", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
+    });
+  });
+
+  describe("analyzes an immediate feedback graph with a link \"to\" it", () => {
+    const graph: ISageGraph = immediateFeedback;
+    it("finds 3 nodes", () => {
+      chai.expect(getTopology(graph).nodes).to.eql(3);
+    });
+    it("finds 3 links", () => {
+      chai.expect(getTopology(graph).links).to.eql(3);
+    });
+    it("finds 1 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(1);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodes).to.eql(0);
+    });
+    it("finds 1 independent graphs", () => {
+      chai.expect(getTopology(graph).graphs).to.eql(1);
+    });
+    it("finds no unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphs).to.eql(0);
+    });
+    it("finds 1 graph with feedback", () => {
+      chai.expect(getTopology(graph).feedbackGraphs).to.eql(1);
+    });
+    it("finds 1 graph with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphs).to.eql(1);
+    });
+    it("inds no graphs with a multi-path", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
+    });
+  });
+
+  describe("analyzes an immediate feedback graph with at link \"from\" ", () => {
+    const graph: ISageGraph = immediateFeedbackOut;
+    it("finds 3 nodes", () => {
+      chai.expect(getTopology(graph).nodes).to.eql(3);
+    });
+    it("finds 3 links", () => {
+      chai.expect(getTopology(graph).links).to.eql(3);
+    });
+    it("finds 0 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(0);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodes).to.eql(0);
+    });
+    it("finds 1 independent graphs", () => {
+      chai.expect(getTopology(graph).graphs).to.eql(1);
+    });
+    it("finds no unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphs).to.eql(0);
+    });
+    it("finds 1 graph with feedback", () => {
+      chai.expect(getTopology(graph).feedbackGraphs).to.eql(1);
+    });
+    it("finds 1 graph with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphs).to.eql(1);
+    });
+    it("finds no graphs with a multi-path", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
+    });
+  });
+
+
   describe("analyzes a linear, 3 node, 2 transfer link graph", () => {
     const graph: ISageGraph = threeNodesWithTransferLinks;
     it("finds 5 nodes", () => {
@@ -315,8 +457,8 @@ describe("TopologyTagger", () => {
     it("finds 2 graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphs).to.eql(2);
     });
-    it("finds 1 graph with a multi-path", () => {
-      chai.expect(getTopology(graph).multiPathGraphs).to.eql(1);
+    it("finds no graphs with a multi-paths", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
     });
   });
 
@@ -343,14 +485,14 @@ describe("TopologyTagger", () => {
     it("finds no linear graphs", () => {
       chai.expect(getTopology(graph).linearGraphs).to.eql(0);
     });
-    it("finds 1 graphs with feedback", () => {
+    it("finds 1 graph with feedback", () => {
       chai.expect(getTopology(graph).feedbackGraphs).to.eql(1);
     });
     it("finds 1 graphs with branches", () => {
       chai.expect(getTopology(graph).branchedGraphs).to.eql(1);
     });
-    it("finds 1 graph with a multi-path", () => {
-      chai.expect(getTopology(graph).multiPathGraphs).to.eql(1);
+    it("finds no graphs with a multi-paths", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
     });
   });
 
@@ -483,6 +625,40 @@ describe("TopologyTagger", () => {
     });
     it("finds no graphs with feedback", () => {
       chai.expect(getTopology(graph).feedbackGraphs).to.eql(0);
+    });
+    it("finds 1 graph with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphs).to.eql(1);
+    });
+    it("finds 1 graph with a multi-path", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(1);
+    });
+  });
+
+  describe("finds a multi-path and feedback in the same graph", () => {
+    const graph: ISageGraph = multipathAndFeedback;
+    it("finds 4 nodes", () => {
+      chai.expect(getTopology(graph).nodes).to.eql(5);
+    });
+    it("finds 6 links", () => {
+      chai.expect(getTopology(graph).links).to.eql(6);
+    });
+    it("finds 1 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(1);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodes).to.eql(0);
+    });
+    it("finds 1 independent graphs", () => {
+      chai.expect(getTopology(graph).graphs).to.eql(1);
+    });
+    it("finds no unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphs).to.eql(0);
+    });
+    it("finds 1 graph with feedback", () => {
+      chai.expect(getTopology(graph).feedbackGraphs).to.eql(1);
     });
     it("finds 1 graph with branches", () => {
       chai.expect(getTopology(graph).branchedGraphs).to.eql(1);

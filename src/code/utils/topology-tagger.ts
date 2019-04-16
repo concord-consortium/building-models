@@ -230,7 +230,11 @@ function countGraphsWithMultiPaths(g) {
     return _.intersection(predecessorsPredecessors).length > 0;
     };
 
-  const listOfMultiPathNodes = g.nodes().filter( n => isMultiPathNode(n) );
+  const nodesInCycles = _.uniq(_.flatten(GraphLibAlg.findCycles(g)));
+  const listOfMultiPathNodes = g.nodes()
+    .filter( n => isMultiPathNode(n) )
+    .filter( n => (nodesInCycles.indexOf(n) === -1) );
+
   return GraphLibAlg.components(g)
     .filter( nodes => _.intersection(nodes, listOfMultiPathNodes).length > 0)
     .length;
