@@ -1,5 +1,5 @@
 const _ = require("lodash");
-import { Graph as AnalysisGraph, alg as GraphLibAlg, alg} from "graphlib";
+import { Graph as AnalysisGraph, alg as GraphLibAlg } from "graphlib";
 
 type sageNodeKey = string;
 
@@ -37,30 +37,70 @@ export interface ISageGraph {
   nodes: ISageNode[];
 }
 
-export function getAnalysisGraph(sageModelGraph: ISageGraph) {
-  // Builds an analysis graph from a serialized sage graph. Only the useful
-  // properties of the nodes and links should be included in the constructed
-  // graph, as is dictated by the required analysis.
-  const graphlibGraph = new AnalysisGraph();
+export function getAnalysisGraph(sageModelGraph: ISageGraph, swapTransferSource = false) {
+  // Returns an analysis graph from a serialized sage graph.
+  //
+  // Transfer links complicate this step as they are represented, in the sage
+  // model, as additional, unconnected nodes with control data defining the
+  // transfer's behavior. The source and target nodes of a transfer link are
+  // represented by a single link with some control data that references the
+  // transfer node. (One might think of this as the transfer node drawn -- as a
+  // valve icon -- hovering over the link.)
+  //
+  // To make this all work, the analysis graph is built from the serialized sage
+  // model by first creating all the nodes in the model and then inspecting all
+  // the links in the model and building the edges of the analysis graph based
+  // on the particulars of the links. In particular, transfer links are replaced
+  // with two links -- from the source-node to the transfer-node, and from the
+  // transfer-node to the target-node. Ordinary links simply link their nodes,
+  // from source to target, as one would expect.
+  //
+  // As a result, the transfer nodes are no longer seen as unconnected nodes,
+  // and this makes counting links and nodes straightforward.
+  //
+  // This does have a drawback with respect to linearity and feedback. Although
+  // this implementation maintains the link direction with consistency in how
+  // the user creates the link -- that is, the source "links to" the target,
+  // it would also be reasonable to reverse the link between the source node
+  // and the transfer node since the transfer nodes do effect the value the
+  // source node during a transfer.
+  //
+  // When the swapTransferSource flag is true, the direction of the source link
+  // is reversed so the transfer node "links to" the source node. Doing so
+  // facilitates the detection of feedback at the cost of messing up the tests
+  // for linearity.
+  //
+  // Because this analysis model also allows a model to have more than 1 link
+  // between the same 2 nodes. This has two consequences for the analysis graph:
+  // first, it must be a multigraph; and second, all edges must be labeled.
+
+  const graphlibGraph = new AnalysisGraph({ multigraph: true });
+
   sageModelGraph.nodes.forEach((n) => {
-    graphlibGraph.setNode(
-      n.key,
-      {
-        isAccumulator: n.data && n.data.isAccumulator
-      }
-    );
+    graphlibGraph.setNode(n.key, { isAccumulator: n.data && n.data.isAccumulator });
   });
+
+  const setEdge = (s, t, link, label) => {
+    const linkData = {
+      title: link.title,
+      transferNode: link.transferNode ? link.transferNode : "",
+      relation: link.relation ? link.relation : null,
+      source: link.sourceNode
+    };
+    graphlibGraph.setEdge(s, t, linkData, label);
+  };
+
   sageModelGraph.links.forEach((l) => {
-    graphlibGraph.setEdge(
-      l.sourceNode,
-      l.targetNode,
-      {
-        title: l.title,
-        transferNode: l.transferNode ? l.transferNode : "",
-        relation: l.relation ? l.relation : null,
-        source: l.sourceNode
+    if (l.transferNode && l.transferNode !== "") {
+      if (swapTransferSource) {
+        setEdge(l.transferNode, l.sourceNode, l, "source-to-transfer-node");
+      } else {
+        setEdge(l.sourceNode, l.transferNode, l, "source-to-transfer-node");
       }
-    );
+      setEdge(l.transferNode, l.targetNode, l, "transfer-node-to-target");
+    } else {
+      setEdge(l.sourceNode, l.targetNode, l, "normal-link");
+    }
   });
   return graphlibGraph;
 }
@@ -68,58 +108,50 @@ export function getAnalysisGraph(sageModelGraph: ISageGraph) {
 function countMultiLinkTargetNodes(g) {
   // Returns the number of nodes that have 2 or more incoming edges. This is
   // the count of ALL nodes in all the sub-graphs of the model.
-  return g.nodes()
-    .filter( (node: string) => g.inEdges(node).length > 1 )
-    .length;
+  return g.nodes().filter((node: string) => g.inEdges(node).length > 1).length;
 }
 
 function countCollectorNodes(g) {
   // Returns the number of nodes, in all the sub-graphs of the model, that are
-  // flagged as accumulators (that is, collector nodes).
-  return g.nodes()
-    .filter( (node: string) => g.node(node).isAccumulator)
-    .length;
+  // flagged as accumulators (which is what makes it a collector node).
+  return g.nodes().filter((node: string) => g.node(node).isAccumulator).length;
 }
 
 function countUnconnectedNodes(g) {
   // Returns the number of unconnected nodes in the graph. These are the normal
   // sorts of nodes that might be used to display a free-standing variable.
-  // However, internally, a transfer node is also a unconnected node and must
-  // be excluded from the count. This is calculated by finding the number of
-  // transfer nodes in the graph and subtracting this from the total number of
-  // nodes that have no edges.
-  const transferNodes = g.edges()
-    .filter( (e: string) => g.edge(e).transferNode !== "" );
-  return g.nodes()
-    .filter( (node: string) => g.nodeEdges(node).length <= 0 )
-    .length - transferNodes.length;
+  return g.nodes().filter((node: string) => g.nodeEdges(node).length <= 0).length;
 }
 
 function countLinearGraphs(g) {
   // This function uses that fact that a component (that is, a free-standing
   // sub-graph in the model) is linear if each node has, at most 1 incoming
-  // and 1 outgoing arc. There is one case of a non-linear graph that has this
-  // property, which is a ring-graph. This non-linear case can be rejected by
-  // observing that a linear model must also have one fewer in (or out) arcs
-  // than the number of nodes in the component.
+  // and 1 outgoing arc. This almost works, except for 1 case.
+  //
+  // The one shape that meets the above condition and still is non-linear is a
+  // ring-graph. This non-linear case can be rejected by observing that a linear
+  // model must also have one fewer in (or out) arcs than the number of nodes in
+  // the component (sub-graph).
   //
   // We make this a little easier by defining a predicate, isLinear(), that
   // applies the two tests for a linear sub-graph. Then this predicate is
   // used to count the sub-graphs in this model where the predicate is true.
+
   function isLinear(subGraph: string[]) {
     const atMost1InOutEdges = (node: string) => {
       return g.inEdges(node).length <= 1 && g.outEdges(node).length <= 1;
     };
     const nodesWithAtMost1inAnd1outEdge =
-      subGraph.filter( (node: string) => (atMost1InOutEdges(node)) ).length;
+      subGraph.filter((node: string) => (atMost1InOutEdges(node))).length;
     const numberOfInEdges =
-      subGraph.map( (node: string) => g.inEdges(node).length )
-        .reduce( (a: number, b: number) => (a + b), 0 );  // Sum the map.
+      subGraph.map((node: string) => g.inEdges(node).length)
+        .reduce((a: number, b: number) => (a + b), 0);  // Sum the map.
     return nodesWithAtMost1inAnd1outEdge === subGraph.length &&
       numberOfInEdges === subGraph.length - 1;
   }
+
   return GraphLibAlg.components(g)
-    .filter( (subGraph) => (subGraph.length > 1 && isLinear(subGraph)) )
+    .filter((subGraph) => (subGraph.length > 1 && isLinear(subGraph)))
     .length;
 }
 
@@ -128,13 +160,13 @@ function countBranchesAndJoins(g) {
   // branching or joining nodes. A branching node is defined as a node with
   // 2 or more outgoing edges. Similarly, a joining node is defined as a node
   // with 2 or more incoming edges.
-  const hasABranchOrJoinNode = (nodes) => {
-    return nodes.filter( node => (g.inEdges(node).length > 1 ||
-      g.outEdges(node).length > 1 ) ).length > 0;
+  const hasABranchOrJoinNode = (subGraph) => {
+    return subGraph.filter(node =>
+      (g.inEdges(node).length > 1 || g.outEdges(node).length > 1)).length > 0;
   };
   return GraphLibAlg.components(g)
-    .filter( subGraph => subGraph.length > 2 )  // Ignore unless 3 or more nodes.
-    .filter( subGraph => hasABranchOrJoinNode(subGraph) )
+    .filter(subGraph => subGraph.length > 2)  // Ignore, unless 3 or more nodes.
+    .filter(subGraph => hasABranchOrJoinNode(subGraph))
     .length;
 }
 
@@ -142,91 +174,102 @@ function countIndependentGraphs(g) {
   // Independent graphs are all all the disconnected sub-graphs that have two
   // or more nodes. This means that single, free standing nodes without any
   // links to other nodes are not counted as an independent graph.
-  return GraphLibAlg.components(g)
-    .filter ( subGraph => (subGraph.length > 1) )
-    .length;
-}
-
-function countLinks(g) {
-  // The number of links in a graph is complicated by the presence of transfer
-  // links. These are represented, in the sage model as extra, unconnected
-  // nodes. But the transfer links between the "real" nodes, as it were, are
-  // represented as a single link, but are drawn in the UI as two: one from the
-  // source node to the transfer-node (that looks like a gate valve) and one
-  // from the transfer-node to the target node. For analysis purposes, these
-  // links are supposed to be counted as they are drawn, that is, as two links.
-  // For this reason, ordinary links count as a single link and transfer links
-  // count as 2.
-  return g.edges()
-    .map( (edge: string) => (g.edge(edge).transferNode === "") ? 1 : 2 )
-    .reduce( (a: number, b: number) => (a + b), 0 );  // Sum the 1's and 2's in the map.
+  return GraphLibAlg.components(g).filter(subGraph => (subGraph.length > 1)).length;
 }
 
 function countGraphsWithFeedback(g) {
-  // A sub-graph is counted as having feedback in two cases. First, if it has
-  // any topological cycles -- that is, at least one node can reach itself; or
-  // Second, if there are any transfer links present in the sub-graph.
+  // A sub-graph is counted as having feedback if it has any cycles -- that is,
+  // at least one node can reach itself.
   //
-  // Computing this is a little tricky. The library method, findCycles() returns
-  // an array of node arrays, where each node array has all the nodes that are
-  // in the cycle.
+  // The library method, findCycles() returns an array of node arrays, where
+  // each node array has all the nodes that are in that cycle. A sub-graph could
+  //  contain multiple and disjoint cycles, in which case findCycles() would
+  // return several node arrays for a particular sub-graph. Here, we only want
+  // to count a particular sub-graph as having feedback once, no mater how many
+  // cycles it might contain.
   //
-  // It is also possible that a sub-graph could contain multiple and disjoint
-  // cycles, in which case findCycles() would return several node arrays
-  // for a particular sub-graph. But we only want to count a particular sub-
-  // graph as having feedback once, no mater how many cycles it might contain.
-  //
-  // To make this simpler, we first create two lists of nodes from all the
-  // sub-graphs of the model. The first is a list of all nodes that are in
-  // a cycle. The second is a list of all the sourceNodes referenced in
-  // transfer links. A sub-graph has feedback if it has any nodes in either of
-  // these two lists. Using the hasFeedback() predicate, we count up all the
-  // sub-graphs in the model where this predicate is true.
-  const nodesInCycles = _.flatten(GraphLibAlg.findCycles(g));
-  const sourceNodes = g.edges()
-    .filter( (edge: string) => (g.edge(edge).transferNode !== "") )
-    .map( (edge: string) => g.edge(edge).source );
-  const hasFeedback = (subGraph: string[]): boolean => {
-    return ((_.intersection(subGraph, nodesInCycles).length > 0) ||
-            ( _.intersection(subGraph, sourceNodes).length > 0));
-  };
+  // Note about transfer links: for this feedback to be determined correctly
+  // when the sub-graph contains transfer links, the link between the transfer
+  // node and the source node must be reversed so that it points "to" the
+  // the source link. Therefore, this method must be called with an analysis
+  // graph that is constructed with the swapTransferSource flag set to true.
+
+  const cycles = _.flatten(GraphLibAlg.findCycles(g));
+  const hasFeedback = subGraph => _.intersection(subGraph, cycles).length > 0 ;
+
   return GraphLibAlg.components(g)
-    .filter( subGraph => subGraph.length > 1 )   // Only care, if 2 or more nodes.
-    .filter( subGraph => hasFeedback(subGraph) )
+    .filter(subGraph => subGraph.length > 1)   // Only care, if 2 or more nodes.
+    .filter(subGraph => hasFeedback(subGraph))
     .length;
 }
 
-function countMultiplePaths(g) {
-  return 43;
+function countGraphsWithMultiPaths(g) {
+  // A "multiple path" is present when a node is connected to any other node
+  // through multiple link paths.
+  //
+  // We are interested in counting the graphs in the model that have one or
+  // more nodes with multiple paths. This is a bit simpler if we have a
+  // predicate, isMultiPathNode(). To determine if a node is a multi-path
+  // node, we first find all the immediate predecessors of the node being
+  // tested. For each predecessor, we find all the predecessors of the
+  // immediate-predecessor. If there is a non-empty intersection of all those
+  // predecessor-predecessors, the node must be a multi-path node.
+  //
+  // Using this primitive, all the nodes in the model are checked to produce a
+  // list of the multi-path nodes. Then each component/sub-graph is checked to
+  // see if any of its nodes are multi-nodes.
+
+  const isMultiPathNode = (node: string) => {
+    const immediatePredecessors = g.inEdges(node).map( edge => edge.v );
+    if (immediatePredecessors.length <= 1) {
+      return false;
+    }
+    const predecessorsPredecessors = immediatePredecessors
+      .map( (node: string) => g.predecessors(node) )
+      .filter( (nodes: string[]) => nodes.length > 0);
+    return _.intersection(predecessorsPredecessors).length > 0;
+    };
+
+  const nodesInCycles = _.uniq(_.flatten(GraphLibAlg.findCycles(g)));
+  const listOfMultiPathNodes = g.nodes()
+    .filter( n => isMultiPathNode(n) )
+    .filter( n => (nodesInCycles.indexOf(n) === -1) );
+
+  return GraphLibAlg.components(g)
+    .filter( nodes => _.intersection(nodes, listOfMultiPathNodes).length > 0)
+    .length;
 }
 
 export function getTopology(sageModelGraph: ISageGraph) {
+
   const g = getAnalysisGraph(sageModelGraph);
 
-  const nodeCount = g.nodeCount();
-  const linkCount = countLinks(g);
-  const multiLinkTargetNodeCount = countMultiLinkTargetNodes(g);
-  const collectorNodeCount = countCollectorNodes(g);
-  const independentGraphCount = countIndependentGraphs(g); // GraphLibAlg.components(g).length;
-  const unconnectedNodeCount = countUnconnectedNodes(g);
-  const linearGraphCount = countLinearGraphs(g);
-  const graphsWithFeedbackCount = countGraphsWithFeedback(g);
-  const branchedGraphCount = countBranchesAndJoins(g);
-  
-  // const hasMultiplePaths = (! isLinear) &&
-  //                          (multiLinkTargetNodeCount > 0) &&
-  //                          (countMultiplePaths(g) > 0);
+  const links = g.edgeCount();
+
+  const nodes = g.nodeCount();
+  const unconnectedNodes = countUnconnectedNodes(g);
+  const collectorNodes = countCollectorNodes(g);
+  const multiLinkTargetNodes = countMultiLinkTargetNodes(g);
+
+  const graphs = countIndependentGraphs(g);
+  const linearGraphs = countLinearGraphs(g);
+
+  const gPrime = getAnalysisGraph(sageModelGraph, true);
+  const feedbackGraphs = countGraphsWithFeedback(gPrime);
+
+  const branchedGraphs = countBranchesAndJoins(g);
+  const multiPathGraphs = countGraphsWithMultiPaths(g);
 
   return {
-    nodeCount,
-    linkCount,
-    multiLinkTargetNodeCount,
-    collectorNodeCount,
-    independentGraphCount,
-    unconnectedNodeCount,
-    linearGraphCount,
-    graphsWithFeedbackCount,
-    branchedGraphCount,
-    // hasMultiplePaths
+    links,
+    nodes,
+    unconnectedNodes,
+    collectorNodes,
+    multiLinkTargetNodes,
+    graphs,
+    linearGraphs,
+    feedbackGraphs,
+    branchedGraphs,
+    multiPathGraphs
   };
 }
