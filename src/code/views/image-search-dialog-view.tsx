@@ -175,10 +175,11 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
 
   public render() {
     const havePreviewImage = !!(this.props.selectedImage && this.props.selectedImage.image);
+    const showProviderMessage = !havePreviewImage && this.state.searchable && this.state.searched && (this.state.results.length > 0);
     return (
       <div className="image-search-dialog">
         {havePreviewImage ? this.imageDialogViewMixin.renderPreviewImage() : this.renderDialogForm()}
-        {!havePreviewImage ?
+        {showProviderMessage ?
            <div className="image-search-provider-message">
             <a href="https://pixabay.com/" target="_blank">{tr("~IMAGE-BROWSER.PROVIDER_MESSAGE")}</a>
           </div> : null}
