@@ -28,7 +28,7 @@
     "~NODE-EDIT.ADD_REMOTE": "Add remote",
     "~NODE-EDIT.DELETE": "Delete",
 
-
+                                         
     "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value",
     "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS": "You are defining values with numbers.",
     "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words.",
@@ -43,7 +43,7 @@
     "~NODE-VALUE-EDIT.HIGH": "High",
     "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable",
 
-
+                                       
     "~NODE-RELATION-EDIT.COMBINATION_METHOD": "Combine variables using:",
     "~NODE-RELATION-EDIT.ARITHMETIC_MEAN": "average",
     "~NODE-RELATION-EDIT.SCALED_PRODUCT": "limiting factor",
@@ -98,36 +98,36 @@
     "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
     "~ADD-NEW-IMAGE.LINK-TAB": "Link",
 
-
+                                      
     "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image",
     "~PALETTE-INSPECTOR.ADD_IMAGE_SHORT": "New",
     "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
     "~PALETTE-INSPECTOR.DELETE": "Delete Image",
     "~PALETTE-INSPECTOR.REPLACE": "Replace Image",
 
-
+                                   
     "~PALETTE-DIALOG.TITLE": "Delete image?",
     "~PALETTE-DIALOG.DELETE": "Delete",
     "~PALETTE-DIALOG.REPLACE": "and replace with",
     "~PALETTE-DIALOG.OK": "ok",
     "~PALETTE-DIALOG.CANCEL": "✖ cancel",
 
-
+                                   
     "~METADATA.TITLE": "Title",
     "~METADATA.LINK": "Link",
     "~METADATA.CREDIT": "Credit",
 
-
+                                  
     "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
     "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
     "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
     "~IMAGE-BROWSER.SEARCH_BUTTON_LABEL": "Search",
     "~IMAGE-BROWSER.NO_IMAGES_FOUND": "Sorry, no images found.",
     "~IMAGE-BROWSER.TRY_ANOTHER_SEARCH": "Try another search, or browse images below.",
-    "~IMAGE-BROWSER.SEARCHING": "Searching openclipart.org for %{page} of \"%{query}\"",
+    "~IMAGE-BROWSER.SEARCHING": "Searching Pixabay for %{page} of \"%{query}\"",
     "~IMAGE-BROWSER.SEARCHING_FIRST_PAGE": "first page",
     "~IMAGE-BROWSER.SEARCHING_PAGE": "page %{page}",
-    "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No openclipart.org results found for \"%{query}.\"",
+    "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No Pixabay results found for \"%{query}.\"",
     "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette",
     "~IMAGE-BROWSER.PREVIOUS": "‹ Previous",
     "~IMAGE-BROWSER.NEXT": "Next ›",
@@ -140,7 +140,7 @@
     "~IMAGE-BROWSER.PLEASE_DROP_FILE": "Please select or drop a file",
     "~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP": "Drop image from desktop here",
     "~IMAGE-BROWSER.CHOOSE_FILE": "Or choose a file from your desktop:",
-    "~IMAGE-BROWSER.PROVIDER_MESSAGE": "Image search courtesy of openclipart.org",
+    "~IMAGE-BROWSER.PROVIDER_MESSAGE": "Image search courtesy of Pixabay",
 
     "~COLOR.YELLOW": "Yellow",
     "~COLOR.DARK_BLUE": "Dark Blue",
@@ -151,7 +151,7 @@
     "~COLOR.MEDIUM_GRAY": "Gray",
     "~COLOR.DATA": "Codap Orange",
 
-
+                            
     "~FILE.CHECKING_AUTH": "Checking authorization...",
     "~FILE.CONFIRM": "Are you sure?",
     "~FILE.DOWNLOADING": "Downloading...",
@@ -176,7 +176,7 @@
     "~DOCUMENT.ACTIONS.REDO": "Redo",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship.",
 
-
+                             
     "~DOCUMENT.CODAP_ACTIONS.TABLES": "Tables",
     "~DOCUMENT.CODAP_ACTIONS.TABLES.NEW": "New Table",
     "~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM": "Are you sure you want to delete \"%{tableName}\"?",

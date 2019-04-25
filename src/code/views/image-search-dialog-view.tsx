@@ -14,7 +14,8 @@ import * as React from "react";
 
 import { ImageDialogActions, ImageDialogMixinProps, ImageDialogMixinState, ImageDialogMixin } from "../stores/image-dialog-store";
 
-import { OpenClipArt } from "../utils/open-clipart";
+// import { OpenClipArt } from "../utils/open-clipart";
+import { Pixabay } from "../utils/pixabay";
 import { tr } from "../utils/translate";
 import { ImageDialogViewMixin, ImageDialogViewMixinProps, ImageDialogViewMixinState } from "../mixins/image-dialog-view";
 import { Mixer } from "../mixins/components";
@@ -177,6 +178,10 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
     return (
       <div className="image-search-dialog">
         {havePreviewImage ? this.imageDialogViewMixin.renderPreviewImage() : this.renderDialogForm()}
+        {!havePreviewImage ?
+           <div className="image-search-provider-message">
+            <a href="https://pixabay.com/" target="_blank">{tr("~IMAGE-BROWSER.PROVIDER_MESSAGE")}</a>
+          </div> : null}
       </div>
     );
   }
@@ -209,7 +214,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
 
     if (showNoResultsAlert) {
       const iterable = _.map(this.props.internalLibrary);
-      for (index = 0; index < iterable.length; index++) {
+      for (index = 0; index < Math.min(20, iterable.length); index++) {
         node = iterable[index];
         if (node.image) {
           if (node.image) {
@@ -299,7 +304,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
     });
 
     if (validQuery) {
-      OpenClipArt.search(query, options, (results, page, numPages) => {
+      Pixabay.search(query, options, (results, page, numPages) => {
         this.setState({
           searching: false,
           searched: true,
