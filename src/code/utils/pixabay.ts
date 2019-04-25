@@ -26,7 +26,7 @@ export const Pixabay = {
       jqXHR.abort();
     }
 
-    const url = `https://pixabay.com/api/?key=${API_KEY}&q=${encodeURIComponent(query)}&image_type=illustration&safesearch=true&order=popular&page=${options.page}&per_page=${RESULTS_PER_PAGE}&callback=?`;
+    const url = `https://pixabay.com/api/?key=${API_KEY}&q=${encodeURIComponent(query)}&image_type=illustration&safesearch=true&order=popular&colors=transparent&page=${options.page}&per_page=${RESULTS_PER_PAGE}&callback=?`;
 
     jqXHR = $.getJSON(url, (result: PixabayResults) => {
       const results: ImageInfo[] = [];
