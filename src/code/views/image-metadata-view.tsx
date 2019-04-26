@@ -75,7 +75,7 @@ export class ImageMetadataView extends React.Component<ImageMetadataViewProps, I
       return (
         <div key="internal">
           <p />
-          <div>{`\"${title}\"`}</div>
+          <div>{title}</div>
           {link ? <div key="hostname"><a href={link} target="_blank">{`See it on ${this.hostname()}`}</a></div> : undefined}
           <p />
           <div>License</div>
