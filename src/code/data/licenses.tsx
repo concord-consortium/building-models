@@ -14,6 +14,11 @@ export const licenses = {
       fullLabel: "Public Domain",
       link: "http://en.wikipedia.org/wiki/Public_domain"
     },
+    "pixabay": {
+      label: "Pixabay",
+      fullLabel: "Pixabay",
+      link: "https://pixabay.com/service/license/"
+    },
     "creative commons": {
       "cc by": {
         label: "Attribution Only",
