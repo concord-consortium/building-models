@@ -41,7 +41,6 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
     const minSimulationType = GraphStore.getMinimumSimulationType();
     const minComplexity = GraphStore.getMinimumComplexity();
-    const diagramOnlyDisabled = minSimulationType > SimulationType.diagramOnly;
     const staticDisabled = minSimulationType > SimulationType.static;
     const basicDisabled = minComplexity > Complexity.basic;
 
@@ -73,8 +72,8 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
           className="radio-group simulation-radio-buttons"
         >
           <label key="simulation-type-diagram-only">
-            <Radio value={SimulationType.diagramOnly} disabled={diagramOnlyDisabled} />
-            <span className={diagramOnlyDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.DIAGRAM_ONLY")}</span>
+            <Radio value={SimulationType.diagramOnly} />
+            <span>{tr("~SIMULATION.COMPLEXITY.DIAGRAM_ONLY")}</span>
           </label>
           <div key="simulation-static-options">
             <label key="simulation-type-static">
