@@ -690,9 +690,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
     if (isDoubleClick) {
       this.selectionManager.selectNodeForInspection(link.targetNode);
-      if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
-        return InspectorPanelActions.openInspectorPanel("relations", {link});
-      }
+      return InspectorPanelActions.openInspectorPanel("relations", {link});
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click
       const singleClickHandler = () => {

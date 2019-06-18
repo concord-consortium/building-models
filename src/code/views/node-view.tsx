@@ -429,10 +429,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     if (this.props.data.inLinks().length > 0) {
       const now = (new Date()).getTime();
       if ((now - (this.lastClickLinkTime || 0)) <= 250) {
-        // Only open inspector if we're not in diagram-only mode
-        if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
-          InspectorPanelActions.openInspectorPanel("relations");
-        }
+        InspectorPanelActions.openInspectorPanel("relations");
       }
       return this.lastClickLinkTime = now;
     }
