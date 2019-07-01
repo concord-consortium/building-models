@@ -273,7 +273,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   public componentDidUpdate() {
-    const handle = ".img-background";
+    const handle = this.props.selected ? ".selected-background" : ".img-background";
     const $elem = $(this.node!);
     return ($elem as any).draggable( "option", "handle", handle);
   }
@@ -324,6 +324,9 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
                 onTouchEnd={handleBackgroundTouchEnd}
               >
                 {this.renderNodeInternal()}
+                {this.props.selected &&
+                <div className="selected-background" />
+              }
               </div>
               {this.props.data.isTransfer
                 ? <div className="node-title" />
@@ -338,7 +341,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
                       nodeKey={this.props.nodeKey}
                       graphStore={this.props.graphStore}
                     />
-                  </div>}
+                </div>}
             </div>
           </div>
         </div>
