@@ -256,7 +256,8 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
   private handleUpdateNegativeValuesAllowed = (evt) => {
     const value = evt.target.checked;
-    return this.props.graphStore.changeNode({allowNegativeValues: value});
+    this.props.graphStore.changeNode({allowNegativeValues: value});
+    return SimulationActions.toggledAllowNegativeValues(value);
   }
 
   private handleUpdateDefiningType = () => {
