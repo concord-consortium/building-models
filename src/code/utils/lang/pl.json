@@ -198,7 +198,7 @@
     "~MENU.ABOUT.ABOUT": "About SageModeler",
     "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
     "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Experiment #",
-    "~SIMULATION.GUIDE": "Show guide",
+    "~SIMULATION.GUIDE": "Include a guide",
     "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
     "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Guide"
 }

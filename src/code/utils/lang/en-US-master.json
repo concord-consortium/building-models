@@ -196,7 +196,7 @@
     "~SIMULATION.COMPLEXITY.BASIC": "Basic relationships",
     "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships",
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols",
-    "~SIMULATION.GUIDE": "Show guide",
+    "~SIMULATION.GUIDE": "Include a guide",
     "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
 
     "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",

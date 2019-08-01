@@ -821,6 +821,22 @@ export class CodapConnect {
     }
   }
 
+  public hideGuide() {
+    if (this.guideComponentId) {
+      this.codapPhone.call({
+        action: "update",
+        resource: `component[${this.guideComponentId}]`,
+        values: {
+          currentItemIndex: 0,
+          isVisible: false,
+          position: "top"
+        }
+      }, (result) => {
+        console.log("hideGuide", result);
+      });
+    }
+  }
+
   private getGuideItems() {
     const getGuideComponent = (id) => {
       this.codapPhone.call({

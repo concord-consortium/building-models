@@ -143,7 +143,11 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
                 checked={this.state.guide}
                 onChange={this.handleGuide}
               />
-              {tr("~SIMULATION.GUIDE")} (<span className="link" onClick={this.handleConfigureGuide}>{tr("~SIMULATION.CONFIGURE_GUIDE")}</span>)
+              {tr("~SIMULATION.GUIDE")}
+              {this.state.guide
+                ? <span> (<span className="link" onClick={this.handleConfigureGuide}>{tr("~SIMULATION.CONFIGURE_GUIDE")}</span>)</span>
+                : ""
+              }
             </label>
           </div>
         </div>
@@ -165,6 +169,9 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleGuide = (e) => {
     AppSettingsActions.guide(e.target.checked);
+    if (!e.target.checked) {
+      this.codapConnect.hideGuide();
+    }
   }
 
   private handleConfigureGuide = (e: React.MouseEvent<HTMLSpanElement>) => {
