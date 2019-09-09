@@ -25,6 +25,14 @@ declare var jsPlumb;
 
 let appView;
 
+const waitForAppView = (callback: () => void) => {
+  if (appView) {
+    callback();
+  } else {
+    setTimeout(() => waitForAppView(callback), 1);
+  }
+};
+
 // App API
 (window as any).Sage = {
   initApp() {
@@ -40,24 +48,31 @@ let appView;
   },
 
   clearModel() {
-    return (appView != null ? appView.props.graphStore.deleteAll() : undefined);
+    waitForAppView(() => {
+      appView.props.graphStore.deleteAll();
+    });
   },
 
-  serializeModel() {
-    return (appView != null ? appView.props.graphStore.toJsonString(PaletteStore.palette) : undefined);
+  serializeModel(callback) {
+    waitForAppView(() => {
+      const model = appView.props.graphStore.toJsonString(PaletteStore.palette);
+      callback(model);
+    });
   },
 
   loadModel(data) {
-    if (appView != null) {
+    waitForAppView(() => {
       appView.props.graphStore.deleteAll();
-    }
-    if (typeof data === "string") {
-      data = JSON.parse(data);
-    }
-    return (appView != null ? appView.props.graphStore.loadData(data) : undefined);
+      if (typeof data === "string") {
+        data = JSON.parse(data);
+      }
+      appView.props.graphStore.loadData(data);
+    });
   },
 
   addChangeListener(listener) {
-    return (appView != null ? appView.props.graphStore.addChangeListener(listener) : undefined);
+    waitForAppView(() => {
+      appView.props.graphStore.addChangeListener(listener);
+    });
   }
 };

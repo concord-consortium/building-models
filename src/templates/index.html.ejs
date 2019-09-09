@@ -102,7 +102,9 @@
               break;
 
             case 'getContent':
-              event.callback(JSON.parse(Sage.serializeModel()));
+              Sage.serializeModel((model) => {
+                event.callback(JSON.parse(model));
+              })
               break;
 
             case 'newedFile':
