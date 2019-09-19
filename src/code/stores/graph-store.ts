@@ -60,6 +60,8 @@ export declare class GraphStoreClass extends StoreClass {
 
   public readonly currentSliderNodeKey: string;
 
+  public readonly ready: boolean;
+
   public init(context?): void;
   public resetSimulation(): void;
   public updateSimulationData(data: any): void;
@@ -119,6 +121,7 @@ export declare class GraphStoreClass extends StoreClass {
   public getGraphState(): GraphSettings;
   public updateListeners(): void;
   public nudgeNodeWithKeyInitialValue(key: string, delta: number);
+  public waitUntilReady(callback: () => void): void;
 }
 
 export const GraphStore: GraphStoreClass = Reflux.createStore({
@@ -128,10 +131,12 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     this.loadListeners      = [];
     this.filename           = null;
     this.filenameListeners  = [];
+    this.ready = false;
 
     // wait because of require order
     setTimeout(() => {
       this.undoRedoManager    = undoRedoInstance({debug: false, context});
+      this.ready = true;
     }, 1);
     this.selectionManager   = new SelectionManager();
     PaletteDeleteDialogStore.listen(this.paletteDelete.bind(this));
@@ -147,6 +152,15 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
     return this.lastRunModel = "";
   },   // string description of the model last time we ran simulation
+
+  // waits for undoRedoManager to be ready
+  waitUntilReady(callback) {
+    if (this.ready) {
+      callback();
+    } else {
+      setTimeout(() => this.waitUntilReady(callback), 1);
+    }
+  },
 
   resetSimulation() {
     for (const node of this.getNodes()) {
