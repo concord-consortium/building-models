@@ -14,6 +14,7 @@
     "build:watch": "npm-run-all clean build:webpack:watch",
     "build:webpack": "webpack --mode production",
     "build:webpack:watch": "webpack --watch --mode production",
+    "dev": "webpack --watch",
     "clean": "rimraf dist",
     "lint": "tslint -c tslint.json 'src/code/**/*.{ts,tsx}'",
     "lint:fix": "tslint -c tslint.json --fix 'src/code/**/*.{ts,tsx}",
