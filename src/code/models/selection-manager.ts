@@ -65,8 +65,9 @@ export class SelectionManager {
   }
 
   public _clearSelection(context?) {
+    // deselects without notifying about the change
+    // this should be paired with a call to this._notifySelectionChange() when doing multiple selection operations
     this._deselect({context});
-    return this._notifySelectionChange();
   }
 
   public clearSelection(context?) {
@@ -75,7 +76,7 @@ export class SelectionManager {
   }
 
   public clearLinkInspection() {
-    return this._clearSelection(SelectionManager.LinkInspection);
+    return this.clearSelection(SelectionManager.LinkInspection);
   }
 
   public clearSelectionFor(graphprimitive, context?) {
@@ -118,7 +119,8 @@ export class SelectionManager {
 
   public clearTitleEditing() {
     this._clearSelection(SelectionManager.NodeTitleEditing);
-    return this._clearSelection(SelectionManager.LinkTitleEditing);
+    this._clearSelection(SelectionManager.LinkTitleEditing);
+    this._notifySelectionChange();
   }
 
   public isSelectedForTitleEditing(graphprimitive) {
@@ -144,7 +146,7 @@ export class SelectionManager {
   }
 
   public clearNodeInspection() {
-    return this._clearSelection(SelectionManager.NodeInspection);
+    return this.clearSelection(SelectionManager.NodeInspection);
   }
 
   public isSelectedForInspection(graphprimitive) {
