@@ -91,75 +91,78 @@ export class CodapConnect {
     this.codapPhone = new IframePhoneRpcEndpoint( this.codapRequestHandler,
       "data-interactive", window.parent );
 
-    // load any previous data; also check if CODAP's undo is available,
-    // or if we are in standalone mode.
-    this.codapPhone.call([
-      {
-        action: "update",
-        resource: "interactiveFrame",
-        values: {
-          title: tr("~CODAP.INTERACTIVE_FRAME.TITLE"),
-          preventBringToFront: true,
-          cannotClose: true
+    // wait for the graphstore to be ready to receive the CODAP data
+    this.graphStore.waitUntilReady(() => {
+      // load any previous data; also check if CODAP's undo is available,
+      // or if we are in standalone mode.
+      this.codapPhone.call([
+        {
+          action: "update",
+          resource: "interactiveFrame",
+          values: {
+            title: tr("~CODAP.INTERACTIVE_FRAME.TITLE"),
+            preventBringToFront: true,
+            cannotClose: true
+          }
+        },
+        {
+          action: "get",
+          resource: "interactiveFrame"
+        },
+        {
+          action: "get",
+          resource: "dataContext"
         }
-      },
-      {
+      ], ret => {
+        if (ret) {
+          const frame   = ret[1];
+          context = ret[2];
+
+          this.graphStore.setUsingCODAP(true);
+
+          if (frame != null ? frame.values.externalUndoAvailable : undefined) {
+            CodapActions.hideUndoRedo();
+          } else if (frame != null ? frame.values.standaloneUndoModeAvailable : undefined) {
+            this.standaloneMode = true;
+            this.graphStore.setCodapStandaloneMode(true);
+          }
+
+          // We check for game state in either the frame (CODAP API 2.0) or the dataContext
+          // (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
+          const state = (frame != null ? frame.values.savedState : undefined) ||
+                  __guard__(__guard__(context != null ? context.values : undefined, x1 => x1.contextStorage), x => x.gameState);
+
+          if (state != null) {
+            this.graphStore.deleteAll();
+            this.graphStore.loadData(state);
+            return this._initialSyncAttributeProperties(null, true);
+          }
+        } else {
+          return log.info("null response in codap-connect codapPhone.call");
+        }
+      });
+
+
+      // check if we already have a datacontext (if we're opening a saved model).
+      // if we don't create one with our collections. Then kick off init
+      this.codapPhone.call({
         action: "get",
-        resource: "interactiveFrame"
-      },
-      {
-        action: "get",
-        resource: "dataContext"
+        resource: `dataContext[${this.dataContextName}]`
       }
-    ], ret => {
-      if (ret) {
-        const frame   = ret[1];
-        context = ret[2];
-
-        this.graphStore.setUsingCODAP(true);
-
-        if (frame != null ? frame.values.externalUndoAvailable : undefined) {
-          CodapActions.hideUndoRedo();
-        } else if (frame != null ? frame.values.standaloneUndoModeAvailable : undefined) {
-          this.standaloneMode = true;
-          this.graphStore.setCodapStandaloneMode(true);
+      , ret => {
+        // ret==null is indication of timeout, not an indication that the data set
+        // doesn't exist.
+        if (!ret || ret.success) {
+          let attrs;
+          if (attrs = (__guard__(__guard__(__guard__(ret != null ? ret.values : undefined, x2 => x2.collections), x1 => x1[1]), x => x.attrs) != null)) {
+            this._initialSyncAttributeProperties(attrs);
+          }
+        } else {
+          this._createDataContext();
         }
-
-        // We check for game state in either the frame (CODAP API 2.0) or the dataContext
-        // (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
-        const state = (frame != null ? frame.values.savedState : undefined) ||
-                __guard__(__guard__(context != null ? context.values : undefined, x1 => x1.contextStorage), x => x.gameState);
-
-        if (state != null) {
-          this.graphStore.deleteAll();
-          this.graphStore.loadData(state);
-          return this._initialSyncAttributeProperties(null, true);
-        }
-      } else {
-        return log.info("null response in codap-connect codapPhone.call");
-      }
-    });
-
-
-    // check if we already have a datacontext (if we're opening a saved model).
-    // if we don't create one with our collections. Then kick off init
-    this.codapPhone.call({
-      action: "get",
-      resource: `dataContext[${this.dataContextName}]`
-    }
-    , ret => {
-      // ret==null is indication of timeout, not an indication that the data set
-      // doesn't exist.
-      if (!ret || ret.success) {
-        let attrs;
-        if (attrs = (__guard__(__guard__(__guard__(ret != null ? ret.values : undefined, x2 => x2.collections), x1 => x1[1]), x => x.attrs) != null)) {
-          this._initialSyncAttributeProperties(attrs);
-        }
-      } else {
-        this._createDataContext();
-      }
-      this.updateExperimentColumn();
-      return this._getExperimentNumber();
+        this.updateExperimentColumn();
+        return this._getExperimentNumber();
+      });
     });
   }
 
