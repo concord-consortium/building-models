@@ -183,6 +183,7 @@
     "~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME": "AttributeName",
     "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Graph",
     "~DOCUMENT.CODAP_ACTIONS.TEXT": "Text",
+    "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Guide",
 
     "~SIMULATION.SIMULATION_SETTINGS": "Simulation Settings",
     "~SIMULATION.VIEW_SETTINGS": "View settings",
@@ -195,6 +196,8 @@
     "~SIMULATION.COMPLEXITY.BASIC": "Basic relationships",
     "~SIMULATION.COMPLEXITY.EXPANDED": "Expanded set of relationships",
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols",
+    "~SIMULATION.GUIDE": "Include a guide",
+    "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
 
     "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
     "~DROP.ONLY_ALLOWED_IF_IFRAMED": "Sorry, dropping items of this type is only allowed if iframed.",

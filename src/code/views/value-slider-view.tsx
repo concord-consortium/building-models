@@ -80,6 +80,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
 
   private slider: HTMLDivElement | null;
   private handle: HTMLDivElement | null;
+  private buttonContainer: HTMLDivElement | null;
   private input: HTMLInputElement | null;
 
   private nudgeInterval: number | null = null;
@@ -126,7 +127,19 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
   }
 
   public componentWillUnmount() {
+    window.removeEventListener("mousedown", this.handleCheckIfNeedToHideButtons, true);
     return window.removeEventListener("resize", this.handleUpdate);
+  }
+
+  public componentDidUpdate(prevProps: SVGSliderViewProps, prevState: SVGSliderViewState) {
+    const {showButtons} = this.state;
+    if (showButtons !== prevState.showButtons) {
+      if (showButtons) {
+        window.addEventListener("mousedown", this.handleCheckIfNeedToHideButtons, true);
+      } else {
+        window.removeEventListener("mousedown", this.handleCheckIfNeedToHideButtons, true);
+      }
+    }
   }
 
   public render() {
@@ -322,6 +335,8 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
         maxAbsDelta = Math.max(maxAbsDelta, Math.abs(wiggleList[i] - oldestValue));
       }
       if (maxAbsDelta <= maxChange) {
+        /*
+        // keep for debugging later
         console.log("checkForSliderWiggle - showing button!", {
           maxAbsDelta,
           maxChange,
@@ -331,6 +346,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
           testedList: wiggleList.slice(oldestIndex),
           fullList: wiggleList,
         });
+        */
         this.setState({showButtons: true});
       }
     }
@@ -589,7 +605,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     const marginLeft = -(buttonSize + width + margin);
 
     return (
-      <div style={{marginTop, marginLeft}}>
+      <div style={{marginTop, marginLeft}} ref={s => this.buttonContainer = s}>
         <svg className="slider-buttons" width={`${buttonSize}px`} height={`${svgHeight}px`} viewBox={`0 0 ${buttonSize} ${svgHeight}`}>
           <g className="slider-button" onMouseDown={this.handleNudgeUp} onTouchStart={this.handleNudgeUp} onTouchEnd={this.handleNoop}>
             <rect width={buttonSize} height={buttonSize} rx={buttonRadius} ry={buttonRadius} style={upButtonStyle}  />
@@ -649,5 +665,22 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
 
     document.addEventListener("mouseup", mouseUp);
     this.setState({deltaButtonDown: delta});
+  }
+
+  private handleCheckIfNeedToHideButtons = (e: MouseEvent) => {
+    const {showHandle} = this.props;
+    const {showButtons} = this.state;
+    if (showHandle && showButtons) {
+      let target: HTMLElement | null = e.target as HTMLElement;
+      while (target !== null) {
+        if (target === this.buttonContainer) {
+          // the event was inside the nudge buttons container so ignore it
+          return;
+        }
+        target = target.parentElement;
+      }
+      // the event was outside the nudge buttons container so hide the buttons
+      this.setState({showButtons: false});
+    }
   }
 }

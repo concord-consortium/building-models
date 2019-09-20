@@ -18,6 +18,7 @@ import { PaletteStore } from "../stores/palette-store";
 import { TimeUnits } from "../utils/time-units";
 import { escapeRegExp } from "../utils/escape-reg-ex";
 import { GraphStore, GraphStoreClass } from "../stores/graph-store";
+import { AppSettingsActions } from "../stores/app-settings-store";
 
 // log -- see loglevel in package.json
 
@@ -67,6 +68,8 @@ export class CodapConnect {
   private tableCreated: boolean;
   private _attrsToSync: any; // checked: any ok
   private _attrsAreLoaded: boolean;
+  private guidePollerInterval: number | null = null;
+  private guideComponentId: number | null = null;
 
   constructor(context) {
     this.codapRequestHandler = this.codapRequestHandler.bind(this);
@@ -91,75 +94,81 @@ export class CodapConnect {
     this.codapPhone = new IframePhoneRpcEndpoint( this.codapRequestHandler,
       "data-interactive", window.parent );
 
-    // load any previous data; also check if CODAP's undo is available,
-    // or if we are in standalone mode.
-    this.codapPhone.call([
-      {
-        action: "update",
-        resource: "interactiveFrame",
-        values: {
-          title: tr("~CODAP.INTERACTIVE_FRAME.TITLE"),
-          preventBringToFront: true,
-          cannotClose: true
+    // wait for the graphstore to be ready to receive the CODAP data
+    this.graphStore.waitUntilReady(() => {
+      // load any previous data; also check if CODAP's undo is available,
+      // or if we are in standalone mode.
+      this.codapPhone.call([
+        {
+          action: "update",
+          resource: "interactiveFrame",
+          values: {
+            title: tr("~CODAP.INTERACTIVE_FRAME.TITLE"),
+            preventBringToFront: true,
+            cannotClose: true
+          }
+        },
+        {
+          action: "get",
+          resource: "interactiveFrame"
+        },
+        {
+          action: "get",
+          resource: "dataContext"
         }
-      },
-      {
-        action: "get",
-        resource: "interactiveFrame"
-      },
-      {
-        action: "get",
-        resource: "dataContext"
-      }
-    ], ret => {
-      if (ret) {
-        const frame   = ret[1];
-        context = ret[2];
+      ], ret => {
+        if (ret) {
+          const frame   = ret[1];
+          context = ret[2];
 
-        this.graphStore.setUsingCODAP(true);
+          this.graphStore.setUsingCODAP(true);
 
-        if (frame != null ? frame.values.externalUndoAvailable : undefined) {
-          CodapActions.hideUndoRedo();
-        } else if (frame != null ? frame.values.standaloneUndoModeAvailable : undefined) {
-          this.standaloneMode = true;
-          this.graphStore.setCodapStandaloneMode(true);
-        }
+          if (frame != null ? frame.values.externalUndoAvailable : undefined) {
+            CodapActions.hideUndoRedo();
+          } else if (frame != null ? frame.values.standaloneUndoModeAvailable : undefined) {
+            this.standaloneMode = true;
+            this.graphStore.setCodapStandaloneMode(true);
+          }
 
-        // We check for game state in either the frame (CODAP API 2.0) or the dataContext
-        // (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
-        const state = (frame != null ? frame.values.savedState : undefined) ||
+          // get the current list of guide items
+          this.getGuideItems();
+
+          // We check for game state in either the frame (CODAP API 2.0) or the dataContext
+          // (API 1.0). We ignore the dataContext if we find game state in the interactiveFrame
+          const state = (frame != null ? frame.values.savedState : undefined) ||
                 __guard__(__guard__(context != null ? context.values : undefined, x1 => x1.contextStorage), x => x.gameState);
 
-        if (state != null) {
-          this.graphStore.deleteAll();
-          this.graphStore.loadData(state);
-          return this._initialSyncAttributeProperties(null, true);
+          if (state != null) {
+            this.graphStore.deleteAll();
+            this.graphStore.loadData(state);
+            return this._initialSyncAttributeProperties(null, true);
+          }
+        } else {
+          return log.info("null response in codap-connect codapPhone.call");
         }
-      } else {
-        return log.info("null response in codap-connect codapPhone.call");
-      }
-    });
+      });
 
 
-    // check if we already have a datacontext (if we're opening a saved model).
-    // if we don't create one with our collections. Then kick off init
-    this.codapPhone.call({
-      action: "get",
-      resource: `dataContext[${this.dataContextName}]`
-    }
-    , ret => {
-      // ret==null is indication of timeout, not an indication that the data set
-      // doesn't exist.
-      if (!ret || ret.success) {
-        let attrs;
-        if (attrs = (__guard__(__guard__(__guard__(ret != null ? ret.values : undefined, x2 => x2.collections), x1 => x1[1]), x => x.attrs) != null)) {
-          this._initialSyncAttributeProperties(attrs);
-        }
-      } else {
-        this._createDataContext();
+      // check if we already have a datacontext (if we're opening a saved model).
+      // if we don't create one with our collections. Then kick off init
+      this.codapPhone.call({
+        action: "get",
+        resource: `dataContext[${this.dataContextName}]`
       }
-      this.updateExperimentColumn();
-      return this._getExperimentNumber();
+      , ret => {
+        // ret==null is indication of timeout, not an indication that the data set
+        // doesn't exist.
+        if (!ret || ret.success) {
+          let attrs;
+          if (attrs = (__guard__(__guard__(__guard__(ret != null ? ret.values : undefined, x2 => x2.collections), x1 => x1[1]), x => x.attrs) != null)) {
+            this._initialSyncAttributeProperties(attrs);
+          }
+        } else {
+          this._createDataContext();
+        }
+        this.updateExperimentColumn();
+        return this._getExperimentNumber();
+      });
     });
   }
 
@@ -648,6 +657,19 @@ export class CodapConnect {
     });
   }
 
+  public openGuideConfiguration() {
+    this.codapPhone.call({
+      action: "notify",
+      resource: "interactiveFrame",
+      values: {
+        request: "openGuideConfiguration"
+      }
+    });
+
+    // start polling for guide item updates to keep guide dropdown in sync
+    this.pollForGuideItemUpdates();
+  }
+
   public codapRequestHandler(cmd, callback) {
     let successes;
     const { resource } = cmd;
@@ -781,6 +803,78 @@ export class CodapConnect {
       });
     });
     return promise;
+  }
+
+  public showGuideItemAtIndex(index: number) {
+    if (this.guideComponentId) {
+      this.codapPhone.call({
+        action: "update",
+        resource: `component[${this.guideComponentId}]`,
+        values: {
+          currentItemIndex: index,
+          isVisible: true,
+          position: "top"
+        }
+      }, (result) => {
+        console.log("showGuideItemAtIndex", result);
+      });
+    }
+  }
+
+  public hideGuide() {
+    if (this.guideComponentId) {
+      this.codapPhone.call({
+        action: "update",
+        resource: `component[${this.guideComponentId}]`,
+        values: {
+          currentItemIndex: 0,
+          isVisible: false,
+          position: "top"
+        }
+      }, (result) => {
+        console.log("hideGuide", result);
+      });
+    }
+  }
+
+  private getGuideItems() {
+    const getGuideComponent = (id) => {
+      this.codapPhone.call({
+        action: "get",
+        resource: `component[${id}]`
+      }, (result) => {
+        if (result && result.success && result.values) {
+          const items = result.values.items || [];
+          AppSettingsActions.setGuideItems(items);
+        }
+      });
+    };
+
+    if (!this.guideComponentId) {
+      this.codapPhone.call({
+        action: "get",
+        resource: "componentList"
+      }, (result) => {
+        if (result && result.success && result.values) {
+          _.map(result.values, (value) => {
+            if (value.type === "guideView") {
+              this.guideComponentId = value.id;
+            }
+          });
+          if (this.guideComponentId) {
+            getGuideComponent(this.guideComponentId);
+          }
+        }
+      });
+    } else {
+      getGuideComponent(this.guideComponentId);
+    }
+  }
+
+  private pollForGuideItemUpdates() {
+    if (!this.guidePollerInterval) {
+      this.guidePollerInterval = window.setInterval(() => this.getGuideItems(), 1000);
+    }
   }
 }
 

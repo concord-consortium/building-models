@@ -1,3 +1,4 @@
+const _ = require("lodash");
 import * as React from "react";
 
 import { AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin, SimulationType } from "../stores/app-settings-store";
@@ -13,6 +14,8 @@ import { CodapConnect, CODAPDataContextListItem } from "../models/codap-connect"
 import { GraphStoreClass } from "../stores/graph-store";
 import { Link } from "../models/link";
 import { Node } from "../models/node";
+
+import { DropDownView } from "./dropdown-view";
 
 interface CODAPTableMenuProps {
   toggleMenu: (override?: boolean) => void;
@@ -203,6 +206,7 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
           label: tr("~DOCUMENT.CODAP_ACTIONS.TEXT"),
           onClick: this.handleCODAPTextToolClicked
         })}
+        {this.renderGuideMenu()}
       </div>
     );
   }
@@ -218,6 +222,42 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
         <div style={labelStyle} className={labelClassName}>{label}</div>
       </div>
     );
+  }
+
+  private renderGuideMenu() {
+    if (this.state.guide) {
+      const anchor =
+        <div className="toolbar-button">
+          <div><i className="moonicon-icon-guide" /></div>
+          <div>
+            {tr("~DOCUMENT.CODAP_ACTIONS.GUIDE")}
+          </div>
+        </div>;
+
+      const items = this.state.guideItems.map((guideItem, index) => {
+        return {
+          key: index,
+          name: guideItem.itemTitle,
+          action: () => {
+            this.handleCODAPGuideItemClicked(index);
+          }
+        };
+      });
+
+      const className = `toolbar-button${items.length === 0 ? " disabled" : ""}`;
+
+      return (
+        <div className={className}>
+          <DropDownView
+            anchor={anchor}
+            items={items}
+            hideArrow={true}
+            isActionMenu={true}
+            rightSide={false}
+          />
+        </div>
+      );
+    }
   }
 
   private renderRunPanel() {
@@ -250,13 +290,19 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     this.setState({showCODAPTableMenu});
   }
 
+  private codapConnect() {
+    return CodapConnect.instance("building-models");
+  }
+
   private handleCODAPGraphToolClicked = () => {
-    const codapConnect = CodapConnect.instance("building-models");
-    codapConnect.createEmptyGraph();
+    this.codapConnect().createEmptyGraph();
   }
 
   private handleCODAPTextToolClicked = () => {
-    const codapConnect = CodapConnect.instance("building-models");
-    codapConnect.createText();
+    this.codapConnect().createText();
+  }
+
+  private handleCODAPGuideItemClicked = (index: number) => {
+    this.codapConnect().showGuideItemAtIndex(index);
   }
 }
