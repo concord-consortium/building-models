@@ -228,7 +228,7 @@ export class DocumentActionsView extends Mixer<DocumentActionsViewProps, Documen
     if (this.state.guide) {
       const anchor =
         <div className="toolbar-button">
-          <div><i className="moonicon-icon-guide" /></div>
+          <div><i className="moonicon-icon-guide big" /></div>
           <div>
             {tr("~DOCUMENT.CODAP_ACTIONS.GUIDE")}
           </div>
