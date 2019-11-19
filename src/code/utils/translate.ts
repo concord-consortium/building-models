@@ -13,6 +13,7 @@ const languageFiles = {
   "en-US": require("./lang/en-US.json"),
   "he": require("./lang/he.json"),
   "tr": require("./lang/tr.json"),
+  "zh-Hans": require("./lang/zh-Hans.json"),
   "zh-TW": require("./lang/zh-TW.json"),
   "es": require("./lang/es.json"),
   "et": require("./lang/et.json"),
