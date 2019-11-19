@@ -198,7 +198,7 @@
     "~MENU.ABOUT.ABOUT": "Σχετικά",
     "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
     "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Πείραμα #",
+    "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Guide",
     "~SIMULATION.GUIDE": "Include a guide",
-    "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
-    "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Guide"
+    "~SIMULATION.CONFIGURE_GUIDE": "configure guide"
 }

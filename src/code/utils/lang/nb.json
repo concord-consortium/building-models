@@ -198,7 +198,7 @@
     "~MENU.ABOUT.ABOUT": "Om SageModeler",
     "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "URL til SageModeler-serveren:",
     "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Eksperiment #",
-    "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Guide",
-    "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
-    "~SIMULATION.GUIDE": "Include a guide"
+    "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Bruksanvisning",
+    "~SIMULATION.GUIDE": "Legg til bruksanvisning",
+    "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksanvisning"
 }
