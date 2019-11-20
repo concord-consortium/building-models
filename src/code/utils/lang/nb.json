@@ -193,7 +193,7 @@
     "~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME": "Navn på egenskap",
     "~DOCUMENT.CODAP_ACTIONS.GRAPH": "Graf",
     "~DOCUMENT.CODAP_ACTIONS.TEXT": "Tekst",
-    "~MENU.ABOUT": "Om",
+    "~MENU.ABOUT": "Hjelp",
     "~MENU.ABOUT.HELP": "Gå til hjelp-side",
     "~MENU.ABOUT.ABOUT": "Om SageModeler",
     "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "URL til SageModeler-serveren:",
