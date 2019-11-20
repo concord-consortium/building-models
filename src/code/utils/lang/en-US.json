@@ -6,7 +6,7 @@
     "~MENU.REVERT_TO_ORIGINAL": "Revert To Original",
     "~MENU.REVERT_TO_LAST_SAVE": "Revert To Last Save",
     "~MENU.UNTITLED_MODEL": "Untitled model",
-    "~MENU.ABOUT": "About",
+    "~MENU.ABOUT": "Help",
     "~MENU.ABOUT.HELP": "Go to help website",
     "~MENU.ABOUT.ABOUT": "About SageModeler",
 
@@ -28,7 +28,7 @@
     "~NODE-EDIT.ADD_REMOTE": "Add remote",
     "~NODE-EDIT.DELETE": "Delete",
 
-
+                                         
     "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value",
     "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS": "You are defining values with numbers.",
     "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words.",
@@ -43,7 +43,7 @@
     "~NODE-VALUE-EDIT.HIGH": "High",
     "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable",
 
-
+                                       
     "~NODE-RELATION-EDIT.COMBINATION_METHOD": "Combine variables using:",
     "~NODE-RELATION-EDIT.ARITHMETIC_MEAN": "average",
     "~NODE-RELATION-EDIT.SCALED_PRODUCT": "limiting factor",
@@ -98,26 +98,26 @@
     "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
     "~ADD-NEW-IMAGE.LINK-TAB": "Link",
 
-
+                                      
     "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image",
     "~PALETTE-INSPECTOR.ADD_IMAGE_SHORT": "New",
     "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
     "~PALETTE-INSPECTOR.DELETE": "Delete Image",
     "~PALETTE-INSPECTOR.REPLACE": "Replace Image",
 
-
+                                   
     "~PALETTE-DIALOG.TITLE": "Delete image?",
     "~PALETTE-DIALOG.DELETE": "Delete",
     "~PALETTE-DIALOG.REPLACE": "and replace with",
     "~PALETTE-DIALOG.OK": "ok",
     "~PALETTE-DIALOG.CANCEL": "✖ cancel",
 
-
+                                   
     "~METADATA.TITLE": "Title",
     "~METADATA.LINK": "Link",
     "~METADATA.CREDIT": "Credit",
 
-
+                                  
     "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
     "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
     "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
@@ -151,7 +151,7 @@
     "~COLOR.MEDIUM_GRAY": "Gray",
     "~COLOR.DATA": "Codap Orange",
 
-
+                            
     "~FILE.CHECKING_AUTH": "Checking authorization...",
     "~FILE.CONFIRM": "Are you sure?",
     "~FILE.DOWNLOADING": "Downloading...",
@@ -176,7 +176,7 @@
     "~DOCUMENT.ACTIONS.REDO": "Redo",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship.",
 
-
+                             
     "~DOCUMENT.CODAP_ACTIONS.TABLES": "Tables",
     "~DOCUMENT.CODAP_ACTIONS.TABLES.NEW": "New Table",
     "~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM": "Are you sure you want to delete \"%{tableName}\"?",
