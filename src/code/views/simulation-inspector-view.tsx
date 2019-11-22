@@ -109,7 +109,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
           </label>
         </div>
 
-        <div className={runPanelClasses}>
+        <div className="run-panel">
           <div className="title">{tr("~SIMULATION.VIEW_SETTINGS")}</div>
           <div className="row">
             <label key="symbols-label">
@@ -176,6 +176,12 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleSimulationType = (val) => {
     AppSettingsActions.setSimulationType(val);
+    if (val === SimulationType.diagramOnly) {
+      const minComplexity = GraphStore.getMinimumComplexity();
+      if (minComplexity <= Complexity.basic) {
+        AppSettingsActions.setComplexity(Complexity.basic);
+      }
+    }
   }
 
   private handleComplexity = (val) => {
