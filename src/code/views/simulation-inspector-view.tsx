@@ -51,24 +51,6 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
     const staticDisabled = minSimulationType > SimulationType.static;
     const basicDisabled = minComplexity > Complexity.basic;
 
-    const complexityRadioButtons = (
-      <RadioGroup
-        name="complexity"
-        selectedValue={this.state.complexity}
-        onChange={this.handleComplexity}
-        className="radio-group"
-      >
-        <label key="complexity-basic">
-          <Radio value={Complexity.basic} disabled={basicDisabled} />
-          <span className={basicDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.BASIC")}</span>
-        </label>
-        <label key="complexity-expanded">
-          <Radio value={Complexity.expanded} />
-          <span>{tr("~SIMULATION.COMPLEXITY.EXPANDED")}</span>
-        </label>
-      </RadioGroup>
-    );
-
     return (
       <div className="simulation-panel">
         <div className="title">{tr("~SIMULATION.SIMULATION_SETTINGS")}</div>
@@ -78,6 +60,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
           onChange={this.handleSimulationType}
           className="radio-group simulation-radio-buttons"
         >
+          <div className="radio-group-title">{tr("~SIMULATION.MODEL_TYPE")}</div>
           <label key="simulation-type-diagram-only">
             <Radio value={SimulationType.diagramOnly} disabled={diagramOnlyDisabled} />
             <span className={diagramOnlyDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.DIAGRAM_ONLY")}</span>
@@ -87,19 +70,30 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
               <Radio value={SimulationType.static} disabled={staticDisabled} />
               <span className={staticDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.STATIC")}</span>
             </label>
-            <div key="static-complexity" className={`expanding-submenu${this.state.simulationType === SimulationType.static ? " expanded" : ""}`}>
-              {this.state.simulationType === SimulationType.static ? complexityRadioButtons : undefined}
-            </div>
           </div>
           <div key="simulation-complexity-options">
             <label key="simulation-type-time">
               <Radio value={SimulationType.time} />
               <span>{tr("~SIMULATION.COMPLEXITY.TIME")}</span>
             </label>
-            <div key="time-complexity" className={`expanding-submenu${this.state.simulationType === SimulationType.time ? " expanded" : ""}`}>
-              {this.state.simulationType === SimulationType.time ? complexityRadioButtons : undefined}
-            </div>
           </div>
+        </RadioGroup>
+
+        <RadioGroup
+          name="complexity"
+          selectedValue={this.state.complexity}
+          onChange={this.handleComplexity}
+          className="radio-group complexity-radio-buttons"
+        >
+          <div className="radio-group-title">{tr("~SIMULATION.RELATIONSHIPS")}</div>
+          <label key="complexity-basic">
+            <Radio value={Complexity.basic} disabled={basicDisabled} />
+            <span className={basicDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.BASIC")}</span>
+          </label>
+          <label key="complexity-expanded">
+            <Radio value={Complexity.expanded} />
+            <span>{tr("~SIMULATION.COMPLEXITY.EXPANDED")}</span>
+          </label>
         </RadioGroup>
 
         <div className={`row ${runPanelClasses}`}>

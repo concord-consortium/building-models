@@ -200,5 +200,7 @@
     "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Eksperiment #",
     "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Bruksanvisning",
     "~SIMULATION.GUIDE": "Legg til bruksanvisning",
-    "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksanvisning"
+    "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksanvisning",
+    "~SIMULATION.MODEL_TYPE": "Model Type",
+    "~SIMULATION.RELATIONSHIPS": "Relationships"
 }
