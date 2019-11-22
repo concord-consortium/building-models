@@ -128,8 +128,8 @@ describe("Complexity", () => {
         this.graphStore.addLink(link);
       });
 
-      it("should be static", () => {
-        this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.static);
+      it("should be diagramOnly", () => {
+        this.graphStore.getMinimumSimulationType().should.equal(AppSettingsStore.SimulationType.diagramOnly);
       });
     });
 
