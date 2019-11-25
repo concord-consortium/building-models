@@ -25,6 +25,8 @@ export interface DropCallbackImageInfo {
 export interface DropCallbackUrlInfo {
   type: "url";
   url: string;
+  componentType?: string;
+  name?: string;
 }
 export type DropCallbackInfo = DropCallbackImageInfo | DropCallbackUrlInfo;
 
@@ -97,13 +99,19 @@ const dropAnyFileHandler = (file: File, callback: DropCallback) => {
   reader.addEventListener("load", e => {
     if (reader.result) {
       let url = reader.result.toString();
-      if (file.name.match(/\.csv$/i)) {
+      const isCSV = file.name.match(/\.csv$/i);
+      // csv import fails in CODAP if DG.GameView is selected
+      // so we disable it when we get a csv dropped
+      const componentType = isCSV ? undefined : "DG.GameView";
+      if (isCSV) {
         // CODAP expects csv file data urls to be of type text/csv
         url = url.replace(/^data:([^;]*);/, "data:text/csv;");
       }
       callback({
         type: "url",
-        url
+        url,
+        componentType,
+        name: file.name
       });
     }
   });

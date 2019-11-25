@@ -574,7 +574,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
             eventData: {
               url: item.url,
               via: "select",
-              componentType: "DG.GameView"
+              componentType: item.componentType,
+              name: item.name
             }
           }, "*");
         }
