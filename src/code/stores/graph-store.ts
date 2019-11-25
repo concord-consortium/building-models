@@ -889,12 +889,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   //   0 (diagramOnly)    if there are no defined relationships
   //   2 (time)           if there are collectors
   getMinimumSimulationType() {
-    const links = this.getLinks();
-    for (const link of links) {
-      let source, target;
-      if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { continue; }
-
-      if (source.isAccumulator || target.isAccumulator) {
+    const nodes = this.getNodes();
+    for (const node of nodes) {
+      if (node.isAccumulator) {
         // we know we have to be time-based
         return AppSettingsStore.SimulationType.time;
       }
