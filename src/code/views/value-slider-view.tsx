@@ -262,7 +262,8 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     }
     this.handleNoop(e);
     if (!this.sliderMoved) {
-      this.toggleButtons();
+      // hide the buttons if the slider was just clicked and not moved
+      this.setState({showButtons: false});
     }
     this.sliderMoved = false;
     this.wiggleList = [];
