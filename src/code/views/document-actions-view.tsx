@@ -75,15 +75,7 @@ class CODAPTableMenu extends React.Component<CODAPTableMenuProps, CODAPTableMenu
   }
 
   private handleCreateNewTable = () => {
-    // trigger the same blank csv import method that CODAP uses internally
-    window.parent.postMessage({
-      type: "cfm::event",
-      eventType: "importedData",
-      eventData: {
-        text: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME"),
-        name: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW")
-      }
-    }, "*");
+    this.codapConnect.addNewDataContextAndTable();
     this.props.toggleMenu(false);
   }
 

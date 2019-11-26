@@ -837,6 +837,35 @@ export class CodapConnect {
     }
   }
 
+  public addNewDataContextAndTable() {
+    const newDataContextName = `NewTable${Math.floor(10000000000 * Math.random())}`;
+    this.codapPhone.call({
+      action: "create",
+      resource: "dataContext",
+      values: {
+        name: newDataContextName,
+        title: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW"),
+        collections: [{
+          name: "Data",
+          attrs: [
+            { "name": tr("~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME") }
+          ]
+        }]
+      }
+    }, (result) => {
+      this.codapPhone.call({
+        action: "create",
+        resource: "component",
+        values: {
+          type: "caseTable",
+          title: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW"),
+          dataContext: newDataContextName,
+          position: "bottom"
+        }
+      });
+    });
+  }
+
   private getGuideItems() {
     const getGuideComponent = (id) => {
       this.codapPhone.call({
