@@ -451,6 +451,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
   }
 
   private renderNonAccumulator(source, target) {
+    const showGraph = this.state.complexity !== AppSettingsStore.Complexity.basic;
     return (
       <div>
         <div className="top">
@@ -462,6 +463,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
             {this.renderScalarPulldown(this.state.selectedScalar)}
           </div>
         </div>
+        {showGraph ?
         <div className="bottom">
           <div className="graph" id="relation-graph">
             <LinkGraphView
@@ -472,6 +474,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
             />
           </div>
         </div>
+        : null}
       </div>
     );
   }
