@@ -837,6 +837,39 @@ export class CodapConnect {
     }
   }
 
+  public addNewDataContextAndTable() {
+    const newDataContextName = `NewTable${Date.now()}`;
+    this.codapPhone.call({
+      action: "create",
+      resource: "dataContext",
+      values: {
+        name: newDataContextName,
+        title: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW"),
+        collections: [{
+          name: "Data",
+          attrs: [
+            { "name": tr("~DOCUMENT.CODAP_ACTIONS.TABLES.ATTRIBUTE_NAME") }
+          ]
+        }]
+      }
+    }, (result) => {
+      if (!result || !result.success) {
+        alert("Unable to create new table data context!");
+      } else {
+        this.codapPhone.call({
+          action: "create",
+          resource: "component",
+          values: {
+            type: "caseTable",
+            title: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW"),
+            dataContext: newDataContextName,
+            position: "bottom"
+          }
+        });
+      }
+    });
+  }
+
   private getGuideItems() {
     const getGuideComponent = (id) => {
       this.codapPhone.call({
