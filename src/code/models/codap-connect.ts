@@ -838,7 +838,7 @@ export class CodapConnect {
   }
 
   public addNewDataContextAndTable() {
-    const newDataContextName = `NewTable${Math.floor(10000000000 * Math.random())}`;
+    const newDataContextName = `NewTable${Date.now()}`;
     this.codapPhone.call({
       action: "create",
       resource: "dataContext",
@@ -853,16 +853,20 @@ export class CodapConnect {
         }]
       }
     }, (result) => {
-      this.codapPhone.call({
-        action: "create",
-        resource: "component",
-        values: {
-          type: "caseTable",
-          title: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW"),
-          dataContext: newDataContextName,
-          position: "bottom"
-        }
-      });
+      if (!result || !result.success) {
+        alert("Unable to create new table data context!");
+      } else {
+        this.codapPhone.call({
+          action: "create",
+          resource: "component",
+          values: {
+            type: "caseTable",
+            title: tr("~DOCUMENT.CODAP_ACTIONS.TABLES.NEW"),
+            dataContext: newDataContextName,
+            position: "bottom"
+          }
+        });
+      }
     });
   }
 
