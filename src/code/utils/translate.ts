@@ -19,7 +19,8 @@ const languageFiles = {
   "pl": require("./lang/pl.json"),
   "el": require("./lang/el.json"),
   "nb": require("./lang/nb.json"),
-  "nn": require("./lang/nn.json")
+  "nn": require("./lang/nn.json"),
+  "de": require("./lang/de.json")
 };
 
 const translations =  {};
