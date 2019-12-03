@@ -122,6 +122,7 @@ export declare class GraphStoreClass extends StoreClass {
   public updateListeners(): void;
   public nudgeNodeWithKeyInitialValue(key: string, delta: number);
   public waitUntilReady(callback: () => void): void;
+  public allLinksAreUndefined(): boolean;
 }
 
 export const GraphStore: GraphStoreClass = Reflux.createStore({
@@ -1002,6 +1003,16 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       SimulationActions.runSimulation();
       this.lastRunModel = graphState.description.model;
     }
+  },
+
+  allLinksAreUndefined(): boolean {
+    const links = this.getLinks();
+    for (const link of links) {
+      if (link.relation.isDefined) {
+        return false;
+      }
+    }
+    return true;
   }
 });
 

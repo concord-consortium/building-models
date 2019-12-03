@@ -176,11 +176,8 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleSimulationType = (val) => {
     AppSettingsActions.setSimulationType(val);
-    if (val === SimulationType.diagramOnly) {
-      TODO: SWITCH ONLY IF ALL LINKS ARE NOT DEFINED
-      if (GraphStore.getLinks().length === 0) {
-        AppSettingsActions.setComplexity(Complexity.basic);
-      }
+    if ((val === SimulationType.diagramOnly) && GraphStore.allLinksAreUndefined()) {
+      AppSettingsActions.setComplexity(Complexity.basic);
     }
   }
 
