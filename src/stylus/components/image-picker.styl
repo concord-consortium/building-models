@@ -1,3 +1,4 @@
+@require "node-z-index.styl"
 
 .image-picker
   position relative
@@ -39,7 +40,7 @@
     vertical-align top
     overflow hidden
     cursor pointer
-    z-index 5
+    z-index $node-z-index-offset + 5
     width 350px
     left -100px
     no-select()

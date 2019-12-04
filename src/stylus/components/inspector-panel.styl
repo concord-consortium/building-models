@@ -1,3 +1,5 @@
+@require "node-z-index.styl"
+
 inspector-panel-top = 70px
 inspector-panel-tab-width = 50px
 inspector-panel-tab-height = 195px
@@ -10,7 +12,7 @@ inspector-panel-inner-height = 500px
     right 0px
     margin 0px
     background-color white
-    z-index 4
+    z-index $node-z-index-offset + 4
     margin 0px
     transition 0.2s
 
@@ -45,7 +47,7 @@ inspector-panel-inner-height = 500px
       right: 0px
       cursor pointer
       border-radius 5px
-      z-index 5
+      z-index $node-z-index-offset + 5
 
   .inspector-panel-content
       box-sizing border-box
@@ -56,7 +58,7 @@ inspector-panel-inner-height = 500px
       border-radius 0 0 5px 5px
       transition 0.2s
       box-shadow -1px 2px 2px hsla(0,0,50,0.3)
-      z-index 2
+      z-index $node-z-index-offset + 2
       padding-right 70px
 
       .inspector-content, .bottom-pane
