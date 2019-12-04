@@ -122,6 +122,7 @@ export declare class GraphStoreClass extends StoreClass {
   public updateListeners(): void;
   public nudgeNodeWithKeyInitialValue(key: string, delta: number);
   public waitUntilReady(callback: () => void): void;
+  public allLinksAreUndefined(): boolean;
 }
 
 export const GraphStore: GraphStoreClass = Reflux.createStore({
@@ -704,9 +705,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
     if (isDoubleClick) {
       this.selectionManager.selectNodeForInspection(link.targetNode);
-      if (AppSettingsStore.settings.simulationType !== AppSettingsStore.SimulationType.diagramOnly) {
-        return InspectorPanelActions.openInspectorPanel("relations", {link});
-      }
+      return InspectorPanelActions.openInspectorPanel("relations", {link});
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click
       const singleClickHandler = () => {
@@ -889,26 +888,17 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   // Returns the minimum simulation type that the current graph allows.
   // Returns
   //   0 (diagramOnly)    if there are no defined relationships
-  //   1 (static)         if there are no collectors
   //   2 (time)           if there are collectors
   getMinimumSimulationType() {
-    let minSimulationType = AppSettingsStore.SimulationType.diagramOnly;
-
-    const links = this.getLinks();
-    for (const link of links) {
-      let source, target;
-      if ((!(source = link.sourceNode)) || (!(target = link.targetNode))) { continue; }
-
-      if (source.isAccumulator || target.isAccumulator) {
+    const nodes = this.getNodes();
+    for (const node of nodes) {
+      if (node.isAccumulator) {
         // we know we have to be time-based
         return AppSettingsStore.SimulationType.time;
-      } else if (link.relation != null ? link.relation.formula : undefined) {
-        // we have a defined relationship, so we know we'll be at least 1
-        minSimulationType = AppSettingsStore.SimulationType.static;
       }
     }
 
-    return minSimulationType;
+    return AppSettingsStore.SimulationType.diagramOnly;
   },
 
   // Returns the minimum complexity that the current graph allows.
@@ -1013,6 +1003,16 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       SimulationActions.runSimulation();
       this.lastRunModel = graphState.description.model;
     }
+  },
+
+  allLinksAreUndefined(): boolean {
+    const links = this.getLinks();
+    for (const link of links) {
+      if (link.relation.isDefined) {
+        return false;
+      }
+    }
+    return true;
   }
 });
 
