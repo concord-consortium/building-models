@@ -1,7 +1,9 @@
+@require "node-z-index.styl"
+
 gray-fill   = #dbdbea
 
 .value-slider
-  z-index: 3  // put slider above node
+  z-index: $node-z-index + 2  // put slider above node
   position relative
   margin 1em
   .slider-line
@@ -15,7 +17,7 @@ gray-fill   = #dbdbea
   &.no-handle
     cursor not-allowed
   .value-slider-handle
-    z-index 2
+    z-index $node-z-index + 1
     cursor pointer
     position absolute
     box-sizing border-box

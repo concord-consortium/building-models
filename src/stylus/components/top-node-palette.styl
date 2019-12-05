@@ -16,13 +16,13 @@ node-well-tab-height = 30px
   max-width node-well-width
   box-sizing padding-box
   overflow hidden
-  z-index 1
+  z-index $node-z-index-offset + 1
   box-shadow 0px 1px 1px hsla(0,0,50,0.4)
   transition 0.2s
 
   .node-well
     padding 1em
-    z-index 2
+    z-index $node-z-index-offset + 2
     display flex
     enable-flex(row)
 
@@ -57,7 +57,7 @@ node-well-tab-height = 30px
   position absolute
   left 0px
   max-width node-well-width
-  z-index 3
+  z-index $node-z-index-offset + 3
   transition 0.2s
   .tab-wrapper
     width 100%
@@ -75,7 +75,7 @@ node-well-tab-height = 30px
       box-shadow 0px 2px 2px hsla(0,0,50,0.4)
       border-radius 0px 0px 4px 4px
       padding 1em 2em
-      z-index 3
+      z-index $node-z-index-offset + 3
       transition 0.2s
       &.collapsed
         background-image url("../assets/img/bb-chrome/chevron-down.png")

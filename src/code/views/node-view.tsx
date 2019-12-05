@@ -301,48 +301,51 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     const handleBackgroundClick = evt => this.handleSelected(true, evt);
     const handleBackgroundTouchEnd = () => this.handleSelected(true);
 
+    // NOTE: the div.node-container is needed below to ensure jq-plumb positions the arrows correctly
     return (
       <div className={this.nodeClasses()} ref={el => this.node = el} style={style}>
         <div className={this.linkTargetClasses()} data-node-key={this.props.nodeKey}>
-          <div className="slider" data-node-key={this.props.nodeKey}>
-            {this.props.simulating && this.props.data.canEditInitialValue() && <div>{this.renderSliderView()}</div>}
-          </div>
-          <div>
-            <div className="actions">
-              <div className="connection-source action-circle icon-codap-link" data-node-key={this.props.nodeKey} />
-              {this.props.showGraphButton ?
-                <div
-                  className="graph-source action-circle icon-codap-graph"
-                  draggable={true}
-                  onDragStart={handleDragStart}
-                  onClick={handleGraphButtonClick}
-                /> : undefined}
+          <div className="node-container">
+            <div className="slider" data-node-key={this.props.nodeKey}>
+              {this.props.simulating && this.props.data.canEditInitialValue() && <div>{this.renderSliderView()}</div>}
             </div>
-            <div className={this.topClasses()} data-node-key={this.props.nodeKey}>
-              <div
-                className={`img-background transfer-target ${fullWidthBackgroundClass}`}
-                onClick={handleBackgroundClick}
-                onTouchEnd={handleBackgroundTouchEnd}
-              >
-                {this.renderNodeInternal()}
-                {this.props.selected &&
-                <div className="selected-background" />
-              }
+            <div>
+              <div className="actions">
+                <div className="connection-source action-circle icon-codap-link" data-node-key={this.props.nodeKey} />
+                {this.props.showGraphButton ?
+                  <div
+                    className="graph-source action-circle icon-codap-graph"
+                    draggable={true}
+                    onDragStart={handleDragStart}
+                    onClick={handleGraphButtonClick}
+                  /> : undefined}
               </div>
-              {this.props.data.isTransfer
-                ? <div className="node-title" />
-                : <div draggable={this.props.showGraphButton} onDragStart={handleDragStart}>
-                    <NodeTitleView
-                      isEditing={this.props.editTitle}
-                      title={this.props.data.title}
-                      onChange={this.handleChangeTitle}
-                      onStopEditing={this.handleStopEditing}
-                      onStartEditing={this.handleStartEditing}
-                      node={this.props.data}
-                      nodeKey={this.props.nodeKey}
-                      graphStore={this.props.graphStore}
-                    />
-                </div>}
+              <div className={this.topClasses()} data-node-key={this.props.nodeKey}>
+                <div
+                  className={`img-background transfer-target ${fullWidthBackgroundClass}`}
+                  onClick={handleBackgroundClick}
+                  onTouchEnd={handleBackgroundTouchEnd}
+                >
+                  {this.renderNodeInternal()}
+                  {this.props.selected &&
+                  <div className="selected-background" />
+                }
+                </div>
+                {this.props.data.isTransfer
+                  ? <div className="node-title" />
+                  : <div draggable={this.props.showGraphButton} onDragStart={handleDragStart}>
+                      <NodeTitleView
+                        isEditing={this.props.editTitle}
+                        title={this.props.data.title}
+                        onChange={this.handleChangeTitle}
+                        onStopEditing={this.handleStopEditing}
+                        onStartEditing={this.handleStartEditing}
+                        node={this.props.data}
+                        nodeKey={this.props.nodeKey}
+                        graphStore={this.props.graphStore}
+                      />
+                  </div>}
+              </div>
             </div>
           </div>
         </div>
