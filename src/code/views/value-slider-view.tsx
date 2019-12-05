@@ -445,7 +445,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
       if (!isEditable) { return; }
       // first copy state value to model if we were editing
       if (this.state[key] && this.input) {
-        this.updateRange(property, parseInt(this.input.value, 10));
+        this.updateRange(property, parseFloat(this.input.value));
       }
       const toggleValue = !this.state[key];
       const focus = () => this.input ? this.input.focus() : undefined;

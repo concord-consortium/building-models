@@ -28,6 +28,7 @@ import { Mixer } from "../mixins/components";
 import { Node} from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
 import { SelectionManager } from "../models/selection-manager";
+import { stepSize } from "../utils/step-size";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
@@ -350,6 +351,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private renderSliderView() {
+    const {min, max} = this.props.data;
     return (
       <SVGSliderView
         orientation="vertical"
@@ -361,13 +363,13 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
         onValueChange={this.handleChangeValue}
         value={this.props.data.initialValue}
         displaySemiQuant={this.props.data.valueDefinedSemiQuantitatively}
-        max={this.props.data.max}
-        min={this.props.data.min}
+        max={max}
+        min={min}
         onSliderDragStart={this.handleSliderDragStart}
         onSliderDragEnd={this.handleSliderDragEnd}
         color={this.props.dataColor}
         handleSize={16}
-        stepSize={1}
+        stepSize={stepSize({min, max})}
         showTicks={false}
         displayPrecision={0}
         renderValueTooltip={true}

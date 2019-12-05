@@ -14,6 +14,8 @@ import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
+import { stepSize } from "../utils/step-size";
+import { toFixedTrimmed } from "../utils/to-fixed-trimmed";
 
 interface NodeValueInspectorViewOuterProps {
 
@@ -63,6 +65,8 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
   public render() {
     const { node } = this.props;
+    const { initialValue, min, max } = node;
+    const value = toFixedTrimmed(initialValue, 2);
     return (
       <div className="value-inspector">
         <div className="inspector-content group">
@@ -73,9 +77,9 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
                 <input
                   className="left"
                   type="number"
-                  min={node.min}
-                  max={node.max}
-                  value={node.initialValue}
+                  min={min}
+                  max={max}
+                  value={value}
                   onClick={this.handleSelectText}
                   onChange={this.handleUpdateValue}
                 />
@@ -84,9 +88,10 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
               <input
                 className="full"
                 type="range"
-                min={node.min}
-                max={node.max}
-                value={node.initialValue}
+                min={min}
+                max={max}
+                step={stepSize({min, max})}
+                value={value}
                 onChange={this.handleUpdateValue}
               />
               {this.renderMinAndMax(node)}
@@ -126,7 +131,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
     const handleUpdateProperty = (evt) => {
       // just update internal state while typing
-      const value = parseInt(evt.target.value, 10);
+      const value = parseFloat(evt.target.value);
       if (value != null) {
         if (property === "min") {
           this.setState({"min-value": value});
@@ -234,7 +239,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
     }
 
     if (value = evt.target.value) {
-      value = this.trim(parseInt(value, 10));
+      value = this.trim(parseFloat(value));
       return this.props.graphStore.changeNode({initialValue: value});
     }
   }
