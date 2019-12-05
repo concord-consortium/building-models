@@ -8,7 +8,7 @@ panelWidth = 236px
   top 36px
   width panelWidth
   padding 5px
-  z-index: 2
+  z-index: $node-z-index-offset + 2
   &.collapsed
     display none
   .title
@@ -67,8 +67,6 @@ panelWidth = 236px
       .menu-showing
         right: 50px
         min-width: 135px
-    input[type="checkbox"]
-      margin 0.5em
     input[type="number"]
       width 5em
     input[type="number"]:not(.max)
@@ -110,7 +108,15 @@ panelWidth = 236px
         flex none
         margin-right 7px
 
+    .radio-group-title
+      margin: 5px 0 7px 5px
+
     &.simulation-radio-buttons
+      border: 1px solid #D2D2D2
+      padding: 2px
+      border-radius: 4px
+
+    &.complexity-radio-buttons
       border: 1px solid #D2D2D2
       padding: 2px
       border-radius: 4px

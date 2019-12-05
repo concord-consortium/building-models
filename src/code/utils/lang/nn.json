@@ -200,5 +200,7 @@
     "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Eksperiment #",
     "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Bruksrettleiing",
     "~SIMULATION.GUIDE": "Legg til bruksrettleiing",
-    "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksrettleiing"
+    "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksrettleiing",
+    "~SIMULATION.MODEL_TYPE": "Model Type",
+    "~SIMULATION.RELATIONSHIPS": "Relationships"
 }

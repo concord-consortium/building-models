@@ -34,8 +34,19 @@ _.each(languageFiles, (langContents, langKey) => {
   }
 });
 
-// default to English unless the user expresses another preference (via URL param for now)
-const defaultLang = urlParams.lang && translations[urlParams.lang] ? urlParams.lang : "en";
+const getFirstBrowserLanguage = () => {
+  const nav = window.navigator as any;
+  const languages = nav ? (nav.languages || []).concat([nav.language, nav.browserLanguage, nav.systemLanguage, nav.userLanguage]) : [];
+
+  for (const language of languages) {
+    if (language) {
+      return language;
+    }
+  }
+};
+
+const lang = urlParams.lang || getFirstBrowserLanguage();
+const defaultLang = lang && translations[lang] ? lang : "en";
 
 const varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
 

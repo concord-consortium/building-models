@@ -198,6 +198,8 @@
     "~SIMULATION.RELATIONSHIP_SYMBOLS": "Show relationship symbols",
     "~SIMULATION.GUIDE": "Include a guide",
     "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
+    "~SIMULATION.MODEL_TYPE": "Model Type",
+    "~SIMULATION.RELATIONSHIPS": "Relationships",
 
     "~DROP.ONLY_IMAGES_ALLOWED": "Sorry, only images are allowed.",
     "~DROP.ONLY_ALLOWED_IF_IFRAMED": "Sorry, dropping items of this type is only allowed if iframed.",
