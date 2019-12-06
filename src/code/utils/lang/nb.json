@@ -135,7 +135,7 @@
     "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Legg til i grafer",
     "~DOCUMENT.ACTIONS.SHOW_MINI_GRAPHS": "Vis mini-graf",
     "~DOCUMENT.ACTIONS.QUICK_TEST": "Hurtig-test",
-    "~DOCUMENT.ACTIONS.UNDO": "Gjør om",
+    "~DOCUMENT.ACTIONS.UNDO": "Angre",
     "~DOCUMENT.ACTIONS.REDO": "Gjenta",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "Det må være minst én kobling med en definert sammenheng.",
     "~SIMULATION.SIMULATION_SETTINGS": "Innstillinger for simuleringen",
@@ -201,6 +201,6 @@
     "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Bruksanvisning",
     "~SIMULATION.GUIDE": "Legg til bruksanvisning",
     "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksanvisning",
-    "~SIMULATION.MODEL_TYPE": "Model Type",
-    "~SIMULATION.RELATIONSHIPS": "Relationships"
+    "~SIMULATION.MODEL_TYPE": "Modell",
+    "~SIMULATION.RELATIONSHIPS": "Sammenhenger"
 }
