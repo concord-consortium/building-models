@@ -39,10 +39,10 @@
     "~NODE-RELATION-EDIT.SCALED_PRODUCT": "begrensende faktor",
     "~NODE-RELATION-EDIT.UNSELECTED": "Velg et alternativ...",
     "~NODE-RELATION-EDIT.AN_INCREASE_IN": "En økning i",
-    "~NODE-RELATION-EDIT.CAUSES": "årsaker",
-    "~NODE-RELATION-EDIT.TO": "til",
-    "~NODE-RELATION-EDIT.INCREASES": "økning",
-    "~NODE-RELATION-EDIT.DECREASES": "nedgang",
+    "~NODE-RELATION-EDIT.CAUSES": "gjør at",
+    "~NODE-RELATION-EDIT.TO": "\u200B",
+    "~NODE-RELATION-EDIT.INCREASES": "øker",
+    "~NODE-RELATION-EDIT.DECREASES": "synker",
     "~NODE-RELATION-EDIT.VARIES": "varierer",
     "~NODE-RELATION-EDIT.BY": "med",
     "~NODE-RELATION-EDIT.ABOUT_THE_SAME": "omtrent det samme",
@@ -202,5 +202,10 @@
     "~SIMULATION.GUIDE": "Legg til bruksanvisning",
     "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksanvisning",
     "~SIMULATION.MODEL_TYPE": "Modell",
-    "~SIMULATION.RELATIONSHIPS": "Sammenhenger"
+    "~SIMULATION.RELATIONSHIPS": "Sammenhenger",
+    "~METADATA.LICENSE": "License",
+    "~METADATA.BLANK_NODE_TITLE": "Blank",
+    "~METADATA.SEE_IT_ON": "See it on %{hostname}",
+    "~METADATA.LICENSE.PUBLIC_DOMAIN": "Public Domain",
+    "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabay search"
 }

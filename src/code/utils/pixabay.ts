@@ -1,5 +1,6 @@
 import * as $ from "jquery";
 import { ImageInfo } from "../views/preview-image-dialog-view";
+import { tr } from "./translate";
 
 const MAX_NUMBER_OF_PAGES = 20;
 const RESULTS_PER_PAGE = 20;
@@ -37,7 +38,7 @@ export const Pixabay = {
           image: hit.webformatURL, // NOTE: the docs say you can replace the `_640` the url with any width to get smaller images but tests show this does not work for all images
           metadata: {
             source: "search",
-            title: `"${query}" via Pixabay search`,
+            title: tr("~METADATA.PIXABAY.TITLE", {query}),
             description: "n/a",
             link: hit.pageURL,
             license: "pixabay"

@@ -202,5 +202,10 @@
     "~SIMULATION.GUIDE": "Include a guide",
     "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
     "~SIMULATION.MODEL_TYPE": "Model Type",
-    "~SIMULATION.RELATIONSHIPS": "Relationships"
+    "~SIMULATION.RELATIONSHIPS": "Relationships",
+    "~METADATA.LICENSE": "La Licencia",
+    "~METADATA.BLANK_NODE_TITLE": "En Blanco",
+    "~METADATA.SEE_IT_ON": "Verlo en %{hostname}",
+    "~METADATA.LICENSE.PUBLIC_DOMAIN": "Dominio Público",
+    "~METADATA.PIXABAY.TITLE": "\"%{query}\" de la búsqueda de Pixabay"
 }
