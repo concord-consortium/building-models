@@ -43,7 +43,7 @@ export const SimulationActions = Reflux.createActions(
     "recordingDidEnd",
     "createExperiment",
     "toggledCollectorTo",
-    "toggledAllowNegativeValues",
+    "reRunSimulation",
     "setExperimentNumber"
   ]
 );
@@ -310,7 +310,7 @@ export const SimulationStore = Reflux.createStore({
     }
   },
 
-  onToggledAllowNegativeValues(allow) {
+  onReRunSimulation() {
     this._runSimulation();
     return this.notifyChange();
   },

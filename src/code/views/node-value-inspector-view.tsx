@@ -14,12 +14,9 @@ import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
-<<<<<<< HEAD
 import { stepSize } from "../utils/step-size";
 import { toFixedTrimmed } from "../utils/to-fixed-trimmed";
-=======
 import { ENABLE_ALL_BELOW_ZERO } from "../utils/url-params";
->>>>>>> Added enableAllBelowZero url param [#164295027]
 
 interface NodeValueInspectorViewOuterProps {
 
@@ -257,7 +254,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
   private handleUpdateNegativeValuesAllowed = (evt) => {
     const value = evt.target.checked;
     this.props.graphStore.changeNode({allowNegativeValues: value});
-    return SimulationActions.toggledAllowNegativeValues(value);
+    return SimulationActions.reRunSimulation();
   }
 
   private handleUpdateDefiningType = () => {
