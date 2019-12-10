@@ -2,6 +2,7 @@ import * as React from "react";
 
 const _ = require("lodash");
 import { CSSProperties } from "react";
+import { SHOW_NODE_RANGE } from "../utils/url-params";
 
 const AUTO_RESCALE_TIME = 1500;
 const TICK_FADE_TIME = 1000;
@@ -37,6 +38,7 @@ interface NodeSvgGraphViewOuterState {
   xAnimationMultiplier: number;
   yAnimationMultiplier: number;
   tickAlpha: number;
+  unscaled: boolean;
 }
 type NodeSvgGraphViewState = NodeSvgGraphViewOuterState & SimulationMixinState;
 
@@ -61,6 +63,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       xAnimationMultiplier: 1,
       yAnimationMultiplier: 1,
       tickAlpha: 0,
+      unscaled: props.unscaled
     };
     this.setInitialState(outerState, SimulationMixin.InitialState());
   }
@@ -70,6 +73,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       <div>
         {this.renderImage()}
         {this.renderSVG()}
+        {this.renderNodeRange()}
       </div>
     );
   }
@@ -99,6 +103,10 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
         }
       } else if (prevProps.unscaled !== this.props.unscaled) {
 
+        // only allow unscaling if the node starts as unscaled
+        const offChart = this.offChart();
+        const unscaled = this.props.unscaled ? !offChart : this.props.unscaled;
+
         /*
         // start timer to animate rescale after 500ms of no activity
         if (this.props.unscaled) {
@@ -112,13 +120,13 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
         this.clearYAnimationInterval();
         this.clearTickFadeInterval();
         if (this.mounted) {
-          if (!this.props.unscaled) {
-            this.setState({yAnimationMultiplier: 0, tickAlpha: this.offChart() ? 1 : 0}, () => {
+          if (this.props.unscaled) {
+            this.setState({yAnimationMultiplier: 1, tickAlpha: 0, unscaled});
+          } else {
+            this.setState({yAnimationMultiplier: 0, tickAlpha: offChart ? 1 : 0, unscaled}, () => {
               this.yAnimationStartTime = Date.now();
               this.yAnimationInterval = window.setInterval(this.handleYAnimationInterval, 10);
             });
-          } else {
-            this.setState({yAnimationMultiplier: 1});
           }
         }
       }
@@ -170,6 +178,17 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     );
   }
 
+  private renderNodeRange() {
+    if (SHOW_NODE_RANGE) {
+      const {pointMin} = this.getPathPoints();
+      const {currentValue, max} = this.props;
+      if (pointMin === currentValue) {
+        return <div className="node-range">{Math.round(pointMin)} / {max}</div>;
+      }
+      return <div className="node-range">{Math.round(pointMin)} - {Math.round(currentValue)} / {max}</div>;
+    }
+  }
+
   private invertPoint(point) {
     return {x: this.props.width - point.x, y: this.props.height - point.y};
   }
@@ -212,19 +231,21 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   }
 
   private getPathPoints() {
-    const { max, min, data, unscaled } = this.props;
-    const { yAnimationMultiplier } = this.state;
+    const { max, min, data } = this.props;
+    const { yAnimationMultiplier, unscaled } = this.state;
 
     const rangex = SimulationStore.simulationDuration();
     const trailingData = _.takeRight(data, rangex).reverse();
 
     let rangeMin = min;
     let rangeMax = max;
+    let pointMin;
     const animatingY = yAnimationMultiplier < 1;
     const starterRangeY = max - min;
     for (const point of trailingData) {
       if ((!unscaled || animatingY) && (point > rangeMax)) { rangeMax = point; }
       if (point < rangeMin) { rangeMin = point; }
+      pointMin = pointMin === undefined ? point : Math.min(point, pointMin);
     }
     const rangey = rangeMax - rangeMin;
     const rangeDiff = rangey - starterRangeY;
@@ -241,7 +262,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       return {x, y};
     });
 
-    return {points, offChart, maxY: max * yMultiplier};
+    return {points, offChart, maxY: max * yMultiplier, pointMin};
   }
 
   private getUnscaledTicks(maxY: number, tickAlpha: number) {
