@@ -15,7 +15,7 @@ const log = require("loglevel");
 import { GraphPrimitive } from "./graph-primitive";
 import { ColorChoices } from "../utils/colors";
 import { tr } from "../utils/translate";
-import { urlParams } from "../utils/url-params";
+import { urlParams, ENABLE_ALL_BELOW_ZERO } from "../utils/url-params";
 import { PalleteItem } from "../stores/palette-store";
 
 const SEMIQUANT_MIN = 0;
@@ -181,6 +181,9 @@ export class Node extends GraphPrimitive {
   }
 
   get limitMinValue() {
+    if (ENABLE_ALL_BELOW_ZERO) {
+      return !this.allowNegativeValues;
+    }
     return ((this.isAccumulator || this.isTransfer) && !this.allowNegativeValues);
   }
 

@@ -16,6 +16,7 @@ import { Node } from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
 import { stepSize } from "../utils/step-size";
 import { toFixedTrimmed } from "../utils/to-fixed-trimmed";
+import { ENABLE_ALL_BELOW_ZERO } from "../utils/url-params";
 
 interface NodeValueInspectorViewOuterProps {
 
@@ -97,7 +98,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
               {this.renderMinAndMax(node)}
             </div>
           </div>
-          {this.renderCollectorOptions(node)}
+          {ENABLE_ALL_BELOW_ZERO || !node.isTransfer ? this.renderCollectorOptions(node) : undefined}
         </div>
 
         <div className="bottom-pane">
@@ -222,7 +223,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
           />
           {tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR")}
         </label> : null}
-        {positiveCheckbox}
+        {ENABLE_ALL_BELOW_ZERO || node.isAccumulator ? positiveCheckbox : undefined}
       </span>
     );
   }
@@ -252,7 +253,8 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
   private handleUpdateNegativeValuesAllowed = (evt) => {
     const value = evt.target.checked;
-    return this.props.graphStore.changeNode({allowNegativeValues: value});
+    this.props.graphStore.changeNode({allowNegativeValues: value});
+    return SimulationActions.reRunSimulation();
   }
 
   private handleUpdateDefiningType = () => {

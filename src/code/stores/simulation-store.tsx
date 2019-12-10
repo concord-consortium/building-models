@@ -43,6 +43,7 @@ export const SimulationActions = Reflux.createActions(
     "recordingDidEnd",
     "createExperiment",
     "toggledCollectorTo",
+    "reRunSimulation",
     "setExperimentNumber"
   ]
 );
@@ -307,6 +308,11 @@ export const SimulationStore = Reflux.createStore({
     } else if (!checked && (numCollectors === 0)) {
       return this.onSetStepUnits({unit: this.defaultUnit});
     }
+  },
+
+  onReRunSimulation() {
+    this._runSimulation();
+    return this.notifyChange();
   },
 
   _isModelRunnable() {
