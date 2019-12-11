@@ -221,7 +221,7 @@
     "~CODAP.SIMULATION.STEPS": "steps",
     "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation.",
 
-    "~CODAP.DATA.CONTEXT_NAME": "Sagemodeler Data",
+    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
     "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experiments",
     "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Data points",
     "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Data point",
