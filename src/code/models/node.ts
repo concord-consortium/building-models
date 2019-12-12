@@ -380,6 +380,14 @@ export class Node extends GraphPrimitive {
   public hasGraphData() {
     return this.frames.length > 0;
   }
+
+  public startSliderDrag() {
+    this.unscaled = true;
+  }
+
+  public endSliderDrag() {
+    this.unscaled = false;
+  }
 }
 
 Node.initialize();

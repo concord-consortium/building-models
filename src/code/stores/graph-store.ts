@@ -774,8 +774,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   startNodeSliderDrag(key: string) {
     const node = this.nodeKeys[key];
     if (node) {
-      node.unscaled = true;
-      _.map(node.outNodes(), (outNode: Node) => outNode.unscaled = true);
+      node.startSliderDrag();
+      _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.startSliderDrag());
       this.updateListeners();
     }
   },
@@ -783,8 +783,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   endNodeSliderDrag(key: string) {
     const node = this.nodeKeys[key];
     if (node) {
-      node.unscaled = false;
-      _.map(node.outNodes(), (outNode: Node) => outNode.unscaled = false);
+      node.endSliderDrag();
+      _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.endSliderDrag());
       this.updateListeners();
     }
   },
@@ -1116,6 +1116,30 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       }
     }
     return true;
+  },
+
+  linkedOutNodes(startNode: Node) {
+    const visitedKeys: string[] = [];
+    const unvisitedKeys = [startNode.key];
+    const outNodes: Node[] = [];
+    while (unvisitedKeys.length > 0) {
+      const unvisitedKey = unvisitedKeys.shift();
+      if (unvisitedKey) {
+        visitedKeys.push(unvisitedKey);
+        const unvisitedNode = this.nodeKeys[unvisitedKey];
+        if (unvisitedNode) {
+          _.forEach(unvisitedNode.outNodes(), outNode => {
+            const visited = visitedKeys.indexOf(outNode.key) !== -1;
+            const unvisited = unvisitedKeys.indexOf(outNode.key) !== -1;
+            if (!visited && !unvisited) {
+              outNodes.push(outNode);
+              unvisitedKeys.push(outNode.key);
+            }
+          });
+        }
+      }
+    }
+    return outNodes;
   }
 });
 
