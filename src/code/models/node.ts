@@ -45,6 +45,7 @@ export class Node extends GraphPrimitive {
   public title: string;
   public currentValue: number;
   public unscaled: boolean = false;
+  public unscaledMax: number = 0;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
@@ -83,29 +84,29 @@ export class Node extends GraphPrimitive {
     // Specify default values using key = <defaultValue>
     // see https://halfdecent.net/2013/12/02/coffeescript-constructor-options-with-defaults/
     val = nodeSpec.x,
-    this.x = val != null ? val : 0,
-    val1 = nodeSpec.y,
-    this.y = val1 != null ? val1 : 0,
-    val2 = nodeSpec.title,
-    this.title = val2 != null ? val2 : tr("~NODE.UNTITLED"),
-    val3 = nodeSpec.codapID,
-    this.codapID = val3 != null ? val3 : null,
-    val4 = nodeSpec.codapName,
-    this.codapName = val4 != null ? val4 : null,
-    this.image = nodeSpec.image,
-    val5 = nodeSpec.isAccumulator,
-    this.isAccumulator = val5 != null ? val5 : false,
-    val6 = nodeSpec.allowNegativeValues,
-    this.allowNegativeValues = val6 != null ? val6 : false,
-    val7 = nodeSpec.valueDefinedSemiQuantitatively,
-    this.valueDefinedSemiQuantitatively = val7 != null ? val7 : true,
-    this.paletteItem = nodeSpec.paletteItem,
-    val8 = nodeSpec.frames,
-    this.frames = val8 != null ? val8 : [],
-    val9 = nodeSpec.addedThisSession,
-    this.addedThisSession = val9 != null ? val9 : false,
-    val10 = nodeSpec.combineMethod,
-    this.combineMethod = val10 != null ? val10 : "average";
+      this.x = val != null ? val : 0,
+      val1 = nodeSpec.y,
+      this.y = val1 != null ? val1 : 0,
+      val2 = nodeSpec.title,
+      this.title = val2 != null ? val2 : tr("~NODE.UNTITLED"),
+      val3 = nodeSpec.codapID,
+      this.codapID = val3 != null ? val3 : null,
+      val4 = nodeSpec.codapName,
+      this.codapName = val4 != null ? val4 : null,
+      this.image = nodeSpec.image,
+      val5 = nodeSpec.isAccumulator,
+      this.isAccumulator = val5 != null ? val5 : false,
+      val6 = nodeSpec.allowNegativeValues,
+      this.allowNegativeValues = val6 != null ? val6 : false,
+      val7 = nodeSpec.valueDefinedSemiQuantitatively,
+      this.valueDefinedSemiQuantitatively = val7 != null ? val7 : true,
+      this.paletteItem = nodeSpec.paletteItem,
+      val8 = nodeSpec.frames,
+      this.frames = val8 != null ? val8 : [],
+      val9 = nodeSpec.addedThisSession,
+      this.addedThisSession = val9 != null ? val9 : false,
+      val10 = nodeSpec.combineMethod,
+      this.combineMethod = val10 != null ? val10 : "average";
 
     const accumulatorScaleUrlParam = (urlParams.collectorScale && Number(urlParams.collectorScale)) || 1;
     this.accumulatorInputScale = accumulatorScaleUrlParam > 0 ? accumulatorScaleUrlParam : 1;
@@ -381,8 +382,14 @@ export class Node extends GraphPrimitive {
     return this.frames.length > 0;
   }
 
-  public startSliderDrag() {
+  public startSliderDrag(options: { simulationDuration: number }) {
     this.unscaled = true;
+    let pointMax = 0;
+    _.forEach(_.takeRight(this.frames, options.simulationDuration).reverse(), (point) => {
+      pointMax = Math.max(pointMax, point);
+    });
+    this.unscaledMax = Math.max(this.max, pointMax - this.min);
+    console.log("node", this.key, "unscaledRange", this.unscaledRange);
   }
 
   public endSliderDrag() {

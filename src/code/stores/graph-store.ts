@@ -774,8 +774,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   startNodeSliderDrag(key: string) {
     const node = this.nodeKeys[key];
     if (node) {
-      node.startSliderDrag();
-      _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.startSliderDrag());
+      const simulationDuration = SimulationStore.simulationDuration();
+      node.startSliderDrag({simulationDuration});
+      _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.startSliderDrag({simulationDuration}));
       this.updateListeners();
     }
   },

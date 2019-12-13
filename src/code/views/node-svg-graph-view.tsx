@@ -31,6 +31,7 @@ interface NodeSvgGraphViewOuterProps {
   animateGraphs: boolean;
   hideGraphs: boolean;
   unscaled: boolean;
+  unscaledMax: number;
 }
 type NodeSvgGraphViewProps = NodeSvgGraphViewOuterProps & SimulationMixinProps;
 
@@ -106,16 +107,6 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
         // only allow unscaling if the node starts as unscaled
         const offChart = this.offChart();
         const unscaled = this.props.unscaled ? !offChart : this.props.unscaled;
-
-        /*
-        // start timer to animate rescale after 500ms of no activity
-        if (this.props.unscaled) {
-          this.clearYAnimationTimeout();
-          this.yAnimationTimeout = setTimeout(() => {
-            this.startYAnimation();
-          }, 500);
-        }
-        */
 
         this.clearYAnimationInterval();
         this.clearTickFadeInterval();
@@ -231,14 +222,14 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   }
 
   private getPathPoints() {
-    const { max, min, data } = this.props;
+    const { max, min, data, unscaledMax } = this.props;
     const { yAnimationMultiplier, unscaled } = this.state;
 
     const rangex = SimulationStore.simulationDuration();
     const trailingData = _.takeRight(data, rangex).reverse();
 
     let rangeMin = min;
-    let rangeMax = max;
+    let rangeMax = unscaled ? unscaledMax : max;
     let pointMin;
     const animatingY = yAnimationMultiplier < 1;
     const starterRangeY = max - min;

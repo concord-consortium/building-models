@@ -437,6 +437,7 @@ getDefaultProps() {
           animateGraphs={this.props.animateGraphs}
           hideGraphs={this.props.hideGraphs}
           unscaled={this.props.data.unscaled}
+          unscaledMax={this.props.data.unscaledMax}
         />
       );
     } else {
