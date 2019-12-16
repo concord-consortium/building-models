@@ -18,7 +18,7 @@ import { PaletteStore } from "../stores/palette-store";
 import { TimeUnits } from "../utils/time-units";
 import { escapeRegExp } from "../utils/escape-reg-ex";
 import { GraphStore, GraphStoreClass } from "../stores/graph-store";
-import { AppSettingsActions } from "../stores/app-settings-store";
+import { AppSettingsActions, AppSettingsStore, SimulationType } from "../stores/app-settings-store";
 
 // log -- see loglevel in package.json
 
@@ -80,9 +80,9 @@ export class CodapConnect {
     this.lastTimeSent = this._timeStamp();
     this.sendThrottleMs = 300;
 
-    this.dataContextName = "Sage Simulation";
-    this.simulationCollectionName = "Simulation";
-    this.samplesCollectionName = "Samples";
+    this.dataContextName = tr("~CODAP.DATA.CONTEXT_NAME");
+    this.simulationCollectionName = tr("~CODAP.DATA.SIMULATION_COLLECTION_NAME");
+    this.samplesCollectionName = tr("~CODAP.DATA.SAMPLES_COLLECTION_NAME");
 
     this.defaultExperimentName = "ExpNo";
     SimulationActions.recordingFramesCreated.listen(this.addData.bind(this));
@@ -227,7 +227,8 @@ export class CodapConnect {
     const nodes = this.graphStore.getNodes();
 
     // First column definition is the time index
-    const timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
+    const timeUnit = this.getTimeUnit();
+
     const sampleDataAttrs = [
       {
         name: timeUnit,
@@ -545,7 +546,7 @@ export class CodapConnect {
   }
 
   public addData(data) {
-    const timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
+    const timeUnit = this.getTimeUnit();
     // Create the sample data values (node values array)
     const sampleData = _.map(data, (frame) => {
       const sample = {};
@@ -565,7 +566,7 @@ export class CodapConnect {
 
   public createGraph(yAttributeName) {
     this._createMissingDataAttributes();
-    const timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
+    const timeUnit = this.getTimeUnit();
 
     return this.codapPhone.call({
       action: "create",
@@ -868,6 +869,53 @@ export class CodapConnect {
         });
       }
     });
+  }
+
+  public removeEmptyDataPointColumn() {
+    const dataPointColumnName = tr("~CODAP.DATA.SAMPLE_COLUMN_NAME");
+
+    // get the list of attributes
+    this.codapPhone.call({
+      action: "get",
+      resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attributeList`
+    }, (attributeListResp) => {
+      if (attributeListResp && attributeListResp.success) {
+        const attributes = _.pluck(attributeListResp.values, "name");
+
+        // get all the cases
+        if (_.includes(attributes, dataPointColumnName)) {
+          this.codapPhone.call({
+            action: "get",
+            resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].allCases`
+          }, (allCasesResp) => {
+            if (allCasesResp && allCasesResp.success) {
+
+              // check if all the case values are empty
+              let hasValue = false;
+              _.forEach(allCasesResp.values.cases, (kase) => {
+                hasValue = hasValue || (kase.case.values[dataPointColumnName] != null); // use != for null and undefined
+              });
+
+              if (!hasValue) {
+                // delete the column if all case values are empty
+                this.codapPhone.call({
+                  action: "delete",
+                  resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute[${dataPointColumnName}]`
+                });
+              }
+            }
+          });
+        }
+      }
+    });
+  }
+
+  private getTimeUnit() {
+    let timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
+    if (AppSettingsStore.settings.simulationType === SimulationType.static) {
+      timeUnit = tr("~CODAP.DATA.SAMPLE_COLUMN_NAME");
+    }
+    return timeUnit;
   }
 
   private getGuideItems() {

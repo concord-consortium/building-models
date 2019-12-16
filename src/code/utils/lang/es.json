@@ -207,5 +207,10 @@
     "~METADATA.BLANK_NODE_TITLE": "En Blanco",
     "~METADATA.SEE_IT_ON": "Verlo en %{hostname}",
     "~METADATA.LICENSE.PUBLIC_DOMAIN": "Dominio Público",
-    "~METADATA.PIXABAY.TITLE": "\"%{query}\" de la búsqueda de Pixabay"
+    "~METADATA.PIXABAY.TITLE": "\"%{query}\" de la búsqueda de Pixabay",
+    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
+    "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experiments",
+    "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Data points",
+    "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Data point",
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuously"
 }

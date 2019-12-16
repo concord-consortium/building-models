@@ -172,6 +172,7 @@
     "~DOCUMENT.ACTIONS.DATA.POINT": "Data Point",
     "~DOCUMENT.ACTIONS.DATA.RECORD": "Record",
     "~DOCUMENT.ACTIONS.DATA.STREAM": "Data Stream",
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuously",
     "~DOCUMENT.ACTIONS.DATA.STOP": "Stop",
     "~DOCUMENT.ACTIONS.DATA.RECORDING": "Recording",
     "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Save to graphs",
@@ -219,6 +220,11 @@
     "~CODAP.SIMULATION.EXPERIMENT": "Exp.#",
     "~CODAP.SIMULATION.STEPS": "steps",
     "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation.",
+
+    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
+    "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experiments",
+    "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Data points",
+    "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Data point",
 
     "~TIME.STEP": "Step",
     "~TIME.SECOND": "Second",
