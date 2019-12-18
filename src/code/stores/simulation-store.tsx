@@ -1,3 +1,5 @@
+
+
 const _ = require("lodash");
 const Reflux = require("reflux");
 
@@ -5,6 +7,8 @@ import { AppSettingsStore, AppSettingsActions } from "./app-settings-store";
 import { ImportActions } from "../actions/import-actions";
 import { GraphActions } from "../actions/graph-actions";
 import { Simulation } from "../models/simulation";
+import { SimulationV2 } from "../models/simulation-v2";
+import { urlParams } from "../utils/url-params";
 import { TimeUnits } from "../utils/time-units";
 import { tr } from "../utils/translate";
 import { Mixin } from "../mixins/components";
@@ -204,7 +208,8 @@ export const SimulationStore = Reflux.createStore({
       // it is run to clear pre-saved data after first load
       this.settings.modelIsRunning = true;
       this.notifyChange();
-      this.currentSimulation = new Simulation({
+      const SimulationClass = urlParams.simulation === "v2" ? SimulationV2 : Simulation;
+      this.currentSimulation = new SimulationClass({
         nodes: this.nodes,
         duration: this.simulationStepCount(),
         capNodeValues: this.settings.capNodeValues,

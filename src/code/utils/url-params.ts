@@ -21,6 +21,8 @@ export interface UrlParams {
   lang?: string;
   showTopology?: string;
   enableAllBelowZero?: string;
+  simulation?: string;
+  timestep?: number;
 }
 
 export const urlParams: UrlParams = params;
