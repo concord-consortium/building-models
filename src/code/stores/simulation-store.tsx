@@ -241,7 +241,7 @@ export const SimulationStore = Reflux.createStore({
         }
       });
 
-      return this.currentSimulation.run();
+      this.currentSimulation.run();
     }
   },
 

@@ -72,8 +72,7 @@ const EvaluateStaticRelationshipsFunction = function(loopId: string) {
     return this.currentValue;
   }
   if (loopId === this.loopId) {
-    window.alert("Cycle detected!");
-    throw new Error("cycle detected");
+    throw new Error("loop detected");
   }
   this.loopId = loopId;
 
@@ -263,9 +262,18 @@ export class SimulationV2 {
     // Before the first step, set the initial values of all accumulators,
     // in case they are linked with `initial-value` relationships.
     collectorNodes.forEach(node => node.setInitialAccumulatorValue());
-    allNodes.forEach(node => node.currentValue = node.initialValue);
 
-    staticNodes.forEach(node => node.evaluateStaticRelationships(node.key));
+    // Move initial value to previousValue and use that to calculate initial state. Note that we only need to update
+    // static nodes. Accumulators will always have their initial value at time 0.
+    allNodes.forEach(node => node.previousValue = node.initialValue);
+
+
+    try {
+      staticNodes.forEach(node => node.evaluateStaticRelationships(node.key));
+    } catch (e) {
+      window.alert("Simulation engine error: " + e.message);
+      return;
+    }
 
     const step = () => {
       allNodes.forEach(node => this.nextStep(node));  // toggles previous / current val.
