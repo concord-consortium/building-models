@@ -239,7 +239,7 @@ export class SimulationV2 {
   public run() {
     console.log("simulation v2 start");
     this.stopRun = false;
-    let time = 0;
+    let steps = 0;
     this.framesBundle = [];
     const timeStep = (urlParams.timestep && Number(urlParams.timestep)) || 1;
 
@@ -263,12 +263,13 @@ export class SimulationV2 {
     // in case they are linked with `initial-value` relationships.
     collectorNodes.forEach(node => node.setInitialAccumulatorValue());
 
-    // Move initial value to previousValue and use that to calculate initial state. Note that we only need to update
-    // static nodes. Accumulators will always have their initial value at time 0.
+    // Calculate initial state.
+    // All nodes should have set previous value correctly.
     allNodes.forEach(node => node.previousValue = node.initialValue);
-
-
+    // Collectors should be just set to their initial value (t=0 value).
+    collectorNodes.forEach(node => node.currentValue = node.initialValue);
     try {
+      // Static nodes should be evaluated at t=0.
       staticNodes.forEach(node => node.evaluateStaticRelationships(node.key));
     } catch (e) {
       window.alert("Simulation engine error: " + e.message);
@@ -276,17 +277,15 @@ export class SimulationV2 {
     }
 
     const step = () => {
+      this.generateFrame(steps);
       allNodes.forEach(node => this.nextStep(node));  // toggles previous / current val.
-
       collectorNodes.forEach(node => node.evaluateAccumulatorValue(timeStep));
       staticNodes.forEach(node => node.evaluateStaticRelationships(node.key));
-
-      this.generateFrame(time);
-      time += timeStep;
+      steps += 1;
     };
 
     // simulate each step
-    while (time < this.duration) {
+    while (steps < this.duration) {
       step();
     }
 
