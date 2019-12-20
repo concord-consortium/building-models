@@ -163,7 +163,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
             <i className="icon-codap-video-camera" />
           </div>
           <div className="horizontal">
-            <span>{tr("~DOCUMENT.ACTIONS.DATA.STREAM")}</span>
+            <span>{tr("~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY")}</span>
           </div>
         </RecordButtonView>
       );

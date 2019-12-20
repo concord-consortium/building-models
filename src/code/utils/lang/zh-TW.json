@@ -202,5 +202,15 @@
     "~SIMULATION.GUIDE": "Include a guide",
     "~SIMULATION.CONFIGURE_GUIDE": "configure guide",
     "~SIMULATION.MODEL_TYPE": "Model Type",
-    "~SIMULATION.RELATIONSHIPS": "Relationships"
+    "~SIMULATION.RELATIONSHIPS": "Relationships",
+    "~METADATA.LICENSE": "License",
+    "~METADATA.BLANK_NODE_TITLE": "Blank",
+    "~METADATA.SEE_IT_ON": "See it on %{hostname}",
+    "~METADATA.LICENSE.PUBLIC_DOMAIN": "Public Domain",
+    "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabay search",
+    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
+    "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experiments",
+    "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Data points",
+    "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Data point",
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuously"
 }

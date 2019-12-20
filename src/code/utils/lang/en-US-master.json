@@ -116,6 +116,11 @@
     "~METADATA.TITLE": "Title",
     "~METADATA.LINK": "Link",
     "~METADATA.CREDIT": "Credit",
+    "~METADATA.LICENSE": "License",
+    "~METADATA.BLANK_NODE_TITLE": "Blank",
+    "~METADATA.SEE_IT_ON": "See it on %{hostname}",
+    "~METADATA.LICENSE.PUBLIC_DOMAIN": "Public Domain",
+    "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabay search",
 
     // views/image-browser-view.js
     "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
@@ -167,6 +172,7 @@
     "~DOCUMENT.ACTIONS.DATA.POINT": "Data Point",
     "~DOCUMENT.ACTIONS.DATA.RECORD": "Record",
     "~DOCUMENT.ACTIONS.DATA.STREAM": "Data Stream",
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuously",
     "~DOCUMENT.ACTIONS.DATA.STOP": "Stop",
     "~DOCUMENT.ACTIONS.DATA.RECORDING": "Recording",
     "~DOCUMENT.ACTIONS.SAVE_TO_GRAPHS": "Save to graphs",
@@ -214,6 +220,11 @@
     "~CODAP.SIMULATION.EXPERIMENT": "Exp.#",
     "~CODAP.SIMULATION.STEPS": "steps",
     "~CODAP.SIMULATION.STEPS.DESCRIPTION": "Number of steps in the simulation.",
+
+    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
+    "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experiments",
+    "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Data points",
+    "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Data point",
 
     "~TIME.STEP": "Step",
     "~TIME.SECOND": "Second",

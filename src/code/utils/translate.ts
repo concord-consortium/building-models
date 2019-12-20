@@ -14,11 +14,9 @@ const languageFiles = {
   "el":    require("./lang/el.json"),    // Greek
   "en-US": require("./lang/en-US.json"), // US English
   "es":    require("./lang/es.json"),    // Spanish
-  "et":    require("./lang/et.json"),    // Estonian
   "he":    require("./lang/he.json"),    // Hebrew
   "nb":    require("./lang/nb.json"),    // Norwegian Bokmål
   "nn":    require("./lang/nn.json"),    // Norwegian Nynorsk
-  "pl":    require("./lang/pl.json"),    // Polish
   "tr":    require("./lang/tr.json"),    // Turkish
   "zh-TW": require("./lang/zh-TW.json"), // Chinese (Taiwan)
 };

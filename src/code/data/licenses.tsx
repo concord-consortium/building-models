@@ -1,4 +1,5 @@
 import * as React from "react";
+import { tr } from "../utils/translate";
 
 /*
  * decaffeinate suggestions:
@@ -10,8 +11,8 @@ import * as React from "react";
 export const licenses = {
   map: {
     "public domain": {
-      label: "Public Domain",
-      fullLabel: "Public Domain",
+      label: tr("~METADATA.LICENSE.PUBLIC_DOMAIN"),
+      fullLabel: tr("~METADATA.LICENSE.PUBLIC_DOMAIN"),
       link: "http://en.wikipedia.org/wiki/Public_domain"
     },
     "pixabay": {

@@ -1,3 +1,5 @@
+import { tr } from "../utils/translate";
+
 export const initialPalette = [
   {
     "id": "1",
@@ -5,7 +7,7 @@ export const initialPalette = [
     "image": "img/nodes/blank.png",
     "metadata": {
       "source": "internal",
-      "title": "Blank",
+      "title": tr("~METADATA.BLANK_NODE_TITLE"),
       "link": null,
       "license": "public domain"
     }
