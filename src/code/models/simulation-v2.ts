@@ -101,7 +101,6 @@ const EvaluateStaticRelationshipsFunction = function(loopId: string) {
   if (this.capNodeValues && isUnscaledTransferNode(this)) {
     value = Math.min(value, getTransferLimit(this));
   }
-
   // if we need to cap, do it at end of all calculations
   this.currentValue = this.filterFinalValue(value);
 };
@@ -124,7 +123,7 @@ const SetInitialAccumulatorValueFunction = function() {
 };
 
 // keep as function so it can be bound to a node
-const EvaluateAccumulatorValueFunction = function(timeStep) {
+const GetAccumulatorDeltaFunction = function() {
   // collectors only have accumulator and transfer links
   const links = this.inLinks("accumulator").concat(this.inLinks("transfer")).concat(this.outLinks("transfer"));
 
@@ -155,7 +154,7 @@ const EvaluateAccumulatorValueFunction = function(timeStep) {
       break;
     }
   }
-  this.currentValue = this.filterFinalValue(this.previousValue + deltaValue * timeStep);
+  return deltaValue;
 };
 
 export class SimulationV2 {
@@ -177,13 +176,9 @@ export class SimulationV2 {
     this.duration       = this.opts.duration   || 10;
     this.capNodeValues  = this.opts.capNodeValues || false;
     this.decorateNodes(); // extend nodes with integration methods
-
     this.onStart     = this.opts.onStart || (nodeNames => log.info(`simulation stated: ${nodeNames}`));
-
     this.onFrames    = this.opts.onFrames || (frames => log.info(`simulation frames: ${frames}`));
-
     this.onEnd       = this.opts.onEnd || (() => log.info("simulation end"));
-
     this.recalculateDesiredSteps = false;
     this.stopRun = false;
   }
@@ -197,7 +192,7 @@ export class SimulationV2 {
       // Put the functionality here rather than in the class "Node".
       // Keep all the logic for integration here in one file for clarity.
       node.evaluateStaticRelationships = EvaluateStaticRelationshipsFunction.bind(node);
-      node.evaluateAccumulatorValue = EvaluateAccumulatorValueFunction.bind(node);
+      node.getAccumulatorDelta = GetAccumulatorDeltaFunction.bind(node);
       node.setInitialAccumulatorValue = SetInitialAccumulatorValueFunction.bind(node);
     });
   }
@@ -208,10 +203,12 @@ export class SimulationV2 {
     node.loopId = null;
   }
 
-  public nextStep(node) {
-    node.previousValue = node.currentValue;
-    node.currentValue = null;
-    node.loopId = null;
+  public toggleCurrentPrevValues() {
+    this.nodes.forEach(node => {
+      node.previousValue = node.currentValue;
+      node.currentValue = null;
+      node.loopId = null;
+    });
   }
 
   // create an object representation of the current timeStep and add
@@ -255,32 +252,95 @@ export class SimulationV2 {
     // is changed from not being an accumulator.  Range links are the type of the original links -
     // they are pure functions that transmit a value from a source (domain) to a target (range) node.
 
-    const allNodes = this.nodes;
     const collectorNodes = this.nodes.filter(node => node.isAccumulator);
     const staticNodes = this.nodes.filter(node => !node.isAccumulator);
+
+    const evaluateStaticNodes = () => {
+      staticNodes.forEach(node => node.evaluateStaticRelationships(node.key));
+    };
 
     // Before the first step, set the initial values of all accumulators,
     // in case they are linked with `initial-value` relationships.
     collectorNodes.forEach(node => node.setInitialAccumulatorValue());
-
     // Calculate initial state.
     // All nodes should have set previous value correctly.
-    allNodes.forEach(node => node.previousValue = node.initialValue);
+    this.nodes.forEach(node => node.previousValue = node.initialValue);
     // Collectors should be just set to their initial value (t=0 value).
     collectorNodes.forEach(node => node.currentValue = node.initialValue);
     try {
-      // Static nodes should be evaluated at t=0.
-      staticNodes.forEach(node => node.evaluateStaticRelationships(node.key));
+      // Static nodes should be evaluated at t=0. Detect cycles. It's enough to do it once, as graph structure
+      // doesn't change over time.
+      evaluateStaticNodes();
     } catch (e) {
       window.alert("Simulation engine error: " + e.message);
       return;
     }
 
+    const eulerStep = () => {
+      collectorNodes.forEach(node =>
+        node.currentValue = node.filterFinalValue(node.previousValue + node.getAccumulatorDelta() * timeStep)
+      );
+      evaluateStaticNodes();
+    };
+
+    const rk4Step = () => {
+      // See: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#The_Runge%E2%80%93Kutta_method
+      // Note that static nodes don't require any integration. It's all about collectors.
+      // If you take a look at RK4 references / descriptions, y function is a collector value,
+      // delta y is collector delta in each step.
+
+      // Store collectors previous values, they're going to be useful during all the calculations.
+      const prevValue = collectorNodes.map(node => node.previousValue);
+
+      // Calculate k1, k2, k3 and k4, which are partial deltas, used in the final equation.
+      // k1 = dt * f(tn, yn)
+      const k1 = collectorNodes.map(node => timeStep * node.getAccumulatorDelta());
+
+      // k2 = dt * f(tn + 0.5 * dt, yn + 0.5 * k1)
+      // We need to update y values first.
+      collectorNodes.forEach((node, idx) =>
+        node.currentValue = node.filterFinalValue(prevValue[idx] + 0.5 * k1[idx])
+      );
+      evaluateStaticNodes();
+      // Calc k2. Toggle current and prev values first, as getAccumulatorDelta() uses previous value.
+      this.toggleCurrentPrevValues();
+      const k2 = collectorNodes.map(node => timeStep * node.getAccumulatorDelta());
+
+      // k3 = dt * f(tn + 0.5 * dt, yn + 0.5 * k2)
+      // We need to update y values first.
+      collectorNodes.forEach((node, idx) =>
+        node.currentValue = node.filterFinalValue(prevValue[idx] + 0.5 * k2[idx])
+      );
+      evaluateStaticNodes();
+      this.toggleCurrentPrevValues();
+      // Calc k3. Toggle current and prev values first, as getAccumulatorDelta() uses previous value.
+      const k3 = collectorNodes.map(node => timeStep * node.getAccumulatorDelta());
+
+      // k4 = dt * f(tn + dt, yn * k3)
+      // We need to update y values first.
+      collectorNodes.forEach((node, idx) =>
+        node.currentValue = node.filterFinalValue(prevValue[idx] + k3[idx])
+      );
+      evaluateStaticNodes();
+      this.toggleCurrentPrevValues();
+      // Calc k4. Toggle current and prev values first, as getAccumulatorDelta() uses previous value.
+      const k4 = collectorNodes.map(node => timeStep * node.getAccumulatorDelta());
+
+      // Finally calculate yn+1
+      collectorNodes.forEach((node, idx) =>
+        node.currentValue = node.filterFinalValue(prevValue[idx] + (k1[idx] + 2 * k2[idx] + 2 * k3[idx] + k4[idx]) / 6)
+      );
+      evaluateStaticNodes();
+    };
+
     const step = () => {
       this.generateFrame(steps);
-      allNodes.forEach(node => this.nextStep(node));  // toggles previous / current val.
-      collectorNodes.forEach(node => node.evaluateAccumulatorValue(timeStep));
-      staticNodes.forEach(node => node.evaluateStaticRelationships(node.key));
+      this.toggleCurrentPrevValues();
+      if (urlParams.integration === "rk4") {
+        rk4Step();
+      } else {
+        eulerStep();
+      }
       steps += 1;
     };
 

@@ -23,6 +23,7 @@ export interface UrlParams {
   enableAllBelowZero?: string;
   simulation?: string;
   timestep?: number;
+  integration?: string;
 }
 
 export const urlParams: UrlParams = params;
