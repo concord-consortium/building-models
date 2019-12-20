@@ -142,7 +142,7 @@ const EvaluateAccumulatorValueFunction = function(timeStep) {
       deltaValue += relation.evaluate(inV, outV, sourceNode.max, this.max);
       break;
     case "transfer":
-      let transferValue = sourceNode.previousValue;
+      let transferValue = transferNode.previousValue;
       // can't overdraw non-negative collectors
       if (this.capNodeValues || sourceNode.limitMinValue) {
         transferValue = Math.min(transferValue, getTransferLimit(transferNode));
