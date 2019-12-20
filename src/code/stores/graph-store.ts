@@ -965,7 +965,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     })();
     const settings = AppSettingsStore.serialize();
     settings.simulation = SimulationStore.serialize();
-    const topology = getTopology({nodes: nodeExports, links: linkExports});
+    // TODO: fix and re-enable https://www.pivotaltracker.com/n/projects/1263626/stories/170410042
+    // const topology = getTopology({nodes: nodeExports, links: linkExports});
     const data = {
       version: latestVersion(),
       filename: this.filename,
@@ -973,7 +974,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       nodes: nodeExports,
       links: linkExports,
       settings,
-      topology
+      // topology
     };
     return data;
   },
