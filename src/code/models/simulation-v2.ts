@@ -11,6 +11,14 @@ const _ = require("lodash");
 const log = require("loglevel");
 import { urlParams } from "../utils/url-params";
 
+interface DecoratedNode {
+  key: string;
+  previousValue: null | number;
+  currentValue: null | number;
+  loopId: string;
+  evaluateStaticRelationships: (loopId: string, inLoop: boolean) => void;
+}
+
 const isScaledTransferNode = (node) => {
   if (!node.isTransfer) { return false; }
   if (node.inLinks("transfer-modifier").length) { return false; }
@@ -66,13 +74,15 @@ const filterFinalValue = function(value) {
 };
 
 // keep as function so it can be bound to a node
-const EvaluateStaticRelationshipsFunction = function(loopId: string) {
+const EvaluateStaticRelationshipsFunction = function(loopId: string, inLoop: false) {
   // if we've already calculated a currentValue for ourselves this step, return it
   if (this.currentValue != null) {
     return this.currentValue;
   }
   if (loopId === this.loopId) {
-    throw new Error("loop detected");
+    if (!inLoop) {
+      EvaluateLoopFunction(this.allNodes, loopId);
+    }
   }
   this.loopId = loopId;
 
@@ -83,10 +93,18 @@ const EvaluateStaticRelationshipsFunction = function(loopId: string) {
   _.each(links, link => {
     if (!link.relation.isDefined) { return; }
     const { sourceNode } = link;
-    if (sourceNode.currentValue == null) {
-      sourceNode.evaluateStaticRelationships(loopId);
+    let sourceValue;
+
+    if (!inLoop) {
+      if (sourceNode.currentValue == null) {
+        sourceNode.evaluateStaticRelationships(loopId);
+      }
+      sourceValue = sourceNode.currentValue;
+    } else {
+      sourceValue = sourceNode.previousValue;
     }
-    const inV = scaleInput(sourceNode.currentValue, sourceNode, this);
+
+    const inV = scaleInput(sourceValue, sourceNode, this);
     const outV = this.previousValue;
     return inValues.push(link.relation.evaluate(inV, outV, link.sourceNode.max, this.max));
   });
@@ -103,6 +121,28 @@ const EvaluateStaticRelationshipsFunction = function(loopId: string) {
   }
   // if we need to cap, do it at end of all calculations
   this.currentValue = this.filterFinalValue(value);
+};
+
+const LOOP_RESOLVING_STEPS = 30;
+const EvaluateLoopFunction = (nodes: DecoratedNode[], loopId: string) => {
+  const loopNodes = nodes.filter(n => n.loopId = loopId);
+  const avg = {};
+  for (let i = 0; i < LOOP_RESOLVING_STEPS; i += 1) {
+    loopNodes.forEach(n => {
+      n.evaluateStaticRelationships(loopId, true);
+      if (avg[n.key] === undefined) {
+        avg[n.key] = 0;
+      }
+      avg[n.key] += n.currentValue!;
+    });
+    loopNodes.forEach(n => {
+      n.previousValue = n.currentValue;
+      n.currentValue = null;
+    });
+  }
+  loopNodes.forEach(n => {
+    n.currentValue = avg[n.key] / LOOP_RESOLVING_STEPS;
+  });
 };
 
 // Sets the value of node.initialValue before the simulations starts. If there
@@ -194,6 +234,7 @@ export class SimulationV2 {
       node.evaluateStaticRelationships = EvaluateStaticRelationshipsFunction.bind(node);
       node.getAccumulatorDelta = GetAccumulatorDeltaFunction.bind(node);
       node.setInitialAccumulatorValue = SetInitialAccumulatorValueFunction.bind(node);
+      node.allNodes = this.nodes;
     });
   }
 

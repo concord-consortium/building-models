@@ -43,7 +43,7 @@ export class Node extends GraphPrimitive {
 
   public type: string = "Node";
   public title: string;
-  public currentValue: number;
+  public currentValue: number | null;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
