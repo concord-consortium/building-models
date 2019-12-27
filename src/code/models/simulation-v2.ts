@@ -19,6 +19,17 @@ interface DecoratedNode {
   evaluateStaticRelationships: (loopId: string, inLoop: boolean) => void;
 }
 
+// Valid time step is either integer number or a binary fraction (0.5, 0.25, 0.125, 0.0625, ...).
+// Binary fractions are required to avoid floating point precision errors when time steps are summed multiple times.
+const isTimeStepValid = (timeStep) => {
+  // tslint:disable-next-line:no-bitwise
+  const isPowerOfTwo = (x) => (x & (x - 1)) === 0;
+  if (timeStep >= 1) {
+    return timeStep % 1 === 0;
+  }
+  return (1 / timeStep) % 1 === 0 && isPowerOfTwo(1 / timeStep);
+};
+
 const isScaledTransferNode = (node) => {
   if (!node.isTransfer) { return false; }
   if (node.inLinks("transfer-modifier").length) { return false; }
@@ -276,10 +287,19 @@ export class SimulationV2 {
 
   public run() {
     console.log("simulation v2 start");
-    this.stopRun = false;
-    let steps = 0;
-    this.framesBundle = [];
+    console.time("sim-v2-run");
     const timeStep = (urlParams.timestep && Number(urlParams.timestep)) || 1;
+    if (!isTimeStepValid(timeStep)) {
+      window.alert(
+        "Invalid time step. Please use a whole number (1, 2, 3, ...) or binary fraction " +
+        "(0.5, 0.25, 0.125, 0.0625, ...) to avoid floating-point errors."
+      );
+      return;
+    }
+
+    this.stopRun = false;
+    let time = 0;
+    this.framesBundle = [];
 
     this.nodes.forEach(node => this.initializeValues(node));
 
@@ -308,14 +328,8 @@ export class SimulationV2 {
     this.nodes.forEach(node => node.previousValue = node.initialValue);
     // Collectors should be just set to their initial value (t=0 value).
     collectorNodes.forEach(node => node.currentValue = node.initialValue);
-    try {
-      // Static nodes should be evaluated at t=0. Detect cycles. It's enough to do it once, as graph structure
-      // doesn't change over time.
-      evaluateStaticNodes();
-    } catch (e) {
-      window.alert("Simulation engine error: " + e.message);
-      return;
-    }
+    // Static nodes should be evaluated at t=0.
+    evaluateStaticNodes();
 
     const eulerStep = () => {
       collectorNodes.forEach(node =>
@@ -374,23 +388,26 @@ export class SimulationV2 {
       evaluateStaticNodes();
     };
 
-    const step = () => {
-      this.generateFrame(steps);
-      this.toggleCurrentPrevValues();
-      if (urlParams.integration === "rk4") {
-        rk4Step();
-      } else {
-        eulerStep();
-      }
-      steps += 1;
-    };
+    const step = urlParams.integration === "rk4" ? rk4Step : eulerStep;
 
-    // simulate each step
-    while (steps < this.duration) {
+    while (time < this.duration) {
+      // Generate frames (notify rest of the app about new data) only when time is a whole number (0, 1, 2, 3, ...).
+      // Note that because of the floating inaccuracy, we can't simply expect time % 1 to be equal 0.
+      // E.g. if you add ten times 0.1, you won't receive 1.0, but 0.9999...
+      // That's why it's recommended to use time steps that can be precisely represented using binary system, like
+      // 1/2 (0.5), 1/4 (0.25), 1/8 (0.125), 1/16 (0.0625) and so on.
+      const wholeNumberDiff = Math.min(time % 1, 1 - (time % 1));
+      if (wholeNumberDiff < timeStep * 0.1) {
+        time = Math.round(time); // just in case non-binary fraction is allowed
+        this.generateFrame(time);
+      }
+      this.toggleCurrentPrevValues();
       step();
+      time += timeStep;
     }
 
     this.onFrames(this.framesBundle);    // send all at once
+    console.timeEnd("sim-v2-run");
     return this.onEnd();
   }
 }
