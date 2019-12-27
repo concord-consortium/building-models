@@ -163,7 +163,7 @@ const SetAccumulatorValueFunction = function(nodeValues) {
   return this.currentValue = this.filterFinalValue(startValue + deltaValue);
 };
 
-export class Simulation {
+export class SimulationV1 {
   private opts: any;
   private nodes: any[];
   private duration: number;
@@ -246,6 +246,7 @@ export class Simulation {
 
   public run() {
     console.log("simulation v1 start");
+    console.time("sim-v1-run");
     this.stopRun = false;
     let time = 0;
     this.framesBundle = [];
@@ -324,6 +325,7 @@ export class Simulation {
     }
 
     this.onFrames(this.framesBundle);    // send all at once
+    console.timeEnd("sim-v1-run");
     return this.onEnd();
   }
 }

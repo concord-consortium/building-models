@@ -18,7 +18,7 @@ const { expect }         = chai;
 import { Link } from "../src/code/models/link";
 import { Node } from "../src/code/models/node";
 import { TransferModel } from "../src/code/models/transfer";
-import { Simulation } from "../src/code/models/simulation";
+import { SimulationV1 } from "../src/code/models/simulation-v1";
 import { Relationship } from "../src/code/models/relationship";
 import { RelationFactory } from "../src/code/models/relation-factory";
 
@@ -66,7 +66,7 @@ describe("Simulation", () => {
 
   describe("the constructor", () => {
     beforeEach(() => {
-      this.simulation = new Simulation(this.arguments);
+      this.simulation = new SimulationV1(this.arguments);
     });
 
     it("makes a configured instance", () => {
@@ -87,7 +87,7 @@ describe("Simulation", () => {
         };
 
         LinkNodes(this.nodeA, this.nodeB, { type: "range", formula: this.formula });
-        this.simulation = new Simulation(this.arguments);
+        this.simulation = new SimulationV1(this.arguments);
       });
 
       it("the link formula should work", () => {
@@ -277,7 +277,7 @@ describe("Simulation", () => {
               node = nodes[key];
               nodeArray.push(node);
             }
-            const simulation = new Simulation({
+            const simulation = new SimulationV1({
               nodes: nodeArray,
               duration: j + 1,
               capNodeValues: scenario.cap === true
@@ -308,7 +308,7 @@ describe("Simulation", () => {
         };
 
         LinkNodes(this.nodeA, this.nodeB, { type: "range", formula: this.formula });
-        this.simulation = new Simulation(this.arguments);
+        this.simulation = new SimulationV1(this.arguments);
       });
 
       describe("when the input is SQ and the output is Q", () => {
@@ -363,7 +363,7 @@ describe("Simulation", () => {
           duration: 2
         };
 
-        this.simulation = new Simulation(this.arguments);
+        this.simulation = new SimulationV1(this.arguments);
       });
 
       describe("should transfer appropriate amount from the source node to the target node", () => {
