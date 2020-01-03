@@ -55,7 +55,7 @@ const asyncListenTest = (done, action, func) => {
   });
 };
 
-describe("Simulation", () => {
+describe("Simulation V1", () => {
   beforeEach(() => {
     this.nodes     = [];
     this.arguments = {

@@ -88,12 +88,13 @@ export class SimulationV2 {
   public previousValue: {[key: string]: number | null} = {};
   public loopId: {[key: string]: string | null} = {};
 
-  public timeStep = (urlParams.timestep && Number(urlParams.timestep)) || 1;
+  public timeStep: number;
   public duration: number;
   public nodes: Node[];
   public staticNodes: Node[];
   public collectorNodes: Node[];
-  private capNodeValues: boolean;
+  public capNodeValues: boolean;
+  public integrationStep: () => void;
 
   private opts: any;
   private onStart: any;
@@ -103,12 +104,15 @@ export class SimulationV2 {
   constructor(opts) {
     if (opts == null) { opts = {}; }
     this.opts = opts;
-    this.nodes          = this.opts.nodes      || [];
-    this.duration       = this.opts.duration   || 10;
-    this.capNodeValues  = this.opts.capNodeValues || false;
-    this.onStart     = this.opts.onStart || (nodeNames => log.info(`simulation stated: ${nodeNames}`));
-    this.onFrames    = this.opts.onFrames || (frames => log.info(`simulation frames: ${frames}`));
-    this.onEnd       = this.opts.onEnd || (() => log.info("simulation end"));
+    this.nodes = this.opts.nodes || [];
+    this.duration = this.opts.duration != null ? this.opts.duration : 10;
+    this.capNodeValues = this.opts.capNodeValues || false;
+    this.timeStep = Number(this.opts.timeStep) || 1;
+    this.integrationStep = this.opts.integrationMethod === "rk4" ? this.rk4Step : this.eulerStep;
+
+    this.onStart = this.opts.onStart || (nodeNames => log.info(`simulation stated: ${nodeNames}`));
+    this.onFrames = this.opts.onFrames || (frames => log.info(`simulation frames: ${frames}`));
+    this.onEnd = this.opts.onEnd || (() => log.info("simulation end"));
 
     // There are now three types of nodes: normal / static, collector, and transfer and four types of links:
     // range, accumulator, transfer and transfer-modifier.  Transfer nodes are created automatically
@@ -373,17 +377,11 @@ export class SimulationV2 {
         framesBundle.push(this.generateFrame(time));
       }
       this.toggleCurrentPrevValues();
-
-      if (urlParams.integration === "rk4") {
-        this.rk4Step();
-      } else {
-        this.eulerStep();
-      }
-
+      this.integrationStep();
       time += this.timeStep;
     }
 
-    this.nodes.forEach(n => n.currentValue = this.currentValue[n.key] || n.initialValue);
+    this.nodes.forEach(n => n.currentValue = this.currentValue[n.key] != null ? this.currentValue[n.key] : n.initialValue);
     this.onFrames(framesBundle); // send all at once
 
     console.timeEnd("sim-v2-run");

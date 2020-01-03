@@ -211,6 +211,8 @@ export const SimulationStore = Reflux.createStore({
       const SimulationClass = urlParams.simulation === "v2" ? SimulationV2 : SimulationV1;
       this.currentSimulation = new SimulationClass({
         nodes: this.nodes,
+        timeStep: urlParams.timestep,
+        integrationMethod: urlParams.integration,
         duration: this.simulationStepCount(),
         capNodeValues: this.settings.capNodeValues,
 
