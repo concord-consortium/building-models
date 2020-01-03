@@ -245,7 +245,6 @@ export class SimulationV1 {
 
 
   public run() {
-    console.log("simulation v1 start");
     console.time("sim-v1-run");
     this.stopRun = false;
     let time = 0;
