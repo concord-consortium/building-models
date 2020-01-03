@@ -6,7 +6,6 @@
  */
 const _ = require("lodash");
 const log = require("loglevel");
-import { urlParams } from "../utils/url-params";
 import { Node } from "./node";
 
 const LOOP_RESOLVING_STEPS = 30;

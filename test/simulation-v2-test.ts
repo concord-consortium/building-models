@@ -102,6 +102,55 @@ describe("Simulation V2", () => {
       );
     });
 
+    // Note that this is not a good model for testing. Although it was part of the test suite for V1 (scenario 4 in
+    // "other scenarios" suite). It shows differences between integration methods and time step too, so let's keep it.
+    describe("for a collector with feedback", () => {
+      beforeEach(() => {
+        this.nodeA    = new Node({initialValue: 10});
+        this.nodeB    = new Node({initialValue: 50, isAccumulator: true});
+        LinkNodes(this.nodeA, this.nodeB, { type: "accumulator", formula: "1 * in" });
+        LinkNodes(this.nodeB, this.nodeA, { type: "range", formula: "1 * in" });
+      });
+
+      describe("the result", () =>
+        it("should grow, but it depends on time step and integration method", () => {
+          let simulation = new SimulationV2({
+            nodes: [this.nodeA, this.nodeB],
+            duration: 0
+          });
+          simulation.run();
+          expect(this.nodeA.currentValue).to.be.closeTo(50, 0.001);
+          expect(this.nodeB.currentValue).to.be.closeTo(50, 0.001);
+
+          simulation = new SimulationV2({
+            nodes: [this.nodeA, this.nodeB],
+            duration: 1
+          });
+          simulation.run();
+          expect(this.nodeA.currentValue).to.be.closeTo(100, 0.001);
+          expect(this.nodeB.currentValue).to.be.closeTo(100, 0.001);
+
+          simulation = new SimulationV2({
+            nodes: [this.nodeA, this.nodeB],
+            duration: 1,
+            timeStep: 0.5
+          });
+          simulation.run();
+          expect(this.nodeA.currentValue).to.be.closeTo(112.5, 0.001);
+          expect(this.nodeB.currentValue).to.be.closeTo(112.5, 0.001);
+
+          simulation = new SimulationV2({
+            nodes: [this.nodeA, this.nodeB],
+            duration: 1,
+            integrationMethod: "rk4"
+          });
+          simulation.run();
+          expect(this.nodeA.currentValue).to.be.closeTo(135.416666666, 0.001);
+          expect(this.nodeB.currentValue).to.be.closeTo(135.416666666, 0.001);
+        })
+      );
+    });
+
     // We can describe each scenario as an object:
     // Each single-letter key is a node.
     // Values can be:
@@ -143,29 +192,21 @@ describe("Simulation V2", () => {
           [5, 60]
         ]},
 
-        // 4: basic collector with feedback (A<->[B])
-        {A: 10, B: "50+", AB: "1 * in", BA: "1 * in",
-        results: [
-          [50, 50],
-          [100, 100],
-          [200, 200]
-        ]},
-
-        // 5: three-node graph (>-) with averaging
+        // 4: three-node graph (>-) with averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "1 * in",
         results: [
           [10, 20, 15],
           [10, 20, 15]
         ]},
 
-        // 6: three-node graph (>-) with non-linear averaging
+        // 5: three-node graph (>-) with non-linear averaging
         {A: 10, B: 20, C: null, AC: "1 * in", BC: "0.1 * in",
         results: [
           [10, 20, 6],
           [10, 20, 6]
         ]},
 
-        // 7: three-node graph with collector (>-[C])
+        // 6: three-node graph with collector (>-[C])
         {A: 10, B: 20, C: "0+", AC: "1 * in", BC: "0.1 * in",
         results: [
           [10, 20, 0],
@@ -173,7 +214,7 @@ describe("Simulation V2", () => {
           [10, 20, 24]
         ]},
 
-        // 8: three-node graph with collector (>-[C]) and negative relationship
+        // 7: three-node graph with collector (>-[C]) and negative relationship
         {A: 10, B: 1, C: "0+", AC: "1 * in", BC: "-1 * in",
         results: [
           [10, 1, 0],
@@ -181,7 +222,7 @@ describe("Simulation V2", () => {
           [10, 1, 18]
         ]},
 
-        // 9: four-node graph with collector (>-[D]) and scaled product combination
+        // 8: four-node graph with collector (>-[D]) and scaled product combination
         {A: 50, B: 50, C: "0*", D: "0+", AC: "1 * in", BC: "1 * in", CD: "1 * in",
         results: [
           [50, 50, 25, 0],
@@ -192,7 +233,7 @@ describe("Simulation V2", () => {
         // *** Tests for graphs with bounded ranges ***
         // Note most nodes have min:0 and max:100 by default
         // But collectors have a default max of 1000
-        // 10: basic collector (A->[B])
+        // 9: basic collector (A->[B])
         {A: 30, B: "900+", AB: "1 * in",
         cap: true,
         results: [
@@ -203,7 +244,7 @@ describe("Simulation V2", () => {
           [30, 1000]
         ]},
 
-        // 11: basic subtracting collector (A- -1 ->[B])
+        // 10: basic subtracting collector (A- -1 ->[B])
         {A: 40, B: "90+", AB: "-1 * in",
         cap: true,
         results: [
@@ -213,7 +254,7 @@ describe("Simulation V2", () => {
           [40, 0]
         ]},
 
-        // 12: basic independent and dependent nodes (A->B)
+        // 11: basic independent and dependent nodes (A->B)
         {A: 120, B: 0, AB: "1 * in",
         cap: true,
         results: [
@@ -222,21 +263,21 @@ describe("Simulation V2", () => {
 
         // *** Collector initial-value tests ***
 
-        // 13: (A-init->B+)
+        // 12: (A-init->B+)
         {A: 10, B: "50+", AB: "initial-value",
         results: [
           [10, 10],
           [10, 10]
         ]},
 
-        // 14: A and B averageing initial values >- (A-init->C+, B-init->C+)
+        // 13: A and B averageing initial values >- (A-init->C+, B-init->C+)
         {A: 10, B: 20, C: "50+", AC: "initial-value", BC: "initial-value",
         results: [
           [10, 20, 15],
           [10, 20, 15]
         ]},
 
-        // 15: Setting initial values, and accumulating >- (A-init->C+, B->C+)
+        // 14: Setting initial values, and accumulating >- (A-init->C+, B->C+)
         {A: 10, B: 20, C: "50+", AC: "initial-value", BC: "1 * in",
         results: [
           [10, 20, 10],
@@ -270,26 +311,32 @@ describe("Simulation V2", () => {
               LinkNodes(node1, node2, { type, formula: value, func });
             }
           }
-          for (let j = 0; j < scenario.results.length; j++) {
-            const result = scenario.results[j];
-            const nodeArray: Node[] = [];
-            for (key in nodes) {
-              node = nodes[key];
-              nodeArray.push(node);
-            }
-            const simulation = new SimulationV2({
-              nodes: nodeArray,
-              duration: j,
-              capNodeValues: scenario.cap === true
-            });
+          for (let m = 0; m < 4; m++) {
+            const integrationMethod = m % 2 === 0 ? "euler" : "rk4";
+            const timeStep = 1 / (Math.floor(m / 2) + 1); // 1, 1, 0.5, 0.5
+            for (let j = 0; j < scenario.results.length; j++) {
+              const result = integrationMethod === "rk4" && scenario.rk4Results ? scenario.rk4Results[j] : scenario.results[j];
+              const nodeArray: Node[] = [];
+              for (key in nodes) {
+                node = nodes[key];
+                nodeArray.push(node);
+              }
+              const simulation = new SimulationV2({
+                nodes: nodeArray,
+                duration: j,
+                timeStep,
+                integrationMethod,
+                capNodeValues: scenario.cap === true
+              });
 
-            if (result === false) {
-              expect(simulation.run.bind(simulation)).to.throw("Graph not valid");
-            } else {
-              simulation.run();
-              for (let k = 0; k < nodeArray.length; k++) {
-                node = nodeArray[k];
-                expect(node.currentValue, `Step: ${j}, Node: ${node.title}`).to.be.closeTo(result[k], 0.000001);
+              if (result === false) {
+                expect(simulation.run.bind(simulation)).to.throw("Graph not valid");
+              } else {
+                simulation.run();
+                for (let k = 0; k < nodeArray.length; k++) {
+                  node = nodeArray[k];
+                  expect(node.currentValue, `Step: ${j}, Integration: ${integrationMethod}, Time Step: ${timeStep}, Node: ${node.title}`).to.be.closeTo(result[k], 0.000001);
+                }
               }
             }
           }
