@@ -207,11 +207,11 @@ export class Node extends GraphPrimitive {
     }
   }
 
-  public outLinks(relationType = null) {
+  public outLinks(relationType: string | null = null) {
     return _.filter(this.links, link => (link.sourceNode === this) && ((relationType === null) || (relationType === link.relation.type)));
   }
 
-  public inLinks(relationType = null) {
+  public inLinks(relationType: string | null = null) {
     return _.filter(this.links, link => (link.targetNode === this) && ((relationType === null) || (relationType === link.relation.type)));
   }
 
