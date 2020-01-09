@@ -357,9 +357,9 @@ export class SimulationV2 {
     this.collectorNodes.forEach(node => setInitialAccumulatorValue(node));
     // Calculate initial state.
     // All nodes should have set previous value correctly.
-    this.nodes.forEach(node => this.previousValue[node.key] = node.initialValue);
+    this.nodes.forEach(node => this.previousValue[node.key] = this.filterFinalValue(node, node.initialValue));
     // Collectors should be just set to their initial value (t=0 value).
-    this.collectorNodes.forEach(node => this.currentValue[node.key] = node.initialValue);
+    this.collectorNodes.forEach(node => this.currentValue[node.key] = this.filterFinalValue(node, node.initialValue));
     // Static nodes should be evaluated at t=0.
     this.evaluateStaticNodes();
 
@@ -380,7 +380,11 @@ export class SimulationV2 {
       time += this.timeStep;
     }
 
-    this.nodes.forEach(n => n.currentValue = this.currentValue[n.key] != null ? this.currentValue[n.key] : n.initialValue);
+    this.nodes.forEach(n =>
+      // Note that previous value is set for every node.
+      // If node is not linked to any other node, it equals to filtered initial value.
+      n.currentValue = (this.currentValue[n.key] != null ? this.currentValue[n.key] : this.previousValue[n.key]) as number
+    );
     this.onFrames(framesBundle); // send all at once
 
     console.timeEnd("sim-v2-run");
