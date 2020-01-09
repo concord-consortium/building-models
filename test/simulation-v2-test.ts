@@ -102,6 +102,35 @@ describe("Simulation V2", () => {
       );
     });
 
+    describe("for unconnected nodes", () => {
+      beforeEach(() => {
+        this.nodeA    = new Node({initialValue: 1e7, isAccumulator: true});
+        this.nodeB    = new Node({initialValue: 1e6 });
+      });
+
+      describe("the result", () => {
+        it("should return initial values", () => {
+          const simulation = new SimulationV2({
+            nodes: [this.nodeA, this.nodeB],
+            duration: 10
+          });
+          simulation.run();
+          this.nodeA.currentValue.should.equal(1e7);
+          this.nodeB.currentValue.should.equal(1e6);
+        });
+        it("when nodes values are capped, it should return filtered initial values", () => {
+          const simulation = new SimulationV2({
+            nodes: [this.nodeA, this.nodeB],
+            capNodeValues: true,
+            duration: 10
+          });
+          simulation.run();
+          this.nodeA.currentValue.should.equal(1000);
+          this.nodeB.currentValue.should.equal(100);
+        });
+      });
+    });
+
     // Note that this is not a good model for testing. Although it was part of the test suite for V1 (scenario 4 in
     // "other scenarios" suite). It shows differences between integration methods and time step too, so let's keep it.
     describe("for a collector with feedback", () => {
