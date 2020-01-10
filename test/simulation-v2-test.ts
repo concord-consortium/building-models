@@ -145,7 +145,8 @@ describe("Simulation V2", () => {
         it("should grow, but it depends on time step and integration method", () => {
           let simulation = new SimulationV2({
             nodes: [this.nodeA, this.nodeB],
-            duration: 0
+            duration: 0,
+            integrationMethod: "euler"
           });
           simulation.run();
           expect(this.nodeA.currentValue).to.be.closeTo(50, 0.001);
@@ -153,7 +154,8 @@ describe("Simulation V2", () => {
 
           simulation = new SimulationV2({
             nodes: [this.nodeA, this.nodeB],
-            duration: 1
+            duration: 1,
+            integrationMethod: "euler"
           });
           simulation.run();
           expect(this.nodeA.currentValue).to.be.closeTo(100, 0.001);
@@ -162,7 +164,8 @@ describe("Simulation V2", () => {
           simulation = new SimulationV2({
             nodes: [this.nodeA, this.nodeB],
             duration: 1,
-            timeStep: 0.5
+            timeStep: 0.5,
+            integrationMethod: "euler"
           });
           simulation.run();
           expect(this.nodeA.currentValue).to.be.closeTo(112.5, 0.001);
@@ -436,7 +439,8 @@ describe("Simulation V2", () => {
         this.transferNode = this.transferLink.transferNode;
         this.arguments = {
           nodes: [this.nodeA, this.nodeB, this.transferNode],
-          duration: 1
+          duration: 1,
+          integrationMethod: "euler"
         };
 
         this.simulation = new SimulationV2(this.arguments);
