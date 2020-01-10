@@ -107,7 +107,8 @@ export class SimulationV2 {
     this.duration = this.opts.duration != null ? this.opts.duration : 10;
     this.capNodeValues = this.opts.capNodeValues || false;
     this.timeStep = Number(this.opts.timeStep) || 1;
-    this.integrationStep = this.opts.integrationMethod === "rk4" ? this.rk4Step : this.eulerStep;
+    // RK4 is default integration method.
+    this.integrationStep = this.opts.integrationMethod === "euler" ? this.eulerStep : this.rk4Step;
 
     this.onStart = this.opts.onStart || (nodeNames => log.info(`simulation stated: ${nodeNames}`));
     this.onFrames = this.opts.onFrames || (frames => log.info(`simulation frames: ${frames}`));

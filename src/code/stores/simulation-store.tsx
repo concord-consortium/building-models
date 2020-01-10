@@ -208,7 +208,8 @@ export const SimulationStore = Reflux.createStore({
       // it is run to clear pre-saved data after first load
       this.settings.modelIsRunning = true;
       this.notifyChange();
-      const SimulationClass = urlParams.simulation === "v2" ? SimulationV2 : SimulationV1;
+      // V2 is default.
+      const SimulationClass = urlParams.simulation === "v1" ? SimulationV1 : SimulationV2;
       this.currentSimulation = new SimulationClass({
         nodes: this.nodes,
         timeStep: urlParams.timestep,
