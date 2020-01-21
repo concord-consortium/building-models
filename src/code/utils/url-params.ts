@@ -20,13 +20,10 @@ export interface UrlParams {
   hide?: string;
   lang?: string;
   showTopology?: string;
-  enableAllBelowZero?: string;
   simulation?: string;
   timestep?: number;
   integration?: string;
 }
 
 export const urlParams: UrlParams = params;
-
-export const ENABLE_ALL_BELOW_ZERO = urlParams.enableAllBelowZero === "true";
 
