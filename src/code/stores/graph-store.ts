@@ -752,10 +752,12 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   },
 
   _maybeChangeRelation(link, relation) {
-    if (relation && relation.isTransfer) {
-      return this._addTransfer(link);
-    } else {
-      return this._removeTransfer(link);
+    if (relation) {
+      if (relation.isTransfer) {
+        return this._addTransfer(link);
+      } else {
+        return this._removeTransfer(link);
+      }
     }
   },
 
