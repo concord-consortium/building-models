@@ -29,6 +29,7 @@ import { leadingRingFeedback } from "./serialized-test-data/topology-test-cases/
 import { embeddedRingFeedback } from "./serialized-test-data/topology-test-cases/embedded-ring-feedback";
 import { immediateFeedbackOut } from "./serialized-test-data/topology-test-cases/immedate-feedback-from";
 import { multipathAndFeedback } from "./serialized-test-data/topology-test-cases/multipath-and-feedback";
+import { twoTransferNodes } from "./serialized-test-data/topology-test-cases/two-transfer-nodes";
 
 describe("TopologyTagger", () => {
   beforeEach(() => null);
@@ -563,6 +564,22 @@ describe("TopologyTagger", () => {
     });
     it("finds no graphs with a multi-path", () => {
       chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
+    });
+  });
+
+  describe("does not break when the transfer node is deleted", () => {
+    const graph: ISageGraph = twoTransferNodes;
+
+    // fake deleting the transfer node (T1)
+    const preDeleteNumNodes = graph.nodes.length;
+    graph.nodes = graph.nodes.filter(node => node.key !== "T1");
+    graph.links[0].relation = {type: "range"};
+    const postDeleteNumNodes = graph.nodes.length;
+
+    it("finds 3 nodes before deletion and 2 nodes after", () => {
+      chai.expect(preDeleteNumNodes).to.eql(3);
+      chai.expect(postDeleteNumNodes).to.eql(2);
+      chai.expect(getTopology(graph).nodes).to.eql(2);
     });
   });
 

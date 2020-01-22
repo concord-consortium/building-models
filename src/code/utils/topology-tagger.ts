@@ -80,10 +80,15 @@ export function getAnalysisGraph(sageModelGraph: ISageGraph, swapTransferSource 
     graphlibGraph.setNode(n.key, { isAccumulator: n.data && n.data.isAccumulator });
   });
 
+  const hasValidTransferNode = (link: ISageLink) =>
+    link.transferNode
+    && (link.transferNode !== "")
+    && graphlibGraph.hasNode(link.transferNode);
+
   const setEdge = (s, t, link, label) => {
     const linkData = {
       title: link.title,
-      transferNode: link.transferNode ? link.transferNode : "",
+      transferNode: hasValidTransferNode(link) ? link.transferNode : "",
       relation: link.relation ? link.relation : null,
       source: link.sourceNode
     };
@@ -91,7 +96,7 @@ export function getAnalysisGraph(sageModelGraph: ISageGraph, swapTransferSource 
   };
 
   sageModelGraph.links.forEach((l) => {
-    if (l.transferNode && l.transferNode !== "") {
+    if (hasValidTransferNode(l)) {
       if (swapTransferSource) {
         setEdge(l.transferNode, l.sourceNode, l, "source-to-transfer-node");
       } else {

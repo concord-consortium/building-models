@@ -426,6 +426,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     this.endNodeEdit();
     const node = this.nodeKeys[nodeKey];
     const transferRelation = node.transferLink != null ? node.transferLink.relation : undefined;
+    const transferNode = node.transferLink != null ? node.transferLink.transferNode : undefined;
 
     // create a copy of the list of links
     const links = node.links.slice();
@@ -441,6 +442,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       execute: () => {
         if (node.transferLink != null) {
           node.transferLink.relation = node.transferLink.defaultRelation();
+          delete node.transferLink.transferNode;
         }
         for (const link of links) { this._removeLink(link); }
         for (const link of transferLinks) { this._removeTransfer(link); }
@@ -449,6 +451,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       undo: () => {
         if (node.transferLink != null) {
           node.transferLink.relation = transferRelation;
+          node.transferLink.transferNode = transferNode;
         }
         this._addNode(node);
         for (const link of transferLinks) { this._addTransfer(link); }
@@ -965,8 +968,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     })();
     const settings = AppSettingsStore.serialize();
     settings.simulation = SimulationStore.serialize();
-    // TODO: fix and re-enable https://www.pivotaltracker.com/n/projects/1263626/stories/170410042
-    // const topology = getTopology({nodes: nodeExports, links: linkExports});
+    const topology = getTopology({nodes: nodeExports, links: linkExports});
     const data = {
       version: latestVersion(),
       filename: this.filename,
@@ -974,7 +976,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       nodes: nodeExports,
       links: linkExports,
       settings,
-      // topology
+      topology
     };
     return data;
   },
