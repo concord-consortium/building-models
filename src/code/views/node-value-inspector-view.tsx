@@ -16,7 +16,6 @@ import { Node } from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
 import { stepSize } from "../utils/step-size";
 import { toFixedTrimmed } from "../utils/to-fixed-trimmed";
-import { ENABLE_ALL_BELOW_ZERO } from "../utils/url-params";
 
 interface NodeValueInspectorViewOuterProps {
 
@@ -98,7 +97,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
               {this.renderMinAndMax(node)}
             </div>
           </div>
-          {ENABLE_ALL_BELOW_ZERO || !node.isTransfer ? this.renderCollectorOptions(node) : undefined}
+          {this.renderCollectorOptions(node)}
         </div>
 
         <div className="bottom-pane">
@@ -194,22 +193,6 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
       : (isChecked
         ? tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP")
         : tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP"));
-    const positiveCheckbox = (
-      <label
-        className={this.state.capNodeValues ? "disabled" : ""}
-        title={tooltip}
-        key="positive-label"
-      >
-        <input
-          key="positive-checkbox"
-          type="checkbox"
-          checked={isChecked}
-          disabled={this.state.capNodeValues}
-          onChange={this.state.capNodeValues ? undefined : this.handleUpdateNegativeValuesAllowed}
-        />
-        {tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE")}
-      </label>
-    );
 
     return (
       <span className="checkbox group full">
@@ -223,7 +206,20 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
           />
           {tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR")}
         </label> : null}
-        {ENABLE_ALL_BELOW_ZERO || node.isAccumulator ? positiveCheckbox : undefined}
+        <label
+          className={this.state.capNodeValues ? "disabled" : ""}
+          title={tooltip}
+          key="positive-label"
+        >
+          <input
+            key="positive-checkbox"
+            type="checkbox"
+            checked={isChecked}
+            disabled={this.state.capNodeValues}
+            onChange={this.state.capNodeValues ? undefined : this.handleUpdateNegativeValuesAllowed}
+          />
+          {tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE")}
+        </label>
       </span>
     );
   }

@@ -255,7 +255,7 @@ describe("Simulation V1", () => {
               isAccumulator = (typeof value === "string") && ~value.indexOf("+"); // tslint:disable-line:no-bitwise
               const isProduct = (typeof value === "string") && ~value.indexOf("*"); // tslint:disable-line:no-bitwise
               const combineMethod = isProduct ? "product" : "average";
-              nodes[key] = new Node({title: key, initialValue: parseInt(value, 10), combineMethod, isAccumulator});
+              nodes[key] = new Node({title: key, initialValue: parseInt(value, 10), combineMethod, isAccumulator, allowNegativeValues: true});
             } else if (key.length === 2) {
               let type;
               const node1 = nodes[key[0]];
