@@ -203,14 +203,14 @@
     "~SIMULATION.CONFIGURE_GUIDE": "konfigurer bruksrettleiing",
     "~SIMULATION.MODEL_TYPE": "Modell",
     "~SIMULATION.RELATIONSHIPS": "Samanhengar",
-    "~METADATA.LICENSE": "License",
+    "~METADATA.LICENSE": "Lisens",
     "~METADATA.BLANK_NODE_TITLE": "Blank",
-    "~METADATA.SEE_IT_ON": "See it on %{hostname}",
-    "~METADATA.LICENSE.PUBLIC_DOMAIN": "Public Domain",
-    "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabay search",
-    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
-    "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experiments",
-    "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Data points",
-    "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Data point",
-    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuously"
+    "~METADATA.SEE_IT_ON": "Sjå på %{hostname}",
+    "~METADATA.LICENSE.PUBLIC_DOMAIN": "Offentleg eigedom",
+    "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabaysøk",
+    "~CODAP.DATA.CONTEXT_NAME": "Data frå SageModeler",
+    "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Eksperiment",
+    "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Datapunkt",
+    "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Datapunkt",
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Kontinuerleg"
 }
