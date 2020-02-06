@@ -10,15 +10,16 @@ const _ = require("lodash");
 import { urlParams } from "./url-params";
 
 const languageFiles = {
-  "de":    require("./lang/de.json"),    // German
-  "el":    require("./lang/el.json"),    // Greek
-  "en-US": require("./lang/en-US.json"), // US English
-  "es":    require("./lang/es.json"),    // Spanish
-  "he":    require("./lang/he.json"),    // Hebrew
-  "nb":    require("./lang/nb.json"),    // Norwegian Bokmål
-  "nn":    require("./lang/nn.json"),    // Norwegian Nynorsk
-  "tr":    require("./lang/tr.json"),    // Turkish
-  "zh-TW": require("./lang/zh-TW.json"), // Chinese (Taiwan)
+  "de":      require("./lang/de.json"),      // German
+  "el":      require("./lang/el.json"),      // Greek
+  "en-US":   require("./lang/en-US.json"),   // US English
+  "es":      require("./lang/es.json"),      // Spanish
+  "he":      require("./lang/he.json"),      // Hebrew
+  "nb":      require("./lang/nb.json"),      // Norwegian Bokmål
+  "nn":      require("./lang/nn.json"),      // Norwegian Nynorsk
+  "tr":      require("./lang/tr.json"),      // Turkish
+  "zh-Hans": require("./lang/zh-Hans.json"), // Chinese (Simplified)
+  "zh-TW":   require("./lang/zh-TW.json"),   // Chinese (Taiwan)
 };
 
 const getBaseLanguage = (langKey: string) => {
