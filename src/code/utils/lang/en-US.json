@@ -134,6 +134,7 @@
     "~IMAGE-BROWSER.SEARCHING_PAGE": "page %{page}",
     "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No Pixabay results found for \"%{query}.\"",
     "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette",
+    "~IMAGE-BROWSER.NO_IMAGES_REMAINING": "No images remaining.",
     "~IMAGE-BROWSER.PREVIOUS": "‹ Previous",
     "~IMAGE-BROWSER.NEXT": "Next ›",
 
