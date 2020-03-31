@@ -23,6 +23,20 @@ export interface UrlParams {
   simulation?: string;
   timestep?: number;
   integration?: string;
+  /**
+   * Image Collections are groups of images that we will display in the New Image dialog
+   * in separate tabs. If one or more collections are defined, they will appear at the top
+   * of the dialog, above the search options.
+   * An image collection can either be a collection of images, or a collection of collections.
+   * These could nest to an arbitrary depth, but the user will see a flat list of collections
+   * of images.
+   * Examples:
+   *    Collection:
+   *      ?imageCollections=image-collections/cbio/collections/population.json
+   *    Collection of collections:
+   *      ?imageCollections=image-collections/cbio/collections/population-cell.json
+   */
+  imageCollections?: string;
 }
 
 export const urlParams: UrlParams = params;
