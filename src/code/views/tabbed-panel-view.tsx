@@ -47,34 +47,19 @@ class TabbedPanelTabView extends React.Component<TabbedPanelTabViewProps, Tabbed
 }
 
 interface TabbedPanelViewProps {
-  selectedTabIndex?: number;
-  onTabSelected?: (index: number) => void;
+  selectedTabIndex: number;
+  onTabSelected: (index: number) => void;
   clientClass?: string;
   onRenderBelowTabsComponent?: () => any; // TODO: get concrete type
   tabs: TabInfo[];
 }
 
-interface TabbedPanelViewState {
-  selectedTabIndex: number;
-}
-
-export class TabbedPanelView extends React.Component<TabbedPanelViewProps, TabbedPanelViewState> {
+export class TabbedPanelView extends React.Component<TabbedPanelViewProps> {
 
   public static displayName = "TabbedPanelView";
 
   public static Tab(settings?: TabInfoSettings) {
     return new TabInfo(settings);
-  }
-
-  constructor(props: TabbedPanelViewProps) {
-    super(props);
-    this.state = {selectedTabIndex: this.props.selectedTabIndex || 0};
-  }
-
-  public componentWillReceiveProps(nextProps) {
-    if (this.state.selectedTabIndex !== nextProps.selectedTabIndex) {
-      return this.selectedTab(nextProps.selectedTabIndex);
-    }
   }
 
   public render() {
@@ -90,18 +75,6 @@ export class TabbedPanelView extends React.Component<TabbedPanelViewProps, Tabbe
     );
   }
 
-  private selectedTab(index) {
-    return this.setState({selectedTabIndex: index || 0});
-  }
-
-  private handleTabSelected = (index) => {
-    if (this.props.onTabSelected) {
-      return this.props.onTabSelected(index);
-    } else {
-      return this.selectedTab(index);
-    }
-  }
-
   private renderTab(tab, index) {
     return (
       <TabbedPanelTabView
@@ -109,8 +82,8 @@ export class TabbedPanelView extends React.Component<TabbedPanelViewProps, Tabbe
         key={index}
         index={index}
         defined={tab.defined}
-        selected={index === this.state.selectedTabIndex}
-        onSelected={this.handleTabSelected}
+        selected={index === this.props.selectedTabIndex}
+        onSelected={this.props.onTabSelected}
       />
     );
   }
@@ -131,7 +104,7 @@ export class TabbedPanelView extends React.Component<TabbedPanelViewProps, Tabbe
         {this.props.tabs.map((tab, index) =>
           <div
             key={index}
-            style={{display: index === this.state.selectedTabIndex ? "block" : "none"}}
+            style={{display: index === this.props.selectedTabIndex ? "block" : "none"}}
           >
             {tab.component}
           </div>

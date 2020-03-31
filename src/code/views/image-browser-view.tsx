@@ -19,7 +19,15 @@ type ImageBrowserViewProps = ImageBrowserViewOuterProps & PaletteMixinProps & Im
 
 interface ImageBrowserViewOuterState {
 }
-type ImageBrowserViewState = ImageBrowserViewOuterState & PaletteMixinState & ImageDialogMixinState;
+
+interface ImageBrowserViewTabState {
+  selectedTabIndex: number;
+}
+const ImageBrowserViewTabInitialState = {
+  selectedTabIndex: 0
+};
+
+type ImageBrowserViewState = ImageBrowserViewOuterState & PaletteMixinState & ImageDialogMixinState & ImageBrowserViewTabState;
 
 export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserViewState> {
 
@@ -30,7 +38,7 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
 
     this.mixins = [new ImageDialogMixin(this), new PaletteMixin(this)];
     const outerState: ImageBrowserViewOuterState = {};
-    this.setInitialState(outerState, ImageDialogMixin.InitialState(), PaletteMixin.InitialState());
+    this.setInitialState(outerState, ImageDialogMixin.InitialState(), PaletteMixin.InitialState(), ImageBrowserViewTabInitialState);
   }
 
   public render() {
@@ -45,6 +53,8 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
     return (
       <ModalTabbedDialogView
         title={tr("~ADD-NEW-IMAGE.TITLE")}
+        selectedTabIndex={this.state.selectedTabIndex}
+        onTabSelected={this.onTabSelected}
         clientClass="image-browser"
         close={ImageDialogActions.close}
         tabs={[
@@ -54,5 +64,9 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
         ]}
       />
     );
+  }
+
+  private onTabSelected = (selectedTabIndex) => {
+    this.setState({selectedTabIndex});
   }
 }
