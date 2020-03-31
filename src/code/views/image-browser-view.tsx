@@ -67,6 +67,7 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
   }
 
   private onTabSelected = (selectedTabIndex) => {
+    ImageDialogActions.cancel();
     this.setState({selectedTabIndex});
   }
 }
