@@ -4,17 +4,20 @@ interface TabInfoSettings {
   label: string;
   component: JSX.Element | null;
   defined?: boolean;
+  divider?: boolean;
 }
 
 export class TabInfo {
   public readonly label: string;
   public readonly component: JSX.Element | null;
   public readonly defined: boolean;
+  public readonly divider: boolean;
 
   constructor(settings?: TabInfoSettings) {
     settings = settings || {label: "", component: null, defined: false};
     ({label: this.label, component: this.component} = settings);
     this.defined = !!settings.defined;
+    this.divider = !!settings.divider;
   }
 }
 
@@ -23,6 +26,7 @@ interface TabbedPanelTabViewProps {
   selected: boolean;
   label: string;
   index: number;
+  divider: boolean;       // a horizontal line with no associated tab
   onSelected: (index: number) => void;
 }
 
@@ -37,11 +41,17 @@ class TabbedPanelTabView extends React.Component<TabbedPanelTabViewProps, Tabbed
     if (this.props.selected) {
       classname += " tab-selected";
     }
+    if (this.props.divider) {
+      classname += " tab-divider";
+    }
     return <li className={classname} onClick={this.handleClicked}>{this.props.label}</li>;
   }
 
   private handleClicked = (e) => {
     e.preventDefault();
+    if (this.props.divider) {
+      return;
+    }
     return this.props.onSelected(this.props.index);
   }
 }
@@ -82,6 +92,7 @@ export class TabbedPanelView extends React.Component<TabbedPanelViewProps> {
         key={index}
         index={index}
         defined={tab.defined}
+        divider={tab.divider}
         selected={index === this.props.selectedTabIndex}
         onSelected={this.props.onTabSelected}
       />

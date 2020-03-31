@@ -57,6 +57,7 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
     ];
 
     if (this.state.collections.length > 0) {
+      tabs.unshift(TabbedPanelView.Tab({divider: true, label: "", component: null}));
       // insert at the front
       tabs.splice(0, 0, ...this.state.collections.map(collection =>
         TabbedPanelView.Tab({label: (collection.title), component: <ImageSearchDialogView collection={collection.images} {...props} />})
