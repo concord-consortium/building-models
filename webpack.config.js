@@ -139,6 +139,15 @@ module.exports = (env, argv) => {
         __VERSION__: buildInfo.tag,
         __BUILD_DATE__: buildInfo.date,
       }),
+      new HtmlWebpackPlugin({
+        inject: false,
+        filename: 'lara.html',
+        template: 'src/templates/lara.html.ejs',
+        __BUILD_INFO__: buildInfoString,
+        __ENVIRONMENT__: environment,
+        __VERSION__: buildInfo.tag,
+        __BUILD_DATE__: buildInfo.date,
+      }),
       new CopyWebpackPlugin([{
         from: 'src/assets',
         to: '',

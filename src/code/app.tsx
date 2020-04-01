@@ -9,6 +9,7 @@ import "../stylus/app.styl";
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+const IframePhone = require("iframe-phone");
 
 import { AppView } from "./views/app-view";
 import { GraphStore } from "./stores/graph-store";
@@ -74,5 +75,7 @@ const waitForAppView = (callback: () => void) => {
     waitForAppView(() => {
       appView.props.graphStore.addChangeListener(listener);
     });
-  }
+  },
+
+  iframePhone: IframePhone,         // re-expose for external use
 };
