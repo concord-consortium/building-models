@@ -5,6 +5,8 @@ import { TabbedPanelView, TabInfo } from "./tabbed-panel-view";
 
 interface ModalTabbedDialogViewProps {
   title: string;
+  selectedTabIndex: number;
+  onTabSelected: (index: number) => void;
   close: () => void;
   clientClass: string;
   tabs: TabInfo[];
@@ -19,7 +21,7 @@ export class ModalTabbedDialogView extends React.Component<ModalTabbedDialogView
   public render() {
     return (
       <ModalDialogView title={this.props.title} close={this.props.close}>
-        <TabbedPanelView clientClass={this.props.clientClass} tabs={this.props.tabs} />
+        <TabbedPanelView {...this.props} />
       </ModalDialogView>
     );
   }

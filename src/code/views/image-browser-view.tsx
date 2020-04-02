@@ -19,7 +19,15 @@ type ImageBrowserViewProps = ImageBrowserViewOuterProps & PaletteMixinProps & Im
 
 interface ImageBrowserViewOuterState {
 }
-type ImageBrowserViewState = ImageBrowserViewOuterState & PaletteMixinState & ImageDialogMixinState;
+
+interface ImageBrowserViewTabState {
+  selectedTabIndex: number;
+}
+const ImageBrowserViewTabInitialState = {
+  selectedTabIndex: 0
+};
+
+type ImageBrowserViewState = ImageBrowserViewOuterState & PaletteMixinState & ImageDialogMixinState & ImageBrowserViewTabState;
 
 export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserViewState> {
 
@@ -30,7 +38,7 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
 
     this.mixins = [new ImageDialogMixin(this), new PaletteMixin(this)];
     const outerState: ImageBrowserViewOuterState = {};
-    this.setInitialState(outerState, ImageDialogMixin.InitialState(), PaletteMixin.InitialState());
+    this.setInitialState(outerState, ImageDialogMixin.InitialState(), PaletteMixin.InitialState(), ImageBrowserViewTabInitialState);
   }
 
   public render() {
@@ -42,17 +50,34 @@ export class ImageBrowserView extends Mixer<ImageBrowserViewProps, ImageBrowserV
       selectedImage: this.state.paletteItem // from ImageDialogStore mixin
     };
 
+    const tabs = [
+      TabbedPanelView.Tab({label: (tr("~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB")), component: <ImageSearchDialogView {...props} />}),
+      TabbedPanelView.Tab({label: (tr("~ADD-NEW-IMAGE.MY-COMPUTER-TAB")), component: <ImageMyComputerDialogView {...props} />}),
+      TabbedPanelView.Tab({label: (tr("~ADD-NEW-IMAGE.LINK-TAB")), component: <ImageLinkDialogView {...props} />})
+    ];
+
+    if (this.state.collections.length > 0) {
+      tabs.unshift(TabbedPanelView.Tab({divider: true, label: "", component: null}));
+      // insert at the front
+      tabs.splice(0, 0, ...this.state.collections.map(collection =>
+        TabbedPanelView.Tab({label: (collection.title), component: <ImageSearchDialogView collection={collection.images} {...props} />})
+      ));
+    }
+
     return (
       <ModalTabbedDialogView
         title={tr("~ADD-NEW-IMAGE.TITLE")}
+        selectedTabIndex={this.state.selectedTabIndex}
+        onTabSelected={this.onTabSelected}
         clientClass="image-browser"
         close={ImageDialogActions.close}
-        tabs={[
-          TabbedPanelView.Tab({label: (tr("~ADD-NEW-IMAGE.IMAGE-SEARCH-TAB")), component: <ImageSearchDialogView {...props} />}),
-          TabbedPanelView.Tab({label: (tr("~ADD-NEW-IMAGE.MY-COMPUTER-TAB")), component: <ImageMyComputerDialogView {...props} />}),
-          TabbedPanelView.Tab({label: (tr("~ADD-NEW-IMAGE.LINK-TAB")), component: <ImageLinkDialogView {...props} />})
-        ]}
+        tabs={tabs}
       />
     );
+  }
+
+  private onTabSelected = (selectedTabIndex) => {
+    ImageDialogActions.cancel();
+    this.setState({selectedTabIndex});
   }
 }

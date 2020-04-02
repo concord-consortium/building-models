@@ -127,7 +127,11 @@ interface ImageSearchDialogViewOuterProps {
   inLibrary: (node: Node) => boolean;
 }
 
-type ImageSearchDialogViewProps = ImageSearchDialogViewOuterProps & ImageDialogMixinProps & ImageDialogViewMixinProps;
+interface ImageSearchCollectionProps {
+  collection?: InternalLibraryItem[];
+}
+type ImageSearchDialogViewProps = ImageSearchDialogViewOuterProps & ImageDialogMixinProps & ImageDialogViewMixinProps
+                                  & ImageSearchCollectionProps;
 
 interface ImageSearchDialogViewOuterState {
   searching: boolean;
@@ -174,11 +178,16 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
   }
 
   public render() {
+    const collection = this.props.collection;
     const havePreviewImage = !!(this.props.selectedImage && this.props.selectedImage.image);
-    const showProviderMessage = !havePreviewImage && this.state.searchable && this.state.searched && (this.state.results.length > 0);
+    const showProviderMessage = !havePreviewImage && !collection && this.state.searchable && this.state.searched && (this.state.results.length > 0);
     return (
       <div className="image-search-dialog">
-        {havePreviewImage ? this.imageDialogViewMixin.renderPreviewImage() : this.renderDialogForm()}
+        {havePreviewImage ?
+          this.imageDialogViewMixin.renderPreviewImage() :
+            collection ?
+              this.renderCollection() :
+              this.renderDialogForm()}
         {showProviderMessage ?
            <div className="image-search-provider-message">
             <a href="https://pixabay.com/" target="_blank">{tr("~IMAGE-BROWSER.PROVIDER_MESSAGE")}</a>
@@ -204,6 +213,37 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
         </div>
       );
     }
+  }
+
+  private renderCollection() {
+    if (!this.props.collection) {
+      return;
+    }
+
+    const images: JSX.Element[] = [];
+    this.props.collection.forEach((item, i) => {
+      if (item.image && !this.handleIsDisabledInInternalLibrary(item)) {
+        images.push(<ImageSearchResultView key={i} imageInfo={item} isDisabled={this.handleIsDisabledInInternalLibrary} />);
+      }
+    });
+
+    return (
+      <div>
+        <div className="image-search-main-results full-height">
+          <div key="image-search-section-post-search" className="image-search-section" style={{height: "100%"}}>
+            {images.length > 0 ?
+              <div key="results" className="image-search-dialog-results">
+                {images}
+              </div> :
+              <div className="modal-dialog-alert">
+                {tr("~IMAGE-BROWSER.NO_IMAGES_REMAINING")}
+              </div>
+            }
+            {this.renderPagination()}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   private renderDialogForm() {

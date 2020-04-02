@@ -4,17 +4,20 @@ interface TabInfoSettings {
   label: string;
   component: JSX.Element | null;
   defined?: boolean;
+  divider?: boolean;
 }
 
 export class TabInfo {
   public readonly label: string;
   public readonly component: JSX.Element | null;
   public readonly defined: boolean;
+  public readonly divider: boolean;
 
   constructor(settings?: TabInfoSettings) {
     settings = settings || {label: "", component: null, defined: false};
     ({label: this.label, component: this.component} = settings);
     this.defined = !!settings.defined;
+    this.divider = !!settings.divider;
   }
 }
 
@@ -23,6 +26,7 @@ interface TabbedPanelTabViewProps {
   selected: boolean;
   label: string;
   index: number;
+  divider: boolean;       // a horizontal line with no associated tab
   onSelected: (index: number) => void;
 }
 
@@ -37,44 +41,35 @@ class TabbedPanelTabView extends React.Component<TabbedPanelTabViewProps, Tabbed
     if (this.props.selected) {
       classname += " tab-selected";
     }
+    if (this.props.divider) {
+      classname += " tab-divider";
+    }
     return <li className={classname} onClick={this.handleClicked}>{this.props.label}</li>;
   }
 
   private handleClicked = (e) => {
     e.preventDefault();
+    if (this.props.divider) {
+      return;
+    }
     return this.props.onSelected(this.props.index);
   }
 }
 
 interface TabbedPanelViewProps {
-  selectedTabIndex?: number;
-  onTabSelected?: (index: number) => void;
+  selectedTabIndex: number;
+  onTabSelected: (index: number) => void;
   clientClass?: string;
   onRenderBelowTabsComponent?: () => any; // TODO: get concrete type
   tabs: TabInfo[];
 }
 
-interface TabbedPanelViewState {
-  selectedTabIndex: number;
-}
-
-export class TabbedPanelView extends React.Component<TabbedPanelViewProps, TabbedPanelViewState> {
+export class TabbedPanelView extends React.Component<TabbedPanelViewProps> {
 
   public static displayName = "TabbedPanelView";
 
   public static Tab(settings?: TabInfoSettings) {
     return new TabInfo(settings);
-  }
-
-  constructor(props: TabbedPanelViewProps) {
-    super(props);
-    this.state = {selectedTabIndex: this.props.selectedTabIndex || 0};
-  }
-
-  public componentWillReceiveProps(nextProps) {
-    if (this.state.selectedTabIndex !== nextProps.selectedTabIndex) {
-      return this.selectedTab(nextProps.selectedTabIndex);
-    }
   }
 
   public render() {
@@ -90,18 +85,6 @@ export class TabbedPanelView extends React.Component<TabbedPanelViewProps, Tabbe
     );
   }
 
-  private selectedTab(index) {
-    return this.setState({selectedTabIndex: index || 0});
-  }
-
-  private handleTabSelected = (index) => {
-    if (this.props.onTabSelected) {
-      return this.props.onTabSelected(index);
-    } else {
-      return this.selectedTab(index);
-    }
-  }
-
   private renderTab(tab, index) {
     return (
       <TabbedPanelTabView
@@ -109,8 +92,9 @@ export class TabbedPanelView extends React.Component<TabbedPanelViewProps, Tabbe
         key={index}
         index={index}
         defined={tab.defined}
-        selected={index === this.state.selectedTabIndex}
-        onSelected={this.handleTabSelected}
+        divider={tab.divider}
+        selected={index === this.props.selectedTabIndex}
+        onSelected={this.props.onTabSelected}
       />
     );
   }
@@ -131,7 +115,7 @@ export class TabbedPanelView extends React.Component<TabbedPanelViewProps, Tabbe
         {this.props.tabs.map((tab, index) =>
           <div
             key={index}
-            style={{display: index === this.state.selectedTabIndex ? "block" : "none"}}
+            style={{display: index === this.props.selectedTabIndex ? "block" : "none"}}
           >
             {tab.component}
           </div>
