@@ -8,6 +8,7 @@ chai.config.includeStack = true;
 const Sinon = require("sinon");
 
 import { ImageDialogStore, ImageDialogActions } from "../src/code/stores/image-dialog-store";
+import { PaletteActions } from "../src/code/stores/palette-store";
 
 describe("ImageDialogStore", () => {
 
@@ -53,15 +54,17 @@ describe("ImageDialogStore", () => {
 
         it("shouldn't keep the dialog open", () => ImageDialogStore.keepShowing.should.equal(false));
 
+        // The close and callback feature is used when the user confirms a new palette selection
+        // after having dragged in the New Image node.
         it("should call 'close' when finishing", () => {
           this.mock.expects("close");
-          this.actions.cancel();
+          PaletteActions.update();
           this.clock.tick(1);
           this.mock.verify();
         });
 
         it("should call the callback when finishing", () => {
-          this.actions.cancel();
+          PaletteActions.update();
           this.clock.tick(1);
           this.callbackF.called.should.equal(true);
         });
