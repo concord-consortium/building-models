@@ -6,6 +6,7 @@ import { ImageMetadata } from "./preview-image-dialog-view";
 
 interface ImageMetadataViewProps {
   metadata: ImageMetadata;
+  small?: boolean;
   update: ({metadata: ImageMetadata}) => void;
 }
 
@@ -25,8 +26,12 @@ export class ImageMetadataView extends React.Component<ImageMetadataViewProps, I
 
   public render() {
     return (
-      <div className="image-metadata">
-        {this.props.metadata ? this.renderMetadata() : undefined}
+      <div className={`image-metadata${this.props.small ? " small" : ""}`}>
+        {this.props.metadata ?
+          this.props.small ?
+            this.renderSmallMetadata() :
+            this.renderMetadata() :
+          undefined}
       </div>
     );
   }
@@ -85,6 +90,18 @@ export class ImageMetadataView extends React.Component<ImageMetadataViewProps, I
         </div>
       );
     }
+  }
+
+  private renderSmallMetadata() {
+    const licenseName = this.props.metadata.license || "public domain";
+    const licenseData = licenses.getLicense(licenseName);
+    const { title }   = this.props.metadata;
+    return (
+      <div>
+        <div>{title}</div>
+        <div className="license">{tr("~METADATA.LICENSE")}: <a href={licenseData.link} target="_blank">{licenseData.label}</a></div>
+      </div>
+    );
   }
 
   private hostname() {

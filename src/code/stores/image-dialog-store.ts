@@ -78,7 +78,7 @@ export const ImageDialogStore = Reflux.createStore({
 
   onCancel() {
     this.resetPaletteItem();
-    return this.finish();
+    this._updateChanges();
   },
 
   invoke_callback() {

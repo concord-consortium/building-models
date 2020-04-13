@@ -19,6 +19,10 @@ node-well-tab-height = 30px
   z-index $node-z-index-offset + 1
   box-shadow 0px 1px 1px hsla(0,0,50,0.4)
   transition 0.2s
+  pointer-events all
+
+  .ui-draggable
+    cursor pointer
 
   .node-well
     padding 1em
@@ -59,9 +63,11 @@ node-well-tab-height = 30px
   max-width node-well-width
   z-index $node-z-index-offset + 3
   transition 0.2s
+  pointer-events none
   .tab-wrapper
     width 100%
     background-color hsla(1,1,1,0.0)
+    pointer-events all
     .top-node-palette-tab
       float right
       box-sizing border-box
@@ -77,6 +83,7 @@ node-well-tab-height = 30px
       padding 1em 2em
       z-index $node-z-index-offset + 3
       transition 0.2s
+      cursor pointer
       &.collapsed
         background-image url("../assets/img/bb-chrome/chevron-down.png")
         // top: palette-and-actions-height + global-nav-height + 30px
