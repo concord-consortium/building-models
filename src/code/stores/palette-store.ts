@@ -31,7 +31,8 @@ export interface PalleteItem {
 export const PaletteActions = Reflux.createActions(
   [
     "addToPalette", "selectPaletteIndex", "selectPaletteItem",
-    "restoreSelection", "itemDropped", "update", "delete"
+    "restoreSelection", "itemDropped", "update", "delete",
+    "addCollectionToPalette"
   ]
 );
 
@@ -200,7 +201,7 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
     }
   },
 
-  addToPalette(node) {
+  addToPalette(node: ImageInfo) {
     // PaletteItems always get added to library first
     this.addToLibrary(node);
     if (!this.inPalette(node)) {
@@ -210,7 +211,7 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
     }
   },
 
-  onAddToPalette(node) {
+  onAddToPalette(node: ImageInfo) {
     return this.undoManger.createAndExecuteCommand("addPaletteItem", {
       execute: () => {
         this.addToPalette(node);
@@ -224,6 +225,15 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
     );
   },
 
+  addCollectionToPalette(collection: InternalLibraryItem[]) {
+    this.undoManger.startCommandBatch();
+    collection.forEach((image: ImageInfo) => {
+      if (!this.inPalette(image)) {
+        this.onAddToPalette(image);
+      }
+    });
+    this.undoManger.endCommandBatch();
+  },
 
   onSelectPaletteIndex(index) {
     // @moveToFront(index) if we want to add the selected item to front

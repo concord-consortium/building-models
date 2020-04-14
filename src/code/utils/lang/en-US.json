@@ -147,6 +147,7 @@
     "~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP": "Drop image from desktop here",
     "~IMAGE-BROWSER.CHOOSE_FILE": "Or choose a file from your desktop:",
     "~IMAGE-BROWSER.PROVIDER_MESSAGE": "Image search courtesy of Pixabay",
+    "~IMAGE-BROWSER.ADD_ALL_IMAGES": "Add all images",
 
     "~COLOR.YELLOW": "Yellow",
     "~COLOR.DARK_BLUE": "Dark Blue",
