@@ -13,6 +13,7 @@ import * as React from "react";
  */
 
 import { ImageDialogActions, ImageDialogMixinProps, ImageDialogMixinState, ImageDialogMixin } from "../stores/image-dialog-store";
+import { PaletteActions } from "../stores/palette-store";
 
 // import { OpenClipArt } from "../utils/open-clipart";
 import { Pixabay } from "../utils/pixabay";
@@ -189,8 +190,12 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
               this.renderCollection() :
               this.renderDialogForm()}
         {showProviderMessage ?
-           <div className="image-search-provider-message">
+          <div className="image-search-provider-message">
             <a href="https://pixabay.com/" target="_blank">{tr("~IMAGE-BROWSER.PROVIDER_MESSAGE")}</a>
+          </div> : null}
+        {collection && !havePreviewImage ?
+          <div className="image-collection-bottom-bar">
+             <input className="small-button" type="submit" value={tr("~IMAGE-BROWSER.ADD_ALL_IMAGES")} onClick={this.handleAddAllImages(collection)}/>
           </div> : null}
       </div>
     );
@@ -363,6 +368,10 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
 
   private handleIsDisabledInExternalSearch = (node) => {
     return (this.props.inPalette(node)) || (this.props.inLibrary(node));
+  }
+
+  private handleAddAllImages = (collection: InternalLibraryItem[]) => () => {
+    PaletteActions.addCollectionToPalette(collection);
   }
 
 }
