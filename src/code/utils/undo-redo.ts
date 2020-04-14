@@ -72,6 +72,7 @@ export class UndoRedoManager {
       if (this.currentBatch.commands.length > 0) {
         this.commands.push(this.currentBatch);
         this.stackPosition++;
+        this._changed();
       }
       return this.currentBatch = null;
     }
