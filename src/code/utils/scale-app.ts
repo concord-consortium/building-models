@@ -20,6 +20,12 @@ const setScaling = (el: ElementCSSInlineStyle) => () => {
     el.style.height = trans.unscaledHeight + "px";
     el.style.transformOrigin = "top left";
     el.style.transform = "scale3d(" + trans.scale + "," + trans.scale + ",1)";
+
+    // if we have fullscreen help text, make it big
+    const helpText = document.getElementsByClassName("fullscreen-help")[0]  as unknown as ElementCSSInlineStyle;
+    if (helpText) {
+      helpText.style.fontSize = Math.round(Math.pow(Math.min(window.innerWidth, 500), 0.65)) + "px";
+    }
   } else {
     // Disable scaling in fullscreen mode.
     el.style.width = "100%";
