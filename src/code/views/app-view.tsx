@@ -33,6 +33,7 @@ import { Link } from "../models/link";
 import { GraphStoreClass } from "../stores/graph-store";
 import { NodeChangedValues } from "./node-inspector-view";
 import { InternalLibraryItem } from "../data/internal-library";
+import { FullScreenButton } from "./fullscreen-button";
 
 interface AppViewOuterProps {
   graphStore: GraphStoreClass;
@@ -183,6 +184,9 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
           {this.state.showingDialog ? <ImageBrowserView /* graphStore={this.props.graphStore} */ /> : null}
           <ModalPaletteDeleteView />
         </div>
+        {AppSettingsStore.settings.uiElements.fullscreenButton &&
+          <FullScreenButton />
+        }
         {this.state.iframed ? <BuildInfoView /> : null}
       </div>
     );

@@ -23,6 +23,7 @@ export interface UrlParams {
   simulation?: string;
   timestep?: number;
   integration?: string;
+  fullscreenButton?: string;    // whether to show fullscreen button (note: Document Store auomatically provides one)
   /**
    * Image Collections are groups of images that we will display in the New Image dialog
    * in separate tabs. If one or more collections are defined, they will appear at the top
