@@ -19,13 +19,13 @@ export class FullScreenButton extends React.Component<IProps, IState> {
 
   public componentDidMount() {
     if (screenfull.isEnabled) {
-      screenfull.on("change", () => {
-        const isFullscreen = (screenfull as any).isFullscreen;
-        this.setState({ isFullscreen });
-        if (this.props.onFullscreenChange) {
-          this.props.onFullscreenChange(isFullscreen);
-        }
-      });
+      screenfull.on("change", this.handleFullscreenChange);
+    }
+  }
+
+  public componentWillUnmount() {
+    if (screenfull.isEnabled) {
+      screenfull.off("change", this.handleFullscreenChange);
     }
   }
 
@@ -52,6 +52,14 @@ export class FullScreenButton extends React.Component<IProps, IState> {
   private toggleFullscreen() {
     if (screenfull.isEnabled) {
       screenfull.toggle();
+    }
+  }
+
+  private handleFullscreenChange = () => {
+    const isFullscreen = (screenfull as any).isFullscreen;
+    this.setState({ isFullscreen });
+    if (this.props.onFullscreenChange) {
+      this.props.onFullscreenChange(isFullscreen);
     }
   }
 }
