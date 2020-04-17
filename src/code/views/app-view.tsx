@@ -34,6 +34,7 @@ import { GraphStoreClass } from "../stores/graph-store";
 import { NodeChangedValues } from "./node-inspector-view";
 import { InternalLibraryItem } from "../data/internal-library";
 import { FullScreenButton } from "./fullscreen-button";
+import scaleApp from "../utils/scale-app";
 
 interface AppViewOuterProps {
   graphStore: GraphStoreClass;
@@ -63,6 +64,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
 
   public static displayName = "AppView";
 
+  private appContainer: HTMLDivElement | null;
   private inspectorPanel: InspectorPanelView | null;
 
   constructor(props: AppViewProps) {
@@ -110,6 +112,10 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     PaletteStore.listen(this.handlePaletteChange);
     CodapStore.listen(this.handleCodapStateChange);
     // LaraStore.listen(this.onLaraStateChange);  TODO: was in coffee but doesn't exist
+
+    if (AppSettingsStore.settings.uiElements.scaling && this.appContainer) {
+      scaleApp(this.appContainer);
+    }
   }
 
   public componentWillUnmount() {
@@ -134,7 +140,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     const renderGlobalNav = !this.state.iframed && (AppSettingsStore.settings.uiElements.globalNav !== false);
 
     return (
-      <div className="app">
+      <div className="app" ref={el => this.appContainer = el}>
         <div className={this.state.iframed ? "iframed-workspace" : "workspace"}>
           {renderGlobalNav ?
             <GlobalNavView
