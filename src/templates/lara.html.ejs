@@ -129,13 +129,20 @@
 
     phone.initialize();
 
-    phone.post("supportedFeatures", {
+    const supportedFeatures = {
       apiVersion: 1,
       features: {
         authoredState: true,
         interactiveState: true
       }
-    });
+    };
+
+    if (Sage.urlParams.scaling === "true") {
+      // notify LARA that we want to use screen aspect ratio as our aspect ratio
+      supportedFeatures.features.aspectRatio = screen.width / screen.height;
+    }
+
+    phone.post("supportedFeatures", supportedFeatures);
   </script>
 </body>
 </html>
