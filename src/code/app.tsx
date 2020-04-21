@@ -17,6 +17,7 @@ import { PaletteStore } from "./stores/palette-store";
 import { HashParams } from "./utils/hash-parameters";
 
 import * as $ from "jquery";
+import { urlParams } from "./utils/url-params";
 require("jquery-ui-dist/jquery-ui.js");
 const Touchpunch = require("./vendor/touchpunch.js");
 Touchpunch($);
@@ -78,4 +79,5 @@ const waitForAppView = (callback: () => void) => {
   },
 
   iframePhone: IframePhone,         // re-expose for external use
+  urlParams,
 };

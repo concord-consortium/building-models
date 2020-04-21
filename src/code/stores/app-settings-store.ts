@@ -86,6 +86,8 @@ export interface UIElements {
   actionBar: boolean;
   inspectorPanel: boolean;
   nodePalette: boolean;
+  fullscreenButton: boolean;
+  scaling: boolean;
 }
 
 export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
@@ -101,7 +103,9 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       globalNav: true,
       actionBar: true,
       inspectorPanel: true,
-      nodePalette: true
+      nodePalette: true,
+      fullscreenButton: false,
+      scaling: false,
     };
     const uiParams = HashParams.getParam("hide") || urlParams.hide;
     // For situations where some ui elements need to be hidden, this parameter can be specified.
@@ -112,6 +116,13 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
       uiElements.actionBar = uiParams.indexOf("actionBar") === -1;
       uiElements.inspectorPanel = uiParams.indexOf("inspectorPanel") === -1;
       uiElements.nodePalette = uiParams.indexOf("nodePalette") === -1;
+    }
+
+    if (HashParams.getParam("fullscreenButton") === "true" || urlParams.fullscreenButton === "true") {
+      uiElements.fullscreenButton = true;
+    }
+    if (HashParams.getParam("scaling") === "true" || urlParams.scaling === "true") {
+      uiElements.scaling = true;
     }
 
     const lockdown = (HashParams.getParam("lockdown") === "true") || (urlParams.lockdown === "true");
