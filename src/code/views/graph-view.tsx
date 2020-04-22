@@ -3,6 +3,8 @@ import * as ReactDOM from "react-dom";
 import * as _ from "lodash";
 import * as $ from "jquery";
 
+import { getViewScale } from "../utils/scale-app";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -168,6 +170,12 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
           height: $panel.height() || 0,
           offset: $panel.offset() || {left: 0, top: 0}
         };
+        const viewScale = getViewScale();
+
+        ui.position.top /= viewScale;
+        ui.position.left /= viewScale;
+        ui.offset.top /= viewScale;
+        ui.offset.left /= viewScale;
 
         const inPanel = (ui.offset.left >= panel.offset.left) &&
                   (ui.offset.top >= panel.offset.top) &&

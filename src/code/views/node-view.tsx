@@ -4,6 +4,8 @@ const log = require("loglevel");
 import * as React from "react";
 import * as $ from "jquery";
 
+import { getViewScale } from "../utils/scale-app";
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -444,6 +446,12 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleMove = (evt, extra) => {
+    const viewScale = getViewScale();
+    extra.position.top /= viewScale;
+    extra.position.left /= viewScale;
+    extra.offset.top /= viewScale;
+    extra.offset.left /= viewScale;
+
     this.props.onMove({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
@@ -457,6 +465,12 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleStop = (evt, extra) => {
+    const viewScale = getViewScale();
+    extra.position.top /= viewScale;
+    extra.position.left /= viewScale;
+    extra.offset.top /= viewScale;
+    extra.offset.left /= viewScale;
+
     return this.props.onMoveComplete({
       nodeKey: this.props.nodeKey,
       reactComponent: this,
