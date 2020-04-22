@@ -600,8 +600,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       // calculate selection box before calling setTimeout
       const selectBox = $.extend({}, this.state.selectBox);
       const offset = $(this.linkView!).offset() || {left: 0, top: 0};
-      selectBox.startX = e.pageX - offset.left;
-      selectBox.startY = e.pageY - offset.top;
+      const viewScale = getViewScale();
+      selectBox.startX = (e.pageX - offset.left) / viewScale;
+      selectBox.startY = (e.pageY - offset.top) / viewScale;
       selectBox.x = selectBox.startX;
       selectBox.y = selectBox.startY;
 
@@ -641,8 +642,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     if (this.state.drawingMarquee) {
       const offset = $(this.linkView!).offset() || {left: 0, top: 0};
       const selectBox = $.extend({}, this.state.selectBox);
-      selectBox.x = e.pageX - offset.left;
-      selectBox.y = e.pageY - offset.top;
+      const viewScale = getViewScale();
+      selectBox.x = (e.pageX - offset.left) / viewScale;
+      selectBox.y = (e.pageY  - offset.top) / viewScale;
       return this.setState({selectBox});
     }
   }
