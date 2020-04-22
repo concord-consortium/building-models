@@ -1,6 +1,8 @@
 import * as screenfull from "screenfull";
 import { DOMElement } from "react";
 
+let currentScale = 1;
+
 const getWindowTransforms = () => {
   const MAX_WIDTH = 2000;
   const width  = Math.max(window.innerWidth, Math.min(MAX_WIDTH, screen.width));
@@ -16,6 +18,7 @@ const getWindowTransforms = () => {
 const setScaling = (el: ElementCSSInlineStyle) => () => {
   if (!screenfull.isEnabled || !screenfull.isFullscreen) {
     const trans = getWindowTransforms();
+    currentScale = trans.scale;
     el.style.width = trans.unscaledWidth + "px";
     el.style.height = trans.unscaledHeight + "px";
     el.style.transformOrigin = "top left";
@@ -28,13 +31,18 @@ const setScaling = (el: ElementCSSInlineStyle) => () => {
     }
   } else {
     // Disable scaling in fullscreen mode.
+    currentScale = 1;
     el.style.width = "100%";
     el.style.height = "100%";
     el.style.transform = "scale3d(1,1,1)";
   }
 };
 
-export default function scaleApp(el: ElementCSSInlineStyle) {
+export function getViewScale() {
+  return currentScale;
+}
+
+export function scaleApp(el: ElementCSSInlineStyle) {
   const scaleElement = setScaling(el);
   scaleElement();
   window.addEventListener("resize", scaleElement);

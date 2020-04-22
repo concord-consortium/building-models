@@ -34,7 +34,7 @@ import { GraphStoreClass } from "../stores/graph-store";
 import { NodeChangedValues } from "./node-inspector-view";
 import { InternalLibraryItem } from "../data/internal-library";
 import { FullScreenButton } from "./fullscreen-button";
-import scaleApp from "../utils/scale-app";
+import { scaleApp } from "../utils/scale-app";
 
 interface AppViewOuterProps {
   graphStore: GraphStoreClass;
