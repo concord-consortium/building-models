@@ -63,6 +63,13 @@
  *
  */
 
+// Hack: Add a top-level zoom.
+// Issue: when instance.setZoom() is called, this fires a "zoom" event on all the listeners,
+// which includes the Katavorio drag-drop handler.
+// However, when we call instance.reset -- which we do on every update in Sage -- all the
+// listeners are removed. Thus the drag-drop handlers do not get informed of the zoom.
+var JSPLUMB_ZOOM = 1;
+
 (function() {
 
     var root = this;
@@ -1947,7 +1954,7 @@
 
         this._dragsByScope = {};
         this._dropsByScope = {};
-        var _zoom = 1,
+        var _zoom = JSPLUMB_ZOOM,
             _reg = function(obj, map) {
                 _each(obj, function(_obj) {
                     for(var i = 0; i < _obj.scopes.length; i++) {
@@ -3454,6 +3461,7 @@
 
         this.setZoom = function (z, repaintEverything) {
             _zoom = z;
+            JSPLUMB_ZOOM = z;
             _currentInstance.fire("zoom", _zoom);
             if (repaintEverything) _currentInstance.repaintEverything();
             return true;
@@ -5784,7 +5792,7 @@
                 _currentInstance.removeAllGroups();
                 _currentInstance.removeGroupManager();
                 _currentInstance.deleteEveryEndpoint();
-                _currentInstance.unbind();
+                // _currentInstance.unbind();
                 this.targetEndpointDefinitions = {};
                 this.sourceEndpointDefinitions = {};
                 connections.length = 0;
