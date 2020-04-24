@@ -3,6 +3,9 @@ import { DOMElement } from "react";
 
 let currentScale = 1;
 
+type ScaleListener = (scale: number) => void;
+const listeners: ScaleListener[] = [];
+
 const getWindowTransforms = () => {
   const MAX_WIDTH = 2000;
   const width  = Math.max(window.innerWidth, Math.min(MAX_WIDTH, screen.width));
@@ -36,7 +39,19 @@ const setScaling = (el: ElementCSSInlineStyle) => () => {
     el.style.height = "100%";
     el.style.transform = "scale3d(1,1,1)";
   }
+  listeners.forEach(l => l(currentScale));
 };
+
+export function registerScaleListener(listener: ScaleListener) {
+  listeners.push(listener);
+}
+
+export function removeScaleListener(listener: ScaleListener) {
+  const index = listeners.indexOf(listener);
+  if (index > -1) {
+    listeners.splice(index, 1);
+  }
+}
 
 export function getViewScale() {
   return currentScale;

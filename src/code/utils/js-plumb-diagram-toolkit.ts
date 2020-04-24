@@ -12,7 +12,7 @@ const log = require("loglevel");
 import { LinkColors } from "../utils/link-colors";
 import * as $ from "jquery";
 
-import { getViewScale } from "../utils/scale-app";
+import { getViewScale, registerScaleListener } from "../utils/scale-app";
 
 // const jsPlumb = require("../../vendor/jsPlumb");
 declare var jsPlumb;
@@ -48,7 +48,12 @@ export class DiagramToolkit {
       ConnectionsDetachable: true,
       DoNotThrowErrors: false
     });
+
     this.kit.setZoom(getViewScale(), true);
+    registerScaleListener((scale: number) => {
+      this.kit.setZoom(scale, true);
+    });
+
     this.kit.repaintEverything();
     this.registerListeners();
 
@@ -164,7 +169,6 @@ export class DiagramToolkit {
     if (this.kit) {
       this.kit.deleteEveryEndpoint();
       this.kit.reset();
-      this.kit.setZoom(getViewScale(), true);
       this.kit.repaintEverything();
       return this.registerListeners();
     } else {
