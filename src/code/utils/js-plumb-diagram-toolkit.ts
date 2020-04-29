@@ -12,6 +12,8 @@ const log = require("loglevel");
 import { LinkColors } from "../utils/link-colors";
 import * as $ from "jquery";
 
+import { getViewScale, registerScaleListener } from "../utils/scale-app";
+
 // const jsPlumb = require("../../vendor/jsPlumb");
 declare var jsPlumb;
 
@@ -46,6 +48,13 @@ export class DiagramToolkit {
       ConnectionsDetachable: true,
       DoNotThrowErrors: false
     });
+
+    this.kit.setZoom(getViewScale(), true);
+    registerScaleListener((scale: number) => {
+      this.kit.setZoom(scale, true);
+    });
+
+    this.kit.repaintEverything();
     this.registerListeners();
 
     // transfer-modifier links attach to fixed locations on the left or right of the flow node
@@ -160,6 +169,7 @@ export class DiagramToolkit {
     if (this.kit) {
       this.kit.deleteEveryEndpoint();
       this.kit.reset();
+      this.kit.repaintEverything();
       return this.registerListeners();
     } else {
       return log.info("No kit defined");
