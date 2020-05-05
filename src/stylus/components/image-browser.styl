@@ -19,6 +19,17 @@
     input[type=submit]
       modal-button()
 
+  .image-collection-bottom-bar
+    margin-top: -11px;
+    display: flex;
+    flex-direction: row-reverse;
+
+
+  input.small-button[type=submit]
+    modal-button($thickness:7px)
+    label-font(weight:bold, size:13px)
+    z-index: 10
+
   .image-search-dialog-results
     position absolute
     margin 16px 0px
@@ -54,6 +65,8 @@
     height 300px
     &.no-results
       height 260px
+    &.full-height
+      height 100%
     .image-search-section
       position relative
   .image-search-provider-message

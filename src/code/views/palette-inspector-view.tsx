@@ -56,12 +56,11 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
         </div>
         {this.state.selectedPaletteItem ?
           <div className="palette-about-image">
-            <div className="palette-about-image-title">
-              <i className="icon-codap-info" />
-              <span>{tr("~PALETTE-INSPECTOR.ABOUT_IMAGE")}</span>
-              <img src={this.state.selectedPaletteImage} />
-            </div>
-            {(this.state.palette.length !== 1) || !this.state.paletteItemHasNodes ?
+            <div className="palette-about-image-info">
+              {this.state.selectedPaletteItem.metadata
+                ? <ImageMetadataView small={true} metadata={this.state.selectedPaletteItem.metadata} update={PaletteActions.update} />
+                : undefined}
+              {(this.state.palette.length !== 1) || !this.state.paletteItemHasNodes ?
               <div className="palette-delete" onClick={this.handleDelete}>
                 {this.state.paletteItemHasNodes ?
                   <span>
@@ -74,10 +73,9 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
                     <label>{tr("~PALETTE-INSPECTOR.DELETE")}</label>
                   </span>}
               </div> : undefined}
-            <div className="palette-about-image-info">
-              {this.state.selectedPaletteItem.metadata
-                ? <ImageMetadataView metadata={this.state.selectedPaletteItem.metadata} update={PaletteActions.update} />
-                : undefined}
+            </div>
+            <div className="palette-about-image-title">
+              <img src={this.state.selectedPaletteImage} />
             </div>
           </div> : undefined}
       </div>

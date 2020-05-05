@@ -134,6 +134,7 @@
     "~IMAGE-BROWSER.SEARCHING_PAGE": "page %{page}",
     "~IMAGE-BROWSER.NO_EXTERNAL_FOUND": "No Pixabay results found for \"%{query}.\"",
     "~IMAGE-BROWSER.ALREADY-IN-PALETTE": "Already in palette",
+    "~IMAGE-BROWSER.NO_IMAGES_REMAINING": "No images remaining.",
     "~IMAGE-BROWSER.PREVIOUS": "‹ Previous",
     "~IMAGE-BROWSER.NEXT": "Next ›",
 
@@ -146,6 +147,7 @@
     "~IMAGE-BROWSER.DROP_IMAGE_FROM_DESKTOP": "Drop image from desktop here",
     "~IMAGE-BROWSER.CHOOSE_FILE": "Or choose a file from your desktop:",
     "~IMAGE-BROWSER.PROVIDER_MESSAGE": "Image search courtesy of Pixabay",
+    "~IMAGE-BROWSER.ADD_ALL_IMAGES": "Add all images",
 
     "~COLOR.YELLOW": "Yellow",
     "~COLOR.DARK_BLUE": "Dark Blue",

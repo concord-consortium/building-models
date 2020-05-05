@@ -1,0 +1,27 @@
+{
+  "title": "Population",
+  "images": [
+    {
+      "id": "mouse",
+      "title": "Mouse",
+      "image": "image-collections/cbio/img/mouse.png",
+      "metadata": {
+        "source": "internal",
+        "title": "Mouse",
+        "link": "https://cdn.pixabay.com/photo/2013/07/12/17/39/rat-152162_1280.png",
+        "license": "public domain"
+      }
+    },
+    {
+      "id": "hawk",
+      "title": "Hawk",
+      "image": "image-collections/cbio/img/hawk.png",
+      "metadata": {
+        "source": "internal",
+        "title": "Hawk",
+        "link": "https://cdn.pixabay.com/photo/2016/04/01/11/29/animal-1300361_1280.png",
+        "license": "public domain"
+      }
+    }
+  ]
+}

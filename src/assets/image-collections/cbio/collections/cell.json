@@ -1,0 +1,27 @@
+{
+  "title": "Cell",
+  "images": [
+    {
+      "id": "cell",
+      "title": "Cell",
+      "image": "image-collections/cbio/img/cell.png",
+      "metadata": {
+        "source": "internal",
+        "title": "Cell",
+        "link": "https://cdn.pixabay.com/photo/2013/07/13/10/15/bacteria-156870_1280.png",
+        "license": "public domain"
+      }
+    },
+    {
+      "id": "dna",
+      "title": "DNA",
+      "image": "image-collections/cbio/img/dna.png",
+      "metadata": {
+        "source": "internal",
+        "title": "DNA",
+        "link": "https://cdn.pixabay.com/photo/2014/03/25/15/24/dna-296744_1280.png",
+        "license": "public domain"
+      }
+    }
+  ]
+}

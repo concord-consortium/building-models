@@ -9,6 +9,7 @@ import "../stylus/app.styl";
 
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+const IframePhone = require("iframe-phone");
 
 import { AppView } from "./views/app-view";
 import { GraphStore } from "./stores/graph-store";
@@ -16,6 +17,7 @@ import { PaletteStore } from "./stores/palette-store";
 import { HashParams } from "./utils/hash-parameters";
 
 import * as $ from "jquery";
+import { urlParams } from "./utils/url-params";
 require("jquery-ui-dist/jquery-ui.js");
 const Touchpunch = require("./vendor/touchpunch.js");
 Touchpunch($);
@@ -74,5 +76,8 @@ const waitForAppView = (callback: () => void) => {
     waitForAppView(() => {
       appView.props.graphStore.addChangeListener(listener);
     });
-  }
+  },
+
+  iframePhone: IframePhone,         // re-expose for external use
+  urlParams,
 };
