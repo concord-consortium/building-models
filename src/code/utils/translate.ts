@@ -54,7 +54,7 @@ const lang = urlParams.lang || getFirstBrowserLanguage();
 const baseLang = getBaseLanguage(lang || "");
 const defaultLang = lang && translations[lang] ? lang : (baseLang && translations[baseLang] ? baseLang : "en");
 
-console.log(`building-models: using ${defaultLang} for translation (lang is ${lang})`);
+console.log(`building-models: using ${defaultLang} for translation (lang is "${urlParams.lang}" || "${getFirstBrowserLanguage()}")`);
 
 const varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
 
