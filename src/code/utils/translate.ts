@@ -23,10 +23,7 @@ const languageFiles = {
 };
 
 const getBaseLanguage = (langKey: string) => {
-  const dashLoc = langKey.indexOf("-");
-  if (dashLoc !== -1) {
-    return langKey.substring(0, dashLoc);
-  }
+  return langKey.split("-")[0];
 };
 
 const getFirstBrowserLanguage = () => {
@@ -45,7 +42,7 @@ _.each(languageFiles, (langContents, langKey) => {
   translations[langKey] = langContents;
   // accept full key with region code or just the language code
   const baseLang = getBaseLanguage(langKey);
-  if (baseLang) {
+  if (!translations[baseLang]) {
     translations[baseLang] = langContents;
   }
 });
