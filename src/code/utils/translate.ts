@@ -10,22 +10,20 @@ const _ = require("lodash");
 import { urlParams } from "./url-params";
 
 const languageFiles = {
-  "de":    require("./lang/de.json"),    // German
-  "el":    require("./lang/el.json"),    // Greek
-  "en-US": require("./lang/en-US.json"), // US English
-  "es":    require("./lang/es.json"),    // Spanish
-  "he":    require("./lang/he.json"),    // Hebrew
-  "nb":    require("./lang/nb.json"),    // Norwegian Bokmål
-  "nn":    require("./lang/nn.json"),    // Norwegian Nynorsk
-  "tr":    require("./lang/tr.json"),    // Turkish
-  "zh-TW": require("./lang/zh-TW.json"), // Chinese (Taiwan)
+  "de":      require("./lang/de.json"),      // German
+  "el":      require("./lang/el.json"),      // Greek
+  "en-US":   require("./lang/en-US.json"),   // US English
+  "es":      require("./lang/es.json"),      // Spanish
+  "he":      require("./lang/he.json"),      // Hebrew
+  "nb":      require("./lang/nb.json"),      // Norwegian Bokmål
+  "nn":      require("./lang/nn.json"),      // Norwegian Nynorsk
+  "tr":      require("./lang/tr.json"),      // Turkish
+  "zh":      require("./lang/zh-HANS.json"), // Chinese (Simplified)
+  "zh-TW":   require("./lang/zh-TW.json"),   // Chinese (Traditional)
 };
 
 const getBaseLanguage = (langKey: string) => {
-  const dashLoc = langKey.indexOf("-");
-  if (dashLoc !== -1) {
-    return langKey.substring(0, dashLoc);
-  }
+  return langKey.split("-")[0];
 };
 
 const getFirstBrowserLanguage = () => {
@@ -44,7 +42,7 @@ _.each(languageFiles, (langContents, langKey) => {
   translations[langKey] = langContents;
   // accept full key with region code or just the language code
   const baseLang = getBaseLanguage(langKey);
-  if (baseLang) {
+  if (!translations[baseLang]) {
     translations[baseLang] = langContents;
   }
 });
@@ -52,6 +50,8 @@ _.each(languageFiles, (langContents, langKey) => {
 const lang = urlParams.lang || getFirstBrowserLanguage();
 const baseLang = getBaseLanguage(lang || "");
 const defaultLang = lang && translations[lang] ? lang : (baseLang && translations[baseLang] ? baseLang : "en");
+
+console.log(`building-models: using ${defaultLang} for translation (lang is "${urlParams.lang}" || "${getFirstBrowserLanguage()}")`);
 
 const varRegExp = /%\{\s*([^}\s]*)\s*\}/g;
 
