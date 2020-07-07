@@ -978,7 +978,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       nodes: nodeExports,
       links: linkExports,
       settings,
-      topology
+      customReportFields: {
+        version: 1,
+        values: topology
+      }
     };
     return data;
   },

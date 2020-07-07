@@ -119,3 +119,25 @@ To update the icon fonts used in this project:
 
 If you want to disable Rollbar integration on your development machine just add a `disableRollbar` local storage option with the value `true` (as a string, all local storage values are strings).  This value is checked in the index.html file prior to defining
 the Rollbar configuration object and loading the Rollbar remote Javascript.
+
+## Adding Custom Report Fields for the Topology values
+
+To add the topology values to a custom research report add the following to the authored state of the interactive.
+
+```
+{"customReportFields": {
+  "version": 1,
+  "fields": [
+    {"id": "links", "columnHeading": "Links"},
+    {"id": "nodes", "columnHeading": "Nodes"},
+    {"id": "unconnectedNodes", "columnHeading": "Unconnected Nodes"},
+    {"id": "collectorNodes", "columnHeading": "Collector Nodes"},
+    {"id": "multiLinkTargetNodes", "columnHeading": "Multi Link Target Nodes"},
+    {"id": "graphs", "columnHeading": "Graphs"},
+    {"id": "linearGraphs", "columnHeading": "Linear Graphs"},
+    {"id": "feedbackGraphs", "columnHeading": "Feedback Graphs"},
+    {"id": "branchedGraphs", "columnHeading": "Branched Graphs"},
+    {"id": "multiPathGraphs", "columnHeading": "Multi Path Graphs"}
+  ]
+}}
+```

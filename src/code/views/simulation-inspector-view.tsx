@@ -150,7 +150,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
   }
   private showTopology = (e) => {
     const state = GraphStore.serializeGraph({});
-    alert(JSON.stringify(state.topology, null, 3));
+    alert(JSON.stringify(state.customReportFields.values, null, 3));
   }
 
   private handleCapNodeValues = (e) => {
