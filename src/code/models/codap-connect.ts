@@ -70,6 +70,7 @@ export class CodapConnect {
   private _attrsAreLoaded: boolean;
   private guidePollerInterval: number | null = null;
   private guideComponentId: number | null = null;
+  private id: any;
 
   constructor(context) {
     this.codapRequestHandler = this.codapRequestHandler.bind(this);
@@ -129,6 +130,8 @@ export class CodapConnect {
             this.standaloneMode = true;
             this.graphStore.setCodapStandaloneMode(true);
           }
+
+          this.id = frame ? frame.values.id : undefined;
 
           // get the current list of guide items
           this.getGuideItems();
@@ -908,6 +911,16 @@ export class CodapConnect {
         }
       }
     });
+  }
+
+  public selectSelf() {
+    if (this.id) {
+      this.codapPhone.call({
+        action: "notify",
+        resource: `component[${this.id}]`,
+        values: {request: "select"}
+      });
+    }
   }
 
   private getTimeUnit() {

@@ -35,6 +35,7 @@ import { LinkColors } from "../utils/link-colors";
 import { Mixer } from "../mixins/components";
 import { Link } from "../models/link";
 import { SelectionManager } from "../models/selection-manager";
+import { selectSelf } from "../utils/select-self";
 
 interface GraphViewOuterProps {
   selectionManager: SelectionManager;
@@ -618,6 +619,12 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       // see https://www.pivotaltracker.com/story/show/164438776
       setTimeout(deselectAction, 1);
     }
+
+    // When embedded in CODAP any click on this component sends a message to CODAP to select
+    // the app which will unselect any existing other CODAP component.
+    // This is also called in the main appView but also must be called here as jsPlumb
+    // adds a click handler that stops the top level handler from being called.
+    selectSelf();
   }
 
   private handleMouseUp = (e) => {
