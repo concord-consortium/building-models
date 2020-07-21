@@ -166,7 +166,7 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
     if (_.includes([8, 46], e.which) && !this.titleUpdated) {
       const canDeleteWhenEmpty = this.props.node.addedThisSession && !this.titleUpdated;
       if (canDeleteWhenEmpty) {
-        return this.props.graphStore.removeNode(this.props.nodeKey);
+        return this.props.graphStore.removeNode(this.props.nodeKey, {logEvent: true});
       }
     // 13 is enter
     } else if (e.which === 13) {
@@ -265,6 +265,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   private lastClickLinkTime;
   private initialTitle: string;
   private node: HTMLDivElement | null;
+  private logValueLogTimeout;
 
   constructor(props: NodeViewProps) {
     super(props);
@@ -490,14 +491,14 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleChangeValue = (newValue) => {
-    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {initialValue: newValue});
+    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {initialValue: newValue}, {logEvent: true});
   }
 
   private handleChangeTitle = (newTitle, isComplete) => {
     if (isComplete) { newTitle = this.props.graphStore.ensureUniqueTitle(this.props.data, newTitle); }
     this.props.graphStore.startNodeEdit();
     log.info(`Title is changing to ${newTitle}`);
-    return this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {title: newTitle});
+    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {title: newTitle}, {logEvent: true});
   }
 
   private handleStartEditing = () => {

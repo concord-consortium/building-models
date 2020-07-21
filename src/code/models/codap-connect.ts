@@ -923,6 +923,17 @@ export class CodapConnect {
     }
   }
 
+  public log(formatStr: string, replaceArgs: any[]) {
+    this.codapPhone.call({
+      action: "notify",
+      resource: "logMessage",
+      values: {
+        formatStr,
+        replaceArgs
+      }
+    });
+  }
+
   private getTimeUnit() {
     let timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
     if (AppSettingsStore.settings.simulationType === SimulationType.static) {

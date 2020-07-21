@@ -243,7 +243,7 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
 
   private handleUpdateAccumulatorChecked = (evt) => {
     const value = evt.target.checked;
-    this.props.graphStore.changeNode({isAccumulator: value});
+    this.props.graphStore.changeNode({isAccumulator: value}, undefined, {logEvent: true});
     return SimulationActions.toggledCollectorTo(value);
   }
 

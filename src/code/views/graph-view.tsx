@@ -310,7 +310,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       addedThisSession: true
     });
 
-    this.props.graphStore.addNode(newNode);
+    this.props.graphStore.addNode(newNode, {logEvent: true});
     return this.props.graphStore.editNode(newNode.key);
   }
 
@@ -360,7 +360,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
   }
 
   private handleNodeDeleted = (node_event) => {
-    return this.handleEvent(() => GraphStore.removeNode(node_event.nodeKey));
+    return this.handleEvent(() => GraphStore.removeNode(node_event.nodeKey, {logEvent: true}));
   }
 
   private handleConnect = (info, evnt) => {
