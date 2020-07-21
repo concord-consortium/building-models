@@ -10,6 +10,6 @@ export const logEvent = (event: string, parameters: object = {}) => {
 
   const codapConnect = CodapConnect.instance("building-models");
   if (codapConnect.log) {
-    codapConnect.log(formatStr, replaceArgs);
+    codapConnect.log(event, replaceArgs);
   }
 };
