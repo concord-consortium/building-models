@@ -934,7 +934,7 @@ export class CodapConnect {
     });
   }
 
-  private getTimeUnit() {
+  public getTimeUnit() {
     let timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
     if (AppSettingsStore.settings.simulationType === SimulationType.static) {
       timeUnit = tr("~CODAP.DATA.SAMPLE_COLUMN_NAME");

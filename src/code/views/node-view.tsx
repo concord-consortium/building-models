@@ -31,6 +31,7 @@ import { Node} from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
 import { SelectionManager } from "../models/selection-manager";
 import { stepSize } from "../utils/step-size";
+import { logEvent } from "../utils/logger";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
@@ -534,7 +535,8 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private handleGraphClick = (attributeName) => {
     const codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
-    return codapConnect.createGraph(attributeName);
+    codapConnect.createGraph(attributeName);
+    logEvent("graph created", {horizontal: codapConnect.getTimeUnit(), vertical: attributeName});
   }
 
   private handleCODAPAttributeDrag = (evt, attributeName) => {
