@@ -266,7 +266,6 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   private lastClickLinkTime;
   private initialTitle: string;
   private node: HTMLDivElement | null;
-  private logValueLogTimeout;
 
   constructor(props: NodeViewProps) {
     super(props);
