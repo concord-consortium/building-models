@@ -53,6 +53,10 @@ interface LogOptions {
   logEvent?: boolean;
 }
 
+interface UndoRedoOptions {
+  skipUndoRedo?: boolean;
+}
+
 export declare class GraphStoreClass extends StoreClass {
   public nodeKeys: NodeMap;
   public readonly undoRedoManager: UndoRedoManager;
@@ -87,12 +91,12 @@ export declare class GraphStoreClass extends StoreClass {
   public hasLink(link: Link): boolean;
   public hasNode(node: Node): boolean;
   public importNode(nodeSpec: any): Node;
-  public importLink(linkSpec: any): Link;
-  public addLink(link: Link): void;
+  public importLink(linkSpec: any, options?: LogOptions & UndoRedoOptions): Link;
+  public addLink(link: Link, options?: LogOptions & UndoRedoOptions): void;
   public removeLink(link: Link, options?: LogOptions): void;
   public isUniqueTitle(title: string, skipNode: boolean, nodes?: Node[]): boolean;
   public ensureUniqueTitle(node: Node, newTitle: string): string;
-  public addNode(node: Node, options?: LogOptions): void;
+  public addNode(node: Node, options?: LogOptions & UndoRedoOptions): void;
   public removeNode(nodeKey: string, options?: LogOptions): void;
   public moveNodeCompleted(nodeKey: string, leftDiff: number, topDiff: number): void;
   public moveNode(nodeKey: string, leftDiff: number, topDiff: number): void;
@@ -331,7 +335,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     });
   },
 
-  importLink(linkSpec, options: LogOptions = {}) {
+  importLink(linkSpec, options: LogOptions & UndoRedoOptions = {}) {
     let transferNode;
     const sourceNode: Node = this.nodeKeys[linkSpec.sourceNode];
     const targetNode: Node = this.nodeKeys[linkSpec.targetNode];
@@ -348,13 +352,16 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return link;
   },
 
-  addLink(link, options: LogOptions = {}) {
+  addLink(link, options: LogOptions & UndoRedoOptions = {}) {
     this.endNodeEdit();
-    return this.undoRedoManager.createAndExecuteCommand("addLink", {
-      execute: () => this._addLink(link, options),
-      undo: () => this._removeLink(link, options)
+    if (options.skipUndoRedo) {
+      this._addLink(link, options);
+    } else {
+      this.undoRedoManager.createAndExecuteCommand("addLink", {
+        execute: () => this._addLink(link, options),
+        undo: () => this._removeLink(link, options)
+      });
     }
-    );
   },
 
   _addLink(link, options: LogOptions = {}) {
@@ -430,22 +437,26 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return newTitle;
   },
 
-  addNode(node, options: LogOptions = {}) {
+  addNode(node, options: LogOptions & UndoRedoOptions = {}) {
     this.endNodeEdit();
     node.title = this.ensureUniqueTitle(node);
-    this.undoRedoManager.createAndExecuteCommand("addNode", {
-      execute: () => {
-        this._addNode(node, options);
-      },
-      undo: () => {
-        // Remove related variable from CODAP. Note that this is not part of the _removeNode.
-        // When we undo "add" operation, it makes perfect sense to cleanup CODAP attribute.
-        // However, when node was around for some time, there's some data, and user deletes it, it's safer
-        // to leave this data around. User might want to delete it or not.
-        CodapConnect.instance(DEFAULT_CONTEXT_NAME).sendDeleteAttribute(node);
-        this._removeNode(node, options);
-      }
-    });
+    if (options.skipUndoRedo) {
+      this._addNode(node, options);
+    } else {
+      this.undoRedoManager.createAndExecuteCommand("addNode", {
+        execute: () => {
+          this._addNode(node, options);
+        },
+        undo: () => {
+          // Remove related variable from CODAP. Note that this is not part of the _removeNode.
+          // When we undo "add" operation, it makes perfect sense to cleanup CODAP attribute.
+          // However, when node was around for some time, there's some data, and user deletes it, it's safer
+          // to leave this data around. User might want to delete it or not.
+          CodapConnect.instance(DEFAULT_CONTEXT_NAME).sendDeleteAttribute(node);
+          this._removeNode(node, options);
+        }
+      });
+    }
   },
 
   removeNode(nodeKey, options: LogOptions = {}) {
@@ -1001,11 +1012,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   },
 
   loadData(data) {
-    log.info("json success");
     const importer = new Importer(this, AppSettingsStore, PaletteStore);
     importer.importData(data);
     this.resetSimulation();
-    return this.undoRedoManager.clearHistory();
+    this.undoRedoManager.clearHistory();
   },
 
   loadDataFromUrl: url => {
