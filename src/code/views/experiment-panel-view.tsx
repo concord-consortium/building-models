@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import { SimulationActions, SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
 import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
+import { logEvent } from "../utils/logger";
 
 interface ExperimentPanelViewOuterProps {
   disabled: boolean;
@@ -54,7 +55,9 @@ export class ExperimentPanelView extends Mixer<ExperimentPanelViewProps, Experim
 
   private handleIncrement = () => {
     if (!this.props.disabled) {
+      const experimentNumber = this.state.experimentNumber + 1;
       SimulationActions.createExperiment();
+      logEvent("incremented experiment number", {experimentNumber});
     }
   }
 }
