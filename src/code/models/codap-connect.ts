@@ -70,6 +70,7 @@ export class CodapConnect {
   private _attrsAreLoaded: boolean;
   private guidePollerInterval: number | null = null;
   private guideComponentId: number | null = null;
+  private id: any;
 
   constructor(context) {
     this.codapRequestHandler = this.codapRequestHandler.bind(this);
@@ -129,6 +130,8 @@ export class CodapConnect {
             this.standaloneMode = true;
             this.graphStore.setCodapStandaloneMode(true);
           }
+
+          this.id = frame ? frame.values.id : undefined;
 
           // get the current list of guide items
           this.getGuideItems();
@@ -910,7 +913,28 @@ export class CodapConnect {
     });
   }
 
-  private getTimeUnit() {
+  public selectSelf() {
+    if (this.id) {
+      this.codapPhone.call({
+        action: "notify",
+        resource: `component[${this.id}]`,
+        values: {request: "select"}
+      });
+    }
+  }
+
+  public log(formatStr: string, replaceArgs: any[]) {
+    this.codapPhone.call({
+      action: "notify",
+      resource: "logMessage",
+      values: {
+        formatStr,
+        replaceArgs
+      }
+    });
+  }
+
+  public getTimeUnit() {
     let timeUnit = TimeUnits.toString(SimulationStore.stepUnits(), true);
     if (AppSettingsStore.settings.simulationType === SimulationType.static) {
       timeUnit = tr("~CODAP.DATA.SAMPLE_COLUMN_NAME");

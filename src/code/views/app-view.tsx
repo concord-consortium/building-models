@@ -35,6 +35,7 @@ import { NodeChangedValues } from "./node-inspector-view";
 import { InternalLibraryItem } from "../data/internal-library";
 import { FullScreenButton } from "./fullscreen-button";
 import { scaleApp } from "../utils/scale-app";
+import { selectSelf } from "../utils/select-self";
 
 interface AppViewOuterProps {
   graphStore: GraphStoreClass;
@@ -93,6 +94,8 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
       standaloneMode: urlParams.standalone === "true"
     };
     this.setInitialState(outerState, ImageDialogMixin.InitialState(), AppSettingsMixin.InitialState());
+
+    this.handleWindowClick = this.handleWindowClick.bind(this);
   }
 
   public componentDidMount() {
@@ -116,6 +119,8 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     if (AppSettingsStore.settings.uiElements.scaling && this.appContainer) {
       scaleApp(this.appContainer);
     }
+
+    window.addEventListener("click", this.handleWindowClick, true);
   }
 
   public componentWillUnmount() {
@@ -123,6 +128,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     super.componentWillUnmount();
 
     this.addDeleteKeyHandler(false);
+    window.removeEventListener("click", this.handleWindowClick, true);
   }
 
   public componentDidUpdate(prevProps, prevState, prevContext) {
@@ -328,5 +334,13 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
         }
       }
     });
+  }
+
+  private handleWindowClick() {
+    // When embedded in CODAP any click on the window sends a message to CODAP to select
+    // the app which will unselect any existing other CODAP component.
+    // This is also called in the graphView as jsPlumb adds a click handler that
+    // stops this handler from being called.
+    selectSelf();
   }
 }

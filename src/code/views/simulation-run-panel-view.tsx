@@ -11,6 +11,7 @@ import { ExperimentPanelView } from "./experiment-panel-view";
 import { SimulationMixin, SimulationMixinState } from "../stores/simulation-store";
 import { AppSettingsMixin, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
+import { logEvent } from "../utils/logger";
 
 
 interface SimulationRunPanelViewOuterProps {}
@@ -60,6 +61,10 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
     if (!this.state.simulationPanelExpanded) { wrapperClasses += " closed"; }
     const disabled = (this.state.isRecording && !this.state.isRecordingOne) || !this.state.modelIsRunnable;
     const experimentDisabled = !this.state.modelIsRunnable || this.state.isRecordingPeriod;
+    const onClick = () => {
+      SimulationActions.recordOne();
+      logEvent("record 1 data point pressed");
+    };
     return (
       <div className={wrapperClasses}>
         <div className="vertical">
@@ -68,7 +73,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
             ? this.renderRecordForCollectors()
             : <div className="horizontal">
                 <RecordButtonView
-                  onClick={SimulationActions.recordOne}
+                  onClick={onClick}
                   disabled={disabled}
                   recording={false}
                   includeLight={false}
@@ -89,13 +94,15 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
   }
 
   private renderRecordForCollectors() {
-    let recordAction = SimulationActions.recordPeriod;
-    if (this.state.isRecording) {
-      recordAction = () => undefined;
-    }
+    const onClick = () => {
+      if (!this.state.isRecording) {
+        SimulationActions.recordPeriod();
+        logEvent("record timeseries");
+      }
+    };
 
     const props = {
-      onClick: recordAction,
+      onClick,
       includeLight: false,
       recording: this.state.isRecording,
       disabled: !this.state.modelIsRunnable
@@ -132,12 +139,19 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
 
   private renderRecordStreamButton() {
     let recordAction = SimulationActions.recordStream;
+    let logParams: object = {started: true};
     if (this.state.isRecording) {
       recordAction = SimulationActions.stopRecording;
+      logParams = {stopped: true};
     }
 
+    const onClick = () => {
+      recordAction();
+      logEvent("record continuously pressed", logParams);
+    };
+
     const props = {
-      onClick: recordAction,
+      onClick,
       includeLight: true,
       recording: this.state.isRecordingStream,
       disabled: !this.state.modelIsRunnable || this.state.isRecordingOne
@@ -171,14 +185,18 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
   }
 
   private handleSetDuration = (e) => {
-    SimulationActions.setDuration(parseInt(e.target.value, 10));
+    const duration = parseInt(e.target.value, 10);
+    SimulationActions.setDuration(duration);
+    logEvent("steps changed", {steps: duration});
   }
 
   private handleToggle = () => {
+    const logParams = this.state.simulationPanelExpanded ? {closed: true} : {opened: true};
     if (this.state.simulationPanelExpanded) {
       SimulationActions.collapseSimulationPanel();
     } else {
       SimulationActions.expandSimulationPanel();
     }
+    logEvent("simulate pressed", logParams);
   }
 }

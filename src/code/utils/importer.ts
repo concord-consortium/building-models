@@ -51,14 +51,14 @@ export class Importer {
       const node = this.importNode(nodespec);
       // ensure id matches key for imported documents
       node.id = node.key;
-      this.graphStore.addNode(node);
+      this.graphStore.addNode(node, {skipUndoRedo: true});
     }
     // prevent unused default return value
   }
 
   public importLinks(links) {
     for (const link of links) {
-      this.graphStore.importLink(link);
+      this.graphStore.importLink(link, {skipUndoRedo: true});
       // ensure id matches key for imported documents
       link.id = link.key;
     }

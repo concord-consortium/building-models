@@ -36,6 +36,7 @@ import { GraphView } from "../views/graph-view";
 import { InspectorPanelActions } from "./inspector-panel-store";
 import { getTopology } from "../utils/topology-tagger";
 import { urlParams } from "../utils/url-params";
+import { logEvent } from "../utils/logger";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -46,6 +47,14 @@ interface GraphSettings {
 
 interface NodeMap {
   [key: string]: Node;
+}
+
+interface LogOptions {
+  logEvent?: boolean;
+}
+
+interface UndoRedoOptions {
+  skipUndoRedo?: boolean;
 }
 
 export declare class GraphStoreClass extends StoreClass {
@@ -82,13 +91,13 @@ export declare class GraphStoreClass extends StoreClass {
   public hasLink(link: Link): boolean;
   public hasNode(node: Node): boolean;
   public importNode(nodeSpec: any): Node;
-  public importLink(linkSpec: any): Link;
-  public addLink(link: Link): void;
-  public removeLink(link: Link): void;
+  public importLink(linkSpec: any, options?: LogOptions & UndoRedoOptions): Link;
+  public addLink(link: Link, options?: LogOptions & UndoRedoOptions): void;
+  public removeLink(link: Link, options?: LogOptions): void;
   public isUniqueTitle(title: string, skipNode: boolean, nodes?: Node[]): boolean;
   public ensureUniqueTitle(node: Node, newTitle: string): string;
-  public addNode(node: Node): void;
-  public removeNode(nodeKey: string): void;
+  public addNode(node: Node, options?: LogOptions & UndoRedoOptions): void;
+  public removeNode(nodeKey: string, options?: LogOptions): void;
   public moveNodeCompleted(nodeKey: string, leftDiff: number, topDiff: number): void;
   public moveNode(nodeKey: string, leftDiff: number, topDiff: number): void;
   public selectedNodes(): Node[];
@@ -96,10 +105,10 @@ export declare class GraphStoreClass extends StoreClass {
   public editingNode(): Node | null;
   public editNode(nodeKey: string): Node;
   public selectNode(nodeKey: string): Node;
-  public changeNode(data: any, node?: Node): void;
+  public changeNode(data: any, node?: Node, options?: LogOptions): void;
   public changeNodeOutsideUndoRedo(node: Node, data: any, notifyCodap: boolean): void;
-  public changeNodeProperty(property: string, value: any, node: Node): void;
-  public changeNodeWithKey(key: string, data: any): void;
+  public changeNodeProperty(property: string, value: any, node: Node, options?: LogOptions): void;
+  public changeNodeWithKey(key: string, data: any, options?: LogOptions): void;
   public startNodeEdit(): void;
   public endNodeEdit(): void;
   public clickLink(link: Link, multipleSelectionsAllowed: boolean): void;
@@ -150,6 +159,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     this.usingCODAP = false;
     this.usingLara = false;
     this.codapStandaloneMode = false;
+
+    this.logValueLogTimeout = 0;
 
     return this.lastRunModel = "";
   },   // string description of the model last time we ran simulation
@@ -310,10 +321,24 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return node;
   },
 
-  importLink(linkSpec) {
+  _logLinkEvent(event: string, link: Link, extra: object = {}) {
+    const nodeType = (node: Node) => node.isAccumulator ? "collector" : (node.isTransfer ? "flow" : "value");
+    logEvent(event, {
+      id: link.id,
+      startingId: link.sourceNode.id,
+      startingName: link.sourceNode.title,
+      startingType: nodeType(link.sourceNode),
+      endingId: link.targetNode.id,
+      endingName: link.targetNode.title,
+      endingType: nodeType(link.targetNode),
+      ...extra
+    });
+  },
+
+  importLink(linkSpec, options: LogOptions & UndoRedoOptions = {}) {
     let transferNode;
-    const sourceNode = this.nodeKeys[linkSpec.sourceNode];
-    const targetNode = this.nodeKeys[linkSpec.targetNode];
+    const sourceNode: Node = this.nodeKeys[linkSpec.sourceNode];
+    const targetNode: Node = this.nodeKeys[linkSpec.targetNode];
     if (linkSpec.transferNode) { transferNode = this.nodeKeys[linkSpec.transferNode]; }
     linkSpec.sourceNode = sourceNode;
     linkSpec.targetNode = targetNode;
@@ -323,46 +348,52 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       delete linkSpec.transferNode;
     }
     const link = new Link(linkSpec);
-    this.addLink(link);
+    this.addLink(link, options);
     return link;
   },
 
-  addLink(link) {
+  addLink(link, options: LogOptions & UndoRedoOptions = {}) {
     this.endNodeEdit();
-    return this.undoRedoManager.createAndExecuteCommand("addLink", {
-      execute: () => this._addLink(link),
-      undo: () => this._removeLink(link)
+    if (options.skipUndoRedo) {
+      this._addLink(link, options);
+    } else {
+      this.undoRedoManager.createAndExecuteCommand("addLink", {
+        execute: () => this._addLink(link, options),
+        undo: () => this._removeLink(link, options)
+      });
     }
-    );
   },
 
-  _addLink(link) {
+  _addLink(link, options: LogOptions = {}) {
     if ((link.sourceNode !== link.targetNode) && !this.hasLink(link)) {
       this.linkKeys[link.terminalKey()] = link;
       this.nodeKeys[link.sourceNode.key].addLink(link);
       this.nodeKeys[link.targetNode.key].addLink(link);
     }
     this._graphUpdated();
+    if (options.logEvent) {
+      this._logLinkEvent("relationship formed", link);
+    }
     return this.updateListeners();
   },
 
 
-  removeLink(link) {
+  removeLink(link, options: LogOptions = {}) {
     this.endNodeEdit();
     return this.undoRedoManager.createAndExecuteCommand("removeLink", {
       execute: () => {
-        this._removeLink(link);
-        if (link.transferNode != null) { return this._removeTransfer(link); }
+        this._removeLink(link, options);
+        if (link.transferNode != null) { return this._removeTransfer(link, options); }
       },
       undo: () => {
-        if (link.transferNode != null) { this._addTransfer(link); }
-        return this._addLink(link);
+        if (link.transferNode != null) { this._addTransfer(link, options); }
+        return this._addLink(link, options);
       }
     }
     );
   },
 
-  _removeLink(link) {
+  _removeLink(link, options: LogOptions = {}) {
     delete this.linkKeys[link.terminalKey()];
     if (this.nodeKeys[link.sourceNode.key] != null) {
       this.nodeKeys[link.sourceNode.key].removeLink(link);
@@ -371,6 +402,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       this.nodeKeys[link.targetNode.key].removeLink(link);
     }
     this._graphUpdated();
+    if (options.logEvent) {
+      this._logLinkEvent("relationship deleted", link);
+    }
     return this.updateListeners();
   },
 
@@ -403,26 +437,29 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return newTitle;
   },
 
-  addNode(node) {
+  addNode(node, options: LogOptions & UndoRedoOptions = {}) {
     this.endNodeEdit();
     node.title = this.ensureUniqueTitle(node);
-    console.log("Added node");
-    this.undoRedoManager.createAndExecuteCommand("addNode", {
-      execute: () => {
-        this._addNode(node);
-      },
-      undo: () => {
-        // Remove related variable from CODAP. Note that this is not part of the _removeNode.
-        // When we undo "add" operation, it makes perfect sense to cleanup CODAP attribute.
-        // However, when node was around for some time, there's some data, and user deletes it, it's safer
-        // to leave this data around. User might want to delete it or not.
-        CodapConnect.instance(DEFAULT_CONTEXT_NAME).sendDeleteAttribute(node);
-        this._removeNode(node);
-      }
-    });
+    if (options.skipUndoRedo) {
+      this._addNode(node, options);
+    } else {
+      this.undoRedoManager.createAndExecuteCommand("addNode", {
+        execute: () => {
+          this._addNode(node, options);
+        },
+        undo: () => {
+          // Remove related variable from CODAP. Note that this is not part of the _removeNode.
+          // When we undo "add" operation, it makes perfect sense to cleanup CODAP attribute.
+          // However, when node was around for some time, there's some data, and user deletes it, it's safer
+          // to leave this data around. User might want to delete it or not.
+          CodapConnect.instance(DEFAULT_CONTEXT_NAME).sendDeleteAttribute(node);
+          this._removeNode(node, options);
+        }
+      });
+    }
   },
 
-  removeNode(nodeKey) {
+  removeNode(nodeKey, options: LogOptions = {}) {
     this.endNodeEdit();
     const node = this.nodeKeys[nodeKey];
     const transferRelation = node.transferLink != null ? node.transferLink.relation : undefined;
@@ -444,24 +481,24 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
           node.transferLink.relation = node.transferLink.defaultRelation();
           delete node.transferLink.transferNode;
         }
-        for (const link of links) { this._removeLink(link); }
-        for (const link of transferLinks) { this._removeTransfer(link); }
-        return this._removeNode(node);
+        for (const link of links) { this._removeLink(link, options); }
+        for (const link of transferLinks) { this._removeTransfer(link, options); }
+        return this._removeNode(node, options);
       },
       undo: () => {
         if (node.transferLink != null) {
           node.transferLink.relation = transferRelation;
           node.transferLink.transferNode = transferNode;
         }
-        this._addNode(node);
-        for (const link of transferLinks) { this._addTransfer(link); }
-        for (const link of links) { this._addLink(link); }
+        this._addNode(node, options);
+        for (const link of transferLinks) { this._addTransfer(link, options); }
+        for (const link of links) { this._addLink(link, options); }
       }
     }
     );
   },
 
-  _addNode(node) {
+  _addNode(node, options: LogOptions = {}) {
     if (!this.hasNode(node)) {
       this.nodeKeys[node.key] = node;
       this._graphUpdated();
@@ -472,13 +509,19 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       node.codapName = null;
       // add variable to CODAP
       CodapConnect.instance(DEFAULT_CONTEXT_NAME)._createMissingDataAttributes();
+      if (options.logEvent) {
+        logEvent("variable added", {id: node.id, name: node.title});
+      }
       return this.updateListeners();
     }
   },
 
-  _removeNode(node) {
+  _removeNode(node, options: LogOptions = {}) {
     delete this.nodeKeys[node.key];
     this._graphUpdated();
+    if (options.logEvent) {
+      logEvent("variable deleted", {id: node.id, name: node.title});
+    }
     return this.updateListeners();
   },
 
@@ -495,17 +538,17 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return this._addNode(link.transferNode);
   },
 
-  _removeTransfer(tLink) {
+  _removeTransfer(tLink, options: LogOptions = {}) {
     const transfer = tLink.transferNode;
     if (!transfer) { return; }
 
     const links = this.getLinks();
     _.each(links, link => {
       if ((link.sourceNode === transfer) || (link.targetNode === transfer)) {
-        return this.removeLink(link);
+        return this.removeLink(link, options);
       }
     });
-    return this._removeNode(transfer);
+    return this._removeNode(transfer, options);
   },
 
   _graphUpdated() {
@@ -566,7 +609,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return this.updateListeners();
   },
 
-  changeNode(data, node) {
+  changeNode(data, node, options: LogOptions = {}) {
     const _node = node || this.selectedNodes();
     const nodes = [].concat(_node); // force an array of nodes
     return (() => {
@@ -615,6 +658,30 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
               }
             }
 
+            const logNodeChange = (changes) => {
+              if (options.logEvent) {
+                if (changes.hasOwnProperty("title")) {
+                  if (node.title !== changes.title) {
+                    logEvent("variable name changed", {
+                      id: node.id,
+                      initialName: node.title,
+                      editedName: changes.title
+                    });
+                  }
+                }
+                if (changes.hasOwnProperty("initialValue")) {
+                  // debounce so we don't flood messages when scrubber is moved
+                  clearTimeout(this.logValueLogTimeout);
+                  this.logValueLogTimeout = setTimeout(() => {
+                    logEvent("set variable value", {id: node.id, name: node.title, value: changes.initialValue});
+                  }, 250);
+                }
+                if (changes.hasOwnProperty("isAccumulator")) {
+                  logEvent("collector status changed", {id: node.id, name: node.title, collector: changes.isAccumulator});
+                }
+              }
+            };
+
             this.undoRedoManager.startCommandBatch();
             this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
@@ -623,9 +690,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                     this._changeLink(link, { relation: link.defaultRelation() });
                   }
                 }
+                logNodeChange(data);
                 return this.changeNodeOutsideUndoRedo(node, data);
               },
               undo: () => {
+                logNodeChange(originalData);
                 this.changeNodeOutsideUndoRedo(node, originalData);
                 if (accumulatorChanged) {
                   for (link of changedLinks) {
@@ -668,16 +737,16 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return this._notifyNodeChanged(node);
   },
 
-  changeNodeProperty(property, value, node) {
+  changeNodeProperty(property, value, node, options: LogOptions = {}) {
     const data = {};
     data[property] = value;
-    return this.changeNode(data, node);
+    return this.changeNode(data, node, options);
   },
 
-  changeNodeWithKey(key, data) {
+  changeNodeWithKey(key, data, options: LogOptions = {}) {
     const node = this.nodeKeys[ key ];
     if (node) {
-      return this.changeNode(data, node);
+      return this.changeNode(data, node, options);
     }
   },
 
@@ -687,7 +756,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       const {initialValue, min, max} = node;
       const nudgeFactor = (max - min) / 1000;
       const newInitialValue = Math.max(min, Math.min(max, initialValue + (nudgeFactor * delta)));
-      this.changeNodeProperty("initialValue", newInitialValue, node);
+      this.changeNodeProperty("initialValue", newInitialValue, node, {logEvent: true});
     }
   },
 
@@ -737,10 +806,24 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         relation: link.relation,
         reasoning: link.reasoning
       };
+      const initial: any = {};
+      Object.keys(changes).forEach(key => initial[key] = originalData[key]);
       this.undoRedoManager.startCommandBatch();
       this.undoRedoManager.createAndExecuteCommand("changeLink", {
-        execute: () => this._changeLink(link,  changes),
-        undo: () => this._changeLink(link, originalData)
+        execute: () => {
+          this._changeLink(link,  changes);
+          this._logLinkEvent("relationship changed", link, {
+            initial,
+            final: changes
+          });
+        },
+        undo: () => {
+          this._changeLink(link, originalData);
+          this._logLinkEvent("relationship changed", link, {
+            initial: changes,
+            final: initial
+          });
+        }
       }
       );
       return this.undoRedoManager.endCommandBatch();
@@ -804,6 +887,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     const endKey   = $(info.target).data("node-key") || "undefined";
     const startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
     const endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
+
     this.importLink({
       sourceNode: startKey,
       targetNode: endKey,
@@ -811,7 +895,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       targetTerminal: endTerminal,
       color: info.color,
       title: info.title
-    });
+    }, {logEvent: true});
     return true;
   },
 
@@ -826,11 +910,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
   removeSelectedNodes() {
     const selectedNodeKeys = this.selectedNodes().map((node) => node.key);
-    return selectedNodeKeys.map((nodeKey) => this.removeNode(nodeKey));
+    return selectedNodeKeys.map((nodeKey) => this.removeNode(nodeKey, {logEvent: true}));
   },
 
   removeSelectedLinks() {
-    return this.selectedLinks().map((selectedLink) => this.removeLink(selectedLink));
+    return this.selectedLinks().map((selectedLink) => this.removeLink(selectedLink, {logEvent: true}));
   },
 
   deleteSelected() {
@@ -928,11 +1012,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   },
 
   loadData(data) {
-    log.info("json success");
     const importer = new Importer(this, AppSettingsStore, PaletteStore);
     importer.importData(data);
     this.resetSimulation();
-    return this.undoRedoManager.clearHistory();
+    this.undoRedoManager.clearHistory();
   },
 
   loadDataFromUrl: url => {
