@@ -181,7 +181,7 @@
     "~NODE-RELATION-EDIT.VARIABLE_FLOW_TARGET_B": " %{sourceTitle} se transferirá cada ",
     "~SIMULATION.COMPLEXITY.STATIC": "Simulación equilibrio estático",
     "~SIMULATION.COMPLEXITY.TIME": "Simulación dinámica x tiempo",
-    "~DROP.ONLY_ALLOWED_IF_IFRAMED": "Sorry, dropping items of this type is only allowed if iframed.",
+    "~DROP.ONLY_ALLOWED_IF_IFRAMED": "No se puede arrastar este tipo de items acá",
     "~SAGEMODELER.MENU.CLOSE": "Cerrar",
     "~SAGEMODELER.MENU.IMPORT": "Importar...",
     "~SAGEMODELER.OPEN_OR_CREATE.TITLE": "¿Que quieres hacer?",
@@ -196,7 +196,7 @@
     "~MENU.ABOUT": "Ayuda",
     "~MENU.ABOUT.HELP": "Ayuda página web",
     "~MENU.ABOUT.ABOUT": "Sobre SageModeler",
-    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
+    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "URL server SageModeler:",
     "~DOCUMENT.ACTIONS.EXPERIMENT_NUM": "Experimento #",
     "~DOCUMENT.CODAP_ACTIONS.GUIDE": "Guía",
     "~SIMULATION.GUIDE": "Incluir guía",
@@ -208,9 +208,9 @@
     "~METADATA.SEE_IT_ON": "Verlo en %{hostname}",
     "~METADATA.LICENSE.PUBLIC_DOMAIN": "Dominio Público",
     "~METADATA.PIXABAY.TITLE": "\"%{query}\" de la búsqueda de Pixabay",
-    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
+    "~CODAP.DATA.CONTEXT_NAME": "Datos SageModeler",
     "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experimentos",
     "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Puntos de datos",
     "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Punto del dato",
-    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuously"
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuamente"
 }
