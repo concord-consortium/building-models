@@ -17,8 +17,7 @@ const buildDate = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTC
 
 const env = process.env;
 const gitBranch =
-  env.TRAVIS_PULL_REQUEST_BRANCH ||
-  env.TRAVIS_BRANCH ||
+  (env.GITHUB_REF || "").split("/").pop() ||
   getOutput('git symbolic-ref --short HEAD');
 
 const gitLog = getOutput('git log -1 --date=short --pretty=format:"%cd %h %ce"')

@@ -25,8 +25,8 @@ context("Sage top bar UI", () => {
   context("About menu", () => {
     it("opens a menu displaying 'About' and 'Help'", () => {
       cy.getSageIframe().find('.icon-codap-help').click()
-      cy.getSageIframe().contains(".menuItem", "About")
-      cy.getSageIframe().contains(".menuItem", "Help")
+      cy.getSageIframe().contains(".menuItem", "About SageModeler")
+      cy.getSageIframe().contains(".menuItem", "Go to help website")
     })
     it ("Will display a splash screen when we click on about", () => {
       cy.getSageIframe().find('.icon-codap-help').click()
