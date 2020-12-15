@@ -106,7 +106,8 @@ export class CodapConnect {
           values: {
             title: tr("~CODAP.INTERACTIVE_FRAME.TITLE"),
             preventBringToFront: true,
-            cannotClose: true
+            cannotClose: true,
+            preventDataContextReorg: false // allows tables to be reorganized
           }
         },
         {
