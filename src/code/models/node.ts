@@ -289,6 +289,11 @@ export class Node extends GraphPrimitive {
   public normalizeValues(keys) {
     if (isNaN(this.min)) { this.min = 0; }
     if (isNaN(this.max)) { this.max = 0; }
+    // when switching back to semi-quantitative (defined by words), reset the internal min/max, bypassing the setters
+    if (_.contains(keys, "valueDefinedSemiQuantitatively") && this.valueDefinedSemiQuantitatively) {
+      this._min = SEMIQUANT_MIN;
+      this._max = SEMIQUANT_MAX;
+    }
     if (_.contains(keys, "max")) {
       this.min = Math.min(this.min, this.max);
     } else {
