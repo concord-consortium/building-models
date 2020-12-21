@@ -24,7 +24,9 @@ export class TransferModel extends Node {
 
   public setTransferLink(link) {
     this.transferLink = link;
-    return this.title = this.title || this.computeTitle();
+    if (this.title === tr("~NODE.UNTITLED")) {
+      this.title = this.computeTitle();
+    }
   }
 
   public isDefaultTransferTitle() {
