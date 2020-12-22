@@ -436,8 +436,9 @@ getDefaultProps() {
           strokeWidth={3}
           animateGraphs={this.props.animateGraphs}
           hideGraphs={this.props.hideGraphs}
-          unscaled={this.props.data.unscaled}
-          unscaledMax={this.props.data.unscaledMax}
+          usingSlider={this.props.data.usingSlider}
+          sliderStartMax={this.props.data.sliderStartMax}
+          animateRescale={this.props.data.animateRescale}
         />
       );
     } else {

@@ -44,8 +44,9 @@ export class Node extends GraphPrimitive {
   public type: string = "Node";
   public title: string;
   public currentValue: number;
-  public unscaled: boolean = false;
-  public unscaledMax: number = 0;
+  public usingSlider: boolean = false;
+  public sliderStartMax: number = 0;
+  public animateRescale: boolean = false;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
@@ -383,17 +384,17 @@ export class Node extends GraphPrimitive {
   }
 
   public startSliderDrag(options: { simulationDuration: number }) {
-    this.unscaled = true;
-    let pointMax = 0;
+    this.usingSlider = true;
+    this.sliderStartMax = this.max;
     _.forEach(_.takeRight(this.frames, options.simulationDuration).reverse(), (point) => {
-      pointMax = Math.max(pointMax, point);
+      this.sliderStartMax = Math.max(this.sliderStartMax, point);
     });
-    this.unscaledMax = Math.max(this.max, pointMax - this.min);
-    console.log("node", this.key, "unscaledRange", this.unscaledRange);
+    this.animateRescale = false;
   }
 
   public endSliderDrag() {
-    this.unscaled = false;
+    this.usingSlider = false;
+    this.animateRescale = this.currentValue > 0 && (Math.max(this.sliderStartMax, this.currentValue) > this.max);
   }
 }
 
