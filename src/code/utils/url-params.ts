@@ -39,12 +39,10 @@ export interface UrlParams {
    *      ?imageCollections=image-collections/cbio/collections/population-cell.json
    */
   imageCollections?: string;
-  enableAllBelowZero?: string;
   showNodeRange?: string;
 }
 
 export const urlParams: UrlParams = params;
 
-export const ENABLE_ALL_BELOW_ZERO = urlParams.enableAllBelowZero === "true";
 export const SHOW_NODE_RANGE = urlParams.showNodeRange === "true";
 
