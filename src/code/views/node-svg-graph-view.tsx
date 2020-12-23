@@ -7,6 +7,10 @@ import { SHOW_NODE_RANGE } from "../utils/url-params";
 const AUTO_RESCALE_TIME = 1500;
 const TICK_FADE_TIME = 1000;
 
+const NUM_TICKS = 10;
+const TICK_WIDTH = 5;
+const TICK_STROKE = 2;
+
 interface Range {
   min: number;
   max: number;
@@ -151,10 +155,10 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
     if (!this.props.hideGraphs && (this.props.data.length > 0)) {
       if (this.props.isTimeBased) {
-        const {points, rangeRatio} = this.getPathPoints();
+        const {points, tickHeight} = this.getPathPoints();
         chart = <path d={this.pointsToPath(points)} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill="none" />;
         if (tickAlpha > 0) {
-          ticks = this.getUnscaledTicks(rangeRatio, tickAlpha);
+          ticks = this.getAnimatedTicks(tickHeight, tickAlpha);
         }
       } else {
         chart = <path d={this.getBarPath()} strokeWidth={this.props.strokeWidth} stroke={this.props.color} fill={this.props.innerColor} />;
@@ -207,14 +211,14 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   }
 
   private getPathPoints() {
-    const { max, min, data, animateRescale, usingSlider, sliderStartMax, currentValue } = this.props;
+    const { max, min, data, animateRescale, usingSlider, sliderStartMax, height } = this.props;
     const { yAnimationMultiplier } = this.state;
 
     const rangeX = SimulationStore.simulationDuration();
     const trailingData = _.takeRight(data, rangeX).reverse();
 
     if (trailingData.length === 0) {
-      return {points: [], rangeRatio: 1, pointMin: 0};
+      return {points: [], tickHeight: 0, pointMin: 0};
     }
 
     const animating = animateRescale && (yAnimationMultiplier < 1);
@@ -229,13 +233,12 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     const dataDiff = dataRange.max - dataRange.min;
 
     let rangeY;
-    let rangeRatio;
+    let tickHeight;
     if (animating) {
-      const finalTickRange = max - min;
-      const diff = graphDiff - dataDiff;
-      const _rangeY = graphDiff - (diff * (1 - yAnimationMultiplier));
-      rangeY = graphDiff - (diff * yAnimationMultiplier);
-      rangeRatio = dataDiff > graphDiff ? _rangeY / finalTickRange : finalTickRange / rangeY;
+      const finalTickHeight = max - min;
+      const startTickHeight = finalTickHeight * (dataRange.max / graphRange.max);
+      tickHeight = height * ((startTickHeight + ((finalTickHeight - startTickHeight) * yAnimationMultiplier)) / finalTickHeight);
+      rangeY = graphDiff - ((graphDiff - dataDiff) * yAnimationMultiplier);
     } else if (usingSlider) {
       rangeY = graphDiff;
     } else {
@@ -248,26 +251,23 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       return {x, y};
     });
 
-    return {points, rangeRatio, pointMin: dataRange.min};
+    return {points, tickHeight, pointMin: dataRange.min};
   }
 
-  private getUnscaledTicks(rangeRatio: number, tickAlpha: number) {
+  private getAnimatedTicks(tickHeight: number, tickAlpha: number) {
     const { width, height } = this.props;
 
-    const numTicks = 10;
-    const tickWidth = 5;
-    const tickStroke = 2;
-    const tickSpacing = (height * rangeRatio) / numTicks;
-    const tickX = width - tickWidth;
+    const tickSpacing = tickHeight / NUM_TICKS;
+    const tickX = width - TICK_WIDTH;
     const ticks: string[] = [];
-    for (let i = 0; i < numTicks; i++) {
-      const tickY = height - (i * tickSpacing) - tickStroke;
+    for (let i = 0; i < NUM_TICKS; i++) {
+      const tickY = height - (i * tickSpacing) - TICK_STROKE;
       if (tickY >= 0) {
         ticks.push(`M ${tickX} ${tickY} L ${width} ${tickY}`);
       }
     }
 
-    return <path d={ticks.join(" ")} strokeWidth={tickStroke} stroke={this.props.color} fill="none" strokeOpacity={tickAlpha} />;
+    return <path d={ticks.join(" ")} strokeWidth={TICK_STROKE} stroke={this.props.color} fill="none" strokeOpacity={tickAlpha} />;
   }
 
   private getBarPath() {
