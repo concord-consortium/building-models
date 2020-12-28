@@ -29,14 +29,16 @@ export class TransferModel extends Node {
     }
   }
 
-  public isDefaultTransferTitle() {
-    return this.title === this.computeTitle();
+  public isDefaultTransferTitle(changedNode?: Node, prevTitle?: string) {
+    return this.title === this.computeTitle(changedNode, prevTitle);
   }
 
-  public computeTitle() {
+  public computeTitle(changedNode?: Node, prevTitle?: string) {
     if (this.transferLink) {
-      return tr("~TRANSFER_NODE.TITLE", { sourceTitle: this.transferLink.sourceNode.title,
-        targetTitle: this.transferLink.targetNode.title });
+      const {sourceNode, targetNode} = this.transferLink;
+      const sourceTitle = sourceNode === changedNode ? prevTitle : sourceNode.title;
+      const targetTitle = targetNode === changedNode ? prevTitle : targetNode.title;
+      return tr("~TRANSFER_NODE.TITLE", { sourceTitle, targetTitle });
     } else {
       return undefined;
     }

@@ -729,7 +729,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             const codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
             codapConnect.sendRenameAttribute(node.key, prev);
           }
-          this._maybeChangeTransferTitle(node);
+          this._maybeChangeTransferTitle(node, prev);
         }
       }
     }
@@ -847,20 +847,14 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     }
   },
 
-  _maybeChangeTransferTitle(changedNode) {
-    return (() => {
-      const result: any = [];
-      for (const key in this.nodeKeys) {
-        const node = this.nodeKeys[key];
-        const { transferLink } = node;
-        if (transferLink && ((transferLink.sourceNode === changedNode) || (transferLink.targetNode === changedNode))) {
-          result.push(this.changeNodeWithKey(key, {title: node.computeTitle()}));
-        } else {
-          result.push(undefined);
-        }
+  _maybeChangeTransferTitle(changedNode, prevTitle) {
+    for (const key in this.nodeKeys) {
+      const node = this.nodeKeys[key];
+      const { transferLink } = node;
+      if (transferLink && node.isDefaultTransferTitle(changedNode, prevTitle) && ((transferLink.sourceNode === changedNode) || (transferLink.targetNode === changedNode))) {
+        this.changeNodeWithKey(key, {title: node.computeTitle()});
       }
-      return result;
-    })();
+    }
   },
 
   _changeLink(link, changes) {
