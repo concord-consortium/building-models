@@ -27,14 +27,18 @@ import { NodeTitleMixinState, NodeTitleMixinProps, NodeTitleMixin } from "../mix
 
 import { InspectorPanelActions } from "../stores/inspector-panel-store";
 import { Mixer } from "../mixins/components";
-import { Node} from "../models/node";
+import { Node } from "../models/node";
 import { GraphStoreClass } from "../stores/graph-store";
 import { SelectionManager } from "../models/selection-manager";
 import { stepSize } from "../utils/step-size";
 import { logEvent } from "../utils/logger";
+import { TransferModel } from "../models/transfer";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
+  selected: boolean;
+  hovering: boolean;
+  isTransfer: boolean;
   node: Node;
   graphStore: GraphStoreClass;
   nodeKey: string;
@@ -101,6 +105,12 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
   }
 
   public render() {
+    // don't show default transfer titles when not editing or hovering
+    const { selected, isTransfer, isEditing, hovering, node } = this.props;
+    if (!selected && !hovering && !isEditing && isTransfer && (node as TransferModel).isDefaultTransferTitle()) {
+      return null;
+    }
+
     return (
       <div className="node-title-box">
         {this.renderTitle()}
@@ -114,7 +124,7 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
       <div
         className={`node-title${this.nodeTitleMixin.isDefaultTitle() ? " untitled" : ""}`}
         key="display"
-        style={{display: this.props.isEditing ? "none" : "block" }}
+        style={{ display: this.props.isEditing ? "none" : "block" }}
         onClick={this.props.onStartEditing}
       >
         {this.props.title}
@@ -167,14 +177,14 @@ class NodeTitleView extends Mixer<NodeTitleViewProps, NodeTitleViewState> {
     if (_.includes([8, 46], e.which) && !this.titleUpdated) {
       const canDeleteWhenEmpty = this.props.node.addedThisSession && !this.titleUpdated;
       if (canDeleteWhenEmpty) {
-        return this.props.graphStore.removeNode(this.props.nodeKey, {logEvent: true});
+        return this.props.graphStore.removeNode(this.props.nodeKey, { logEvent: true });
       }
-    // 13 is enter
+      // 13 is enter
     } else if (e.which === 13) {
       return this.handleFinishEditing();
-    // 27 is escape
+      // 27 is escape
     } else if (e.which === 27) {
-      return this.setState({isCancelled: true}, () => this.handleFinishEditing());
+      return this.setState({ isCancelled: true }, () => this.handleFinishEditing());
     }
   }
 
@@ -233,30 +243,31 @@ interface NodeViewState {
   editingNodeTitle: boolean;
   ignoreDrag: boolean;
   isTransfer: boolean;
+  hovering: boolean;
 }
 
 export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
-    /*
-  getDefaultProps() {
-    return {
-      onMove() { return log.info("internal move handler"); },
-      onStop() { return log.info("internal move handler"); },
-      onDelete() { return log.info("internal on-delete handler"); },
-      onSelect() { return log.info("internal select handler"); },
-      selected: false,
-      simulating: false,
-      value: null,
-      dataColor: "#aaa",
-      data: {
-        title: "foo",
-        x: 10,
-        y: 10,
-        color: "dark-blue"
-      }
-    };
-  },
-  */
+  /*
+getDefaultProps() {
+  return {
+    onMove() { return log.info("internal move handler"); },
+    onStop() { return log.info("internal move handler"); },
+    onDelete() { return log.info("internal on-delete handler"); },
+    onSelect() { return log.info("internal select handler"); },
+    selected: false,
+    simulating: false,
+    value: null,
+    dataColor: "#aaa",
+    data: {
+      title: "foo",
+      x: 10,
+      y: 10,
+      color: "dark-blue"
+    }
+  };
+},
+*/
 
 
   public static displayName = "NodeView";
@@ -272,14 +283,15 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     this.state = {
       editingNodeTitle: false,
       ignoreDrag: false,
-      isTransfer: this.props.data.isTransfer
+      isTransfer: this.props.data.isTransfer,
+      hovering: false
     };
   }
 
   public componentDidUpdate() {
     const handle = this.props.selected ? ".selected-background" : ".img-background";
     const $elem = $(this.node!);
-    return ($elem as any).draggable( "option", "handle", handle);
+    return ($elem as any).draggable("option", "handle", handle);
   }
 
   public componentDidMount() {
@@ -308,7 +320,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     return (
       <div className={this.nodeClasses()} ref={el => this.node = el} style={style}>
         <div className={this.linkTargetClasses()} data-node-key={this.props.nodeKey}>
-          <div className="node-container">
+          <div className="node-container" onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut}>
             <div className="slider" data-node-key={this.props.nodeKey}>
               {this.props.simulating && this.props.data.canEditInitialValue() && <div>{this.renderSliderView()}</div>}
             </div>
@@ -331,23 +343,24 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
                 >
                   {this.renderNodeInternal()}
                   {this.props.selected &&
-                  <div className="selected-background" />
-                }
+                    <div className="selected-background" />
+                  }
                 </div>
-                {this.props.data.isTransfer
-                  ? <div className="node-title" />
-                  : <div draggable={this.props.showGraphButton} onDragStart={handleDragStart}>
-                      <NodeTitleView
-                        isEditing={this.props.editTitle}
-                        title={this.props.data.title}
-                        onChange={this.handleChangeTitle}
-                        onStopEditing={this.handleStopEditing}
-                        onStartEditing={this.handleStartEditing}
-                        node={this.props.data}
-                        nodeKey={this.props.nodeKey}
-                        graphStore={this.props.graphStore}
-                      />
-                  </div>}
+                <div draggable={this.props.showGraphButton} onDragStart={handleDragStart}>
+                  <NodeTitleView
+                    isEditing={this.props.editTitle}
+                    title={this.props.data.title}
+                    onChange={this.handleChangeTitle}
+                    onStopEditing={this.handleStopEditing}
+                    onStartEditing={this.handleStartEditing}
+                    node={this.props.data}
+                    nodeKey={this.props.nodeKey}
+                    graphStore={this.props.graphStore}
+                    selected={this.props.selected}
+                    hovering={this.state.hovering}
+                    isTransfer={this.state.isTransfer}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -357,7 +370,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private renderSliderView() {
-    const {min, max} = this.props.data;
+    const { min, max } = this.props.data;
     return (
       <SVGSliderView
         orientation="vertical"
@@ -375,7 +388,7 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
         onSliderDragEnd={this.handleSliderDragEnd}
         color={this.props.dataColor}
         handleSize={16}
-        stepSize={stepSize({min, max})}
+        stepSize={stepSize({ min, max })}
         showTicks={false}
         displayPrecision={0}
         renderValueTooltip={true}
@@ -491,14 +504,14 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
   }
 
   private handleChangeValue = (newValue) => {
-    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {initialValue: newValue}, {logEvent: true});
+    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, { initialValue: newValue }, { logEvent: true });
   }
 
   private handleChangeTitle = (newTitle, isComplete) => {
     if (isComplete) { newTitle = this.props.graphStore.ensureUniqueTitle(this.props.data, newTitle); }
     this.props.graphStore.startNodeEdit();
     log.info(`Title is changing to ${newTitle}`);
-    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, {title: newTitle}, {logEvent: true});
+    this.props.graphStore.changeNodeWithKey(this.props.nodeKey, { title: newTitle }, { logEvent: true });
   }
 
   private handleStartEditing = () => {
@@ -525,17 +538,17 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
     if (this.props.onSliderDragStart) {
       this.props.onSliderDragStart(this.props.nodeKey);
     }
-    return this.setState({ignoreDrag: true});
+    return this.setState({ ignoreDrag: true });
   }
 
   private handleSliderDragEnd = () => {
-    return this.setState({ignoreDrag: false});
+    return this.setState({ ignoreDrag: false });
   }
 
   private handleGraphClick = (attributeName) => {
     const codapConnect = CodapConnect.instance(DEFAULT_CONTEXT_NAME);
     codapConnect.createGraph(attributeName);
-    logEvent("graph created", {horizontal: codapConnect.getTimeUnit(), vertical: attributeName});
+    logEvent("graph created", { horizontal: codapConnect.getTimeUnit(), vertical: attributeName });
   }
 
   private handleCODAPAttributeDrag = (evt, attributeName) => {
@@ -554,6 +567,23 @@ export class NodeView extends React.Component<NodeViewProps, NodeViewState> {
 
   private handleNudge = (delta: number) => {
     this.props.graphStore.nudgeNodeWithKeyInitialValue(this.props.nodeKey, delta);
+  }
+
+  private handleMouseOver = () => {
+    this.setState({ hovering: true });
+  }
+
+  private handleMouseOut = (e) => {
+    // keep hovering until the mouse leaves the container element
+    let target = e.toElement || e.relatedTarget;
+    while (target && target.parentNode) {
+      if (target.parentNode === e.currentTarget) {
+        e.preventDefault();
+        return;
+      }
+      target = target.parentNode;
+    }
+    this.setState({ hovering: false });
   }
 
   private nodeClasses() {
