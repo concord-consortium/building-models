@@ -154,6 +154,7 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
         <div
           className={drawClass}
           onMouseDown={this.handleStartDrawCurve}
+          onTouchStart={this.handleStartDrawCurve}
           ref={(el) => this.graphBody = el}
         />
         {this.state.newCustomData ? this.renderCustomHint() : null}
@@ -305,8 +306,10 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
   private handleStartDrawCurve = (e) => {
     // can only draw on custom relationships
     if (this.state.canDraw) {
-      document.addEventListener("mousemove", this.handleDrawCurve);
-      document.addEventListener("mouseup", this.handleEndDrawCurve);
+      document.addEventListener("mousemove", this.handleDrawCurve, {passive: true});
+      document.addEventListener("touchmove", this.handleDrawCurve, {passive: true});
+      document.addEventListener("mouseup", this.handleEndDrawCurve, {passive: true});
+      document.addEventListener("touchend", this.handleEndDrawCurve, {passive: true});
       this.drawing = true;
       if (this.state.newCustomData) {
         const scaledCoords = this.pointToScaledCoords(e);
@@ -321,7 +324,6 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
 
   private handleDrawCurve = (e) => {
     if (this.drawing && !this.state.newCustomData) {
-      e.preventDefault();
       const scaledCoords = this.pointToScaledCoords(e);
 
       const x = Math.round(scaledCoords.x);
@@ -364,7 +366,9 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
   private handleEndDrawCurve = (e) => {
     if (this.drawing) {
       document.removeEventListener("mousemove", this.handleDrawCurve);
+      document.removeEventListener("touchmove", this.handleDrawCurve);
       document.removeEventListener("mouseup", this.handleEndDrawCurve);
+      document.removeEventListener("touchend", this.handleEndDrawCurve);
       this.drawing = false;
       // update relation with custom data
       this.updateRelationCustomData(this.state.currentData);
@@ -373,8 +377,9 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
   }
 
   private pointToScaledCoords(e) {
+    const {clientX, clientY} = e.touches ? e.touches[0] : e;
     const rect = this.graphBody ? this.graphBody.getBoundingClientRect() : {width: 0, height: 0, right: 0, bottom: 0 };
-    const coords = {x: rect.width - (rect.right - e.clientX), y: rect.bottom - e.clientY};
+    const coords = {x: rect.width - (rect.right - clientX), y: rect.bottom - clientY};
     coords.x = Math.max(0, Math.min(coords.x, rect.width));
     coords.y = Math.max(0, Math.min(coords.y, rect.height));
     const scaledCoords = {x: Math.round((coords.x / rect.width) * 100), y: Math.round((coords.y / rect.height) * 100)};
