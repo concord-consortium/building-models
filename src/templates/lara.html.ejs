@@ -86,10 +86,15 @@
     // mutates passed-in object by json-parsing any props that ought to be objects but
     // might be strings
     // (see bug https://www.pivotaltracker.com/n/projects/736901/stories/171888125)
+    // Note LARA may pass in an empty string, so we need to check the length
     const parseJSON = (obj, propsToParse) => {
       for (const prop of propsToParse) {
-        if (typeof obj[prop] === "string") {
-          obj[prop] = JSON.parse(obj[prop]);
+        if (typeof obj[prop] === "string" && obj[prop].length > 0) {
+          try {
+            obj[prop] = JSON.parse(obj[prop]);
+          } catch (e) {
+            // do nothing
+          }
         }
       }
     };
