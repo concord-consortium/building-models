@@ -128,6 +128,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
 
   public componentWillUnmount() {
     window.removeEventListener("mousedown", this.handleCheckIfNeedToHideButtons, true);
+    window.removeEventListener("touchstart", this.handleCheckIfNeedToHideButtons, true);
     return window.removeEventListener("resize", this.handleUpdate);
   }
 
@@ -136,8 +137,10 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     if (showButtons !== prevState.showButtons) {
       if (showButtons) {
         window.addEventListener("mousedown", this.handleCheckIfNeedToHideButtons, true);
+        window.addEventListener("touchstart", this.handleCheckIfNeedToHideButtons, true);
       } else {
         window.removeEventListener("mousedown", this.handleCheckIfNeedToHideButtons, true);
+        window.removeEventListener("touchstart", this.handleCheckIfNeedToHideButtons, true);
       }
     }
   }
@@ -276,8 +279,10 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     if (this.props.onSliderDragStart) {
       this.props.onSliderDragStart();
     }
-    document.addEventListener("mousemove", this.handleDrag);
-    return document.addEventListener("mouseup",   this.handleEnd);
+    document.addEventListener("mousemove", this.handleDrag, true);
+    document.addEventListener("touchmove", this.handleDrag, true);
+    document.addEventListener("mouseup",   this.handleEnd, true);
+    document.addEventListener("touchend",  this.handleEnd, true);
   }
 
   private handleEnd = (e) => {
@@ -287,8 +292,10 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     if (this.props.onSliderDragEnd) {
       this.props.onSliderDragEnd();
     }
-    document.removeEventListener("mousemove", this.handleDrag);
-    return document.removeEventListener("mouseup",   this.handleEnd);
+    document.removeEventListener("mousemove", this.handleDrag, true);
+    document.removeEventListener("touchmove", this.handleDrag, true);
+    document.removeEventListener("mouseup",   this.handleEnd, true);
+    document.removeEventListener("touchend",  this.handleEnd, true);
   }
 
   private handleDrag = (e) => {
@@ -426,8 +433,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
         style={style}
         ref={(el) => this.handle = el}
         onMouseDown={this.handleStart}
-        onTouchEnd={this.handleNoop}
-        onTouchMove={this.handleDrag}
+        onTouchStart={this.handleStart}
         onClick={this.handleClick}
       >
         <i className={classNames} />
@@ -656,14 +662,16 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     const mouseUp = (e: MouseEvent) => {
       clearMouseDownInterval();
       nudge(delta);
-      document.removeEventListener("mouseup", mouseUp);
+      document.removeEventListener("mouseup", mouseUp, true);
+      document.removeEventListener("touchend", mouseUp, true);
       this.setState({deltaButtonDown: 0});
     };
 
     clearMouseDownInterval();
     this.nudgeInterval = window.setInterval(mouseDownNudge, 200);
 
-    document.addEventListener("mouseup", mouseUp);
+    document.addEventListener("mouseup", mouseUp, true);
+    document.addEventListener("touchend", mouseUp, true);
     this.setState({deltaButtonDown: delta});
   }
 
@@ -671,6 +679,8 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     const {showHandle} = this.props;
     const {showButtons} = this.state;
     if (showHandle && showButtons) {
+      // if this comes in as a touch event prevent the mouse event from being generated
+      e.preventDefault();
       let target: HTMLElement | null = e.target as HTMLElement;
       while (target !== null) {
         if (target === this.buttonContainer) {

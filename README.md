@@ -1,7 +1,5 @@
 # Sage Modeler
 
-[![Build Status](https://travis-ci.org/concord-consortium/building-models.svg?branch=master)](https://travis-ci.org/concord-consortium/building-models)
-
 A [System Dynamics](https://en.wikipedia.org/wiki/System_dynamics) modeling tool, under development
 by the [Building Models Project](https://concord.org/projects/building-models) of [Concord Consortium](http://concord.org/).
 
@@ -47,19 +45,11 @@ we are using.
     * For more in-depth testing, build your own copy of CODAP from [GitHub](https://github.com/concord-consortium/codap)
 
 
-### Manual Github Pages deployment:
-* Read `./build.sh` before running it.
-* run `./build.sh`. This should:
-    * Check out new clone of this repo into dest, checking out the gh-pages branch by default
-    * Run `npm build` on your **current** codebase to generate all assets into ./dist/
-    * Push changes up to gh-pages on github.
-* See the model at http://concord-consortium.github.io/building-models/sage.html
-
 ### Automatic CI branch deployment
-* Named branches or pushed tags get deployed to S3 automatically by [travis](https://travis-ci.org/concord-consortium/building-models).
+* Named branches or pushed tags get deployed to S3 automatically by GitHub actions.
 * The URL for branch deploys is `https://sage.concord.org/branch/<branchname>/sage.html`
 * The `production` branch is deployed to `https://sage.concord.org/`
-* Read `.travis.yml` and `s3_deploy.sh` for more information.
+* Read `.github/workflows/ci.yml` and `s3_deploy.sh` for more information.
 
 ### Production Deployment
 1. Checkout the `production` branch.

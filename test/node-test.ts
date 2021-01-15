@@ -90,20 +90,22 @@ describe("A Node", () => {
         this.graphStore.changeNode({valueDefinedSemiQuantitatively: false}, node);
         node.initialValue.should.equal(50);
 
-        // change inital value, min and max
+        // change initial value, min and max
         this.graphStore.changeNode({min: 100, max: 150, initialValue: 140}, node);
         node.initialValue.should.equal(140);
 
-        // switch back to semi-quant mode. InitialValue should be at 80%
+        // switch back to semi-quant mode. Min/max should be reset and initialValue should be at 100, as 140 is above semi-quant max
         this.graphStore.changeNode({valueDefinedSemiQuantitatively: true}, node);
-        node.initialValue.should.equal(80);
+        node.min.should.equal(Node.SEMIQUANT_MIN);
+        node.max.should.equal(Node.SEMIQUANT_MAX);
+        node.initialValue.should.equal(100);
 
-        // change inital value to 10% and then switch back to quant mode.
-        // InitialValue should now be 10% of the way between 100 and 150
+        // change initial value to 10% and then switch back to quant mode.
+        // InitialValue should still be 10%
         this.graphStore.changeNode({initialValue: 10}, node);
         node.initialValue.should.equal(10);
         this.graphStore.changeNode({valueDefinedSemiQuantitatively: false}, node);
-        node.initialValue.should.equal(105);
+        node.initialValue.should.equal(10);
     });
   });
 });

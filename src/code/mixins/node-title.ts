@@ -8,20 +8,29 @@ const _ = require("lodash");
 
 import { tr } from "../utils/translate";
 import { Mixin } from "./components";
+import { Node } from "../models/node";
+import { TransferModel } from "../models/transfer";
 
 export interface NodeTitleMixinProps {
   title: string;
+  node: Node;
 }
 export interface NodeTitleMixinState {}
 
 export class NodeTitleMixin extends Mixin<NodeTitleMixinProps, NodeTitleMixinState> {
 
   public defaultTitle() {
-    return tr("~NODE.UNTITLED");
+    let title = tr("~NODE.UNTITLED");
+    const node = this.props.node;
+    if (node.isTransfer) {
+      title = (node as TransferModel).computeTitle() || title;
+    }
+    return title;
   }
 
   public titlePlaceholder() {
-    return this.defaultTitle();
+    const node = this.props.node;
+    return node.isTransfer ? "" : this.defaultTitle();
   }
 
   public isDefaultTitle() {
