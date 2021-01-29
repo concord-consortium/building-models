@@ -6,7 +6,7 @@ on: push
 jobs:
   build_test:
     name: Build and Run Jest Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -19,7 +19,7 @@ jobs:
       - name: Run Tests
         run: npm run test
   cypress:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -59,7 +59,7 @@ jobs:
     needs:
       - build_test
       - cypress
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
