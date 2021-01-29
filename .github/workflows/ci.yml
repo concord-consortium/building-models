@@ -30,6 +30,9 @@ jobs:
         # run 3 copies of the current job in parallel
         containers: [1, 2, 3]
     steps:
+      - name: Install Dependencies
+        run: |
+          apt-get install libgtk2.0-0
       - name: Checkout
         uses: actions/checkout@v1
       - uses: cypress-io/github-action@v2
