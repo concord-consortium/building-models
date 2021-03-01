@@ -214,7 +214,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
   }
 
   private getPathPoints() {
-    const { max, min, data, animateRescale, usingSlider, sliderStartMax, height } = this.props;
+    const { max, min, data, animateRescale, usingSlider, sliderStartMax, height, currentValue } = this.props;
     const { yAnimationMultiplier } = this.state;
 
     const rangeX = SimulationStore.simulationDuration();
@@ -227,7 +227,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     const animating = animateRescale && (yAnimationMultiplier < 1);
 
     const graphRange: Range = {min, max: animating || usingSlider ? sliderStartMax : max};
-    const dataRange: Range = {min, max};
+    const dataRange: Range = {min, max: Math.max(max, currentValue)};
     for (const point of trailingData) {
       dataRange.min = Math.min(point, dataRange.min);
       dataRange.max = Math.max(point, dataRange.max);
