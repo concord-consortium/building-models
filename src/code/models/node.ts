@@ -391,8 +391,8 @@ export class Node extends GraphPrimitive {
 
   public endSliderDrag(options: { simulationDuration: number }) {
     this.usingSlider = false;
-    const dataMax = this.getMax(options);
-    this.animateRescale = (this.currentValue > 0 && (Math.max(this.sliderStartMax, dataMax) > this.max));
+    const dataMax = Math.max(this.sliderStartMax, this.getMax(options));
+    this.animateRescale = (dataMax > 0 && (dataMax > this.max)); // NOTE: this skips animation when value is below zero
   }
 
   private getMax(options: { simulationDuration: number }) {
