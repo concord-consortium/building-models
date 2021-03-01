@@ -175,12 +175,9 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
 
   private renderNodeRange() {
     if (SHOW_NODE_RANGE) {
-      const {pointMin} = this.getPathPoints();
+      const {pointMax} = this.getPathPoints();
       const {currentValue, max} = this.props;
-      if (pointMin === currentValue) {
-        return <div className="node-range">{Math.round(pointMin)} / {max}</div>;
-      }
-      return <div className="node-range">{Math.round(pointMin)} - {Math.round(currentValue)} / {max}</div>;
+      return <div className="node-range">{Math.round(currentValue)} / {Math.round(pointMax)}</div>;
     }
   }
 
@@ -218,7 +215,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
     const trailingData = _.takeRight(data, rangeX).reverse();
 
     if (trailingData.length === 0) {
-      return {points: [], tickHeight: 0, pointMin: 0};
+      return {points: [], tickHeight: 0, pointMin: 0, pointMax: 0};
     }
 
     const animating = animateRescale && (yAnimationMultiplier < 1);
@@ -251,7 +248,7 @@ export class NodeSvgGraphView extends Mixer<NodeSvgGraphViewProps, NodeSvgGraphV
       return {x, y};
     });
 
-    return {points, tickHeight, pointMin: dataRange.min};
+    return {points, tickHeight, pointMin: dataRange.min, pointMax: dataRange.max};
   }
 
   private getAnimatedTicks(tickHeight: number, tickAlpha: number) {

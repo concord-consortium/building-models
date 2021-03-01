@@ -385,16 +385,22 @@ export class Node extends GraphPrimitive {
 
   public startSliderDrag(options: { simulationDuration: number }) {
     this.usingSlider = true;
-    this.sliderStartMax = this.max;
-    _.forEach(_.takeRight(this.frames, options.simulationDuration).reverse(), (point) => {
-      this.sliderStartMax = Math.max(this.sliderStartMax, point);
-    });
+    this.sliderStartMax = this.getMax(options);
     this.animateRescale = false;
   }
 
-  public endSliderDrag() {
+  public endSliderDrag(options: { simulationDuration: number }) {
     this.usingSlider = false;
-    this.animateRescale = this.currentValue > 0 && (Math.max(this.sliderStartMax, this.currentValue) > this.max);
+    const dataMax = this.getMax(options);
+    this.animateRescale = (this.currentValue > 0 && (Math.max(this.sliderStartMax, this.currentValue, dataMax) > this.max));
+  }
+
+  private getMax(options: { simulationDuration: number }) {
+    let max = this.max;
+    _.forEach(_.takeRight(this.frames, options.simulationDuration).reverse(), (point) => {
+      max = Math.max(max, point);
+    });
+    return max;
   }
 }
 
