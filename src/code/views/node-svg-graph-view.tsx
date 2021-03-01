@@ -2,9 +2,15 @@ import * as React from "react";
 
 const _ = require("lodash");
 import { CSSProperties } from "react";
-import { SHOW_NODE_RANGE } from "../utils/url-params";
+import { urlParams, SHOW_NODE_RANGE } from "../utils/url-params";
 
-const AUTO_RESCALE_TIME = 1500;
+// this is to allow Dan to try out different animation times
+let autoRescaleTime = parseInt(urlParams.autoRescaleTime || "1500", 10);
+if (isNaN(autoRescaleTime)) {
+  autoRescaleTime = 1500;
+}
+
+const AUTO_RESCALE_TIME = autoRescaleTime;
 const TICK_FADE_TIME = 1000;
 
 const NUM_TICKS = 10;

@@ -40,6 +40,7 @@ export interface UrlParams {
    */
   imageCollections?: string;
   showNodeRange?: string;
+  autoRescaleTime?: string;  // this is to allow Dan to try out different animation times
 }
 
 export const urlParams: UrlParams = params;
