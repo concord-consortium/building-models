@@ -5,9 +5,9 @@ import { CSSProperties } from "react";
 import { urlParams, SHOW_NODE_RANGE } from "../utils/url-params";
 
 // this is to allow Dan to try out different animation times
-let autoRescaleTime = parseInt(urlParams.autoRescaleTime || "1500", 10);
+let autoRescaleTime = parseInt(urlParams.autoRescaleTime || "750", 10);
 if (isNaN(autoRescaleTime)) {
-  autoRescaleTime = 1500;
+  autoRescaleTime = 750;
 }
 
 const AUTO_RESCALE_TIME = autoRescaleTime;

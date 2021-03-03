@@ -393,7 +393,7 @@ export class Node extends GraphPrimitive {
     this.usingSlider = false;
     const dataMax = Math.round(this.getMax(options));
     const maxMax = Math.max(this.sliderStartMax, dataMax);
-    this.animateRescale = maxMax > 0 && (maxMax > this.max) && (dataMax !== this.sliderStartMax); // NOTE: this skips animation when value is below zero
+    this.animateRescale = dataMax > 0 && maxMax > 0 && (maxMax > this.max) && (dataMax !== this.sliderStartMax); // NOTE: this skips animation when value is below zero
   }
 
   private getMax(options: { simulationDuration: number }) {
