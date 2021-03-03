@@ -397,7 +397,7 @@ export class Node extends GraphPrimitive {
   }
 
   private getMax(options: { simulationDuration: number }) {
-    let max = Math.max(this.max, this.currentValue);
+    let max = this.currentValue;
     _.forEach(_.takeRight(this.frames, options.simulationDuration), (point) => {
       max = Math.max(max, point);
     });
