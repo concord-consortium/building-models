@@ -385,24 +385,23 @@ export class Node extends GraphPrimitive {
 
   public startSliderDrag(options: { simulationDuration: number }) {
     this.usingSlider = true;
-    this.sliderStartMax = Math.round(this.getMax(options));
+    this.sliderStartMax = Math.round(this.getMax({...options, includeNodeMax: true}));
     this.animateRescale = false;
   }
 
   public endSliderDrag(options: { simulationDuration: number }) {
     this.usingSlider = false;
-    const sliderEndMax = Math.round(this.getMax(options));
+    const sliderEndMax = Math.round(this.getMax({...options, includeNodeMax: false}));
     const maxMax = Math.max(this.sliderStartMax, sliderEndMax);
     this.animateRescale = sliderEndMax > 0 && maxMax > 0 && (maxMax > this.max) && (sliderEndMax !== this.sliderStartMax); // NOTE: this skips animation when value is below zero
   }
 
-  private getMax(options: { simulationDuration: number }) {
+  private getMax(options: { simulationDuration: number, includeNodeMax: boolean }) {
     let max = this.currentValue;
     _.forEach(_.takeRight(this.frames, options.simulationDuration), (point) => {
       max = Math.max(max, point);
     });
-    // to avoid zeroed lines animating the ticks this is conditional
-    if (max > 0) {
+    if (options.includeNodeMax) {
       max = Math.max(max, this.max);
     }
     return max;
