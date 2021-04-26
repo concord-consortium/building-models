@@ -39,7 +39,11 @@ export interface UrlParams {
    *      ?imageCollections=image-collections/cbio/collections/population-cell.json
    */
   imageCollections?: string;
+  showNodeRange?: string;
+  autoRescaleTime?: string;  // this is to allow Dan to try out different animation times
 }
 
 export const urlParams: UrlParams = params;
+
+export const SHOW_NODE_RANGE = urlParams.showNodeRange === "true";
 
