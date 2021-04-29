@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sage Modeler Report Generator</title>
+  <style>
+    body {
+      font-size: 14pt;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 2em;
+      background-color: hsl(50,20%,85%);
+      color: hsl(50,20%,15%)
+    }
+    .instructions {
+      background-color: hsl(50,20%,90%);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .status {
+      background-color: hsl(50,20%,90%);
+      border-radius: 12px;
+      font-size: 14pt;
+      font-weight: bold;
+      padding: 12px;
+      min-height: 40px;
+      margin-top: 12px;
+    }
+    .links {
+      margin-top: 12px;
+      font-size: 16pt;
+    }
+    a {
+      color:hsl(200,80%,35%);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="output"></div>
+  <div>
+    version: <%= htmlWebpackPlugin.options.__VERSION__ %>
+    date: <%= htmlWebpackPlugin.options.__BUILD_DATE__ %>
+  </div>
+</body>
+</html>

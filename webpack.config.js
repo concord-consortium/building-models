@@ -41,7 +41,7 @@ const buildInfo = {
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
-  return {
+  const main = {
     context: __dirname, // to automatically find tsconfig.json
     devtool: 'source-map',
     entry: './src/code/app.tsx',
@@ -175,4 +175,22 @@ module.exports = (env, argv) => {
       }
     }
   };
+  const reportTool = { ...main,
+    entry: './src/code/reporting/components/app.tsx',
+    output: {
+      path: __dirname + (devMode ? "/dev" : "/dist"),
+      filename: 'js/report.js'
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        filename: 'report.html',
+        template: 'src/templates/report.html.ejs',
+        __BUILD_INFO__: buildInfoString,
+        __ENVIRONMENT__: environment,
+        __VERSION__: buildInfo.tag,
+        __BUILD_DATE__: buildInfo.date,
+      }),
+    ]
+  }
+  return [main, reportTool];
 };

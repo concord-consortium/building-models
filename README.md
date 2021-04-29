@@ -109,3 +109,28 @@ To update the icon fonts used in this project:
 
 If you want to disable Rollbar integration on your development machine just add a `disableRollbar` local storage option with the value `true` (as a string, all local storage values are strings).  This value is checked in the index.html file prior to defining
 the Rollbar configuration object and loading the Rollbar remote Javascript.
+
+## How to generate CSV researcher graph topology reports:
+Tool for education researchers to report on Sage Modeler diagram topology.
+For more information see: https://www.pivotaltracker.com/story/show/177674195
+### From web interface:
+1. Simply browse over to /report.html and follow the instructions
+#### Local development mode:
+6. Run a local webserver `npm run start`
+7. upload files using http://localhost:8080/report.html
+
+### Command line (deprecated):
+2. Make sure you have [npm & node installed](https://www.npmjs.com/get-npm).
+2. Install node dependencies `npm install`
+3. Place your reporting sources (`*/.xlsx`) into the `input` folder here.
+4. Run `npm run convert`
+5. Output CSV files will appear in the `output` directory here.
+
+## Reference Material
+
+* [Sage Modeler topology tagger code](https://github.com/concord-consortium/building-models/blob/master/src/code/utils/topology-tagger.ts)
+* [XLSX processing npm module](https://www.npmjs.com/package/xlsx)
+* [XLSX parsing options](https://www.npmjs.com/package/xlsx#parsing-options)
+* [https://www.npmjs.com/package/papaparse npm](https://www.npmjs.com/package/papaparse)
+
+
