@@ -611,7 +611,7 @@ export class CodapConnect {
       resource: "component",
       values: {
         type: "text",
-        title: "Text",
+        title: tr("~DOCUMENT.CODAP_ACTIONS.TEXT"),
         position: "bottom"
       }
     });
