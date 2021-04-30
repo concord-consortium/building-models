@@ -111,6 +111,8 @@ export declare class GraphStoreClass extends StoreClass {
   public changeNodeWithKey(key: string, data: any, options?: LogOptions): void;
   public startNodeEdit(): void;
   public endNodeEdit(): void;
+  public startNodeSliderDrag(key: string): void;
+  public endNodeSliderDrag(key: string): void;
   public clickLink(link: Link, multipleSelectionsAllowed: boolean): void;
   public editLink(link: Link): Link;
   public changeLink(link: Link, changes: any): void;
@@ -142,6 +144,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     this.filename           = null;
     this.filenameListeners  = [];
     this.ready = false;
+    this.unscaledNodes      = [];
 
     // wait because of require order
     setTimeout(() => {
@@ -768,6 +771,26 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return this.undoRedoManager.endCommandBatch();
   },
 
+  startNodeSliderDrag(key: string) {
+    const node = this.nodeKeys[key];
+    if (node) {
+      const simulationDuration = SimulationStore.simulationDuration();
+      node.startSliderDrag({simulationDuration});
+      _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.startSliderDrag({simulationDuration}));
+      this.updateListeners();
+    }
+  },
+
+  endNodeSliderDrag(key: string) {
+    const node = this.nodeKeys[key];
+    if (node) {
+      const simulationDuration = SimulationStore.simulationDuration();
+      node.endSliderDrag({simulationDuration});
+      _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.endSliderDrag({simulationDuration}));
+      this.updateListeners();
+    }
+  },
+
   clickLink(link, multipleSelectionsAllowed) {
     // this is to allow both clicks and double clicks
     const now = (new Date()).getTime();
@@ -1095,6 +1118,30 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       }
     }
     return true;
+  },
+
+  linkedOutNodes(startNode: Node) {
+    const visitedKeys: string[] = [];
+    const unvisitedKeys = [startNode.key];
+    const outNodes: Node[] = [];
+    while (unvisitedKeys.length > 0) {
+      const unvisitedKey = unvisitedKeys.shift();
+      if (unvisitedKey) {
+        visitedKeys.push(unvisitedKey);
+        const unvisitedNode = this.nodeKeys[unvisitedKey];
+        if (unvisitedNode) {
+          _.forEach(unvisitedNode.outNodes(), outNode => {
+            const visited = visitedKeys.indexOf(outNode.key) !== -1;
+            const unvisited = unvisitedKeys.indexOf(outNode.key) !== -1;
+            if (!visited && !unvisited) {
+              outNodes.push(outNode);
+              unvisitedKeys.push(outNode.key);
+            }
+          });
+        }
+      }
+    }
+    return outNodes;
   }
 });
 

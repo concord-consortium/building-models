@@ -237,6 +237,7 @@ interface NodeViewProps {
   onMoveComplete: (options: NodeViewHandlerOptions) => void;
   onDelete: (options: NodeViewHandlerOptions) => void;
   onSliderDragStart?: (key: string) => void;
+  onSliderDragEnd?: (key: string) => void;
 }
 
 interface NodeViewState {
@@ -435,6 +436,9 @@ getDefaultProps() {
           strokeWidth={3}
           animateGraphs={this.props.animateGraphs}
           hideGraphs={this.props.hideGraphs}
+          usingSlider={this.props.data.usingSlider}
+          sliderStartMax={this.props.data.sliderStartMax}
+          animateRescale={this.props.data.animateRescale}
         />
       );
     } else {
@@ -542,7 +546,10 @@ getDefaultProps() {
   }
 
   private handleSliderDragEnd = () => {
-    return this.setState({ ignoreDrag: false });
+    if (this.props.onSliderDragEnd) {
+      this.props.onSliderDragEnd(this.props.nodeKey);
+    }
+    return this.setState({ignoreDrag: false});
   }
 
   private handleGraphClick = (attributeName) => {

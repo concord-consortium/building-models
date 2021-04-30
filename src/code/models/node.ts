@@ -44,6 +44,9 @@ export class Node extends GraphPrimitive {
   public type: string = "Node";
   public title: string;
   public currentValue: number;
+  public usingSlider: boolean = false;
+  public sliderStartMax: number = 0;
+  public animateRescale: boolean = false;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
@@ -82,29 +85,29 @@ export class Node extends GraphPrimitive {
     // Specify default values using key = <defaultValue>
     // see https://halfdecent.net/2013/12/02/coffeescript-constructor-options-with-defaults/
     val = nodeSpec.x,
-    this.x = val != null ? val : 0,
-    val1 = nodeSpec.y,
-    this.y = val1 != null ? val1 : 0,
-    val2 = nodeSpec.title,
-    this.title = val2 != null ? val2 : tr("~NODE.UNTITLED"),
-    val3 = nodeSpec.codapID,
-    this.codapID = val3 != null ? val3 : null,
-    val4 = nodeSpec.codapName,
-    this.codapName = val4 != null ? val4 : null,
-    this.image = nodeSpec.image,
-    val5 = nodeSpec.isAccumulator,
-    this.isAccumulator = val5 != null ? val5 : false,
-    val6 = nodeSpec.allowNegativeValues,
-    this.allowNegativeValues = val6 != null ? val6 : false,
-    val7 = nodeSpec.valueDefinedSemiQuantitatively,
-    this.valueDefinedSemiQuantitatively = val7 != null ? val7 : true,
-    this.paletteItem = nodeSpec.paletteItem,
-    val8 = nodeSpec.frames,
-    this.frames = val8 != null ? val8 : [],
-    val9 = nodeSpec.addedThisSession,
-    this.addedThisSession = val9 != null ? val9 : false,
-    val10 = nodeSpec.combineMethod,
-    this.combineMethod = val10 != null ? val10 : "average";
+      this.x = val != null ? val : 0,
+      val1 = nodeSpec.y,
+      this.y = val1 != null ? val1 : 0,
+      val2 = nodeSpec.title,
+      this.title = val2 != null ? val2 : tr("~NODE.UNTITLED"),
+      val3 = nodeSpec.codapID,
+      this.codapID = val3 != null ? val3 : null,
+      val4 = nodeSpec.codapName,
+      this.codapName = val4 != null ? val4 : null,
+      this.image = nodeSpec.image,
+      val5 = nodeSpec.isAccumulator,
+      this.isAccumulator = val5 != null ? val5 : false,
+      val6 = nodeSpec.allowNegativeValues,
+      this.allowNegativeValues = val6 != null ? val6 : false,
+      val7 = nodeSpec.valueDefinedSemiQuantitatively,
+      this.valueDefinedSemiQuantitatively = val7 != null ? val7 : true,
+      this.paletteItem = nodeSpec.paletteItem,
+      val8 = nodeSpec.frames,
+      this.frames = val8 != null ? val8 : [],
+      val9 = nodeSpec.addedThisSession,
+      this.addedThisSession = val9 != null ? val9 : false,
+      val10 = nodeSpec.combineMethod,
+      this.combineMethod = val10 != null ? val10 : "average";
 
     const accumulatorScaleUrlParam = (urlParams.collectorScale && Number(urlParams.collectorScale)) || 1;
     this.accumulatorInputScale = accumulatorScaleUrlParam > 0 ? accumulatorScaleUrlParam : 1;
@@ -214,6 +217,10 @@ export class Node extends GraphPrimitive {
 
   public inNodes() {
     return _.map(this.inLinks(), link => link.sourceNode);
+  }
+
+  public outNodes() {
+    return _.map(this.outLinks(), link => link.targetNode);
   }
 
   public isDependent(onlyConsiderDefinedRelations?: boolean) {
@@ -374,6 +381,30 @@ export class Node extends GraphPrimitive {
 
   public hasGraphData() {
     return this.frames.length > 0;
+  }
+
+  public startSliderDrag(options: { simulationDuration: number }) {
+    this.usingSlider = true;
+    this.sliderStartMax = Math.round(this.getMax({...options, includeNodeMax: true}));
+    this.animateRescale = false;
+  }
+
+  public endSliderDrag(options: { simulationDuration: number }) {
+    this.usingSlider = false;
+    const sliderEndMax = Math.round(this.getMax({...options, includeNodeMax: false}));
+    const maxMax = Math.max(this.sliderStartMax, sliderEndMax);
+    this.animateRescale = sliderEndMax > 0 && maxMax > 0 && (maxMax > this.max) && (sliderEndMax !== this.sliderStartMax); // NOTE: this skips animation when value is below zero
+  }
+
+  private getMax(options: { simulationDuration: number, includeNodeMax: boolean }) {
+    let max = this.currentValue;
+    _.forEach(_.takeRight(this.frames, options.simulationDuration), (point) => {
+      max = Math.max(max, point);
+    });
+    if (options.includeNodeMax) {
+      max = Math.max(max, this.max);
+    }
+    return max;
   }
 }
 
