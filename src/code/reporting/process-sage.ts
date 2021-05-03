@@ -89,13 +89,9 @@ const processCodapItem = (key: string, item: any) => {
     if (!sageData) {
       return;
     }
-    if (sageData.topology) {
-      topology = sageData.topology;
-    } else {
-      // migrate to the latest sage modeler format first:
-      const migrated = migrationUpdate(sageData);
-      topology = getTopology(migrated);
-    }
+    // migrate to the latest sage modeler format first:
+    const migrated = migrationUpdate(sageData);
+    topology = getTopology(migrated);
   });
   return topology;
 };
