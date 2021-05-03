@@ -116,11 +116,12 @@ For more information see: https://www.pivotaltracker.com/story/show/177674195
 ### From web interface:
 1. Simply browse over to /report.html and follow the instructions
 #### Local development mode:
-6. Run a local webserver `npm run start`
-7. upload files using http://localhost:8080/report.html
+1. install `npm install`
+1. Run a local webserver `npm run start`
+2. upload files using http://localhost:8080/report.html
 
 ### Command line (deprecated):
-2. Make sure you have [npm & node installed](https://www.npmjs.com/get-npm).
+1. Make sure you have [npm & node installed](https://www.npmjs.com/get-npm).
 2. Install node dependencies `npm install`
 3. Place your reporting sources (`*/.xlsx`) into the `input` folder here.
 4. Run `npm run convert`

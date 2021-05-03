@@ -90,7 +90,7 @@ const processCodapItem = (key: string, item: any) => {
       return;
     }
     if (sageData.topology) {
-      topology = comp.componentStorage.savedGameState.topology;
+      topology = sageData.topology;
     } else {
       // migrate to the latest sage modeler format first:
       const migrated = migrationUpdate(sageData);

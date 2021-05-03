@@ -132,11 +132,10 @@ export class ReportApp extends React.Component<IAppProps, IAppState> {
   }
 }
 
-
-ReactDOM.render(
-  <ReportApp userName="Researcher" place="report converter" />,
-  document.getElementById("output")
-);
-
-console.log("YIPEEE KAYAY!!!!");
+document.addEventListener("DOMContentLoaded", () => {
+  ReactDOM.render(
+    <ReportApp userName="Researcher" place="report converter" />,
+    document.getElementById("output")
+  );
+});
 
