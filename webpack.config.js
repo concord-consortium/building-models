@@ -181,6 +181,7 @@ module.exports = (env, argv) => {
       path: __dirname + (devMode ? "/dev" : "/dist"),
       filename: 'js/report.js'
     },
+    optimization: {},
     plugins: [
       new HtmlWebpackPlugin({
         filename: 'report.html',
