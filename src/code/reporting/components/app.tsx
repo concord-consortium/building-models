@@ -29,10 +29,7 @@ interface ICSVFileRecord {
   fileName: string;
 }
 
-export interface IAppProps {
-  userName: string;
-  place: string;
-}
+export interface IAppProps {}
 
 export interface IAppState {
   CSVs: ICSVFileRecord[];
@@ -134,8 +131,9 @@ export class ReportApp extends React.Component<IAppProps, IAppState> {
 
 document.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    <ReportApp userName="Researcher" place="report converter" />,
-    document.getElementById("output")
+    <ReportApp />,
+    document.getElementById("report-app")
   );
+  console.log("Report view loaded ...");
 });
 
