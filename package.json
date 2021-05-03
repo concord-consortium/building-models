@@ -2,7 +2,7 @@
   "name": "building-models",
   "description": "System dynamics modeling tool.",
   "author": "The Concord Consortium",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/concord-consortium/building-models"
