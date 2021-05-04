@@ -37,6 +37,19 @@ export interface ISageGraph {
   nodes: ISageNode[];
 }
 
+export interface ITopoReport {
+  links: number;
+  nodes: number;
+  unconnectedNodes: number;
+  collectorNodes: number;
+  multiLinkTargetNodes: number;
+  graphs: number;
+  linearGraphs: number;
+  feedbackGraphs: number;
+  branchedGraphs: number;
+  multiPathGraphs: number;
+}
+
 export function getAnalysisGraph(sageModelGraph: ISageGraph, swapTransferSource = false) {
   // Returns an analysis graph from a serialized sage graph.
   //
