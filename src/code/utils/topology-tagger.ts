@@ -245,7 +245,7 @@ function countGraphsWithMultiPaths(g) {
     const predecessorsPredecessors = immediatePredecessors
       .map( (node: string) => g.predecessors(node) )
       .filter( (nodes: string[]) => nodes.length > 0);
-    return _.intersection(predecessorsPredecessors).length > 0;
+    return _.intersection(immediatePredecessors, predecessorsPredecessors).length > 0;
     };
 
   const nodesInCycles = _.uniq(_.flatten(GraphLibAlg.findCycles(g)));

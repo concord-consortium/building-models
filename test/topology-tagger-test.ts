@@ -30,6 +30,7 @@ import { embeddedRingFeedback } from "./serialized-test-data/topology-test-cases
 import { immediateFeedbackOut } from "./serialized-test-data/topology-test-cases/immedate-feedback-from";
 import { multipathAndFeedback } from "./serialized-test-data/topology-test-cases/multipath-and-feedback";
 import { twoTransferNodes } from "./serialized-test-data/topology-test-cases/two-transfer-nodes";
+import { fourNodesWithoutCycles } from "./serialized-test-data/topology-test-cases/four-nodes-without-cycles";
 
 describe("TopologyTagger", () => {
   beforeEach(() => null);
@@ -682,6 +683,40 @@ describe("TopologyTagger", () => {
     });
     it("finds 1 graph with a multi-path", () => {
       chai.expect(getTopology(graph).multiPathGraphs).to.eql(1);
+    });
+  });
+
+  describe("finds no multi-path in a 4 node graph without cycles", () => {
+    const graph: ISageGraph = fourNodesWithoutCycles;
+    it("finds 4 nodes", () => {
+      chai.expect(getTopology(graph).nodes).to.eql(4);
+    });
+    it("finds 3 links", () => {
+      chai.expect(getTopology(graph).links).to.eql(3);
+    });
+    it("finds 1 node with multiple target links", () => {
+      chai.expect(getTopology(graph).multiLinkTargetNodes).to.eql(1);
+    });
+    it("finds no collector nodes", () => {
+      chai.expect(getTopology(graph).collectorNodes).to.eql(0);
+    });
+    it("finds 1 independent graphs", () => {
+      chai.expect(getTopology(graph).graphs).to.eql(1);
+    });
+    it("finds no unconnected nodes", () => {
+      chai.expect(getTopology(graph).unconnectedNodes).to.eql(0);
+    });
+    it("finds no linear graphs", () => {
+      chai.expect(getTopology(graph).linearGraphs).to.eql(0);
+    });
+    it("finds no graphs with feedback", () => {
+      chai.expect(getTopology(graph).feedbackGraphs).to.eql(0);
+    });
+    it("finds 1 graph with branches", () => {
+      chai.expect(getTopology(graph).branchedGraphs).to.eql(1);
+    });
+    it("finds no graphs with a multi-path", () => {
+      chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
     });
   });
 
