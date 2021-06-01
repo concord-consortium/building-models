@@ -2944,18 +2944,18 @@ var JSPLUMB_ZOOM = 1;
 
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the core code.
  *
  * Copyright (c) 2010 - 2016 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * http://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 (function () {
@@ -3342,7 +3342,7 @@ var JSPLUMB_ZOOM = 1;
         },
         setHoverPaintStyle: function (style, doNotRepaint) {
             //this._jsPlumb.hoverPaintStyle = jsPlumb.extend({}, style);
-// TODO figure out if we want components to clone paintStyle so as not to share it.		    	
+// TODO figure out if we want components to clone paintStyle so as not to share it.
             this._jsPlumb.hoverPaintStyle = style;
             _updateHoverStyle(this);
             if (!doNotRepaint) this.repaint();
@@ -5054,7 +5054,7 @@ var JSPLUMB_ZOOM = 1;
             return new root.jsPlumb.DynamicAnchor({anchors: anchors, selector: anchorSelector, elementId: null, jsPlumbInstance: _currentInstance});
         };
 
-// --------------------- makeSource/makeTarget ---------------------------------------------- 
+// --------------------- makeSource/makeTarget ----------------------------------------------
 
         this.targetEndpointDefinitions = {};
         var _setEndpointPaintStylesAndAnchor = function (ep, epIndex, _instance) {
@@ -5639,7 +5639,7 @@ var JSPLUMB_ZOOM = 1;
             return _setEnabled("target", el, state, null, connectionType);
         };
 
-// --------------------- end makeSource/makeTarget ---------------------------------------------- 				
+// --------------------- end makeSource/makeTarget ----------------------------------------------
 
         this.ready = function (fn) {
             _currentInstance.bind("ready", fn);
@@ -6026,9 +6026,9 @@ var JSPLUMB_ZOOM = 1;
         }
     });
 
-// --------------------- static instance + AMD registration -------------------------------------------	
+// --------------------- static instance + AMD registration -------------------------------------------
 
-// create static instance and assign to window if window exists.	
+// create static instance and assign to window if window exists.
     var jsPlumb = new jsPlumbInstance();
     // register on 'root' (lets us run on server or browser)
     root.jsPlumb = jsPlumb;
@@ -6068,7 +6068,7 @@ var JSPLUMB_ZOOM = 1;
         module.exports = jsPlumb;
     }
 
-// --------------------- end static instance + AMD registration -------------------------------------------		
+// --------------------- end static instance + AMD registration -------------------------------------------
 
 }).call(typeof window !== 'undefined' ? window : this);
 
@@ -6884,18 +6884,18 @@ var JSPLUMB_ZOOM = 1;
 
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the code for Endpoints.
  *
  * Copyright (c) 2010 - 2016 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * http://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 (function () {
@@ -7475,7 +7475,7 @@ var JSPLUMB_ZOOM = 1;
 
                     _makeDraggablePlaceholder(placeholderInfo, _jsPlumb, ipco, ips);
 
-                    // store the id of the dragging div and the source element. the drop function will pick these up.                   
+                    // store the id of the dragging div and the source element. the drop function will pick these up.
                     _jsPlumb.setAttributes(this.canvas, {
                         "dragId": placeholderInfo.id,
                         "elId": this.elementId
@@ -7497,7 +7497,7 @@ var JSPLUMB_ZOOM = 1;
                     if (jpc == null) {
 
                         this.setHover(false, false);
-                        // create a connection. one end is this endpoint, the other is a floating endpoint.                    
+                        // create a connection. one end is this endpoint, the other is a floating endpoint.
                         jpc = _newConnection({
                             sourceEndpoint: this,
                             targetEndpoint: this._jsPlumb.floatingEndpoint,
@@ -8148,18 +8148,18 @@ var JSPLUMB_ZOOM = 1;
 
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the code for Connections.
  *
  * Copyright (c) 2010 - 2015 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * https://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
@@ -8209,7 +8209,7 @@ var JSPLUMB_ZOOM = 1;
         this.previousConnection = params.previousConnection;
         this.source = _jp.getElement(params.source);
         this.target = _jp.getElement(params.target);
-        // sourceEndpoint and targetEndpoint override source/target, if they are present. but 
+        // sourceEndpoint and targetEndpoint override source/target, if they are present. but
         // source is not overridden if the Endpoint has declared it is not the final target of a connection;
         // instead we use the source that the Endpoint declares will be the final source element.
         if (params.sourceEndpoint) this.source = params.sourceEndpoint.getElement();
@@ -8219,7 +8219,7 @@ var JSPLUMB_ZOOM = 1;
 
         this.sourceId = this._jsPlumb.instance.getId(this.source);
         this.targetId = this._jsPlumb.instance.getId(this.target);
-        this.scope = params.scope; // scope may have been passed in to the connect call. if it wasn't, we will pull it from the source endpoint, after having initialised the endpoints.            
+        this.scope = params.scope; // scope may have been passed in to the connect call. if it wasn't, we will pull it from the source endpoint, after having initialised the endpoints.
         this.endpoints = [];
         this.endpointStyles = [];
 
@@ -8391,7 +8391,7 @@ var JSPLUMB_ZOOM = 1;
 
         this.updateConnectedClass();
 
-// END PAINTING    
+// END PAINTING
     };
 
     _ju.extend(_jp.Connection, _jp.OverlayCapableJsPlumbUIComponent, {
@@ -8691,23 +8691,23 @@ var JSPLUMB_ZOOM = 1;
             return e;
         }
 
-    }); // END Connection class            
+    }); // END Connection class
 }).call(typeof window !== 'undefined' ? window : this);
 
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the code for creating and manipulating anchors.
  *
  * Copyright (c) 2010 - 2016 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * http://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
@@ -8820,34 +8820,32 @@ var JSPLUMB_ZOOM = 1;
                 return a;
             },
         // used by edgeSortFunctions
-            currySort = function (reverseAngles) {
+            currySort = function (flipValues) {
                 return function (a, b) {
-                    var r = true;
-                    if (reverseAngles) {
-                        r = a[0][0] < b[0][0];
+                    var p1 = a[0][0],
+                        p2 = b[0][0],
+                        result;
+                    if (flipValues) {
+                        // normalize the values on the negative y axis, which flips from -Pi to Pi when rotating counterclockwise
+                        p1 = p1 < 0 ? -Math.PI - p1 : Math.PI - p1,
+                        p2 = p2 < 0 ? -Math.PI - p2 : Math.PI - p2;
+                        // reversed on the left ride compared to the right side
+                        result = p1 > p2 ? -1 : 1;
+                        return p1 === p2 ? result : -result;
+                    } else {
+                        result = p1 < p2 ? 1 : -1;
+                        return p1 === p2 ? -result : result;
                     }
-                    else {
-                        r = a[0][0] > b[0][0];
-                    }
-                    return r === false ? -1 : 1;
                 };
-            },
-        // used by edgeSortFunctions
-            leftSort = function (a, b) {
-                // first get adjusted values
-                var p1 = a[0][0] < 0 ? -Math.PI - a[0][0] : Math.PI - a[0][0],
-                    p2 = b[0][0] < 0 ? -Math.PI - b[0][0] : Math.PI - b[0][0];
-                if (p1 > p2) return 1;
-                else return a[0][1] > b[0][1] ? 1 : -1;
             },
         // used by placeAnchors
             edgeSortFunctions = {
                 "top": function (a, b) {
                     return a[0] > b[0] ? 1 : -1;
                 },
-                "right": currySort(true),
-                "bottom": currySort(true),
-                "left": leftSort
+                "right": currySort(false),
+                "bottom": currySort(false),  // this is not used in Sage but left here.  If it is brought back the changes to currySort() may need to be adjusted
+                "left": currySort(true),
             },
         // used by placeAnchors
             _sortHelper = function (_array, _fn) {
@@ -8945,7 +8943,7 @@ var JSPLUMB_ZOOM = 1;
                 removeEndpointFromAnchorLists(connection.floatingEndpoint);
             }
 
-            // remove from anchorLists            
+            // remove from anchorLists
             removeEndpointFromAnchorLists(connection.endpoints[0]);
             removeEndpointFromAnchorLists(connection.endpoints[1]);
 
@@ -9548,14 +9546,14 @@ var JSPLUMB_ZOOM = 1;
         return anchor.constructor == _jp.Anchor ? anchor : jsPlumbInstance.makeAnchor(anchor, elementId, jsPlumbInstance);
     };
 
-    /* 
+    /*
      * A DynamicAnchor is an Anchor that contains a list of other Anchors, which it cycles
      * through at compute time to find the one that is located closest to
      * the center of the target element, and returns that Anchor's compute
      * method result. this causes endpoints to follow each other with
      * respect to the orientation of their target elements, which is a useful
      * feature for some applications.
-     * 
+     *
      */
     _jp.DynamicAnchor = function (params) {
         _jp.Anchor.apply(this, arguments);
@@ -9653,7 +9651,7 @@ var JSPLUMB_ZOOM = 1;
     };
     _ju.extend(_jp.DynamicAnchor, _jp.Anchor);
 
-// -------- basic anchors ------------------    
+// -------- basic anchors ------------------
     var _curryAnchor = function (x, y, ox, oy, type, fnInit) {
         _jp.Anchors[type] = function (params) {
             var a = params.jsPlumbInstance.makeAnchor([ x, y, ox, oy, 0, 0 ], params.elementId, params.jsPlumbInstance);
@@ -9678,7 +9676,7 @@ var JSPLUMB_ZOOM = 1;
     _curryAnchor(0, 0, 0, -1, "TopLeft");
     _curryAnchor(0, 1, 0, 1, "BottomLeft");
 
-// ------- dynamic anchors -------------------    
+// ------- dynamic anchors -------------------
 
     // default dynamic anchors chooses from Top, Right, Bottom, Left
     _jp.Defaults.DynamicAnchors = function (params) {
@@ -9692,7 +9690,7 @@ var JSPLUMB_ZOOM = 1;
         return a;
     };
 
-// ------- continuous anchors -------------------    
+// ------- continuous anchors -------------------
 
     var _curryContinuousAnchor = function (type, faces) {
         _jp.Anchors[type] = function (params) {
@@ -9711,7 +9709,7 @@ var JSPLUMB_ZOOM = 1;
     _curryContinuousAnchor("ContinuousBottom", ["bottom"]);
     _curryContinuousAnchor("ContinuousRight", ["right"]);
 
-// ------- position assign anchors -------------------    
+// ------- position assign anchors -------------------
 
     // this anchor type lets you assign the position at connection time.
     _curryAnchor(0, 0, 0, 0, "Assign", function (anchor, params) {
@@ -9740,7 +9738,7 @@ var JSPLUMB_ZOOM = 1;
         }
     };
 
-// ------- perimeter anchors -------------------    
+// ------- perimeter anchors -------------------
 
     _jp.Anchors.Perimeter = function (params) {
         params = params || {};
@@ -9855,18 +9853,18 @@ var JSPLUMB_ZOOM = 1;
 }).call(typeof window !== 'undefined' ? window : this);
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the default Connectors, Endpoint and Overlay definitions.
  *
  * Copyright (c) 2010 - 2016 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * http://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
@@ -9885,7 +9883,7 @@ var JSPLUMB_ZOOM = 1;
          * much easier to do now.
          *
          * A Segment is responsible for providing coordinates for painting it, and also must be able to report its length.
-         * 
+         *
          */
         AbstractSegment: function (params) {
             this.params = params;
@@ -10034,7 +10032,7 @@ var JSPLUMB_ZOOM = 1;
                     out.y = within(y1, y2, y) ? y : closest(y1, y2, y);
                 }
                 else {
-                    // closest point lies on normal from given point to this line.  
+                    // closest point lies on normal from given point to this line.
                     var b = y1 - (m * x1),
                         b2 = y - (m2 * x),
                     // y1 = m.x1 + b and y1 = m2.x1 + b2
@@ -10120,7 +10118,7 @@ var JSPLUMB_ZOOM = 1;
             if (this.endAngle < 0) this.endAngle += TWO_PI;
             if (this.startAngle < 0) this.startAngle += TWO_PI;
 
-            // segment is used by vml     
+            // segment is used by vml
             //this.segment = _jg.quadrant([this.x1, this.y1], [this.x2, this.y2]);
 
             // we now have startAngle and endAngle as positive numbers, meaning the
@@ -10834,7 +10832,7 @@ var JSPLUMB_ZOOM = 1;
 // ********************************* END OF ENDPOINT TYPES *******************************************************************
 
 
-// ********************************* OVERLAY DEFINITIONS ***********************************************************************    
+// ********************************* OVERLAY DEFINITIONS ***********************************************************************
 
     var AbstractOverlay = _jp.Overlays.AbstractOverlay = function (params) {
         this.visible = true;
@@ -10956,17 +10954,17 @@ var JSPLUMB_ZOOM = 1;
                     if (params.variableWidth && params.variableWidth > 1){
                         if (Math.abs(adjustX) > Math.abs(adjustY))
                           adjustY += params.variableWidth-0.5;
-                        else 
+                        else
                           adjustX += params.variableWidth-0.5;
                     }
-                    
+
                     hxy.x += adjustX;
                     hxy.y += adjustY;
                     mid.x += adjustX;
                     mid.y += adjustY;
                     txy.x += adjustX;
                     txy.y += adjustY;
-                    // End CC 
+                    // End CC
 
                     if (direction == -1) {
                         var _ = txy;
@@ -11043,7 +11041,7 @@ var JSPLUMB_ZOOM = 1;
 
     /*
      * Class: Overlays.Diamond
-     * 
+     *
      * A diamond. Like PlainArrow, this is a concrete case of the more generic case of the tail points converging on some point...it just
      * happens that in this case, that point is greater than the length of the the arrow.
      *
@@ -11226,12 +11224,12 @@ var JSPLUMB_ZOOM = 1;
      */
     /*
      * Function: Constructor
-     * 
+     *
      * Parameters:
      * 	create - function for jsPlumb to call that returns a DOM element.
      * 	location - distance (as a decimal from 0 to 1 inclusive) marking where the label should sit on the connector. defaults to 0.5.
      * 	id - optional id to use for later retrieval of this overlay.
-     * 	
+     *
      */
     _jp.Overlays.Custom = function (params) {
         this.type = "Custom";
@@ -11276,7 +11274,7 @@ var JSPLUMB_ZOOM = 1;
      */
     /*
      * Function: Constructor
-     * 
+     *
      * Parameters:
      * 	cssClass - optional css class string to append to css class. This string is appended "as-is", so you can of course have multiple classes
      *             defined.  This parameter is preferred to using labelStyle, borderWidth and borderStyle.
@@ -11284,8 +11282,8 @@ var JSPLUMB_ZOOM = 1;
      *         label function returns null.  empty strings _will_ be painted.
      * 	location - distance (as a decimal from 0 to 1 inclusive) marking where the label should sit on the connector. defaults to 0.5.
      * 	id - optional id to use for later retrieval of this overlay.
-     * 
-     * 	
+     *
+     *
      */
     _jp.Overlays.Label = function (params) {
         this.labelStyle = params.labelStyle;
@@ -12186,18 +12184,18 @@ var JSPLUMB_ZOOM = 1;
 
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the 'flowchart' connectors, consisting of vertical and horizontal line segments.
  *
  * Copyright (c) 2010 - 2016 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * http://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
@@ -12560,10 +12558,10 @@ var JSPLUMB_ZOOM = 1;
  * This file contains the code for the Bezier connector type.
  *
  * Copyright (c) 2010 - 2015 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * https://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
@@ -12697,14 +12695,14 @@ var JSPLUMB_ZOOM = 1;
                 x1: _sx, y1: _sy, x2: _tx, y2: _ty,
                 cp1x: _CP[0], cp1y: _CP[1], cp2x: _CP2[0], cp2y: _CP2[1]
             });
-            
+
             // Begin CC: Variable width functionality
             var vw = params.variableWidth;
             if (vw){
                 var incDir = vw > 0 ? 1 : 0;
                 var decDir = vw < 0 ? 1 : 0;
                 var xMod = 0, yMod = 0;
-                
+
                 if (incDir === 1) {
                     xMod = (tp[3] === 0 || tp[3] === 1) ? 1 : 0;
                     yMod = (tp[2] === 0 || tp[2] === 1) ? 1 : 0;
@@ -12713,13 +12711,13 @@ var JSPLUMB_ZOOM = 1;
                     xMod = (sp[3] === 0 || sp[3] === 1) ? 1 : 0;
                     yMod = (sp[2] === 0 || sp[2] === 1) ? 1 : 0;
                 }
-                
+
                 for (var i = 0; i < Math.abs(vw); i++){
                     var x1i = xMod * i * incDir;
                     var y1i = yMod * i * incDir;
                     var x2i = xMod * i * decDir;
                     var y2i = yMod * i * decDir;
-                    
+
                     _super.addSegment(this, "Bezier", {
                         x1: _sx + x1i, y1: _sy + y1i, x2: _tx + x2i, y2: _ty + y2i,
                         cp1x: _CP[0], cp1y: _CP[1], cp2x: _CP2[0], cp2y: _CP2[1]
@@ -12742,10 +12740,10 @@ var JSPLUMB_ZOOM = 1;
  * This file contains the state machine connectors, which extend AbstractBezierConnector.
  *
  * Copyright (c) 2010 - 2015 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * https://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
@@ -12897,24 +12895,24 @@ var JSPLUMB_ZOOM = 1;
 }).call(typeof window !== 'undefined' ? window : this);
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the SVG renderers.
  *
  * Copyright (c) 2010 - 2016 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * http://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
 (function () {
 
-// ************************** SVG utility methods ********************************************	
+// ************************** SVG utility methods ********************************************
 
     "use strict";
     var root = this, _jp = root.jsPlumb, _ju = root.jsPlumbUtil;
@@ -13250,7 +13248,7 @@ var JSPLUMB_ZOOM = 1;
     };
     _ju.extend(_jp.ConnectorRenderers.svg, SvgComponent);
 
-// ******************************* svg segment renderer *****************************************************	
+// ******************************* svg segment renderer *****************************************************
 
     _jp.Segments.svg = {
         SegmentRenderer: {
@@ -13516,18 +13514,18 @@ var JSPLUMB_ZOOM = 1;
 
 /*
  * jsPlumb
- * 
+ *
  * Title:jsPlumb 2.1.0
- * 
+ *
  * Provides a way to visually connect elements on an HTML page, using SVG.
- * 
+ *
  * This file contains the 'vanilla' adapter - having no external dependencies other than bundled libs.
  *
  * Copyright (c) 2010 - 2016 jsPlumb (hello@jsplumbtoolkit.com)
- * 
+ *
  * http://jsplumbtoolkit.com
  * http://github.com/sporritt/jsplumb
- * 
+ *
  * Dual licensed under the MIT and GPL2 licenses.
  */
 ;
