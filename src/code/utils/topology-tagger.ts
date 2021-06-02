@@ -242,9 +242,9 @@ function countGraphsWithMultiPaths(g) {
     if (immediatePredecessors.length <= 1) {
       return false;
     }
-    const predecessorsPredecessors = immediatePredecessors
+    const predecessorsPredecessors = _.flattenDeep(immediatePredecessors
       .map( (node: string) => g.predecessors(node) )
-      .filter( (nodes: string[]) => nodes.length > 0);
+      .filter( (nodes: string[]) => nodes.length > 0));
     return _.intersection(immediatePredecessors, predecessorsPredecessors).length > 0;
     };
 
