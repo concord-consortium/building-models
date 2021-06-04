@@ -222,39 +222,37 @@ function countGraphsWithFeedback(g) {
 }
 
 function countGraphsWithMultiPaths(g) {
-  // A "multiple path" is present when a node is connected to any other node
-  // through multiple link paths.
-  //
-  // We are interested in counting the graphs in the model that have one or
-  // more nodes with multiple paths. This is a bit simpler if we have a
-  // predicate, isMultiPathNode(). To determine if a node is a multi-path
-  // node, we first find all the immediate predecessors of the node being
-  // tested. For each predecessor, we find all the predecessors of the
-  // immediate-predecessor. If there is a non-empty intersection of all those
-  // predecessor-predecessors, the node must be a multi-path node.
-  //
-  // Using this primitive, all the nodes in the model are checked to produce a
-  // list of the multi-path nodes. Then each component/sub-graph is checked to
-  // see if any of its nodes are multi-nodes.
+  const sinks = g.sinks();
 
-  const isMultiPathNode = (node: string) => {
-    const immediatePredecessors = g.inEdges(node).map( edge => edge.v );
-    if (immediatePredecessors.length <= 1) {
-      return false;
+  const componentHasMultiPaths = (component) => {
+    while (component.length > 0) {
+      // do a breadth-first search from nodes to all other nodes (checking for cycles on the way)
+      // we exit early when we visit a sink more than once as that signifies a multi-path
+      const node = component.shift();
+      const visited: Record<string, number> = {[node]: 1};
+      const queue = [node];
+      while (queue.length > 0) {
+        const visiting = queue.shift();
+        const successors = g.successors(visiting);
+        while (successors.length > 0) {
+          const successor = successors.shift();
+          visited[successor] = visited[successor] || 0;
+          visited[successor]++;
+          if (visited[successor] === 1) {
+            // first time visiting this node, add it to the search list
+            queue.push(successor);
+          } else if ((visited[successor] > 1) && (sinks.indexOf(successor) !== -1)) {
+            // second time visiting a sink so there is a multi-path to the sink
+            return true;
+          }
+        }
+      }
     }
-    const predecessorsPredecessors = _.flattenDeep(immediatePredecessors
-      .map( (node: string) => g.predecessors(node) )
-      .filter( (nodes: string[]) => nodes.length > 0));
-    return _.intersection(immediatePredecessors, predecessorsPredecessors).length > 0;
-    };
+    return false;
+  };
 
-  const nodesInCycles = _.uniq(_.flatten(GraphLibAlg.findCycles(g)));
-  const listOfMultiPathNodes = g.nodes()
-    .filter( n => isMultiPathNode(n) )
-    .filter( n => (nodesInCycles.indexOf(n) === -1) );
-
-  return GraphLibAlg.components(g)
-    .filter( nodes => _.intersection(nodes, listOfMultiPathNodes).length > 0)
+  return GraphLibAlg.components(g).
+    filter(componentHasMultiPaths)
     .length;
 }
 
