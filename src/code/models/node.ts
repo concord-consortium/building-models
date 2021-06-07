@@ -361,7 +361,8 @@ export class Node extends GraphPrimitive {
         allowNegativeValues: this.allowNegativeValues,
         valueDefinedSemiQuantitatively: this.valueDefinedSemiQuantitatively,
         frames: _.clone(this.frames),
-        combineMethod: this.combineMethod
+        combineMethod: this.combineMethod,
+        image: this.image
       }
     };
     return result;
