@@ -410,10 +410,22 @@ getDefaultProps() {
           />
         );
       } else {
-        const outLinks = node.outLinks();
-        const hasAddedToLink = _.some(outLinks, link => link.relation.formula === "+in");
-        const hasSubtractedFromLink = _.some(outLinks, link => link.relation.formula === "-in");
-        const image = node.isTransfer || hasAddedToLink || hasSubtractedFromLink ? "img/nodes/transfer.png" : node.image;
+        let image = node.image;
+        if (node.isTransfer) {
+          image = "img/nodes/transfer.png";
+        } else {
+          const outLinks = node.outLinks();
+          const hasAddedToLink = _.some(outLinks, link => link.relation.formula === "+in");
+          const hasSubtractedFromLink = _.some(outLinks, link => link.relation.formula === "-in");
+          if (hasAddedToLink && hasSubtractedFromLink) {
+            // TODO: need composite image here?  For now use source
+            image = "img/nodes/source.png";
+          } else if (hasAddedToLink) {
+            image = "img/nodes/source.png";
+          } else if (hasSubtractedFromLink) {
+            image = "img/nodes/sink.png";
+          }
+        }
         return (
           <SquareImageView image={image} />
         );
