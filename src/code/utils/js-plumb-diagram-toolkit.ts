@@ -28,6 +28,7 @@ export class DiagramToolkit {
   private flowNodeModifierAnchors: any[];
   private flowNodeFlowAnchors: any[];
   private flowNodeLinkAnchors: any[];
+  private flowNodeSourceAnchors: any[];
   private standardAnchors: any[];
   private $currentSource: any;
 
@@ -67,6 +68,7 @@ export class DiagramToolkit {
       [0, 0.25, -1, 0, 8, 0], [0, 0.75, -1, 0, 8, 0],                         // left
       [0.3, 1, 0, 1, 0, 0], [0.5, 1, 0, 1, 0, 0], [0.7, 1, 0, 1, 0, 0],       // bottom
       [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]];   // right
+    this.flowNodeSourceAnchors = ["Continuous", { faces: ["right"] }];
     // links to non-flow nodes link to locations assigned by jsPlumb on the left, top, or right faces
     this.standardAnchors = ["Continuous", { faces: ["top", "left", "right"] }];
   }
@@ -185,7 +187,8 @@ export class DiagramToolkit {
     };
   }
 
-  public _overlays(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) {
+  public _overlays({label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow, transferNotch}:
+                   {label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow, transferNotch}) {
     if (editingLabel == null) { editingLabel = true; }
     const results: any[] = []; // checked: any ok
     if (!hideArrow) {
@@ -195,6 +198,13 @@ export class DiagramToolkit {
         variableWidth,
         width: 9 + thickness,
         foldback: arrowFoldback
+      }]);
+    }
+    if (transferNotch) {
+      results.push(["Custom", {
+        create: this._createTransferArrowNotch(transferNotch),
+        location: 0,
+        id: "transferNotch"
       }]);
     }
     if (changeIndicator && (variableWidth !== 0)) {
@@ -258,6 +268,15 @@ export class DiagramToolkit {
     };
   }
 
+  public _createTransferArrowNotch(transferNotch) {
+    return () => {
+      const svg = $('<svg viewBox="0 0 20 10" fill="#ececec" xmlns="http://www.w3.org/2000/svg">')
+        .html('<polygon points="10,0 20,5 10,10" />');
+      return $("<div />")
+        .css({width: 20, height: 10})
+        .append(svg);
+    };
+  }
 
   public _clean_borked_endpoints() {
     return $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
@@ -311,6 +330,12 @@ export class DiagramToolkit {
       ({ thickness } = opts);
     }
 
+    if (opts.isTransfer || opts.magnitude !== 0) {
+      thickness = 10;
+      this.kit.importDefaults({
+        Connector: ["Flowchart", {}]});
+    }
+
     paintStyle.lineWidth = thickness;
     startColor = finalColor;
 
@@ -345,11 +370,6 @@ export class DiagramToolkit {
       changeIndicator = null;
     }
 
-    if (opts.isTransfer) {
-      this.kit.importDefaults({
-        Connector: ["Flowchart", {}]});
-    }
-
     const linkSource = opts.linkModel != null ? opts.linkModel.sourceNode : undefined;
     const linkTarget = opts.linkModel != null ? opts.linkModel.targetNode : undefined;
     const linkRelation = opts.linkModel != null ? opts.linkModel.relation : undefined;
@@ -360,17 +380,34 @@ export class DiagramToolkit {
                             ((linkTarget != null ? linkTarget.isTransfer : undefined) && ((linkTarget.transferLink != null ? linkTarget.transferLink.sourceNode : undefined) === linkSource));
     const isTransferToFlowNode = opts.isTransfer && opts.fromSource;
     const isTransferFromFlowNode = opts.isTransfer && !opts.fromSource;
-    const sourceAnchors = isTransferFromFlowNode ? this.flowNodeFlowAnchors : this.standardAnchors;
+    const sourceAnchors = isTransferFromFlowNode ? this.flowNodeFlowAnchors :
+      isTransferToFlowNode ? this.flowNodeSourceAnchors : this.standardAnchors;
     const targetAnchors = isTransferToFlowNode ? this.flowNodeFlowAnchors :
       isModifierToFlowNode ? this.flowNodeModifierAnchors :
         isLinkToFlowNode ? this.flowNodeLinkAnchors : this.standardAnchors;
 
+    // swap source and target for subtracts from, otherwise the arrow doesn't render correctly
+    // (if you change the location to 0 the thick arrow bleeds out in front of the arrow)
+    const swapEnds = opts.magnitude < 0;
+
     const connection = this.kit.connect({
-      source: opts.source,
-      target: opts.target,
-      anchors: [sourceAnchors, targetAnchors],
+      source: swapEnds ? opts.target : opts.source,
+      target: swapEnds ? opts.source : opts.target,
+      anchors: swapEnds ? [targetAnchors, sourceAnchors] : [sourceAnchors, targetAnchors],
       paintStyle,
-      overlays: this._overlays(opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel, opts.hideArrow),
+      overlays: this._overlays({
+        label: opts.label,
+        selected: opts.isSelected,
+        editingLabel: opts.isEditing,
+        thickness,
+        finalColor: fixedColor,
+        variableWidth: variableWidthMagnitude,
+        arrowFoldback,
+        changeIndicator,
+        link: opts.linkModel,
+        hideArrow: opts.hideArrow,
+        transferNotch: isTransferToFlowNode
+      }),
       endpoint: this._endpointOptions("Rectangle", thickness, "node-link-endpoint")
     });
 
