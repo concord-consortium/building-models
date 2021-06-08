@@ -499,7 +499,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
         useGradient,
         useVariableThickness,
         linkModel: link,
-        showIndicators: this.state.relationshipSymbols
+        showIndicators: this.state.relationshipSymbols,
+        formula: link.relation.formula
       };
       if (relationDetails.transferModifier != null) {
         opts.thickness = RelationFactory.thicknessFromRelation(link.relation);
