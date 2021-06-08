@@ -31,6 +31,10 @@ import { immediateFeedbackOut } from "./serialized-test-data/topology-test-cases
 import { multipathAndFeedback } from "./serialized-test-data/topology-test-cases/multipath-and-feedback";
 import { twoTransferNodes } from "./serialized-test-data/topology-test-cases/two-transfer-nodes";
 import { fourNodesWithoutCycles } from "./serialized-test-data/topology-test-cases/four-nodes-without-cycles";
+import { multiPath1 } from "./serialized-test-data/topology-test-cases/multipath-1";
+import { multiPath2 } from "./serialized-test-data/topology-test-cases/multipath-2";
+import { multiPath3 } from "./serialized-test-data/topology-test-cases/multipath-3";
+import { multiPath4 } from "./serialized-test-data/topology-test-cases/multipath-4";
 
 describe("TopologyTagger", () => {
   beforeEach(() => null);
@@ -717,6 +721,35 @@ describe("TopologyTagger", () => {
     });
     it("finds no graphs with a multi-path", () => {
       chai.expect(getTopology(graph).multiPathGraphs).to.eql(0);
+    });
+  });
+
+  describe("finds multi-paths", () => {
+    it("in first example", () => {
+      chai.expect(getTopology(multiPath1).multiPathGraphs).to.eql(1);
+    });
+    it("in second example", () => {
+      chai.expect(getTopology(multiPath2).multiPathGraphs).to.eql(1);
+    });
+    it("in third example", () => {
+      chai.expect(getTopology(multiPath3).multiPathGraphs).to.eql(1);
+    });
+    it("in fourth example", () => {
+      chai.expect(getTopology(multiPath4).multiPathGraphs).to.eql(1);
+    });
+    it("in all four examples combined", () => {
+      const combinedGraphs: ISageGraph = {nodes: [], links: []};
+      const examples = [multiPath1, multiPath2, multiPath3, multiPath4];
+      examples.forEach((example, index) => {
+        example.nodes.forEach(node => node.key = `${node.key}-${index}`);
+        example.links.forEach(link => {
+          link.sourceNode = `${link.sourceNode}-${index}`;
+          link.targetNode = `${link.targetNode}-${index}`;
+        });
+        combinedGraphs.nodes = combinedGraphs.nodes.concat(example.nodes);
+        combinedGraphs.links = combinedGraphs.links.concat(example.links);
+      });
+      chai.expect(getTopology(combinedGraphs).multiPathGraphs).to.eql(4);
     });
   });
 
