@@ -410,10 +410,12 @@ getDefaultProps() {
           />
         );
       } else {
+        const outLinks = node.outLinks();
+        const hasAddedToLink = _.filter(outLinks, link => link.relation.formula === "+in").length > 0;
+        const hasSubtractedFromLink = _.filter(outLinks, link => link.relation.formula === "-in").length > 0;
+        const image = node.isTransfer || hasAddedToLink || hasSubtractedFromLink ? "img/nodes/transfer.png" : node.image;
         return (
-          <SquareImageView
-            image={node.isTransfer ? "img/nodes/transfer.png" : node.image}
-          />
+          <SquareImageView image={image} />
         );
       }
     };
