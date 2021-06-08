@@ -330,7 +330,7 @@ export class DiagramToolkit {
       ({ thickness } = opts);
     }
 
-    if (opts.isTransfer || opts.magnitude !== 0) {
+    if (opts.isTransfer || opts.formula === "+in" || opts.formula === "-in") {
       thickness = 10;
       this.kit.importDefaults({
         Connector: ["Flowchart", {}]});
@@ -388,7 +388,7 @@ export class DiagramToolkit {
 
     // swap source and target for subtracts from, otherwise the arrow doesn't render correctly
     // (if you change the location to 0 the thick arrow bleeds out in front of the arrow)
-    const swapEnds = opts.magnitude < 0;
+    const swapEnds = opts.formula === "-in";
 
     const connection = this.kit.connect({
       source: swapEnds ? opts.target : opts.source,
