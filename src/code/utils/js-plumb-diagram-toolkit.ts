@@ -289,6 +289,8 @@ export class DiagramToolkit {
     // use large outline width for all links, this gives a larger selection target around the link
     paintStyle.outlineWidth = 10;
 
+    const formula = opts.linkModel != null && opts.linkModel.relation != null ? opts.linkModel.relation.formula : undefined;
+
     let startColor = LinkColors.default;
     let finalColor = LinkColors.default;
     let fixedColor = LinkColors.default;
@@ -330,7 +332,7 @@ export class DiagramToolkit {
       ({ thickness } = opts);
     }
 
-    if (opts.isTransfer || opts.formula === "+in" || opts.formula === "-in") {
+    if (opts.isTransfer || formula === "+in" || formula === "-in") {
       thickness = 10;
       this.kit.importDefaults({
         Connector: ["Flowchart", {}]});
@@ -388,7 +390,7 @@ export class DiagramToolkit {
 
     // swap source and target for subtracts from, otherwise the arrow doesn't render correctly
     // (if you change the location to 0 the thick arrow bleeds out in front of the arrow)
-    const swapEnds = opts.formula === "-in";
+    const swapEnds = formula === "-in";
 
     const connection = this.kit.connect({
       source: swapEnds ? opts.target : opts.source,
