@@ -28,7 +28,6 @@ export class DiagramToolkit {
   private flowNodeModifierAnchors: any[];
   private flowNodeFlowAnchors: any[];
   private flowNodeLinkAnchors: any[];
-  private flowNodeSourceAnchors: any[];
   private standardAnchors: any[];
   private $currentSource: any;
 
@@ -68,7 +67,6 @@ export class DiagramToolkit {
       [0, 0.25, -1, 0, 8, 0], [0, 0.75, -1, 0, 8, 0],                         // left
       [0.3, 1, 0, 1, 0, 0], [0.5, 1, 0, 1, 0, 0], [0.7, 1, 0, 1, 0, 0],       // bottom
       [1, 0.25, 1, 0, -8, 0], [1, 0.4, 1, 0, -8, 0], [1, 0.8, 1, 0, -8, 0]];   // right
-    this.flowNodeSourceAnchors = ["Continuous", { faces: ["right"] }];
     // links to non-flow nodes link to locations assigned by jsPlumb on the left, top, or right faces
     this.standardAnchors = ["Continuous", { faces: ["top", "left", "right"] }];
   }
@@ -270,10 +268,11 @@ export class DiagramToolkit {
 
   public _createTransferArrowNotch(transferNotch) {
     return () => {
-      const svg = $('<svg viewBox="0 0 20 10" fill="#ececec" xmlns="http://www.w3.org/2000/svg">')
-        .html('<polygon points="10,0 20,5 10,10" />');
+      const svg = $('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24" fill="#ececec">')  // ececec
+        .html('<path d="M12,1L9,9L1,12L9,15L12,23L15,15L23,12L15,9L12,1Z" />');
+        // .html('<path d="M 1,15 10,20 15,30 20,20 30,15 20,10 15,1 10,10 Z" />');
       return $("<div />")
-        .css({width: 20, height: 10})
+        .css({width: 28, height: 26})
         .append(svg);
     };
   }
@@ -290,6 +289,7 @@ export class DiagramToolkit {
     paintStyle.outlineWidth = 10;
 
     const formula = opts.linkModel != null && opts.linkModel.relation != null ? opts.linkModel.relation.formula : undefined;
+    const isAddedToOrSubtractedFrom = formula === "+in" || formula === "-in";
 
     let startColor = LinkColors.default;
     let finalColor = LinkColors.default;
@@ -315,13 +315,9 @@ export class DiagramToolkit {
       paintStyle.dashstyle = undefined;
     }
     if (opts.magnitude < 0) {
-      fixedColor = LinkColors.decrease;
-      fadedColor = LinkColors.decreaseFaded;
       changeIndicator = "\u2013";
     }
     if (opts.magnitude > 0) {
-      fixedColor = LinkColors.increase;
-      fadedColor = LinkColors.increaseFaded;
       changeIndicator = "+";
     }
     if (opts.color !== LinkColors.default) {
@@ -332,8 +328,10 @@ export class DiagramToolkit {
       ({ thickness } = opts);
     }
 
-    if (opts.isTransfer || formula === "+in" || formula === "-in") {
+    if (opts.isTransfer || isAddedToOrSubtractedFrom) {
       thickness = 10;
+      fixedColor = LinkColors.transferPipe;
+      fadedColor = LinkColors.transferPipe;
       this.kit.importDefaults({
         Connector: ["Flowchart", {}]});
     }
@@ -382,8 +380,7 @@ export class DiagramToolkit {
                             ((linkTarget != null ? linkTarget.isTransfer : undefined) && ((linkTarget.transferLink != null ? linkTarget.transferLink.sourceNode : undefined) === linkSource));
     const isTransferToFlowNode = opts.isTransfer && opts.fromSource;
     const isTransferFromFlowNode = opts.isTransfer && !opts.fromSource;
-    const sourceAnchors = isTransferFromFlowNode ? this.flowNodeFlowAnchors :
-      isTransferToFlowNode ? this.flowNodeSourceAnchors : this.standardAnchors;
+    const sourceAnchors = isTransferFromFlowNode ? this.flowNodeFlowAnchors : this.standardAnchors;
     const targetAnchors = isTransferToFlowNode ? this.flowNodeFlowAnchors :
       isModifierToFlowNode ? this.flowNodeModifierAnchors :
         isLinkToFlowNode ? this.flowNodeLinkAnchors : this.standardAnchors;
@@ -408,7 +405,7 @@ export class DiagramToolkit {
         changeIndicator,
         link: opts.linkModel,
         hideArrow: opts.hideArrow,
-        transferNotch: isTransferToFlowNode
+        transferNotch: isTransferToFlowNode || isAddedToOrSubtractedFrom
       }),
       endpoint: this._endpointOptions("Rectangle", thickness, "node-link-endpoint")
     });
