@@ -199,10 +199,12 @@ export class DiagramToolkit {
       }]);
     }
     if (transferNotch) {
-      results.push(["Custom", {
-        create: this._createTransferArrowNotch(transferNotch),
+      results.push(["Arrow", {
         location: 0,
-        id: "transferNotch"
+        length: 10,
+        variableWidth,
+        width: 9 + thickness,
+        foldback: 1
       }]);
     }
     if (changeIndicator && (variableWidth !== 0)) {
