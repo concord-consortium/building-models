@@ -9,7 +9,8 @@ export const Stub = () => {
   this.sandbox.stub(CodapConnect, "instance", () =>
     ({
       sendUndoableActionPerformed() { return ""; },
-      _createMissingDataAttributes() { return ""; }
+      _createMissingDataAttributes() { return ""; },
+      deleteDataAttributeIfEmpty() { return; }
     })
   );
 };

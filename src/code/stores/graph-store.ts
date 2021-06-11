@@ -521,6 +521,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
   _removeNode(node, options: LogOptions = {}) {
     delete this.nodeKeys[node.key];
+    CodapConnect.instance(DEFAULT_CONTEXT_NAME).deleteDataAttributeIfEmpty(node);
     this._graphUpdated();
     if (options.logEvent) {
       logEvent("variable deleted", {id: node.id, name: node.title});
