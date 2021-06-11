@@ -268,7 +268,7 @@ export class DiagramToolkit {
 
   public _createTransferArrowNotch(transferNotch) {
     return () => {
-      const svg = $('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24" fill="#ececec">')  // ececec
+      const svg = $('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24" fill="#eef2f3">')
         .html('<path d="M12,1L9,9L1,12L9,15L12,23L15,15L23,12L15,9L12,1Z" />');
       return $("<div />")
         .css({width: 32, height: 32})
