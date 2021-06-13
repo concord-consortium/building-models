@@ -60,6 +60,7 @@ export class Node extends GraphPrimitive {
   public readonly x: any; // TODO: get concrete type
   public readonly y: any; // TODO: get concrete type
   public readonly frames: any; // TODO: get concrete type
+  public readonly isFlowVariable: boolean;
 
   protected links: any; // TODO: get concrete type
   protected allowNegativeValues: any; // TODO: get concrete type
@@ -75,7 +76,7 @@ export class Node extends GraphPrimitive {
   constructor(nodeSpec, key?, isTransfer?) {
     super(isTransfer ? "Transfer" : "Node");
 
-    let val, val1, val10, val2, val3, val4, val5, val6, val7, val8, val9;
+    let val, val1, val10, val11, val2, val3, val4, val5, val6, val7, val8, val9;
     if (nodeSpec == null) { nodeSpec = {}; }
     if (key) {
       this.key = key;
@@ -108,7 +109,9 @@ export class Node extends GraphPrimitive {
       val9 = nodeSpec.addedThisSession,
       this.addedThisSession = val9 != null ? val9 : false,
       val10 = nodeSpec.combineMethod,
-      this.combineMethod = val10 != null ? val10 : "average";
+      this.combineMethod = val10 != null ? val10 : "average",
+      val11 = nodeSpec.isFlowVariable,
+      this.isFlowVariable = !!val11;
 
     const accumulatorScaleUrlParam = (urlParams.collectorScale && Number(urlParams.collectorScale)) || 1;
     this.accumulatorInputScale = accumulatorScaleUrlParam > 0 ? accumulatorScaleUrlParam : 1;
@@ -368,7 +371,8 @@ export class Node extends GraphPrimitive {
         valueDefinedSemiQuantitatively: this.valueDefinedSemiQuantitatively,
         frames: _.clone(this.frames),
         combineMethod: this.combineMethod,
-        image: this.image
+        image: this.image,
+        isFlowVariable: this.isFlowVariable
       }
     };
     return result;
