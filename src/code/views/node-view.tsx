@@ -411,8 +411,8 @@ getDefaultProps() {
         );
       } else {
         const outLinks = node.outLinks();
-        const hasAddedToLink = _.filter(outLinks, link => link.relation.formula === "+in").length > 0;
-        const hasSubtractedFromLink = _.filter(outLinks, link => link.relation.formula === "-in").length > 0;
+        const hasAddedToLink = _.some(outLinks, link => link.relation.formula === "+in");
+        const hasSubtractedFromLink = _.some(outLinks, link => link.relation.formula === "-in");
         const image = node.isTransfer || hasAddedToLink || hasSubtractedFromLink ? "img/nodes/transfer.png" : node.image;
         return (
           <SquareImageView image={image} />
