@@ -47,6 +47,7 @@ export class Node extends GraphPrimitive {
   public usingSlider: boolean = false;
   public sliderStartMax: number = 0;
   public animateRescale: boolean = false;
+  public uuid: string;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type

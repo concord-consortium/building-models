@@ -39,6 +39,7 @@ export class PaletteItemView extends Mixer<PaletteItemViewProps, PaletteItemView
         data-index={this.props.index}
         data-title={this.props.node.title}
         data-droptype={"paletteItem"}
+        data-uuid={this.props.node.uuid}
         className={className}
         ref={el => this.node = el}
         onClick={this.handleClick}
