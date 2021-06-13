@@ -284,9 +284,12 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       return paletteItem = this.handleAddNewPaletteNode(e, ui);
 
     } else if (data.droptype === "paletteItem") {
-      paletteItem = PaletteStore.palette[data.index];
-      PaletteActions.selectPaletteIndex(data.index);
-      return this.handleAddPaletteNode(ui, paletteItem);
+      paletteItem = PaletteStore.findByUUID(data.uuid);
+      if (paletteItem) {
+        const index = PaletteStore.palette.indexOf(paletteItem);
+        PaletteActions.selectPaletteIndex(index);
+        return this.handleAddPaletteNode(ui, paletteItem);
+      }
     }
   }
 
