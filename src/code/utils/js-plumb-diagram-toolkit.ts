@@ -199,10 +199,20 @@ export class DiagramToolkit {
       }]);
     }
     if (transferNotch) {
+      /*
+      // leaving this here in case we want to use the notch instead of the arrow "flange"
       results.push(["Custom", {
         create: this._createTransferArrowNotch(transferNotch),
         location: 0,
         id: "transferNotch"
+      }]);
+      */
+      results.push(["Arrow", {
+        location: 0,
+        length: 10,
+        variableWidth,
+        width: 9 + thickness,
+        foldback: 1
       }]);
     }
     if (changeIndicator && (variableWidth !== 0)) {
