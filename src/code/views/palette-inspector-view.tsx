@@ -12,14 +12,15 @@ import { NodesMixin, NodesMixinProps, NodesMixinState } from "../stores/nodes-st
 import { tr } from "../utils/translate";
 
 import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/palette-store";
+import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
 interface PaletteInspectorViewOuterProps {}
-type PaletteInspectorViewProps = PaletteInspectorViewOuterProps & PaletteMixinProps & NodesMixinProps;
+type PaletteInspectorViewProps = PaletteInspectorViewOuterProps & PaletteMixinProps & NodesMixinProps & AppSettingsMixinProps;
 
 interface PaletteInspectorViewOuterState {
 }
-type PaletteInspectorViewState = PaletteInspectorViewOuterState & PaletteMixinState & NodesMixinState;
+type PaletteInspectorViewState = PaletteInspectorViewOuterState & PaletteMixinState & NodesMixinState & AppSettingsMixinState;
 
 export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, PaletteInspectorViewState> {
 
@@ -31,10 +32,10 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
 
   constructor(props: PaletteInspectorViewProps) {
     super(props);
-    this.mixins = [new PaletteMixin(this), new NodesMixin(this)];
+    this.mixins = [new PaletteMixin(this), new NodesMixin(this), new AppSettingsMixin(this)];
     const outerState: PaletteInspectorViewOuterState = {
     };
-    this.setInitialState(outerState, PaletteMixin.InitialState(), NodesMixin.InitialState());
+    this.setInitialState(outerState, PaletteMixin.InitialState(), NodesMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   public render() {
@@ -98,9 +99,11 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
   private orderedPalette() {
     const result: PalleteItem[] = [];
     const itemsById: Record<string, PalleteItem> = {};
+    const enableFlowVariable = this.state.simulationType === AppSettingsStore.SimulationType.time;
     this.state.palette.forEach(item => itemsById[item.id] = item);
     this.fixedPaletteItemIds.forEach(id => {
-      if (itemsById[id]) {
+      // only display flow variable in time based simulations
+      if (itemsById[id] && (enableFlowVariable || id !== "flow-variable")) {
         result.push(itemsById[id]);
       }
     });
