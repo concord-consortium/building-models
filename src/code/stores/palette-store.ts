@@ -23,6 +23,7 @@ import { Node } from "../models/node";
 import { urlParams } from "../utils/url-params";
 
 export interface PalleteItem {
+  id: string;
   image: string;
   metadata: ImageMetadata;
 }
@@ -173,6 +174,12 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
         this.addToPalette(p_item);
       }
     }
+
+    // ensure the default palette items exist
+    for (const node of initialPalette) {
+      this.addToPalette(node);
+    }
+
     return this.updateChanges();
   },
 

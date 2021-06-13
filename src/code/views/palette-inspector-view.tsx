@@ -5,7 +5,7 @@ import { PaletteItemView } from "./palette-item-view";
 import { PaletteAddView } from "./palette-add-view";
 import { ImageMetadataView } from "./image-metadata-view";
 
-import { PaletteActions } from "../stores/palette-store";
+import { PaletteActions, PalleteItem, PaletteStore } from "../stores/palette-store";
 import { PaletteDeleteDialogActions } from "../stores/palette-delete-dialog-store";
 import { NodesMixin, NodesMixinProps, NodesMixinState } from "../stores/nodes-store";
 
@@ -27,6 +27,8 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
 
   private palette: HTMLDivElement | null;
 
+  private fixedPaletteItemIds = ["1", "flow-variable"];
+
   constructor(props: PaletteInspectorViewProps) {
     super(props);
     this.mixins = [new PaletteMixin(this), new NodesMixin(this)];
@@ -42,10 +44,9 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
         <div className="palette" ref={el => this.palette = el}>
           <div>
             <PaletteAddView label={tr("~PALETTE-INSPECTOR.ADD_IMAGE")} />
-            {_.map(this.state.palette, (node, index) => {
+            {_.map(this.orderedPalette(), (node, index) => {
               return <PaletteItemView
                 key={index}
-                index={index}
                 node={node}
                 image={node.image}
                 // selected={index === this.state.selectedPaletteIndex}
@@ -60,7 +61,7 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
               {this.state.selectedPaletteItem.metadata
                 ? <ImageMetadataView small={true} metadata={this.state.selectedPaletteItem.metadata} update={PaletteActions.update} />
                 : undefined}
-              {(this.state.palette.length !== 1) || !this.state.paletteItemHasNodes ?
+              {!this.isFixedPaletteItem(this.state.selectedPaletteItem) ?
               <div className="palette-delete" onClick={this.handleDelete}>
                 {this.state.paletteItemHasNodes ?
                   <span>
@@ -82,11 +83,36 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
     );
   }
 
-  private handleImageSelected = (index) => {
-    PaletteActions.selectPaletteIndex(index);
+  private handleImageSelected = (uuid: string) => {
+    const item = PaletteStore.findByUUID(uuid);
+    if (item) {
+      const index = PaletteStore.palette.indexOf(item);
+      PaletteActions.selectPaletteIndex(index);
+    }
   }
 
   private handleDelete = () => {
     PaletteDeleteDialogActions.open();
+  }
+
+  private orderedPalette() {
+    const result: PalleteItem[] = [];
+    const itemsById: Record<string, PalleteItem> = {};
+    this.state.palette.forEach(item => itemsById[item.id] = item);
+    this.fixedPaletteItemIds.forEach(id => {
+      if (itemsById[id]) {
+        result.push(itemsById[id]);
+      }
+    });
+    this.state.palette.forEach(item => {
+      if (!this.isFixedPaletteItem(item)) {
+        result.push(item);
+      }
+    });
+    return result;
+  }
+
+  private isFixedPaletteItem(paletteItem: PalleteItem) {
+    return this.fixedPaletteItemIds.indexOf(paletteItem.id) >= 0;
   }
 }
