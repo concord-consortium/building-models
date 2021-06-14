@@ -376,12 +376,26 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
   private renderAccumulator(source, target) {
     let currentOption;
     const options: JSX.Element[] = [];
-    _.each(RelationFactory.accumulators, (opt, i) => {
-      if ((!opt.forDualAccumulator || this.state.isDualAccumulator) &&
-          (!opt.forSoloAccumulatorOnly || !this.state.isDualAccumulator)) {
-        return options.push(<option value={opt.id} key={opt.id}>{opt.text}</option>);
+    const {link} = this.props;
+    const {sourceNode, targetNode} = link;
+    const {added, subtracted} = RelationFactory.accumulators;
+
+    // constrain flow variables to their starting link relationship
+    if (sourceNode.isFlowVariable) {
+      if (link.relation.formula === added.formula) {
+        options.push(<option value={added.id} key={added.id}>{added.text}</option>);
+      } else if (link.relation.formula === subtracted.formula) {
+        options.push(<option value={subtracted.id} key={subtracted.id}>{subtracted.text}</option>);
       }
-    });
+    }
+    if (options.length === 0) {
+      _.each(RelationFactory.accumulators, (opt, i) => {
+        if ((!opt.forDualAccumulator || this.state.isDualAccumulator) &&
+            (!opt.forSoloAccumulatorOnly || !this.state.isDualAccumulator)) {
+          options.push(<option value={opt.id} key={opt.id}>{opt.text}</option>);
+        }
+      });
+    }
 
     if (!this.state.selectedAccumulator) {
       options.unshift(<option key="placeholder" value="unselected" disabled={true}>{tr("~NODE-RELATION-EDIT.UNSELECTED")}</option>);

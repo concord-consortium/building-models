@@ -37,6 +37,7 @@ import { InspectorPanelActions } from "./inspector-panel-store";
 import { getTopology } from "@concord-consortium/topology-tagger";
 import { urlParams } from "../utils/url-params";
 import { logEvent } from "../utils/logger";
+import { Relationship } from "../models/relationship";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -908,10 +909,27 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
   newLinkFromEvent(info) {
     const newLink = {};
-    const startKey = $(info.source).data("node-key") || "undefined";
-    const endKey   = $(info.target).data("node-key") || "undefined";
-    const startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
-    const endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
+    let startKey = $(info.source).data("node-key") || "undefined";
+    let endKey   = $(info.target).data("node-key") || "undefined";
+    let startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
+    let endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
+
+    const sourceNode: Node = this.nodeKeys[startKey];
+    const targetNode: Node = this.nodeKeys[endKey];
+    let relation: any;
+    if (sourceNode.isFlowVariable && targetNode.isAccumulator) {
+      // added to
+      relation = RelationFactory.CreateRelation(RelationFactory.accumulators.added).toExport();
+    } else if (sourceNode.isAccumulator && targetNode.isFlowVariable) {
+      // subtracted from (swap nodes too)
+      relation = RelationFactory.CreateRelation(RelationFactory.accumulators.subtracted).toExport();
+      const tempKey = startKey;
+      startKey = endKey;
+      endKey = tempKey;
+      const tempTerminal = startTerminal;
+      startTerminal = endTerminal;
+      endTerminal = tempTerminal;
+    }
 
     this.importLink({
       sourceNode: startKey,
@@ -919,7 +937,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       sourceTerminal: startTerminal,
       targetTerminal: endTerminal,
       color: info.color,
-      title: info.title
+      title: info.title,
+      relation
     }, {logEvent: true});
     return true;
   },
