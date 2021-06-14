@@ -424,6 +424,8 @@ getDefaultProps() {
             image = "img/nodes/source.png";
           } else if (hasSubtractedFromLink) {
             image = "img/nodes/sink.png";
+          } else if (node.isFlowVariable && (outLinks.length === 0)) {
+            image = "img/nodes/flow-variable.png";
           }
         }
         return (

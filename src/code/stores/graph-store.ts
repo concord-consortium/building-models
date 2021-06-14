@@ -633,7 +633,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             isAccumulator: node.isAccumulator,
             allowNegativeValues: node.allowNegativeValues,
             combineMethod: node.combineMethod,
-            valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
+            valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively,
+            isFlowVariable: node.isFlowVariable
           };
 
           let nodeChanged = false;
@@ -646,8 +647,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
           if (nodeChanged) {        // don't do anything unless we've actually changed the node
 
             let changedLinks, link, originalRelations;
-            const accumulatorChanged = (data.isAccumulator != null) &&
-                                  (!!data.isAccumulator !== !!originalData.isAccumulator);
+            const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
+            const flowVariableChanged = (data.isFlowVariable != null) && (!!data.isFlowVariable !== !!originalData.isFlowVariable);
+            const originalImage = node.image;
+            const originalPaletteItem = node.paletteItem;
 
             if (accumulatorChanged) {
               // all inbound links are invalidated
@@ -684,6 +687,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                 if (changes.hasOwnProperty("isAccumulator")) {
                   logEvent("collector status changed", {id: node.id, name: node.title, collector: changes.isAccumulator});
                 }
+                if (changes.hasOwnProperty("isFlowVariable")) {
+                  logEvent("flow variable status changed", {id: node.id, name: node.title, flowVariable: changes.isFlowVariable});
+                }
               }
             };
 
@@ -693,6 +699,13 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                 if (accumulatorChanged) {
                   for (link of changedLinks) {
                     this._changeLink(link, { relation: link.defaultRelation() });
+                  }
+                }
+                if (flowVariableChanged) {
+                  const paletteItem = data.isFlowVariable ? PaletteStore.getFlowVariablePaletteItem() : PaletteStore.getBlankPaletteItem();
+                  if (paletteItem) {
+                    node.image = paletteItem.image;
+                    node.paletteItem =  paletteItem.uuid;
                   }
                 }
                 logNodeChange(data);
@@ -705,6 +718,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                   for (link of changedLinks) {
                     this._changeLink(link, { relation: originalRelations[link.key] });
                   }
+                }
+                if (flowVariableChanged) {
+                  node.image = originalImage;
+                  node.paletteItem = originalPaletteItem;
                 }
               }
             }
