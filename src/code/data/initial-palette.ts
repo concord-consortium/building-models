@@ -15,7 +15,7 @@ export const initialPalette = [
   {
     "id": "flow-variable",
     "title": "",
-    "image": "img/nodes/transfer.png",
+    "image": "img/nodes/flow-variable.png",
     "metadata": {
       "source": "internal",
       "title": tr("~METADATA.FLOW_VARIABLE_NODE_TITLE"),
