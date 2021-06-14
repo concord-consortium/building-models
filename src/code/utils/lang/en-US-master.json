@@ -35,6 +35,7 @@
     "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS": "Switch to define with words.",
     "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS": "Switch to define with numbers.",
     "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Collector",
+    "~NODE-VALUE-EDIT.IS_FLOW_VARIABLE": "Flow Variable",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE": "Can go below zero",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP": "Click to allow negative values",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP": "Click to prevent negative values",

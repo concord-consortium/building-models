@@ -28,13 +28,14 @@
     "~NODE-EDIT.ADD_REMOTE": "Add remote",
     "~NODE-EDIT.DELETE": "Delete",
 
-                                         
+
     "~NODE-VALUE-EDIT.INITIAL-VALUE": "Initial Value",
     "~NODE-VALUE-EDIT.DEFINING_WITH_NUMBERS": "You are defining values with numbers.",
     "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "You are defining values with words.",
     "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS": "Switch to define with words.",
     "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS": "Switch to define with numbers.",
     "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Collector",
+    "~NODE-VALUE-EDIT.IS_FLOW_VARIABLE": "Flow Variable",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE": "Can go below zero",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP": "Click to allow negative values",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP": "Click to prevent negative values",
@@ -43,7 +44,7 @@
     "~NODE-VALUE-EDIT.HIGH": "High",
     "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable",
 
-                                       
+
     "~NODE-RELATION-EDIT.COMBINATION_METHOD": "Combine variables using:",
     "~NODE-RELATION-EDIT.ARITHMETIC_MEAN": "average",
     "~NODE-RELATION-EDIT.SCALED_PRODUCT": "limiting factor",
@@ -98,31 +99,32 @@
     "~ADD-NEW-IMAGE.MY-COMPUTER-TAB": "My Computer",
     "~ADD-NEW-IMAGE.LINK-TAB": "Link",
 
-                                      
+
     "~PALETTE-INSPECTOR.ADD_IMAGE": "New Image",
     "~PALETTE-INSPECTOR.ADD_IMAGE_SHORT": "New",
     "~PALETTE-INSPECTOR.ABOUT_IMAGE": "About This Image",
     "~PALETTE-INSPECTOR.DELETE": "Delete Image",
     "~PALETTE-INSPECTOR.REPLACE": "Replace Image",
 
-                                   
+
     "~PALETTE-DIALOG.TITLE": "Delete image?",
     "~PALETTE-DIALOG.DELETE": "Delete",
     "~PALETTE-DIALOG.REPLACE": "and replace with",
     "~PALETTE-DIALOG.OK": "ok",
     "~PALETTE-DIALOG.CANCEL": "✖ cancel",
 
-                                   
+
     "~METADATA.TITLE": "Title",
     "~METADATA.LINK": "Link",
     "~METADATA.CREDIT": "Credit",
     "~METADATA.LICENSE": "License",
     "~METADATA.BLANK_NODE_TITLE": "Blank",
+    "~METADATA.FLOW_VARIABLE_NODE_TITLE": "Flow Variable",
     "~METADATA.SEE_IT_ON": "See it on %{hostname}",
     "~METADATA.LICENSE.PUBLIC_DOMAIN": "Public Domain",
     "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabay search",
 
-                                  
+
     "~IMAGE-BROWSER.PREVIEW": "Preview Your Image",
     "~IMAGE-BROWSER.ADD_IMAGE": "Add Image",
     "~IMAGE-BROWSER.SEARCH_HEADER": "Search for images",
@@ -158,7 +160,7 @@
     "~COLOR.MEDIUM_GRAY": "Gray",
     "~COLOR.DATA": "Codap Orange",
 
-                            
+
     "~FILE.CHECKING_AUTH": "Checking authorization...",
     "~FILE.CONFIRM": "Are you sure?",
     "~FILE.DOWNLOADING": "Downloading...",
@@ -184,7 +186,7 @@
     "~DOCUMENT.ACTIONS.REDO": "Redo",
     "~DOCUMENT.ACTIONS.NO_DEFINED_LINKS": "There must be at least one link with a defined relationship.",
 
-                             
+
     "~DOCUMENT.CODAP_ACTIONS.TABLES": "Tables",
     "~DOCUMENT.CODAP_ACTIONS.TABLES.NEW": "New Table",
     "~DOCUMENT.CODAP_ACTIONS.TABLES.DELETE_CONFIRM": "Are you sure you want to delete \"%{tableName}\"?",
