@@ -324,9 +324,13 @@ export class DiagramToolkit {
       paintStyle.dashstyle = undefined;
     }
     if (opts.magnitude < 0) {
+      fixedColor = LinkColors.decrease;
+      fadedColor = LinkColors.decreaseFaded;
       changeIndicator = "\u2013";
     }
     if (opts.magnitude > 0) {
+      fixedColor = LinkColors.increase;
+      fadedColor = LinkColors.increaseFaded;
       changeIndicator = "+";
     }
     if (opts.color !== LinkColors.default) {
