@@ -935,17 +935,27 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     const targetNode: Node = this.nodeKeys[endKey];
     let relation: any;
     if (sourceNode.isFlowVariable && targetNode.isAccumulator) {
-      // added to
-      relation = RelationFactory.CreateRelation(RelationFactory.accumulators.added).toExport();
+      // check if connected to another flow variable using subtracted to
+      if (false) {
+        // TODO: create transfer link between the two collectors
+      } else {
+        // use added to
+        relation = RelationFactory.CreateRelation(RelationFactory.accumulators.added).toExport();
+      }
     } else if (sourceNode.isAccumulator && targetNode.isFlowVariable) {
-      // subtracted from (swap nodes too)
-      relation = RelationFactory.CreateRelation(RelationFactory.accumulators.subtracted).toExport();
-      const tempKey = startKey;
-      startKey = endKey;
-      endKey = tempKey;
-      const tempTerminal = startTerminal;
-      startTerminal = endTerminal;
-      endTerminal = tempTerminal;
+      // check if connected to another flow variable using added to
+      if (false) {
+        // TODO: create transfer link between the two collectors
+      } else {
+        // use subtracted from (swap nodes also)
+        relation = RelationFactory.CreateRelation(RelationFactory.accumulators.subtracted).toExport();
+        const tempKey = startKey;
+        startKey = endKey;
+        endKey = tempKey;
+        const tempTerminal = startTerminal;
+        startTerminal = endTerminal;
+        endTerminal = tempTerminal;
+      }
     }
 
     this.importLink({
