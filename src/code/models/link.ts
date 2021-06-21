@@ -28,11 +28,11 @@ export class Link extends GraphPrimitive {
   public targetNode: Node | TransferModel;
 
   public readonly title: string;
+  public readonly color: string;
 
   private options: any; // TODO: get concrete type
   private sourceTerminal: any; // TODO: get concrete type
   private targetTerminal: any; // TODO: get concrete type
-  private color: string;
   private jsPlumbConnection: any; // TODO: get concrete type
 
   constructor(options) {

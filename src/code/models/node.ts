@@ -17,6 +17,7 @@ import { ColorChoices } from "../utils/colors";
 import { tr } from "../utils/translate";
 import { urlParams } from "../utils/url-params";
 import { PalleteItem } from "../stores/palette-store";
+import { Link } from "./link";
 
 const SEMIQUANT_MIN = 0;
 const SEMIQUANT_MAX = 100;
@@ -61,8 +62,8 @@ export class Node extends GraphPrimitive {
   public readonly y: any; // TODO: get concrete type
   public readonly frames: any; // TODO: get concrete type
   public readonly isFlowVariable: boolean;
+  public readonly links: Link[];
 
-  protected links: any; // TODO: get concrete type
   protected allowNegativeValues: any; // TODO: get concrete type
   protected paletteItem: PalleteItem;
   protected _min: any; // TODO: get concrete type
@@ -220,7 +221,7 @@ export class Node extends GraphPrimitive {
     return _.filter(this.links, link => (link.sourceNode === this) && ((relationType === null) || (relationType === link.relation.type)));
   }
 
-  public inLinks(relationType: string | null = null) {
+  public inLinks(relationType: string | null = null): Link[] {
     return _.filter(this.links, link => (link.targetNode === this) && ((relationType === null) || (relationType === link.relation.type)));
   }
 
