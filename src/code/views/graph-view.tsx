@@ -474,8 +474,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const relationDetails = RelationFactory.selectionsFromRelation(link.relation);
     if ((relationDetails.vector != null ? relationDetails.vector.isCustomRelationship : undefined) && (link.relation.customData != null)) {
       link.color = LinkColors.customRelationship;
-    } else if ((relationDetails.accumulator != null ? relationDetails.accumulator.id : undefined) === "setInitialValue") {
-      link.color = LinkColors.customRelationship;
+    // leave in for now in case we need to customize this
+    // } else if ((relationDetails.accumulator != null ? relationDetails.accumulator.id : undefined) === "setInitialValue") {
+    //  link.color = LinkColors.customRelationship;
     } else if (link.relation.isTransferModifier) {
       link.color = LinkColors.fromLink(link);
     } else {
