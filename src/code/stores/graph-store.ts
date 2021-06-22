@@ -378,13 +378,13 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         this._addNode(transferNode);
         this._addLink(transferLink);
 
-        // add back the flow variable links to the transfer node except for the one we are replacing with the transfer link
+        // add back the flow variable links to the transfer node as undefined links except for the one we are replacing with the transfer link
         flowVariableLinks.forEach(link => {
           if (link !== replaceSourceLink) {
-            const linkSpec = link.toExport();
-            linkSpec.sourceNode = link.sourceNode === flowVariable ? transferNode : this.nodeKeys[linkSpec.sourceNode];
-            linkSpec.targetNode = link.targetNode === flowVariable ? transferNode : this.nodeKeys[linkSpec.targetNode];
-            this._addLink(new Link(linkSpec));
+            this._addLink(new Link({
+              sourceNode: link.sourceNode === flowVariable ? transferNode : link.sourceNode,
+              targetNode: link.targetNode === flowVariable ? transferNode : link.targetNode
+            }));
           }
         });
 
