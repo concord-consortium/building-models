@@ -940,7 +940,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       // then turn that into a flow variable in the underlying model.
       let changedIsFlowVariable = link.sourceNode.isFlowVariable;
       const originalIsFlowVariable = link.sourceNode.isFlowVariable;
-      const isAddedOrSubtractedRelation = (changes.relation.formula === RelationFactory.added.formula) || (changes.relation.formula === RelationFactory.subtracted.formula);
+      const isAddedOrSubtractedRelation = changes.relation && ((changes.relation.formula === RelationFactory.added.formula) || (changes.relation.formula === RelationFactory.subtracted.formula));
       if (!link.sourceNode.isFlowVariable && link.targetNode.isAccumulator && isAddedOrSubtractedRelation) {
         changedIsFlowVariable = true;
       }
