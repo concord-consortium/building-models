@@ -1029,8 +1029,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       } else if ((addedToLinks.length > 0 && subtractedFromLinks.length === 0) && !flowVariableIsSource) {
         return {
           replaceSourceLink: addedToLinks[0],
-          sourceNode: addedToLinks[0].targetNode,
-          targetNode: accumulator,
+          sourceNode: accumulator,
+          targetNode: addedToLinks[0].targetNode,
           flowVariable,
         };
       } else if ((addedToLinks.length === 0 && subtractedFromLinks.length > 0) && flowVariableIsSource) {
