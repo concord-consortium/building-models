@@ -899,7 +899,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return this.selectionManager.selectLinkForTitleEditing(link);
   },
 
-  changeLink(link, changes) {
+  changeLink(link: Link, changes) {
     if (changes == null) { changes = {}; }
     if (changes.deleted) {
       return this.removeSelectedLinks();
@@ -912,9 +912,22 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       };
       const initial: any = {};
       Object.keys(changes).forEach(key => initial[key] = originalData[key]);
+
+      // if regular variable is connected to a collector and "add-to" or "subtract-from" is selected as the relationship,
+      // then turn that into a flow variable in the underlying model.
+      let changedIsFlowVariable = link.sourceNode.isFlowVariable;
+      const originalIsFlowVariable = link.sourceNode.isFlowVariable;
+      const isAddedOrSubtractedRelation = (changes.relation.formula === RelationFactory.added.formula) || (changes.relation.formula === RelationFactory.subtracted.formula);
+      if (!link.sourceNode.isFlowVariable && link.targetNode.isAccumulator && isAddedOrSubtractedRelation) {
+        changedIsFlowVariable = true;
+      }
+
       this.undoRedoManager.startCommandBatch();
       this.undoRedoManager.createAndExecuteCommand("changeLink", {
         execute: () => {
+          if (changedIsFlowVariable !== originalIsFlowVariable) {
+            this.changeNode({isFlowVariable: changedIsFlowVariable}, link.sourceNode, {logEvent: true});
+          }
           this._changeLink(link,  changes);
           this._logLinkEvent("relationship changed", link, {
             initial,
@@ -922,6 +935,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
           });
         },
         undo: () => {
+          if (changedIsFlowVariable !== originalIsFlowVariable) {
+            this.changeNode({isFlowVariable: originalIsFlowVariable}, link.sourceNode, {logEvent: true});
+          }
           this._changeLink(link, originalData);
           this._logLinkEvent("relationship changed", link, {
             initial: changes,
