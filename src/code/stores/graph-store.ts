@@ -1048,13 +1048,13 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     if (sourceNode.isFlowVariable && targetNode.isAccumulator) {
       // check if connected to another flow variable using subtracted to
       transfer = maybeCreateTransferLink(targetNode, sourceNode, true);
-      if (!transfer) {
+      if (!transfer && !this.relationshipExists(sourceNode, targetNode)) {
         relation = RelationFactory.CreateRelation(RelationFactory.added).toExport();
       }
     } else if (sourceNode.isAccumulator && targetNode.isFlowVariable) {
       // check if connected to another flow variable using added to
       transfer = maybeCreateTransferLink(sourceNode, targetNode, false);
-      if (!transfer) {
+      if (!transfer && !this.relationshipExists(sourceNode, targetNode)) {
         // use subtracted from (swap nodes also)
         relation = RelationFactory.CreateRelation(RelationFactory.subtracted).toExport();
         const tempKey = startKey;
@@ -1079,6 +1079,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         relation
       }, {logEvent: true});
     }
+  },
+
+  relationshipExists(sourceNode: Node, targetNode: Node) {
+    return _.some(sourceNode.links, link => (link.sourceNode === targetNode) || (link.targetNode === targetNode));
   },
 
   deleteAll() {
