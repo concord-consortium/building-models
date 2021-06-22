@@ -220,16 +220,6 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
           />
           {tr("~NODE-VALUE-EDIT.RESTRICT_POSITIVE")}
         </label>
-        {!node.isTransfer ?
-        <label key="flow-variable-label">
-          <input
-            key="variable-checkbox"
-            type="checkbox"
-            checked={node.isFlowVariable}
-            onChange={this.handleUpdateFlowVariableChecked}
-          />
-          {tr("~NODE-VALUE-EDIT.IS_FLOW_VARIABLE")}
-        </label> : null}
       </span>
     );
   }
@@ -255,11 +245,6 @@ export class NodeValueInspectorView extends Mixer<NodeValueInspectorViewProps, N
     const value = evt.target.checked;
     this.props.graphStore.changeNode({isAccumulator: value}, undefined, {logEvent: true});
     return SimulationActions.toggledCollectorTo(value);
-  }
-
-  private handleUpdateFlowVariableChecked = (evt) => {
-    const value = evt.target.checked;
-    this.props.graphStore.changeNode({isFlowVariable: value}, undefined, {logEvent: true});
   }
 
   private handleUpdateNegativeValuesAllowed = (evt) => {
