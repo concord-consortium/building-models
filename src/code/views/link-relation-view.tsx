@@ -380,13 +380,10 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     const {sourceNode, targetNode} = link;
     const {added, subtracted} = RelationFactory.accumulators;
 
-    // constrain flow variables to their starting link relationship
+    // constrain flow variables to added/subtracted options
     if (sourceNode.isFlowVariable) {
-      if (link.relation.formula === added.formula) {
-        options.push(<option value={added.id} key={added.id}>{added.text}</option>);
-      } else if (link.relation.formula === subtracted.formula) {
-        options.push(<option value={subtracted.id} key={subtracted.id}>{subtracted.text}</option>);
-      }
+      options.push(<option value={added.id} key={added.id}>{added.text}</option>);
+      options.push(<option value={subtracted.id} key={subtracted.id}>{subtracted.text}</option>);
     }
     if (options.length === 0) {
       _.each(RelationFactory.accumulators, (opt, i) => {
