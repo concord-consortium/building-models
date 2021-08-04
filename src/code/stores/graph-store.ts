@@ -325,16 +325,31 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return node;
   },
 
+  _nodeType(node: Node) {
+    return node.isAccumulator ? "collector" : (node.isTransfer ? "flow" : (node.isFlowVariable ? "flow-variable" : "value"));
+  },
+
   _logLinkEvent(event: string, link: Link, extra: object = {}) {
-    const nodeType = (node: Node) => node.isAccumulator ? "collector" : (node.isTransfer ? "flow" : "value");
     logEvent(event, {
       id: link.id,
       startingId: link.sourceNode.id,
       startingName: link.sourceNode.title,
-      startingType: nodeType(link.sourceNode),
+      startingType: this._nodeType(link.sourceNode),
       endingId: link.targetNode.id,
       endingName: link.targetNode.title,
-      endingType: nodeType(link.targetNode),
+      endingType: this._nodeType(link.targetNode),
+      ...extra
+    });
+  },
+
+  _logTwoNodeEvent(event: string, sourceNode: Node, targetNode: Node, extra: object = {}) {
+    logEvent(event, {
+      startingId: sourceNode.id,
+      startingName: sourceNode.title,
+      startingType: this._nodeType(sourceNode),
+      endingId: targetNode.id,
+      endingName: targetNode.title,
+      endingType: this._nodeType(targetNode),
       ...extra
     });
   },
@@ -388,7 +403,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
           }
         });
 
-        // TODO: add logging
+        if (options.logEvent) {
+          this._logTwoNodeEvent("auto converted flow variable to transfer link", sourceNode, targetNode);
+        }
       },
       undo: () => {
         // remove transfer node and links
@@ -406,7 +423,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         // add back the flow variable links
         flowVariableLinks.forEach(link => this._addLink(link));
 
-        // TODO: add logging
+        if (options.logEvent) {
+          this._logTwoNodeEvent("removed auto converted flow variable to transfer link", sourceNode, targetNode);
+        }
       }
     });
   },
@@ -423,13 +442,17 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         this._addTransfer(transferLink);
         this._addLink(transferLink);
 
-        // TODO: add logging
+        if (options.logEvent) {
+          this._logTwoNodeEvent("auto created transfer link between accumulators", sourceNode, targetNode);
+        }
       },
       undo: () => {
         this._removeLink(transferLink);
         if (transferLink.transferNode != null) { return this._removeTransfer(transferLink, options); }
 
-        // TODO: add logging
+        if (options.logEvent) {
+          this._logTwoNodeEvent("removed auto created transfer link between accumulators", sourceNode, targetNode);
+        }
       }
     });
   },
