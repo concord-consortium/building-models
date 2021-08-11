@@ -1073,8 +1073,6 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       }
     };
 
-    debugger;
-
     if (sourceNode.isFlowVariable && targetNode.isAccumulator) {
       // check if connected to another flow variable using subtracted to
       flowVariableTransferOptions = maybeCreateTransferLink(targetNode, sourceNode, true);
