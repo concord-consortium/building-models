@@ -384,7 +384,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         // remove the flow variable links
         flowVariableLinks.forEach(link => this._removeLink(link));
 
-        // replace the flow variable with a transfer link/node
+        // replace the flow variable with a transfer link/node (and drop other flow variable links)
         this._removeNode(flowVariable);
         transferLink = transferLink || new Link({sourceNode, targetNode, relation: RelationFactory.transferred});
         transferNode = transferNode || new TransferModel({x: flowVariable.x, y: flowVariable.y, title: flowVariable.title});
@@ -392,16 +392,6 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         transferLink.transferNode = transferNode;
         this._addNode(transferNode);
         this._addLink(transferLink);
-
-        // add back the flow variable links to the transfer node as undefined links except for the one we are replacing with the transfer link
-        flowVariableLinks.forEach(link => {
-          if (link !== replaceSourceLink) {
-            this._addLink(new Link({
-              sourceNode: link.sourceNode === flowVariable ? transferNode : link.sourceNode,
-              targetNode: link.targetNode === flowVariable ? transferNode : link.targetNode
-            }));
-          }
-        });
 
         if (options.logEvent) {
           this._logTwoNodeEvent("auto converted flow variable to transfer link", sourceNode, targetNode);
@@ -747,24 +737,15 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
           if (nodeChanged) {        // don't do anything unless we've actually changed the node
 
-            let changedLinks, link, originalRelations;
+            let deletedLinks, link;
             const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
             const flowVariableChanged = (data.isFlowVariable != null) && (!!data.isFlowVariable !== !!originalData.isFlowVariable);
             const originalImage = node.image;
             const originalPaletteItem = node.paletteItem;
 
             if (accumulatorChanged) {
-              // all inbound links are invalidated
-              changedLinks = [].concat(node.inLinks())
-              // along with outbound transfer links
-                .concat(_.filter(node.outLinks(), link =>
-                  (link.relation.type === "transfer") ||
-                                  (link.relation.type === "initial-value")
-                ));
-              originalRelations = {};
-              for (link of changedLinks) {
-                originalRelations[link.key] = link.relation;
-              }
+              // all inbound and outbound links are deleted
+              deletedLinks = [].concat(node.links);
             }
 
             const logNodeChange = (changes) => {
@@ -798,8 +779,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
                 if (accumulatorChanged) {
-                  for (link of changedLinks) {
-                    this._changeLink(link, { relation: link.defaultRelation() });
+                  for (link of deletedLinks) {
+                    this._removeLink(link);
                   }
                 }
                 if (flowVariableChanged) {
@@ -816,8 +797,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                 logNodeChange(originalData);
                 this.changeNodeOutsideUndoRedo(node, originalData);
                 if (accumulatorChanged) {
-                  for (link of changedLinks) {
-                    this._changeLink(link, { relation: originalRelations[link.key] });
+                  for (link of deletedLinks) {
+                    this._addLink(link);
                   }
                 }
                 if (flowVariableChanged) {
@@ -1091,6 +1072,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         return false;
       }
     };
+
+    debugger;
 
     if (sourceNode.isFlowVariable && targetNode.isAccumulator) {
       // check if connected to another flow variable using subtracted to
