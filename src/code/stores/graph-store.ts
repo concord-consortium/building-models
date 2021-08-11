@@ -557,8 +557,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   removeNode(nodeKey, options: LogOptions = {}) {
     this.endNodeEdit();
     const node = this.nodeKeys[nodeKey];
-    const transferRelation = node.transferLink != null ? node.transferLink.relation : undefined;
-    const transferNode = node.transferLink != null ? node.transferLink.transferNode : undefined;
+    const transferLink = node.transferLink;
+    const transferRelation = transferLink != null ? transferLink.relation : undefined;
+    const transferNode = transferLink != null ? transferLink.transferNode : undefined;
 
     // create a copy of the list of links
     const links = node.links.slice();
@@ -572,22 +573,20 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
     return this.undoRedoManager.createAndExecuteCommand("removeNode", {
       execute: () => {
-        if (node.transferLink != null) {
-          node.transferLink.relation = node.transferLink.defaultRelation();
-          delete node.transferLink.transferNode;
+        if (transferLink != null) {
+          this._removeLink(transferLink, options);
         }
         for (const link of links) { this._removeLink(link, options); }
         for (const link of transferLinks) { this._removeTransfer(link, options); }
         return this._removeNode(node, options);
       },
       undo: () => {
-        if (node.transferLink != null) {
-          node.transferLink.relation = transferRelation;
-          node.transferLink.transferNode = transferNode;
-        }
         this._addNode(node, options);
         for (const link of transferLinks) { this._addTransfer(link, options); }
         for (const link of links) { this._addLink(link, options); }
+        if (transferLink != null) {
+          this._addLink(transferLink, options);
+        }
       }
     }
     );
