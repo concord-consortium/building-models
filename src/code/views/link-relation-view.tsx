@@ -88,6 +88,7 @@ interface LinkRelationViewOuterState {
   selectedAccumulator: any ; // TODO: get concrete type
   selectedTransferModifier: any; // TODO: get concrete type
   isAccumulator: boolean;
+  isAccumulatorToTransfer: boolean;
   isDualAccumulator: boolean;
   isTransfer: boolean;
   isTransferModifier: boolean;
@@ -116,6 +117,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       selectedAccumulator: null,
       selectedTransferModifier: null,
       isAccumulator: status.isAccumulator,
+      isAccumulatorToTransfer: status.isAccumulatorToTransfer,
       isDualAccumulator: status.isDualAccumulator,
       isTransfer: status.isTransfer,
       isTransferModifier: status.isTransferModifier
@@ -202,6 +204,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     const {sourceNode, targetNode} = link;
     return status = {
       isAccumulator: targetNode.isAccumulator,
+      isAccumulatorToTransfer: sourceNode.isAccumulator && targetNode.isTransfer,
       isDualAccumulator: sourceNode.isAccumulator && targetNode.isAccumulator,
       isTransfer: targetNode.isTransfer,
       isTransferModifier: (targetNode.isTransfer &&
@@ -225,6 +228,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       selectedAccumulator: accumulator,
       selectedTransferModifier: transferModifier,
       isAccumulator: status.isAccumulator,
+      isAccumulatorToTransfer: status.isAccumulatorToTransfer,
       isDualAccumulator: status.isDualAccumulator,
       isTransferModifier: status.isTransferModifier
     });
@@ -242,7 +246,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
         relation.isDefined = true;
         return this.props.graphStore.changeLink(link, {relation});
       }
-    } else if (this.state.isTransferModifier) {
+    } else if (this.state.isTransferModifier || this.state.isAccumulatorToTransfer) {
       const selectedTransferModifier = this.getTransferModifier();
       this.setState({selectedTransferModifier});
 
@@ -494,14 +498,15 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
   }
 
   private renderRelation() {
-    const source = this.props.link.sourceNode.title;
-    let target = this.props.link.targetNode.title;
+    const {sourceNode, targetNode} = this.props.link;
+    const source = sourceNode.title;
+    let target = targetNode.title;
 
     if (this.state.isAccumulator) {
       return this.renderAccumulator(source, target);
-    } else if (this.state.isTransferModifier) {
+    } else if (this.state.isTransferModifier || this.state.isAccumulatorToTransfer) {
       target = __guard__(__guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x1 => x1.targetNode), x => x.title);
-      const isTargetProportional = this.props.link.sourceNode === __guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x2 => x2.targetNode);
+      const isTargetProportional = sourceNode === __guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x2 => x2.targetNode);
       return this.renderTransfer(source, target, isTargetProportional);
     } else {
       return this.renderNonAccumulator(source, target);
