@@ -736,7 +736,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
           if (nodeChanged) {        // don't do anything unless we've actually changed the node
 
-            let deletedLinks, link;
+            let deletedLinks: Link[];
+            let deletedLink: Link;
+            let deletedNodes: Node[];
+            let deletedNode: Node;
             const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
             const flowVariableChanged = (data.isFlowVariable != null) && (!!data.isFlowVariable !== !!originalData.isFlowVariable);
             const originalImage = node.image;
@@ -745,6 +748,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             if (accumulatorChanged) {
               // all inbound and outbound links are deleted
               deletedLinks = [].concat(node.links);
+              deletedNodes = deletedLinks.filter(link => !!link.transferNode).map(link => link.transferNode);
             }
 
             const logNodeChange = (changes) => {
@@ -778,8 +782,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
                 if (accumulatorChanged) {
-                  for (link of deletedLinks) {
-                    this._removeLink(link);
+                  for (deletedLink of deletedLinks) {
+                    this._removeLink(deletedLink);
+                  }
+                  for (deletedNode of deletedNodes) {
+                    this._removeNode(deletedNode);
                   }
                 }
                 if (flowVariableChanged) {
@@ -796,8 +803,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                 logNodeChange(originalData);
                 this.changeNodeOutsideUndoRedo(node, originalData);
                 if (accumulatorChanged) {
-                  for (link of deletedLinks) {
-                    this._addLink(link);
+                  for (deletedNode of deletedNodes) {
+                    this._addNode(deletedNode);
+                  }
+                  for (deletedLink of deletedLinks) {
+                    this._addLink(deletedLink);
                   }
                 }
                 if (flowVariableChanged) {
