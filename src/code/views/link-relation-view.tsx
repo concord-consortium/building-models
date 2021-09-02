@@ -89,9 +89,11 @@ interface LinkRelationViewOuterState {
   selectedTransferModifier: any; // TODO: get concrete type
   isAccumulator: boolean;
   isAccumulatorToTransfer: boolean;
+  isAccumulatorToFlow: boolean;
   isDualAccumulator: boolean;
   isTransfer: boolean;
   isTransferModifier: boolean;
+  isSinkFlowVariable: boolean;
 }
 type LinkRelationViewState = LinkRelationViewOuterState & SimulationMixinState & AppSettingsMixinState;
 
@@ -118,9 +120,11 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       selectedTransferModifier: null,
       isAccumulator: status.isAccumulator,
       isAccumulatorToTransfer: status.isAccumulatorToTransfer,
+      isAccumulatorToFlow: status.isAccumulatorToFlow,
       isDualAccumulator: status.isDualAccumulator,
       isTransfer: status.isTransfer,
-      isTransferModifier: status.isTransferModifier
+      isTransferModifier: status.isTransferModifier,
+      isSinkFlowVariable: status.isSinkFlowVariable
     };
     this.setInitialState(outerState, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }
@@ -202,14 +206,20 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
   private checkStatus(link) {
     let status;
     const {sourceNode, targetNode} = link;
+
+    const isAccumulatorToFlow = sourceNode.isAccumulator && targetNode.isFlowVariable;
+    const isSinkFlowVariable = isAccumulatorToFlow && _.some(targetNode.outLinks(), link => link.relation.formula === "-in");
+
     return status = {
       isAccumulator: targetNode.isAccumulator,
       isAccumulatorToTransfer: sourceNode.isAccumulator && targetNode.isTransfer,
+      isAccumulatorToFlow,
       isDualAccumulator: sourceNode.isAccumulator && targetNode.isAccumulator,
       isTransfer: targetNode.isTransfer,
       isTransferModifier: (targetNode.isTransfer &&
         ((targetNode.transferLink != null ? targetNode.transferLink.sourceNode : undefined) === sourceNode)) ||
-        ((targetNode.transferLink != null ? targetNode.transferLink.targetNode : undefined) === sourceNode)
+        ((targetNode.transferLink != null ? targetNode.transferLink.targetNode : undefined) === sourceNode),
+      isSinkFlowVariable
     };
   }
 
@@ -229,14 +239,16 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       selectedTransferModifier: transferModifier,
       isAccumulator: status.isAccumulator,
       isAccumulatorToTransfer: status.isAccumulatorToTransfer,
+      isAccumulatorToFlow: status.isAccumulatorToFlow,
       isDualAccumulator: status.isDualAccumulator,
-      isTransferModifier: status.isTransferModifier
+      isTransferModifier: status.isTransferModifier,
+      isSinkFlowVariable: status.isSinkFlowVariable
     });
   }
 
   private handleUpdateRelation = () => {
     let link, relation;
-    if (this.state.isAccumulator) {
+    if (this.state.isAccumulator && !this.state.isAccumulatorToFlow) {
       const selectedAccumulator = this.getAccumulator();
       this.setState({selectedAccumulator});
 
@@ -246,7 +258,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
         relation.isDefined = true;
         return this.props.graphStore.changeLink(link, {relation});
       }
-    } else if (this.state.isTransferModifier || this.state.isAccumulatorToTransfer) {
+    } else if (this.state.isTransferModifier || this.state.isAccumulatorToTransfer || this.state.isAccumulatorToFlow) {
       const selectedTransferModifier = this.getTransferModifier();
       this.setState({selectedTransferModifier});
 
@@ -426,6 +438,47 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     );
   }
 
+  private renderAccumulatorToFlow(sourceNode, targetNode) {
+    let currentOption;
+    const spanWrap = (string, className) => `<span class='${className}'>${string}</span>`;
+    const options = _.map(RelationFactory.transferModifiers, (opt, i) => <option value={opt.id} key={opt.id}>{opt.text}</option>);
+
+    const line_a = tr("~NODE-RELATION-EDIT.VARIABLE_FLOW_SOURCE_A", { sourceTitle: spanWrap(sourceNode.title, "source") });
+    const line_b = this.state.isSinkFlowVariable ? tr("~NODE-RELATION-EDIT.SUBTRACTED_FROM") : tr("~NODE-RELATION-EDIT.ADDED_TO");
+
+    let flowTargetTitles = targetNode.links
+      .filter(link => link.relation.formula === (this.state.isSinkFlowVariable ? "-in" : "+in"))
+      .map(link => link.targetNode === targetNode ? link.sourceNode : link.targetNode)
+      .map(node => node.title);
+    flowTargetTitles.sort();
+    flowTargetTitles = flowTargetTitles.join(" & ");
+
+    if (!this.state.selectedTransferModifier) {
+      options.unshift(<option key="placeholder" value="unselected" disabled={true}>{tr("~NODE-RELATION-EDIT.UNSELECTED")}</option>);
+      currentOption = "unselected";
+    } else {
+      currentOption = this.state.selectedTransferModifier.id;
+    }
+
+    // note that localization will be a problem here due to the hard-coded order
+    // of the elements and because we can't use the string-replacement capabilities
+    // of the translate module since there is special formatting of node titles, etc.
+    return (
+      <div className="top">
+        <span dangerouslySetInnerHTML={{__html: line_a}} />
+        <select value={currentOption} ref={el => this.transfer = el} onChange={this.handleUpdateRelation}>
+          {options}
+        </select>
+        <span> {tr("~NODE-RELATION-EDIT.IS")} </span>
+        <span dangerouslySetInnerHTML={{__html: line_b}} />
+        <span className="target"> {flowTargetTitles} </span>
+        <span> {tr("~NODE-RELATION-EDIT.EACH")} </span>
+        <span>{this.state.stepUnits.toLowerCase()}.</span>
+      </div>
+    );
+  }
+
+
   private renderTransfer(source, target, isTargetProportional) {
     let currentOption, line_a, line_b;
     const spanWrap = (string, className) => `<span class='${className}'>${string}</span>`;
@@ -502,7 +555,9 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     const source = sourceNode.title;
     let target = targetNode.title;
 
-    if (this.state.isAccumulator) {
+    if (this.state.isAccumulatorToFlow) {
+      return this.renderAccumulatorToFlow(sourceNode, targetNode);
+    } else if (this.state.isAccumulator) {
       return this.renderAccumulator(source, target);
     } else if (this.state.isTransferModifier || this.state.isAccumulatorToTransfer) {
       target = __guard__(__guard__(this.targetAsTransferNode != null ? this.targetAsTransferNode.transferLink : undefined, x1 => x1.targetNode), x => x.title);
