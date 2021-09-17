@@ -36,6 +36,7 @@ export class UndoRedoManager {
   private changeListeners: UndoRedoListener[];
   private currentBatch: UndoRedoCommandBatch | null;
   private debug: boolean;
+  private commandBatchingEnabled: boolean;
 
   constructor(options) {
     this.endCommandBatch = Reflux.createAction();
@@ -49,9 +50,10 @@ export class UndoRedoManager {
     this.savePosition = -1;
     this.changeListeners = [];
     this.currentBatch = null;
+    this.commandBatchingEnabled = true;
 
     // listen to all our actions
-    this.endCommandBatch.listen(this._endComandBatch, this);
+    this.endCommandBatch.listen(this._endCommandBatch, this);
     this.undo.listen(this._undo, this);
     this.redo.listen(this._redo, this);
   }
@@ -61,13 +63,19 @@ export class UndoRedoManager {
   // This allows us to group similar commands together and not worry that an unrelated
   // command might be inserted into this same batch before it is closed.
   public startCommandBatch(optionalName) {
+    if (!this.commandBatchingEnabled) {
+      return;
+    }
     if (this.currentBatch && !this.currentBatch.matches(optionalName)) {
-      this._endComandBatch();
+      this._endCommandBatch();
     }
     if (!this.currentBatch) { return this.currentBatch = new UndoRedoCommandBatch(optionalName); }
   }
 
-  public _endComandBatch() {
+  public _endCommandBatch() {
+    if (!this.commandBatchingEnabled) {
+      return;
+    }
     if (this.currentBatch) {
       if (this.currentBatch.commands.length > 0) {
         this.commands.push(this.currentBatch);
@@ -78,9 +86,15 @@ export class UndoRedoManager {
     }
   }
 
+  // allows for disabling of command batching, useful for wrapping command batches in other command batches
+  // such as the node slider
+  public enableCommandBatching(commandBatchingEnabled: boolean) {
+    this.commandBatchingEnabled = commandBatchingEnabled;
+  }
+
   public createAndExecuteCommand(name, methods) {
     if (this.currentBatch && !this.currentBatch.matches(name)) {
-      this._endComandBatch();
+      this._endCommandBatch();
     }
 
     const result = this.execute((new UndoRedoCommand(name, methods)));

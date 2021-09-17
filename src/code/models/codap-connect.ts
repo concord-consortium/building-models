@@ -885,33 +885,15 @@ export class CodapConnect {
     }, (attributeListResp) => {
       if (attributeListResp && attributeListResp.success) {
         const attributes = _.pluck(attributeListResp.values, "name");
-
-        // get all the cases
         if (_.includes(attributes, dataPointColumnName)) {
-          this.codapPhone.call({
-            action: "get",
-            resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].allCases`
-          }, (allCasesResp) => {
-            if (allCasesResp && allCasesResp.success) {
-
-              // check if all the case values are empty
-              let hasValue = false;
-              _.forEach(allCasesResp.values.cases, (kase) => {
-                hasValue = hasValue || (kase.case.values[dataPointColumnName] != null); // use != for null and undefined
-              });
-
-              if (!hasValue) {
-                // delete the column if all case values are empty
-                this.codapPhone.call({
-                  action: "delete",
-                  resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute[${dataPointColumnName}]`
-                });
-              }
-            }
-          });
+          this._deleteDataAttributeIfEmpty(dataPointColumnName);
         }
       }
     });
+  }
+
+  public deleteDataAttributeIfEmpty(node) {
+    this._deleteDataAttributeIfEmpty(node.title);
   }
 
   public selectSelf() {
@@ -941,6 +923,30 @@ export class CodapConnect {
       timeUnit = tr("~CODAP.DATA.SAMPLE_COLUMN_NAME");
     }
     return timeUnit;
+  }
+
+  private _deleteDataAttributeIfEmpty(columnName) {
+    this.codapPhone.call({
+      action: "get",
+      resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].allCases`
+    }, (allCasesResp) => {
+      if (allCasesResp && allCasesResp.success) {
+
+        // check if all the case values are empty
+        let hasValue = false;
+        _.forEach(allCasesResp.values.cases, (kase) => {
+          hasValue = hasValue || (kase.case.values[columnName] != null); // use != for null and undefined
+        });
+
+        if (!hasValue) {
+          // delete the column if all case values are empty
+          this.codapPhone.call({
+            action: "delete",
+            resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute[${columnName}]`
+          });
+        }
+      }
+    });
   }
 
   private getGuideItems() {

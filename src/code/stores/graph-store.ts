@@ -521,6 +521,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
   _removeNode(node, options: LogOptions = {}) {
     delete this.nodeKeys[node.key];
+    CodapConnect.instance(DEFAULT_CONTEXT_NAME).deleteDataAttributeIfEmpty(node);
     this._graphUpdated();
     if (options.logEvent) {
       logEvent("variable deleted", {id: node.id, name: node.title});
@@ -778,6 +779,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       node.startSliderDrag({simulationDuration});
       _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.startSliderDrag({simulationDuration}));
       this.updateListeners();
+      // start a command batch and disable further command batching due to changeNode()
+      // using a command batch with each slider movement value change
+      this.undoRedoManager.startCommandBatch("changeNodeViaSlider");
+      this.undoRedoManager.enableCommandBatching(false);
     }
   },
 
@@ -789,6 +794,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       _.map(this.linkedOutNodes(node), (outNode: Node) => outNode.endSliderDrag({simulationDuration}));
       this.updateListeners();
     }
+    // do this outside of if in case node disappears
+    this.undoRedoManager.enableCommandBatching(true);
+    this.undoRedoManager.endCommandBatch();
   },
 
   clickLink(link, multipleSelectionsAllowed) {

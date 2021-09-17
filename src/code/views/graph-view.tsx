@@ -36,6 +36,7 @@ import { Mixer } from "../mixins/components";
 import { Link } from "../models/link";
 import { SelectionManager } from "../models/selection-manager";
 import { selectSelf } from "../utils/select-self";
+import { resizeImage } from "../utils/resize-image";
 
 interface GraphViewOuterProps {
   selectionManager: SelectionManager;
@@ -567,15 +568,25 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       const {iframed} = this.props;
       dropHandler({allow: "anythingIfFramed", iframed}, e, (item) => {
         if (item.type === "image") {
-          const node = this.props.graphStore.importNode({
-            data: {
-              x: dropPos.x,
-              y: dropPos.y,
-              title: tr("~NODE.UNTITLED"),
-              image: item.image
-            }
+          resizeImage(item.image, dataUrl => {
+            const node = this.props.graphStore.importNode({
+              data: {
+                x: dropPos.x,
+                y: dropPos.y,
+                title: tr("~NODE.UNTITLED"),
+                image: dataUrl
+              }
+            });
+            this.props.graphStore.editNode(node.key);
+            PaletteActions.addToPalette({
+              image: item.image,
+              metadata: {
+                title: "Dropped Image",
+                link: "n/a",
+                source: "n/a"
+              }
+            });
           });
-          this.props.graphStore.editNode(node.key);
         } else if (iframed) {
           // invoke an import data event via url event on the parent
           window.parent.postMessage({
