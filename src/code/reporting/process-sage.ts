@@ -2,7 +2,7 @@ import * as Papa from "papaparse";
 
 import * as base64 from "base-64";
 import fetch, { Response } from "node-fetch";
-import { ITopoReport, getTopology, ISageGraph} from "../utils/topology-tagger";
+import { ITopoReport, getTopology, ISageGraph} from "@concord-consortium/topology-tagger";
 import { migrationUpdate } from "../data/migrations/migrations";
 
 export let SuccessCount = 0;
