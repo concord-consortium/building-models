@@ -251,5 +251,6 @@
     "~SAGEMODELER.OPEN_OR_CREATE.TITLE": "What would you like to do?",
     "~SAGEMODELER.OPEN_OR_CREATE.OPEN_DOC": "Open Document or Browse Examples",
     "~SAGEMODELER.OPEN_OR_CREATE.NEW_DOC": "Create New Document",
+    "~SAGEMODELER.OPEN_OR_CREATE.EXAMPLES": "Examples",
     "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:"
 }

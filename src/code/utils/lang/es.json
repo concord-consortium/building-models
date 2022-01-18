@@ -212,5 +212,8 @@
     "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experimentos",
     "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Puntos de datos",
     "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Punto del dato",
-    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuamente"
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Continuamente",
+    "~IMAGE-BROWSER.NO_IMAGES_REMAINING": "No images remaining.",
+    "~IMAGE-BROWSER.ADD_ALL_IMAGES": "Add all images",
+    "~SAGEMODELER.OPEN_OR_CREATE.EXAMPLES": "Examples"
 }
