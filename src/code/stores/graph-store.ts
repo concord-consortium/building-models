@@ -1101,7 +1101,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         startTerminal = endTerminal;
         endTerminal = tempTerminal;
       }
-    } else if (sourceNode.isAccumulator && targetNode.isAccumulator && !this.relationshipExists(sourceNode, targetNode)) {
+    } else if (sourceNode.isAccumulator && targetNode.isAccumulator && !this.directRelationshipExists(sourceNode, targetNode)) {
       addAccumulatorTransfer = true;
     }
 
@@ -1124,6 +1124,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
   relationshipExists(sourceNode: Node, targetNode: Node) {
     return _.some(sourceNode.links, link => (link.sourceNode === targetNode) || (link.targetNode === targetNode));
+  },
+
+  directRelationshipExists(sourceNode: Node, targetNode: Node) {
+    return _.some(sourceNode.links, link => link.targetNode === targetNode);
   },
 
   deleteAll() {
