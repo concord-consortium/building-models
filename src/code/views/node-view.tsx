@@ -402,36 +402,38 @@ getDefaultProps() {
 
   private renderNodeInternal() {
     const getNodeImage = (node) => {
-      if (node.isAccumulator) {
+
+      let image = node.image;
+      if (node.isTransfer) {
+        image = "img/nodes/transfer.png";
+      } else {
+        const outLinks = node.outLinks();
+        const hasAddedToLink = _.some(outLinks, link => link.relation.formula === "+in");
+        const hasSubtractedFromLink = _.some(outLinks, link => link.relation.formula === "-in");
+        if (hasAddedToLink && hasSubtractedFromLink) {
+          // TODO: need composite image here?  For now use source
+          image = "img/nodes/source.png";
+        } else if (hasAddedToLink) {
+          image = "img/nodes/source.png";
+        } else if (hasSubtractedFromLink) {
+          image = "img/nodes/sink.png";
+        } else if (node.isFlowVariable && (outLinks.length === 0)) {
+          image = "img/nodes/flow-variable.png";
+        }
+      }
+
+      if ((image === node.image) && node.isAccumulator) {
         return (
           <StackedImageView
             image={node.image}
             imageProps={node.collectorImageProps()}
           />
         );
-      } else {
-        let image = node.image;
-        if (node.isTransfer) {
-          image = "img/nodes/transfer.png";
-        } else {
-          const outLinks = node.outLinks();
-          const hasAddedToLink = _.some(outLinks, link => link.relation.formula === "+in");
-          const hasSubtractedFromLink = _.some(outLinks, link => link.relation.formula === "-in");
-          if (hasAddedToLink && hasSubtractedFromLink) {
-            // TODO: need composite image here?  For now use source
-            image = "img/nodes/source.png";
-          } else if (hasAddedToLink) {
-            image = "img/nodes/source.png";
-          } else if (hasSubtractedFromLink) {
-            image = "img/nodes/sink.png";
-          } else if (node.isFlowVariable && (outLinks.length === 0)) {
-            image = "img/nodes/flow-variable.png";
-          }
-        }
-        return (
-          <SquareImageView image={image} />
-        );
       }
+
+      return (
+        <SquareImageView image={image} />
+      );
     };
 
     const nodeImage = getNodeImage(this.props.data);

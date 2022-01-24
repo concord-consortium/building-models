@@ -750,9 +750,6 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             let deletedNodes: Node[];
             let deletedNode: Node;
             const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
-            const flowVariableChanged = (data.isFlowVariable != null) && (!!data.isFlowVariable !== !!originalData.isFlowVariable);
-            const originalImage = node.image;
-            const originalPaletteItem = node.paletteItem;
 
             if (accumulatorChanged) {
               // all inbound and outbound links are deleted
@@ -798,13 +795,6 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                     this._removeNode(deletedNode);
                   }
                 }
-                if (flowVariableChanged) {
-                  const paletteItem = data.isFlowVariable ? PaletteStore.getFlowVariablePaletteItem() : PaletteStore.getBlankPaletteItem();
-                  if (paletteItem) {
-                    node.image = paletteItem.image;
-                    node.paletteItem =  paletteItem.uuid;
-                  }
-                }
                 logNodeChange(data);
                 return this.changeNodeOutsideUndoRedo(node, data);
               },
@@ -818,10 +808,6 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                   for (deletedLink of deletedLinks) {
                     this._addLink(deletedLink);
                   }
-                }
-                if (flowVariableChanged) {
-                  node.image = originalImage;
-                  node.paletteItem = originalPaletteItem;
                 }
               }
             }
