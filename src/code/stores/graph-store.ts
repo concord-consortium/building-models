@@ -396,6 +396,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         if (options.logEvent) {
           this._logTwoNodeEvent("auto converted flow variable to transfer link", sourceNode, targetNode);
         }
+
+        this.openPanelForLink(transferLink);
       },
       undo: () => {
         // remove transfer node and links
@@ -435,6 +437,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         if (options.logEvent) {
           this._logTwoNodeEvent("auto created transfer link between accumulators", sourceNode, targetNode);
         }
+
+        this.openPanelForLink(transferLink);
       },
       undo: () => {
         this._removeLink(transferLink);
@@ -445,6 +449,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         }
       }
     });
+  },
+
+  openPanelForLink(link: Link) {
+    this.selectNode(link.targetNode.key);
+    InspectorPanelActions.openInspectorPanel("relations", {link});
   },
 
   addLink(link, options: LogOptions & UndoRedoOptions = {}) {
@@ -1110,7 +1119,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     } else if (flowVariableTransferOptions) {
       this.convertFlowVariableToTransferLink(flowVariableTransferOptions);
     } else {
-      this.importLink({
+      const newLink = this.importLink({
         sourceNode: startKey,
         targetNode: endKey,
         sourceTerminal: startTerminal,
@@ -1119,6 +1128,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         title: info.title,
         relation
       }, {logEvent: true});
+
+      if (relation) {
+        // automatically open the relationship panel for the auto created relationship
+        this.openPanelForLink(newLink);
+      }
     }
   },
 
