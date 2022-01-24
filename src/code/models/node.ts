@@ -112,12 +112,17 @@ export class Node extends GraphPrimitive {
     const accumulatorScaleUrlParam = (urlParams.collectorScale && Number(urlParams.collectorScale)) || 1;
     this.accumulatorInputScale = accumulatorScaleUrlParam > 0 ? accumulatorScaleUrlParam : 1;
 
-    // Save internal values of min, max and initialValues. Actual values retreived
-    // using @min or node.min will depend on whether we are in quantitative or
+    // Save internal values of min, max and initialValues. Actual values retrieved
+    // using this.min or node.min will depend on whether we are in quantitative or
     // semi-quantitative mode. (See getters and setters below).
     this._min = nodeSpec.min != null ? nodeSpec.min : SEMIQUANT_MIN;
     this._max = nodeSpec.max != null ? nodeSpec.max : this.isAccumulator ? SEMIQUANT_ACCUMULATOR_MAX : SEMIQUANT_MAX;
     this._initialValue = nodeSpec.initialValue != null ? nodeSpec.initialValue : Math.round(SEMIQUANT_MAX / 2);
+
+    // ensure that initial value is within range
+    // NOTE: we are using the _min/_max values already set instead of the min/max getters as those scale up for accumulators
+    // which then cause the initialValue getter to return values out of range
+    this._initialValue = Math.max(Math.min(this._initialValue, this._max), this._min);
 
     if (this.color == null) { this.color = ColorChoices[0].value; }
 

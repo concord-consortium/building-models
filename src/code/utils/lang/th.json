@@ -212,5 +212,8 @@
     "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "การทดลอง",
     "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "ชุดข้อมูล",
     "~CODAP.DATA.SAMPLE_COLUMN_NAME": "ชุดข้อมูล",
-    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "แบบต่อเนื่อง"
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "แบบต่อเนื่อง",
+    "~IMAGE-BROWSER.NO_IMAGES_REMAINING": "No images remaining.",
+    "~IMAGE-BROWSER.ADD_ALL_IMAGES": "Add all images",
+    "~SAGEMODELER.OPEN_OR_CREATE.EXAMPLES": "ตัวอย่าง"
 }

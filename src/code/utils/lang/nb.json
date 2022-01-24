@@ -26,7 +26,7 @@
     "~NODE-VALUE-EDIT.DEFINING_WITH_WORDS": "Du definerer verdier med ord.",
     "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_WORDS": "Bytt til å definere med ord.",
     "~NODE-VALUE-EDIT.SWITCH_TO_DEFINING_WITH_NUMBERS": "Bytt til å definere med tall.",
-    "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Glidebryter",
+    "~NODE-VALUE-EDIT.IS_ACCUMULATOR": "Oppsamler",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE": "Kan være mindre enn null",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_UNCHECKED_TOOLTIP": "Klikk for å tillate negative verdier",
     "~NODE-VALUE-EDIT.RESTRICT_POSITIVE_CHECKED_TOOLTIP": "Klikk for å ikke tillate negative verdier",
@@ -42,7 +42,7 @@
     "~NODE-RELATION-EDIT.CAUSES": "gjør at",
     "~NODE-RELATION-EDIT.TO": "\u200B",
     "~NODE-RELATION-EDIT.INCREASES": "øker",
-    "~NODE-RELATION-EDIT.DECREASES": "synker",
+    "~NODE-RELATION-EDIT.DECREASES": "avtar",
     "~NODE-RELATION-EDIT.VARIES": "varierer",
     "~NODE-RELATION-EDIT.BY": "med",
     "~NODE-RELATION-EDIT.ABOUT_THE_SAME": "omtrent det samme",
@@ -54,7 +54,7 @@
     "~NODE-RELATION-EDIT.CUSTOM_HINT": "Tegn sammenheng her",
     "~NODE-RELATION-EDIT.BECAUSE": "Hvorfor tror du det?",
     "~NODE-RELATION-EDIT.BECAUSE_PLACEHOLDER": "Skriv svaret ditt her",
-    "~NODE-RELATION-EDIT.IS": "er",
+    "~NODE-RELATION-EDIT.IS": "blir",
     "~NODE-RELATION-EDIT.ADDED_TO": "lagt til",
     "~NODE-RELATION-EDIT.SUBTRACTED_FROM": "trukket fra",
     "~NODE-RELATION-EDIT.TRANSFERRED_TO": "overført eller omgjort til",
@@ -212,5 +212,8 @@
     "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Ekperiment",
     "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Datapunkter",
     "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Datapunkt",
-    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Kontinuerlig"
+    "~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY": "Kontinuerlig",
+    "~IMAGE-BROWSER.NO_IMAGES_REMAINING": "No images remaining.",
+    "~IMAGE-BROWSER.ADD_ALL_IMAGES": "Add all images",
+    "~SAGEMODELER.OPEN_OR_CREATE.EXAMPLES": "Eksempler"
 }

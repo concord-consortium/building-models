@@ -109,14 +109,15 @@ describe("Simulation V2", () => {
       });
 
       describe("the result", () => {
-        it("should return initial values", () => {
+        // NOTE: this is a change - we now always cap initial values on load
+        it("should return initial values within min/max", () => {
           const simulation = new SimulationV2({
             nodes: [this.nodeA, this.nodeB],
             duration: 10
           });
           simulation.run();
-          this.nodeA.currentValue.should.equal(1e7);
-          this.nodeB.currentValue.should.equal(1e6);
+          this.nodeA.currentValue.should.equal(1000);
+          this.nodeB.currentValue.should.equal(100);
         });
         it("when nodes values are capped, it should return filtered initial values", () => {
           const simulation = new SimulationV2({

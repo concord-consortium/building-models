@@ -2,7 +2,7 @@
   "name": "building-models",
   "description": "System dynamics modeling tool.",
   "author": "The Concord Consortium",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/concord-consortium/building-models"
@@ -29,6 +29,7 @@
     "cypress:open": "cypress open"
   },
   "dependencies": {
+    "@concord-consortium/topology-tagger": "^1.0.0",
     "@types/graphlib": "^2.1.4",
     "autosize": "^3.0.18",
     "babelify": "^8.0.0",

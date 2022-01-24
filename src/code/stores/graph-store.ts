@@ -34,7 +34,7 @@ import { Mixin } from "../mixins/components";
 import { StoreUnsubscriber, StoreClass } from "./store-class";
 import { GraphView } from "../views/graph-view";
 import { InspectorPanelActions } from "./inspector-panel-store";
-import { getTopology } from "../utils/topology-tagger";
+import { getTopology } from "@concord-consortium/topology-tagger";
 import { urlParams } from "../utils/url-params";
 import { logEvent } from "../utils/logger";
 const DEFAULT_CONTEXT_NAME = "building-models";
