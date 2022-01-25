@@ -453,11 +453,14 @@ getDefaultProps() {
     const multipleSelections = evt && (evt.ctrlKey || evt.metaKey || evt.shiftKey);
     this.props.selectionManager.selectNodeForInspection(this.props.data, multipleSelections);
 
-    // open the relationship panel on double click if the node has incombing links
-    if (this.props.data.inLinks().length > 0) {
+    // open the relationship panel on double click if the node has incoming links
+    const links = this.props.data.inLinks();
+    if (links.length > 0) {
       const now = (new Date()).getTime();
       if ((now - (this.lastClickLinkTime || 0)) <= 250) {
-        InspectorPanelActions.openInspectorPanel("relations");
+        // show the first unset link if available, otherwise show the first one
+        const link = links.find(l => !l.relation.isDefined) || links[0];
+        InspectorPanelActions.openInspectorPanel("relations", {link});
       }
       return this.lastClickLinkTime = now;
     }
