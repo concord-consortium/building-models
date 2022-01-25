@@ -403,6 +403,15 @@ getDefaultProps() {
   private renderNodeInternal() {
     const getNodeImage = (node) => {
 
+      if (node.isAccumulator) {
+        return (
+          <StackedImageView
+            image={node.image}
+            imageProps={node.collectorImageProps()}
+          />
+        );
+      }
+
       let image = node.image;
       if (node.isTransfer) {
         image = "img/nodes/transfer.png";
@@ -420,15 +429,6 @@ getDefaultProps() {
         } else if (node.isFlowVariable && (outLinks.length === 0)) {
           image = "img/nodes/flow-variable.png";
         }
-      }
-
-      if ((image === node.image) && node.isAccumulator) {
-        return (
-          <StackedImageView
-            image={node.image}
-            imageProps={node.collectorImageProps()}
-          />
-        );
       }
 
       return (
