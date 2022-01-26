@@ -284,9 +284,12 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       return paletteItem = this.handleAddNewPaletteNode(e, ui);
 
     } else if (data.droptype === "paletteItem") {
-      paletteItem = PaletteStore.palette[data.index];
-      PaletteActions.selectPaletteIndex(data.index);
-      return this.handleAddPaletteNode(ui, paletteItem);
+      paletteItem = PaletteStore.findByUUID(data.uuid);
+      if (paletteItem) {
+        const index = PaletteStore.palette.indexOf(paletteItem);
+        PaletteActions.selectPaletteIndex(index);
+        return this.handleAddPaletteNode(ui, paletteItem);
+      }
     }
   }
 
@@ -309,7 +312,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       title,
       paletteItem: paletteItem.uuid,
       image: paletteItem.image,
-      addedThisSession: true
+      addedThisSession: true,
+      isFlowVariable: paletteItem.id === "flow-variable"
     });
 
     this.props.graphStore.addNode(newNode, {logEvent: true});
@@ -474,8 +478,9 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const relationDetails = RelationFactory.selectionsFromRelation(link.relation);
     if ((relationDetails.vector != null ? relationDetails.vector.isCustomRelationship : undefined) && (link.relation.customData != null)) {
       link.color = LinkColors.customRelationship;
-    } else if ((relationDetails.accumulator != null ? relationDetails.accumulator.id : undefined) === "setInitialValue") {
-      link.color = LinkColors.customRelationship;
+    // leave in for now in case we need to customize this
+    // } else if ((relationDetails.accumulator != null ? relationDetails.accumulator.id : undefined) === "setInitialValue") {
+    //  link.color = LinkColors.customRelationship;
     } else if (link.relation.isTransferModifier) {
       link.color = LinkColors.fromLink(link);
     } else {

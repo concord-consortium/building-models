@@ -37,6 +37,7 @@ import { InspectorPanelActions } from "./inspector-panel-store";
 import { getTopology } from "@concord-consortium/topology-tagger";
 import { urlParams } from "../utils/url-params";
 import { logEvent } from "../utils/logger";
+import { Relationship } from "../models/relationship";
 const DEFAULT_CONTEXT_NAME = "building-models";
 
 interface GraphSettings {
@@ -324,16 +325,31 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return node;
   },
 
+  _nodeType(node: Node) {
+    return node.isAccumulator ? "collector" : (node.isTransfer ? "flow" : (node.isFlowVariable ? "flow-variable" : "value"));
+  },
+
   _logLinkEvent(event: string, link: Link, extra: object = {}) {
-    const nodeType = (node: Node) => node.isAccumulator ? "collector" : (node.isTransfer ? "flow" : "value");
     logEvent(event, {
       id: link.id,
       startingId: link.sourceNode.id,
       startingName: link.sourceNode.title,
-      startingType: nodeType(link.sourceNode),
+      startingType: this._nodeType(link.sourceNode),
       endingId: link.targetNode.id,
       endingName: link.targetNode.title,
-      endingType: nodeType(link.targetNode),
+      endingType: this._nodeType(link.targetNode),
+      ...extra
+    });
+  },
+
+  _logTwoNodeEvent(event: string, sourceNode: Node, targetNode: Node, extra: object = {}) {
+    logEvent(event, {
+      startingId: sourceNode.id,
+      startingName: sourceNode.title,
+      startingType: this._nodeType(sourceNode),
+      endingId: targetNode.id,
+      endingName: targetNode.title,
+      endingType: this._nodeType(targetNode),
       ...extra
     });
   },
@@ -355,6 +371,91 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return link;
   },
 
+  convertFlowVariableToTransferLink(transfer: {replaceSourceLink: Link, sourceNode: Node, targetNode: Node, flowVariable: Node}, options: LogOptions = {}) {
+    const {replaceSourceLink, sourceNode, targetNode, flowVariable} = transfer;
+
+    let transferLink: Link;
+    let transferNode: TransferModel;
+    const flowVariableLinks = flowVariable.links.slice();
+
+    this.endNodeEdit();
+    this.undoRedoManager.createAndExecuteCommand("convertFlowVariableToTransferLink", {
+      execute: () => {
+        // remove the flow variable links
+        flowVariableLinks.forEach(link => this._removeLink(link));
+
+        // replace the flow variable with a transfer link/node (and drop other flow variable links)
+        this._removeNode(flowVariable);
+        transferLink = transferLink || new Link({sourceNode, targetNode, relation: RelationFactory.transferred});
+        transferNode = transferNode || new TransferModel({x: flowVariable.x, y: flowVariable.y, title: flowVariable.title});
+        transferNode.setTransferLink(transferLink);
+        transferLink.transferNode = transferNode;
+        this._addNode(transferNode);
+        this._addLink(transferLink);
+
+        if (options.logEvent) {
+          this._logTwoNodeEvent("auto converted flow variable to transfer link", sourceNode, targetNode);
+        }
+
+        this.openPanelForLink(transferLink);
+      },
+      undo: () => {
+        // remove transfer node and links
+        this._removeLink(transferLink);
+        transferNode.links.forEach(link => {
+          if (link !== transferLink) {
+            this._removeLink(link);
+          }
+        });
+        this._removeNode(transferNode);
+
+        // add back the flow variable
+        this._addNode(flowVariable);
+
+        // add back the flow variable links
+        flowVariableLinks.forEach(link => this._addLink(link));
+
+        if (options.logEvent) {
+          this._logTwoNodeEvent("removed auto converted flow variable to transfer link", sourceNode, targetNode);
+        }
+      }
+    });
+  },
+
+  createTransferLinkBetweenAccumulators(sourceNode: Node, targetNode: Node, options: LogOptions = {}) {
+
+    let transferLink: Link;
+
+    this.endNodeEdit();
+    this.undoRedoManager.createAndExecuteCommand("createTransferLinkBetweenAccumulators", {
+      execute: () => {
+        // create the transfer link/node
+        transferLink = transferLink || new Link({sourceNode, targetNode, relation: RelationFactory.transferred});
+        this._addTransfer(transferLink);
+        this._addLink(transferLink);
+
+        if (options.logEvent) {
+          this._logTwoNodeEvent("auto created transfer link between accumulators", sourceNode, targetNode);
+        }
+
+        this.openPanelForLink(transferLink);
+      },
+      undo: () => {
+        this._removeLink(transferLink);
+        if (transferLink.transferNode != null) { return this._removeTransfer(transferLink, options); }
+
+        if (options.logEvent) {
+          this._logTwoNodeEvent("removed auto created transfer link between accumulators", sourceNode, targetNode);
+        }
+      }
+    });
+  },
+
+  openPanelForLink(link: Link) {
+    this.selectNode(link.targetNode.key);
+    InspectorPanelActions.openInspectorPanel("relations", {link});
+  },
+
   addLink(link, options: LogOptions & UndoRedoOptions = {}) {
     this.endNodeEdit();
     if (options.skipUndoRedo) {
@@ -367,7 +468,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     }
   },
 
-  _addLink(link, options: LogOptions = {}) {
+  _addLink(link: Link, options: LogOptions = {}) {
     if ((link.sourceNode !== link.targetNode) && !this.hasLink(link)) {
       this.linkKeys[link.terminalKey()] = link;
       this.nodeKeys[link.sourceNode.key].addLink(link);
@@ -465,8 +566,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   removeNode(nodeKey, options: LogOptions = {}) {
     this.endNodeEdit();
     const node = this.nodeKeys[nodeKey];
-    const transferRelation = node.transferLink != null ? node.transferLink.relation : undefined;
-    const transferNode = node.transferLink != null ? node.transferLink.transferNode : undefined;
+    const transferLink = node.transferLink;
+    const transferRelation = transferLink != null ? transferLink.relation : undefined;
+    const transferNode = transferLink != null ? transferLink.transferNode : undefined;
 
     // create a copy of the list of links
     const links = node.links.slice();
@@ -480,22 +582,20 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
     return this.undoRedoManager.createAndExecuteCommand("removeNode", {
       execute: () => {
-        if (node.transferLink != null) {
-          node.transferLink.relation = node.transferLink.defaultRelation();
-          delete node.transferLink.transferNode;
+        if (transferLink != null) {
+          this._removeLink(transferLink, options);
         }
         for (const link of links) { this._removeLink(link, options); }
         for (const link of transferLinks) { this._removeTransfer(link, options); }
         return this._removeNode(node, options);
       },
       undo: () => {
-        if (node.transferLink != null) {
-          node.transferLink.relation = transferRelation;
-          node.transferLink.transferNode = transferNode;
-        }
         this._addNode(node, options);
         for (const link of transferLinks) { this._addTransfer(link, options); }
         for (const link of links) { this._addLink(link, options); }
+        if (transferLink != null) {
+          this._addLink(transferLink, options);
+        }
       }
     }
     );
@@ -632,7 +732,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             isAccumulator: node.isAccumulator,
             allowNegativeValues: node.allowNegativeValues,
             combineMethod: node.combineMethod,
-            valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively
+            valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively,
+            isFlowVariable: node.isFlowVariable
           };
 
           let nodeChanged = false;
@@ -644,22 +745,16 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
           if (nodeChanged) {        // don't do anything unless we've actually changed the node
 
-            let changedLinks, link, originalRelations;
-            const accumulatorChanged = (data.isAccumulator != null) &&
-                                  (!!data.isAccumulator !== !!originalData.isAccumulator);
+            let deletedLinks: Link[];
+            let deletedLink: Link;
+            let deletedNodes: Node[];
+            let deletedNode: Node;
+            const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
 
             if (accumulatorChanged) {
-              // all inbound links are invalidated
-              changedLinks = [].concat(node.inLinks())
-              // along with outbound transfer links
-                .concat(_.filter(node.outLinks(), link =>
-                  (link.relation.type === "transfer") ||
-                                  (link.relation.type === "initial-value")
-                ));
-              originalRelations = {};
-              for (link of changedLinks) {
-                originalRelations[link.key] = link.relation;
-              }
+              // all inbound and outbound links are deleted
+              deletedLinks = [].concat(node.links);
+              deletedNodes = deletedLinks.filter(link => !!link.transferNode).map(link => link.transferNode);
             }
 
             const logNodeChange = (changes) => {
@@ -683,6 +778,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                 if (changes.hasOwnProperty("isAccumulator")) {
                   logEvent("collector status changed", {id: node.id, name: node.title, collector: changes.isAccumulator});
                 }
+                if (changes.hasOwnProperty("isFlowVariable")) {
+                  logEvent("flow variable status changed", {id: node.id, name: node.title, flowVariable: changes.isFlowVariable});
+                }
               }
             };
 
@@ -690,8 +788,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
                 if (accumulatorChanged) {
-                  for (link of changedLinks) {
-                    this._changeLink(link, { relation: link.defaultRelation() });
+                  for (deletedLink of deletedLinks) {
+                    this._removeLink(deletedLink);
+                  }
+                  for (deletedNode of deletedNodes) {
+                    this._removeNode(deletedNode);
                   }
                 }
                 logNodeChange(data);
@@ -701,8 +802,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
                 logNodeChange(originalData);
                 this.changeNodeOutsideUndoRedo(node, originalData);
                 if (accumulatorChanged) {
-                  for (link of changedLinks) {
-                    this._changeLink(link, { relation: originalRelations[link.key] });
+                  for (deletedNode of deletedNodes) {
+                    this._addNode(deletedNode);
+                  }
+                  for (deletedLink of deletedLinks) {
+                    this._addLink(deletedLink);
                   }
                 }
               }
@@ -826,7 +930,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return this.selectionManager.selectLinkForTitleEditing(link);
   },
 
-  changeLink(link, changes) {
+  changeLink(link: Link, changes) {
     if (changes == null) { changes = {}; }
     if (changes.deleted) {
       return this.removeSelectedLinks();
@@ -839,9 +943,22 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       };
       const initial: any = {};
       Object.keys(changes).forEach(key => initial[key] = originalData[key]);
+
+      // if regular variable is connected to a collector and "add-to" or "subtract-from" is selected as the relationship,
+      // then turn that into a flow variable in the underlying model.
+      let changedIsFlowVariable = link.sourceNode.isFlowVariable;
+      const originalIsFlowVariable = link.sourceNode.isFlowVariable;
+      const isAddedOrSubtractedRelation = changes.relation && ((changes.relation.formula === RelationFactory.added.formula) || (changes.relation.formula === RelationFactory.subtracted.formula));
+      if (!link.sourceNode.isFlowVariable && link.targetNode.isAccumulator && isAddedOrSubtractedRelation) {
+        changedIsFlowVariable = true;
+      }
+
       this.undoRedoManager.startCommandBatch();
       this.undoRedoManager.createAndExecuteCommand("changeLink", {
         execute: () => {
+          if (changedIsFlowVariable !== originalIsFlowVariable) {
+            this.changeNode({isFlowVariable: changedIsFlowVariable}, link.sourceNode, {logEvent: true});
+          }
           this._changeLink(link,  changes);
           this._logLinkEvent("relationship changed", link, {
             initial,
@@ -849,6 +966,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
           });
         },
         undo: () => {
+          if (changedIsFlowVariable !== originalIsFlowVariable) {
+            this.changeNode({isFlowVariable: originalIsFlowVariable}, link.sourceNode, {logEvent: true});
+          }
           this._changeLink(link, originalData);
           this._logLinkEvent("relationship changed", link, {
             initial: changes,
@@ -908,20 +1028,106 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
   newLinkFromEvent(info) {
     const newLink = {};
-    const startKey = $(info.source).data("node-key") || "undefined";
-    const endKey   = $(info.target).data("node-key") || "undefined";
-    const startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
-    const endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
+    let startKey = $(info.source).data("node-key") || "undefined";
+    let endKey   = $(info.target).data("node-key") || "undefined";
+    let startTerminal = info.connection.endpoints[0].anchor.type === "Top" ? "a" : "b";
+    let endTerminal   = info.connection.endpoints[1].anchor.type === "Top" ? "a" : "b";
 
-    this.importLink({
-      sourceNode: startKey,
-      targetNode: endKey,
-      sourceTerminal: startTerminal,
-      targetTerminal: endTerminal,
-      color: info.color,
-      title: info.title
-    }, {logEvent: true});
-    return true;
+    const sourceNode: Node = this.nodeKeys[startKey];
+    const targetNode: Node = this.nodeKeys[endKey];
+    let relation: any;
+    let flowVariableTransferOptions: any;
+    let addAccumulatorTransfer = false;
+
+    const maybeCreateTransferLink = (accumulator: Node, flowVariable: Node, flowVariableIsSource: boolean) => {
+      let hasDirectLink = false;
+      const subtractedFromLinks: Link[] = [];
+      const addedToLinks: Link[] = [];
+      for (const key in this.linkKeys) {
+        const link = this.linkKeys[key];
+        if (((link.sourceNode === accumulator) && (link.targetNode === flowVariable)) || ((link.sourceNode === flowVariable) && (link.targetNode === accumulator))) {
+          hasDirectLink = true;
+        } else if (link.sourceNode === flowVariable) {
+          if (link.relation.formula === RelationFactory.added.formula) {
+            addedToLinks.push(link);
+          } else if (link.relation.formula === RelationFactory.subtracted.formula) {
+            subtractedFromLinks.push(link);
+          }
+        }
+      }
+
+      if (hasDirectLink) {
+        return false;
+      } else if ((addedToLinks.length > 0 && subtractedFromLinks.length === 0) && !flowVariableIsSource) {
+        return {
+          replaceSourceLink: addedToLinks[0],
+          sourceNode: accumulator,
+          targetNode: addedToLinks[0].targetNode,
+          flowVariable,
+        };
+      } else if ((addedToLinks.length === 0 && subtractedFromLinks.length > 0) && flowVariableIsSource) {
+        return {
+          replaceSourceLink: subtractedFromLinks[0],
+          sourceNode: subtractedFromLinks[0].targetNode,
+          targetNode: accumulator,
+          flowVariable
+        };
+      } else {
+        return false;
+      }
+    };
+
+    if (sourceNode.isFlowVariable && targetNode.isAccumulator) {
+      // check if connected to another flow variable using subtracted to
+      flowVariableTransferOptions = maybeCreateTransferLink(targetNode, sourceNode, true);
+      if (!flowVariableTransferOptions && !this.relationshipExists(sourceNode, targetNode)) {
+        relation = RelationFactory.CreateRelation(RelationFactory.added).toExport();
+      }
+    } else if (sourceNode.isAccumulator && targetNode.isFlowVariable) {
+      // check if connected to another flow variable using added to
+      flowVariableTransferOptions = maybeCreateTransferLink(sourceNode, targetNode, false);
+      if (!flowVariableTransferOptions && !this.relationshipExists(sourceNode, targetNode)) {
+        // use subtracted from (swap nodes also)
+        relation = RelationFactory.CreateRelation(RelationFactory.subtracted).toExport();
+        const tempKey = startKey;
+        startKey = endKey;
+        endKey = tempKey;
+        const tempTerminal = startTerminal;
+        startTerminal = endTerminal;
+        endTerminal = tempTerminal;
+      }
+    } else if (sourceNode.isAccumulator && targetNode.isAccumulator && !this.directRelationshipExists(sourceNode, targetNode)) {
+      addAccumulatorTransfer = true;
+    }
+
+    if (addAccumulatorTransfer) {
+      this.createTransferLinkBetweenAccumulators(sourceNode, targetNode);
+    } else if (flowVariableTransferOptions) {
+      this.convertFlowVariableToTransferLink(flowVariableTransferOptions);
+    } else {
+      const newLink = this.importLink({
+        sourceNode: startKey,
+        targetNode: endKey,
+        sourceTerminal: startTerminal,
+        targetTerminal: endTerminal,
+        color: info.color,
+        title: info.title,
+        relation
+      }, {logEvent: true});
+
+      if (relation) {
+        // automatically open the relationship panel for the auto created relationship
+        this.openPanelForLink(newLink);
+      }
+    }
+  },
+
+  relationshipExists(sourceNode: Node, targetNode: Node) {
+    return _.some(sourceNode.links, link => (link.sourceNode === targetNode) || (link.targetNode === targetNode));
+  },
+
+  directRelationshipExists(sourceNode: Node, targetNode: Node) {
+    return _.some(sourceNode.links, link => link.targetNode === targetNode);
   },
 
   deleteAll() {
