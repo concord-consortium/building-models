@@ -24,6 +24,7 @@ export const LinkColors = {
     if (((link.relation != null ? link.relation.formula : undefined) == null)) { return LinkColors.default; }
     switch (link.relation.formula) {
     case RelationFactory.added.formula: return LinkColors.increase;
+    case RelationFactory.setInitialValue.formula: return LinkColors.increase;
     case RelationFactory.subtracted.formula: return LinkColors.decrease;
     case RelationFactory.proportionalSourceLess.formula: return LinkColors.decrease;
     case RelationFactory.proportionalSourceMore.formula: return LinkColors.increase;

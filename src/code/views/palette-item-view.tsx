@@ -6,10 +6,9 @@ import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 
 interface PaletteItemViewOuterProps {
-  index: number;
   image?: string;
   node: Node;
-  onSelect: (index: number) => void;
+  onSelect: (uuid: string) => void;
 }
 type PaletteItemViewProps = PaletteItemViewOuterProps & DraggableMixinProps;
 
@@ -36,9 +35,9 @@ export class PaletteItemView extends Mixer<PaletteItemViewProps, PaletteItemView
 
     return (
       <div
-        data-index={this.props.index}
         data-title={this.props.node.title}
         data-droptype={"paletteItem"}
+        data-uuid={this.props.node.uuid}
         className={className}
         ref={el => this.node = el}
         onClick={this.handleClick}
@@ -53,6 +52,6 @@ export class PaletteItemView extends Mixer<PaletteItemViewProps, PaletteItemView
   }
 
   private handleClick = () => {
-    this.props.onSelect(this.props.index);
+    this.props.onSelect(this.props.node.uuid);
   }
 }

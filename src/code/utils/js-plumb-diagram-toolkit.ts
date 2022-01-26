@@ -185,7 +185,8 @@ export class DiagramToolkit {
     };
   }
 
-  public _overlays(label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow) {
+  public _overlays({label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow, transferNotch}:
+                   {label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow, transferNotch}) {
     if (editingLabel == null) { editingLabel = true; }
     const results: any[] = []; // checked: any ok
     if (!hideArrow) {
@@ -195,6 +196,23 @@ export class DiagramToolkit {
         variableWidth,
         width: 9 + thickness,
         foldback: arrowFoldback
+      }]);
+    }
+    if (transferNotch) {
+      /*
+      // leaving this here in case we want to use the notch instead of the arrow "flange"
+      results.push(["Custom", {
+        create: this._createTransferArrowNotch(transferNotch),
+        location: 0,
+        id: "transferNotch"
+      }]);
+      */
+      results.push(["Arrow", {
+        location: 0,
+        length: 10,
+        variableWidth,
+        width: 9 + thickness,
+        foldback: 1
       }]);
     }
     if (changeIndicator && (variableWidth !== 0)) {
@@ -258,6 +276,15 @@ export class DiagramToolkit {
     };
   }
 
+  public _createTransferArrowNotch(transferNotch) {
+    return () => {
+      const svg = $('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 24 24" fill="#eef2f3">')
+        .html('<path d="M12,1L9,9L1,12L9,15L12,23L15,15L23,12L15,9L12,1Z" />');
+      return $("<div />")
+        .css({width: 32, height: 32})
+        .append(svg);
+    };
+  }
 
   public _clean_borked_endpoints() {
     return $("._jsPlumb_endpoint:not(.jsplumb-draggable)").remove();
@@ -269,6 +296,9 @@ export class DiagramToolkit {
     paintStyle.outlineColor = "none";
     // use large outline width for all links, this gives a larger selection target around the link
     paintStyle.outlineWidth = 10;
+
+    const formula = opts.linkModel != null && opts.linkModel.relation != null ? opts.linkModel.relation.formula : undefined;
+    const isAddedToOrSubtractedFrom = formula === "+in" || formula === "-in";
 
     let startColor = LinkColors.default;
     let finalColor = LinkColors.default;
@@ -311,6 +341,14 @@ export class DiagramToolkit {
       ({ thickness } = opts);
     }
 
+    if (opts.isTransfer || isAddedToOrSubtractedFrom) {
+      thickness = 10;
+      fixedColor = LinkColors.transferPipe;
+      fadedColor = LinkColors.transferPipe;
+      this.kit.importDefaults({
+        Connector: ["Flowchart", {}]});
+    }
+
     paintStyle.lineWidth = thickness;
     startColor = finalColor;
 
@@ -345,11 +383,6 @@ export class DiagramToolkit {
       changeIndicator = null;
     }
 
-    if (opts.isTransfer) {
-      this.kit.importDefaults({
-        Connector: ["Flowchart", {}]});
-    }
-
     const linkSource = opts.linkModel != null ? opts.linkModel.sourceNode : undefined;
     const linkTarget = opts.linkModel != null ? opts.linkModel.targetNode : undefined;
     const linkRelation = opts.linkModel != null ? opts.linkModel.relation : undefined;
@@ -365,12 +398,28 @@ export class DiagramToolkit {
       isModifierToFlowNode ? this.flowNodeModifierAnchors :
         isLinkToFlowNode ? this.flowNodeLinkAnchors : this.standardAnchors;
 
+    // swap source and target for subtracts from, otherwise the arrow doesn't render correctly
+    // (if you change the location to 0 the thick arrow bleeds out in front of the arrow)
+    const swapEnds = formula === "-in";
+
     const connection = this.kit.connect({
-      source: opts.source,
-      target: opts.target,
-      anchors: [sourceAnchors, targetAnchors],
+      source: swapEnds ? opts.target : opts.source,
+      target: swapEnds ? opts.source : opts.target,
+      anchors: swapEnds ? [targetAnchors, sourceAnchors] : [sourceAnchors, targetAnchors],
       paintStyle,
-      overlays: this._overlays(opts.label, opts.isSelected, opts.isEditing, thickness, fixedColor, variableWidthMagnitude, arrowFoldback, changeIndicator, opts.linkModel, opts.hideArrow),
+      overlays: this._overlays({
+        label: opts.label,
+        selected: opts.isSelected,
+        editingLabel: opts.isEditing,
+        thickness,
+        finalColor: fixedColor,
+        variableWidth: variableWidthMagnitude,
+        arrowFoldback,
+        changeIndicator,
+        link: opts.linkModel,
+        hideArrow: opts.hideArrow,
+        transferNotch: isTransferToFlowNode || isAddedToOrSubtractedFrom
+      }),
       endpoint: this._endpointOptions("Rectangle", thickness, "node-link-endpoint")
     });
 

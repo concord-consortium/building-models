@@ -23,6 +23,8 @@ import { Node } from "../models/node";
 import { urlParams } from "../utils/url-params";
 
 export interface PalleteItem {
+  id: string;
+  uuid: string;
   image: string;
   metadata: ImageMetadata;
 }
@@ -51,6 +53,8 @@ export declare class PaletteStoreClass extends StoreClass {
   public inLibrary(node: Node): boolean;
   public inPalette(node: Node): boolean;
   public findByUUID(uuid: string): PalleteItem | undefined;
+  public getBlankPaletteItem(): PalleteItem | undefined;
+  public getFlowVariablePaletteItem(): PalleteItem | undefined;
 }
 
 export const PaletteStore: PaletteStoreClass = Reflux.createStore({
@@ -173,6 +177,12 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
         this.addToPalette(p_item);
       }
     }
+
+    // ensure the default palette items exist
+    for (const node of initialPalette) {
+      this.addToPalette(node);
+    }
+
     return this.updateChanges();
   },
 
@@ -293,6 +303,14 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
 
   findByUUID(uuid) {
     return _.find(this.palette, {uuid});
+  },
+
+  getBlankPaletteItem() {
+    return _.find(this.palette, {id: "1"});
+  },
+
+  getFlowVariablePaletteItem() {
+    return _.find(this.palette, {id: "flow-variable"});
   },
 
   inLibrary(node) {

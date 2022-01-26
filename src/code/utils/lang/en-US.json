@@ -118,6 +118,7 @@
     "~METADATA.CREDIT": "Credit",
     "~METADATA.LICENSE": "License",
     "~METADATA.BLANK_NODE_TITLE": "Blank",
+    "~METADATA.FLOW_VARIABLE_NODE_TITLE": "Flow Variable",
     "~METADATA.SEE_IT_ON": "See it on %{hostname}",
     "~METADATA.LICENSE.PUBLIC_DOMAIN": "Public Domain",
     "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabay search",
