@@ -681,6 +681,7 @@ export class SVGSliderView extends React.Component<SVGSliderViewProps, SVGSlider
     if (showHandle && showButtons) {
       // if this comes in as a touch event prevent the mouse event from being generated
       e.preventDefault();
+      e.stopPropagation();
       let target: HTMLElement | null = e.target as HTMLElement;
       while (target !== null) {
         if (target === this.buttonContainer) {
