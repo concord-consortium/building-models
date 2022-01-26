@@ -11,6 +11,8 @@
 const _ = require("lodash");
 const log = require("loglevel");
 const Reflux = require("reflux");
+const hash = require("object-hash");
+
 import * as $ from "jquery";
 
 import { Importer } from "../utils/importer";
@@ -1194,7 +1196,15 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
           if (transfer) { modelDescription += `${transfer.key}:${transfer.initialValue}:${transfer.combineMethod};`; }
         }
         modelDescription += `${target.key}${target.isAccumulator ? `:${target.value != null ? target.value : target.initialValue}` : ""}`;
-        return modelDescription += `;${target.combineMethod}|`;
+        modelDescription += `;${target.combineMethod}|`;
+
+        // add custom data hash to cause links to redraw (linkDescription) and simulation to re-run (modelDescription)
+        // when the vary relationship is either defined or updated or removed
+        const customDataHash = link.relation.customData ? hash(link.relation.customData) : null;
+        if (customDataHash) {
+          linkDescription += `${customDataHash}|`;
+          modelDescription += `${customDataHash}|`;
+        }
       }
     });
     linkDescription += nodes.length;     // we need to redraw targets when new node is added
