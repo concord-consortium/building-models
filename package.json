@@ -42,7 +42,7 @@
     "lodash": "3.3.0",
     "loglevel": "1.2.0",
     "mathjs": "^3.18.0",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "object-hash": "^2.2.0",
     "papaparse": "^5.3.0",
     "react": "^16.8.5",
