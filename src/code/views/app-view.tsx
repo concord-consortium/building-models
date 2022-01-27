@@ -123,7 +123,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     window.addEventListener("click", this.handleWindowClick, true);
 
     // Ensure the app has focus so that the top level window delete key handler is invoked
-    // if an element is selected right after and file load and the delete key is pressed.
+    // if an element is selected right after a file load and the delete key is pressed.
     // NOTE: this also requires the app div has a tabIndex property set
     this.appContainer?.focus();
   }
