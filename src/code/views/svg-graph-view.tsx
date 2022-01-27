@@ -306,24 +306,34 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
   private handleStartDrawCurve = (e) => {
     // can only draw on custom relationships
     if (this.state.canDraw) {
-      document.addEventListener("mousemove", this.handleDrawCurve, {passive: true});
-      document.addEventListener("touchmove", this.handleDrawCurve, {passive: true});
-      document.addEventListener("mouseup", this.handleEndDrawCurve, {passive: true});
-      document.addEventListener("touchend", this.handleEndDrawCurve, {passive: true});
+      e.preventDefault();
+      e.stopPropagation();
+
+      document.addEventListener("mousemove", this.handleDrawCurve, true);
+      document.addEventListener("touchmove", this.handleDrawCurve, true);
+      document.addEventListener("mouseup", this.handleEndDrawCurve, true);
+      document.addEventListener("touchend", this.handleEndDrawCurve, true);
       this.drawing = true;
+
       if (this.state.newCustomData) {
         const scaledCoords = this.pointToScaledCoords(e);
         const starterFunction = `1 * ${scaledCoords.y}`;
         this.updatePointData(starterFunction, null);
         const newCustomData = false;
-        this.setState({newCustomData});
+        // persist the synthetic event so handleDrawCurve can use it
+        e.persist();
+        this.setState({newCustomData}, () => this.handleDrawCurve(e));
+      } else {
+        this.handleDrawCurve(e);
       }
-      return this.handleDrawCurve(e);
     }
   }
 
   private handleDrawCurve = (e) => {
     if (this.drawing && !this.state.newCustomData) {
+      e.preventDefault();
+      e.stopPropagation();
+
       const scaledCoords = this.pointToScaledCoords(e);
 
       const x = Math.round(scaledCoords.x);
@@ -365,6 +375,9 @@ export class SvgGraphView extends React.Component<SvgGraphViewProps, SvgGraphVie
 
   private handleEndDrawCurve = (e) => {
     if (this.drawing) {
+      e.preventDefault();
+      e.stopPropagation();
+
       document.removeEventListener("mousemove", this.handleDrawCurve);
       document.removeEventListener("touchmove", this.handleDrawCurve);
       document.removeEventListener("mouseup", this.handleEndDrawCurve);
