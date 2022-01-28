@@ -147,8 +147,8 @@ export class Node extends GraphPrimitive {
     this._isDefaultImage =
              val === "img/nodes/blank.png"
           || val === "img/nodes/flow-variable.png"
-          || val.substr(0, BlankImagePrefix.length) === BlankImagePrefix
-          || val.substr(0, FlowImagePrefix.length) === FlowImagePrefix
+          || val?.substr(0, BlankImagePrefix.length) === BlankImagePrefix
+          || val?.substr(0, FlowImagePrefix.length) === FlowImagePrefix
           ;
   }
   get image() {
