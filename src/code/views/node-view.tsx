@@ -33,6 +33,7 @@ import { SelectionManager } from "../models/selection-manager";
 import { stepSize } from "../utils/step-size";
 import { logEvent } from "../utils/logger";
 import { TransferModel } from "../models/transfer";
+import { FlowImageView } from "./flow-image-view";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
@@ -417,17 +418,13 @@ getDefaultProps() {
         image = "img/nodes/transfer.png";
       } else {
         const outLinks = node.outLinks();
-        const hasAddedToLink = _.some(outLinks, link => link.relation.formula === "+in");
-        const hasSubtractedFromLink = _.some(outLinks, link => link.relation.formula === "-in");
-        if (hasAddedToLink && hasSubtractedFromLink) {
-          // TODO: need composite image here?  For now use source
-          image = "img/nodes/source.png";
-        } else if (hasAddedToLink) {
-          image = "img/nodes/source.png";
-        } else if (hasSubtractedFromLink) {
-          image = "img/nodes/sink.png";
-        } else if (node.isFlowVariable && (outLinks.length === 0)) {
+        if (node.isFlowVariable && (outLinks.length === 0)) {
           image = "img/nodes/flow-variable.png";
+        } else {
+          const firstFlowLink = _.find(outLinks, link => link.relation.formula === "+in" || link.relation.formula === "-in");
+          if (firstFlowLink) {
+            return <FlowImageView link={firstFlowLink} />;
+          }
         }
       }
 

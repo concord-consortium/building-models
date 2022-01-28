@@ -49,7 +49,7 @@ export class PaletteDeleteView extends React.Component<PaletteDeleteViewProps, P
         <div className="vertical-content">
           <div className="label">{tr("~PALETTE-DIALOG.REPLACE")}</div>
           <ImagePickerView
-            selected={this.props.replacement}
+            selected={this.props.replacement.image}
             onChange={this.handleChangePalette}
           />
         </div>

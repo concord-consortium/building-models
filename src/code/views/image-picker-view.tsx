@@ -11,7 +11,7 @@ import { ImageInfo } from "./preview-image-dialog-view";
 
 interface ImgChoiceViewProps {
   node: Node;
-  selected: ImageInfo;
+  selected: string;
   onChange: (node: Node) => void;
 }
 
@@ -23,7 +23,7 @@ class ImgChoiceView extends React.Component<ImgChoiceViewProps, ImgChoiceViewSta
 
   public render() {
     let className = "image-choice";
-    if (this.props.node.image === this.props.selected.image) {
+    if (this.props.node.image === this.props.selected) {
       className = "image-choice selected";
     }
     return (
@@ -39,7 +39,7 @@ class ImgChoiceView extends React.Component<ImgChoiceViewProps, ImgChoiceViewSta
 }
 
 interface ImagePickerViewOuterProps {
-  selected: ImageInfo;
+  selected: string;
   onChange: (node: Node) => void;
 }
 interface ImagePickerViewOuterState {
@@ -64,7 +64,7 @@ export class ImagePickerView extends Mixer<ImagePickerViewProps, ImagePickerView
     return (
       <div onClick={this.handleToggleOpen} className="image-picker">
         <div className="selected-image">
-          <img src={this.props.selected.image} />
+          <img src={this.props.selected} />
         </div>
         <div className={this.className()}>
           <div className="image-choice">
