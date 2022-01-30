@@ -121,6 +121,11 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     }
 
     window.addEventListener("click", this.handleWindowClick, true);
+
+    // Ensure the app has focus so that the top level window delete key handler is invoked
+    // if an element is selected right after a file load and the delete key is pressed.
+    // NOTE: this also requires the app div has a tabIndex property set
+    this.appContainer?.focus();
   }
 
   public componentWillUnmount() {
@@ -146,7 +151,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     const renderGlobalNav = !this.state.iframed && (AppSettingsStore.settings.uiElements.globalNav !== false);
 
     return (
-      <div className="app" ref={el => this.appContainer = el}>
+      <div className="app" ref={el => this.appContainer = el} tabIndex={0}>
         <div className={this.state.iframed ? "iframed-workspace" : "workspace"}>
           {renderGlobalNav ?
             <GlobalNavView
