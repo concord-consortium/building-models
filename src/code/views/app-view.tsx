@@ -121,6 +121,11 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     }
 
     window.addEventListener("click", this.handleWindowClick, true);
+
+    // Ensure the app has focus so that the top level window delete key handler is invoked
+    // if an element is selected right after a file load and the delete key is pressed.
+    // NOTE: this also requires the app div has a tabIndex property set
+    this.appContainer?.focus();
   }
 
   public componentWillUnmount() {
@@ -146,7 +151,7 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     const renderGlobalNav = !this.state.iframed && (AppSettingsStore.settings.uiElements.globalNav !== false);
 
     return (
-      <div className="app" ref={el => this.appContainer = el}>
+      <div className="app" ref={el => this.appContainer = el} tabIndex={0}>
         <div className={this.state.iframed ? "iframed-workspace" : "workspace"}>
           {renderGlobalNav ?
             <GlobalNavView
@@ -229,24 +234,28 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
   }
 
   private addDeleteKeyHandler(add) {
-    if (add) {
-      let deleteFunction;
-      if (AppSettingsStore.settings.lockdown) {
-        // In Lockdown mode users can only remove relationships between links
-        deleteFunction = this.props.graphStore.removeSelectedLinks.bind(this.props.graphStore);
-      } else {
-        deleteFunction = this.props.graphStore.deleteSelected.bind(this.props.graphStore);
-      }
-
-      return $(window).on("keydown", (e) => {
-        // 8 is backspace, 46 is delete
-        if (_.includes([8, 46], e.which) && !$(e.target).is("input, textarea")) {
-          e.preventDefault();
-          return deleteFunction();
-        }
-      });
+    let deleteFunction;
+    if (AppSettingsStore.settings.lockdown) {
+      // In Lockdown mode users can only remove relationships between links
+      deleteFunction = this.props.graphStore.removeSelectedLinks.bind(this.props.graphStore);
     } else {
-      return $(window).off("keydown");
+      deleteFunction = this.props.graphStore.deleteSelected.bind(this.props.graphStore);
+    }
+
+    const deleteKeyHandler = (e: KeyboardEvent) => {
+      // 8 is backspace, 46 is delete
+      if (_.includes([8, 46], e.which) && e.target && !$(e.target).is("input, textarea")) {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteFunction();
+      }
+    };
+
+    // add a capturing event handler so we get the event before any element in the app
+    if (add) {
+      window.addEventListener("keydown", deleteKeyHandler, true);
+    } else {
+      window.removeEventListener("keydown", deleteKeyHandler, true);
     }
   }
 
