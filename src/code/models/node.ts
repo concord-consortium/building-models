@@ -38,7 +38,8 @@ export class Node extends GraphPrimitive {
       "title", "image", "color", "paletteItem",
       "initialValue", "min", "max",
       "isAccumulator", "allowNegativeValues", "combineMethod",
-      "valueDefinedSemiQuantitatively", "frames", "isFlowVariable"
+      "valueDefinedSemiQuantitatively", "frames", "isFlowVariable",
+      "usesDefaultImage"
     ];
     Node.SEMIQUANT_MIN = SEMIQUANT_MIN;
     Node.SEMIQUANT_MAX = SEMIQUANT_MAX;
