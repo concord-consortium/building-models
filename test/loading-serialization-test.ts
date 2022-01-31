@@ -98,7 +98,7 @@ describe("Serialization and Loading", () => {
       it("should serialize all the properties of the model", () => {
         const model = JSON.parse(jsonString);
 
-        model.version.should.equal("1.25.0");
+        model.version.should.equal("1.27.0");
         model.nodes.length.should.equal(3);
         model.links.length.should.equal(2);
       });

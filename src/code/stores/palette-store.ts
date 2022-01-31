@@ -156,6 +156,7 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
     if (!node.image) { node.image = ""; }
     if (!node.key) { node.key = this.makeNodeSignature(node); }
     if (!node.uuid) { node.uuid = uuid.v4(); }
+    if (!node.usesDefaultImage) { node.usesDefaultImage = false; }
     return node.metadata || (node.metadata = _.clone(this.blankMetadata, true));
   },
 

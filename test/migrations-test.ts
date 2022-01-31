@@ -5,6 +5,7 @@ import { TimeUnits } from "../src/code/utils/time-units";
 import { v01data } from "./serialized-test-data/v-0.1";
 import { v1220data } from "./serialized-test-data/v-1.22.0";
 import { v1220MissingCombineMethodData } from "./serialized-test-data/v-1.22.0-missing-combine-method";
+import { v1270data } from "./serialized-test-data/v-1.27.0";
 
 import * as chai from "chai";
 
@@ -21,8 +22,8 @@ describe("Migrations",  () =>
     });
 
     describe("the final version number", () =>
-      it("should be 1.25.0", () => {
-        migrationUpdate(data).version.should.equal("1.25.0");
+      it("should be 1.27.0", () => {
+        migrationUpdate(data).version.should.equal("1.27.0");
       })
     );
 
@@ -254,5 +255,20 @@ describe("Migrations",  () =>
         expect(result.settings.showMinigraphs).to.equal(undefined);
       })
     );
+
+    describe("v-1.27.0 changes", () =>
+      it("should add usesDefaultImage setting", () => {
+        const countNodesUsingDefaultImages = (testData) => testData.nodes.reduce((acc, node) => acc + (node.data.usesDefaultImage ? 1 : 0), 0);
+        const example = _.cloneDeep(v1270data);
+        expect(countNodesUsingDefaultImages(example)).to.equal(0);
+        expect(example.nodes.length).to.equal(6);
+        const result = migrationUpdate(example, "1.27.0");
+        expect(countNodesUsingDefaultImages(result)).to.equal(4);
+
+        // migrate the main data so we can test the end migration version
+        migrationUpdate(data, "1.27.0");
+      })
+    );
+
   })
 );

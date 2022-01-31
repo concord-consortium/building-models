@@ -21,7 +21,7 @@ export class FlowImageView extends React.Component<FlowImageViewProps, FlowImage
   private outerImage() {
     const {sourceNode, targetNode} = this.props.link;
     let image = sourceNode.image;
-    if (sourceNode.isDefaultImage) {
+    if (sourceNode.usesDefaultImage) {
       image = targetNode.image;
     }
     return this.url(image);

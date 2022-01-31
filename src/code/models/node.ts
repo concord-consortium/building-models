@@ -52,6 +52,7 @@ export class Node extends GraphPrimitive {
   public sliderStartMax: number = 0;
   public animateRescale: boolean = false;
   public uuid: string;
+  public image: string;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
@@ -65,6 +66,7 @@ export class Node extends GraphPrimitive {
   public readonly frames: any; // TODO: get concrete type
   public readonly isFlowVariable: boolean;
   public readonly links: Link[];
+  public readonly usesDefaultImage: boolean;
 
   protected allowNegativeValues: any; // TODO: get concrete type
   protected paletteItem: PalleteItem;
@@ -75,13 +77,11 @@ export class Node extends GraphPrimitive {
   protected isInDependentCycle: any; // TODO: get concrete type
   protected _collectorImageProps: any; // TODO: get concrete type
   protected _isAccumulator: any; // TODO: get concrete type
-  protected _image: string;
-  protected _isDefaultImage: boolean;
 
   constructor(nodeSpec, key?, isTransfer?) {
     super(isTransfer ? "Transfer" : "Node");
 
-    let val, val1, val10, val11, val2, val3, val4, val5, val6, val7, val8, val9;
+    let val, val1, val10, val11, val12, val2, val3, val4, val5, val6, val7, val8, val9;
     if (nodeSpec == null) { nodeSpec = {}; }
     if (key) {
       this.key = key;
@@ -116,7 +116,9 @@ export class Node extends GraphPrimitive {
       val10 = nodeSpec.combineMethod,
       this.combineMethod = val10 != null ? val10 : "average",
       val11 = nodeSpec.isFlowVariable,
-      this.isFlowVariable = !!val11;
+      this.isFlowVariable = !!val11,
+      val12 = nodeSpec.usesDefaultImage,
+      this.usesDefaultImage = !!val12;
 
     const accumulatorScaleUrlParam = (urlParams.collectorScale && Number(urlParams.collectorScale)) || 1;
     this.accumulatorInputScale = accumulatorScaleUrlParam > 0 ? accumulatorScaleUrlParam : 1;
@@ -140,23 +142,6 @@ export class Node extends GraphPrimitive {
     this._collectorImageProps = null;
 
     this.isTransfer = false;
-  }
-
-  set image(val: string) {
-    this._image = val;
-    this._isDefaultImage =
-             val === "img/nodes/blank.png"
-          || val === "img/nodes/flow-variable.png"
-          || val?.substr(0, BlankImagePrefix.length) === BlankImagePrefix
-          || val?.substr(0, FlowImagePrefix.length) === FlowImagePrefix
-          ;
-  }
-  get image() {
-    return this._image;
-  }
-
-  public get isDefaultImage() {
-    return this._isDefaultImage;
   }
 
   // Scale the value of initialValue such that, if we are in semi-quantitative mode,
@@ -394,7 +379,8 @@ export class Node extends GraphPrimitive {
         frames: _.clone(this.frames),
         combineMethod: this.combineMethod,
         image: this.image,
-        isFlowVariable: this.isFlowVariable
+        isFlowVariable: this.isFlowVariable,
+        usesDefaultImage: this.usesDefaultImage
       }
     };
     return result;

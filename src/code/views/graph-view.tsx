@@ -313,7 +313,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       paletteItem: paletteItem.uuid,
       image: paletteItem.image,
       addedThisSession: true,
-      isFlowVariable: paletteItem.id === "flow-variable"
+      isFlowVariable: paletteItem.id === "flow-variable",
+      usesDefaultImage: !!paletteItem.usesDefaultImage
     });
 
     this.props.graphStore.addNode(newNode, {logEvent: true});
