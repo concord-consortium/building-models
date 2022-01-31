@@ -32,6 +32,7 @@ import { migration_23 } from "./23_add_simulation_type";
 import { migration_24 } from "./24_fix_simulation_type";
 import { migration_25 } from "./25_ensure_combine_method";
 import { migration_26 } from "./26_remove_minigraphs_visibility";
+import { migration_27 } from "./27_add_uses_default_image";
 
 export const migrations = [
   migration_01,
@@ -59,7 +60,8 @@ export const migrations = [
   migration_23,
   migration_24,
   migration_25,
-  migration_26
+  migration_26,
+  migration_27
 ];
 
 export const migrationUpdate = (data, upToVersion: string | null = null) => {

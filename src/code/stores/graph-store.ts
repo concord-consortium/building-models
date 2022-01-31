@@ -735,7 +735,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             allowNegativeValues: node.allowNegativeValues,
             combineMethod: node.combineMethod,
             valueDefinedSemiQuantitatively: node.valueDefinedSemiQuantitatively,
-            isFlowVariable: node.isFlowVariable
+            isFlowVariable: node.isFlowVariable,
+            usesDefaultImage: node.usesDefaultImage
           };
 
           let nodeChanged = false;

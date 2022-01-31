@@ -80,7 +80,11 @@ export class NodeInspectorView extends Mixer<NodeInspectorViewProps, NodeInspect
 
   private handleChangeImage = (node) => {
     if (this.props.onNodeChanged) {
-      this.props.onNodeChanged(this.props.node, {image: node.image, paletteItem: node.uuid});
+      this.props.onNodeChanged(this.props.node, {
+        image: node.image,
+        paletteItem: node.uuid,
+        usesDefaultImage: node.usesDefaultImage
+      });
     }
   }
 
