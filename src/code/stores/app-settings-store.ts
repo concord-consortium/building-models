@@ -12,7 +12,6 @@ import { ImportActions } from "../actions/import-actions";
 import { urlParams } from "../utils/url-params";
 import { StoreClass, StoreUnsubscriber } from "./store-class";
 import { Mixin } from "../mixins/components";
-import { CodapConnect } from "../models/codap-connect";
 
 export declare class AppSettingsActionsClass {
   public setComplexity(val: any): void;  // TODO: get concrete class
@@ -153,11 +152,6 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
   onSetSimulationType(val) {
     const prevSimulationType = this.settings.simulationType;
     this.settings.simulationType = val;
-
-    // if changing from static simulation remove the data point column if it is empty
-    if ((prevSimulationType === SimulationType.static) && (val !== SimulationType.static)) {
-      CodapConnect.instance("building-models").removeEmptyDataPointColumn();
-    }
 
     return this.notifyChange();
   },
