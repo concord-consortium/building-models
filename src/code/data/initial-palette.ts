@@ -5,6 +5,7 @@ export const initialPalette = [
     "id": "1",
     "title": "",
     "image": "img/nodes/blank.png",
+    "usesDefaultImage": true,
     "metadata": {
       "source": "internal",
       "title": tr("~METADATA.BLANK_NODE_TITLE"),
@@ -16,6 +17,7 @@ export const initialPalette = [
     "id": "flow-variable",
     "title": "",
     "image": "img/nodes/flow-variable.png",
+    "usesDefaultImage": true,
     "metadata": {
       "source": "internal",
       "title": tr("~METADATA.FLOW_VARIABLE_NODE_TITLE"),
