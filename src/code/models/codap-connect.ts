@@ -87,6 +87,7 @@ export class CodapConnect {
 
     this.defaultExperimentName = "ExpNo";
     SimulationActions.recordingFramesCreated.listen(this.addData.bind(this));
+    SimulationActions.simulationEnded.listen(this.simulationEnded.bind(this));
 
     CodapActions.sendUndoToCODAP.listen(this._sendUndoToCODAP.bind(this));
     CodapActions.sendRedoToCODAP.listen(this._sendRedoToCODAP.bind(this));
@@ -163,10 +164,16 @@ export class CodapConnect {
         // ret==null is indication of timeout, not an indication that the data set
         // doesn't exist.
         if (!ret || ret.success) {
-          let attrs;
-          if (attrs = (__guard__(__guard__(__guard__(ret != null ? ret.values : undefined, x2 => x2.collections), x1 => x1[1]), x => x.attrs) != null)) {
-            this._initialSyncAttributeProperties(attrs);
-          }
+          // ensure that the samples sub-collection exists
+          // this fixes a bug were the sub-collection was deleted when the simulation
+          // was switched from static to dynamic
+          this._ensureSamplesCollectionExists(() => {
+            // ensure that all the required collections exist in the data context
+            let attrs;
+            if (attrs = (__guard__(__guard__(__guard__(ret != null ? ret.values : undefined, x2 => x2.collections), x1 => x1[1]), x => x.attrs) != null)) {
+              this._initialSyncAttributeProperties(attrs);
+            }
+          });
         } else {
           this._createDataContext();
         }
@@ -223,6 +230,26 @@ export class CodapConnect {
     };
 
     return this.codapPhone.call(message, this.initGameHandler);
+  }
+
+  public _ensureSamplesCollectionExists(callback: () => void) {
+    const sampleDataAttrs = this._getSampleAttributes();
+    const message = {
+      action: "create",
+      resource: `dataContext[${this.dataContextName}].collection`,
+      values: {
+        parent: this.simulationCollectionName,
+        name: this.samplesCollectionName,
+        title: this.samplesCollectionName,
+        labels: {
+          singleCase: "sample",
+          pluralCase: "samples"
+        },
+        attrs: sampleDataAttrs
+      }
+    };
+
+    return this.codapPhone.call(message, callback);
   }
 
 
@@ -932,20 +959,24 @@ export class CodapConnect {
     }, (allCasesResp) => {
       if (allCasesResp && allCasesResp.success) {
 
-        // check if all the case values are empty
-        let hasValue = false;
-        _.forEach(allCasesResp.values.cases, (kase) => {
-          hasValue = hasValue || (kase.case.values[columnName] != null); // use != for null and undefined
-        });
+        // skip if no data has been stored, deleting the sole column on an empty table deletes the collection
+        if (allCasesResp.values.cases.length > 0) {
 
-        if (!hasValue) {
-          // delete the column if all case values are empty
-          this.codapPhone.call({
-            action: "delete",
-            resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute[${columnName}]`
+          // check if all the case values are empty
+          let hasValue = false;
+          _.forEach(allCasesResp.values.cases, (kase) => {
+            hasValue = hasValue || (kase.case.values[columnName] != null); // use != for null and undefined
           });
+
+          if (!hasValue) {
+            // delete the column if all case values are empty
+            this.codapPhone.call({
+              action: "delete",
+              resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}].attribute[${columnName}]`
+            });
+          }
         }
-      }
+    }
     });
   }
 
@@ -987,6 +1018,16 @@ export class CodapConnect {
     if (!this.guidePollerInterval) {
       this.guidePollerInterval = window.setInterval(() => this.getGuideItems(), 1000);
     }
+  }
+
+  private simulationEnded() {
+    // wait for the data to arrive at codap and then get rid of the empty data point column if needed
+    // (if we switched from static to dynamic simulation)
+    // NOTE: this used to be done when the user switched but at some point this caused CODAP to delete
+    // the entire collection
+    window.setTimeout(() => {
+      this.removeEmptyDataPointColumn();
+    }, 100);
   }
 }
 
