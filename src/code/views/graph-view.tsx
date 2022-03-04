@@ -471,8 +471,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       return;
     }
 
-    const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])).find(this.props.connectionTarget);
-    const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])).find(this.props.connectionTarget);
+    const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])!).find(this.props.connectionTarget);
+    const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])!).find(this.props.connectionTarget);
     const isSelected = this.props.selectionManager.isSelected(link);
     const isEditing = link === this.state.editingLink;
     const isDashed = !link.relation.isDefined && this.state.simulationPanelExpanded;
@@ -526,8 +526,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const sourceConnectionClass = fromSource ? this.props.connectionTarget : this.props.transferTarget;
     const targetConnectionClass = !fromSource ? this.props.connectionTarget : this.props.transferTarget;
     if (sourceConnectionClass && targetConnectionClass) {
-      const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])).find(sourceConnectionClass);
-      const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])).find(targetConnectionClass);
+      const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])!).find(sourceConnectionClass);
+      const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])!).find(targetConnectionClass);
       if (source && target) {
         const opts = {
           fromSource,

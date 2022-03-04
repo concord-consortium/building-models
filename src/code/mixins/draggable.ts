@@ -34,7 +34,7 @@ export class DraggableMixin extends Mixin<DraggableMixinProps, DraggableMixinSta
       return clone;
     };
 
-    return ($(ReactDOM.findDOMNode(this.mixer)) as any).draggable({
+    return ($(ReactDOM.findDOMNode(this.mixer)!) as any).draggable({
       drag: this.doMove,
       revert: true,
       helper: reactSafeClone,

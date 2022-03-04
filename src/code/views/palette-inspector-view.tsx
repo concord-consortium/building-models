@@ -47,7 +47,7 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
             <PaletteAddView label={tr("~PALETTE-INSPECTOR.ADD_IMAGE")} />
             {_.map(this.orderedPalette(), (node, index) => {
               return <PaletteItemView
-                key={index}
+                key={node.uuid}
                 node={node}
                 image={node.image}
                 // selected={index === this.state.selectedPaletteIndex}
