@@ -1,7 +1,6 @@
 import { Node } from "../models/node";
-import { tr } from "../utils/translate";
 import * as React from "react";
-import { runInThisContext } from "vm";
+import { QuickActionMenu } from "./quick-action-menu";
 
 export type CircleButtonState = "default" | "hover" | "active" | "disabled";
 
@@ -48,9 +47,7 @@ export class QuickActionButton extends React.Component<QuickActionButtonProps, Q
   private renderOtherDiv() {
     if (this.state.state === "active") {
       return (
-        <div className="quick-actions-panel">
-          This is a panel thing
-        </div>
+        <QuickActionMenu node={this.props.node} />
       );
     }
     return "";

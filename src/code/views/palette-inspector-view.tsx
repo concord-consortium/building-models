@@ -15,7 +15,10 @@ import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/pa
 import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
-interface PaletteInspectorViewOuterProps {}
+interface PaletteInspectorViewOuterProps {
+  hideSelectedInspector?: boolean;
+}
+
 type PaletteInspectorViewProps = PaletteInspectorViewOuterProps & PaletteMixinProps & NodesMixinProps & AppSettingsMixinProps;
 
 interface PaletteInspectorViewOuterState {
@@ -56,7 +59,7 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
             })}
           </div>
         </div>
-        {this.state.selectedPaletteItem ?
+        {this.state.selectedPaletteItem && (!this.props.hideSelectedInspector) ?
           <div className="palette-about-image">
             <div className="palette-about-image-info">
               {this.state.selectedPaletteItem.metadata
