@@ -3,6 +3,9 @@ import { Node } from "../models/node";
 import { tr } from "../utils/translate";
 import { ImgChoiceView } from "./img-choice-view";
 import { PaletteStore } from "../stores/palette-store";
+import { SimulationStore } from "../stores/simulation-store";
+import { AppSettingsStore, SimulationType } from "../stores/app-settings-store";
+import { nodeName } from "jquery";
 
 export interface QuickActionMenuProps {
     node: Node;
@@ -27,22 +30,27 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
     const rightMenuClasses = showImages ? "right-menu" : "right-menu hidden";
     const isAccumulator = node.isAccumulator;
     const isFlow = node.isFlowVariable;
-    const isStandardVariable = !(isAccumulator || isFlow);
-
-    const collectorLabel = tr("~QUICK_ACTIONS.CONVERT_TO_COLLECTOR");
-    const collectorClasses = isAccumulator ? "quick-action-menu-label disabled" : "quick-action-menu-label";
-
-    const flowLabel = tr("~QUICK_ACTIONS.CONVERT_TO_FLOW");
-    const flowClasses = isFlow ? "quick-action-menu-label disabled" : "quick-action-menu-label";
-
-    const standardVariableLabel = tr("~QUICK_ACTIONS.CONVERT_TO_STANDARD_VARIABLE");
-    const standardClasses = isStandardVariable ? "quick-action-menu-label disabled" : "quick-action-menu-label";
+    const isTimeBased = AppSettingsStore.settings.simulationType === SimulationType.time;
 
     const setImageLabel = tr("~QUICK_ACTIONS.SET_IMAGE");
     const setImageClasses = showImages ? "quick-action-menu-label with-icon disabled" : "quick-action-menu-label with-icon";
 
+    const disableCollector = isAccumulator || !isTimeBased;
+    const collectorLabel = tr("~QUICK_ACTIONS.CONVERT_TO_COLLECTOR");
+    const collectorClasses = disableCollector ? "quick-action-menu-label disabled" : "quick-action-menu-label";
+
+    const disableFlow = isFlow || !isTimeBased;
+    const flowLabel = tr("~QUICK_ACTIONS.CONVERT_TO_FLOW");
+    const flowClasses = disableFlow ? "quick-action-menu-label disabled" : "quick-action-menu-label";
+
+    const disableStandard = !(isAccumulator || isFlow);
+    const standardVariableLabel = tr("~QUICK_ACTIONS.CONVERT_TO_STANDARD_VARIABLE");
+    const standardClasses = disableStandard ? "quick-action-menu-label disabled" : "quick-action-menu-label";
+
+
     const createGraphLabel = tr("~QUICK_ACTIONS.CREATE_GRAPH");
     const createGraphClasses = "quick-action-menu-label";
+
     const showImagesF = () => this.setState({ showImages: true });
     const hideImagesF = () =>  this.setState({ showImages: false });
     return(
@@ -63,21 +71,26 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
                 <div className="icon-codap-inspectorArrow-collapse"/>
               </li>
 
-              <li
-                className={collectorClasses}
-                onClick={this.convertToCollector}
-                onMouseEnter={hideImagesF}
-              >
-                {collectorLabel}
-              </li>
+              { isTimeBased &&
+                <>
+                  <li
+                    className={collectorClasses}
+                    onClick={this.convertToCollector}
+                    onMouseEnter={hideImagesF}
+                  >
+                    {collectorLabel}
+                  </li>
 
-              <li
-                className={flowClasses}
-                onClick={this.convertToFlow}
-                onMouseEnter={hideImagesF}
-              >
-                {flowLabel}
-              </li>
+                  <li
+                    className={flowClasses}
+                    onClick={this.convertToFlow}
+                    onMouseEnter={hideImagesF}
+                  >
+                    {flowLabel}
+                  </li>
+                </>
+              }
+
 
               <li
                 className={standardClasses}
@@ -105,7 +118,7 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
   private renderRightMenu() {
     const thisNode = this.props.node;
     const selected = thisNode.image;
-    const onChange = () => console.log("change");
+    const onChange = (i: {image: string}) => thisNode.image = i.image;
     const palette = PaletteStore.palette;
     return (
       <div className="right-panel">
@@ -123,12 +136,10 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
       clearTimeout(this.state.closeTimer);
     }
     this.setState({ closeTimer: null });
-    console.log("mouse enter");
   }
 
   private handleMouseLeave = () => {
     const {closeFn} = this.props;
-    console.log("mouse leave");
     if (closeFn) {
       const nextTimeout = setTimeout(() => {
         closeFn();
@@ -138,27 +149,28 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
   }
   private toggleShowImages = (): void => {
     const {showImages} = this.state;
-    console.log("click state", this.state);
     this.setState({ showImages: !showImages });
   }
 
   private convertToCollector = (): void => {
-    console.log("convert to collector");
+    const {node} = this.props;
+    node.isAccumulator = true;
+    node.isFlowVariable = false;
   }
 
   private convertToFlow = (): void => {
-    console.log("convert to flow");
+    const {node} = this.props;
+    node.isFlowVariable = true;
+    node.isAccumulator = false;
   }
 
   private convertToStandard = (): void => {
-    console.log("convert to standard");
+    const {node} = this.props;
+    node.isFlowVariable = false;
+    node.isAccumulator = false;
   }
 
   private createGraph = (): void => {
     console.log("create graph");
-  }
-
-  private handleChangeImage = (n: Node): void => {
-    console.log("handleChangeImage graph");
   }
 }
