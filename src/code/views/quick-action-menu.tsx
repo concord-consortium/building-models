@@ -6,17 +6,19 @@ import { PaletteStore } from "../stores/palette-store";
 
 export interface QuickActionMenuProps {
     node: Node;
+    closeFn?: () => void;
 }
 
 export interface QuickActionMenuState {
   showImages: boolean;
+  closeTimer: NodeJS.Timeout|null;
 }
 
 
 export class QuickActionMenu extends React.Component<QuickActionMenuProps, QuickActionMenuState> {
   constructor(props: QuickActionMenuProps) {
     super(props);
-    this.state = { showImages: false };
+    this.state = { showImages: false,  closeTimer: null };
   }
 
   public render() {
@@ -37,21 +39,61 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
     const standardClasses = isStandardVariable ? "quick-action-menu-label disabled" : "quick-action-menu-label";
 
     const setImageLabel = tr("~QUICK_ACTIONS.SET_IMAGE");
-    const setImageClasses = showImages ? "quick-action-menu-label disabled" : "quick-action-menu-label";
+    const setImageClasses = showImages ? "quick-action-menu-label with-icon disabled" : "quick-action-menu-label with-icon";
 
     const createGraphLabel = tr("~QUICK_ACTIONS.CREATE_GRAPH");
     const createGraphClasses = "quick-action-menu-label";
-
+    const showImagesF = () => this.setState({ showImages: true });
+    const hideImagesF = () =>  this.setState({ showImages: false });
     return(
       <>
-        <div className="quick-action-menu">
+        <div
+          className="quick-action-menu"
+          onMouseEnter={this.handleMouseEnter}
+          onMouseLeave={this.handleMouseLeave}
+        >
           <div className="left-panel">
             <ul>
-              <li className={setImageClasses} onClick={this.toggleShowImages}>{setImageLabel}</li>
-              <li className={collectorClasses} onClick={this.convertToCollector}>{collectorLabel}</li>
-              <li className={flowClasses} onClick={this.convertToFlow}>{flowLabel}</li>
-              <li className={standardClasses} onClick={this.convertToStandard}>{standardVariableLabel}</li>
-              <li className={createGraphClasses} onClick={this.createGraph}>{createGraphLabel}</li>
+              <li
+                className={setImageClasses}
+                onClick={this.toggleShowImages}
+                onMouseEnter={showImagesF}
+              >
+                <div>{setImageLabel}</div>
+                <div className="icon-codap-inspectorArrow-collapse"/>
+              </li>
+
+              <li
+                className={collectorClasses}
+                onClick={this.convertToCollector}
+                onMouseEnter={hideImagesF}
+              >
+                {collectorLabel}
+              </li>
+
+              <li
+                className={flowClasses}
+                onClick={this.convertToFlow}
+                onMouseEnter={hideImagesF}
+              >
+                {flowLabel}
+              </li>
+
+              <li
+                className={standardClasses}
+                onClick={this.convertToStandard}
+                onMouseEnter={hideImagesF}
+              >
+                {standardVariableLabel}
+              </li>
+
+              <li
+                className={createGraphClasses}
+                onClick={this.createGraph}
+                onMouseEnter={hideImagesF}
+              >
+                {createGraphLabel}
+              </li>
             </ul>
           </div>
           {showImages && this.renderRightMenu()}
@@ -76,6 +118,24 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
     );
   }
 
+  private handleMouseEnter = () => {
+    if (this.state.closeTimer) {
+      clearTimeout(this.state.closeTimer);
+    }
+    this.setState({ closeTimer: null });
+    console.log("mouse enter");
+  }
+
+  private handleMouseLeave = () => {
+    const {closeFn} = this.props;
+    console.log("mouse leave");
+    if (closeFn) {
+      const nextTimeout = setTimeout(() => {
+        closeFn();
+      }, 500);
+      this.setState({ closeTimer: nextTimeout });
+    }
+  }
   private toggleShowImages = (): void => {
     const {showImages} = this.state;
     console.log("click state", this.state);

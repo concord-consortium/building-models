@@ -46,8 +46,15 @@ export class QuickActionButton extends React.Component<QuickActionButtonProps, Q
 
   private renderOtherDiv() {
     if (this.state.state === "active") {
+      const closeActionMenu = () => {
+        console.log("Closing things");
+        this.setState({state: "default"});
+      };
       return (
-        <QuickActionMenu node={this.props.node} />
+        <QuickActionMenu
+          node={this.props.node}
+          closeFn={closeActionMenu}
+        />
       );
     }
     return "";

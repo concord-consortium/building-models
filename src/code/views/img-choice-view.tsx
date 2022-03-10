@@ -1,11 +1,13 @@
 import * as React from "react";
-import { Node } from "../models/node";
-import { PalleteItem } from "../stores/palette-store";
+
+interface HasImage {
+  image: string;
+}
 
 interface ImgChoiceViewProps {
-  node: Node | PaletteItem;
+  node: HasImage;
   selected: string;
-  onChange: (node: Node) => void;
+  onChange: (node: HasImage) => void;
 }
 
 interface ImgChoiceViewState {}

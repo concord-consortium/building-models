@@ -6,7 +6,7 @@
   padding: 0px;
   left: 95px;
   top: -16px;
-  z-index: 1;
+  z-index: 12; //Node titles z-index is 10
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -28,6 +28,17 @@
       list-style: none;
       margin: 0;
       padding: 0;
+    }
+
+    li:hover {
+      cursor: pointer;
+      color: dark-blue;
+    }
+    .with-icon {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
     }
     .disabled {
       opacity: 0.5;
