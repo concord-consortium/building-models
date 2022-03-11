@@ -10,6 +10,8 @@ import { nodeName } from "jquery";
 export interface QuickActionMenuProps {
     node: Node;
     closeFn?: () => void;
+    showGraphButton?: boolean;
+    graphClickHandler?: () => void;
 }
 
 export interface QuickActionMenuState {
@@ -53,6 +55,8 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
 
     const showImagesF = () => this.setState({ showImages: true });
     const hideImagesF = () =>  this.setState({ showImages: false });
+
+    const { showGraphButton  } = this.props;
     return(
       <>
         <div
@@ -100,13 +104,16 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
                 {standardVariableLabel}
               </li>
 
-              <li
-                className={createGraphClasses}
-                onClick={this.createGraph}
-                onMouseEnter={hideImagesF}
-              >
-                {createGraphLabel}
-              </li>
+              {showGraphButton &&
+                <li
+                  className={createGraphClasses}
+                  onClick={this.createGraph}
+                  onMouseEnter={hideImagesF}
+                >
+                  {createGraphLabel}
+                </li>
+              }
+
             </ul>
           </div>
           {showImages && this.renderRightMenu()}
@@ -171,6 +178,9 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
   }
 
   private createGraph = (): void => {
-    console.log("create graph");
+    const {graphClickHandler} = this.props;
+    if (graphClickHandler) {
+      graphClickHandler();
+    }
   }
 }

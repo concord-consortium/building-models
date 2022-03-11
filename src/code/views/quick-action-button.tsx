@@ -6,6 +6,8 @@ export type CircleButtonState = "default" | "hover" | "active" | "disabled";
 
 export interface QuickActionButtonProps {
     node: Node;
+    graphClickHandler?: () => void;
+    showGraphButton?: boolean;
 }
 
 export interface QuickActionButtonState {
@@ -47,13 +49,14 @@ export class QuickActionButton extends React.Component<QuickActionButtonProps, Q
   private renderOtherDiv() {
     if (this.state.state === "active") {
       const closeActionMenu = () => {
-        console.log("Closing things");
         this.setState({state: "default"});
       };
       return (
         <QuickActionMenu
           node={this.props.node}
           closeFn={closeActionMenu}
+          showGraphButton={this.props.showGraphButton}
+          graphClickHandler={this.props.graphClickHandler}
         />
       );
     }
