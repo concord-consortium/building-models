@@ -22,6 +22,53 @@ describe("The Graphstore", () => {
 
   afterEach(() => UnStub());
 
+  describe("default filename", () => {
+    it("should not have a default filename after init", () => {
+      expect(this.graphStore.filename).to.equal(null);
+    });
+
+    it("should not have a default filename after deleting all", () => {
+      this.graphStore.setFilename("test");
+      expect(this.graphStore.filename).to.equal("test");
+      this.graphStore.deleteAll();
+      expect(this.graphStore.filename).to.equal(null);
+    });
+
+    it("should not have a default filename after loading data with a null filename", () => {
+      const data: Record<string, any> = {
+        "version": "1.25.0",
+        "filename": null,
+        "palette": [],
+        "nodes": [],
+        "links": [],
+        "settings": {
+          "complexity": 1,
+          "simulationType": 2,
+          "relationshipSymbols": false,
+          "guide": false,
+          "simulation": {
+            "duration": 20,
+            "stepUnits": "STEP",
+            "capNodeValues": false
+          }
+        }
+      };
+
+      expect(data.filename).to.equal(null);
+      expect(this.graphStore.filename).to.equal(null);
+
+      this.graphStore.loadData(data);
+      expect(this.graphStore.filename).to.equal(null);
+
+      this.graphStore.deleteAll();
+      expect(this.graphStore.filename).to.equal(null);
+
+      data.filename = "New Model";
+      this.graphStore.loadData(data);
+      expect(this.graphStore.filename).to.equal("New Model");
+    });
+  });
+
   describe("with transfer nodes", () => {
     beforeEach(() => {
       this.graphStore.loadData({
