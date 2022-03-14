@@ -755,9 +755,17 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
 
             if (accumulatorChanged) {
-              // all inbound and outbound links are deleted
+              // all inbound and outbound links are deleted along with any transfer nodes along those links and
+              //  any links pointing to deleted transfer nodes
               deletedLinks = [].concat(node.links);
               deletedNodes = deletedLinks.filter(link => !!link.transferNode).map(link => link.transferNode);
+              deletedNodes.forEach(deletedNode => {
+                deletedNode.inLinks().forEach(inLink => {
+                  if (deletedLinks.indexOf(inLink) === -1) {
+                    deletedLinks.push(inLink);
+                  }
+                });
+              });
             }
 
             const logNodeChange = (changes) => {
