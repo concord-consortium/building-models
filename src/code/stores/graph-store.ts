@@ -1138,7 +1138,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       this.removeNode(node);
     }
     GraphPrimitive.resetCounters();
-    this.setFilename("New Model");
+    this.setFilename(null);
     return this.undoRedoManager.clearHistory();
   },
 
