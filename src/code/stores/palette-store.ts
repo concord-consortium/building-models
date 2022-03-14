@@ -21,6 +21,7 @@ import { ImageMetadata, ImageInfo } from "../views/preview-image-dialog-view";
 const uuid           = require("uuid");
 import { Node } from "../models/node";
 import { urlParams } from "../utils/url-params";
+import { AppSettingsStore } from "./app-settings-store";
 
 export interface PalleteItem {
   id: string;
@@ -37,6 +38,11 @@ export const PaletteActions = Reflux.createActions(
     "addCollectionToPalette"
   ]
 );
+
+export const fixedPaletteItemIds = ["1", "flow-variable"];
+export const isFixedPaletteItem = (paletteItem: PalleteItem) => {
+  return fixedPaletteItemIds.indexOf(paletteItem.id) >= 0;
+};
 
 interface LibraryMap {
   [key: string]: InternalLibraryItem;
@@ -55,6 +61,8 @@ export declare class PaletteStoreClass extends StoreClass {
   public findByUUID(uuid: string): PalleteItem | undefined;
   public getBlankPaletteItem(): PalleteItem | undefined;
   public getFlowVariablePaletteItem(): PalleteItem | undefined;
+  public orderedPalette(): PalleteItem[];
+  public isFixedPaletteItem(paletteItem: PalleteItem): boolean;
 }
 
 export const PaletteStore: PaletteStoreClass = Reflux.createStore({
@@ -331,7 +339,27 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
 
     log.info(`Sending changes to listeners: ${JSON.stringify(data)}`);
     return this.trigger(data);
+  },
+
+  orderedPalette() {
+    const result: PalleteItem[] = [];
+    const itemsById: Record<string, PalleteItem> = {};
+    const enableFlowVariable = this.simulationType === AppSettingsStore.SimulationType.time;
+    this.palette.forEach(item => itemsById[item.id] = item);
+    fixedPaletteItemIds.forEach(id => {
+      // only display flow variable in time based simulations
+      if (itemsById[id] && (enableFlowVariable || id !== "flow-variable")) {
+        result.push(itemsById[id]);
+      }
+    });
+    this.palette.forEach(item => {
+      if (!isFixedPaletteItem(item)) {
+        result.push(item);
+      }
+    });
+    return result;
   }
+
 });
 
 export interface PaletteMixinProps {}

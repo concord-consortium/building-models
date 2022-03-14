@@ -6,6 +6,8 @@ import { PaletteStore } from "../stores/palette-store";
 import { SimulationStore } from "../stores/simulation-store";
 import { AppSettingsStore, SimulationType } from "../stores/app-settings-store";
 import { nodeName } from "jquery";
+import { PaletteAddView } from "./palette-add-view";
+import { GraphStore } from "../stores/graph-store";
 
 export interface QuickActionMenuProps {
     node: Node;
@@ -92,17 +94,16 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
                   >
                     {flowLabel}
                   </li>
+
+                  <li
+                    className={standardClasses}
+                    onClick={this.convertToStandard}
+                    onMouseEnter={hideImagesF}
+                  >
+                  {standardVariableLabel}
+                  </li>
                 </>
               }
-
-
-              <li
-                className={standardClasses}
-                onClick={this.convertToStandard}
-                onMouseEnter={hideImagesF}
-              >
-                {standardVariableLabel}
-              </li>
 
               {showGraphButton &&
                 <li
@@ -116,7 +117,7 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
 
             </ul>
           </div>
-          {showImages && this.renderRightMenu()}
+          {true && this.renderRightMenu()}
         </div>
       </>
     );
@@ -125,14 +126,32 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
   private renderRightMenu() {
     const thisNode = this.props.node;
     const selected = thisNode.image;
-    const onChange = (i: {image: string}) => thisNode.image = i.image;
-    const palette = PaletteStore.palette;
+    const onImageChage = (i: {image: string}) =>  {
+      GraphStore.changeNode({ image: i.image }, thisNode);
+    };
+
+    const palette = PaletteStore.orderedPalette();
+    const imageAddCallback = (i: {image: string}) => {
+      this.setState({ showImages: true, closeTimer: null });
+      GraphStore.changeNode({ image: i.image }, thisNode);
+    };
     return (
       <div className="right-panel">
         <div className="image-choices">
+          <PaletteAddView
+            label={tr("~PALETTE-INSPECTOR.ADD_IMAGE")}
+            callback={imageAddCallback}
+          />
           { palette.map((pi, i) =>
-              <ImgChoiceView key={i} node={pi} selected={selected} onChange={onChange} />)
-          }
+            <div className="image-choice-wrapper" key={i}>
+              <ImgChoiceView
+                key={i}
+                node={pi}
+                selected={selected}
+                onChange={onImageChage}
+              />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -161,20 +180,17 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
 
   private convertToCollector = (): void => {
     const {node} = this.props;
-    node.isAccumulator = true;
-    node.isFlowVariable = false;
+    GraphStore.changeNode({ isFlowVariable: false, isAccumulator: true}, node);
   }
 
   private convertToFlow = (): void => {
     const {node} = this.props;
-    node.isFlowVariable = true;
-    node.isAccumulator = false;
+    GraphStore.changeNode({ isFlowVariable: true, isAccumulator: false }, node);
   }
 
   private convertToStandard = (): void => {
     const {node} = this.props;
-    node.isFlowVariable = false;
-    node.isAccumulator = false;
+    GraphStore.changeNode({ isFlowVariable: false, isAccumulator: false }, node);
   }
 
   private createGraph = (): void => {
