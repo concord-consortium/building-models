@@ -82,6 +82,25 @@ describe("The Graphstore", () => {
             }
           },
           {
+            "key": "Node-3",
+            "data": {
+              "title": "Untitled 3",
+              "codapName": null,
+              "codapID": null,
+              "x": 577,
+              "y": 131,
+              "paletteItem": "f09828a4-0d36-4554-a393-3dad5747d036",
+              "initialValue": 50,
+              "min": 0,
+              "max": 1000,
+              "isAccumulator": false,
+              "allowNegativeValues": false,
+              "valueDefinedSemiQuantitatively": true,
+              "frames": [],
+              "combineMethod": "average"
+            }
+          },
+          {
             "key": "Transfer-1",
             "data": {
               "title": "flow from Untitled to Untitled 2",
@@ -115,6 +134,18 @@ describe("The Graphstore", () => {
             },
             "reasoning": "test",
             "transferNode": "Transfer-1"
+          },
+          {
+            "title": "",
+            "color": "#777",
+            "sourceNode": "Node-3",
+            "sourceTerminal": "b",
+            "targetNode": "Transfer-1",
+            "targetTerminal": "b",
+            "relation": {
+              "type": "range"
+            },
+            "reasoning": ""
           }
         ],
         "settings": {
@@ -149,6 +180,22 @@ describe("The Graphstore", () => {
       link.relation.type.should.equal("range");
       expect(this.graphStore.hasNode({key: "Transfer-1"})).to.equal(false);
     });
+
+    it("should remove the transfer node and links pointing to it when the node changes from an accumulator", () => {
+      const node = this.graphStore.getNodes()[0];
+
+      node.isAccumulator.should.equal(true);
+      expect(this.graphStore.hasNode({key: "Transfer-1"})).to.equal(true);
+      expect(this.graphStore.getLinks().length).to.equal(2);
+
+      this.graphStore.changeNode({isAccumulator: false}, node);
+
+      node.isAccumulator.should.equal(false);
+      expect(this.graphStore.hasNode({key: "Transfer-1"})).to.equal(false);
+      // ensure both the transfer and the link pointing to the transfer were deleted
+      expect(this.graphStore.getLinks().length).to.equal(0);
+    });
+
   });
 
 });
