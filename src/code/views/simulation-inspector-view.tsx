@@ -15,10 +15,13 @@ import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 import { urlParams } from "../utils/url-params";
 import { CodapConnect } from "../models/codap-connect";
+import { ModalModelTypeHelpView } from "./modal-model-type-help";
 
 const { SimulationType, Complexity } = AppSettingsStore;
 
-interface SimulationInspectorOuterProps {}
+interface SimulationInspectorOuterProps {
+  onShowModelTypeHelp: () => void;
+}
 type SimulationInspectorProps = SimulationInspectorOuterProps & SimulationMixinProps & AppSettingsMixinProps;
 
 interface SimulationInspectorViewOuterState {}
@@ -29,11 +32,10 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
   public static displayName = "SimulationInspectorView";
   private codapConnect: CodapConnect;
 
-  constructor(props: {}) {
+  constructor(props: SimulationInspectorProps) {
     super(props);
     this.mixins = [new SimulationMixin(this), new AppSettingsMixin(this)];
-    const outerProps: SimulationInspectorOuterProps = {};
-    this.setInitialState(outerProps, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
+    this.setInitialState(props, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   public componentWillMount() {
@@ -60,7 +62,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
           onChange={this.handleSimulationType}
           className="radio-group simulation-radio-buttons"
         >
-          <div className="radio-group-title">{tr("~SIMULATION.MODEL_TYPE")}</div>
+          <div className="radio-group-title">{tr("~SIMULATION.MODEL_TYPE")} <i className="icon-codap-help big model-type-help-icon" onClick={this.props.onShowModelTypeHelp} /></div>
           <label key="simulation-type-diagram-only">
             <Radio value={SimulationType.diagramOnly} disabled={diagramOnlyDisabled} />
             <span className={diagramOnlyDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.DIAGRAM_ONLY")}</span>

@@ -143,6 +143,7 @@ interface InspectorPanelViewOuterProps {
   onNodeDelete: (node: Node) => void;
   palette: PaletteItem[];
   graphStore: GraphStoreClass;
+  onShowModelTypeHelp: () => void;
 }
 interface InspectorPanelViewOuterState {
 }
@@ -206,7 +207,7 @@ export class InspectorPanelView extends Mixer<InspectorPanelViewProps, Inspector
   }
 
   public renderSimulationInspector() {
-    return <SimulationInspectorView />;
+    return <SimulationInspectorView onShowModelTypeHelp={this.props.onShowModelTypeHelp} />;
   }
 
   public renderDesignInspector() {

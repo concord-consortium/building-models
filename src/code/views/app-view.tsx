@@ -36,6 +36,7 @@ import { InternalLibraryItem } from "../data/internal-library";
 import { FullScreenButton } from "./fullscreen-button";
 import { scaleApp } from "../utils/scale-app";
 import { selectSelf } from "../utils/select-self";
+import { ModalModelTypeHelpView } from "./modal-model-type-help";
 
 interface AppViewOuterProps {
   graphStore: GraphStoreClass;
@@ -56,6 +57,7 @@ interface AppViewOuterState {
   selectedLink: Link | null;
   internalLibrary: InternalLibraryItem[] | null;
   standaloneMode: boolean;
+  showModelTypeHelp: boolean;
 }
 
 type AppViewProps = AppViewOuterProps & ImageDialogMixinProps & AppSettingsMixinProps;
@@ -91,7 +93,8 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
       editingNode: null,
       selectedLink: null,
       internalLibrary: null,
-      standaloneMode: urlParams.standalone === "true"
+      standaloneMode: urlParams.standalone === "true",
+      showModelTypeHelp: false
     };
     this.setInitialState(outerState, ImageDialogMixin.InitialState(), AppSettingsMixin.InitialState());
 
@@ -197,9 +200,11 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
             graphStore={this.props.graphStore}
             ref={el => this.inspectorPanel = el}
             display={AppSettingsStore.settings.uiElements.inspectorPanel}
+            onShowModelTypeHelp={this.toggleShowModelTypeHelp}
           />
           {this.state.showingDialog ? <ImageBrowserView /* graphStore={this.props.graphStore} */ /> : null}
           <ModalPaletteDeleteView />
+          <ModalModelTypeHelpView showing={this.state.showModelTypeHelp} onClose={this.toggleShowModelTypeHelp} />
         </div>
         {AppSettingsStore.settings.uiElements.fullscreenButton &&
           <FullScreenButton />
@@ -351,5 +356,11 @@ export class AppView extends Mixer<AppViewProps, AppViewState> {
     // This is also called in the graphView as jsPlumb adds a click handler that
     // stops this handler from being called.
     selectSelf();
+  }
+
+  private toggleShowModelTypeHelp = () => {
+    this.setState(prev => {
+      return {showModelTypeHelp: !prev.showModelTypeHelp};
+    });
   }
 }
