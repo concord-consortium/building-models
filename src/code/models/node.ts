@@ -16,7 +16,7 @@ import { GraphPrimitive } from "./graph-primitive";
 import { ColorChoices } from "../utils/colors";
 import { tr } from "../utils/translate";
 import { urlParams } from "../utils/url-params";
-import { PalleteItem } from "../stores/palette-store";
+import { PaletteItem } from "../stores/palette-store";
 import { Link } from "./link";
 
 const SEMIQUANT_MIN = 0;
@@ -54,6 +54,7 @@ export class Node extends GraphPrimitive {
   public animateRescale: boolean = false;
   public uuid: string;
   public image: string;
+  public isFlowVariable: boolean;
 
   public readonly combineMethod: any; // TODO: get concrete type
   public readonly valueDefinedSemiQuantitatively: any; // TODO: get concrete type
@@ -65,12 +66,11 @@ export class Node extends GraphPrimitive {
   public readonly x: any; // TODO: get concrete type
   public readonly y: any; // TODO: get concrete type
   public readonly frames: any; // TODO: get concrete type
-  public readonly isFlowVariable: boolean;
   public readonly links: Link[];
   public readonly usesDefaultImage: boolean;
 
   protected allowNegativeValues: any; // TODO: get concrete type
-  protected paletteItem: PalleteItem;
+  protected paletteItem: PaletteItem;
   protected _min: any; // TODO: get concrete type
   protected _max: any; // TODO: get concrete type
   protected _initialValue: any; // TODO: get concrete type

@@ -21,8 +21,9 @@ import { ImageMetadata, ImageInfo } from "../views/preview-image-dialog-view";
 const uuid           = require("uuid");
 import { Node } from "../models/node";
 import { urlParams } from "../utils/url-params";
+import { AppSettingsStore } from "./app-settings-store";
 
-export interface PalleteItem {
+export interface PaletteItem {
   id: string;
   uuid: string;
   image: string;
@@ -38,23 +39,30 @@ export const PaletteActions = Reflux.createActions(
   ]
 );
 
+export const fixedPaletteItemIds = ["1", "flow-variable"];
+export const isFixedPaletteItem = (paletteItem: PaletteItem) => {
+  return fixedPaletteItemIds.indexOf(paletteItem.id) >= 0;
+};
+
 interface LibraryMap {
   [key: string]: InternalLibraryItem;
 }
 
 export declare class PaletteStoreClass extends StoreClass {
-  public readonly palette: PalleteItem[];
+  public readonly palette: PaletteItem[];
   public readonly library: LibraryMap;
   public readonly collections: LibraryMap[];
-  public readonly selectedPaletteItem: PalleteItem;
+  public readonly selectedPaletteItem: PaletteItem;
   public readonly selectedPaletteIndex: number;
   public readonly selectedPaletteImage: ImageInfo;
   public readonly imageMetadata: ImageMetadata;
   public inLibrary(node: Node): boolean;
   public inPalette(node: Node): boolean;
-  public findByUUID(uuid: string): PalleteItem | undefined;
-  public getBlankPaletteItem(): PalleteItem | undefined;
-  public getFlowVariablePaletteItem(): PalleteItem | undefined;
+  public findByUUID(uuid: string): PaletteItem | undefined;
+  public getBlankPaletteItem(): PaletteItem | undefined;
+  public getFlowVariablePaletteItem(): PaletteItem | undefined;
+  public orderedPalette(): PaletteItem[];
+  public isFixedPaletteItem(paletteItem: PaletteItem): boolean;
 }
 
 export const PaletteStore: PaletteStoreClass = Reflux.createStore({
@@ -331,7 +339,27 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
 
     log.info(`Sending changes to listeners: ${JSON.stringify(data)}`);
     return this.trigger(data);
+  },
+
+  orderedPalette() {
+    const result: PaletteItem[] = [];
+    const itemsById: Record<string, PaletteItem> = {};
+    const enableFlowVariable = this.simulationType === AppSettingsStore.SimulationType.time;
+    this.palette.forEach(item => itemsById[item.id] = item);
+    fixedPaletteItemIds.forEach(id => {
+      // only display flow variable in time based simulations
+      if (itemsById[id] && (enableFlowVariable || id !== "flow-variable")) {
+        result.push(itemsById[id]);
+      }
+    });
+    this.palette.forEach(item => {
+      if (!isFixedPaletteItem(item)) {
+        result.push(item);
+      }
+    });
+    return result;
   }
+
 });
 
 export interface PaletteMixinProps {}
@@ -340,7 +368,7 @@ export interface PaletteMixinState {
   palette: any; // TODO: get concrete type
   library: any; // TODO: get concrete type
   collections: any;
-  selectedPaletteItem: PalleteItem;
+  selectedPaletteItem: PaletteItem;
   selectedPaletteIndex: any; // TODO: get concrete type
   selectedPaletteImage: any; // TODO: get concrete type
   imageMetadata: any; // TODO: get concrete type

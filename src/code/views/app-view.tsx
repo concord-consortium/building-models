@@ -7,7 +7,7 @@ import { tr } from "../utils/translate";
 const _ = require("lodash");
 const log = require("loglevel");
 
-import { PaletteStore, PalleteItem } from "../stores/palette-store";
+import { PaletteStore, PaletteItem } from "../stores/palette-store";
 import { CodapStore } from "../stores/codap-store";
 import { LaraStore } from "../stores/lara-store";
 import { GoogleFileActions } from "../stores/google-file-store";
@@ -45,7 +45,7 @@ interface AppViewOuterProps {
 }
 interface AppViewOuterState {
   selectedNode: Node | null;
-  palette: PalleteItem[];
+  palette: PaletteItem[];
   undoRedoShowing: boolean;
   showBuildInfo: boolean;
   iframed: boolean;
