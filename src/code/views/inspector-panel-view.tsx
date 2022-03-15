@@ -22,7 +22,7 @@ import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 import { Link } from "../models/link";
 import { GraphStoreClass } from "../stores/graph-store";
-import { PalleteItem } from "../stores/palette-store";
+import { PaletteItem } from "../stores/palette-store";
 
 interface ToolButtonViewProps {
   key?: string;
@@ -141,7 +141,7 @@ interface InspectorPanelViewOuterProps {
   link: Link | null;
   onNodeChanged: (node: Node, data: NodeChangedValues) => void;
   onNodeDelete: (node: Node) => void;
-  palette: PalleteItem[];
+  palette: PaletteItem[];
   graphStore: GraphStoreClass;
 }
 interface InspectorPanelViewOuterState {

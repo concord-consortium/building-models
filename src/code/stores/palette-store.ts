@@ -23,7 +23,7 @@ import { Node } from "../models/node";
 import { urlParams } from "../utils/url-params";
 import { AppSettingsStore } from "./app-settings-store";
 
-export interface PalleteItem {
+export interface PaletteItem {
   id: string;
   uuid: string;
   image: string;
@@ -40,7 +40,7 @@ export const PaletteActions = Reflux.createActions(
 );
 
 export const fixedPaletteItemIds = ["1", "flow-variable"];
-export const isFixedPaletteItem = (paletteItem: PalleteItem) => {
+export const isFixedPaletteItem = (paletteItem: PaletteItem) => {
   return fixedPaletteItemIds.indexOf(paletteItem.id) >= 0;
 };
 
@@ -49,20 +49,20 @@ interface LibraryMap {
 }
 
 export declare class PaletteStoreClass extends StoreClass {
-  public readonly palette: PalleteItem[];
+  public readonly palette: PaletteItem[];
   public readonly library: LibraryMap;
   public readonly collections: LibraryMap[];
-  public readonly selectedPaletteItem: PalleteItem;
+  public readonly selectedPaletteItem: PaletteItem;
   public readonly selectedPaletteIndex: number;
   public readonly selectedPaletteImage: ImageInfo;
   public readonly imageMetadata: ImageMetadata;
   public inLibrary(node: Node): boolean;
   public inPalette(node: Node): boolean;
-  public findByUUID(uuid: string): PalleteItem | undefined;
-  public getBlankPaletteItem(): PalleteItem | undefined;
-  public getFlowVariablePaletteItem(): PalleteItem | undefined;
-  public orderedPalette(): PalleteItem[];
-  public isFixedPaletteItem(paletteItem: PalleteItem): boolean;
+  public findByUUID(uuid: string): PaletteItem | undefined;
+  public getBlankPaletteItem(): PaletteItem | undefined;
+  public getFlowVariablePaletteItem(): PaletteItem | undefined;
+  public orderedPalette(): PaletteItem[];
+  public isFixedPaletteItem(paletteItem: PaletteItem): boolean;
 }
 
 export const PaletteStore: PaletteStoreClass = Reflux.createStore({
@@ -342,8 +342,8 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
   },
 
   orderedPalette() {
-    const result: PalleteItem[] = [];
-    const itemsById: Record<string, PalleteItem> = {};
+    const result: PaletteItem[] = [];
+    const itemsById: Record<string, PaletteItem> = {};
     const enableFlowVariable = this.simulationType === AppSettingsStore.SimulationType.time;
     this.palette.forEach(item => itemsById[item.id] = item);
     fixedPaletteItemIds.forEach(id => {
@@ -368,7 +368,7 @@ export interface PaletteMixinState {
   palette: any; // TODO: get concrete type
   library: any; // TODO: get concrete type
   collections: any;
-  selectedPaletteItem: PalleteItem;
+  selectedPaletteItem: PaletteItem;
   selectedPaletteIndex: any; // TODO: get concrete type
   selectedPaletteImage: any; // TODO: get concrete type
   imageMetadata: any; // TODO: get concrete type
