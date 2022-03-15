@@ -143,9 +143,8 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
             callback={imageAddCallback}
           />
           { palette.map((pi, i) =>
-            <div className="image-choice-wrapper" key={i}>
+            <div className="image-choice-wrapper" key={pi.uuid}>
               <ImgChoiceView
-                key={i}
                 node={pi}
                 selected={selected}
                 onChange={onImageChage}

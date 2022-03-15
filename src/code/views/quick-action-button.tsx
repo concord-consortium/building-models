@@ -65,7 +65,6 @@ export class QuickActionButton extends React.Component<QuickActionButtonProps, Q
 
   private toggleState = (): void => {
     const state = this.state.state;
-    console.log("click state", this.state);
     if (state === "default") {
       this.setState({ state: "active" });
     } else if (state === "active") {
