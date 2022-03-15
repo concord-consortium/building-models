@@ -51,7 +51,7 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     if (node) {
       return this.renderNodeRelationInspector(node);
     } else if (link) {
-      return this.renderLinkRelationInspector();
+      return this.renderLinkRelationInspector(link);
     } else {
       return <div />;
     }
@@ -104,8 +104,16 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     );
   }
 
-  private renderLinkRelationInspector() {
-    return <div className="relation-inspector" />;
+  private renderLinkRelationInspector(link: Link) {
+    return (
+      <div className="relation-inspector" >
+        <TabbedPanelView
+          tabs={[this.renderTabforLink(link)]}
+          selectedTabIndex={0}
+          onTabSelected={this.ignoreTabSelected}
+        />
+      </div>
+    );
   }
 
   private handleTabSelected = (index) => {
@@ -114,6 +122,8 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
       InspectorPanelActions.openInspectorPanel("relations", {link: __guard__(node.inLinks(), x => x[index])});
     }
   }
+
+  private ignoreTabSelected = () => undefined;
 
   private handleMethodSelected = (evt) => {
     const {node} = this.props;

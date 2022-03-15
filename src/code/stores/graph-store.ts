@@ -922,7 +922,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     clearTimeout(this.lastClickLinkTimeout);
 
     if (isDoubleClick) {
-      this.selectionManager.selectNodeForInspection(link.targetNode);
+      this.selectionManager.selectLinkForInspection(link);
       return InspectorPanelActions.openInspectorPanel("relations", {link});
     } else {
       // set single click handler to run 250ms from now so we can wait to see if this is a double click

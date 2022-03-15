@@ -78,7 +78,7 @@ class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewSta
   private buttonData: ToolPanelButton[] = [
     {name: "styles", simple: true, shows: "design", "enabled": ["node", "link"] },
     {name: "values", simple: false, shows: "value", "enabled": ["node"] },
-    {name: "qualRel", simple: true, shows: "relations", "enabled": ["dependent-node"]},
+    {name: "qualRel", simple: true, shows: "relations", "enabled": ["dependent-node", "link"]},
     {name: "options",  simple: true, shows: "simulation", "enabled": ["nothing"] }
   ];
 
