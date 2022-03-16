@@ -34,7 +34,7 @@ import { stepSize } from "../utils/step-size";
 import { logEvent } from "../utils/logger";
 import { TransferModel } from "../models/transfer";
 import { FlowImageView } from "./flow-image-view";
-import { QuickActionButton } from "./quick-action-button";
+import { QuickActionButtonView } from "./quick-action-button-view";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
@@ -330,7 +330,7 @@ getDefaultProps() {
             <div>
               <div className="actions">
                 <div className="connection-source action-circle icon-codap-link" data-node-key={this.props.nodeKey} />
-                <QuickActionButton
+                <QuickActionButtonView
                   node={this.props.data}
                   showGraphButton={this.props.showGraphButton}
                   graphClickHandler={handleGraphButtonClick}

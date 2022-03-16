@@ -306,14 +306,23 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const title = tr("~NODE.UNTITLED");
     const linkOffset = $(this.linkView!).offset() || {left: 0, top: 0};
     const imageOffset = NodeView.nodeImageOffset();
+    const isFlowVariable = paletteItem.id === "flow-variable";
+    const isAccumulator = paletteItem.id === "collector";
+
+    // the collector image in the palette is a static png of jumbled blank nodes
+    // we need to convert this into the default single blank node as the graph view
+    // will then stack those images as the node is set as a collector
+    const image = isAccumulator ? PaletteStore.getBlankPaletteItem()?.image : paletteItem.image;
+
     const newNode = new Node({
       x: ui.offset.left - linkOffset.left - imageOffset.left,
       y: ui.offset.top - linkOffset.top - imageOffset.top,
       title,
       paletteItem: paletteItem.uuid,
-      image: paletteItem.image,
+      image,
       addedThisSession: true,
-      isFlowVariable: paletteItem.id === "flow-variable",
+      isFlowVariable,
+      isAccumulator,
       usesDefaultImage: !!paletteItem.usesDefaultImage
     });
 

@@ -40,13 +40,12 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
   }
 
   public render() {
-    const index = 0;
     return (
       <div className="palette-inspector">
         <div className="palette" ref={el => this.palette = el}>
           <div>
             <PaletteAddView label={tr("~PALETTE-INSPECTOR.ADD_IMAGE")} />
-            {_.map(PaletteStore.orderedPalette(), (node, index) => {
+            {_.map(PaletteStore.orderedPalette(this.state.simulationType), (node, index) => {
               return <PaletteItemView
                 key={node.uuid}
                 node={node}
