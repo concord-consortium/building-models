@@ -39,7 +39,7 @@ export const PaletteActions = Reflux.createActions(
   ]
 );
 
-export const fixedPaletteItemIds = ["1", "flow-variable", "collector"];
+export const fixedPaletteItemIds = ["1", "collector", "flow-variable"];
 export const isFixedPaletteItem = (paletteItem: PaletteItem) => {
   return fixedPaletteItemIds.indexOf(paletteItem.id) >= 0;
 };
