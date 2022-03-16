@@ -3,29 +3,36 @@ import { Node } from "../models/node";
 import { tr } from "../utils/translate";
 import { ImgChoiceView } from "./img-choice-view";
 import { PaletteStore } from "../stores/palette-store";
-import { SimulationStore } from "../stores/simulation-store";
-import { AppSettingsStore, SimulationType } from "../stores/app-settings-store";
-import { nodeName } from "jquery";
+import { AppSettingsStore, SimulationType, AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
 import { PaletteAddView } from "./palette-add-view";
 import { GraphStore } from "../stores/graph-store";
+import { Mixer } from "../mixins/components";
 
-export interface QuickActionMenuProps {
-    node: Node;
-    closeFn?: () => void;
-    showGraphButton?: boolean;
-    graphClickHandler?: () => void;
+
+interface QuickActionMenuViewOuterProps {
+  node: Node;
+  closeFn?: () => void;
+  showGraphButton?: boolean;
+  graphClickHandler?: () => void;
 }
+type QuickActionMenuViewProps = QuickActionMenuViewOuterProps & AppSettingsMixinProps;
 
-export interface QuickActionMenuState {
+interface QuickActionMenuViewOuterState {
   showImages: boolean;
   closeTimer: NodeJS.Timeout|null;
 }
+type QuickActionMenuViewState = QuickActionMenuViewOuterState & AppSettingsMixinState;
 
 
-export class QuickActionMenu extends React.Component<QuickActionMenuProps, QuickActionMenuState> {
-  constructor(props: QuickActionMenuProps) {
+export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickActionMenuViewState> {
+  constructor(props: QuickActionMenuViewProps) {
     super(props);
-    this.state = { showImages: false,  closeTimer: null };
+    this.mixins = [new AppSettingsMixin(this)];
+    const outerState: QuickActionMenuViewOuterState = {
+      showImages: false,
+      closeTimer: null
+    };
+    this.setInitialState(outerState, AppSettingsMixin.InitialState());
   }
 
   public render() {
@@ -130,7 +137,7 @@ export class QuickActionMenu extends React.Component<QuickActionMenuProps, Quick
       GraphStore.changeNode({ image: i.image }, thisNode);
     };
 
-    const palette = PaletteStore.orderedPalette();
+    const palette = PaletteStore.orderedPalette(this.state.simulationType);
     const imageAddCallback = (i: {image: string}) => {
       this.setState({ showImages: true, closeTimer: null });
       GraphStore.changeNode({ image: i.image }, thisNode);

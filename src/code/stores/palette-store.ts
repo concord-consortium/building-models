@@ -39,7 +39,7 @@ export const PaletteActions = Reflux.createActions(
   ]
 );
 
-export const fixedPaletteItemIds = ["1", "flow-variable"];
+export const fixedPaletteItemIds = ["1", "flow-variable", "collector"];
 export const isFixedPaletteItem = (paletteItem: PaletteItem) => {
   return fixedPaletteItemIds.indexOf(paletteItem.id) >= 0;
 };
@@ -61,7 +61,7 @@ export declare class PaletteStoreClass extends StoreClass {
   public findByUUID(uuid: string): PaletteItem | undefined;
   public getBlankPaletteItem(): PaletteItem | undefined;
   public getFlowVariablePaletteItem(): PaletteItem | undefined;
-  public orderedPalette(): PaletteItem[];
+  public orderedPalette(simulationType: number): PaletteItem[];
   public isFixedPaletteItem(paletteItem: PaletteItem): boolean;
 }
 
@@ -341,14 +341,20 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
     return this.trigger(data);
   },
 
-  orderedPalette() {
+  orderedPalette(simulationType: number) {
     const result: PaletteItem[] = [];
     const itemsById: Record<string, PaletteItem> = {};
-    const enableFlowVariable = this.simulationType === AppSettingsStore.SimulationType.time;
+    const inTimeBasedSimulation = simulationType === AppSettingsStore.SimulationType.time;
+    const allowInCurrentSimulationType = (id: string) => {
+      if ((id === "flow-variable") || (id === "collector")) {
+        return inTimeBasedSimulation;
+      } else {
+        return true;
+      }
+    };
     this.palette.forEach(item => itemsById[item.id] = item);
     fixedPaletteItemIds.forEach(id => {
-      // only display flow variable in time based simulations
-      if (itemsById[id] && (enableFlowVariable || id !== "flow-variable")) {
+      if (itemsById[id] && allowInCurrentSimulationType(id)) {
         result.push(itemsById[id]);
       }
     });

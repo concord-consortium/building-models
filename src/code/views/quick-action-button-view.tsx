@@ -1,6 +1,6 @@
 import { Node } from "../models/node";
 import * as React from "react";
-import { QuickActionMenu } from "./quick-action-menu";
+import { QuickActionMenuView } from "./quick-action-menu-view";
 
 export type CircleButtonState = "default" | "hover" | "active" | "disabled";
 
@@ -19,12 +19,12 @@ const VerticalEllipse = (props: {size: number} = {size: 16} ) => {
   const {size} = props;
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path fill-rule="evenodd" d="M6 12a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zm6 2a2 2 0 100-4 2 2 0 000 4z" fill="white" transform="translate(24, 0) rotate(90)" />
+      <path fillRule="evenodd" d="M6 12a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zm6 2a2 2 0 100-4 2 2 0 000 4z" fill="white" transform="translate(24, 0) rotate(90)" />
     </svg>
   );
 };
 
-export class QuickActionButton extends React.Component<QuickActionButtonProps, QuickActionButtonState> {
+export class QuickActionButtonView extends React.Component<QuickActionButtonProps, QuickActionButtonState> {
   constructor(props: QuickActionButtonProps) {
     super(props);
     this.state = { state: "default" };
@@ -52,7 +52,7 @@ export class QuickActionButton extends React.Component<QuickActionButtonProps, Q
         this.setState({state: "default"});
       };
       return (
-        <QuickActionMenu
+        <QuickActionMenuView
           node={this.props.node}
           closeFn={closeActionMenu}
           showGraphButton={this.props.showGraphButton}
