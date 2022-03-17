@@ -635,10 +635,16 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     if (link.transferNode == null) {
       const source = link.sourceNode;
       const target = link.targetNode;
-      link.transferNode = new TransferModel({
-        x: source.x + ((target.x - source.x) / 2),
-        y: source.y + ((target.y - source.y) / 2)
-      });
+      const x = source.x + ((target.x - source.x) / 2);
+      let y = source.y + ((target.y - source.y) / 2);
+
+      // if there is already a transfer link in the other direction offset the y axis
+      // so the transfer nodes don't overlay each other in the graph
+      if (source.inLinks().find(l => l.targetNode === source)) {
+        y -= 75;
+      }
+
+      link.transferNode = new TransferModel({x, y});
       link.transferNode.setTransferLink(link);
     }
     return this._addNode(link.transferNode);
