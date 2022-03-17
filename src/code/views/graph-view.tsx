@@ -484,7 +484,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])!).find(this.props.connectionTarget);
     const isSelected = this.props.selectionManager.isSelected(link);
     const isEditing = link === this.state.editingLink;
-    const isDashed = !link.relation.isDefined && this.state.simulationPanelExpanded;
+    const isDashed = !link.relation.isDefined;
     const relationDetails = RelationFactory.selectionsFromRelation(link.relation);
     if ((relationDetails.vector != null ? relationDetails.vector.isCustomRelationship : undefined) && (link.relation.customData != null)) {
       link.color = LinkColors.customRelationship;
