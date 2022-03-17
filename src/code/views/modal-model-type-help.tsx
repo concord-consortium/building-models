@@ -43,7 +43,7 @@ export class ModalModelTypeHelpView extends React.Component<ModalModelTypeHelpVi
             <a href="https://sagemodeler.concord.org/getting-started/index.html" target="_blank">{tr("~MODEL_TYPE_HELP.MORE_LINK")}</a>
           </p>
 
-          <div className="buttons">
+          <div className="buttons" style={{marginTop: -10}}>
             <button name="cancel" value="Close" onClick={this.props.onClose}>{tr("~SAGEMODELER.MENU.CLOSE")}</button>
           </div>
         </div>
