@@ -25,35 +25,27 @@ export class ModalModelTypeHelpView extends React.Component<ModalModelTypeHelpVi
 
   private renderShowing() {
     return (
-      <ModalDialogView title="Model Types" close={this.props.onClose} closeOnBackgroundClick={true}>
+      <ModalDialogView title={tr("~MODEL_TYPE_HELP.TITLE")} close={this.props.onClose} closeOnBackgroundClick={true}>
         <div className="simple-popup-panel">
           <p>
-            <strong>Model diagram:</strong> Used to illustrate connections between concepts or variables. No simulation option.
+            <strong>{tr("~SIMULATION.COMPLEXITY.DIAGRAM_ONLY")}:</strong> {tr("~MODEL_TYPE_HELP.DIAGRAM_ONLY")}
           </p>
 
           <p>
-            <strong>Static equilibrium simulation:</strong> Used to explore a network of relationships between variables. A change in one variable instantly updates the state of all other variables in the system.
+            <strong>{tr("~SIMULATION.COMPLEXITY.STATIC")}:</strong> {tr("~MODEL_TYPE_HELP.STATIC")}
           </p>
 
           <p>
-            <strong>Dynamic time-based simulation:</strong> Used to explore the behavior of a system over time. This modeling/simulation mode is particularly useful for exploring feedback and phenomena where time is a critical component for understanding the system.
+            <strong>{tr("~SIMULATION.COMPLEXITY.TIME")}:</strong> {tr("~MODEL_TYPE_HELP.TIME")}
           </p>
 
           <p>
-            <a href="TODO">Click here</a> for more detail on model settings.
+            <a href="https://sagemodeler.concord.org/getting-started/index.html" target="_blank">{tr("~MODEL_TYPE_HELP.MORE_LINK")}</a>
           </p>
 
           <div className="buttons">
-            <button name="cancel" value="Close" onClick={this.props.onClose}>Close</button>
+            <button name="cancel" value="Close" onClick={this.props.onClose}>{tr("~SAGEMODELER.MENU.CLOSE")}</button>
           </div>
-
-          <p style={{color: "#f00"}}>
-            <strong>TODO</strong>
-            <ul>
-              <li>Get url for the "Click here" link</li>
-              <li>Figure out final full text and add it to the translation files</li>
-            </ul>
-          </p>
         </div>
       </ModalDialogView>
     );
