@@ -214,7 +214,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       }
     }
 
-    // force redraw of the links when switching in/out of diagram only so that undefined links change their style
+    // force redraw of the links when switching in/out of diagram only so that undefined links redraw their style
     const diagramOnly = AppSettingsStore.SimulationType.diagramOnly;
     const curSimulationType = this.state.simulationType;
     const prevSimulationType = prevState.simulationType;
@@ -487,8 +487,6 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     if (!this.props.connectionTarget) {
       return;
     }
-
-    console.log("redrawLink");
 
     const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])!).find(this.props.connectionTarget);
     const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])!).find(this.props.connectionTarget);
