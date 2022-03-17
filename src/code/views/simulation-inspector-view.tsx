@@ -54,6 +54,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
     const diagramOnlyDisabled = minSimulationType > SimulationType.diagramOnly;
     const staticDisabled = minSimulationType > SimulationType.static;
     const basicDisabled = minComplexity > Complexity.basic;
+    const expandedDisabled = !basicDisabled && this.state.simulationType === SimulationType.diagramOnly;
 
     return (
       <div className="simulation-panel">
@@ -90,12 +91,12 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
           className="radio-group complexity-radio-buttons"
         >
           <div className="radio-group-title">{tr("~SIMULATION.RELATIONSHIPS")}</div>
-          <label key="complexity-basic">
+          <label key="complexity-basic" className={basicDisabled ? "disabled" : ""}>
             <Radio value={Complexity.basic} disabled={basicDisabled} />
             <span className={basicDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.BASIC")}</span>
           </label>
-          <label key="complexity-expanded">
-            <Radio value={Complexity.expanded} />
+          <label key="complexity-expanded" className={expandedDisabled ? "disabled" : ""} >
+            <Radio value={Complexity.expanded} disabled={expandedDisabled} />
             <span>{tr("~SIMULATION.COMPLEXITY.EXPANDED")}</span>
           </label>
         </RadioGroup>

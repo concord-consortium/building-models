@@ -214,6 +214,14 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       }
     }
 
+    // force redraw of the links when switching in/out of diagram only so that undefined links redraw their style
+    const diagramOnly = AppSettingsStore.SimulationType.diagramOnly;
+    const curSimulationType = this.state.simulationType;
+    const prevSimulationType = prevState.simulationType;
+    if ((prevSimulationType !== curSimulationType) && ((prevSimulationType === diagramOnly) || (curSimulationType === diagramOnly))) {
+      this.forceRedrawLinks = true;
+    }
+
     if ((prevState.description.links !== this.state.description.links) ||
         (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) ||
         (prevState.selectedLink !== this.state.selectedLink) ||
@@ -484,7 +492,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])!).find(this.props.connectionTarget);
     const isSelected = this.props.selectionManager.isSelected(link);
     const isEditing = link === this.state.editingLink;
-    const isDashed = !link.relation.isDefined && this.state.simulationPanelExpanded;
+    const isDashed = !link.relation.isDefined && (this.state.simulationType !== AppSettingsStore.SimulationType.diagramOnly);
     const relationDetails = RelationFactory.selectionsFromRelation(link.relation);
     if ((relationDetails.vector != null ? relationDetails.vector.isCustomRelationship : undefined) && (link.relation.customData != null)) {
       link.color = LinkColors.customRelationship;
