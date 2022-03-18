@@ -44,17 +44,29 @@ we are using.
     * Drag a bookmark or tab pointing at http://localhost:8080 onto the CODAP pane
     * For more in-depth testing, build your own copy of CODAP from [GitHub](https://github.com/concord-consortium/codap)
 
-
-### Automatic CI branch deployment
-* Named branches or pushed tags get deployed to S3 automatically by GitHub actions.
-* The URL for branch deploys is `https://sage.concord.org/branch/<branchname>/sage.html`
-* The `production` branch is deployed to `https://sage.concord.org/`
-* Read `.github/workflows/ci.yml` and `s3_deploy.sh` for more information.
-
 ### Production Deployment
-1. Checkout the `production` branch.
-1. Make changes …
-1. `git push`
+
+Production releases to S3 are based on the contents of the /dist folder and are built automatically by GitHub Actions
+for each branch pushed to GitHub and each merge into production.
+
+Merges into production are deployed to http://sage.concord.org.
+
+Other branches are deployed to http://sage.concord.org/branch/BRANCH-NAME.
+
+To deploy a production release:
+
+1. Update the version number in package.json and run `npm install` to update package-lock.json
+2. Create `v<version>` branch and commit changes, push to GitHub, create PR and merge
+3. Checkout master and pull
+4. Checkout production
+5. Run `git merge master --no-ff`
+6. Push production to GitHub
+7. Use https://github.com/concord-consortium/building-models/releases to create a new release tag
+
+**NOTE:** This repo and the [sage-modeler-site](https://github.com/concord-consortium/sage-modeler-site) repo should be
+released at the same time, with the same version numbers, even if one of the two repos has no changes, in order to
+keep their version numbers in sync so that the splashscreen and top nav bar show the same version numbers. Refer
+to the readme in that repo for release steps.
 
 ## Translation/Localization
 
