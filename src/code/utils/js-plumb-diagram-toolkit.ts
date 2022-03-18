@@ -185,8 +185,8 @@ export class DiagramToolkit {
     };
   }
 
-  public _overlays({label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow, transferNotch}:
-                   {label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, link, hideArrow, transferNotch}) {
+  public _overlays({label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, changeLocation, link, hideArrow, transferNotch}:
+                   {label, selected, editingLabel, thickness, finalColor, variableWidth, arrowFoldback, changeIndicator, changeLocation, link, hideArrow, transferNotch}) {
     if (editingLabel == null) { editingLabel = true; }
     const results: any[] = []; // checked: any ok
     if (!hideArrow) {
@@ -217,13 +217,13 @@ export class DiagramToolkit {
     }
     if (changeIndicator && (variableWidth !== 0)) {
       results.push(["Label", {
-        location: 0.1,
+        location: changeLocation,
         label: changeIndicator || "",
         cssClass: `link-indicator${changeIndicator === "+" ? " increase" : " decrease"}`
       }]);
     } else if (changeIndicator) {
       results.push(["Label", {
-        location: 0.9,
+        location: changeLocation,
         label: changeIndicator || "",
         cssClass: `link-indicator${changeIndicator === "+" ? " increase" : " decrease"}`
       }]);
@@ -305,7 +305,7 @@ export class DiagramToolkit {
     let fixedColor = LinkColors.default;
     let fadedColor = LinkColors.defaultFaded;
     let changeIndicator: string|null = "";
-
+    let changeLocation = 0.9;
     let thickness = Math.abs(opts.magnitude);
     if (!thickness) {
       thickness = 1;
@@ -342,6 +342,14 @@ export class DiagramToolkit {
     }
 
     if (opts.isTransfer || isAddedToOrSubtractedFrom) {
+      // TODO: Add changeIndicators:
+      console.log("opts", opts);
+      const formula = opts.linkModel != null && opts.linkModel.relation != null ?   opts.linkModel.relation.formula : undefined;
+      if (formula === "+in") {
+        changeIndicator = "+";
+      } else if (formula === "-in") {
+        changeIndicator = "\u2013";
+      }
       thickness = 10;
       fixedColor = LinkColors.transferPipe;
       fadedColor = LinkColors.transferPipe;
@@ -401,7 +409,9 @@ export class DiagramToolkit {
     // swap source and target for subtracts from, otherwise the arrow doesn't render correctly
     // (if you change the location to 0 the thick arrow bleeds out in front of the arrow)
     const swapEnds = formula === "-in";
-
+    if (swapEnds) {
+      changeLocation = 1 - changeLocation;
+    }
     const connection = this.kit.connect({
       source: swapEnds ? opts.target : opts.source,
       target: swapEnds ? opts.source : opts.target,
@@ -416,6 +426,7 @@ export class DiagramToolkit {
         variableWidth: variableWidthMagnitude,
         arrowFoldback,
         changeIndicator,
+        changeLocation,
         link: opts.linkModel,
         hideArrow: opts.hideArrow,
         transferNotch: isTransferToFlowNode || isAddedToOrSubtractedFrom
