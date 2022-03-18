@@ -253,6 +253,10 @@ export class Node extends GraphPrimitive {
     }
   }
 
+  public hasLinks() {
+    return this.links.length > 0;
+  }
+
   public checkIsInIndependentCycle() {
     const visitedNodes: any = [];
     const original = this;

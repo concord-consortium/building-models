@@ -1,0 +1,42 @@
+.horizontal-tabbed-panel
+  enable-flex(direction:column, justify:flex-start, alignContent:stretch, alignItems:stretch)
+  width 420px
+  border-radius 5px
+  .workspace-horizontal-tabs
+    padding 0
+    margin 0px
+    background-color: bbgray
+    /* border-bottom 5px solid #72bca6 */
+    ul
+      margin 0
+      margin-right -1px
+      list-style none
+      padding-left 10px
+      overflow-x hidden
+      overflow-y auto
+      li
+        /* blenderbox-modal-labels() */
+        float: left
+        font-size 15px
+        -webkit-border-radius tab-border-radius tab-border-radius 0 0
+        -moz-border-radius tab-border-radius tab-border-radius 0 0
+        border-radius: tab-border-radius tab-border-radius 0 0
+        margin 10px 0 0 6px
+        padding 10px
+        color #000
+        background-color #c8e7de
+        cursor pointer
+        &.horizontal-tab-selected
+          color #fff
+          background-color #72bca6
+        &.horizontal-tab-disabled
+          color button-disabled-text
+          background-color button-disabled
+
+  .workspace-horizontal-tab-component
+    margin 0px
+    padding 0
+
+  .tabbed-panel-left
+    border-top 5px solid #72bca6
+

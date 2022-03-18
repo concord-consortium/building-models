@@ -467,8 +467,8 @@ getDefaultProps() {
     const multipleSelections = evt && (evt.ctrlKey || evt.metaKey || evt.shiftKey);
     this.props.selectionManager.selectNodeForInspection(this.props.data, multipleSelections);
 
-    // open the relationship panel on double click if the node has incoming links
-    const links = this.props.data.inLinks();
+    // open the relationship panel on double click if the node has any links
+    const links = this.props.data.links;
     if (links.length > 0) {
       const now = (new Date()).getTime();
       if ((now - (this.lastClickLinkTime || 0)) <= 250) {
