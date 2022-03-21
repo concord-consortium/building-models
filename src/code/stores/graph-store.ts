@@ -60,6 +60,11 @@ interface UndoRedoOptions {
   skipUndoRedo?: boolean;
 }
 
+interface Position {
+  x: number;
+  y: number;
+}
+
 export declare class GraphStoreClass extends StoreClass {
   public nodeKeys: NodeMap;
   public readonly undoRedoManager: UndoRedoManager;
@@ -432,8 +437,10 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     this.undoRedoManager.createAndExecuteCommand("createTransferLinkBetweenAccumulators", {
       execute: () => {
         // create the transfer link/node
+        const transferNode = transferLink?.transferNode;
+        const position: Position | undefined = transferNode ? {x: transferNode.x, y: transferNode.y} : undefined;
         transferLink = transferLink || new Link({sourceNode, targetNode, relation: RelationFactory.transferred});
-        this._addTransfer(transferLink);
+        this._addTransfer(transferLink, position);
         this._addLink(transferLink);
 
         if (options.logEvent) {
@@ -485,6 +492,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
 
   removeLink(link, options: LogOptions = {}) {
+    const position: Position | undefined = link.transferNode ? {x: link.transferNode.x, y: link.transferNode.y} : undefined;
     this.endNodeEdit();
     return this.undoRedoManager.createAndExecuteCommand("removeLink", {
       execute: () => {
@@ -492,7 +500,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
         if (link.transferNode != null) { return this._removeTransfer(link, options); }
       },
       undo: () => {
-        if (link.transferNode != null) { this._addTransfer(link, options); }
+        if (link.transferNode != null) { this._addTransfer(link, position); }
         return this._addLink(link, options);
       }
     }
@@ -576,9 +584,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     const links = node.links.slice();
     // identify any transfer nodes that need to be removed as well
     const transferLinks: any = [];
+    const positions: Position[] = [];
     _.each(links, (link) => {
       if (__guard__(link != null ? link.transferNode : undefined, x => x.key) != null) {
-        return transferLinks.push(link);
+        transferLinks.push(link);
+        positions.push({x: link.transferNode.x, y: link.transferNode.y});
       }
     });
 
@@ -593,7 +603,9 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       },
       undo: () => {
         this._addNode(node, options);
-        for (const link of transferLinks) { this._addTransfer(link, options); }
+        for (let i = 0; i < transferLinks.length; i++) {
+          this._addTransfer(transferLinks[i], positions[i]);
+        }
         for (const link of links) { this._addLink(link, options); }
         if (transferLink != null) {
           this._addLink(transferLink, options);
@@ -631,17 +643,29 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     return this.updateListeners();
   },
 
-  _addTransfer(link) {
+  _addTransfer(link, position?: Position) {
     if (link.transferNode == null) {
       const source = link.sourceNode;
       const target = link.targetNode;
-      const x = source.x + ((target.x - source.x) / 2);
+      let x = source.x + ((target.x - source.x) / 2);
       let y = source.y + ((target.y - source.y) / 2);
 
-      // if there is already a transfer link in the other direction offset the y axis
-      // so the transfer nodes don't overlay each other in the graph
-      if (source.inLinks().find(l => l.targetNode === source)) {
-        y -= 75;
+      if (position) {
+        // position is set on redo
+        x = position.x;
+        y = position.y;
+      } else {
+        // if there is already a transfer link in the other direction offset the y axis
+        // so the transfer nodes don't overlay each other in the graph
+        const existingTransferLink = source.inLinks().find(l => l.transferNode && l.targetNode === source && l.sourceNode === target);
+        if (existingTransferLink) {
+          // move the transfer node up if it is still visible after the move, otherwise move it down
+          const delta = 75;
+          y = existingTransferLink.transferNode.y - delta;
+          if (y < 0) {
+            y = existingTransferLink.transferNode.y + delta;
+          }
+        }
       }
 
       link.transferNode = new TransferModel({x, y});
