@@ -15,7 +15,6 @@ import { tr } from "../utils/translate";
 import { Mixer } from "../mixins/components";
 import { urlParams } from "../utils/url-params";
 import { CodapConnect } from "../models/codap-connect";
-import { ModalModelTypeHelpView } from "./modal-model-type-help";
 
 const { SimulationType, Complexity } = AppSettingsStore;
 
@@ -37,7 +36,10 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
   constructor(props: SimulationInspectorProps) {
     super(props);
     this.mixins = [new SimulationMixin(this), new AppSettingsMixin(this)];
-    this.setInitialState(props, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
+    const outerProps: SimulationInspectorOuterProps = {
+      onShowModelTypeHelp: props.onShowModelTypeHelp
+    };
+    this.setInitialState(outerProps, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
   public componentWillMount() {
@@ -181,7 +183,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleSimulationType = (val) => {
     AppSettingsActions.setSimulationType(val);
-    if ((val === SimulationType.diagramOnly) && GraphStore.allLinksAreUndefined()) {
+    if ((val === SimulationType.diagramOnly) && (GraphStore.allLinksAreUndefined() || (GraphStore.getMinimumComplexity() === Complexity.basic))) {
       AppSettingsActions.setComplexity(Complexity.basic);
     }
   }
