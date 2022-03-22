@@ -553,7 +553,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
           label: "",
           color: LinkColors.transferPipe,
           thickness: 10,
-          showIndicators: false,
+          showIndicators: this.state.relationshipSymbols,
           isEditing: false,
           linkModel: link,
           isTransfer: true,
