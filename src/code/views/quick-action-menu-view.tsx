@@ -137,7 +137,8 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
       GraphStore.changeNode({ image: i.image }, thisNode);
     };
 
-    const palette = PaletteStore.orderedPalette(this.state.simulationType);
+    // Always hide the collector and flow variables in this view.
+    const palette = PaletteStore.orderedPalette(AppSettingsStore.SimulationType.static);
     const imageAddCallback = (i: {image: string}) => {
       this.setState({ showImages: true, closeTimer: null });
       GraphStore.changeNode({ image: i.image }, thisNode);
