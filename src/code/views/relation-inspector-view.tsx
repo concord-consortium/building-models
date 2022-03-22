@@ -21,6 +21,7 @@ import { GraphStore, GraphMixin, GraphMixinProps, GraphMixinState, GraphStoreCla
 import { Mixer } from "../mixins/components";
 import { Link } from "../models/link";
 import { Node } from "../models/node";
+import { HorizontalTabbedPanelView } from "./horizontal-tabbed-panel-view";
 
 interface RelationInspectorViewOuterProps {
   node?: Node | null;
@@ -28,6 +29,7 @@ interface RelationInspectorViewOuterProps {
   graphStore: GraphStoreClass;
 }
 interface RelationInspectorViewOuterState {
+  selectedHoriztonalTabIndex: number;
 }
 
 type RelationInspectorViewProps = RelationInspectorViewOuterProps & InspectorPanelMixinProps & GraphMixinProps;
@@ -42,7 +44,9 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
   constructor(props: RelationInspectorViewProps) {
     super(props);
     this.mixins = [new InspectorPanelMixin(this), new GraphMixin(this)];
-    const outerState: RelationInspectorViewOuterState = {};
+    const outerState: RelationInspectorViewOuterState = {
+      selectedHoriztonalTabIndex: 0,
+    };
     this.setInitialState(outerState, InspectorPanelMixin.InitialState());
   }
 
@@ -57,9 +61,9 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     }
   }
 
-  private renderTabforLink(link) {
+  private renderTabforLink(link, node) {
     const relationView = <LinkRelationView link={link} graphStore={this.props.graphStore} />;
-    const label = link.sourceNode.title;
+    const label = node.title;
     const {vector, scalar, accumulator, transferModifier} = RelationFactory.selectionsFromRelation(link.relation);
     const isFullyDefined = (link.relation.isDefined && (vector != null) && (scalar != null)) || (link.relation.customData != null) || (accumulator != null) || (transferModifier != null);
 
@@ -87,18 +91,56 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
   }
 
   private renderNodeRelationInspector(node: Node) {
-    let selectedTabIndex = 0;
-    const tabs = _.map(node.inLinks(), (link, i) => {
-      if (this.state.selectedLink === link) { selectedTabIndex = i; }
-      return this.renderTabforLink(link);
+    let selectedAffectsTabIndex = 0;
+    let selectedAffectedByTabIndex = 0;
+
+    const affectedByLinkTabs = _.map(node.inLinks(), (link, i) => {
+      if (this.state.selectedLink === link) { selectedAffectedByTabIndex = i; }
+      return this.renderTabforLink(link, link.sourceNode);
     });
+    const affectedByTabDisabled = affectedByLinkTabs.length === 0;
+
+    const affectsLinkTabs = _.map(node.outLinks(), (link, i) => {
+      if (this.state.selectedLink === link) { selectedAffectsTabIndex = i; }
+      return this.renderTabforLink(link, link.targetNode);
+    });
+    const affectsTabDisabled = affectsLinkTabs.length === 0;
+
+    const affectedByTab = HorizontalTabbedPanelView.Tab({
+      label: "Affected By",
+      component: <TabbedPanelView
+        tabs={affectedByLinkTabs}
+        selectedTabIndex={selectedAffectedByTabIndex}
+        onTabSelected={this.handleAffectedByLinkTabSelected}
+        onRenderBelowTabsComponent={this.renderNodeDetailsInspector}
+      />,
+      disabled: affectedByTabDisabled
+    });
+
+    const affectsTab = HorizontalTabbedPanelView.Tab({
+      label: "Affects",
+      component: <TabbedPanelView
+        tabs={affectsLinkTabs}
+        selectedTabIndex={selectedAffectsTabIndex}
+        onTabSelected={this.handleAffectsLinkTabSelected}
+      />,
+      disabled: affectsTabDisabled
+    });
+
+    // make sure the selected tab isn't disabled
+    let selectedTabIndex = this.state.selectedHoriztonalTabIndex;
+    if ((selectedTabIndex === 0) && affectedByTabDisabled) {
+      selectedTabIndex = 1;
+    } else if ((selectedTabIndex === 1) && affectsTabDisabled) {
+      selectedTabIndex = 0;
+    }
+
     return (
       <div className="relation-inspector">
-        <TabbedPanelView
-          tabs={tabs}
+        <HorizontalTabbedPanelView
           selectedTabIndex={selectedTabIndex}
-          onTabSelected={this.handleTabSelected}
-          onRenderBelowTabsComponent={this.renderNodeDetailsInspector}
+          onTabSelected={this.handleHorizontalTabSelected}
+          tabs={[affectedByTab, affectsTab]}
         />
       </div>
     );
@@ -108,7 +150,7 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     return (
       <div className="relation-inspector" >
         <TabbedPanelView
-          tabs={[this.renderTabforLink(link)]}
+          tabs={[this.renderTabforLink(link, link.sourceNode)]}
           selectedTabIndex={0}
           onTabSelected={this.ignoreTabSelected}
         />
@@ -116,10 +158,21 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     );
   }
 
-  private handleTabSelected = (index) => {
+  private handleHorizontalTabSelected = (index) => {
+    this.setState({selectedHoriztonalTabIndex: index});
+  }
+
+  private handleAffectedByLinkTabSelected = (index) => {
     const {node} = this.props;
     if (node) {
       InspectorPanelActions.openInspectorPanel("relations", {link: __guard__(node.inLinks(), x => x[index])});
+    }
+  }
+
+  private handleAffectsLinkTabSelected = (index) => {
+    const {node} = this.props;
+    if (node) {
+      InspectorPanelActions.openInspectorPanel("relations", {link: __guard__(node.outLinks(), x => x[index])});
     }
   }
 
