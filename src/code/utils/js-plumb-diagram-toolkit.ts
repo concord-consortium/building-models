@@ -300,12 +300,16 @@ export class DiagramToolkit {
     const formula = opts.linkModel != null && opts.linkModel.relation != null ? opts.linkModel.relation.formula : undefined;
     const isAddedToOrSubtractedFrom = formula === "+in" || formula === "-in";
 
+    const plusChangeIndicator = "+";
+    const minusChangeIndicator = "\u2013";
+
     let startColor = LinkColors.default;
     let finalColor = LinkColors.default;
     let fixedColor = LinkColors.default;
     let fadedColor = LinkColors.defaultFaded;
     let changeIndicator: string|null = "";
     let changeLocation = 0.9;
+    const reversedChangeLocation = 1 - changeLocation;
     let thickness = Math.abs(opts.magnitude);
     if (!thickness) {
       thickness = 1;
@@ -326,12 +330,12 @@ export class DiagramToolkit {
     if (opts.magnitude < 0) {
       fixedColor = LinkColors.decrease;
       fadedColor = LinkColors.decreaseFaded;
-      changeIndicator = "\u2013";
+      changeIndicator = minusChangeIndicator;
     }
     if (opts.magnitude > 0) {
       fixedColor = LinkColors.increase;
       fadedColor = LinkColors.increaseFaded;
-      changeIndicator = "+";
+      changeIndicator = plusChangeIndicator;
     }
     if (opts.color !== LinkColors.default) {
       fixedColor = opts.color;
@@ -342,13 +346,14 @@ export class DiagramToolkit {
     }
 
     if (opts.isTransfer || isAddedToOrSubtractedFrom) {
-      // TODO: Add changeIndicators:
-      console.log("opts", opts);
       const formula = opts.linkModel != null && opts.linkModel.relation != null ?   opts.linkModel.relation.formula : undefined;
       if (formula === "+in") {
-        changeIndicator = "+";
+        changeIndicator = plusChangeIndicator;
       } else if (formula === "-in") {
-        changeIndicator = "\u2013";
+        changeIndicator = minusChangeIndicator;
+      } else if (opts.isTransfer) {
+        changeIndicator = opts.fromSource ? minusChangeIndicator : plusChangeIndicator;
+        changeLocation = opts.fromSource ? reversedChangeLocation : changeLocation;
       }
       thickness = 10;
       fixedColor = LinkColors.transferPipe;
