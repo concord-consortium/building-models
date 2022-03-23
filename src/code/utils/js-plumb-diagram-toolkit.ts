@@ -304,6 +304,7 @@ export class DiagramToolkit {
     let changeIndicator: string|null = "";
     let changeLocation = 0.9;
     const reversedChangeLocation = 1 - changeLocation;
+    const transferChangeLocation = 0.8;
     let thickness = Math.abs(opts.magnitude);
     if (!thickness) {
       thickness = 1;
@@ -347,7 +348,7 @@ export class DiagramToolkit {
         changeIndicator = minusChangeIndicator;
       } else if (opts.isTransfer) {
         changeIndicator = opts.fromSource ? minusChangeIndicator : plusChangeIndicator;
-        changeLocation = opts.fromSource ? reversedChangeLocation : changeLocation;
+        changeLocation = opts.fromSource ? transferChangeLocation : reversedChangeLocation;
       }
       thickness = 10;
       fixedColor = LinkColors.transferPipe;
