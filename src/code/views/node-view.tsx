@@ -402,28 +402,24 @@ getDefaultProps() {
 
   private renderNodeInternal() {
     const getNodeImage = (node) => {
+      let image = node.image;
 
       if (node.isAccumulator) {
         return (
           <StackedImageView
-            image={node.image}
+            image={image}
             imageProps={node.collectorImageProps()}
           />
         );
-      }
-
-      let image = node.image;
-      if (node.isTransfer) {
+      } else if (node.isTransfer) {
         image = "img/nodes/transfer.png";
-      } else {
-        const outLinks = node.outLinks();
-        if (node.isFlowVariable && (outLinks.length === 0)) {
-          image = "img/nodes/flow-variable.png";
-        } else {
-          const firstFlowLink = _.find(outLinks, link => link.relation.formula === "+in" || link.relation.formula === "-in");
-          if (firstFlowLink) {
-            return <FlowImageView link={firstFlowLink} />;
-          }
+      } else if (node.isFlowVariable) {
+        image = "img/nodes/flow-variable.png";
+
+        // if the flow variable is connected to a node use its image, else use the default flow variable image
+        const firstFlowLink = _.find(node.outLinks(), link => link.relation.formula === "+in" || link.relation.formula === "-in");
+        if (firstFlowLink) {
+          return <FlowImageView link={firstFlowLink} />;
         }
       }
 
