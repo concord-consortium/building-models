@@ -215,13 +215,7 @@ export class DiagramToolkit {
         foldback: 1
       }]);
     }
-    if (changeIndicator && (variableWidth !== 0)) {
-      results.push(["Label", {
-        location: changeLocation,
-        label: changeIndicator || "",
-        cssClass: `link-indicator${changeIndicator === "+" ? " increase" : " decrease"}`
-      }]);
-    } else if (changeIndicator) {
+    if (changeIndicator) {
       results.push(["Label", {
         location: changeLocation,
         label: changeIndicator || "",
@@ -383,6 +377,7 @@ export class DiagramToolkit {
     let arrowFoldback = 0.6;
 
     if (opts.gradual && opts.useVariableThickness) {
+      changeLocation = reversedChangeLocation;
       variableWidthMagnitude = this.lineWidthVariation * opts.gradual;
       arrowFoldback = 0.8;
       this.kit.importDefaults({
@@ -415,7 +410,7 @@ export class DiagramToolkit {
     // (if you change the location to 0 the thick arrow bleeds out in front of the arrow)
     const swapEnds = formula === "-in";
     if (swapEnds) {
-      changeLocation = 1 - changeLocation;
+      changeLocation = reversedChangeLocation;
     }
     const connection = this.kit.connect({
       source: swapEnds ? opts.target : opts.source,
