@@ -256,7 +256,7 @@
     "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
 
     // quick actions
-    "~QUICK_ACTIONS.SET_IMAGE": "Set image",
+    "~QUICK_ACTIONS.SET_IMAGE": "Change image",
     "~QUICK_ACTIONS.CONVERT_TO_COLLECTOR": "Convert to collector",
     "~QUICK_ACTIONS.CONVERT_TO_FLOW": "Convert to flow",
     "~QUICK_ACTIONS.CONVERT_TO_STANDARD_VARIABLE": "Convert to standard variable",

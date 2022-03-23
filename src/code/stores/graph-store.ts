@@ -783,10 +783,12 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             let deletedNodes: Node[];
             let deletedNode: Node;
             const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
+            const flowVariableChanged = (data.isFlowVariable != null) && (!!data.isFlowVariable !== !!originalData.isFlowVariable);
+            const variableTypeChanged = accumulatorChanged || flowVariableChanged;
 
-            if (accumulatorChanged) {
+            if (variableTypeChanged) {
               // all inbound and outbound links are deleted along with any transfer nodes along those links and
-              //  any links pointing to deleted transfer nodes
+              // any links pointing to deleted transfer nodes
               deletedLinks = [].concat(node.links);
               deletedNodes = deletedLinks.filter(link => !!link.transferNode).map(link => link.transferNode);
               deletedNodes.forEach(deletedNode => {
@@ -828,7 +830,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             this.undoRedoManager.startCommandBatch();
             this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
-                if (accumulatorChanged) {
+                if (variableTypeChanged) {
                   for (deletedLink of deletedLinks) {
                     this._removeLink(deletedLink);
                   }
@@ -842,7 +844,7 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
               undo: () => {
                 logNodeChange(originalData);
                 this.changeNodeOutsideUndoRedo(node, originalData);
-                if (accumulatorChanged) {
+                if (variableTypeChanged) {
                   for (deletedNode of deletedNodes) {
                     this._addNode(deletedNode);
                   }
