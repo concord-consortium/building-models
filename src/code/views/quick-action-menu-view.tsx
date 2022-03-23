@@ -7,6 +7,7 @@ import { AppSettingsStore, SimulationType, AppSettingsMixinProps, AppSettingsMix
 import { PaletteAddView } from "./palette-add-view";
 import { GraphStore } from "../stores/graph-store";
 import { Mixer } from "../mixins/components";
+import { SimulationActions } from "../stores/simulation-store";
 
 
 interface QuickActionMenuViewOuterProps {
@@ -19,20 +20,31 @@ type QuickActionMenuViewProps = QuickActionMenuViewOuterProps & AppSettingsMixin
 
 interface QuickActionMenuViewOuterState {
   showImages: boolean;
-  closeTimer: NodeJS.Timeout|null;
 }
 type QuickActionMenuViewState = QuickActionMenuViewOuterState & AppSettingsMixinState;
 
 
 export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickActionMenuViewState> {
+  private closeTimer: number|undefined;
+  private menuRef: HTMLDivElement|null = null;
+
   constructor(props: QuickActionMenuViewProps) {
     super(props);
     this.mixins = [new AppSettingsMixin(this)];
     const outerState: QuickActionMenuViewOuterState = {
-      showImages: false,
-      closeTimer: null
+      showImages: false
     };
     this.setInitialState(outerState, AppSettingsMixin.InitialState());
+  }
+
+  public componentDidMount() {
+    window.addEventListener("mousedown", this.handleCloseOnBackgroundClick, true);
+    window.addEventListener("touchstart", this.handleCloseOnBackgroundClick, true);
+  }
+
+  public componentWillUnmount() {
+    window.removeEventListener("mousedown", this.handleCloseOnBackgroundClick, true);
+    window.removeEventListener("touchstart", this.handleCloseOnBackgroundClick, true);
   }
 
   public render() {
@@ -67,81 +79,90 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
 
     const { showGraphButton  } = this.props;
     return(
-      <>
-        <div
-          className="quick-action-menu"
-          onMouseEnter={this.handleMouseEnter}
-          onMouseLeave={this.handleMouseLeave}
-        >
-          <div className="left-panel">
-            <ul>
-              <li
-                className={setImageClasses}
-                onClick={this.toggleShowImages}
-                onMouseEnter={showImagesF}
-              >
-                <div>{setImageLabel}</div>
-                <div className="icon-codap-inspectorArrow-collapse"/>
-              </li>
+      <div
+        className="quick-action-menu"
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+        ref={el => this.menuRef = el}
+      >
+        <div className="left-panel">
+          <ul>
+            <li
+              className={setImageClasses}
+              onClick={this.toggleShowImages}
+              onMouseEnter={showImagesF}
+            >
+              <div>{setImageLabel}</div>
+              <div className="icon-codap-inspectorArrow-collapse"/>
+            </li>
 
-              { isTimeBased &&
-                <>
-                  <li
-                    className={collectorClasses}
-                    onClick={this.convertToCollector}
-                    onMouseEnter={hideImagesF}
-                  >
-                    {collectorLabel}
-                  </li>
-
-                  <li
-                    className={flowClasses}
-                    onClick={this.convertToFlow}
-                    onMouseEnter={hideImagesF}
-                  >
-                    {flowLabel}
-                  </li>
-
-                  <li
-                    className={standardClasses}
-                    onClick={this.convertToStandard}
-                    onMouseEnter={hideImagesF}
-                  >
-                  {standardVariableLabel}
-                  </li>
-                </>
-              }
-
-              {showGraphButton &&
+            { isTimeBased &&
+              <>
                 <li
-                  className={createGraphClasses}
-                  onClick={this.createGraph}
+                  className={collectorClasses}
+                  onClick={this.convertToCollector}
                   onMouseEnter={hideImagesF}
                 >
-                  {createGraphLabel}
+                  {collectorLabel}
                 </li>
-              }
 
-            </ul>
-          </div>
-          {true && this.renderRightMenu()}
+                <li
+                  className={flowClasses}
+                  onClick={this.convertToFlow}
+                  onMouseEnter={hideImagesF}
+                >
+                  {flowLabel}
+                </li>
+
+                <li
+                  className={standardClasses}
+                  onClick={this.convertToStandard}
+                  onMouseEnter={hideImagesF}
+                >
+                {standardVariableLabel}
+                </li>
+              </>
+            }
+
+            {showGraphButton &&
+              <li
+                className={createGraphClasses}
+                onClick={this.createGraph}
+                onMouseEnter={hideImagesF}
+              >
+                {createGraphLabel}
+              </li>
+            }
+
+          </ul>
         </div>
-      </>
+        {true && this.renderRightMenu()}
+      </div>
     );
+  }
+
+  private clearCloseTimer() {
+    window.clearTimeout(this.closeTimer);
+    this.closeTimer = undefined;
   }
 
   private renderRightMenu() {
     const thisNode = this.props.node;
     const selected = thisNode.image;
-    const onImageChage = (i: {image: string}) =>  {
-      GraphStore.changeNode({ image: i.image }, thisNode);
+    const onImageChange = (i: {image: string, uuid: string, usesDefaultImage: boolean}) =>  {
+      GraphStore.changeNode({
+        image: i.image,
+        paletteItem: i.uuid,
+        usesDefaultImage: i.usesDefaultImage
+      }, thisNode);
     };
 
     // Always hide the collector and flow variables in this view.
     const palette = PaletteStore.orderedPalette(AppSettingsStore.SimulationType.static);
-    const imageAddCallback = (i: {image: string}) => {
-      this.setState({ showImages: true, closeTimer: null });
-      GraphStore.changeNode({ image: i.image }, thisNode);
+    const imageAddCallback = (i: {image: string, uuid: string, usesDefaultImage: boolean}) => {
+      this.clearCloseTimer();
+      this.setState({ showImages: true });
+      onImageChange(i);
     };
     return (
       <div className="right-panel">
@@ -155,7 +176,7 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
               <ImgChoiceView
                 node={pi}
                 selected={selected}
-                onChange={onImageChage}
+                onChange={onImageChange}
               />
             </div>
           )}
@@ -165,21 +186,35 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
   }
 
   private handleMouseEnter = () => {
-    if (this.state.closeTimer) {
-      clearTimeout(this.state.closeTimer);
-    }
-    this.setState({ closeTimer: null });
+    this.clearCloseTimer();
   }
 
   private handleMouseLeave = () => {
     const {closeFn} = this.props;
     if (closeFn) {
-      const nextTimeout = setTimeout(() => {
+      this.closeTimer = window.setTimeout(() => {
         closeFn();
       }, 500);
-      this.setState({ closeTimer: nextTimeout });
     }
   }
+
+  private handleCloseOnBackgroundClick = (e: MouseEvent) => {
+    // make sure the click is outside the menu or off the quick action menu button itself
+    let target = e.target as HTMLElement | null;
+    while (this.menuRef && target) {
+      if ((target === this.menuRef) || (target.dataset.quickActionMenu === "true")) {
+        break;
+      } else {
+        target = target.parentElement;
+      }
+    }
+    if (!target) {
+      this.props.closeFn?.();
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
   private toggleShowImages = (): void => {
     const {showImages} = this.state;
     this.setState({ showImages: !showImages });
@@ -188,16 +223,19 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
   private convertToCollector = (): void => {
     const {node} = this.props;
     GraphStore.changeNode({ isFlowVariable: false, isAccumulator: true}, node);
+    SimulationActions.toggledCollectorTo(true);
   }
 
   private convertToFlow = (): void => {
     const {node} = this.props;
     GraphStore.changeNode({ isFlowVariable: true, isAccumulator: false }, node);
+    SimulationActions.toggledCollectorTo(false);
   }
 
   private convertToStandard = (): void => {
     const {node} = this.props;
     GraphStore.changeNode({ isFlowVariable: false, isAccumulator: false }, node);
+    SimulationActions.toggledCollectorTo(false);
   }
 
   private createGraph = (): void => {

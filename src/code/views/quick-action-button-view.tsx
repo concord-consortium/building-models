@@ -37,6 +37,7 @@ export class QuickActionButtonView extends React.Component<QuickActionButtonProp
         <div
           className="graph-source action-circle"
           data-node-key={node.key}
+          data-quick-action-menu="true"
           onClick={this.handleClick}
         >
           <VerticalEllipse size={16}/>
