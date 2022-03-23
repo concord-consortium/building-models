@@ -12,6 +12,7 @@ import { ImportActions } from "../actions/import-actions";
 import { urlParams } from "../utils/url-params";
 import { StoreClass, StoreUnsubscriber } from "./store-class";
 import { Mixin } from "../mixins/components";
+import { GraphStore } from "./graph-store";
 
 export declare class AppSettingsActionsClass {
   public setComplexity(val: any): void;  // TODO: get concrete class
@@ -20,6 +21,7 @@ export declare class AppSettingsActionsClass {
   public guide(show: boolean): void;
   public setTouchDevice(val: any): void;  // TODO: get concrete class
   public setGuideItems(items: GuideItem[]): void;
+  public checkRelationships(): void;
 }
 
 export declare class AppSettingsStoreClass extends StoreClass {
@@ -35,7 +37,8 @@ export const AppSettingsActions: AppSettingsActionsClass = Reflux.createActions(
     "relationshipSymbols",
     "guide",
     "setTouchDevice",
-    "setGuideItems"
+    "setGuideItems",
+    "checkRelationships"
   ]
 );
 
@@ -152,6 +155,7 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
   onSetSimulationType(val) {
     const prevSimulationType = this.settings.simulationType;
     this.settings.simulationType = val;
+    this.onCheckRelationships();
 
     return this.notifyChange();
   },
@@ -178,6 +182,12 @@ export const AppSettingsStore: AppSettingsStoreClass = Reflux.createStore({
   onImport(data) {
     _.merge(this.settings, data.settings);
     return this.notifyChange();
+  },
+
+  onCheckRelationships() {
+    if ((this.settings.simulationType === SimulationType.diagramOnly) && (GraphStore.allLinksAreUndefined() || (GraphStore.getMinimumComplexity() === Complexity.basic))) {
+      this.onSetComplexity(Complexity.basic);
+    }
   },
 
   serialize() {
