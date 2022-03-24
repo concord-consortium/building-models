@@ -13,6 +13,7 @@ import { LinkColors } from "../utils/link-colors";
 import * as $ from "jquery";
 
 import { getViewScale, registerScaleListener } from "../utils/scale-app";
+import { RelationFactory } from "../models/relation-factory";
 
 // const jsPlumb = require("../../vendor/jsPlumb");
 declare var jsPlumb;
@@ -330,6 +331,11 @@ export class DiagramToolkit {
       fixedColor = LinkColors.increase;
       fadedColor = LinkColors.increaseFaded;
       changeIndicator = plusChangeIndicator;
+    }
+    if (opts.linkModel?.relation.isTransferModifier) {
+      changeIndicator = opts.linkModel.relation.formula === RelationFactory.proportionalSourceLess.formula
+        ? minusChangeIndicator
+        : plusChangeIndicator;
     }
     if (opts.color !== LinkColors.default) {
       fixedColor = opts.color;
