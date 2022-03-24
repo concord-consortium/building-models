@@ -183,9 +183,6 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleSimulationType = (val) => {
     AppSettingsActions.setSimulationType(val);
-    if ((val === SimulationType.diagramOnly) && (GraphStore.allLinksAreUndefined() || (GraphStore.getMinimumComplexity() === Complexity.basic))) {
-      AppSettingsActions.setComplexity(Complexity.basic);
-    }
   }
 
   private handleComplexity = (val) => {

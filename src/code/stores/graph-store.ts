@@ -25,7 +25,7 @@ import { PaletteStore } from "../stores/palette-store";
 import { tr } from "../utils/translate";
 import { latestVersion } from "../data/migrations/migrations";
 import { PaletteDeleteDialogStore } from "../stores/palette-delete-dialog-store";
-import { AppSettingsStore } from "../stores/app-settings-store";
+import { AppSettingsStore, AppSettingsActions } from "../stores/app-settings-store";
 import { SimulationStore, SimulationActions } from "../stores/simulation-store";
 import { GraphActions } from "../actions/graph-actions";
 import { CodapActions } from "../actions/codap-actions";
@@ -688,14 +688,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
   },
 
   _graphUpdated() {
-    return (() => {
-      const result: any = [];
-      for (const key in this.nodeKeys) {
-        const node = this.nodeKeys[key];
-        result.push(node.checkIsInIndependentCycle());
-      }
-      return result;
-    })();
+    for (const key in this.nodeKeys) {
+      const node = this.nodeKeys[key];
+      node.checkIsInIndependentCycle();
+    }
+    AppSettingsActions.checkRelationships();
   },
 
   moveNodeCompleted(nodeKey, leftDiff, topDiff) {
