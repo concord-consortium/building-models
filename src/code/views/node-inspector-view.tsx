@@ -6,6 +6,7 @@ import { ImagePickerView } from "./image-picker-view";
 import { NodeTitleMixin, NodeTitleMixinProps, NodeTitleMixinState } from "../mixins/node-title";
 import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
+import { ImageChange } from "../stores/graph-store";
 
 export interface NodeChangedValues {
 }
@@ -80,11 +81,12 @@ export class NodeInspectorView extends Mixer<NodeInspectorViewProps, NodeInspect
 
   private handleChangeImage = (node) => {
     if (this.props.onNodeChanged) {
-      this.props.onNodeChanged(this.props.node, {
+      const imageChange: ImageChange = {
         image: node.image,
         paletteItem: node.uuid,
         usesDefaultImage: node.usesDefaultImage
-      });
+      };
+      this.props.onNodeChanged(this.props.node, imageChange);
     }
   }
 

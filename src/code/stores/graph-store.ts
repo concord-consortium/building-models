@@ -21,7 +21,7 @@ import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
 import { undoRedoInstance, UndoRedoManager } from "../utils/undo-redo";
 import { SelectionManager } from "../models/selection-manager";
-import { PaletteStore } from "../stores/palette-store";
+import { PaletteStore, PaletteItem } from "../stores/palette-store";
 import { tr } from "../utils/translate";
 import { latestVersion } from "../data/migrations/migrations";
 import { PaletteDeleteDialogStore } from "../stores/palette-delete-dialog-store";
@@ -63,6 +63,12 @@ interface UndoRedoOptions {
 interface Position {
   x: number;
   y: number;
+}
+
+export interface ImageChange {
+  image: string;
+  paletteItem: string;
+  usesDefaultImage: boolean;
 }
 
 export declare class GraphStoreClass extends StoreClass {
@@ -142,6 +148,7 @@ export declare class GraphStoreClass extends StoreClass {
   public nudgeNodeWithKeyInitialValue(key: string, delta: number);
   public waitUntilReady(callback: () => void): void;
   public allLinksAreUndefined(): boolean;
+  public getChangedNodeImageInfo(data: any, node: Node): any;
 }
 
 export const GraphStore: GraphStoreClass = Reflux.createStore({
@@ -775,17 +782,33 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
 
           if (nodeChanged) {        // don't do anything unless we've actually changed the node
 
-            let deletedLinks: Link[];
+            // figure out the new node image based on the changes
+            data = {...data, ...this.getChangedNodeImageInfo(data, node)};
+
+            let deletedLinks: Link[] = [];
             let deletedLink: Link;
-            let deletedNodes: Node[];
+            let deletedNodes: Node[] = [];
             let deletedNode: Node;
             const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
+            const flowVariableChangedToNormal = originalData.isFlowVariable && !data.isFlowVariable && !data.isAccumulator;
+            const variableTypeChanged = accumulatorChanged || flowVariableChangedToNormal;
 
-            if (accumulatorChanged) {
-              // all inbound and outbound links are deleted along with any transfer nodes along those links and
-              // any links pointing to deleted transfer nodes
-              deletedLinks = [].concat(node.links);
-              deletedNodes = deletedLinks.filter(link => !!link.transferNode).map(link => link.transferNode);
+            if (variableTypeChanged) {
+              if (accumulatorChanged) {
+                // all inbound and outbound links are deleted along with any transfer nodes along those links and
+                // any links pointing to deleted transfer nodes
+                deletedLinks = [].concat(node.links);
+                deletedNodes = deletedLinks.filter(link => !!link.transferNode).map(link => link.transferNode);
+              } else if (flowVariableChangedToNormal) {
+                // remove flow variable links
+                node.links.forEach(link => {
+                  const {formula} = link.relation;
+                  if ((formula === "+in") || (formula === "-in")) {
+                    deletedLinks.push(link);
+                  }
+                });
+              }
+
               deletedNodes.forEach(deletedNode => {
                 deletedNode.inLinks().forEach(inLink => {
                   if (deletedLinks.indexOf(inLink) === -1) {
@@ -825,13 +848,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             this.undoRedoManager.startCommandBatch();
             this.undoRedoManager.createAndExecuteCommand("changeNode", {
               execute: () => {
-                if (accumulatorChanged) {
-                  for (deletedLink of deletedLinks) {
-                    this._removeLink(deletedLink);
-                  }
-                  for (deletedNode of deletedNodes) {
-                    this._removeNode(deletedNode);
-                  }
+                for (deletedLink of deletedLinks) {
+                  this._removeLink(deletedLink);
+                }
+                for (deletedNode of deletedNodes) {
+                  this._removeNode(deletedNode);
                 }
                 logNodeChange(data);
                 return this.changeNodeOutsideUndoRedo(node, data);
@@ -839,13 +860,11 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
               undo: () => {
                 logNodeChange(originalData);
                 this.changeNodeOutsideUndoRedo(node, originalData);
-                if (accumulatorChanged) {
-                  for (deletedNode of deletedNodes) {
-                    this._addNode(deletedNode);
-                  }
-                  for (deletedLink of deletedLinks) {
-                    this._addLink(deletedLink);
-                  }
+                for (deletedNode of deletedNodes) {
+                  this._addNode(deletedNode);
+                }
+                for (deletedLink of deletedLinks) {
+                  this._addLink(deletedLink);
                 }
               }
             }
@@ -860,6 +879,53 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       }
       return result;
     })();
+  },
+
+  getChangedNodeImageInfo(changes, node): ImageChange {
+    const accumulatorChanged = (changes.isAccumulator != null) && (!!changes.isAccumulator !== !!node.isAccumulator);
+    const flowVariableChanged = (changes.isFlowVariable != null) && (!!changes.isFlowVariable !== !!node.isFlowVariable);
+
+    const imageInfo = (i: any): ImageChange => {
+      return {
+        image: i.image,
+        paletteItem: i.uuid,
+        usesDefaultImage: i.usesDefaultImage,
+      };
+    };
+
+    const nodeTypeChangeImage = (toPaletteItem: PaletteItem | undefined, fromPaletteItem: PaletteItem | undefined): ImageChange => {
+      // always use direct image changes
+      if (changes.image) {
+        return imageInfo(changes);
+      }
+      if (toPaletteItem && fromPaletteItem) {
+        // default to custom image if present, otherwise fallback to palette item image
+        if (node.image !== fromPaletteItem.image) {
+          return imageInfo(node);
+        }
+        return imageInfo(toPaletteItem);
+      }
+      return imageInfo(node);
+    };
+
+    if (accumulatorChanged || flowVariableChanged) {
+      const blankItem = PaletteStore.getBlankPaletteItem();
+      const flowVariableItem = PaletteStore.getFlowVariablePaletteItem();
+
+      // use blank item for the collector nodes "stack" the blank image
+      const fromPaletteItem = node.isAccumulator ? blankItem : (node.isFlowVariable ? flowVariableItem : blankItem);
+
+      // changed to isFlowVariable
+      if (changes.isFlowVariable) {
+        return nodeTypeChangeImage(flowVariableItem, fromPaletteItem);
+      }
+
+      // changed to accumulator or blank item, they both use the same image
+      return nodeTypeChangeImage(blankItem, fromPaletteItem);
+    }
+
+    // no node type change
+    return nodeTypeChangeImage(undefined, undefined);
   },
 
   changeNodeOutsideUndoRedo(node, data, notifyCodap) {
