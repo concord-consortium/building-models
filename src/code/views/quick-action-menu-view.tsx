@@ -5,7 +5,7 @@ import { ImgChoiceView } from "./img-choice-view";
 import { PaletteStore } from "../stores/palette-store";
 import { AppSettingsStore, SimulationType, AppSettingsMixinProps, AppSettingsMixinState, AppSettingsMixin } from "../stores/app-settings-store";
 import { PaletteAddView } from "./palette-add-view";
-import { GraphStore } from "../stores/graph-store";
+import { GraphStore, ImageChange } from "../stores/graph-store";
 import { Mixer } from "../mixins/components";
 import { SimulationActions } from "../stores/simulation-store";
 
@@ -53,6 +53,7 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
     const rightMenuClasses = showImages ? "right-menu" : "right-menu hidden";
     const isAccumulator = node.isAccumulator;
     const isFlow = node.isFlowVariable;
+    const isTransfer = node.isTransfer;
     const isTimeBased = AppSettingsStore.settings.simulationType === SimulationType.time;
 
     const setImageLabel = tr("~QUICK_ACTIONS.SET_IMAGE");
@@ -70,6 +71,8 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
     const standardVariableLabel = tr("~QUICK_ACTIONS.CONVERT_TO_STANDARD_VARIABLE");
     const standardClasses = disableStandard ? "quick-action-menu-label disabled" : "quick-action-menu-label";
 
+    const showSetImage = !isTransfer;
+    const showConversions = isTimeBased && !isTransfer;
 
     const createGraphLabel = tr("~QUICK_ACTIONS.CREATE_GRAPH");
     const createGraphClasses = "quick-action-menu-label";
@@ -87,16 +90,16 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
       >
         <div className="left-panel">
           <ul>
-            <li
+            {showSetImage && <li
               className={setImageClasses}
               onClick={this.toggleShowImages}
               onMouseEnter={showImagesF}
             >
               <div>{setImageLabel}</div>
               <div className="icon-codap-inspectorArrow-collapse"/>
-            </li>
+            </li>}
 
-            { isTimeBased &&
+            { showConversions &&
               <>
                 <li
                   className={collectorClasses}
@@ -136,7 +139,7 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
 
           </ul>
         </div>
-        {true && this.renderRightMenu()}
+        {showSetImage && this.renderRightMenu()}
       </div>
     );
   }
@@ -149,20 +152,21 @@ export class QuickActionMenuView extends Mixer<QuickActionMenuViewProps, QuickAc
   private renderRightMenu() {
     const thisNode = this.props.node;
     const selected = thisNode.image;
-    const onImageChange = (i: {image: string, uuid: string, usesDefaultImage: boolean}) =>  {
-      GraphStore.changeNode({
-        image: i.image,
-        paletteItem: i.uuid,
-        usesDefaultImage: i.usesDefaultImage
-      }, thisNode);
+    const onImageChange = (node: Node) =>  {
+      const imageChange: ImageChange = {
+        image: node.image,
+        paletteItem: node.uuid,
+        usesDefaultImage: node.usesDefaultImage
+      };
+      GraphStore.changeNode(imageChange, thisNode);
     };
 
     // Always hide the collector and flow variables in this view.
     const palette = PaletteStore.orderedPalette(AppSettingsStore.SimulationType.static);
-    const imageAddCallback = (i: {image: string, uuid: string, usesDefaultImage: boolean}) => {
+    const imageAddCallback = (node: Node) => {
       this.clearCloseTimer();
       this.setState({ showImages: true });
-      onImageChange(i);
+      onImageChange(node);
     };
     return (
       <div className="right-panel">
