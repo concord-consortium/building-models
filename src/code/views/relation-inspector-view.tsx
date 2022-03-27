@@ -107,7 +107,7 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     const affectsTabDisabled = affectsLinkTabs.length === 0;
 
     // don't render a totally disabled tabbed panel
-    if (affectedByTabDisabled && affectedByTabDisabled) {
+    if (affectedByTabDisabled && affectsTabDisabled) {
       return <div />;
     }
 
