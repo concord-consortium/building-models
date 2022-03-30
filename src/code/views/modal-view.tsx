@@ -3,6 +3,7 @@ import * as $ from "jquery";
 
 interface ModalViewProps {
   close?: () => void;
+  closeOnBackgroundClick?: boolean;
 }
 
 interface ModalViewState {}
@@ -22,7 +23,7 @@ export class ModalView extends React.Component<ModalViewProps, ModalViewState> {
   public render() {
     return (
       <div className="modal">
-        <div className="modal-background" />
+        <div className="modal-background" onClick={this.handleBackgroundClose} />
         <div className="modal-content">{this.props.children}</div>
       </div>
     );
@@ -30,6 +31,12 @@ export class ModalView extends React.Component<ModalViewProps, ModalViewState> {
 
   private watchForEscape = (e) => {
     if ((e.keyCode === 27) && this.props.close) {
+      this.props.close();
+    }
+  }
+
+  private handleBackgroundClose = () => {
+    if (this.props.close && this.props.closeOnBackgroundClick) {
       this.props.close();
     }
   }

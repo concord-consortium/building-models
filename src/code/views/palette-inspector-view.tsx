@@ -5,7 +5,7 @@ import { PaletteItemView } from "./palette-item-view";
 import { PaletteAddView } from "./palette-add-view";
 import { ImageMetadataView } from "./image-metadata-view";
 
-import { PaletteActions, PalleteItem, PaletteStore } from "../stores/palette-store";
+import { PaletteActions, PaletteStore, isFixedPaletteItem } from "../stores/palette-store";
 import { PaletteDeleteDialogActions } from "../stores/palette-delete-dialog-store";
 import { NodesMixin, NodesMixinProps, NodesMixinState } from "../stores/nodes-store";
 
@@ -15,7 +15,10 @@ import { PaletteMixinProps, PaletteMixinState, PaletteMixin } from "../stores/pa
 import { AppSettingsStore, AppSettingsMixin, AppSettingsMixinProps, AppSettingsMixinState } from "../stores/app-settings-store";
 import { Mixer } from "../mixins/components";
 
-interface PaletteInspectorViewOuterProps {}
+interface PaletteInspectorViewOuterProps {
+  hideSelectedInspector?: boolean;
+}
+
 type PaletteInspectorViewProps = PaletteInspectorViewOuterProps & PaletteMixinProps & NodesMixinProps & AppSettingsMixinProps;
 
 interface PaletteInspectorViewOuterState {
@@ -28,8 +31,6 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
 
   private palette: HTMLDivElement | null;
 
-  private fixedPaletteItemIds = ["1", "flow-variable"];
-
   constructor(props: PaletteInspectorViewProps) {
     super(props);
     this.mixins = [new PaletteMixin(this), new NodesMixin(this), new AppSettingsMixin(this)];
@@ -39,15 +40,14 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
   }
 
   public render() {
-    const index = 0;
     return (
       <div className="palette-inspector">
         <div className="palette" ref={el => this.palette = el}>
           <div>
             <PaletteAddView label={tr("~PALETTE-INSPECTOR.ADD_IMAGE")} />
-            {_.map(this.orderedPalette(), (node, index) => {
+            {_.map(PaletteStore.orderedPalette(this.state.simulationType), (node, index) => {
               return <PaletteItemView
-                key={index}
+                key={node.uuid}
                 node={node}
                 image={node.image}
                 // selected={index === this.state.selectedPaletteIndex}
@@ -56,13 +56,13 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
             })}
           </div>
         </div>
-        {this.state.selectedPaletteItem ?
+        {this.state.selectedPaletteItem && (!this.props.hideSelectedInspector) ?
           <div className="palette-about-image">
             <div className="palette-about-image-info">
               {this.state.selectedPaletteItem.metadata
                 ? <ImageMetadataView small={true} metadata={this.state.selectedPaletteItem.metadata} update={PaletteActions.update} />
                 : undefined}
-              {!this.isFixedPaletteItem(this.state.selectedPaletteItem) ?
+              {!isFixedPaletteItem(this.state.selectedPaletteItem) ?
               <div className="palette-delete" onClick={this.handleDelete}>
                 {this.state.paletteItemHasNodes ?
                   <span>
@@ -96,26 +96,4 @@ export class PaletteInspectorView extends Mixer<PaletteInspectorViewProps, Palet
     PaletteDeleteDialogActions.open();
   }
 
-  private orderedPalette() {
-    const result: PalleteItem[] = [];
-    const itemsById: Record<string, PalleteItem> = {};
-    const enableFlowVariable = this.state.simulationType === AppSettingsStore.SimulationType.time;
-    this.state.palette.forEach(item => itemsById[item.id] = item);
-    this.fixedPaletteItemIds.forEach(id => {
-      // only display flow variable in time based simulations
-      if (itemsById[id] && (enableFlowVariable || id !== "flow-variable")) {
-        result.push(itemsById[id]);
-      }
-    });
-    this.state.palette.forEach(item => {
-      if (!this.isFixedPaletteItem(item)) {
-        result.push(item);
-      }
-    });
-    return result;
-  }
-
-  private isFixedPaletteItem(paletteItem: PalleteItem) {
-    return this.fixedPaletteItemIds.indexOf(paletteItem.id) >= 0;
-  }
 }

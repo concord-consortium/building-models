@@ -24,5 +24,17 @@ export const initialPalette = [
       "link": null,
       "license": "public domain"
     }
+  },
+  {
+    "id": "collector",
+    "title": "",
+    "image": "img/nodes/collector.png",
+    "usesDefaultImage": true,
+    "metadata": {
+      "source": "internal",
+      "title": tr("~NODE-VALUE-EDIT.IS_ACCUMULATOR"),
+      "link": null,
+      "license": "public domain"
+    }
   }
 ];

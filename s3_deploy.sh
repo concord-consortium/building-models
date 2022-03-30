@@ -53,7 +53,7 @@ if [ "$BRANCH_OR_TAG" = "$CURRENT_TAG" ]; then
   mkdir -p _site/version
   S3_DEPLOY_DIR="version/$BRANCH_OR_TAG"
   DEPLOY_DEST="_site/$S3_DEPLOY_DIR"
-  INVAL_PATH="/version/$BRANCH_OR_TAG/index.html"
+  INVAL_PATHS=("/version/$BRANCH_OR_TAG/index.html" "/version/$BRANCH_OR_TAG/lara.html" "/version/$BRANCH_OR_TAG/report.html" "/version/$BRANCH_OR_TAG/sagemodeler.html")
   # in this case we are going to deploy this code to a subfolder of version
   # So ignore everything except this folder.
   # Currently this only escapes `.`
@@ -63,7 +63,7 @@ if [ "$BRANCH_OR_TAG" = "$CURRENT_TAG" ]; then
 # root branch builds deploy to root of site
 elif [ "$BRANCH_OR_TAG" = "$ROOT_BRANCH" ]; then
   DEPLOY_DEST="_site"
-  INVAL_PATH="/index.html"
+  INVAL_PATHS=("/index.html" "/lara.html" "/report.html" "/sagemodeler.html")
   # in this case we are going to deploy this branch to the top level
   # so we need to ignore the version and branch folders
   IGNORE_ON_SERVER="^$S3_BUCKET_PREFIX(version/|branch/)"
@@ -73,7 +73,7 @@ else
   mkdir -p _site/branch
   S3_DEPLOY_DIR="branch/$DEPLOY_DIR_NAME"
   DEPLOY_DEST="_site/$S3_DEPLOY_DIR"
-  INVAL_PATH="/branch/$DEPLOY_DIR_NAME/index.html"
+  INVAL_PATHS=("/branch/$DEPLOY_DIR_NAME/index.html" "/branch/$DEPLOY_DIR_NAME/lara.html" "/branch/$DEPLOY_DIR_NAME/report.html" "/branch/$DEPLOY_DIR_NAME/sagemodeler.html")
   # in this case we are going to deploy this code to a subfolder of branch
   # So ignore everything except this folder.
   # Currently this only escapes `.`
@@ -117,5 +117,5 @@ curl https://api.rollbar.com/api/1/deploy/ \
 
 # explicit CloudFront invalidation to workaround s3_website gem invalidation bug
 # with origin path (https://github.com/laurilehmijoki/s3_website/issues/207).
-echo Invalidating CloudFront at "$INVAL_PATH"...
-aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths $INVAL_PATH
+echo Invalidating CloudFront at "${INVAL_PATHS[@]}"...
+aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "${INVAL_PATHS[@]}"

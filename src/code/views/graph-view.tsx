@@ -214,6 +214,14 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       }
     }
 
+    // force redraw of the links when switching in/out of diagram only so that undefined links redraw their style
+    const diagramOnly = AppSettingsStore.SimulationType.diagramOnly;
+    const curSimulationType = this.state.simulationType;
+    const prevSimulationType = prevState.simulationType;
+    if ((prevSimulationType !== curSimulationType) && ((prevSimulationType === diagramOnly) || (curSimulationType === diagramOnly))) {
+      this.forceRedrawLinks = true;
+    }
+
     if ((prevState.description.links !== this.state.description.links) ||
         (prevState.simulationPanelExpanded !== this.state.simulationPanelExpanded) ||
         (prevState.selectedLink !== this.state.selectedLink) ||
@@ -306,14 +314,23 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const title = tr("~NODE.UNTITLED");
     const linkOffset = $(this.linkView!).offset() || {left: 0, top: 0};
     const imageOffset = NodeView.nodeImageOffset();
+    const isFlowVariable = paletteItem.id === "flow-variable";
+    const isAccumulator = paletteItem.id === "collector";
+
+    // the collector image in the palette is a static png of jumbled blank nodes
+    // we need to convert this into the default single blank node as the graph view
+    // will then stack those images as the node is set as a collector
+    const image = isAccumulator ? PaletteStore.getBlankPaletteItem()?.image : paletteItem.image;
+
     const newNode = new Node({
       x: ui.offset.left - linkOffset.left - imageOffset.left,
       y: ui.offset.top - linkOffset.top - imageOffset.top,
       title,
       paletteItem: paletteItem.uuid,
-      image: paletteItem.image,
+      image,
       addedThisSession: true,
-      isFlowVariable: paletteItem.id === "flow-variable",
+      isFlowVariable,
+      isAccumulator,
       usesDefaultImage: !!paletteItem.usesDefaultImage
     });
 
@@ -471,11 +488,11 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
       return;
     }
 
-    const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])).find(this.props.connectionTarget);
-    const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])).find(this.props.connectionTarget);
+    const source = $(ReactDOM.findDOMNode(this.refs[link.sourceNode.key])!).find(this.props.connectionTarget);
+    const target = $(ReactDOM.findDOMNode(this.refs[link.targetNode.key])!).find(this.props.connectionTarget);
     const isSelected = this.props.selectionManager.isSelected(link);
     const isEditing = link === this.state.editingLink;
-    const isDashed = !link.relation.isDefined && this.state.simulationPanelExpanded;
+    const isDashed = !link.relation.isDefined && (this.state.simulationType !== AppSettingsStore.SimulationType.diagramOnly);
     const relationDetails = RelationFactory.selectionsFromRelation(link.relation);
     if ((relationDetails.vector != null ? relationDetails.vector.isCustomRelationship : undefined) && (link.relation.customData != null)) {
       link.color = LinkColors.customRelationship;
@@ -526,8 +543,8 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     const sourceConnectionClass = fromSource ? this.props.connectionTarget : this.props.transferTarget;
     const targetConnectionClass = !fromSource ? this.props.connectionTarget : this.props.transferTarget;
     if (sourceConnectionClass && targetConnectionClass) {
-      const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])).find(sourceConnectionClass);
-      const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])).find(targetConnectionClass);
+      const source = $(ReactDOM.findDOMNode(this.refs[sourceNode.key])!).find(sourceConnectionClass);
+      const target = $(ReactDOM.findDOMNode(this.refs[targetNode.key])!).find(targetConnectionClass);
       if (source && target) {
         const opts = {
           fromSource,
@@ -536,7 +553,7 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
           label: "",
           color: LinkColors.transferPipe,
           thickness: 10,
-          showIndicators: false,
+          showIndicators: this.state.relationshipSymbols,
           isEditing: false,
           linkModel: link,
           isTransfer: true,

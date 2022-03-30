@@ -22,7 +22,7 @@ import { Mixer } from "../mixins/components";
 import { Node } from "../models/node";
 import { Link } from "../models/link";
 import { GraphStoreClass } from "../stores/graph-store";
-import { PalleteItem } from "../stores/palette-store";
+import { PaletteItem } from "../stores/palette-store";
 
 interface ToolButtonViewProps {
   key?: string;
@@ -78,7 +78,7 @@ class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewSta
   private buttonData: ToolPanelButton[] = [
     {name: "styles", simple: true, shows: "design", "enabled": ["node", "link"] },
     {name: "values", simple: false, shows: "value", "enabled": ["node"] },
-    {name: "qualRel", simple: true, shows: "relations", "enabled": ["dependent-node"]},
+    {name: "qualRel", simple: true, shows: "relations", "enabled": ["has-links", "link"]},
     {name: "options",  simple: true, shows: "simulation", "enabled": ["nothing"] }
   ];
 
@@ -100,6 +100,7 @@ class ToolPanelView extends React.Component<ToolPanelViewProps, ToolPanelViewSta
     if (_.includes(button.enabled, "nothing")) { return false; }
     if (_.includes(button.enabled, "node") && this.props.node) { return false; }
     if (_.includes(button.enabled, "dependent-node") && (this.props.node != null ? this.props.node.isDependent() : undefined)) { return false; }
+    if (_.includes(button.enabled, "has-links") && (this.props.node != null ? this.props.node.hasLinks() : undefined)) { return false; }
     if (_.includes(button.enabled, "link") && this.props.link) { return false; }
     return true;
   }
@@ -141,8 +142,9 @@ interface InspectorPanelViewOuterProps {
   link: Link | null;
   onNodeChanged: (node: Node, data: NodeChangedValues) => void;
   onNodeDelete: (node: Node) => void;
-  palette: PalleteItem[];
+  palette: PaletteItem[];
   graphStore: GraphStoreClass;
+  onShowModelTypeHelp: () => void;
 }
 interface InspectorPanelViewOuterState {
 }
@@ -206,7 +208,7 @@ export class InspectorPanelView extends Mixer<InspectorPanelViewProps, Inspector
   }
 
   public renderSimulationInspector() {
-    return <SimulationInspectorView />;
+    return <SimulationInspectorView onShowModelTypeHelp={this.props.onShowModelTypeHelp} />;
   }
 
   public renderDesignInspector() {
@@ -234,7 +236,7 @@ export class InspectorPanelView extends Mixer<InspectorPanelViewProps, Inspector
   }
 
   public renderRelationInspector() {
-    if (this.props.node != null ? this.props.node.isDependent() : undefined) {
+    if (this.props.node != null ? this.props.node.hasLinks() : undefined) {
       return <RelationInspectorView node={this.props.node} graphStore={this.props.graphStore} />;
     } else if (this.props.link) {
       return <RelationInspectorView link={this.props.link} graphStore={this.props.graphStore} />;

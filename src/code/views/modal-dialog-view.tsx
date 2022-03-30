@@ -5,6 +5,7 @@ import { ModalView } from "./modal-view";
 interface ModalDialogViewProps {
   title?: string;
   close?: () => void;
+  closeOnBackgroundClick?: boolean;
 }
 
 interface ModalDialogViewState {}
@@ -15,7 +16,7 @@ export class ModalDialogView extends React.Component<ModalDialogViewProps, Modal
 
   public render() {
     return (
-      <ModalView close={this.props.close}>
+      <ModalView close={this.props.close} closeOnBackgroundClick={this.props.closeOnBackgroundClick}>
         <div className="modal-dialog">
           <div className="modal-dialog-wrapper">
             <div className="modal-dialog-title">

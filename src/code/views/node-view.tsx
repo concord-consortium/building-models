@@ -34,6 +34,7 @@ import { stepSize } from "../utils/step-size";
 import { logEvent } from "../utils/logger";
 import { TransferModel } from "../models/transfer";
 import { FlowImageView } from "./flow-image-view";
+import { QuickActionButtonView } from "./quick-action-button-view";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
@@ -329,13 +330,11 @@ getDefaultProps() {
             <div>
               <div className="actions">
                 <div className="connection-source action-circle icon-codap-link" data-node-key={this.props.nodeKey} />
-                {this.props.showGraphButton ?
-                  <div
-                    className="graph-source action-circle icon-codap-graph"
-                    draggable={true}
-                    onDragStart={handleDragStart}
-                    onClick={handleGraphButtonClick}
-                  /> : undefined}
+                <QuickActionButtonView
+                  node={this.props.data}
+                  showGraphButton={this.props.showGraphButton}
+                  graphClickHandler={handleGraphButtonClick}
+                />
               </div>
               <div className={this.topClasses()} data-node-key={this.props.nodeKey}>
                 <div
@@ -403,28 +402,24 @@ getDefaultProps() {
 
   private renderNodeInternal() {
     const getNodeImage = (node) => {
+      let image = node.image;
 
       if (node.isAccumulator) {
         return (
           <StackedImageView
-            image={node.image}
+            image={image}
             imageProps={node.collectorImageProps()}
           />
         );
-      }
-
-      let image = node.image;
-      if (node.isTransfer) {
+      } else if (node.isTransfer) {
         image = "img/nodes/transfer.png";
-      } else {
-        const outLinks = node.outLinks();
-        if (node.isFlowVariable && (outLinks.length === 0)) {
-          image = "img/nodes/flow-variable.png";
-        } else {
-          const firstFlowLink = _.find(outLinks, link => link.relation.formula === "+in" || link.relation.formula === "-in");
-          if (firstFlowLink) {
-            return <FlowImageView link={firstFlowLink} />;
-          }
+      } else if (node.isFlowVariable) {
+        image = "img/nodes/flow-variable.png";
+
+        // if the flow variable is connected to a node use its image, else use the default flow variable image
+        const firstFlowLink = _.find(node.outLinks(), link => link.relation.formula === "+in" || link.relation.formula === "-in");
+        if (firstFlowLink) {
+          return <FlowImageView link={firstFlowLink} />;
         }
       }
 
@@ -468,8 +463,8 @@ getDefaultProps() {
     const multipleSelections = evt && (evt.ctrlKey || evt.metaKey || evt.shiftKey);
     this.props.selectionManager.selectNodeForInspection(this.props.data, multipleSelections);
 
-    // open the relationship panel on double click if the node has incoming links
-    const links = this.props.data.inLinks();
+    // open the relationship panel on double click if the node has any links
+    const links = this.props.data.links;
     if (links.length > 0) {
       const now = (new Date()).getTime();
       if ((now - (this.lastClickLinkTime || 0)) <= 250) {

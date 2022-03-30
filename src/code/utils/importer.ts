@@ -30,7 +30,14 @@ export class Importer {
     this.importLinks(data.links);
     // set the nextID counters
     GraphPrimitive.initCounters({nodes: this.graphStore.getNodes(), links: this.graphStore.getLinks()});
-    return this.graphStore.setFilename(data.filename || "New Model");
+
+    // Update with the saved filename
+    // NOTE: we used to use "New Model" as the default but this caused hash(dataOnLoad) !== hash(dataOnSave)
+    // which then caused immediate saves when a new model was loaded.  These immediate saves caused the linked
+    // interactive UI to show as it compares save times to figure out it content changed.
+    // We opted to remove the default here instead of setting the default in graphStore.init() so that old
+    // saved models, with null as their filename, would hash the same.
+    return this.graphStore.setFilename(data.filename);
   }
 
   public importNode(nodeSpec) {

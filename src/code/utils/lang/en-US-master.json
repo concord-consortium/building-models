@@ -253,5 +253,20 @@
     "~SAGEMODELER.OPEN_OR_CREATE.OPEN_DOC": "Open Document or Browse Examples",
     "~SAGEMODELER.OPEN_OR_CREATE.NEW_DOC": "Create New Document",
     "~SAGEMODELER.OPEN_OR_CREATE.EXAMPLES": "Examples",
-    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:"
+    "~SAGEMODELER.SHARE_DIALOG.SERVER_URL": "SageModeler Server URL:",
+
+    // quick actions
+    "~QUICK_ACTIONS.SET_IMAGE": "Change image",
+    "~QUICK_ACTIONS.CONVERT_TO_COLLECTOR": "Convert to collector",
+    "~QUICK_ACTIONS.CONVERT_TO_FLOW": "Convert to flow",
+    "~QUICK_ACTIONS.CONVERT_TO_STANDARD_VARIABLE": "Convert to standard variable",
+    "~QUICK_ACTIONS.CREATE_GRAPH": "Create graph",
+
+    // model type help dialog text
+    "~MODEL_TYPE_HELP.TITLE": "Model Types",
+    "~MODEL_TYPE_HELP.DIAGRAM_ONLY": "Illustrate connections between concepts or variables. No simulation option.",
+    "~MODEL_TYPE_HELP.STATIC": "Explore a network of relationships between variables. A change in one variable instantly updates the state of all other variables in the system.",
+    "~MODEL_TYPE_HELP.TIME": "Explore the behavior of a system where time and (possibly) feedback are critical for understanding the system.",
+    "~MODEL_TYPE_HELP.MORE_LINK": "Click here for more detail on model settings."
+
 }

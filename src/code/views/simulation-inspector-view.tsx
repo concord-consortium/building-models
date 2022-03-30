@@ -18,7 +18,11 @@ import { CodapConnect } from "../models/codap-connect";
 
 const { SimulationType, Complexity } = AppSettingsStore;
 
-interface SimulationInspectorOuterProps {}
+const helpIcon = <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>;
+
+interface SimulationInspectorOuterProps {
+  onShowModelTypeHelp: () => void;
+}
 type SimulationInspectorProps = SimulationInspectorOuterProps & SimulationMixinProps & AppSettingsMixinProps;
 
 interface SimulationInspectorViewOuterState {}
@@ -29,10 +33,12 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
   public static displayName = "SimulationInspectorView";
   private codapConnect: CodapConnect;
 
-  constructor(props: {}) {
+  constructor(props: SimulationInspectorProps) {
     super(props);
     this.mixins = [new SimulationMixin(this), new AppSettingsMixin(this)];
-    const outerProps: SimulationInspectorOuterProps = {};
+    const outerProps: SimulationInspectorOuterProps = {
+      onShowModelTypeHelp: props.onShowModelTypeHelp
+    };
     this.setInitialState(outerProps, SimulationMixin.InitialState(), AppSettingsMixin.InitialState());
   }
 
@@ -50,6 +56,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
     const diagramOnlyDisabled = minSimulationType > SimulationType.diagramOnly;
     const staticDisabled = minSimulationType > SimulationType.static;
     const basicDisabled = minComplexity > Complexity.basic;
+    const expandedDisabled = !basicDisabled && this.state.simulationType === SimulationType.diagramOnly;
 
     return (
       <div className="simulation-panel">
@@ -60,7 +67,7 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
           onChange={this.handleSimulationType}
           className="radio-group simulation-radio-buttons"
         >
-          <div className="radio-group-title">{tr("~SIMULATION.MODEL_TYPE")}</div>
+          <div className="radio-group-title">{tr("~SIMULATION.MODEL_TYPE")} <span className="model-type-help-icon" onClick={this.props.onShowModelTypeHelp} title={tr("~MENU.ABOUT")} >{helpIcon}</span></div>
           <label key="simulation-type-diagram-only">
             <Radio value={SimulationType.diagramOnly} disabled={diagramOnlyDisabled} />
             <span className={diagramOnlyDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.DIAGRAM_ONLY")}</span>
@@ -86,12 +93,12 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
           className="radio-group complexity-radio-buttons"
         >
           <div className="radio-group-title">{tr("~SIMULATION.RELATIONSHIPS")}</div>
-          <label key="complexity-basic">
+          <label key="complexity-basic" className={basicDisabled ? "disabled" : ""}>
             <Radio value={Complexity.basic} disabled={basicDisabled} />
             <span className={basicDisabled ? "disabled" : undefined}>{tr("~SIMULATION.COMPLEXITY.BASIC")}</span>
           </label>
-          <label key="complexity-expanded">
-            <Radio value={Complexity.expanded} />
+          <label key="complexity-expanded" className={expandedDisabled ? "disabled" : ""} >
+            <Radio value={Complexity.expanded} disabled={expandedDisabled} />
             <span>{tr("~SIMULATION.COMPLEXITY.EXPANDED")}</span>
           </label>
         </RadioGroup>
@@ -176,9 +183,6 @@ export class SimulationInspectorView extends Mixer<SimulationInspectorProps, Sim
 
   private handleSimulationType = (val) => {
     AppSettingsActions.setSimulationType(val);
-    if ((val === SimulationType.diagramOnly) && GraphStore.allLinksAreUndefined()) {
-      AppSettingsActions.setComplexity(Complexity.basic);
-    }
   }
 
   private handleComplexity = (val) => {
