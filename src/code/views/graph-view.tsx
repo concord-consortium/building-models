@@ -320,14 +320,16 @@ export class GraphView extends Mixer<GraphViewProps, GraphViewState> {
     // the collector image in the palette is a static png of jumbled blank nodes
     // we need to convert this into the default single blank node as the graph view
     // will then stack those images as the node is set as a collector
-    const image = isAccumulator ? PaletteStore.getBlankPaletteItem()?.image : paletteItem.image;
+    if (paletteItem.id === "collector") {
+      paletteItem = PaletteStore.getBlankPaletteItem() || paletteItem;
+    }
 
     const newNode = new Node({
       x: ui.offset.left - linkOffset.left - imageOffset.left,
       y: ui.offset.top - linkOffset.top - imageOffset.top,
       title,
       paletteItem: paletteItem.uuid,
-      image,
+      image: paletteItem.image,
       addedThisSession: true,
       isFlowVariable,
       isAccumulator,

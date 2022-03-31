@@ -790,7 +790,8 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
             let deletedNodes: Node[] = [];
             let deletedNode: Node;
             const accumulatorChanged = (data.isAccumulator != null) && (!!data.isAccumulator !== !!originalData.isAccumulator);
-            const flowVariableChangedToNormal = originalData.isFlowVariable && !data.isFlowVariable && !data.isAccumulator;
+            const flowVariableChanged = (data.isFlowVariable != null) && (!!data.isFlowVariable !== !!originalData.isFlowVariable);
+            const flowVariableChangedToNormal = flowVariableChanged && !data.isFlowVariable && !data.isAccumulator;
             const variableTypeChanged = accumulatorChanged || flowVariableChangedToNormal;
 
             if (variableTypeChanged) {
@@ -881,19 +882,28 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     })();
   },
 
-  getChangedNodeImageInfo(changes, node): ImageChange {
+  getChangedNodeImageInfo(changes, node): ImageChange | {} {
     const accumulatorChanged = (changes.isAccumulator != null) && (!!changes.isAccumulator !== !!node.isAccumulator);
     const flowVariableChanged = (changes.isFlowVariable != null) && (!!changes.isFlowVariable !== !!node.isFlowVariable);
 
-    const imageInfo = (i: any): ImageChange => {
-      return {
+    const imageInfo = (i: any): ImageChange | {} => {
+      const result = {
         image: i.image,
-        paletteItem: i.uuid,
+        paletteItem: i.paletteItem || i.uuid,
         usesDefaultImage: i.usesDefaultImage,
       };
+      const current = {
+        image: node.image,
+        paletteItem: node.paletteItem,
+        usesDefaultImage: node.usesDefaultImage,
+      };
+      if (JSON.stringify(result) !== JSON.stringify(current)) {
+        return result;
+      }
+      return {};
     };
 
-    const nodeTypeChangeImage = (toPaletteItem: PaletteItem | undefined, fromPaletteItem: PaletteItem | undefined): ImageChange => {
+    const nodeTypeChangeImage = (toPaletteItem: PaletteItem | undefined, fromPaletteItem: PaletteItem | undefined): ImageChange | {} => {
       // always use direct image changes
       if (changes.image) {
         return imageInfo(changes);
