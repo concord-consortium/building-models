@@ -60,6 +60,7 @@ export declare class PaletteStoreClass extends StoreClass {
   public inPalette(node: Node): boolean;
   public findByUUID(uuid: string): PaletteItem | undefined;
   public getBlankPaletteItem(): PaletteItem | undefined;
+  public getAccumulatorPaletteItem(): PaletteItem | undefined;
   public getFlowVariablePaletteItem(): PaletteItem | undefined;
   public orderedPalette(simulationType: number): PaletteItem[];
   public isFixedPaletteItem(paletteItem: PaletteItem): boolean;
@@ -316,6 +317,10 @@ export const PaletteStore: PaletteStoreClass = Reflux.createStore({
 
   getBlankPaletteItem() {
     return _.find(this.palette, {id: "1"});
+  },
+
+  getAccumulatorPaletteItem() {
+    return _.find(this.palette, {id: "collector"});
   },
 
   getFlowVariablePaletteItem() {

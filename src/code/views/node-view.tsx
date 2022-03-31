@@ -35,6 +35,7 @@ import { logEvent } from "../utils/logger";
 import { TransferModel } from "../models/transfer";
 import { FlowImageView } from "./flow-image-view";
 import { QuickActionButtonView } from "./quick-action-button-view";
+import { PaletteStore } from "../stores/palette-store";
 
 interface NodeTitleViewOuterProps {
   isEditing: boolean;
@@ -404,7 +405,8 @@ getDefaultProps() {
     const getNodeImage = (node) => {
       let image = node.image;
 
-      if (node.isAccumulator) {
+      // never show a stacked image for an accumulator node whose image is already stacked
+      if (node.isAccumulator && image !== PaletteStore.getAccumulatorPaletteItem()?.image) {
         return (
           <StackedImageView
             image={image}
