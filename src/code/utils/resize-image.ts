@@ -1,16 +1,10 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 export const resizeImage = (src, callback) => {
 
   const fail = () => callback(src);
 
   if (typeof document !== "undefined" && document !== null) {
-    const maxWidth = 100;
-    const maxHeight = 100;
+    const maxWidth = 50;
+    const maxHeight = 50;
 
     const img = document.createElement("img");
     img.setAttribute("crossOrigin", "anonymous");
