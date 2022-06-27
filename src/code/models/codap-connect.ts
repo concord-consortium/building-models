@@ -233,25 +233,36 @@ export class CodapConnect {
   }
 
   public _ensureSamplesCollectionExists(callback: () => void) {
-    const sampleDataAttrs = this._getSampleAttributes();
-    const message = {
-      action: "create",
-      resource: `dataContext[${this.dataContextName}].collection`,
-      values: {
-        parent: this.simulationCollectionName,
-        name: this.samplesCollectionName,
-        title: this.samplesCollectionName,
-        labels: {
-          singleCase: "sample",
-          pluralCase: "samples"
-        },
-        attrs: sampleDataAttrs
+    // check to see if it exists first before creating to avoid dirtying the data context
+    this.codapPhone.call({
+      action: "get",
+      resource: `dataContext[${this.dataContextName}].collection[${this.samplesCollectionName}]`
+    }
+    , ret => {
+      if (ret && ret.success) {
+        callback();
+      } else {
+        // either a timeout or it doesn't exist, so create it
+        const sampleDataAttrs = this._getSampleAttributes();
+        const message = {
+          action: "create",
+          resource: `dataContext[${this.dataContextName}].collection`,
+          values: {
+            parent: this.simulationCollectionName,
+            name: this.samplesCollectionName,
+            title: this.samplesCollectionName,
+            labels: {
+              singleCase: "sample",
+              pluralCase: "samples"
+            },
+            attrs: sampleDataAttrs
+          }
+        };
+
+        return this.codapPhone.call(message, callback);
       }
-    };
-
-    return this.codapPhone.call(message, callback);
+    });
   }
-
 
   // Return the column headings and types for our samples. (steps, NodeA, nodeB, nodeC)
   public _getSampleAttributes() {

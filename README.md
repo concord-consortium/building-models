@@ -141,7 +141,7 @@ For more information see: https://www.pivotaltracker.com/story/show/177674195
 
 ## Reference Material
 
-* [Sage Modeler topology tagger code](https://github.com/concord-consortium/building-models/blob/master/src/code/utils/topology-tagger.ts)
+* [Sage Modeler topology tagger code](https://github.com/concord-consortium/topology-tagger)
 * [XLSX processing npm module](https://www.npmjs.com/package/xlsx)
 * [XLSX parsing options](https://www.npmjs.com/package/xlsx#parsing-options)
 * [https://www.npmjs.com/package/papaparse npm](https://www.npmjs.com/package/papaparse)

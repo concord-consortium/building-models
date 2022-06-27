@@ -1392,7 +1392,13 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
       const result: any = [];
       for (key in this.nodeKeys) {
         const node = this.nodeKeys[key];
-        result.push(node.toExport());
+        const exportedNode = node.toExport();
+        // we can save space by not exporting the image if we have a valid palette item id
+        // the Importer.importNode will use the palette item id to find the image
+        if (exportedNode.data.paletteItem && PaletteStore.findByUUID(exportedNode.data.paletteItem)) {
+          delete exportedNode.data.image;
+        }
+        result.push(exportedNode);
       }
       return result;
     })();
