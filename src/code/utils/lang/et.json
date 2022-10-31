@@ -226,5 +226,7 @@
     "~MODEL_TYPE_HELP.STATIC": "Explore a network of relationships between variables. A change in one variable instantly updates the state of all other variables in the system.",
     "~MODEL_TYPE_HELP.TIME": "Explore the behavior of a system where time and (possibly) feedback are critical for understanding the system.",
     "~MODEL_TYPE_HELP.MORE_LINK": "Click here for more detail on model settings.",
-    "~MODEL_TYPE_HELP.TITLE": "Model Types"
+    "~MODEL_TYPE_HELP.TITLE": "Model Types",
+    "~NODE-RELATION-EDIT.AFFECTS": "Affects",
+    "~NODE-RELATION-EDIT.AFFECTED_BY": "Affected by"
 }

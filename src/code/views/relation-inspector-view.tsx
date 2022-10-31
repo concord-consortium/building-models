@@ -112,7 +112,7 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     }
 
     const affectedByTab = HorizontalTabbedPanelView.Tab({
-      label: "Affected By",
+      label: tr("~NODE-RELATION-EDIT.AFFECTED_BY"),
       component: <TabbedPanelView
         tabs={affectedByLinkTabs}
         selectedTabIndex={selectedAffectedByTabIndex}
@@ -123,7 +123,7 @@ export class RelationInspectorView extends Mixer<RelationInspectorViewProps, Rel
     });
 
     const affectsTab = HorizontalTabbedPanelView.Tab({
-      label: "Affects",
+      label: tr("~NODE-RELATION-EDIT.AFFECTS"),
       component: <TabbedPanelView
         tabs={affectsLinkTabs}
         selectedTabIndex={selectedAffectsTabIndex}
