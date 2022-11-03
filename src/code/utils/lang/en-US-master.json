@@ -44,6 +44,8 @@
     "~NODE-VALUE-EDIT.DEPENDENT_VARIABLE": "This node is a dependent variable",
 
     // views/relation-inspector-view.js
+    "~NODE-RELATION-EDIT.AFFECTS": "Affects",
+    "~NODE-RELATION-EDIT.AFFECTED_BY": "Affected by",
     "~NODE-RELATION-EDIT.COMBINATION_METHOD": "Combine variables using:",
     "~NODE-RELATION-EDIT.ARITHMETIC_MEAN": "average",
     "~NODE-RELATION-EDIT.SCALED_PRODUCT": "limiting factor",
