@@ -105,7 +105,7 @@ The ZERO-WIDTH-SPACE character can be used to indicate that the empty string is 
 To add a new language:
 1. Add the language to the POEditor project
 2. Add the language code to the list of languages in `bin/strings-pull-project.sh`
-3. Load the new language file in `src/code/utils/translate.js`
+3. Add the new language file in the `languageFiles` map in `src/code/utils/translate.ts`
 
 Note that there is probably a way to eliminate the need for step 3 above by requiring all JSON files in the `src/code/utils/lang` directory (except for `en-US-master.json`), but that has not been implemented yet.
 
