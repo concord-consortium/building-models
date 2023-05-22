@@ -69,3 +69,5 @@ export const translate = (key, vars?, lang?) => {
 };
 
 export const tr = translate;
+
+export const getDefaultLang = () => defaultLang;
