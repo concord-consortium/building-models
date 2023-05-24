@@ -3,7 +3,7 @@ import * as React from "react";
 import { SimulationActions, SimulationMixinProps } from "../stores/simulation-store";
 import { AppSettingsMixinProps } from "../stores/app-settings-store";
 
-import { tr } from "../utils/translate";
+import { getDefaultLang, tr } from "../utils/translate";
 import { RecordButtonView  } from "./record-button-view";
 import { DropDownView, DropDownViewItem } from "./dropdown-view";
 import { ExperimentPanelView } from "./experiment-panel-view";
@@ -44,13 +44,14 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
 
   private renderToggleButton() {
     const iconClass = this.state.simulationPanelExpanded ? "inspectorArrow-collapse" : "inspectorArrow-expand";
+    const doNotRotate = getDefaultLang() === "ko";
     const simText = tr("~DOCUMENT.ACTIONS.SIMULATE");
     const simTextWidth = (this.simulateElt != null) ? this.simulateElt.clientWidth : simText.length * 6;
     const simTextLeft = (simTextWidth / 2) - 6;
-    const simStyle = { left: simTextLeft };
+    const simStyle = doNotRotate ? {} : { left: simTextLeft };
     return (
       <div className="flow" onClick={this.handleToggle} title={simText}>
-        <div className="toggle-title" ref={el => this.simulateElt = el} style={simStyle}>{simText}</div>
+        <div className={`toggle-title ${doNotRotate ? "toggle-title-no-rotate" : ""}`} ref={el => this.simulateElt = el} style={simStyle}>{simText}</div>
         <i className={`icon-codap-${iconClass}`} />
       </div>
     );
