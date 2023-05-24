@@ -6,10 +6,10 @@ on: push
 jobs:
   build_test:
     name: Build and Run Jest Tests
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: '8'
       - name: Install Dependencies
@@ -19,7 +19,8 @@ jobs:
       - name: Run Tests
         run: npm run test
   cypress:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    container: cypress/browsers:node16.14.2-slim-chrome103-ff102
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -31,7 +32,7 @@ jobs:
         containers: [1, 2, 3]
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - uses: cypress-io/github-action@v2
         with:
           start: npm start
@@ -59,27 +60,26 @@ jobs:
     needs:
       - build_test
       - cypress
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-      - name: Setup Ruby 2.4
-        uses: actions/setup-ruby@v1
+      - uses: actions/setup-node@v2
         with:
-          ruby-version: '2.4'
-      - name: Set up Python (for aws cli)
-        uses: actions/setup-python@v2
-        with:
-          python-version: '2.7'
+          node-version: '16'
       - name: Install Dependencies
-        run: |
-          gem install s3_website -v 3.4.0
-          pip install awscli --upgrade --user
-          npm ci
-      - name: Build
-        run: npm run build
-      - name: Deploy
-        run: ./s3_deploy.sh
+        run: npm ci
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # skip installing cypress since it isn't needed for just building
+          # This decreases the deploy time quite a bit
+          CYPRESS_INSTALL_BINARY: 0
+      - uses: concord-consortium/s3-deploy-action@v1
+        with:
+          bucket: building-models-app.concord.org
+          prefix: ''
+          noPrefix: true
+          awsAccessKeyId: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          awsSecretAccessKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # Parameters to GHActions have to be strings, so a regular yaml array cannot
+          # be used. Instead the `|` turns the following lines into a string
+          topBranches: |
+            ["master"]

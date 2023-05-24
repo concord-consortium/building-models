@@ -46,22 +46,32 @@ we are using.
 
 ### Production Deployment
 
-Production releases to S3 are based on the contents of the /dist folder and are built automatically by GitHub Actions
-for each branch pushed to GitHub and each merge into production.
+Deployments are based on the contents of the /dist folder and are built automatically by GitHub Actions for each branch and tag pushed to GitHub.
 
-Merges into production are deployed to http://sage.concord.org.
+Branches are deployed to `https://sage.concord.org/branch/<name>/`.
 
-Other branches are deployed to http://sage.concord.org/branch/BRANCH-NAME.
+Tags are deployed to `https://sage.concord.org/version/<name>/`
+
+You can view the status of all the branch and tag deploys [here](https://github.com/concord-consortium/building-models/actions).
+
+The production release is available at `https://sage.concord.org`.
+
+Production releases are done using a manual GitHub Actions workflow. You specify which tag you want to release to production and the workflow copies that tag's `index-top.html` to `https://sage.concord.org/index.html`.
+
+See the CLUE [docs/deploy.md](https://github.com/concord-consortium/collaborative-learning/blob/master/docs/deploy.md) for more details (it uses the same process).
 
 To deploy a production release:
 
-1. Update the version number in package.json and run `npm install` to update package-lock.json
-2. Create `v<version>` branch and commit changes, push to GitHub, create PR and merge
-3. Checkout master and pull
-4. Checkout production
-5. Run `git merge master --no-ff`
-6. Push production to GitHub
-7. Use https://github.com/concord-consortium/building-models/releases to create a new release tag
+1. Update the version number in `package.json` and `package-lock.json`
+    - `npm version --no-git-tag-version [patch|minor|major]`
+1. Verify that everything builds correctly
+    - `npm run lint && npm run build && npm run test`
+1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
+1. Test the master build at: https://sage.concord.org/index-master.html
+1. Push a version tag to GitHub and/or use https://github.com/concord-consortium/building-models/releases to create a new GitHub release
+1. Stage the release by running the [Release Staging Workflow](https://github.com/concord-consortium/building-models/actions/workflows/release-staging.yml) and entering the version tag you just pushed.
+1. Test the staged release at https://sage.concord.org/index-staging.html
+1. Update production by running the [Release Workflow](https://github.com/concord-consortium/building-models/actions/workflows/release.yml) and entering the release version tag.
 
 **NOTE:** This repo and the [sage-modeler-site](https://github.com/concord-consortium/sage-modeler-site) repo should be
 released at the same time, with the same version numbers, even if one of the two repos has no changes, in order to
