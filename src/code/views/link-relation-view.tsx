@@ -12,7 +12,7 @@ import * as React from "react";
 
 import { RelationFactory } from "../models/relation-factory";
 import { SvgGraphView } from "./svg-graph-view";
-import { tr } from "../utils/translate";
+import { getDefaultLang, tr } from "../utils/translate";
 
 const autosize         = require("autosize");
 import { SimulationMixin, SimulationMixinState, SimulationMixinProps } from "../stores/simulation-store";
@@ -22,6 +22,9 @@ import { Link } from "../models/link";
 import { Node } from "../models/node";
 import { TransferModel } from "../models/transfer";
 import { GraphStoreClass } from "../stores/graph-store";
+import { TimeUnits } from "../utils/time-units";
+
+const isKorean = getDefaultLang() === "ko";
 
 interface LinkGraphViewProps {
   xAxis: string;
@@ -48,29 +51,6 @@ class LinkGraphView extends React.Component<LinkGraphViewProps, LinkGraphViewSta
         strokeDasharray={"10,6"}
         fontSize={16}
       />
-    );
-  }
-}
-
-interface QuantStartViewProps {
-  source: Node;
-  target: Node;
-}
-
-interface QuantStartViewState {}
-
-class QuantStartView extends React.Component<QuantStartViewProps, QuantStartViewState> {
-  public static displayName = "QuantStartView";
-
-  public render() {
-    const start = tr("~NODE-RELATION-EDIT.SEMI_QUANT_START");
-    return (
-      <div style={{width: "95%"}}>
-        <span>{`${tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")} `}</span>
-        <span className="source">{this.props.source}</span>
-        <span>{` ${tr("~NODE-RELATION-EDIT.CAUSES")} `}</span>
-        <span className="target">{this.props.target}</span>
-      </div>
     );
   }
 }
@@ -328,7 +308,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     }
   }
 
-  private renderVectorPulldown(vectorSelection) {
+  private renderVectorPulldown(vectorSelection, renderOptions: {showTo: boolean}) {
     let currentOption;
     const vectorOptions = this.state.complexity === AppSettingsStore.Complexity.basic ?
       RelationFactory.basicVectors
@@ -345,7 +325,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
 
     return (
       <div className="bb-select">
-        <span>{`${tr("~NODE-RELATION-EDIT.TO")} `}</span>
+        {renderOptions.showTo && <span>{`${tr("~NODE-RELATION-EDIT.TO")} `}</span>}
         <select value={currentOption} className="" ref={el => this.vector = el} onChange={this.handleUpdateRelation}>
           {options}
         </select>
@@ -353,7 +333,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     );
   }
 
-  private renderScalarPulldown(scalarSelection) {
+  private renderScalarPulldown(scalarSelection, renderOptions: {showBy: boolean}) {
     let currentOption;
     const options = _.map(RelationFactory.scalars, (opt, i) => <option value={opt.id} key={i}>{opt.uiText}</option>);
 
@@ -380,7 +360,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     } else {
       return (
         <div className={`bb-select${visClass}`}>
-          <span>{`${tr("~NODE-RELATION-EDIT.BY")} `}</span>
+          {renderOptions.showBy && <span>{`${tr("~NODE-RELATION-EDIT.BY")} `}</span>}
           <select value={currentOption} className="" ref={el => this.scalar = el} onChange={this.handleUpdateRelation}>
             {options}
           </select>
@@ -422,6 +402,25 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
 
     const textClass = (this.state.selectedAccumulator != null ? this.state.selectedAccumulator.hideAdditionalText : undefined) ? "hidden" : "";
 
+    const translatedStepUnits = TimeUnits.toString(this.state.stepUnits);
+
+    if (isKorean) {
+      return (
+        <div className="top">
+          <span className="source">{source}</span>
+          <span className={textClass}>{` ${tr("~NODE-RELATION-EDIT.IS")} `}</span>
+          <span className="target">{target}</span>
+          <span className={textClass}>{` ${translatedStepUnits} `}</span>
+          <span className={textClass}>{` ${tr("~NODE-RELATION-EDIT.EACH")} `}</span>
+          <div>
+            <select value={currentOption} ref={el => this.accumulator = el} onChange={this.handleUpdateRelation}>
+              {options}
+            </select>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="top">
         <span className="source">{source}</span>
@@ -433,7 +432,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
         </div>
         <span className="target">{target}</span>
         <span className={textClass}>{` ${tr("~NODE-RELATION-EDIT.EACH")} `}</span>
-        <span className={textClass}>{this.state.stepUnits.toLowerCase()}</span>
+        <span className={textClass}>{translatedStepUnits.toLowerCase()}</span>
       </div>
     );
   }
@@ -460,6 +459,8 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
       currentOption = this.state.selectedTransferModifier.id;
     }
 
+    const translatedStepUnits = TimeUnits.toString(this.state.stepUnits);
+
     // note that localization will be a problem here due to the hard-coded order
     // of the elements and because we can't use the string-replacement capabilities
     // of the translate module since there is special formatting of node titles, etc.
@@ -473,7 +474,7 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
         <span dangerouslySetInnerHTML={{__html: line_b}} />
         <span className="target"> {flowTargetTitles} </span>
         <span> {tr("~NODE-RELATION-EDIT.EACH")} </span>
-        <span>{this.state.stepUnits.toLowerCase()}.</span>
+        <span>{translatedStepUnits.toLowerCase()}.</span>
       </div>
     );
   }
@@ -506,6 +507,23 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     } else {
       currentOption = this.state.selectedTransferModifier.id;
     }
+
+    const translatedStepUnits = TimeUnits.toString(this.state.stepUnits);
+
+    if (isKorean) {
+      return (
+        <div className="top">
+          <span dangerouslySetInnerHTML={{__html: line_a}} />
+          <span dangerouslySetInnerHTML={{__html: line_b}} />
+          <span>{translatedStepUnits}</span>
+          <span> {tr("~NODE-RELATION-EDIT.EACH")} </span>
+          <select value={currentOption} ref={el => this.transfer = el} onChange={this.handleUpdateRelation}>
+            {options}
+          </select>
+        </div>
+      );
+    }
+
     // note that localization will be a problem here due to the hard-coded order
     // of the elements and because we can't use the string-replacement capabilities
     // of the translate module since there is special formatting of node titles, etc.
@@ -516,24 +534,62 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
           {options}
         </select>
         <span dangerouslySetInnerHTML={{__html: line_b}} />
-        <span>{this.state.stepUnits.toLowerCase()}.</span>
+        <span>{translatedStepUnits.toLowerCase()}.</span>
       </div>
     );
   }
 
   private renderNonAccumulator(source, target) {
     const showGraph = this.state.complexity !== AppSettingsStore.Complexity.basic;
+
+    const renderInner = () => {
+      if (isKorean) {
+        const hasSelectedVector = !!this.state.selectedVector;
+        const isBasic = this.state.complexity === AppSettingsStore.Complexity.basic;
+        const isVary = this.state.selectedVector === RelationFactory.vary;
+
+        return (
+          <div className="top">
+            <div style={{width: "95%"}}>
+              <span>{tr("~NODE-RELATION-EDIT.CAUSES")} </span>
+              <span className="source">{source} </span>
+              <span>{tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")} </span>
+              <br />
+              <span>{tr("~NODE-RELATION-EDIT.TO")} </span>
+              <span className="target">{target}</span>
+            </div>
+            <div className="full">
+              {this.renderVectorPulldown(this.state.selectedVector, { showTo: false })}
+            </div>
+            {hasSelectedVector && !isVary && !isBasic && <span>{tr("~NODE-RELATION-EDIT.BY")} </span>}
+            <div className="full">
+              {this.renderScalarPulldown(this.state.selectedScalar, { showBy: false })}
+            </div>
+          </div>
+        );
+      } else {
+        return (
+          <div className="top">
+            <div style={{width: "95%"}}>
+              <span>{`${tr("~NODE-RELATION-EDIT.AN_INCREASE_IN")} `}</span>
+              <span className="source">{source}</span>
+              <span>{` ${tr("~NODE-RELATION-EDIT.CAUSES")} `}</span>
+              <span className="target">{target}</span>
+            </div>
+            <div className="full">
+              {this.renderVectorPulldown(this.state.selectedVector, { showTo: true })}
+            </div>
+            <div className="full">
+              {this.renderScalarPulldown(this.state.selectedScalar, { showBy: true })}
+            </div>
+          </div>
+        );
+      }
+    };
+
     return (
       <div>
-        <div className="top">
-          <QuantStartView source={source} target={target} />
-          <div className="full">
-            {this.renderVectorPulldown(this.state.selectedVector)}
-          </div>
-          <div className="full">
-            {this.renderScalarPulldown(this.state.selectedScalar)}
-          </div>
-        </div>
+        {renderInner()}
         {showGraph ?
         <div className="bottom">
           <div className="graph" id="relation-graph">
@@ -556,6 +612,8 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     let target = targetNode.title;
 
     if (this.state.isAccumulatorToFlow) {
+      // NOTE: during the Korean translation work it was found this case can no longer be reached but we are leaving it in as is in case we ever
+      // change the code back to allowing this link type to exist again (the current code rewrites the link to never allow this)
       return this.renderAccumulatorToFlow(sourceNode, targetNode);
     } else if (this.state.isAccumulator) {
       return this.renderAccumulator(source, target);
