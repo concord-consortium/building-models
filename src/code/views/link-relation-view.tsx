@@ -407,9 +407,9 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
     if (isKorean) {
       return (
         <div className="top">
-          <span className="source">{source}</span>
-          <span className={textClass}>{` ${tr("~NODE-RELATION-EDIT.IS")} `}</span>
-          <span className="target">{target}</span>
+          <span className="source">{source} </span>
+          <span className={textClass}>{tr("~NODE-RELATION-EDIT.IS")}</span>
+          <span className="target"> {target}</span>
           <span className={textClass}>{` ${translatedStepUnits} `}</span>
           <span className={textClass}>{` ${tr("~NODE-RELATION-EDIT.EACH")} `}</span>
           <div>
