@@ -544,6 +544,9 @@ export class LinkRelationView extends Mixer<LinkRelationViewProps, LinkRelationV
 
     const renderInner = () => {
       if (isKorean) {
+        // NOTE: these are checked in the Korean path and not the other path as the
+        // ~NODE-RELATION-EDIT.BY translation has been coopted for the Korean code path to
+        // provide a modifier before the select panel which isn't shown in these cases
         const hasSelectedVector = !!this.state.selectedVector;
         const isBasic = this.state.complexity === AppSettingsStore.Complexity.basic;
         const isVary = this.state.selectedVector === RelationFactory.vary;
