@@ -147,7 +147,7 @@
     "~DROPZONE.DROP_IMAGES_HERE": "이미지를 여기에 드래그하세요.",
     "~DROPZONE.SQUARES_LOOK_BEST": "(사각형이 보기 좋습니다.)",
     "~RELATIONSHIP.NO_RELATION": "정의된 관계가 없습니다.",
-    "~CODAP.INTERACTIVE_FRAME.TITLE": "세이지모델러",
+    "~CODAP.INTERACTIVE_FRAME.TITLE": "SageModeler",
     "~CODAP.SIMULATION.RUN": "실행",
     "~CODAP.SIMULATION.EXPERIMENT": "실험#",
     "~CODAP.SIMULATION.STEPS": "단계들",
