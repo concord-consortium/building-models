@@ -105,7 +105,7 @@ export class CodapConnect {
           action: "update",
           resource: "interactiveFrame",
           values: {
-            title: tr("~CODAP.INTERACTIVE_FRAME.TITLE"),
+            title: "SageModeler", // do not translate, this isn't displayed but is used to match with the standalone parameter
             preventBringToFront: true,
             cannotClose: true,
             preventDataContextReorg: false // allows tables to be reorganized
