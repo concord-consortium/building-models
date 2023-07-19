@@ -12,6 +12,7 @@ import { GraphStore } from "../src/code/stores/graph-store";
 import { Stub, UnStub } from "./codap-helper";
 import { RelationFactory } from "../src/code/models/relation-factory";
 import { PaletteStore } from "../src/code/stores/palette-store";
+import { Link } from "../src/code/models/link";
 
 describe("The Graphstore", () => {
 
@@ -165,7 +166,26 @@ describe("The Graphstore", () => {
               "frames": [],
               "combineMethod": "product"
             }
-          }
+          },
+          {
+            "key": "Node-4",
+            "data": {
+              "title": "Untitled 4",
+              "codapName": null,
+              "codapID": null,
+              "x": 677,
+              "y": 231,
+              "paletteItem": "f4945d36-264a-11ee-be56-0242ac120002",
+              "initialValue": 50,
+              "min": 0,
+              "max": 1000,
+              "isAccumulator": true,
+              "allowNegativeValues": false,
+              "valueDefinedSemiQuantitatively": true,
+              "frames": [],
+              "combineMethod": "average"
+            }
+          },
         ],
         "links": [
           {
@@ -242,6 +262,48 @@ describe("The Graphstore", () => {
       expect(this.graphStore.hasNode({key: "Transfer-1"})).to.equal(false);
       // ensure both the transfer and the link pointing to the transfer were deleted
       expect(this.graphStore.getLinks().length).to.equal(0);
+    });
+
+    it("should allow a link from a transfer node to an outside non-accumulator", () => {
+      const nodes = this.graphStore.getNodes();
+      const outsideNode = nodes[2];
+      const transferNode = nodes[3];
+
+      expect(this.graphStore.getLinks().length).to.equal(2);
+
+      this.graphStore._addLink(new Link({sourceNode: transferNode, targetNode: outsideNode}))
+
+      expect(this.graphStore.getLinks().length).to.equal(3);
+    });
+
+    it("should allow a link from a transfer node to either its source or target node", () => {
+      const nodes = this.graphStore.getNodes();
+      const sourceNode = nodes[0];
+      const targetNode = nodes[1];
+      const transferNode = nodes[3];
+
+      expect(this.graphStore.getLinks().length).to.equal(2);
+
+      this.graphStore._addLink(new Link({sourceNode: transferNode, targetNode: sourceNode}))
+
+      expect(this.graphStore.getLinks().length).to.equal(3);
+
+      this.graphStore._addLink(new Link({sourceNode: transferNode, targetNode: targetNode}));
+
+      expect(this.graphStore.getLinks().length).to.equal(4);
+    });
+
+    it("should not allow a link from a transfer node to an outside accumulator", () => {
+      const nodes = this.graphStore.getNodes();
+      const transferNode = nodes[3];
+      const outsideAccumulator = nodes[4];
+
+      expect(this.graphStore.getLinks().length).to.equal(2);
+
+      const link = new Link({sourceNode: transferNode, targetNode: outsideAccumulator});
+      this.graphStore._addLink(link)
+
+      expect(this.graphStore.getLinks().length).to.equal(2);
     });
 
   });
