@@ -484,8 +484,29 @@ export const GraphStore: GraphStoreClass = Reflux.createStore({
     }
   },
 
+  _isTransferLinkToOutsideAccumulator(maybeTransferNode: Node, maybeOutsideAccumulator: Node) {
+    // ensure the first parameter is a transfer node and the second is an accumulator
+    if (!(maybeTransferNode instanceof TransferModel) || !maybeOutsideAccumulator.isAccumulator) {
+      return false;
+    }
+    const {transferLink} = maybeTransferNode;
+    // return true if the maybeOutsideAccumulator is not either the source or target of the transfer link
+    return !(transferLink.sourceNode === maybeOutsideAccumulator || transferLink.targetNode === maybeOutsideAccumulator);
+  },
+
   _addLink(link: Link, options: LogOptions = {}) {
-    if ((link.sourceNode !== link.targetNode) && !this.hasLink(link)) {
+    // don't allow links to the same node
+    const isLinkToSameNode = link.sourceNode === link.targetNode;
+
+    // skip links that already exists
+    const isExistingLink = this.hasLink(link);
+
+    // don't allow links to/from transfer nodes to outside accumulators
+    const isTransferLinkToOutsideAccumulator =
+      this._isTransferLinkToOutsideAccumulator(link.sourceNode, link.targetNode) ||
+      this._isTransferLinkToOutsideAccumulator(link.targetNode, link.sourceNode);
+
+    if (!isLinkToSameNode && !isExistingLink && !isTransferLinkToOutsideAccumulator) {
       this.linkKeys[link.terminalKey()] = link;
       this.nodeKeys[link.sourceNode.key].addLink(link);
       this.nodeKeys[link.targetNode.key].addLink(link);
