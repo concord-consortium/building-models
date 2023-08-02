@@ -83,3 +83,5 @@ jobs:
           # be used. Instead the `|` turns the following lines into a string
           topBranches: |
             ["master"]
+          maxVersionAge: '600'
+
