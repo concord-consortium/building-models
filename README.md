@@ -56,9 +56,7 @@ You can view the status of all the branch and tag deploys [here](https://github.
 
 The production release is available at `https://sage.concord.org`.
 
-Production releases are done using a manual GitHub Actions workflow. You specify which tag you want to release to production and the workflow copies that tag's `index-top.html` to `https://sage.concord.org/index.html`.
-
-See the CLUE [docs/deploy.md](https://github.com/concord-consortium/collaborative-learning/blob/master/docs/deploy.md) for more details (it uses the same process).
+Production releases are done using a manual GitHub Actions workflow. You specify which tag you want to release to production and the workflow copies all of the files in that tag's version folder to the root folder.
 
 To deploy a production release:
 
@@ -70,8 +68,8 @@ To deploy a production release:
 1. Test the master build at: https://sage.concord.org/index-master.html
 1. Push a version tag to GitHub and/or use https://github.com/concord-consortium/building-models/releases to create a new GitHub release
 1. Stage the release by running the [Release Staging Workflow](https://github.com/concord-consortium/building-models/actions/workflows/release-staging.yml) and entering the version tag you just pushed.
-1. Test the staged release at https://sage.concord.org/index-staging.html
-1. Update production by running the [Release Workflow](https://github.com/concord-consortium/building-models/actions/workflows/release.yml) and entering the release version tag.
+1. Test the staged release at https://sage.concord.org/staging/
+1. Update production by running the [Release Workflow](https://github.com/concord-consortium/building-models/actions/workflows/release_production.yml) and entering the release version tag.
 
 **NOTE:** This repo and the [sage-modeler-site](https://github.com/concord-consortium/sage-modeler-site) repo should be
 released at the same time, with the same version numbers, even if one of the two repos has no changes, in order to
