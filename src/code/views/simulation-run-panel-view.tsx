@@ -45,7 +45,7 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
   private renderToggleButton() {
     const iconClass = this.state.simulationPanelExpanded ? "inspectorArrow-collapse" : "inspectorArrow-expand";
     const defaultLang = getDefaultLang();
-    const doNotRotate = (defaultLang === "ko") || (defaultLang === "pl");
+    const doNotRotate = ["ko", "pl", "el", "de"].indexOf(defaultLang) !== -1;
     const simText = tr("~DOCUMENT.ACTIONS.SIMULATE");
     const simTextWidth = (this.simulateElt != null) ? this.simulateElt.clientWidth : simText.length * 6;
     const simTextLeft = (simTextWidth / 2) - 6;
