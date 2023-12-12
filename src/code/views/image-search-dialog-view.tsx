@@ -206,7 +206,7 @@ export class ImageSearchDialogView extends Mixer<ImageSearchDialogViewProps, Ima
     if (this.state.numPages > 0) {
       let asc, end;
       const links: JSX.Element[] = [];
-      for (page = 1, end = this.state.numPages, asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
+      for (page = 1, end = Math.min(15, this.state.numPages), asc = 1 <= end; asc ? page <= end : page >= end; asc ? page++ : page--) {
         links.push(<ImageSearchPageLinkView key={`page${page}`} page={page} currentPage={this.state.page} selectPage={this.handleSelectPage} />);
       }
 

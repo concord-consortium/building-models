@@ -18,6 +18,7 @@ const languageFiles = {
   "ko":      require("./lang/ko.json"),      // Korean
   "nb":      require("./lang/nb.json"),      // Norwegian Bokmål
   "nn":      require("./lang/nn.json"),      // Norwegian Nynorsk
+  "pl":      require("./lang/pl.json"),      // Polish
   "pt-BR":   require("./lang/pt-BR.json"),   // Portuguese (Brazilian)
   "th":      require("./lang/th.json"),      // Thai
   "tr":      require("./lang/tr.json"),      // Turkish

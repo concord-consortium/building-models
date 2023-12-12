@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getDefaultLang } from "../utils/translate";
 
 interface HorizontalTabInfoSettings {
   label: string;
@@ -33,8 +34,9 @@ class HorizontalTabbedPanelTabView extends React.Component<HorizontalTabbedPanel
   public static displayName = "HorizontalTabbedPanelTabView";
 
   public render() {
+    const lang = getDefaultLang();
     const classname = this.props.disabled ? "horizontal-tab-disabled" : (this.props.selected ? "horizontal-tab-selected" : "");
-    return <li className={classname} onClick={this.handleClicked}>{this.props.label}</li>;
+    return <li className={`horizontal-tab-${lang} ${classname}`} onClick={this.handleClicked}>{this.props.label}</li>;
   }
 
   private handleClicked = (e) => {
