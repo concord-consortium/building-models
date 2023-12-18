@@ -3,21 +3,20 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: The git tag for the version to use for index.html
+        description: The git tag for the version to recursively copy to the top level folder
         required: true
 env:
   BUCKET: building-models-app.concord.org
   PREFIX: ''
-  SRC_FILE: index-top.html
-  DEST_FILE: index.html
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - run: >
           aws s3 cp
-          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ github.event.inputs.version }}/${{ env.SRC_FILE }}
-          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/${{ env.DEST_FILE }}
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ github.event.inputs.version }}/
+          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/
+          --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
