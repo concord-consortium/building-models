@@ -7,15 +7,14 @@ on:
         required: true
 env:
   BUCKET: building-models-app.concord.org
-  PREFIX: ''
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - run: >
           aws s3 cp
-          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/version/${{ github.event.inputs.version }}
-          s3://${{ env.BUCKET }}/${{ env.PREFIX }}/staging/
+          s3://${{ env.BUCKET }}/version/${{ github.event.inputs.version }}
+          s3://${{ env.BUCKET }}/staging/
           --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
