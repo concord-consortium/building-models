@@ -1,9 +1,8 @@
 # Sage Modeler
 
-A [System Dynamics](https://en.wikipedia.org/wiki/System_dynamics) modeling tool, under development
-by the [Building Models Project](https://concord.org/projects/building-models) of [Concord Consortium](http://concord.org/).
+A [system dynamics](https://en.wikipedia.org/wiki/System_dynamics) modeling tool developed by the [Multilevel Computational Modeling](https://concord.org/our-work/research-projects/multilevel-computational-modeling/) and the [Transitioning to Remote Science Teaching & Learning](https://concord.org/our-work/research-projects/remote-science-teaching/) projects at the [Concord Consortium](http://concord.org/) and the CREATE for STEM Institute at Michigan State University.
 
-See the application running here: http://sage.concord.org/branch/master
+See the application running here: [http://sage.concord.org/branch/master](https://sagemodeler.concord.org/getting-started/index.html )
 
 
 ### Other useful links:
