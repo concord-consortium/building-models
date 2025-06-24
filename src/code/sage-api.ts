@@ -247,8 +247,7 @@ function handleModelRequest(request: SageApiRequest, source: Window): void {
     if (action === 'get') {
         handleGetModel(request, source);
     } else if (action === 'update') {
-        // TODO: Implement model import (handled in Task 1-8)
-        sendErrorResponse(requestId, 'Model import not yet implemented', source);
+        handleLoadModel(request, source);
     } else {
         sendErrorResponse(requestId, `Unsupported model action: ${action}`, source);
     }
@@ -272,6 +271,43 @@ function handleGetModel(request: SageApiRequest, source: Window): void {
         // TODO: Implement SD-JSON conversion utility in PBI-5
         // For now, return an error or stub
         sendErrorResponse(requestId, 'SD-JSON export not yet implemented', source);
+    } else {
+        sendErrorResponse(requestId, `Unsupported format '${format}'`, source);
+    }
+}
+
+function handleLoadModel(request: SageApiRequest, source: Window): void {
+    const { values, requestId } = request;
+    let format = 'native';
+    if (values && typeof values.format === 'string') {
+        format = values.format.toLowerCase();
+    }
+    const modelData = values && values.model;
+    if (!modelData) {
+        sendErrorResponse(requestId, 'No model data provided', source);
+        return;
+    }
+    if (format === 'native') {
+        // Basic validation
+        if (!Array.isArray(modelData.nodes) || !Array.isArray(modelData.links)) {
+            sendErrorResponse(requestId, 'Model format not recognized: missing nodes or links array', source);
+            return;
+        }
+        try {
+            GraphStore.deleteAll();
+            GraphStore.loadData(modelData);
+            const nodeCount = GraphStore.getNodes().length;
+            const linkCount = GraphStore.getLinks().length;
+            sendSuccessResponse(requestId, { message: 'Model loaded', nodeCount, linkCount }, source);
+        } catch (err) {
+            console.error('[SageAPI] Error loading model:', err);
+            // Try to leave model empty if load failed
+            try { GraphStore.deleteAll(); } catch (e) {}
+            sendErrorResponse(requestId, 'Failed to load model', source);
+        }
+    } else if (format === 'sd-json') {
+        // TODO: Implement SD-JSON import in PBI-5
+        sendErrorResponse(requestId, 'SD-JSON import not yet implemented', source);
     } else {
         sendErrorResponse(requestId, `Unsupported format '${format}'`, source);
     }
