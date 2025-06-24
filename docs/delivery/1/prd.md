@@ -25,6 +25,8 @@ Finally, these commands should be **idempotent** (each request does one thing re
 - All link API CRUD operations must accept and return both a `relationVector` ("increase", "decrease", "vary") and a `relationScalar` ("aboutTheSame", "aLittle", "aLot", "moreAndMore", "lessAndLess").
 - When `relationVector` is "vary", the API must accept and return a `customData` field representing the user-drawn functional relationship (e.g., array of points or function definition).
 - The API must validate combinations and ensure correct construction of the underlying Relationship object.
+- The API must support explicit creation of flow nodes (not just variables/accumulators), with all relevant properties, via a dedicated API command.
+- The API must support auto-generation of flow nodes during link creation, matching the UI's logic for connecting accumulators or other cases requiring flows.
 
 #### Acceptance Criteria
 
@@ -39,6 +41,8 @@ Finally, these commands should be **idempotent** (each request does one thing re
 * **All link API CRUD operations support both `relationVector` and `relationScalar` fields.**
 * **When `relationVector` is "vary", the API supports a `customData` field for custom relationships.**
 * **The API returns both fields (and customData if present) in all relevant responses.**
+* **Explicit Flow Node Creation**: A `create` request for `resource: "nodes"` with a property indicating a flow node (e.g., `type: "flow"` or `isFlow: true`) creates a new flow node in the model. The node appears in the UI and is fully functional. The response includes the new node's ID and properties. Invalid requests are rejected with clear errors.
+* **Flow Node Auto-Creation**: When a link creation request would require a flow node (e.g., connecting accumulators), the API automatically creates the flow node and returns all affected node/link IDs. The model remains valid and matches UI affordances.
 
 Each of these acceptance criteria implies thorough testing: unit tests for each handler function (ensuring correct model state changes and responses) and integration tests simulating a plugin sending the request and observing the model/UI outcome.
 
@@ -54,3 +58,5 @@ See [Task List](./tasks.md) for detailed task breakdown:
 * **Task 1-6:** Implement Delete Link API Command
 * **Task 1-7:** Implement Get Model (Export) API Command
 * **Task 1-8:** Implement Load Model (Import) API Command
+* **Task 1-9:** Implement Explicit Flow Node Creation API Command
+* **Task 1-10:** Implement Flow Node Auto-Creation in Link API

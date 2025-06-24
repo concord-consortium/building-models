@@ -468,3 +468,14 @@ Tasks 1-5 through 1-8 can now be implemented by simply adding new handlers to th
 Ready to proceed with Task 1-5: Update Link API Command using the established infrastructure. 
 
 2025-06-24 02:10:00 | 1-5 | API link update, undo/redo, test interface, and iframe postMessage bug fix completed. | ai-agent 
+
+## Date: 2025-06-25
+
+### API Scope Expansion: Settings Menu and Flow Node Support
+
+- **Backlog Updated**: Added PBI 7 (API access to global model settings) and PBI 8 (explicit and auto flow node support).
+- **PBI-1 PRD Updated**: Expanded technical approach and acceptance criteria to reference explicit and auto flow node creation.
+- **Task Index Updated**: Added Task 1-9 (Explicit Flow Node Creation API) and Task 1-10 (Flow Node Auto-Creation in Link API).
+- **New Task Files**: Created `docs/delivery/1/1-9.md` and `docs/delivery/1/1-10.md` for the new tasks.
+- **Rationale**: These changes ensure the API fully matches UI affordances for model construction, including both explicit and automatic flow node creation, and provide programmatic access to all global model settings for automation and integration.
+- **Scope**: These additions expand the API's coverage and align it with user and developer expectations for automation, parity, and completeness. 

@@ -17,6 +17,7 @@
 
 import { GraphStore } from './stores/graph-store';
 import { GraphActions } from './actions/graph-actions';
+import { PaletteStore } from './stores/palette-store';
 
 // Types for API messages
 interface SageApiRequest {
@@ -242,9 +243,38 @@ function handleLinkRequest(request: SageApiRequest, source: Window, linkId?: str
  * Handle model-related API requests
  */
 function handleModelRequest(request: SageApiRequest, source: Window): void {
-    const { requestId } = request;
-    // TODO: Implement model operations (get/load full model)
-    sendErrorResponse(requestId, 'Model operations not yet implemented', source);
+    const { action, values, requestId } = request;
+    if (action === 'get') {
+        handleGetModel(request, source);
+    } else if (action === 'update') {
+        // TODO: Implement model import (handled in Task 1-8)
+        sendErrorResponse(requestId, 'Model import not yet implemented', source);
+    } else {
+        sendErrorResponse(requestId, `Unsupported model action: ${action}`, source);
+    }
+}
+
+function handleGetModel(request: SageApiRequest, source: Window): void {
+    const { values, requestId } = request;
+    let format = 'native';
+    if (values && typeof values.format === 'string') {
+        format = values.format.toLowerCase();
+    }
+    if (format === 'native') {
+        try {
+            const modelObj = GraphStore.serializeGraph(PaletteStore.palette);
+            sendSuccessResponse(requestId, modelObj, source);
+        } catch (err) {
+            console.error('[SageAPI] Error serializing model:', err);
+            sendErrorResponse(requestId, 'Failed to serialize model', source);
+        }
+    } else if (format === 'sd-json') {
+        // TODO: Implement SD-JSON conversion utility in PBI-5
+        // For now, return an error or stub
+        sendErrorResponse(requestId, 'SD-JSON export not yet implemented', source);
+    } else {
+        sendErrorResponse(requestId, `Unsupported format '${format}'`, source);
+    }
 }
 
 /**
