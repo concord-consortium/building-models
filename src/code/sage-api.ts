@@ -46,6 +46,7 @@ interface NodeCreateValues {
     x?: number;
     y?: number;
     isAccumulator?: boolean;
+    isFlowVariable?: boolean;
 }
 
 interface NodeUpdateValues {
@@ -334,12 +335,23 @@ function handleCreateNode(values: NodeCreateValues, requestId: string, source: W
         return;
     }
 
+    // Validate that isAccumulator and isFlowVariable are not both true
+    if (values.isAccumulator && values.isFlowVariable) {
+        sendErrorResponse(requestId, 'A node cannot be both an accumulator and a flow variable', source);
+        return;
+    }
+
     try {
         // Get the appropriate palette item
         const PaletteStore = require('./stores/palette-store').PaletteStore;
-        const paletteItem = values.isAccumulator ?
-            PaletteStore.getAccumulatorPaletteItem() :
-            PaletteStore.getBlankPaletteItem();
+        let paletteItem;
+        if (values.isAccumulator) {
+            paletteItem = PaletteStore.getAccumulatorPaletteItem();
+        } else if (values.isFlowVariable) {
+            paletteItem = PaletteStore.getFlowVariablePaletteItem();
+        } else {
+            paletteItem = PaletteStore.getBlankPaletteItem();
+        }
 
         if (!paletteItem) {
             throw new Error('Required palette item not found');
@@ -354,6 +366,7 @@ function handleCreateNode(values: NodeCreateValues, requestId: string, source: W
             x: values.x !== undefined ? values.x : 100,
             y: values.y !== undefined ? values.y : 100,
             isAccumulator: values.isAccumulator !== undefined ? values.isAccumulator : false,
+            isFlowVariable: values.isFlowVariable !== undefined ? values.isFlowVariable : false,
             paletteItem: paletteItem.uuid,
             image: paletteItem.image
         };
@@ -385,7 +398,8 @@ function handleCreateNode(values: NodeCreateValues, requestId: string, source: W
             max: importedNode.max,
             x: importedNode.x,
             y: importedNode.y,
-            isAccumulator: importedNode.isAccumulator
+            isAccumulator: importedNode.isAccumulator,
+            isFlowVariable: importedNode.isFlowVariable
         }, source);
 
     } catch (error) {

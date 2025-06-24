@@ -16,5 +16,5 @@ This document lists all tasks associated with PBI 1.
 | 1-6     | [Delete Link API Command](./1-6.md)     | Done | Implement API command to delete links from the model |
 | 1-7     | [Get Model API Command](./1-7.md)       | Done | Implement API command to export the full model state |
 | 1-8     | [Load Model API Command](./1-8.md)      | Done | Implement API command to import/replace the entire model |
-| 1-9     | [Explicit Flow Node Creation API](./1-9.md) | Proposed | Add API support for direct creation of flow nodes, with all relevant properties. |
+| 1-9     | [Explicit Flow Node Creation API](./1-9.md) | Done | Add API support for direct creation of flow nodes, with all relevant properties. |
 | 1-10    | [Flow Node Auto-Creation in Link API](./1-10.md) | Proposed | Ensure API link creation auto-generates flow nodes as needed, matching UI affordances. | 
