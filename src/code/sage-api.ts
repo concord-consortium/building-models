@@ -206,6 +206,7 @@ function handleNodeRequest(request: SageApiRequest, source: Window, nodeId?: str
  */
 function handleLinkRequest(request: SageApiRequest, source: Window, linkId?: string): void {
     const { action, values, requestId } = request;
+    console.log('[SageAPI] handleLinkRequest called:', { action, linkId, values, requestId });
     switch (action) {
         case 'create':
             if (linkId) {
@@ -214,8 +215,17 @@ function handleLinkRequest(request: SageApiRequest, source: Window, linkId?: str
                 handleCreateLink(values, requestId, source);
             }
             break;
-        // TODO: Implement get, update, delete for links
+        case 'update':
+            if (!linkId) {
+                console.error('[SageAPI] Link update called with missing linkId');
+                sendErrorResponse(requestId, 'Link ID is required for update action', source);
+            } else {
+                handleUpdateLink(linkId, values, requestId, source);
+            }
+            break;
+        // TODO: Implement get, delete for links
         default:
+            console.error('[SageAPI] Unknown or unimplemented link action:', action);
             sendErrorResponse(requestId, `Unknown or unimplemented link action: ${action}`, source);
     }
 }
@@ -707,6 +717,122 @@ function handleCreateLink(values: any, requestId: string, source: Window): void 
     } catch (error) {
         console.error('[SageAPI] Error creating link:', error);
         sendErrorResponse(requestId, `Failed to create link: ${error.message}`, source);
+    }
+}
+
+/**
+ * Update an existing link in the model
+ */
+function handleUpdateLink(linkId: string, values: any, requestId: string, source: Window): void {
+    console.log('[SageAPI] handleUpdateLink called with linkId:', linkId, 'values:', values);
+
+    // Validate required fields
+    if (!values || (typeof values !== 'object')) {
+        console.error('[SageAPI] No values provided for link update');
+        sendErrorResponse(requestId, 'No values provided for link update', source);
+        return;
+    }
+    // Serialization check
+    try {
+        JSON.stringify(values);
+    } catch (err) {
+        console.error('[SageAPI] Request values are not serializable:', err);
+        sendErrorResponse(requestId, 'Request values are not serializable', source);
+        return;
+    }
+
+    try {
+        // Find the link by ID in GraphStore
+        const link = GraphStore.getLinks().find(l => l.key === linkId);
+        if (!link) {
+            console.error('[SageAPI] Link with id not found:', linkId);
+            sendErrorResponse(requestId, `Link with id '${linkId}' not found`, source);
+            return;
+        }
+
+        // Import RelationFactory here to avoid circular deps
+        const { RelationFactory } = require('./models/relation-factory');
+
+        // Validate relationVector
+        const allowedVectors = ['increase', 'decrease', 'vary'];
+        const relationVector = (values.relationVector || '').toLowerCase();
+        if (!relationVector || !allowedVectors.includes(relationVector)) {
+            console.error('[SageAPI] Unsupported or missing relationVector:', relationVector);
+            sendErrorResponse(requestId, `Unsupported or missing relationVector: '${relationVector}'. Supported: ${allowedVectors.join(', ')}`, source);
+            return;
+        }
+        const vectorObj = RelationFactory.vectors[relationVector];
+        if (!vectorObj) {
+            console.error('[SageAPI] Failed to resolve relationVector:', relationVector);
+            sendErrorResponse(requestId, `Failed to resolve relationVector: '${relationVector}'`, source);
+            return;
+        }
+
+        // Validate relationScalar (optional for 'vary')
+        let relationScalar = values.relationScalar;
+        let scalarObj = undefined;
+        if (relationVector !== 'vary') {
+            const allowedScalars = Object.keys(RelationFactory.scalars);
+            relationScalar = relationScalar || 'aboutTheSame';
+            if (!allowedScalars.includes(relationScalar)) {
+                console.error('[SageAPI] Unsupported relationScalar:', relationScalar);
+                sendErrorResponse(requestId, `Unsupported relationScalar: '${relationScalar}'. Supported: ${allowedScalars.join(', ')}`, source);
+                return;
+            }
+            scalarObj = RelationFactory.scalars[relationScalar];
+            if (!scalarObj) {
+                console.error('[SageAPI] Failed to resolve relationScalar:', relationScalar);
+                sendErrorResponse(requestId, `Failed to resolve relationScalar: '${relationScalar}'`, source);
+                return;
+            }
+        }
+
+        // Handle customData for 'vary'
+        let customData = undefined;
+        if (relationVector === 'vary') {
+            customData = values.customData;
+            if (!customData) {
+                console.error('[SageAPI] customData is required for "vary" relationVector');
+                sendErrorResponse(requestId, 'customData is required when relationVector is "vary"', source);
+                return;
+            }
+        }
+
+        // Construct the Relationship using fromSelections
+        const newRelation = RelationFactory.fromSelections(vectorObj, scalarObj, customData);
+        console.log('[SageAPI] Constructed new relation for update:', newRelation);
+
+        // Only update if the relation is actually changing
+        if (link.relation && JSON.stringify(link.relation.toExport()) === JSON.stringify(newRelation.toExport())) {
+            console.log('[SageAPI] Link relation unchanged, returning success');
+            sendSuccessResponse(requestId, {
+                id: link.key,
+                relationVector,
+                relationScalar: relationScalar || null,
+                customData: customData || null
+            }, source);
+            return;
+        }
+
+        // Prepare changes object
+        const changes = { relation: newRelation };
+
+        // Update the link (undo/redo is handled internally)
+        GraphStore.changeLink(link, changes);
+
+        console.log('[SageAPI] Link updated successfully:', link.key);
+
+        // Send success response with the updated link data
+        sendSuccessResponse(requestId, {
+            id: link.key,
+            relationVector,
+            relationScalar: relationScalar || null,
+            customData: customData || null
+        }, source);
+        console.log('[SageAPI] Success response sent for link update');
+    } catch (error) {
+        console.error('[SageAPI] Error updating link:', error);
+        sendErrorResponse(requestId, `Failed to update link: ${error.message}`, source);
     }
 }
 
