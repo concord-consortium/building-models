@@ -189,8 +189,11 @@ function handleNodeRequest(request: SageApiRequest, source: Window, nodeId?: str
             }
             break;
         case 'delete':
-            // TODO: Implement delete node
-            sendErrorResponse(requestId, 'Delete node not yet implemented', source);
+            if (!nodeId) {
+                sendErrorResponse(requestId, 'Node ID is required for delete action', source);
+            } else {
+                handleDeleteNode(nodeId, requestId, source);
+            }
             break;
         default:
             sendErrorResponse(requestId, `Unknown action: ${action}`, source);
@@ -344,7 +347,7 @@ function handleUpdateNode(nodeId: string, values: NodeUpdateValues, requestId: s
         let positionChanged = false;
         let newX = node.x;
         let newY = node.y;
-        
+
         if (values.x !== undefined) {
             if (typeof values.x !== 'number' || isNaN(values.x)) {
                 sendErrorResponse(requestId, 'x must be a valid number', source);
@@ -353,7 +356,7 @@ function handleUpdateNode(nodeId: string, values: NodeUpdateValues, requestId: s
             newX = values.x;
             positionChanged = true;
         }
-        
+
         if (values.y !== undefined) {
             if (typeof values.y !== 'number' || isNaN(values.y)) {
                 sendErrorResponse(requestId, 'y must be a valid number', source);
@@ -389,7 +392,7 @@ function handleUpdateNode(nodeId: string, values: NodeUpdateValues, requestId: s
             console.log('[SageAPI] Applying node property changes:', updateData);
             GraphStore.changeNode(updateData, node, { logEvent: true });
         }
-        
+
         // Apply position changes using moveNode (absolute positioning)
         if (positionChanged) {
             const leftDiff = newX - node.x;
@@ -415,6 +418,44 @@ function handleUpdateNode(nodeId: string, values: NodeUpdateValues, requestId: s
     } catch (error) {
         console.error('[SageAPI] Error updating node:', error);
         sendErrorResponse(requestId, `Failed to update node: ${error.message}`, source);
+    }
+}
+
+/**
+ * Delete an existing node from the model
+ */
+function handleDeleteNode(nodeId: string, requestId: string, source: Window): void {
+    console.log('[SageAPI] Deleting node with ID:', nodeId);
+
+    try {
+        // Find the node by ID in GraphStore
+        const node = GraphStore.nodeKeys[nodeId];
+        if (!node) {
+            sendErrorResponse(requestId, `Node with id '${nodeId}' not found`, source);
+            return;
+        }
+
+        console.log('[SageAPI] Found node to delete:', { id: nodeId, title: node.title });
+
+        // Use GraphStore.removeNode to delete the node
+        // This will automatically:
+        // - Remove all connected links
+        // - Handle CODAP data attribute cleanup
+        // - Trigger UI updates
+        // - Log the deletion event
+        GraphStore.removeNode(nodeId, { logEvent: true });
+
+        console.log('[SageAPI] Node deleted successfully:', nodeId);
+
+        // Send success response confirming the deletion
+        sendSuccessResponse(requestId, {
+            id: nodeId,
+            message: 'Node deleted successfully'
+        }, source);
+
+    } catch (error) {
+        console.error('[SageAPI] Error deleting node:', error);
+        sendErrorResponse(requestId, `Failed to delete node: ${error.message}`, source);
     }
 }
 
@@ -517,3 +558,4 @@ export function testCreateNode(title: string = "Test Node"): void {
     // Call the API handler directly
     handleApiRequest(testRequest, window);
 }
+
