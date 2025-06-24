@@ -223,6 +223,14 @@ function handleLinkRequest(request: SageApiRequest, source: Window, linkId?: str
                 handleUpdateLink(linkId, values, requestId, source);
             }
             break;
+        case 'delete':
+            if (!linkId) {
+                console.error('[SageAPI] Link delete called with missing linkId');
+                sendErrorResponse(requestId, 'Link ID is required for delete action', source);
+            } else {
+                handleDeleteLink(linkId, requestId, source);
+            }
+            break;
         // TODO: Implement get, delete for links
         default:
             console.error('[SageAPI] Unknown or unimplemented link action:', action);
@@ -833,6 +841,39 @@ function handleUpdateLink(linkId: string, values: any, requestId: string, source
     } catch (error) {
         console.error('[SageAPI] Error updating link:', error);
         sendErrorResponse(requestId, `Failed to update link: ${error.message}`, source);
+    }
+}
+
+/**
+ * Delete an existing link from the model
+ */
+function handleDeleteLink(linkId: string, requestId: string, source: Window): void {
+    console.log('[SageAPI] Deleting link with ID:', linkId);
+
+    try {
+        // Find the link by ID in GraphStore
+        const link = GraphStore.getLinks().find(l => l.key === linkId);
+        if (!link) {
+            sendErrorResponse(requestId, `Link with id '${linkId}' not found`, source);
+            return;
+        }
+
+        console.log('[SageAPI] Found link to delete:', { id: linkId, source: link.sourceNode?.key, target: link.targetNode?.key });
+
+        // Use GraphStore.removeLink to delete the link (undo/redo handled internally)
+        GraphStore.removeLink(link, { logEvent: true });
+
+        console.log('[SageAPI] Link deleted successfully:', linkId);
+
+        // Send success response confirming the deletion
+        sendSuccessResponse(requestId, {
+            id: linkId,
+            message: 'Link deleted successfully'
+        }, source);
+
+    } catch (error) {
+        console.error('[SageAPI] Error deleting link:', error);
+        sendErrorResponse(requestId, `Failed to delete link: ${error.message}`, source);
     }
 }
 
