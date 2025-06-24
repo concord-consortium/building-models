@@ -9,7 +9,7 @@ This document lists all tasks associated with PBI 1.
 | Task ID | Name                                     | Status   | Description                        |
 | :------ | :--------------------------------------- | :------- | :--------------------------------- |
 | 1-1     | [Create Node API Command](./1-1.md)     | Done | Implement API command to create new nodes in the model |
-| 1-2     | [Update Node API Command](./1-2.md)     | Proposed | Implement API command to update existing node properties |
+| 1-2     | [Update Node API Command](./1-2.md)     | Done | Implement API command to update existing node properties |
 | 1-3     | [Delete Node API Command](./1-3.md)     | Proposed | Implement API command to delete nodes from the model |
 | 1-4     | [Create Link API Command](./1-4.md)     | Proposed | Implement API command to create links between nodes |
 | 1-5     | [Update Link API Command](./1-5.md)     | Proposed | Implement API command to update existing link properties |

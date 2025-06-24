@@ -51,13 +51,13 @@ console.log('[DEBUG] About to initialize Sage...');
         googleDoc={HashParams.getParam("googleDoc")}
       />;
       ReactDOM.render(appView, document.getElementById("app"));
-      
+
       // Initialize external API for CODAP integration
       try {
         console.log('[DEBUG] Initializing SageAPI...');
         SageAPI.initialize();
         console.log('[DEBUG] SageAPI.initialize() completed');
-        
+
         // Expose SageAPI to window for testing and external access
         (window as any).SageAPI = SageAPI;
         console.log('[DEBUG] SageAPI exposed to window:', typeof (window as any).SageAPI);
