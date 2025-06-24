@@ -111,6 +111,7 @@ export function initialize(): void {
  * Handle incoming postMessage API requests
  */
 function handleIncomingMessage(event: MessageEvent): void {
+    console.log('[SageAPI] handleIncomingMessage event:', event);
     // Only process messages with sageApi flag
     if (!event.data || !event.data.sageApi) {
         return;
@@ -204,9 +205,19 @@ function handleNodeRequest(request: SageApiRequest, source: Window, nodeId?: str
  * Handle link-related API requests
  */
 function handleLinkRequest(request: SageApiRequest, source: Window, linkId?: string): void {
-    const { requestId } = request;
-    // TODO: Implement link operations
-    sendErrorResponse(requestId, 'Link operations not yet implemented', source);
+    const { action, values, requestId } = request;
+    switch (action) {
+        case 'create':
+            if (linkId) {
+                sendErrorResponse(requestId, 'Link ID should not be specified for create action', source);
+            } else {
+                handleCreateLink(values, requestId, source);
+            }
+            break;
+        // TODO: Implement get, update, delete for links
+        default:
+            sendErrorResponse(requestId, `Unknown or unimplemented link action: ${action}`, source);
+    }
 }
 
 /**
@@ -558,5 +569,144 @@ export function testCreateNode(title: string = "Test Node"): void {
 
     // Call the API handler directly
     handleApiRequest(testRequest, window);
+}
+
+/**
+ * Create a new link in the model
+ */
+function handleCreateLink(values: any, requestId: string, source: Window): void {
+    console.log('[SageAPI] handleCreateLink called with values:', values);
+
+    // Validate required fields
+    if (!values || !values.source || !values.target) {
+        console.error('[SageAPI] Missing source or target node IDs', values);
+        sendErrorResponse(requestId, 'Source and target node IDs are required for link creation', source);
+        return;
+    }
+    if (values.source === values.target) {
+        console.error('[SageAPI] Source and target node IDs are the same:', values.source);
+        sendErrorResponse(requestId, 'Cannot create a link from a node to itself', source);
+        return;
+    }
+
+    try {
+        // Find source and target nodes
+        const sourceNode = GraphStore.nodeKeys[values.source];
+        const targetNode = GraphStore.nodeKeys[values.target];
+        if (!sourceNode || !targetNode) {
+            console.error('[SageAPI] Source or target node not found', { source: values.source, target: values.target });
+            sendErrorResponse(requestId, 'Source or target node not found', source);
+            return;
+        }
+        console.log('[SageAPI] Found source and target nodes:', sourceNode, targetNode);
+
+        // Import RelationFactory here to avoid circular deps
+        const { RelationFactory } = require('./models/relation-factory');
+
+        // Validate relationVector
+        const allowedVectors = ['increase', 'decrease', 'vary'];
+        const relationVector = (values.relationVector || 'increase').toLowerCase();
+        if (!allowedVectors.includes(relationVector)) {
+            console.error('[SageAPI] Unsupported relationVector:', relationVector);
+            sendErrorResponse(requestId, `Unsupported relationVector: '${relationVector}'. Supported: ${allowedVectors.join(', ')}`, source);
+            return;
+        }
+        const vectorObj = RelationFactory.vectors[relationVector];
+        if (!vectorObj) {
+            console.error('[SageAPI] Failed to resolve relationVector:', relationVector);
+            sendErrorResponse(requestId, `Failed to resolve relationVector: '${relationVector}'`, source);
+            return;
+        }
+        console.log('[SageAPI] Using relationVector:', relationVector, vectorObj);
+
+        // Validate relationScalar (optional for 'vary')
+        let relationScalar = values.relationScalar;
+        let scalarObj = undefined;
+        if (relationVector !== 'vary') {
+            const allowedScalars = Object.keys(RelationFactory.scalars);
+            relationScalar = relationScalar || 'aboutTheSame';
+            if (!allowedScalars.includes(relationScalar)) {
+                console.error('[SageAPI] Unsupported relationScalar:', relationScalar);
+                sendErrorResponse(requestId, `Unsupported relationScalar: '${relationScalar}'. Supported: ${allowedScalars.join(', ')}`, source);
+                return;
+            }
+            scalarObj = RelationFactory.scalars[relationScalar];
+            if (!scalarObj) {
+                console.error('[SageAPI] Failed to resolve relationScalar:', relationScalar);
+                sendErrorResponse(requestId, `Failed to resolve relationScalar: '${relationScalar}'`, source);
+                return;
+            }
+            console.log('[SageAPI] Using relationScalar:', relationScalar, scalarObj);
+        }
+
+        // Handle customData for 'vary'
+        let customData = undefined;
+        if (relationVector === 'vary') {
+            customData = values.customData;
+            if (!customData) {
+                console.error('[SageAPI] customData is required for "vary" relationVector');
+                sendErrorResponse(requestId, 'customData is required when relationVector is "vary"', source);
+                return;
+            }
+            console.log('[SageAPI] Using customData for vary:', customData);
+        }
+
+        // Prevent duplicate links (same source, target, and relationVector+relationScalar/customData)
+        const existingLinks = GraphStore.getLinks();
+        const duplicate = existingLinks.some(link =>
+            link.sourceNode && link.targetNode &&
+            link.sourceNode.key === sourceNode.key &&
+            link.targetNode.key === targetNode.key &&
+            link.relation &&
+            (relationVector === 'vary'
+                ? link.relation.type === 'range' && link.relation.customData && JSON.stringify(link.relation.customData) === JSON.stringify(customData)
+                : link.relation.type === 'range' && link.relation.text && link.relation.text.toLowerCase().includes(relationVector) && link.relation.text.toLowerCase().includes(relationScalar))
+        );
+        if (duplicate) {
+            console.error('[SageAPI] Duplicate link detected for source, target, and relationship');
+            sendErrorResponse(requestId, 'A link with the same source, target, and relationship already exists', source);
+            return;
+        }
+        console.log('[SageAPI] No duplicate link found, proceeding to create link');
+
+        // Generate a unique key for the link
+        const uuid = require('uuid');
+        const linkKey = `link-${uuid.v4()}`;
+
+        // Construct the Relationship using fromSelections
+        const relation = RelationFactory.fromSelections(vectorObj, scalarObj, customData);
+        console.log('[SageAPI] Constructed relation:', relation);
+
+        // Prepare link spec for importLink
+        const linkSpec = {
+            key: linkKey,
+            sourceNode: sourceNode.key,
+            targetNode: targetNode.key,
+            relation,
+            title: values.title || '',
+            color: values.color || undefined
+        };
+        console.log('[SageAPI] linkSpec for importLink:', linkSpec);
+
+        // Create the link (records in undo/redo stack by default)
+        const newLink = GraphStore.importLink(linkSpec, { logEvent: true });
+        console.log('[SageAPI] Link created successfully:', newLink);
+
+        // Send success response with the created link data
+        sendSuccessResponse(requestId, {
+            id: newLink.key,
+            source: sourceNode.key,
+            target: targetNode.key,
+            relationVector,
+            relationScalar: relationScalar || null,
+            customData: customData || null,
+            title: newLink.title,
+            color: newLink.color
+        }, source);
+        console.log('[SageAPI] Success response sent for link creation');
+    } catch (error) {
+        console.error('[SageAPI] Error creating link:', error);
+        sendErrorResponse(requestId, `Failed to create link: ${error.message}`, source);
+    }
 }
 
