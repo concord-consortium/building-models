@@ -15,7 +15,7 @@ import { AppView } from "./views/app-view";
 import { GraphStore } from "./stores/graph-store";
 import { PaletteStore } from "./stores/palette-store";
 import { HashParams } from "./utils/hash-parameters";
-import * as SageAPI from "./sage-api";
+import * as SageAPI from './sage-api';
 
 import * as $ from "jquery";
 import { urlParams } from "./utils/url-params";
@@ -36,6 +36,10 @@ const waitForAppView = (callback: () => void) => {
   }
 };
 
+// Debug log to verify JavaScript execution
+console.log('[DEBUG] SageModeler app.tsx is loading...');
+console.log('[DEBUG] About to initialize Sage...');
+
 // App API
 (window as any).Sage = {
   initApp() {
@@ -48,8 +52,23 @@ const waitForAppView = (callback: () => void) => {
       />;
       ReactDOM.render(appView, document.getElementById("app"));
       
-      // Initialize SageAPI for external control
-      SageAPI.initialize();
+      // Initialize external API for CODAP integration
+      try {
+        console.log('[DEBUG] Initializing SageAPI...');
+        SageAPI.initialize();
+        console.log('[DEBUG] SageAPI.initialize() completed');
+        
+        // Expose SageAPI to window for testing and external access
+        (window as any).SageAPI = SageAPI;
+        console.log('[DEBUG] SageAPI exposed to window:', typeof (window as any).SageAPI);
+        console.log('[DEBUG] SageAPI methods:', Object.keys(SageAPI));
+        console.log('[DEBUG] SageAPI initialization completed successfully');
+      } catch (error) {
+        console.error('[DEBUG] SageAPI initialization failed:', error);
+        console.error('[DEBUG] Error stack:', error.stack);
+        // Still expose SageAPI even if initialization failed, for debugging
+        (window as any).SageAPI = SageAPI;
+      }
     });
   },
 
