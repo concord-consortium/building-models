@@ -701,6 +701,32 @@ function handleCreateLink(values: any, requestId: string, source: Window): void 
         // Import RelationFactory here to avoid circular deps
         const { RelationFactory } = require('./models/relation-factory');
 
+        // --- Flow node auto-creation logic (accumulator-to-accumulator) ---
+        if (sourceNode.isAccumulator && targetNode.isAccumulator && !GraphStore['directRelationshipExists'](sourceNode, targetNode)) {
+            // Use the same logic as the UI: create transfer node and link
+            GraphStore['createTransferLinkBetweenAccumulators'](sourceNode, targetNode, { logEvent: true });
+            // Find the new transfer node and link
+            const allLinks = GraphStore.getLinks();
+            const transferLink = allLinks.find(link => link.sourceNode === sourceNode && link.targetNode === targetNode && link.relation && link.relation.type === 'transfer');
+            const transferNode = transferLink && transferLink.transferNode;
+            if (transferLink && transferNode) {
+                sendSuccessResponse(requestId, {
+                    id: transferLink.key,
+                    source: sourceNode.key,
+                    target: targetNode.key,
+                    relationType: 'transfer',
+                    transferNodeId: transferNode.key,
+                    transferNodeTitle: transferNode.title
+                }, source);
+                console.log('[SageAPI] Success response sent for auto-created transfer link and node');
+                return;
+            } else {
+                sendErrorResponse(requestId, 'Failed to auto-create transfer node/link', source);
+                return;
+            }
+        }
+        // --- End flow node auto-creation logic ---
+
         // Validate relationVector
         const allowedVectors = ['increase', 'decrease', 'vary'];
         const relationVector = (values.relationVector || 'increase').toLowerCase();
