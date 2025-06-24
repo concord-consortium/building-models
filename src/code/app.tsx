@@ -15,6 +15,7 @@ import { AppView } from "./views/app-view";
 import { GraphStore } from "./stores/graph-store";
 import { PaletteStore } from "./stores/palette-store";
 import { HashParams } from "./utils/hash-parameters";
+import * as SageAPI from "./sage-api";
 
 import * as $ from "jquery";
 import { urlParams } from "./utils/url-params";
@@ -46,6 +47,9 @@ const waitForAppView = (callback: () => void) => {
         googleDoc={HashParams.getParam("googleDoc")}
       />;
       ReactDOM.render(appView, document.getElementById("app"));
+      
+      // Initialize SageAPI for external control
+      SageAPI.initialize();
     });
   },
 

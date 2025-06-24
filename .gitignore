@@ -42,3 +42,8 @@ building-models.sublime-workspace
 
 # intellij settings
 .idea
+# API Development Testing
+test-sage-api-*.html
+test-sage-api-*.js
+temp-api-test/
+api-test-console/
