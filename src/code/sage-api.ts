@@ -343,29 +343,6 @@ function handleUpdateNode(nodeId: string, values: NodeUpdateValues, requestId: s
             }
         }
 
-        // Handle position changes separately (x, y are not in Node.fields)
-        let positionChanged = false;
-        let newX = node.x;
-        let newY = node.y;
-
-        if (values.x !== undefined) {
-            if (typeof values.x !== 'number' || isNaN(values.x)) {
-                sendErrorResponse(requestId, 'x must be a valid number', source);
-                return;
-            }
-            newX = values.x;
-            positionChanged = true;
-        }
-
-        if (values.y !== undefined) {
-            if (typeof values.y !== 'number' || isNaN(values.y)) {
-                sendErrorResponse(requestId, 'y must be a valid number', source);
-                return;
-            }
-            newY = values.y;
-            positionChanged = true;
-        }
-
         // Validate and prepare boolean fields
         const booleanFields = ['isAccumulator', 'allowNegativeValues', 'valueDefinedSemiQuantitatively'];
         for (const field of booleanFields) {
@@ -387,32 +364,56 @@ function handleUpdateNode(nodeId: string, values: NodeUpdateValues, requestId: s
             updateData.combineMethod = values.combineMethod;
         }
 
-        // Apply non-position changes using GraphStore.changeNode
+        // --- Position update logic ---
+        let positionChanged = false;
+        let newX = node.x;
+        let newY = node.y;
+        if (values.x !== undefined) {
+            if (typeof values.x !== 'number' || isNaN(values.x)) {
+                sendErrorResponse(requestId, 'x must be a valid number', source);
+                return;
+            }
+            newX = values.x;
+            positionChanged = true;
+        }
+        if (values.y !== undefined) {
+            if (typeof values.y !== 'number' || isNaN(values.y)) {
+                sendErrorResponse(requestId, 'y must be a valid number', source);
+                return;
+            }
+            newY = values.y;
+            positionChanged = true;
+        }
+
+        // --- Apply property changes (undoable) ---
         if (Object.keys(updateData).length > 0) {
-            console.log('[SageAPI] Applying node property changes:', updateData);
+            console.log('[SageAPI] Applying node property changes (undoable):', updateData);
             GraphStore.changeNode(updateData, node, { logEvent: true });
         }
 
-        // Apply position changes using moveNode (absolute positioning)
+        // --- Apply position changes (undoable) ---
         if (positionChanged) {
-            const leftDiff = newX - node.x;
-            const topDiff = newY - node.y;
-            console.log('[SageAPI] Applying position changes:', { from: {x: node.x, y: node.y}, to: {x: newX, y: newY}, diff: {leftDiff, topDiff} });
-            GraphStore.moveNode(node.key, leftDiff, topDiff);
+            const dx = newX - node.x;
+            const dy = newY - node.y;
+            if (dx !== 0 || dy !== 0) {
+                console.log('[SageAPI] Applying position changes (undoable):', { from: {x: node.x, y: node.y}, to: {x: newX, y: newY}, diff: {dx, dy} });
+                // Use moveNodeCompleted for undo/redo support
+                GraphStore.moveNodeCompleted(node.key, dx, dy);
+            }
         }
 
-        console.log('[SageAPI] Node updated successfully:', node);
-
         // Send success response with the updated node data
+        // (node.x/y will be updated after moveNodeCompleted)
+        const updatedNode = GraphStore.nodeKeys[nodeId];
         sendSuccessResponse(requestId, {
-            id: node.key,
-            title: node.title,
-            initialValue: node.initialValue,
-            min: node.min,
-            max: node.max,
-            x: node.x,
-            y: node.y,
-            isAccumulator: node.isAccumulator
+            id: updatedNode.key,
+            title: updatedNode.title,
+            initialValue: updatedNode.initialValue,
+            min: updatedNode.min,
+            max: updatedNode.max,
+            x: updatedNode.x,
+            y: updatedNode.y,
+            isAccumulator: updatedNode.isAccumulator
         }, source);
 
     } catch (error) {
