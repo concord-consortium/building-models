@@ -14,8 +14,12 @@ const langNames = {
   "he.json": "Hebrew",
   "nb.json": "Norwegian: Bokmal",
   "nn.json": "Norwegian: Nynorsk",
+  "nl.json": "Dutch",
   "pl.json": "Polish",
   "tr.json": "Turkish",
+  "th.json": "Thai",
+  "ko.json": "Korean",
+  "pt-BR.json": "Portuguese (Brazilian)",
   "zh-TW.json": "Chinese",
 };
 
