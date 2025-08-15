@@ -107,6 +107,8 @@ Unicode escapes are converted to their UTF-8 equivalents when pushed, i.e. strin
 
 The ZERO-WIDTH-SPACE character can be used to indicate that the empty string is the correct translation for a string in a particular language. If the string were simply left untranslated, then POEditor would 1) show it as untranslated in the POEditor UI and 2) replace it with the English string when pulled. The ZERO-WIDTH-SPACE prevents POEditor from treating the string as untranslated, but it is rendered like an empty string.
 
+**NOTE:** Each language needs to have a unique translation for ~CODAP.DATA.CONTEXT_NAME. If it remains the same as the English version (or some other language) then SageModeler will get confused when trying to find certain collection and attribute names which may already exist, but not be identical the the translated srings which are being searched for.
+
 ### Adding a language
 
 To add a new language:
