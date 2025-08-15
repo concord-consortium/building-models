@@ -208,7 +208,7 @@
     "~METADATA.SEE_IT_ON": "Bekijk het op %{hostname}",
     "~METADATA.LICENSE.PUBLIC_DOMAIN": "Publiek Domein",
     "~METADATA.PIXABAY.TITLE": "\"%{query}\" via Pixabay zoeken",
-    "~CODAP.DATA.CONTEXT_NAME": "SageModeler Data",
+    "~CODAP.DATA.CONTEXT_NAME": "Nederlands SageModeler Data",
     "~CODAP.DATA.SIMULATION_COLLECTION_NAME": "Experimenten",
     "~CODAP.DATA.SAMPLES_COLLECTION_NAME": "Data punten",
     "~CODAP.DATA.SAMPLE_COLUMN_NAME": "Data punt",
