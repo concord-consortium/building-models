@@ -159,6 +159,8 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
       disabled: !this.state.modelIsRunnable || this.state.isRecordingOne
     };
 
+    const isDutch = getDefaultLang() === "nl";
+
     if (this.state.isRecording) {
       return (
         <RecordButtonView {...props}>
@@ -172,17 +174,31 @@ export class SimulationRunPanelView extends Mixer<SimulationRunPanelViewProps, S
         </RecordButtonView>
       );
     } else {
-      return (
-        <RecordButtonView {...props}>
-          <div className="horizontal">
-            <span>{tr("~DOCUMENT.ACTIONS.DATA.RECORD")}</span>
-            <i className="icon-codap-video-camera" />
-          </div>
-          <div className="horizontal">
-            <span>{tr("~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY")}</span>
-          </div>
-        </RecordButtonView>
-      );
+      if (isDutch) {
+        return (
+          <RecordButtonView {...props}>
+            <div className="horizontal">
+              <span>{tr("~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY")}</span>
+            </div>
+            <div className="horizontal">
+              <span>{tr("~DOCUMENT.ACTIONS.DATA.RECORD")}</span>
+              <i className="icon-codap-video-camera" />
+            </div>
+          </RecordButtonView>
+        );
+      } else {
+        return (
+          <RecordButtonView {...props}>
+            <div className="horizontal">
+              <span>{tr("~DOCUMENT.ACTIONS.DATA.RECORD")}</span>
+              <i className="icon-codap-video-camera" />
+            </div>
+            <div className="horizontal">
+              <span>{tr("~DOCUMENT.ACTIONS.DATA.CONTINUOUSLY")}</span>
+            </div>
+          </RecordButtonView>
+        );
+      }
     }
   }
 
